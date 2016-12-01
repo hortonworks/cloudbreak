@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
@@ -366,6 +367,7 @@ public class TestUtil {
         } catch (JsonProcessingException e) {
             cluster.setAttributes(null);
         }
+        cluster.setRecoveryMode(RecoveryMode.MANUAL);
         return cluster;
     }
 

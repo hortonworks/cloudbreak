@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
-import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -43,10 +43,10 @@ public class StackDownscaleActions {
 
     @Bean(name = "DOWNSCALE_STATE")
     public Action stackDownscaleAction() {
-        return new AbstractStackDownscaleAction<StackScaleTriggerEvent>(StackScaleTriggerEvent.class) {
+        return new AbstractStackDownscaleAction<StackDownscaleTriggerEvent>(StackDownscaleTriggerEvent.class) {
             @Override
-            protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                stackDownscaleService.startStackDownscale(context, payload.getAdjustment());
+            protected void doExecute(StackScalingFlowContext context, StackDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+                stackDownscaleService.startStackDownscale(context, payload);
                 sendEvent(context);
             }
 

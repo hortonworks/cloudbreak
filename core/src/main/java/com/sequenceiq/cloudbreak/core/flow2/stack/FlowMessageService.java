@@ -26,4 +26,10 @@ public class FlowMessageService {
         String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
         cloudbreakEventService.fireCloudbreakEvent(stackId, eventType, message);
     }
+
+    public void fireInstanceGroupEventAndLog(Long stackId, Msg msgCode, String eventType, String instanceGroup, Object... args) {
+        LOGGER.debug("{} [STACK_FLOW_STEP].", msgCode);
+        String message = messagesService.getMessage(msgCode.code(), Arrays.asList(args));
+        cloudbreakEventService.fireCloudbreakInstanceGroupEvent(stackId, eventType, message, instanceGroup);
+    }
 }

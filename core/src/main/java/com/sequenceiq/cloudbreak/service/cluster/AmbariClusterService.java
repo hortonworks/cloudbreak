@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATH
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
@@ -194,6 +196,9 @@ public class AmbariClusterService implements ClusterService {
             componentConfigProvider.store(components);
             cluster = clusterRepository.save(cluster);
             InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(cluster.getStatus()));
+            if (InMemoryStateStore.getStack(stackId) == null) {
+                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
+            }
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
         }
@@ -347,6 +352,39 @@ public class AmbariClusterService implements ClusterService {
         }
     }
 
+    @Override
+    public void repairCluster(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException {
+        Stack stack = stackService.get(stackId);
+        Cluster cluster = stack.getCluster();
+        Map<String, List<String>> failedNodesMap = new HashMap<>();
+        for (String failedNode : failedNodes) {
+            HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
+            if (hostMetadata == null) {
+                throw new BadRequestException("No metadata information for the node: " + failedNode);
+            }
+            String hostGroup = hostMetadata.getHostGroup().getName();
+            List<String> nodeList = failedNodesMap.get(hostGroup);
+            if (nodeList == null) {
+                validateComponentsCategory(stack, hostGroup);
+                nodeList = new ArrayList<>();
+                failedNodesMap.put(hostGroup, nodeList);
+            }
+            nodeList.add(failedNode);
+        }
+        if (cluster.getRecoveryMode() == RecoveryMode.AUTO) {
+            flowManager.triggerClusterRepairFlow(stackId, failedNodesMap);
+            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
+                    Collections.singletonList(failedNodes));
+            LOGGER.info(recoveryMessage);
+            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), recoveryMessage);
+        } else {
+            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
+                    Collections.singletonList(failedNodes));
+            LOGGER.info(recoveryMessage);
+            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), recoveryMessage);
+        }
+    }
+
     private void sync(Stack stack) {
         flowManager.triggerClusterSync(stack.getId());
     }
@@ -399,12 +437,16 @@ public class AmbariClusterService implements ClusterService {
     @Transactional(Transactional.TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
-        Cluster cluster = stackService.findLazy(stackId).getCluster();
+        Stack stack = stackService.findLazy(stackId);
+        Cluster cluster = stack.getCluster();
         if (cluster != null) {
             cluster.setStatus(status);
             cluster.setStatusReason(statusReason);
             cluster = clusterRepository.save(cluster);
             InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(status));
+            if (InMemoryStateStore.getStack(stackId) == null) {
+                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
+            }
         }
         return cluster;
     }
@@ -621,7 +663,7 @@ public class AmbariClusterService implements ClusterService {
             validateUnusedHosts(hostGroup.getConstraint().getInstanceGroup(), scalingAdjustment);
         } else {
             validateRegisteredHosts(stack, hostGroupAdjustment);
-            validateComponentsCategory(stack, hostGroupAdjustment);
+            validateComponentsCategory(stack, hostGroupAdjustment.getHostGroup());
             if (hostGroupAdjustment.getWithStackUpdate() && hostGroupAdjustment.getScalingAdjustment() > 0) {
                 throw new BadRequestException("ScalingAdjustment has to be decommission if you define withStackUpdate = 'true'.");
             }
@@ -629,13 +671,12 @@ public class AmbariClusterService implements ClusterService {
         return downScale;
     }
 
-    private void validateComponentsCategory(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) throws CloudbreakSecuritySetupException {
+    private void validateComponentsCategory(Stack stack, String hostGroup) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
                 ambariAuthenticationProvider.getAmbariUserName(cluster),
                 ambariAuthenticationProvider.getAmbariPassword(cluster));
-        String hostGroup = hostGroupAdjustment.getHostGroup();
         Blueprint blueprint = cluster.getBlueprint();
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
@@ -814,7 +855,9 @@ public class AmbariClusterService implements ClusterService {
         AMBARI_CLUSTER_START_IGNORED("ambari.cluster.start.ignored"),
         AMBARI_CLUSTER_STOP_IGNORED("ambari.cluster.stop.ignored"),
         AMBARI_CLUSTER_HOST_STATUS_UPDATED("ambari.cluster.host.status.updated"),
-        AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested");
+        AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested"),
+        AMBARI_CLUSTER_AUTORECOVERY_REQUESTED("ambari.cluster.autorecovery.requested"),
+        AMBARI_CLUSTER_FAILED_NODES_REPORTED("ambari.cluster.failednodes.reported");
 
         private String code;
 

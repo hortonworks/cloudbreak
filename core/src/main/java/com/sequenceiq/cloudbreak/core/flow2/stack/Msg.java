@@ -69,7 +69,8 @@ public enum Msg {
     AMBARI_CLUSTER_CHANGE_CREDENTIAL_FAILED("ambari.cluster.change.credentail.failed"),
     AMBARI_CLUSTER_UPGRADE("ambari.cluster.upgrade"),
     AMBARI_CLUSTER_UPGRADE_FAILED("ambari.cluster.upgrade.failed"),
-    AMBARI_CLUSTER_UPGRADE_FINISHED("ambari.cluster.upgrade.finished");
+    AMBARI_CLUSTER_UPGRADE_FINISHED("ambari.cluster.upgrade.finished"),
+    AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup");
 
     private String code;
 

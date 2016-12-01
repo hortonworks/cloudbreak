@@ -122,6 +122,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getBlueprintCustomProperties() != null) {
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
+        clusterResponse.setRecoveryMode(source.getRecoveryMode());
         return clusterResponse;
     }
 

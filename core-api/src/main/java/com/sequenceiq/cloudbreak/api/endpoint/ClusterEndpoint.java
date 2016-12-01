@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
+import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -79,4 +80,9 @@ public interface ClusterEndpoint {
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.UPGRADE_AMBARI, produces = ContentType.JSON, notes = Notes.AMBARI_NOTES)
     Response upgradeCluster(@PathParam(value = "id") Long stackId, AmbariRepoDetailsJson ambariRepoDetails);
 
+    @POST
+    @Path("{id}/cluster/repair")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES)
+    Response repairCluster(@PathParam(value = "id") Long stackId, ClusterRepairRequest clusterRepairRequest) throws Exception;
 }

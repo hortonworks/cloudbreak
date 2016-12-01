@@ -58,6 +58,7 @@ public class Notes {
             + " These endpoints are collecting them.";
     public static final String SETTINGS_NOTES = "Collecting Cloudbreak specific resource settings.";
     public static final String SUBSCRIPTION_NOTES = "Accepting client subscriptions to notification events.";
+    public static final String CLUSTER_REPAIR_NOTES = "Removing the failed nodes and starting new nodes to substitute them.";
 
     private Notes() {
     }

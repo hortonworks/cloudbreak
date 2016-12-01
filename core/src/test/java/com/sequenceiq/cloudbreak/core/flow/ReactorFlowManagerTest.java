@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -91,6 +92,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterUpgrade(stackId);
         flowManager.triggerManualRepairFlow(stackId);
         flowManager.triggerStackRepairFlow(stackId, new UnhealthyInstances());
+        flowManager.triggerClusterRepairFlow(stackId, new HashMap<>());
 
         int count = 0;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

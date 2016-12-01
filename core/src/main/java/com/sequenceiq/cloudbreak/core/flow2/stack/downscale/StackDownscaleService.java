@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -41,11 +42,13 @@ public class StackDownscaleService {
     @Inject
     private UsageService usageService;
 
-    public void startStackDownscale(StackScalingFlowContext context, Integer adjustment) {
+    public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack ", context.getStack().getId());
         MDCBuilder.buildMdcContext(context.getStack());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), Math.abs(adjustment));
+        Object msgParam = stackDownscaleTriggerEvent.getHostNames() == null ? Math.abs(stackDownscaleTriggerEvent.getAdjustment())
+                : stackDownscaleTriggerEvent.getHostNames();
+        flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), msgParam);
     }
 
     public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Set<String> instanceIds) {

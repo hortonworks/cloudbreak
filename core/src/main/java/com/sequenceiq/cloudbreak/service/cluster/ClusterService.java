@@ -64,4 +64,6 @@ public interface ClusterService {
     void upgrade(Long stackId, AmbariRepo ambariRepo);
 
     Map<String, String> getHostStatuses(Long stackId) throws CloudbreakSecuritySetupException;
+
+    void repairCluster(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException;
 }

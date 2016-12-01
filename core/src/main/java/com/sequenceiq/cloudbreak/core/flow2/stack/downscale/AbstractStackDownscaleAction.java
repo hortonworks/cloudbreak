@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,7 +23,9 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -73,19 +76,27 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
     }
 
     private Integer extractAdjustment(P payload, Map<Object, Object> variables) {
-        if (payload instanceof StackScaleTriggerEvent) {
-            StackScaleTriggerEvent ssc = (StackScaleTriggerEvent) payload;
-            variables.put(ADJUSTMENT, ssc.getAdjustment());
-            return ssc.getAdjustment();
+        if (payload instanceof StackDownscaleTriggerEvent) {
+            StackDownscaleTriggerEvent ssc = (StackDownscaleTriggerEvent) payload;
+            Integer adjustment = ssc.getHostNames() == null ? ssc.getAdjustment() : -ssc.getHostNames().size();
+            variables.put(ADJUSTMENT, adjustment);
+            return adjustment;
         }
         return getAdjustment(variables);
     }
 
     private Set<String> extractInstanceIds(P payload, Map<Object, Object> variables, Stack stack) {
-        if (payload instanceof StackScaleTriggerEvent) {
-            StackScaleTriggerEvent ssc = (StackScaleTriggerEvent) payload;
-            Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
-            Set<String> instanceIds = new HashSet<>(unusedInstanceIds.keySet());
+        if (payload instanceof StackDownscaleTriggerEvent) {
+            StackDownscaleTriggerEvent ssc = (StackDownscaleTriggerEvent) payload;
+            Set<String> instanceIds;
+            if (ssc.getHostNames() == null) {
+                Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
+                instanceIds = new HashSet<>(unusedInstanceIds.keySet());
+            } else {
+                Set<InstanceMetaData> imds = stack.getInstanceGroupByInstanceGroupName(ssc.getInstanceGroup()).getInstanceMetaData();
+                instanceIds = imds.stream().filter(imd -> ssc.getHostNames().contains(imd.getDiscoveryFQDN())).map(InstanceMetaData::getInstanceId)
+                        .collect(Collectors.toSet());
+            }
             variables.put(INSTANCEIDS, instanceIds);
             return instanceIds;
         }
