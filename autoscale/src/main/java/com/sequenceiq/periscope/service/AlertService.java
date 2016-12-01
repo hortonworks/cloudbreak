@@ -58,7 +58,7 @@ public class AlertService {
     private AmbariClientProvider ambariClientProvider;
 
     public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
-        Cluster cluster = clusterService.findOneByUser(clusterId);
+        Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
         MetricAlert metricAlert = metricAlertRepository.save(alert);
         cluster.addMetricAlert(metricAlert);
@@ -93,12 +93,12 @@ public class AlertService {
     }
 
     public Set<MetricAlert> getMetricAlerts(long clusterId) {
-        Cluster cluster = clusterService.findOneByUser(clusterId);
+        Cluster cluster = clusterService.findOneById(clusterId);
         return cluster.getMetricAlerts();
     }
 
     public TimeAlert createTimeAlert(long clusterId, TimeAlert alert) {
-        Cluster cluster = clusterService.findOneByUser(clusterId);
+        Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
         alert = timeAlertRepository.save(alert);
         cluster.addTimeAlert(alert);
@@ -120,12 +120,12 @@ public class AlertService {
     }
 
     public Set<TimeAlert> getTimeAlerts(long clusterId) {
-        Cluster cluster = clusterService.findOneByUser(clusterId);
+        Cluster cluster = clusterService.findOneById(clusterId);
         return cluster.getTimeAlerts();
     }
 
     public void deleteTimeAlert(long clusterId, long alertId) {
-        Cluster cluster = clusterService.findOneByUser(clusterId);
+        Cluster cluster = clusterService.findOneById(clusterId);
         timeAlertRepository.findByCluster(alertId, clusterId);
         cluster.setTimeAlerts(removeTimeAlert(cluster, alertId));
         timeAlertRepository.delete(alertId);
@@ -153,7 +153,7 @@ public class AlertService {
     }
 
     public List<Map<String, Object>> getAlertDefinitions(long clusterId) {
-        Cluster cluster = clusterService.findOneByUser(clusterId);
+        Cluster cluster = clusterService.findOneById(clusterId);
         List<Map<String, Object>> ret = new ArrayList<>();
         List<Map<String, String>> alertDefinitions = ambariClientProvider.createAmbariClient(cluster).getAlertDefinitions();
         for (Map<String, String> alertDefinition : alertDefinitions) {
@@ -168,12 +168,14 @@ public class AlertService {
 
     public void addPeriscopeAlerts(Cluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
-        AmbariClient client = ambariClientProvider.createAmbariClient(cluster);
-        try {
-            createAlert(client, getAlertDefinition(client, CONTAINER_ALERT), CONTAINER_ALERT);
-            createAlert(client, getAlertDefinition(client, APP_ALERT), APP_ALERT);
-        } catch (Exception e) {
-            LOGGER.error("Cannot parse alert definitions", e);
+        if (cluster.getSecurityConfig() != null) {
+            try {
+                AmbariClient client = ambariClientProvider.createAmbariClient(cluster);
+                createAlert(client, getAlertDefinition(client, CONTAINER_ALERT), CONTAINER_ALERT);
+                createAlert(client, getAlertDefinition(client, APP_ALERT), APP_ALERT);
+            } catch (Exception e) {
+                LOGGER.error("Cannot create alert definitions", e);
+            }
         }
     }
 

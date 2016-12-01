@@ -189,6 +189,12 @@ public class StackController implements StackEndpoint {
     }
 
     @Override
+    public Set<StackResponse> getAll() {
+        LOGGER.info("Get all stack, autoscale authorized only.");
+        return stackService.retrieveAllStacks();
+    }
+
+    @Override
     public Response validate(StackValidationRequest request) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);

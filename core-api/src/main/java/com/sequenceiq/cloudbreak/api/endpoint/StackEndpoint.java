@@ -139,4 +139,10 @@ public interface StackEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
     StackResponse getStackForAmbari(@Valid AmbariAddressJson json);
+
+    @GET
+    @Path(value = "all")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
+    Set<StackResponse> getAll();
 }

@@ -49,7 +49,7 @@ public class ScalingService {
     }
 
     public List<ScalingPolicy> getPolicies(long clusterId) {
-        clusterService.findOneByUser(clusterId);
+        clusterService.findOneById(clusterId);
         return policyRepository.findAllByCluster(clusterId);
     }
 

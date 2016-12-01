@@ -83,6 +83,7 @@ public class OperationDescriptions {
         public static final String VALIDATE = "validate stack";
         public static final String DELETE_INSTANCE_BY_ID = "delete instance resource from stack";
         public static final String GET_PLATFORM_VARIANTS = "retrieve available platform variants";
+        public static final String GET_ALL = "retrieve all stacks";
     }
 
     public static class ClusterOpDescription {

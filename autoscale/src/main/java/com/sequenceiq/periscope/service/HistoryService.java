@@ -28,7 +28,7 @@ public class HistoryService {
     }
 
     public List<History> getHistory(long clusterId) {
-        clusterService.findOneByUser(clusterId);
+        clusterService.findOneById(clusterId);
         return historyRepository.findAllByCluster(clusterId);
     }
 

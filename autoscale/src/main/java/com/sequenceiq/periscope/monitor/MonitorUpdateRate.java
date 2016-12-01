@@ -23,6 +23,11 @@ public final class MonitorUpdateRate {
     public static final String TIME_UPDATE_RATE_CRON = "0/10 * * * * ?";
 
     /**
+     * Every minutes.
+     */
+    public static final String EVERY_MIN_RATE_CRON = "0 * * * * ?";
+
+    /**
      * Time update rate in ms, aligned to the cron expression.
      */
     public static final int CLUSTER_UPDATE_RATE = 10_000;

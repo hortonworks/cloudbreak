@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -504,6 +505,10 @@ public class StackService {
 
     public List<Stack> getAllAlive() {
         return stackRepository.findAllAlive();
+    }
+
+    public Set<StackResponse> retrieveAllStacks() {
+        return convertStacks(getAllAlive().stream().collect(Collectors.toSet()));
     }
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {
