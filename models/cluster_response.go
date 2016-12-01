@@ -31,6 +31,11 @@ type ClusterResponse struct {
 	 */
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
 
+	// TODO WARNING: do not replace it with string, otherwise it cannot be serialized
+	/* blueprint custom properties
+	 */
+	BlueprintCustomProperties []Configurations `json:"blueprintCustomProperties,omitempty"`
+
 	/* blueprint id for the cluster
 	 */
 	BlueprintID *int64 `json:"blueprintId,omitempty"`

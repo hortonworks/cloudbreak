@@ -382,14 +382,15 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		clusterReq := models.ClusterRequest{
-			Name:            skeleton.ClusterName,
-			BlueprintID:     <-blueprintId,
-			HostGroups:      hostGroups,
-			UserName:        skeleton.ClusterAndAmbariUser,
-			Password:        skeleton.ClusterAndAmbariPassword,
-			RdsConfigJSON:   rdsConfig,
-			RdsConfigID:     rdsId,
-			BlueprintInputs: inputs,
+			Name:                      skeleton.ClusterName,
+			BlueprintID:               <-blueprintId,
+			HostGroups:                hostGroups,
+			UserName:                  skeleton.ClusterAndAmbariUser,
+			Password:                  skeleton.ClusterAndAmbariPassword,
+			RdsConfigJSON:             rdsConfig,
+			RdsConfigID:               rdsId,
+			BlueprintInputs:           inputs,
+			BlueprintCustomProperties: skeleton.Configurations,
 		}
 
 		resp, err := postCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})

@@ -31,6 +31,11 @@ type ClusterRequest struct {
 	 */
 	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
 
+	// TODO WARNING: do not replace it with string, otherwise it cannot be serialized
+	/* blueprint custom properties
+	 */
+	BlueprintCustomProperties []Configurations `json:"blueprintCustomProperties,omitempty"`
+
 	/* blueprint id for the cluster
 
 	Required: true

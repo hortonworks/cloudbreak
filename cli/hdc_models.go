@@ -39,9 +39,10 @@ type ClusterSkeleton struct {
 
 type ClusterSkeletonResult struct {
 	ClusterSkeletonBase
-	HiveMetastore *HiveMetastoreResult `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	Status        string               `json:"Status,omitempty" yaml:"Status,omitempty"`
-	StatusReason  string               `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	HiveMetastore  *HiveMetastoreResult    `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	Configurations []models.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Status         string                  `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason   string                  `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 }
 
 type InstanceConfig struct {

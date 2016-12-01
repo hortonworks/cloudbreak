@@ -172,6 +172,10 @@ func (c *ClusterSkeletonResult) fill(
 	}
 	c.RemoteAccess = strings.Join(keys, ",")
 
+	if stack.Cluster != nil && stack.Cluster.BlueprintCustomProperties != nil {
+		c.Configurations = stack.Cluster.BlueprintCustomProperties
+	}
+
 	return nil
 }
 
