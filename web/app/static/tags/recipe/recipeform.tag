@@ -32,7 +32,7 @@
         <div class="col-sm-9">
             <div class="row">
                 <div class="col-md-3">
-                    <select class="form-control" id="recipeContentType" name="recipeContentType" ng-options="recipeContentType.key as recipeContentType.value for recipeContentType in $root.config.RECIPE_CONTENT_TYPE.content_types" ng-model="recipeContentType"></select>
+                    <select class="form-control" id="recipeContentType" name="recipeContentType" ng-options="recipeContentType.key as recipeContentType.value for recipeContentType in $root.config.RECIPE_CONTENT_TYPE.content_types" ng-model="$parent.recipeContentType"></select>
                 </div>
             </div>
         </div>
@@ -54,6 +54,13 @@
         </div>
     </div>
 
+    <div class="form-group" ng-show="recipeContentType == 'URL'">
+            <label class="col-sm-3 control-label" for="recipeUrl" style="border-bottom: 0">{{msg.recipe_url}}</label>
+            <div class="col-sm-9">
+                <input type="text" class="form-control" name="recipeUrl" ng-model="recipe.uri" placeholder="{{msg.recipe_url_placeholder}}" >
+            </div>
+    </div>
+
     <div class="form-group">
         <label class="col-sm-3 control-label" for="recipe_public">{{msg.public_in_account_label}}</label>
         <div class="col-sm-9">
@@ -63,7 +70,7 @@
 
     <div class="row btn-row">
         <div class="col-sm-9 col-sm-offset-3">
-            <a id="createRecipe" class="btn btn-success btn-block" ng-disabled="recipeCreationForm.$invalid || (recipeContentType == 'SCRIPT' && $parent.recipeScript == '')" ng-click="createRecipe()" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.recipe_form_create}}</a>
+            <a id="createRecipe" class="btn btn-success btn-block" ng-disabled="recipeCreationForm.$invalid || !validateRecipe()" ng-click="createRecipe()" role="button"><i class="fa fa-plus fa-fw"></i>{{msg.recipe_form_create}}</a>
         </div>
     </div>
 
