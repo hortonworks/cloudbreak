@@ -87,6 +87,8 @@ public class ApiDescription {
         public static final String PORT = "Ambari server port";
         public static final String USERNAME = "Ambari server username";
         public static final String PASSWORD = "Ambari server password";
+        public static final String STACK_ID = "Id of the stack in Cloudbreak";
+        public static final String CLUSTER_STATE = "Initial state of the cluster";
     }
 
     public static class ScalingConfigurationJsonProperties {

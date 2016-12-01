@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationJson;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -30,9 +31,12 @@ public class ClusterService {
     @Autowired
     private AlertService alertService;
 
-    public Cluster create(PeriscopeUser user, AmbariStack stack) {
+    public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
         Cluster cluster = new Cluster(periscopeUser, stack);
+        if (clusterState != null) {
+            cluster.setState(clusterState);
+        }
         cluster = save(cluster);
         if (stack.getSecurityConfig() != null) {
             SecurityConfig securityConfig = stack.getSecurityConfig();
@@ -44,7 +48,7 @@ public class ClusterService {
     }
 
     public Cluster update(long clusterId, AmbariStack stack) {
-        Cluster cluster = findOneByUser(clusterId);
+        Cluster cluster = findOneById(clusterId);
         cluster.update(stack);
         cluster = save(cluster);
         if (stack.getSecurityConfig() != null) {
@@ -60,7 +64,7 @@ public class ClusterService {
         return clusterRepository.findAllByUser(user.getId());
     }
 
-    public Cluster findOneByUser(long clusterId) {
+    public Cluster findOneById(long clusterId) {
         return clusterRepository.findOne(clusterId);
     }
 
@@ -72,13 +76,18 @@ public class ClusterService {
         return clusterRepository.find(clusterId);
     }
 
-    public void remove(long clusterId) {
-        Cluster cluster = findOneByUser(clusterId);
+    public void removeOne(long clusterId) {
+        Cluster cluster = findOneById(clusterId);
+        clusterRepository.delete(cluster);
+    }
+
+    public void removeById(long clusterId) {
+        Cluster cluster = find(clusterId);
         clusterRepository.delete(cluster);
     }
 
     public void updateScalingConfiguration(long clusterId, ScalingConfigurationJson scalingConfiguration) {
-        Cluster cluster = findOneByUser(clusterId);
+        Cluster cluster = findOneById(clusterId);
         cluster.setMinSize(scalingConfiguration.getMinSize());
         cluster.setMaxSize(scalingConfiguration.getMaxSize());
         cluster.setCoolDown(scalingConfiguration.getCoolDown());
@@ -86,7 +95,7 @@ public class ClusterService {
     }
 
     public ScalingConfigurationJson getScalingConfiguration(long clusterId) {
-        Cluster cluster = findOneByUser(clusterId);
+        Cluster cluster = findOneById(clusterId);
         ScalingConfigurationJson configuration = new ScalingConfigurationJson();
         configuration.setCoolDown(cluster.getCoolDown());
         configuration.setMaxSize(cluster.getMaxSize());
@@ -95,13 +104,17 @@ public class ClusterService {
     }
 
     public Cluster setState(long clusterId, ClusterState state) {
-        Cluster cluster = findOneByUser(clusterId);
+        Cluster cluster = findOneById(clusterId);
         cluster.setState(state);
         return clusterRepository.save(cluster);
     }
 
     public List<Cluster> findAll(ClusterState state) {
         return clusterRepository.findAllByState(state);
+    }
+
+    public List<Cluster> findAll() {
+        return Lists.newArrayList(clusterRepository.findAll());
     }
 
     private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {

@@ -22,9 +22,9 @@ public class ClusterSecurityService {
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    public boolean hasAccess(PeriscopeUser user, Ambari ambari) {
+    public boolean hasAccess(PeriscopeUser user, Ambari ambari, Long stackId) {
         try {
-            return hasAccess(user.getId(), user.getAccount(), ambari.getHost());
+            return hasAccess(user.getId(), user.getAccount(), ambari.getHost(), stackId);
         } catch (Exception e) {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor
@@ -32,10 +32,15 @@ public class ClusterSecurityService {
         }
     }
 
-    private boolean hasAccess(String userId, String account, String ambariAddress) {
-        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
-        ambariAddressJson.setAmbariAddress(ambariAddress);
-        StackResponse stack = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson);
+    private boolean hasAccess(String userId, String account, String ambariAddress, Long stackId) {
+        StackResponse stack;
+        if (stackId != null) {
+            stack = cloudbreakClient.stackEndpoint().get(stackId);
+        } else {
+            AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
+            ambariAddressJson.setAmbariAddress(ambariAddress);
+            stack = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson);
+        }
         return stack.getOwner().equals(userId) || (stack.isPublicInAccount() && stack.getAccount().equals(account));
     }
 

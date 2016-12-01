@@ -20,14 +20,26 @@ public class AmbariJson implements Json {
     @ApiModelProperty(AmbariJsonProperties.PASSWORD)
     private String pass;
 
+    @ApiModelProperty(AmbariJsonProperties.STACK_ID)
+    private Long stackId;
+
+    @ApiModelProperty(AmbariJsonProperties.CLUSTER_STATE)
+    private ClusterState clusterState;
+
     public AmbariJson() {
     }
 
     public AmbariJson(String host, String port, String user, String pass) {
+        this(host, port, user, pass, null, null);
+    }
+
+    public AmbariJson(String host, String port, String user, String pass, Long stackId, ClusterState clusterState) {
         this.host = host;
         this.port = port;
         this.user = user;
         this.pass = pass;
+        this.stackId = stackId;
+        this.clusterState = clusterState;
     }
 
     public String getHost() {
@@ -60,5 +72,21 @@ public class AmbariJson implements Json {
 
     public void setPass(String pass) {
         this.pass = pass;
+    }
+
+    public Long getStackId() {
+        return stackId;
+    }
+
+    public void setStackId(Long stackId) {
+        this.stackId = stackId;
+    }
+
+    public ClusterState getClusterState() {
+        return clusterState;
+    }
+
+    public void setClusterState(ClusterState clusterState) {
+        this.clusterState = clusterState;
     }
 }
