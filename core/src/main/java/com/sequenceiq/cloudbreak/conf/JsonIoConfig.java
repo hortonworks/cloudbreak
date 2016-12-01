@@ -15,6 +15,7 @@ public class JsonIoConfig {
         JsonReader.assignInstantiator("com.google.common.collect.EmptyImmutableBiMap", new JsonReader.MapFactory());
         JsonReader.assignInstantiator("com.google.common.collect.SingletonImmutableList", new JsonReader.CollectionFactory());
         JsonReader.assignInstantiator("com.google.common.collect.RegularImmutableList", new JsonReader.CollectionFactory());
+        JsonReader.assignInstantiator("com.google.common.collect.RegularImmutableSet", new JsonReader.CollectionFactory());
         JsonReader.assignInstantiator("java.util.Collections$SingletonSet", new JsonReader.CollectionFactory());
     }
 }

@@ -13,10 +13,10 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-@Component("FillInMemoryStateStoreRestartAction")
-public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
+@Component("FillInMemoryStateStoreBothRestartAction")
+public class FillInMemoryStateStoreBothRestartAction extends DefaultRestartAction {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FillInMemoryStateStoreRestartAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FillInMemoryStateStoreBothRestartAction.class);
 
     @Inject
     private StackService stackService;

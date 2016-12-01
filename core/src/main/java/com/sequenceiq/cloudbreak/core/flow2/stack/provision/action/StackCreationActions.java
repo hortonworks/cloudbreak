@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisio
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -12,7 +13,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoResult;
+import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialRequest;
+import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
@@ -43,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackWithFingerprintsEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
@@ -103,8 +106,8 @@ public class StackCreationActions {
         };
     }
 
-    @Bean(name = "START_PROVISIONING_STATE")
-    public Action startProvisioningAction() {
+    @Bean(name = "CREATE_CREDENTIAL_STATE")
+    public Action createCredentialAction() {
         return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
@@ -115,7 +118,22 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                FailurePolicy policy = Optional.fromNullable(context.getStack().getFailurePolicy()).or(new FailurePolicy());
+                return new CreateCredentialRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+            }
+        };
+    }
+
+    @Bean(name = "START_PROVISIONING_STATE")
+    public Action startProvisioningAction() {
+        return new AbstractStackCreationAction<CreateCredentialResult>(CreateCredentialResult.class) {
+            @Override
+            protected void doExecute(StackContext context, CreateCredentialResult payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                FailurePolicy policy = Optional.ofNullable(context.getStack().getFailurePolicy()).orElse(new FailurePolicy());
                 return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         policy.getAdjustmentType(), policy.getThreshold());
             }
@@ -187,21 +205,18 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.setupTls(context, payload);
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new StackEvent(StackCreationEvent.TLS_SETUP_FINISHED_EVENT.stringRepresentation(), context.getStack().getId());
+                StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getStackId(), payload.getSshFingerprints());
+                sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.stringRepresentation(), fingerprintsEvent);
             }
         };
     }
 
     @Bean(name = "STACK_CREATION_FINISHED_STATE")
     public Action stackCreationFinishedAction() {
-        return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
+        return new AbstractStackCreationAction<StackWithFingerprintsEvent>(StackWithFingerprintsEvent.class) {
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StackContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) throws Exception {
+                stackCreationService.removeTemporarySShKey(context, payload.getSshFingerprints());
                 stackCreationService.stackCreationFinished(context.getStack());
                 sendEvent(context);
             }

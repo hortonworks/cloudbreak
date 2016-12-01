@@ -87,14 +87,13 @@ public class TlsSetupService {
         }
         SSHClient ssh = new SSHClient();
         Orchestrator orchestrator = stack.getOrchestrator();
-        String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
         try {
-            waitForSsh(stack, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation);
+            waitForSsh(stack, publicIp, sshPort, hostKeyVerifier, user);
+            String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
             setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
             uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
             executeTlsSetupScript(ssh);
-            removeTemporarySShKey(ssh, user, stack.getCredential());
             downloadAndSavePrivateKey(stack, ssh);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
@@ -109,7 +108,25 @@ public class TlsSetupService {
         }
     }
 
-    private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation) {
+    public void removeTemporarySShKey(Stack stack, String publicIp, int sshPort, String user, Set<String> sshFingerprints) throws CloudbreakException {
+        SSHClient ssh = new SSHClient();
+        try {
+            String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
+            HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
+            prepareSshConnection(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
+            removeTemporarySShKey(ssh, user, stack.getCredential());
+        } catch (IOException e) {
+            LOGGER.info("Unable to delete temporary SSH key for stack {}", stack.getId());
+        } finally {
+            try {
+                ssh.disconnect();
+            } catch (IOException e) {
+                throw new CloudbreakException("Couldn't disconnect temp SSH session", e);
+            }
+        }
+    }
+
+    private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user) {
         sshCheckerTaskContextPollingService.pollWithTimeoutSingleFailure(
                 sshCheckerTask,
                 new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, tlsSecurityService.getSshPrivateFileLocation(stack.getId())),
@@ -120,6 +137,13 @@ public class TlsSetupService {
     private void setupTemporarySsh(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation,
             Credential credential) throws IOException {
         LOGGER.info("Setting up temporary ssh...");
+        prepareSshConnection(ssh, ip, port, hostKeyVerifier, user, privateKeyLocation, credential);
+        String remoteTlsCertificatePath = "/tmp/cb-client.pem";
+        ssh.newSCPFileTransfer().upload(tlsCertificatePath, remoteTlsCertificatePath);
+        LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
+    }
+
+    private void prepareSshConnection(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation, Credential credential) throws IOException {
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, port);
         if (credential.passwordAuthenticationRequired()) {
@@ -127,9 +151,6 @@ public class TlsSetupService {
         } else {
             ssh.authPublickey(user, privateKeyLocation);
         }
-        String remoteTlsCertificatePath = "/tmp/cb-client.pem";
-        ssh.newSCPFileTransfer().upload(tlsCertificatePath, remoteTlsCertificatePath);
-        LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
     private void uploadTlsSetupScript(Orchestrator orchestrator, SSHClient ssh, String publicIp, Integer sslPort, Credential credential)
