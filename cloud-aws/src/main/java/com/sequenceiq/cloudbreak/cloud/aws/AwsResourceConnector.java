@@ -247,16 +247,16 @@ public class AwsResourceConnector implements ResourceConnector {
     private List<CloudResource> getCloudResources(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
             AmazonEC2Client amazonEC2Client, AmazonAutoScalingClient amazonASClient, boolean mapPublicIpOnLaunch) {
         List<CloudResource> cloudResources = new ArrayList<>();
+        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
+        scheduleStatusChecks(stack, ac, cloudFormationClient);
+        suspendAutoScaling(ac, stack);
         if (mapPublicIpOnLaunch) {
             String eipAllocationId = getElasticIpAllocationId(cFStackName, client);
             Group gateWay = stack.getGroups().stream().filter(group -> group.getType() == InstanceGroupType.GATEWAY).findFirst().get();
             List<String> instanceIds = cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, gateWay.getName()));
             associateElasticIpToInstance(amazonEC2Client, eipAllocationId, instanceIds);
         }
-        AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        scheduleStatusChecks(stack, ac, cloudFormationClient);
-        suspendAutoScaling(ac, stack);
         return cloudResources;
     }
 
