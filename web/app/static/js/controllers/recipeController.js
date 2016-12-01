@@ -16,6 +16,20 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
         });
         initalizeRecipe();
 
+        $scope.validateRecipe = function() {
+            if($scope.recipeContentType == 'SCRIPT'){
+                if(!$scope.recipeScript){
+                    return false;
+                }
+            } else if($scope.recipeContentType == 'URL'){
+                if(!$scope.recipe.uri){
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         $scope.createRecipe = function() {
             var successHandler = function(result) {
                 GlobalRecipe.get({
@@ -32,7 +46,13 @@ angular.module('uluwatuControllers').controller('recipeController', ['$scope', '
                 $scope.showError(error, $rootScope.msg.recipe_failed);
             };
 
-            $scope.recipe.content = $base64.encode($scope.recipeScript);
+            if ($scope.recipeContentType == 'URL') {
+                $scope.recipe.content = null;
+            } else {
+                $scope.recipe.uri = null;
+                $scope.recipe.content = $base64.encode($scope.recipeScript);
+            }
+
             if ($scope.recipePublicInAccount) {
                 AccountRecipe.save($scope.recipe, successHandler, errorHandler);
             } else {

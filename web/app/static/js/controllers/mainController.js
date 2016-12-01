@@ -46,6 +46,9 @@ angular.module('uluwatuControllers')
                     }, {
                         key: 'FILE',
                         value: 'File'
+                    }, {
+                        key: 'URL',
+                        value: 'Url'
                     }]
                 },
                 'SSSDCONFIG_TYPE': {
