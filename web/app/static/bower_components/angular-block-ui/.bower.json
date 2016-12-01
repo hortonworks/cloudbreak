@@ -1,0 +1,71 @@
+{
+  "name": "angular-block-ui",
+  "description": "An AngularJS module that allows you to block user interaction on AJAX requests.",
+  "version": "0.1.1",
+  "keywords": [
+    "angular",
+    "angularjs",
+    "block",
+    "block-ui",
+    "blockui",
+    "loading"
+  ],
+  "authors": [
+    "Null McNull <no@spam.org>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "gulp-tasks",
+    "src",
+    "dest",
+    "/build-config.js",
+    "/gulpfile.js",
+    "/package.json",
+    "/README.md",
+    "/karma.conf.js"
+  ],
+  "main": [
+    "dist/angular-block-ui.js",
+    "dist/angular-block-ui.css"
+  ],
+  "dependencies": {
+    "angular": "~1.2.21"
+  },
+  "devDependencies": {
+    "angular-route": "~1.2.21",
+    "bootstrap": "~3.2.0",
+    "jquery": "1.*",
+    "respond": "~1.4.2",
+    "html5shiv": "~3.7.2",
+    "angular-resource": "~1.2.22",
+    "showdown": "~0.3.1",
+    "angular-mocks": "~1.2.22",
+    "angular-inform": "~0.0.8",
+    "angular-animate": "~1.2.22",
+    "animate.css": "~3.2.0"
+  },
+  "overrides": {
+    "respond": {
+      "main": "dest/respond.min.js"
+    },
+    "showdown": {
+      "main": "compressed/showdown.js"
+    },
+    "angular-mocks": {
+      "ignore": true
+    }
+  },
+  "homepage": "https://github.com/McNull/angular-block-ui",
+  "_release": "0.1.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.1.1",
+    "commit": "da99254be59b61907956501cdda7479fb43be0f4"
+  },
+  "_source": "https://github.com/McNull/angular-block-ui.git",
+  "_target": "v0.1.1",
+  "_originalSource": "angular-block-ui"
+}
