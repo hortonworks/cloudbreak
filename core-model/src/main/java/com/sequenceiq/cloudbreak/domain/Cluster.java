@@ -182,6 +182,9 @@ public class Cluster implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json blueprintInputs;
 
+    @Column(columnDefinition = "TEXT")
+    private String blueprintCustomProperties;
+
     public Stack getStack() {
         return stack;
     }
@@ -512,5 +515,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setCloudbreakAmbariPassword(String cloudbreakAmbariPassword) {
         this.cloudbreakAmbariPassword = cloudbreakAmbariPassword;
+    }
+
+    public String getBlueprintCustomProperties() {
+        return blueprintCustomProperties;
+    }
+
+    public void setBlueprintCustomProperties(String blueprintCustomProperties) {
+        this.blueprintCustomProperties = blueprintCustomProperties;
     }
 }

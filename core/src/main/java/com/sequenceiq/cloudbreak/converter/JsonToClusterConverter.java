@@ -46,6 +46,11 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         try {
             Json json = new Json(convertBlueprintInputJsons(source.getBlueprintInputs()));
             cluster.setBlueprintInputs(source.getBlueprintInputs() == null ? new Json(new HashMap<>()) : json);
+            if (source.getBlueprintCustomProperties() != null) {
+                cluster.setBlueprintCustomProperties(source.getBlueprintCustomProperties());
+            } else {
+                cluster.setBlueprintCustomProperties(null);
+            }
         } catch (JsonProcessingException e) {
             cluster.setBlueprintInputs(null);
         }
