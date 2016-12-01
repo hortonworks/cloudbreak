@@ -1,0 +1,22 @@
+{
+    "name"           : "log4javascript",
+    "title"          : "log4javascript",
+    "version"        : "1.4.6",
+    "author"         : {
+        "name"    : "Tim Down",
+        "email"   : "tim@log4javascript.org",
+        "homepage": "http://log4javascript.org/"
+    },
+    "main": "./log4javascript.js",
+    "description"    : "log4javascript",
+    "keywords"       : [
+        "log4javascript",
+        "logging",
+        "js",
+        "json"
+    ],
+    "repository"     : {
+        "type": "git",
+        "url" : "https://github.com/DECK36/log4javascript.git"
+    }
+}
