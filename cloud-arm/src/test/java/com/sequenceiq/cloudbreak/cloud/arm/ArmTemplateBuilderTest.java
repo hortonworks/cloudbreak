@@ -141,7 +141,7 @@ public class ArmTemplateBuilderTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
@@ -168,7 +168,7 @@ public class ArmTemplateBuilderTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
@@ -191,7 +191,7 @@ public class ArmTemplateBuilderTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
@@ -214,7 +214,7 @@ public class ArmTemplateBuilderTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters);
         armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
