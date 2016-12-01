@@ -168,7 +168,6 @@ public class StackCreationService {
                     cloudStackConverter.convert(stack), image);
             LOGGER.info("Triggering event: {}", checkImageRequest);
             eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
-
             CheckImageResult result = checkImageRequest.await();
             sendNotification(result, stack);
             LOGGER.info("Result: {}", result);
@@ -210,6 +209,13 @@ public class StackCreationService {
         String ipToTls = gatewayConfigService.getGatewayIp(stack);
         tlsSetupService.setupTls(stack, ipToTls, gatewayInstance.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
         return stackService.getById(stack.getId());
+    }
+
+    public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
+        Stack stack = context.getStack();
+        InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        String ipToTls = gatewayConfigService.getGatewayIp(stack);
+        tlsSetupService.removeTemporarySShKey(stack, ipToTls, gatewayInstance.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
     }
 
     public void stackCreationFinished(Stack stack) {

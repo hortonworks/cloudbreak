@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.CheckImageAction;
 
 public enum StackCreationState implements FlowState {
@@ -10,6 +12,7 @@ public enum StackCreationState implements FlowState {
     SETUP_STATE,
     IMAGESETUP_STATE,
     IMAGE_CHECK_STATE(CheckImageAction.class),
+    CREATE_CREDENTIAL_STATE,
     START_PROVISIONING_STATE,
     PROVISIONING_FINISHED_STATE,
     COLLECTMETADATA_STATE,
@@ -19,6 +22,8 @@ public enum StackCreationState implements FlowState {
     FINAL_STATE;
 
     private Class<? extends AbstractAction> action;
+
+    private Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     StackCreationState() {
     }
@@ -30,5 +35,10 @@ public enum StackCreationState implements FlowState {
     @Override
     public Class<? extends AbstractAction> action() {
         return action;
+    }
+
+    @Override
+    public Class<? extends RestartAction> restartAction() {
+        return restartAction;
     }
 }
