@@ -83,6 +83,9 @@ public class ClusterResponse {
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
+    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
+    private String blueprintCustomProperties;
+
     public Boolean getEnableShipyard() {
         return enableShipyard;
     }
@@ -274,5 +277,14 @@ public class ClusterResponse {
 
     public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
         this.blueprintInputs = blueprintInputs;
+    }
+
+    @JsonRawValue
+    public String getBlueprintCustomProperties() {
+        return blueprintCustomProperties;
+    }
+
+    public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
+        this.blueprintCustomProperties = blueprintCustomProperties.toString();
     }
 }

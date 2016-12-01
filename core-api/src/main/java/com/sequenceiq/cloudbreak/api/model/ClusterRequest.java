@@ -9,6 +9,8 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonRawValue;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
@@ -112,6 +114,9 @@ public class ClusterRequest {
 
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
+
+    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
+    private String blueprintCustomProperties;
 
     public String getDescription() {
         return description;
@@ -311,5 +316,14 @@ public class ClusterRequest {
 
     public void setBlueprintInputs(Set<BlueprintInputJson> blueprintInputs) {
         this.blueprintInputs = blueprintInputs;
+    }
+
+    @JsonRawValue
+    public String getBlueprintCustomProperties() {
+        return blueprintCustomProperties;
+    }
+
+    public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
+        this.blueprintCustomProperties = blueprintCustomProperties.toString();
     }
 }

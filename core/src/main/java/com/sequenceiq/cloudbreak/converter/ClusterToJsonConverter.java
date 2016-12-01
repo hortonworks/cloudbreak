@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
@@ -67,6 +68,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
+    @Inject
+    private JsonHelper jsonHelper;
 
     @Override
     public ClusterResponse convert(Cluster source) {
@@ -115,6 +119,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
+        if (source.getBlueprintCustomProperties() != null) {
+            clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
+        }
         return clusterResponse;
     }
 
