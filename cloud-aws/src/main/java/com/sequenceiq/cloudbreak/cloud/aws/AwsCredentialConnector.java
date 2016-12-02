@@ -67,10 +67,10 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Override
     public CloudCredentialStatus create(AuthenticatedContext auth) {
-        AwsCredentialView awsCredential = new AwsCredentialView(auth.getCloudCredential());
-        String region = auth.getCloudContext().getLocation().getRegion().value();
         if (!awsClient.existingKeyPairNameSpecified(auth)) {
+            AwsCredentialView awsCredential = new AwsCredentialView(auth.getCloudCredential());
             try {
+                String region = auth.getCloudContext().getLocation().getRegion().value();
                 LOGGER.info(String.format("Importing public key to %s region on AWS", region));
                 AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
                 ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(awsClient.getKeyPairName(auth), awsCredential.getPublicKey());

@@ -13,10 +13,10 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-@Component("FillInMemoryStateStoreBothRestartAction")
-public class FillInMemoryStateStoreBothRestartAction extends DefaultRestartAction {
+@Component("FillInMemoryStateStoreRestartAction")
+public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FillInMemoryStateStoreBothRestartAction.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FillInMemoryStateStoreRestartAction.class);
 
     @Inject
     private StackService stackService;
@@ -31,7 +31,9 @@ public class FillInMemoryStateStoreBothRestartAction extends DefaultRestartActio
             Payload stackPayload = (Payload) payload;
             stack = stackService.getById(stackPayload.getStackId());
             InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
-            InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getCluster().getStatus()));
+            if (stack.getCluster() != null) {
+                InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getCluster().getStatus()));
+            }
         } catch (Exception e) {
             if (stack != null) {
                 MDCBuilder.buildMdcContext(stack);

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
@@ -63,21 +64,27 @@ public class OpenStackResourceConnector implements ResourceConnector {
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);
 
-        Stack heatStack = client
-                .heat()
-                .stacks()
-                .create(Builders.stack().name(stackName).template(heatTemplate).disableRollback(false)
-                        .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build());
+        List<CloudResourceStatus> resources;
+        Stack existingStack = client.heat().stacks().getStackByName(stackName);
+        if (existingStack == null) {
+            Stack heatStack = client
+                    .heat()
+                    .stacks()
+                    .create(Builders.stack().name(stackName).template(heatTemplate).disableRollback(false)
+                            .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build());
 
-
-        CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
-        try {
-            notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
-        } catch (Exception e) {
-            //Rollback
-            terminate(authenticatedContext, stack, Lists.newArrayList(cloudResource));
+            CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
+            try {
+                notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
+            } catch (Exception e) {
+                //Rollback
+                terminate(authenticatedContext, stack, Collections.singletonList(cloudResource));
+            }
+            resources = check(authenticatedContext, Collections.singletonList(cloudResource));
+        } else {
+            CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name(existingStack.getId()).build();
+            resources = Collections.singletonList(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED));
         }
-        List<CloudResourceStatus> resources = check(authenticatedContext, Lists.newArrayList(cloudResource));
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
     }

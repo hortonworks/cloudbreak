@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
-import static java.lang.String.format;
 
 import java.util.Map;
 
@@ -52,19 +51,16 @@ public class OpenStackCredentialConnector implements CredentialConnector {
         KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(auth);
 
         String keyPairName = keystoneCredential.getKeyPairName();
-        Keypair keyPair = client.compute().keypairs().get(keyPairName);
-        if (keyPair != null) {
-            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, null, format("Key with name: %s already exist", keyPairName));
+        if (client.compute().keypairs().get(keyPairName) == null) {
+            try {
+                Keypair keyPair = client.compute().keypairs().create(keyPairName, keystoneCredential.getPublicKey());
+                LOGGER.info("Credential has been created: {}, kp: {}", auth.getCloudCredential(), keyPair);
+            } catch (Exception e) {
+                LOGGER.error("Failed to create credential", e);
+                return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
+            }
         }
-
-        try {
-            keyPair = client.compute().keypairs().create(keyPairName, keystoneCredential.getPublicKey());
-            LOGGER.info("Credential has been created: {}, kp: {}", auth.getCloudCredential(), keyPair);
-            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
-        } catch (Exception e) {
-            LOGGER.error("Failed to create credential", e);
-            return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
-        }
+        return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }
 
     @Override
