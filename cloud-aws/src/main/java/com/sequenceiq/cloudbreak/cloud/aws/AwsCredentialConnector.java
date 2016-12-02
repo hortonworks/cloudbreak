@@ -14,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
+import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
@@ -73,8 +75,14 @@ public class AwsCredentialConnector implements CredentialConnector {
                 String region = auth.getCloudContext().getLocation().getRegion().value();
                 LOGGER.info(String.format("Importing public key to %s region on AWS", region));
                 AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
-                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(awsClient.getKeyPairName(auth), awsCredential.getPublicKey());
-                client.importKeyPair(importKeyPairRequest);
+                String keyPairName = awsClient.getKeyPairName(auth);
+                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, awsCredential.getPublicKey());
+                try {
+                    client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
+                    LOGGER.info("Key-pair already exists: {}", keyPairName);
+                } catch (AmazonServiceException e) {
+                    client.importKeyPair(importKeyPairRequest);
+                }
             } catch (Exception e) {
                 String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
                         e.getMessage());
