@@ -17,20 +17,20 @@ var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cl
 	"SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
 
 type ClusterSkeletonBase struct {
-	ClusterName              string            `json:"ClusterName" yaml:"ClusterName"`
-	HDPVersion               string            `json:"HDPVersion" yaml:"HDPVersion"`
-	ClusterType              string            `json:"ClusterType" yaml:"ClusterType"`
-	Master                   InstanceConfig    `json:"Master" yaml:"Master"`
-	Worker                   InstanceConfig    `json:"Worker" yaml:"Worker"`
-	Compute                  InstanceConfig    `json:"Compute" yaml:"Compute"`
-	SSHKeyName               string            `json:"SSHKeyName" yaml:"SSHKeyName"`
-	RemoteAccess             string            `json:"RemoteAccess" yaml:"RemoteAccess"`
-	WebAccess                bool              `json:"WebAccess" yaml:"WebAccess"`
-	ClusterAndAmbariUser     string            `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
-	ClusterAndAmbariPassword string            `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
-	InstanceRole             string            `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
-	Network                  *Network          `json:"Network,omitempty" yaml:"Network,omitempty"`
-	ClusterInputs            map[string]string `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
+	ClusterName              string            	`json:"ClusterName" yaml:"ClusterName"`
+	HDPVersion               string            	`json:"HDPVersion" yaml:"HDPVersion"`
+	ClusterType              string            	`json:"ClusterType" yaml:"ClusterType"`
+	Master                   InstanceConfig    	`json:"Master" yaml:"Master"`
+	Worker                   InstanceConfig    	`json:"Worker" yaml:"Worker"`
+	Compute                  SpotInstanceConfig   	`json:"Compute" yaml:"Compute"`
+	SSHKeyName               string            	`json:"SSHKeyName" yaml:"SSHKeyName"`
+	RemoteAccess             string            	`json:"RemoteAccess" yaml:"RemoteAccess"`
+	WebAccess                bool              	`json:"WebAccess" yaml:"WebAccess"`
+	ClusterAndAmbariUser     string            	`json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
+	ClusterAndAmbariPassword string            	`json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
+	InstanceRole             string            	`json:"InstanceRole,omitempty" yaml:"InstanceRole"`
+	Network                  *Network          	`json:"Network,omitempty" yaml:"Network,omitempty"`
+	ClusterInputs            map[string]string 	`json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
 }
 
 type ClusterSkeleton struct {
@@ -55,6 +55,12 @@ type InstanceConfig struct {
 	InstanceCount int32    `json:"InstanceCount,omitempty" yaml:"InstanceCount,omitempty"`
 	Recipes       []Recipe `json:"Recipes" yaml:"Recipes"`
 }
+
+type SpotInstanceConfig struct {
+	InstanceConfig
+	SpotPrice     string   `json:"SpotPrice" yaml:"SpotPrice"`
+}
+
 
 type Recipe struct {
 	URI   string `json:"URI" yaml:"URI"`

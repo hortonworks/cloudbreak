@@ -596,13 +596,16 @@ func getBaseSkeleton() *ClusterSkeleton {
 				InstanceCount: 2,
 				Recipes:       []Recipe{},
 			},
-			Compute: InstanceConfig{
-				InstanceType:  "m3.xlarge",
-				VolumeType:    "ephemeral",
-				VolumeCount:   &(&int32Wrapper{1}).i,
-				VolumeSize:    &(&int32Wrapper{20}).i,
-				InstanceCount: 0,
-				Recipes:       []Recipe{},
+			Compute: SpotInstanceConfig{
+				InstanceConfig: InstanceConfig{
+					InstanceType:  "m3.xlarge",
+					VolumeType:    "ephemeral",
+					VolumeCount:   &(&int32Wrapper{1}).i,
+					VolumeSize:    &(&int32Wrapper{40}).i,
+					InstanceCount: 2,
+					Recipes:       []Recipe{},
+				},
+				SpotPrice:     "0",
 			},
 			WebAccess:    true,
 			InstanceRole: "CREATE",

@@ -49,8 +49,9 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 		VolumeType:    &skeleton.Compute.VolumeType,
 		VolumeSize:    skeleton.Compute.VolumeSize,
 		VolumeCount:   skeleton.Compute.VolumeCount,
-		Parameters:    make(map[string]interface{}),
-		//TODO: spot
+		Parameters:    map[string]interface{}{
+			"SpotPrice" : skeleton.Compute.SpotPrice,
+		},
 	}
 
 	log.Infof("[CreateTemplate] sending master template create request with name: %s", masterTemplateName)
