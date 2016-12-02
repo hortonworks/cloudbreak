@@ -165,6 +165,7 @@ func describeClusterImpl(clusterName string, format string,
 	if format == "table" {
 		clusterSkeleton.Master.Recipes = []Recipe{}
 		clusterSkeleton.Worker.Recipes = []Recipe{}
+		clusterSkeleton.Compute.Recipes = []Recipe{}
 	}
 	return clusterSkeleton
 }
@@ -225,7 +226,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
 	getRdsConfig func(string) models.RDSConfigResponse,
 	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error),
-	createRecipes func(ClusterSkeleton, chan int64, chan int64, *sync.WaitGroup)) int64 {
+	createRecipes func(ClusterSkeleton, chan int64, chan int64, chan int64, *sync.WaitGroup)) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 
@@ -249,7 +250,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 	masterRecipeIds := make(chan int64, len(skeleton.Master.Recipes))
 	workerRecipeIds := make(chan int64, len(skeleton.Worker.Recipes))
-	go createRecipes(skeleton, masterRecipeIds, workerRecipeIds, &wg)
+	computeRecipeIds := make(chan int64, len(skeleton.Compute.Recipes))
+	go createRecipes(skeleton, masterRecipeIds, workerRecipeIds, computeRecipeIds, &wg)
 
 	go wg.Wait()
 
@@ -259,6 +261,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		failureAction := "DO_NOTHING"
 		masterType := "GATEWAY"
 		workerType := "CORE"
+		computeType := "CORE"
 		ambariVersion := "2.4"
 		secGroupId := <-secGroupId
 		platform := "AWS"
@@ -276,6 +279,13 @@ func createClusterImpl(skeleton ClusterSkeleton,
 				TemplateID:      <-templateIds,
 				NodeCount:       skeleton.Worker.InstanceCount,
 				Type:            &workerType,
+				SecurityGroupID: &secGroupId,
+			},
+			{
+				Group:           COMPUTE,
+				TemplateID:      <-templateIds,
+				NodeCount:       skeleton.Compute.InstanceCount,
+				Type:            &computeType,
 				SecurityGroupID: &secGroupId,
 			},
 		}
@@ -332,6 +342,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			HostCount:         int32(skeleton.Worker.InstanceCount),
 		}
 
+		computeConstraint := models.Constraint{
+			InstanceGroupName: COMPUTE,
+			HostCount:         int32(skeleton.Compute.InstanceCount),
+		}
+
 		var masterRecipes []int64
 		for id := range masterRecipeIds {
 			masterRecipes = append(masterRecipes, id)
@@ -339,6 +354,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		var workerRecipes []int64
 		for id := range workerRecipeIds {
 			workerRecipes = append(workerRecipes, id)
+		}
+
+		var computeRecipes []int64
+		for id := range computeRecipeIds {
+			computeRecipes = append(computeRecipes, id)
 		}
 
 		hostGroups := []*models.HostGroupRequest{
@@ -351,6 +371,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 				Name:       WORKER,
 				Constraint: &workerConstraint,
 				RecipeIds:  workerRecipes,
+			},
+			{
+				Name:       COMPUTE,
+				Constraint: &computeConstraint,
+				RecipeIds:  computeRecipes,
 			},
 		}
 
@@ -569,6 +594,14 @@ func getBaseSkeleton() *ClusterSkeleton {
 				VolumeCount:   &(&int32Wrapper{2}).i,
 				VolumeSize:    &(&int32Wrapper{40}).i,
 				InstanceCount: 2,
+				Recipes:       []Recipe{},
+			},
+			Compute: InstanceConfig{
+				InstanceType:  "m3.xlarge",
+				VolumeType:    "ephemeral",
+				VolumeCount:   &(&int32Wrapper{1}).i,
+				VolumeSize:    &(&int32Wrapper{20}).i,
+				InstanceCount: 0,
 				Recipes:       []Recipe{},
 			},
 			WebAccess:    true,

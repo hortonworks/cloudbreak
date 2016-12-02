@@ -27,7 +27,7 @@ func (c *ClusterSkeleton) JsonPretty() string {
 }
 
 func (c *ClusterSkeletonResult) DataAsStringArray() []string {
-	return []string{c.ClusterName, c.HDPVersion, c.ClusterType, c.Master.Yaml(), c.Worker.Yaml(),
+	return []string{c.ClusterName, c.HDPVersion, c.ClusterType, c.Master.Yaml(), c.Worker.Yaml(), c.Compute.Yaml(),
 		c.SSHKeyName, c.RemoteAccess, strconv.FormatBool(c.WebAccess), c.ClusterAndAmbariUser, c.Status, c.StatusReason}
 }
 
@@ -140,6 +140,7 @@ func (c *ClusterSkeletonResult) fill(
 
 	c.Master.Recipes = convertRecipes(recipeMap[MASTER])
 	c.Worker.Recipes = convertRecipes(recipeMap[WORKER])
+	c.Compute.Recipes = convertRecipes(recipeMap[COMPUTE])
 
 	if securityMap != nil {
 		if stack.InstanceGroups != nil {
@@ -149,6 +150,9 @@ func (c *ClusterSkeletonResult) fill(
 				}
 				if v.Group == WORKER {
 					c.Worker.fill(v, templateMap[v.Group])
+				}
+				if v.Group == COMPUTE {
+					c.Compute.fill(v, templateMap[v.Group])
 				}
 			}
 		}

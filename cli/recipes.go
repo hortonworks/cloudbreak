@@ -10,18 +10,18 @@ import (
 	"time"
 )
 
-func (c *Cloudbreak) CreateRecipe(skeleton ClusterSkeleton, masterRecipes chan int64, workerRecipes chan int64, wg *sync.WaitGroup) {
+func (c *Cloudbreak) CreateRecipe(skeleton ClusterSkeleton, masterRecipes chan int64, workerRecipes chan int64, computeRecipes chan int64, wg *sync.WaitGroup) {
 	defer wg.Done()
-	createRecipeImpl(skeleton, masterRecipes, workerRecipes, c.Cloudbreak.Recipes.PostRecipesAccount)
+	createRecipeImpl(skeleton, masterRecipes, workerRecipes, computeRecipes, c.Cloudbreak.Recipes.PostRecipesAccount)
 }
 
-func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, workerRecipes chan int64,
+func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, workerRecipes chan int64, computeRecipes chan int64,
 	postPublicRecipe func(params *recipes.PostRecipesAccountParams) (*recipes.PostRecipesAccountOK, error)) {
 
 	defer timeTrack(time.Now(), "create recipe")
 
 	var wgr sync.WaitGroup
-	wgr.Add(2)
+	wgr.Add(3)
 
 	go func() {
 		defer wgr.Done()
@@ -39,6 +39,15 @@ func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, worker
 			workerRecipes <- id
 		}
 		close(workerRecipes)
+	}()
+
+	go func() {
+		defer wgr.Done()
+		for _, r := range skeleton.Compute.Recipes {
+			id := createRecipe(r, postPublicRecipe)
+			computeRecipes <- id
+		}
+		close(computeRecipes)
 	}()
 
 	wgr.Wait()

@@ -20,6 +20,7 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTemplate func(*templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error)) {
 	masterTemplateName := "mtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	workerTemplateName := "wtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	computeTemplateName := "ctempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	masterTemplateReqBody := models.TemplateRequest{
 		Name:          masterTemplateName,
@@ -41,6 +42,17 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 		Parameters:    make(map[string]interface{}),
 	}
 
+	computeTemplateReqBody := models.TemplateRequest{
+		Name:          computeTemplateName,
+		CloudPlatform: "AWS",
+		InstanceType:  skeleton.Compute.InstanceType,
+		VolumeType:    &skeleton.Compute.VolumeType,
+		VolumeSize:    skeleton.Compute.VolumeSize,
+		VolumeCount:   skeleton.Compute.VolumeCount,
+		Parameters:    make(map[string]interface{}),
+		//TODO: spot
+	}
+
 	log.Infof("[CreateTemplate] sending master template create request with name: %s", masterTemplateName)
 	resp, err := postTemplate(&templates.PostTemplatesAccountParams{Body: &masterTemplateReqBody})
 
@@ -51,7 +63,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	log.Infof("[CreateTemplate] master template created, id: %d", resp.Payload.ID)
 	channel <- *resp.Payload.ID
 
-	log.Infof("[CreateTemplate] sending worker template create request with name: %s", masterTemplateName)
+	log.Infof("[CreateTemplate] sending worker template create request with name: %s", workerTemplateName)
 	resp, err = postTemplate(&templates.PostTemplatesAccountParams{Body: &workerTemplateReqBody})
 
 	if err != nil {
@@ -59,6 +71,16 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	}
 
 	log.Infof("[CreateTemplate] worker template created, id: %d", resp.Payload.ID)
+	channel <- *resp.Payload.ID
+
+	log.Infof("[CreateTemplate] sending compute template create request with name: %s", computeTemplateName)
+	resp, err = postTemplate(&templates.PostTemplatesAccountParams{Body: &computeTemplateReqBody})
+
+	if err != nil {
+		logErrorAndExit(createTemplateImpl, err.Error())
+	}
+
+	log.Infof("[CreateTemplate] compute template created, id: %d", resp.Payload.ID)
 	channel <- *resp.Payload.ID
 }
 

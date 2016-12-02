@@ -5,6 +5,7 @@ import "github.com/hortonworks/hdc-cli/models"
 const (
 	MASTER   = "master"
 	WORKER   = "worker"
+	COMPUTE	 = "compute"
 	POSTGRES = "POSTGRES"
 	PRE      = "pre"
 	POST     = "post"
@@ -21,6 +22,7 @@ type ClusterSkeletonBase struct {
 	ClusterType              string            `json:"ClusterType" yaml:"ClusterType"`
 	Master                   InstanceConfig    `json:"Master" yaml:"Master"`
 	Worker                   InstanceConfig    `json:"Worker" yaml:"Worker"`
+	Compute                  InstanceConfig    `json:"Compute" yaml:"Compute"`
 	SSHKeyName               string            `json:"SSHKeyName" yaml:"SSHKeyName"`
 	RemoteAccess             string            `json:"RemoteAccess" yaml:"RemoteAccess"`
 	WebAccess                bool              `json:"WebAccess" yaml:"WebAccess"`
