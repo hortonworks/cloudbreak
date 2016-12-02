@@ -59,6 +59,8 @@ public class OpenStackCredentialConnector implements CredentialConnector {
                 LOGGER.error("Failed to create credential", e);
                 return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
             }
+        } else {
+            LOGGER.info("Credential already exists: {}", keyPairName);
         }
         return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.CREATED);
     }

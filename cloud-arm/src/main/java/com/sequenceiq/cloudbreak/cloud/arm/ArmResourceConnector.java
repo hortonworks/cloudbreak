@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
@@ -84,7 +85,15 @@ public class ArmResourceConnector implements ResourceConnector {
             for (String name : storageAccounts.keySet()) {
                 armStorage.createStorage(ac, client, name, storageAccounts.get(name), resourceGroupName, region);
             }
-            client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+            try {
+                client.getTemplateDeployment(resourceGroupName, stackName);
+            } catch (HttpResponseException e) {
+                if (e.getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+                } else {
+                    throw e;
+                }
+            }
         } catch (HttpResponseException e) {
             throw new CloudConnectorException(String.format("Error occurred when creating stack: %s", e.getResponse().getData().toString()));
         } catch (Exception e) {
