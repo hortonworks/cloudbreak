@@ -6,6 +6,8 @@ import java.util.Set;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
 @EntityType(entityClass = InstanceMetaData.class)
@@ -30,5 +32,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
     InstanceMetaData findNotTerminatedByPrivateAddress(@Param("stackId") Long stackId, @Param("privateAddress") String privateAddress);
+
+    List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup, InstanceStatus status);
 
 }
