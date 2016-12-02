@@ -448,16 +448,21 @@ func ResizeCluster(c *cli.Context) error {
 		logMissingParameterAndExit(c, ResizeCluster, fmt.Sprintf("the %s cannot be 0\n", FlScalingAdjustment.Name))
 	}
 
+	nodeType := c.String(FlNodeType.Name)
+	if len(nodeType) == 0 || (nodeType != WORKER && nodeType != COMPUTE) {
+		logMissingParameterAndExit(c, ResizeCluster, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
+	}
+
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	stack := resizeClusterImpl(clusterName, adjustment, oAuth2Client.GetClusterByName, oAuth2Client.Cloudbreak.Stacks.PutStacksID, oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster)
+	stack := resizeClusterImpl(clusterName, nodeType, adjustment, oAuth2Client.GetClusterByName, oAuth2Client.Cloudbreak.Stacks.PutStacksID, oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster)
 
 	oAuth2Client.waitForClusterToFinish(*stack.ID, c)
 
 	return nil
 }
 
-func resizeClusterImpl(clusterName string, adjustment int32, getStack func(string) *models.StackResponse, putStack func(*stacks.PutStacksIDParams) error,
+func resizeClusterImpl(clusterName string, nodeType string, adjustment int32, getStack func(string) *models.StackResponse, putStack func(*stacks.PutStacksIDParams) error,
 	putCluster func(*cluster.PutStacksIDClusterParams) error) *models.StackResponse {
 
 	stack := getStack(clusterName)
@@ -466,7 +471,7 @@ func resizeClusterImpl(clusterName string, adjustment int32, getStack func(strin
 		withClusterScale := true
 		update := &models.UpdateStack{
 			InstanceGroupAdjustment: &models.InstanceGroupAdjustment{
-				InstanceGroup:     WORKER,
+				InstanceGroup:     nodeType,
 				ScalingAdjustment: adjustment,
 				WithClusterEvent:  &withClusterScale,
 			},
@@ -480,7 +485,7 @@ func resizeClusterImpl(clusterName string, adjustment int32, getStack func(strin
 		update := &models.UpdateCluster{
 			HostGroupAdjustment: &models.HostGroupAdjustment{
 				ScalingAdjustment: adjustment,
-				HostGroup:         WORKER,
+				HostGroup:         nodeType,
 				WithStackUpdate:   &withStackScale,
 			},
 		}

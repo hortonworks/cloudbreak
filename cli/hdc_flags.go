@@ -110,6 +110,13 @@ var (
 			Usage: "change the number of worker nodes, positive number for add more nodes, e.g: 1, negative for take down nodes, e.g: -1",
 		},
 	}
+	FlNodeType = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "node-type",
+			Usage: "type of the nodes to scale. One of [worker, compute]",
+		},
+	}
 	FlCredentialName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
