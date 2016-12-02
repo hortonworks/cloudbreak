@@ -6,6 +6,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
@@ -21,6 +22,8 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     private JobId jid;
 
     private JobState jobState = JobState.NOT_STARTED;
+
+    private Multimap<String, String> nodesWithError;
 
     public BaseSaltJobRunner(Set<String> target, Set<Node> allNode) {
         this.target = target;
@@ -49,6 +52,14 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
     public void setJobState(JobState jobState) {
         this.jobState = jobState;
+    }
+
+    public Multimap<String, String> getNodesWithError() {
+        return nodesWithError;
+    }
+
+    public void setNodesWithError(Multimap<String, String> nodesWithError) {
+        this.nodesWithError = nodesWithError;
     }
 
     public StateType stateType() {

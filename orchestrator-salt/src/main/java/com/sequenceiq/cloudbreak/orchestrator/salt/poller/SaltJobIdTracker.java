@@ -74,9 +74,9 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         String jobId = saltJobRunner.getJid().getJobId();
         StringBuilder errorMessageBuilder = new StringBuilder();
         errorMessageBuilder.append(String.format("There are missing nodes from job (jid: %s), target: %s", jobId, saltJobRunner.getTarget()));
-        if (saltJobRunner.getJobState().getNodesWithError() != null) {
-            for (String host : saltJobRunner.getJobState().getNodesWithError().keySet()) {
-                Collection<String> errorMessages = saltJobRunner.getJobState().getNodesWithError().get(host);
+        if (saltJobRunner.getNodesWithError() != null) {
+            for (String host : saltJobRunner.getNodesWithError().keySet()) {
+                Collection<String> errorMessages = saltJobRunner.getNodesWithError().get(host);
                 errorMessageBuilder.append("\n").append("Node: ").append(host).append(" Error(s): ").append(String.join(" | ", errorMessages));
             }
         }
@@ -90,9 +90,8 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
                     saltJobRunner.stateType());
             if (!missingNodesWithReason.isEmpty()) {
                 LOGGER.info("There are missing nodes after the job (jid: {}) completion: {}", jobId, String.join(",", missingNodesWithReason.keySet()));
-                JobState jobState = JobState.FAILED;
-                jobState.setNodesWithError(missingNodesWithReason);
                 saltJobRunner.setJobState(JobState.FAILED);
+                saltJobRunner.setNodesWithError(missingNodesWithReason);
                 saltJobRunner.setTarget(missingNodesWithReason.keySet());
             } else {
                 LOGGER.info("The job (jid: {}) completed successfully on every node.", jobId);
