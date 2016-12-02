@@ -42,7 +42,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} is running currently checking the current state.", jobId);
             checkIsFinished(jobId);
-        } else if (JobState.FAILED.equals(saltJobRunner.getJobState())) {
+        } else if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} failed in the previous time. Trigger again with these targets: {}", jobId, saltJobRunner.getTarget());
             saltJobRunner.setJid(jobId(saltJobRunner.submit(saltConnector)));
@@ -53,7 +53,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             String jobIsRunningMessage = String.format("Job: %s is running currently, waiting for next polling attempt", saltJobRunner.getJid());
             throw new CloudbreakOrchestratorFailedException(jobIsRunningMessage);
         }
-        if (JobState.FAILED.equals(saltJobRunner.getJobState())) {
+        if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
             throw new CloudbreakOrchestratorFailedException(buildErrorMessage());
         }
         LOGGER.info("Job (jid: {}) was finished. Triggering next salt event.", saltJobRunner.getJid().getJobId());
@@ -86,19 +86,24 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
 
     private void checkJobFinishedWithSuccess() {
         String jobId = saltJobRunner.getJid().getJobId();
-        Multimap<String, String> missingNodesWithReason = SaltStates.jidInfo(saltConnector, jobId, new Compound(saltJobRunner.getTarget()),
-                saltJobRunner.stateType());
-        if (!missingNodesWithReason.isEmpty()) {
-            LOGGER.info("There are missing nodes after the job (jid: {}) completion: {}", jobId, String.join(",", missingNodesWithReason.keySet()));
-            JobState jobState = JobState.FAILED;
-            jobState.setNodesWithError(missingNodesWithReason);
-            saltJobRunner.setJobState(JobState.FAILED);
-            Set<String> newTargets = missingNodesWithReason.keySet().stream().map(node -> SaltStates.resolveHostNameToMinionHostName(saltConnector, node))
-                    .collect(Collectors.toSet());
-            saltJobRunner.setTarget(newTargets);
-        } else {
-            LOGGER.info("The job (jid: {}) completed successfully on every node.", jobId);
-            saltJobRunner.setJobState(JobState.FINISHED);
+        try {
+            Multimap<String, String> missingNodesWithReason = SaltStates.jidInfo(saltConnector, jobId, new Compound(saltJobRunner.getTarget()),
+                    saltJobRunner.stateType());
+            if (!missingNodesWithReason.isEmpty()) {
+                LOGGER.info("There are missing nodes after the job (jid: {}) completion: {}", jobId, String.join(",", missingNodesWithReason.keySet()));
+                JobState jobState = JobState.FAILED;
+                jobState.setNodesWithError(missingNodesWithReason);
+                saltJobRunner.setJobState(JobState.FAILED);
+                Set<String> newTargets = missingNodesWithReason.keySet().stream().map(node -> SaltStates.resolveHostNameToMinionHostName(saltConnector, node))
+                        .collect(Collectors.toSet());
+                saltJobRunner.setTarget(newTargets);
+            } else {
+                LOGGER.info("The job (jid: {}) completed successfully on every node.", jobId);
+                saltJobRunner.setJobState(JobState.FINISHED);
+            }
+        } catch (RuntimeException e) {
+            LOGGER.warn("Fail while checking the result (jid: {}), this usually occurs due to concurrency", jobId, e);
+            saltJobRunner.setJobState(JobState.AMBIGUOUS);
         }
     }
 
