@@ -143,7 +143,8 @@ public class TlsSetupService {
         LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
-    private void prepareSshConnection(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation, Credential credential) throws IOException {
+    private void prepareSshConnection(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation,
+            Credential credential) throws IOException {
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, port);
         if (credential.passwordAuthenticationRequired()) {

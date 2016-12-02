@@ -127,12 +127,14 @@ public class ArmSetup implements Setup {
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         String storageGroup = armUtils.getResourceGroupName(ac.getCloudContext());
         AzureRMClient client = armClient.getClient(ac.getCloudCredential());
-        CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
-        String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
-            persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
             if (!resourceGroupExist(client, storageGroup)) {
+                CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
+                persistenceNotifier.notifyAllocation(cloudResource, ac.getCloudContext());
+                String region = ac.getCloudContext().getLocation().getRegion().value();
                 client.createResourceGroup(storageGroup, region);
+            } else {
+                LOGGER.info("Resource group already exists: {}", storageGroup);
             }
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
