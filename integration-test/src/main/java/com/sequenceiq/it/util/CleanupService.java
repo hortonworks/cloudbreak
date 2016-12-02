@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -82,6 +83,13 @@ public class CleanupService {
             if (("AZURE_RM".equals(credential.getCloudPlatform()) && credential.getName().startsWith("its"))
                     || (!"AZURE_RM".equals(credential.getCloudPlatform()) && credential.getName().startsWith("its-"))) {
                 deleteCredential(cloudbreakClient, String.valueOf(credential.getId()));
+            }
+        }
+
+        Set<RDSConfigResponse> rdsconfigs = cloudbreakClient.rdsConfigEndpoint().getPrivates();
+        for (RDSConfigResponse rds : rdsconfigs) {
+            if (rds.getName().startsWith("it-")) {
+                deleteRdsConfigs(cloudbreakClient, rds.getId().toString());
             }
         }
     }
@@ -165,6 +173,11 @@ public class CleanupService {
 
     public boolean deleteRecipe(CloudbreakClient cloudbreakClient, Long recipeId) {
         cloudbreakClient.recipeEndpoint().delete(recipeId);
+        return true;
+    }
+
+    public boolean deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
+        cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));
         return true;
     }
 }

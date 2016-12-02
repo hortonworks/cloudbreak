@@ -32,11 +32,12 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({"clusterName", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
-            "kerberosPassword", "runRecipesOnHosts", "checkAmbari"})
+            "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "withRDSConfig"})
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("false") boolean emailNeeded,
             @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey,
             @Optional String kerberosAdmin, @Optional String kerberosPassword,
-            @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari) throws Exception {
+            @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari,
+            @Optional ("false") boolean withRDSConfig) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
@@ -61,13 +62,19 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
+        if (Boolean.TRUE.equals(withRDSConfig)) {
+            clusterRequest = setRDSConfiguration(itContext, clusterRequest);
+        }
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
         Long clusterId = clusterEndpoint.post(Long.valueOf(stackId), clusterRequest).getId();
-
         // THEN
         Assert.assertNotNull(clusterId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
+
+        if (Boolean.TRUE.equals(withRDSConfig)) {
+            checkRDSConfigWithCluster(itContext, clusterName);
+        }
     }
 
     private Set<HostGroupRequest> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
@@ -92,5 +99,25 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
             hgMaps.add(hostGroupBase);
         }
         return hgMaps;
+    }
+
+    private ClusterRequest setRDSConfiguration(IntegrationTestContext itContext, ClusterRequest clusterRequest) {
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID), "RDS configuration id is missing.");
+        long rdsConfigId = Long.parseLong(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID));
+        clusterRequest.setRdsConfigId(rdsConfigId);
+        return clusterRequest;
+    }
+
+    private void checkRDSConfigWithCluster(IntegrationTestContext itContext, String clusterName) {
+        boolean clusterIsFound = false;
+        long rdsConfigId = Long.parseLong(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID));
+        Set<String> clusterNames = getCloudbreakClient().rdsConfigEndpoint().get(rdsConfigId).getClusterNames();
+        for (String name : clusterNames) {
+            if (name.equals(clusterName)) {
+                clusterIsFound = true;
+                break;
+            }
+        }
+        Assert.assertTrue(clusterIsFound, "The RDS configuration is not connected to the cluster");
     }
 }
