@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 import com.google.common.collect.Multimap;
 
 public enum JobState {
-    NOT_STARTED, IN_PROGRESS, FAILED, FINISHED;
+    NOT_STARTED, IN_PROGRESS, FAILED, FINISHED, AMBIGUOUS;
 
     private Multimap<String, String> nodesWithError;
 
