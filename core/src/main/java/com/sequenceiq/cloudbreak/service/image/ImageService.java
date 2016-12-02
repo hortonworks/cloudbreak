@@ -56,12 +56,12 @@ public class ImageService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion, String imageCatalog)
+    public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion, String imageCatalog, String imageId)
             throws CloudbreakImageNotFoundException {
         try {
             Platform platform = platform(stack.cloudPlatform());
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
-            String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion);
+            String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion, imageId);
             String tmpSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();
@@ -69,7 +69,7 @@ public class ImageService {
                     stack.getRelocateDocker() == null ? false : stack.getRelocateDocker());
             HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(ambariVersion, hdpVersion, imageCatalog);
             if (hdpInfo != null) {
-                String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion());
+                String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion(), imageId);
                 if (specificImage == null) {
                     LOGGER.warn("Cannot find image in the catalog, fallback to default image, ambari: {}, hdp: {}", ambariVersion, hdpVersion);
                     hdpInfo = null;
