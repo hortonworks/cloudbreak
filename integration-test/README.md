@@ -271,6 +271,7 @@ tests:
 * CredentialDeleteByNameTest
 * NetworkDeleteByNameTest
 * RecipeCreationTest
+* RDSConfigTest
 * StackAndClusterUpscaleTest
 * StackAndClusterStartTest
 * StackCreationTest

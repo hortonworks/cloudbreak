@@ -60,6 +60,11 @@ integrationtest:
         tenantId:
         publicKeyFile:
 
+    rdsconfig:
+        rdsUser:
+        rdsPassword:
+        rdsConnectionUrl:
+
     mockcredential:
         name:
         publicKeyFile:

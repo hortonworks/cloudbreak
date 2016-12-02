@@ -35,6 +35,8 @@ public class CloudbreakITContextConstants {
 
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
+    public static final String RDS_CONFIG_ID = "RDS_CONFIG_ID";
+
     private CloudbreakITContextConstants() {
     }
 }
