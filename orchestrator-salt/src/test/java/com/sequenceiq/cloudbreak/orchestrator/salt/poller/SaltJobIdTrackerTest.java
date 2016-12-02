@@ -207,7 +207,7 @@ public class SaltJobIdTrackerTest {
         String missingMachine = "10.0.0.1";
         String errorMessage = "error happened";
         missingNodesWithReason.put(missingMachine, errorMessage);
-        PowerMockito.when(SaltStates.jidInfo(any(), any(), any(), any())).thenReturn(missingNodesWithReason);
+        when(saltJobRunner.getNodesWithError()).thenReturn(missingNodesWithReason);
 
         SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltConnector, saltJobRunner);
         try {
