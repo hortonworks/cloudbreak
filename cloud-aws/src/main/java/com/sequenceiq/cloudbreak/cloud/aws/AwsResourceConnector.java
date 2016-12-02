@@ -155,28 +155,14 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
-
         String cFStackName = cfStackUtil.getCfStackName(ac);
-        CloudResource cloudFormationStack = new CloudResource.Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
-        resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
-
-        Long stackId = ac.getCloudContext().getId();
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-        AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(credentialView, regionName);
-        String snapshotId = getEbsSnapshotIdIfNeeded(ac, stack);
-        Network network = stack.getNetwork();
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-        AwsNetworkView awsNetworkView = new AwsNetworkView(network);
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         boolean existingVPC = awsNetworkView.isExistingVPC();
         boolean existingSubnet = awsNetworkView.isExistingSubnet();
-        boolean existingIGW = awsNetworkView.isExistingIGW();
-        boolean instanceProfileAvailable = awsInstanceProfileView.isInstanceProfileAvailable();
-        boolean enableInstanceProfile = awsInstanceProfileView.isEnableInstanceProfileStrategy();
-        List<String> existingSubnetCidr = existingSubnet ? getExistingSubnetCidr(ac, stack) : null;
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
         boolean mapPublicIpOnLaunch = true;
         if (existingVPC && existingSubnet) {
             DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
@@ -186,31 +172,39 @@ public class AwsResourceConnector implements ResourceConnector {
                 mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
             }
         }
+        try {
+            cfClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
+            LOGGER.info("Stack already exists: {}", cFStackName);
+        } catch (AmazonServiceException e) {
+            CloudResource cloudFormationStack = new CloudResource.Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
+            resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
-        String cidr = stack.getNetwork().getSubnet().getCidr();
-        String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? findNonOverLappingCIDR(ac, stack) : cidr;
-        String inboundSecurityGroup = deployingToSameVPC(awsNetworkView, existingVPC)
-                ? defaultInboundSecurityGroup : "";
-
-        CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
-                .withAuthenticatedContext(ac)
-                .withStack(stack)
-                .withSnapshotId(snapshotId)
-                .withExistingVpc(existingVPC)
-                .withExistingIGW(existingIGW)
-                .withExistingSubnetCidr(existingSubnetCidr)
-                .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
-                .withEnableInstanceProfile(enableInstanceProfile)
-                .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudformationTemplatePath)
-                .withDefaultSubnet(subnet)
-                .withCloudbreakPublicIp(cloudbreakPublicIp)
-                .withDefaultInboundSecurityGroup(inboundSecurityGroup)
-                .withGatewayPort(gatewayPort);
-        String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
-        LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
-        cfClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
-        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, stackId);
+            String cidr = stack.getNetwork().getSubnet().getCidr();
+            String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? findNonOverLappingCIDR(ac, stack) : cidr;
+            String inboundSecurityGroup = deployingToSameVPC(awsNetworkView, existingVPC)
+                    ? defaultInboundSecurityGroup : "";
+            AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
+            CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
+                    .withAuthenticatedContext(ac)
+                    .withStack(stack)
+                    .withSnapshotId(getEbsSnapshotIdIfNeeded(ac, stack))
+                    .withExistingVpc(existingVPC)
+                    .withExistingIGW(awsNetworkView.isExistingIGW())
+                    .withExistingSubnetCidr(existingSubnet ? getExistingSubnetCidr(ac, stack) : null)
+                    .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
+                    .withEnableInstanceProfile(awsInstanceProfileView.isEnableInstanceProfileStrategy())
+                    .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
+                    .withTemplatePath(awsCloudformationTemplatePath)
+                    .withDefaultSubnet(subnet)
+                    .withCloudbreakPublicIp(cloudbreakPublicIp)
+                    .withDefaultInboundSecurityGroup(inboundSecurityGroup)
+                    .withGatewayPort(gatewayPort);
+            String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
+            LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
+            cfClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
+        }
+        LOGGER.info("CloudFormation stack creation request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
+        AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(credentialView, regionName);
         PollTask<Boolean> task = awsPollTaskFactory.newAwsCreateStackStatusCheckerTask(ac, cfClient, asClient, CREATE_COMPLETE, CREATE_FAILED, ERROR_STATUSES,
                 cFStackName);
         try {
@@ -222,6 +216,7 @@ public class AwsResourceConnector implements ResourceConnector {
             throw new CloudConnectorException(e.getMessage(), e);
         }
 
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
         List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
     }
