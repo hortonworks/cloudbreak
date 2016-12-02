@@ -24,7 +24,7 @@ dependencies {
 
   compile project(':core-api')
 
-  compile group: 'org.springframework.shell',     name: 'spring-shell',                 version: '1.1.0.RELEASE'
+  compile group: 'org.springframework.shell',     name: 'spring-shell',                 version: '1.2.0.RELEASE'
   compile group: 'org.springframework.boot',      name: 'spring-boot-starter',          version: springBootVersion
   compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',      version: springBootVersion
 
