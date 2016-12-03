@@ -20,12 +20,41 @@
                 </p>
 
                 <!-- ............ CREATE FORM ............................................. -->
-                <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
                 <div class="panel panel-default">
                     <div id="panel-create-securitygroup-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                         <div class="panel-body">
-                            <div ng-include src="'tags/securitygroup/securitygroupform.tag'"></div>
+                         <div class="row " style="padding-bottom: 10px">
+                                <div class="btn-segmented-control" id="providerSelector2">
+                                    <div class="btn-group btn-group-justified">
+                                        <a id="awsSecurityGroupChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsSecurityGroup, 'btn-default':!awsSecurityGroup}" role="button" ng-click="createAwsSecurityGroupRequest()">{{msg.aws_label}}</a>
+                                        <a id="azureSecurityGroupChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureSecurityGroup, 'btn-default':!azureSecurityGroup}" role="button" ng-click="createAzureSecurityGroupRequest()">{{msg.azure_label}}</a>
+                                    </div>
+                                    <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
+                                        <a id="gcpSecurityGroupChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':gcpSecurityGroup, 'btn-default':!gcpSecurityGroup}" role="button" ng-click="createGcpSecurityGroupRequest()">{{msg.gcp_label}}</a>
+                                        <a id="openstackSecurityGroupChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':openstackSecurityGroup, 'btn-default':!openstackSecurityGroup}" role="button" ng-click="createOpenstackSecurityGroupRequest()">{{msg.openstack_label}}</a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
+                            
+                            <form class="form-horizontal" role="form" name="azureSecurityGroupForm" ng-show="azureSecurityGroup && isVisible('AZURE_RM')">
+                                <div ng-include src="'tags/securitygroup/azuresecuritygroupform.tag'"></div>
+                            </form>
+                            
+                            <form class="form-horizontal" role="form" name="awsSecurityGroupForm" ng-show="awsSecurityGroup && isVisible('AWS')">
+                                <div ng-include src="'tags/securitygroup/awssecuritygroupform.tag'"></div>
+                            </form>
+                            
+                            <form class="form-horizontal" role="form" name="gcpSecurityGroupForm" ng-show="gcpSecurityGroup && isVisible('GCP')" >
+                                <div ng-include src="'tags/securitygroup/gcpsecuritygroupform.tag'"></div>
+                            </form>
+                            
+                            <form class="form-horizontal" role="form" name="openstackSecurityGroupForm" ng-show="openstackSecurityGroup && isVisible('OPENSTACK')" >
+                                <div ng-include src="'tags/securitygroup/openstacksecuritygroupform.tag'"></div>
+                            </form>
+                            
                         </div>
                     </div>
                 </div>
@@ -43,6 +72,7 @@
                         <div class="panel-heading">
                             <h5>
                                 <a href="" data-toggle="collapse" data-parent="#securitygroup-list-accordion" data-target="#panel-securitygroup-collapse{{securitygroup.id}}"><i class="fa fa-file-o fa-fw"></i>{{securitygroup.name}}</a>
+                                <span class="label label-info pull-right" >{{securitygroup.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="securitygroup.publicInAccount"></i>
                             </h5>
                         </div>

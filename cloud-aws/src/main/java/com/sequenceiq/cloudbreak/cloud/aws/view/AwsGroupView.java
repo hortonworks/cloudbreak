@@ -16,9 +16,10 @@ public class AwsGroupView {
     private String volumeType;
     private Double spotPrice;
     private List<SecurityRule> rules;
+    private String cloudSecurityId;
 
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount,
-            Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules) {
+            Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -29,6 +30,7 @@ public class AwsGroupView {
         this.spotPrice = spotPrice;
         this.volumeType = volumeType;
         this.rules = rules;
+        this.cloudSecurityId = cloudSecurityId;
     }
 
     public Integer getInstanceCount() {
@@ -74,4 +76,9 @@ public class AwsGroupView {
     public Boolean getEbsOptimized() {
         return AwsPlatformParameters.AwsDiskType.St1.value().equals(volumeType);
     }
+
+    public String getCloudSecurityId() {
+        return cloudSecurityId;
+    }
+
 }

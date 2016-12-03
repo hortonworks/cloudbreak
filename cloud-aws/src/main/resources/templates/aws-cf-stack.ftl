@@ -348,7 +348,11 @@
 			</#list>
       	],
         "ImageId"        : { "Ref" : "AMI" },
+        <#if group.cloudSecurityId??>
+        "SecurityGroups" : [ "${group.cloudSecurityId}" ],
+        <#else>
         "SecurityGroups" : [ { "Ref" : "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" } ],
+        </#if>
         "InstanceType"   : "${group.flavor}",
         "KeyName"        : { "Ref" : "KeyName" },
         <#if group.spotPrice??>
@@ -363,6 +367,7 @@
       }
     },
 
+	<#if !group.cloudSecurityId??>
     "ClusterNodeSecurityGroup${group.groupName?replace('_', '')}" : {
       "Type" : "AWS::EC2::SecurityGroup",
       "Properties" : {
@@ -386,6 +391,7 @@
         ]
       }
     }<#if (group_index + 1) != instanceGroups?size>,</#if>
+    </#if>
     </#list>
   }
   

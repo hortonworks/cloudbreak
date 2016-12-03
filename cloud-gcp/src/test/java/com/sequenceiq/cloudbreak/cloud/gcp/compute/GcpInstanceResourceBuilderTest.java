@@ -93,7 +93,7 @@ public class GcpInstanceResourceBuilderTest {
         instanceId = "SOME_ID";
         volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         rules = Collections.singletonList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
-        security = new Security(rules);
+        security = new Security(rules, null);
         location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData);

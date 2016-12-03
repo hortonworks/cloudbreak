@@ -8,6 +8,14 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group" ng-show="securitygroup.securityGroupId" ng-if="securitygroup.securityGroupId != 'null'">
+        <label class="col-sm-3 col-sm-offset-1 control-label" for="{{securitygroup.name}}-id">{{msg.security_group_id_label}}</label>
+
+        <div class="col-sm-7">
+            <p id="{{securitygroup.name}}-id" class="form-control-static">{{securitygroup.securityGroupId}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
     <div class="form-group" ng-show="securitygroup.description" ng-if="securitygroup.description != 'null'">
         <label class="col-sm-3 col-sm-offset-1 control-label" for="{{securitygroup.name}}-desc">{{msg.description_label}}</label>
 
@@ -16,7 +24,7 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group">
+    <div class="form-group" ng-show="securitygroup.securityRules.length > 0" ng-if="securitygroup.securityRules != 'null'">
         <label class="col-sm-3 col-sm-offset-1 control-label" for="securitygroup-securityrules">{{msg.securitygroups_rules}}</label>
         <div class="col-sm-6" id="securitygroup-securityrules">
             <table data-toggle="table" class="table security-table table-bordered">

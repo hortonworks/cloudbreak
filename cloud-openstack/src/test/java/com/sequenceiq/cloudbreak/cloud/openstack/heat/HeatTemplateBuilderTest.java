@@ -83,7 +83,7 @@ public class HeatTemplateBuilderTest {
                 new HashMap<>());
         instance = new CloudInstance("SOME_ID", instanceTemplate);
         rules = Collections.singletonList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
-        security = new Security(rules);
+        security = new Security(rules, null);
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",

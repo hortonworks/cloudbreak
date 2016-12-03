@@ -100,7 +100,7 @@ public class ArmTemplateBuilderTest {
                 new HashMap<>());
         instance = new CloudInstance("SOME_ID", instanceTemplate);
         rules = Collections.singletonList(new SecurityRule("0.0.0.0/0", new String[]{"22", "443"}, "tcp"));
-        security = new Security(rules);
+        security = new Security(rules, null);
         image = new Image("cb-centos66-amb200-2015-05-25", userData);
         Map<String, String> parameters = new HashMap<>();
         cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2", "test",
