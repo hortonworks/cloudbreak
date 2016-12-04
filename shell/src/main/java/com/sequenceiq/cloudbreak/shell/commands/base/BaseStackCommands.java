@@ -116,14 +116,14 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliCommand(value = "stack delete --id", help = "Delete the stack by its id")
     public String deleteByName(
             @CliOption(key = "", mandatory = true) Long id,
-            @CliOption(key = "wait", help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         return delete(id, null, wait);
     }
 
     @CliCommand(value = "stack delete --name", help = "Delete the stack by its name")
     public String deleteById(
             @CliOption(key = "", mandatory = true) String name,
-            @CliOption(key = "wait", help = "Wait for stack termination", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         return delete(null, name, wait);
     }
 
@@ -132,9 +132,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return delete(id, name, false);
     }
 
-    public String delete(Long id, String name, Boolean wait) {
+    public String delete(Long id, String name, boolean wait) {
         try {
-            wait = wait == null ? false : wait;
             if (id != null) {
                 shellContext.cloudbreakClient().stackEndpoint().delete(id, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
@@ -238,16 +237,14 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @Override
-    public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, Boolean publicInAccount, OnFailureAction onFailureAction,
-            AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, Boolean wait, PlatformVariant platformVariant, String orchestrator,
+    public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, boolean publicInAccount, OnFailureAction onFailureAction,
+            AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, boolean wait, PlatformVariant platformVariant, String orchestrator,
             String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params) {
         try {
             validateNetwork();
             validateRegion(region);
             validateInstanceGroups();
             validateAvailabilityZone(region, availabilityZone);
-            publicInAccount = publicInAccount == null ? false : publicInAccount;
-            wait = wait == null ? false : wait;
             Long id;
             StackRequest stackRequest = new StackRequest();
             stackRequest.setName(name);
@@ -398,7 +395,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String addNode(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the stack") Integer adjustment,
-            @CliOption(key = "withClusterUpScale", help = "Do the upscale with the cluster together") Boolean withClusterUpScale) {
+            @CliOption(key = "withClusterUpScale", help = "Do the upscale with the cluster together",
+                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withClusterUpScale) {
         try {
             if (adjustment < 1) {
                 return "The adjustment value in case of node addition should be at least 1.";
@@ -406,7 +404,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
             instanceGroupAdjustmentJson.setScalingAdjustment(adjustment);
-            instanceGroupAdjustmentJson.setWithClusterEvent(withClusterUpScale == null ? false : withClusterUpScale);
+            instanceGroupAdjustmentJson.setWithClusterEvent(withClusterUpScale);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             cloudbreakShellUtil.checkResponse("upscaleStack",

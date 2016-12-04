@@ -159,7 +159,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     }
 
     @Override
-    public String create(String name, String subnet, Boolean publicInAccount, String description, Long platformId, Map<String, Object> parameters,
+    public String create(String name, String subnet, boolean publicInAccount, String description, Long platformId, Map<String, Object> parameters,
             String platform) {
         try {
             NetworkRequest networkRequest = new NetworkRequest();
@@ -174,7 +174,6 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
             networkRequest.setTopologyId(platformId);
 
             Long id;
-            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().networkEndpoint().postPublic(networkRequest).getId();
             } else {

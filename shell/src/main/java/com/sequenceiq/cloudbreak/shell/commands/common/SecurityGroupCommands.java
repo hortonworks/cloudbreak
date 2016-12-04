@@ -39,7 +39,7 @@ public class SecurityGroupCommands implements BaseCommands {
             @CliOption(key = "rules",
                     help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
             @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
-                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
+                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") boolean publicInAccount) {
         try {
             Map<String, String> tcpRules = new HashMap<>();
             Map<String, String> udpRules = new HashMap<>();
@@ -73,7 +73,6 @@ public class SecurityGroupCommands implements BaseCommands {
             }
 
             securityGroupRequest.setSecurityRules(securityRuleRequestList);
-            publicInAccount = publicInAccount == null ? false : publicInAccount;
 
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().securityGroupEndpoint().postPublic(securityGroupRequest).getId();

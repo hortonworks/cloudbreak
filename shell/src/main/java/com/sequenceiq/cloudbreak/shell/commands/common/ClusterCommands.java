@@ -85,8 +85,10 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "ldapRequired", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
-            @CliOption(key = "enableShipyard", help = "Run shipyard in cluster") Boolean enableShipyard,
-            @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "enableShipyard", help = "Run shipyard in cluster",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableShipyard,
+            @CliOption(key = "wait", help = "Wait for stack creation",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         try {
             Set<HostGroupRequest> hostGroupList = new HashSet<>();
             Set<? extends Map.Entry<String, ? extends NodeCountEntry>> entries = shellContext.isMarathonMode()
@@ -109,9 +111,8 @@ public class ClusterCommands implements BaseCommands {
                 hostGroupList.add(hostGroupBase);
             }
 
-            wait = wait == null ? false : wait;
             ClusterRequest clusterRequest = new ClusterRequest();
-            clusterRequest.setEnableShipyard(enableShipyard == null ? false : enableShipyard);
+            clusterRequest.setEnableShipyard(enableShipyard);
             clusterRequest.setName(shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackName() : shellContext.getStackName());
             clusterRequest.setDescription(description);
             clusterRequest.setUserName(userName);
@@ -388,7 +389,8 @@ public class ClusterCommands implements BaseCommands {
     public String removeNode(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "The number of the nodes to be removed from the cluster.") Integer adjustment,
-            @CliOption(key = "withStackDownScale", help = "Do the downscale with the stack together") Boolean withStackDownScale) {
+            @CliOption(key = "withStackDownScale", help = "Do the downscale with the stack together",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withStackDownScale) {
         try {
             if (adjustment > -1) {
                 return "The adjustment value in case of node removal should be negative.";
@@ -396,7 +398,7 @@ public class ClusterCommands implements BaseCommands {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
             hostGroupAdjustmentJson.setScalingAdjustment(adjustment);
-            hostGroupAdjustmentJson.setWithStackUpdate(withStackDownScale == null ? false : withStackDownScale);
+            hostGroupAdjustmentJson.setWithStackUpdate(withStackDownScale);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
             String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
