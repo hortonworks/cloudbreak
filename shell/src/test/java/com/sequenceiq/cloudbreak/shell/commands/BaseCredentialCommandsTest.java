@@ -61,7 +61,7 @@ public class BaseCredentialCommandsTest {
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
         given(context.cloudbreakClient()).willReturn(cloudbreakClient);
-        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());
     }
 
     @Test

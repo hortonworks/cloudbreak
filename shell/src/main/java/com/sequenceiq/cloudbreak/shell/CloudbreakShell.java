@@ -176,7 +176,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         initRdsConfigAccessibility();
         Set<NetworkResponse> publics = cloudbreakClient.networkEndpoint().getPublics();
         for (NetworkResponse network : publics) {
-            context.putNetwork(Long.valueOf(network.getId()), network.getCloudPlatform());
+            context.putNetwork(network.getId(), network.getCloudPlatform());
         }
         Set<SecurityGroupResponse> securityGroups = cloudbreakClient.securityGroupEndpoint().getPublics();
         for (SecurityGroupResponse securityGroup : securityGroups) {
@@ -184,7 +184,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         }
         Set<RDSConfigResponse> rdsConfigResponses = cloudbreakClient.rdsConfigEndpoint().getPublics();
         for (RDSConfigResponse rdsConfig: rdsConfigResponses) {
-            context.putRdsConfig(Long.valueOf(rdsConfig.getId()), rdsConfig.getName());
+            context.putRdsConfig(rdsConfig.getId(), rdsConfig.getName());
         }
     }
 
@@ -225,10 +225,10 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     }
 
     private void initPlatformVariants() {
-        Map<String, Collection<String>> platformToVariants = Collections.EMPTY_MAP;
-        Map<String, Collection<String>> regions = Collections.EMPTY_MAP;
-        Map<String, Collection<String>> volumeTypes = Collections.EMPTY_MAP;
-        Map<String, Map<String, Collection<String>>> availabilityZones = Collections.EMPTY_MAP;
+        Map<String, Collection<String>> platformToVariants = Collections.emptyMap();
+        Map<String, Collection<String>> regions = Collections.emptyMap();
+        Map<String, Collection<String>> volumeTypes = Collections.emptyMap();
+        Map<String, Map<String, Collection<String>>> availabilityZones = Collections.emptyMap();
         Map<String, List<Map<String, String>>> instanceTypes = new HashMap<>();
         Map<String, Collection<String>> orchestrators = new HashMap<>();
         try {

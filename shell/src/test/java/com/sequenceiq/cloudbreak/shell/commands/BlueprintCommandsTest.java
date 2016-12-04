@@ -55,7 +55,7 @@ public class BlueprintCommandsTest {
         given(mockContext.isMarathonMode()).willReturn(false);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);
-        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());
     }
 
     @Test

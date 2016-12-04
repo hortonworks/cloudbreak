@@ -6,9 +6,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ResponseTransformer<C extends Collection> {
+public class ResponseTransformer {
 
-    public Map<String, String> transformToMap(C responses, String keyName, String valueName) {
+    public Map<String, String> transformToMap(Collection<?> responses, String keyName, String valueName) {
         Map<String, String> transformed = new HashMap<>();
 
         for (Object object : responses) {
@@ -48,8 +48,8 @@ public class ResponseTransformer<C extends Collection> {
                     if (field.getType().isAssignableFrom(Map.class)) {
                         field.setAccessible(true);
                         try {
-                            Map<Object, Object> o1 = (Map<Object, Object>) field.get(o);
-                            for (Map.Entry<Object, Object> objectObjectEntry : o1.entrySet()) {
+                            Map<?, ?> o1 = (Map<?, ?>) field.get(o);
+                            for (Map.Entry<?, ?> objectObjectEntry : o1.entrySet()) {
                                 result.put(field.getName() + "." + objectObjectEntry.getKey(),
                                         objectObjectEntry.getValue() == null ? "" : objectObjectEntry.getValue().toString());
                             }

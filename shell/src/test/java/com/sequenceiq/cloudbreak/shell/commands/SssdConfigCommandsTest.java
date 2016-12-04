@@ -85,7 +85,7 @@ public class SssdConfigCommandsTest {
         given(sssdConfigEndpoint.get(anyLong())).willReturn(dummyResult);
         given(sssdConfigEndpoint.getPublic(anyString())).willReturn(dummyResult);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
-        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(RuntimeException.class);
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());
         given(mockContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
