@@ -89,9 +89,9 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
         try {
             Set<HostGroupRequest> hostGroupList = new HashSet<>();
-            Set<Map.Entry<String, NodeCountEntry>> entries = (Set<Map.Entry<String, NodeCountEntry>>) (shellContext.isMarathonMode()
-                    ? shellContext.getMarathonHostGroups().entrySet() : shellContext.getHostGroups().entrySet());
-            for (Map.Entry<String, NodeCountEntry> entry : entries) {
+            Set<? extends Map.Entry<String, ? extends NodeCountEntry>> entries = shellContext.isMarathonMode()
+                    ? shellContext.getMarathonHostGroups().entrySet() : shellContext.getHostGroups().entrySet();
+            for (Map.Entry<String, ? extends NodeCountEntry> entry : entries) {
                 HostGroupRequest hostGroupBase = new HostGroupRequest();
                 hostGroupBase.setName(entry.getKey());
 

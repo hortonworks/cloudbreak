@@ -92,7 +92,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
             } else if (networkName != null) {
                 NetworkResponse aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(networkName);
                 if (aPublic != null) {
-                    createHintAndAddNetworkToContext(Long.valueOf(aPublic.getId()), aPublic.getCloudPlatform());
+                    createHintAndAddNetworkToContext(aPublic.getId(), aPublic.getCloudPlatform());
                     msg = "Network is selected with name: " + networkName;
                 }
             }
@@ -202,7 +202,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
         shellContext.getNetworksByProvider().clear();
         Set<NetworkResponse> publics = shellContext.cloudbreakClient().networkEndpoint().getPublics();
         for (NetworkResponse network : publics) {
-            shellContext.putNetwork(Long.valueOf(network.getId()), network.getCloudPlatform());
+            shellContext.putNetwork(network.getId(), network.getCloudPlatform());
         }
         if (!shellContext.getNetworksByProvider().containsKey(shellContext.getActiveNetworkId())) {
             shellContext.setActiveNetworkId(null);

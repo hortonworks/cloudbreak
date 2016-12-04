@@ -28,7 +28,7 @@ public class OutputTransformer {
             return jsonRenderer.render(object);
         } else if (OutPutType.RAW.equals(outPutType)) {
             if (object instanceof Map) {
-                Map map = (Map) object;
+                Map<?, ?> map = (Map<?, ?>) object;
                 if (!map.values().isEmpty()) {
                     Object value = map.values().stream().filter(e -> e != null).findAny().orElse(null);
                     if (value instanceof Collection) {

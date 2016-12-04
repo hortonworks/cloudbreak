@@ -10,10 +10,8 @@ public class TopologyUtil {
 
     public static void checkTopologyForResource(Set<TopologyResponse> publics, Long topologyId, String platform) {
         if (publics != null && topologyId != null) {
-            boolean found = false;
             for (TopologyResponse t : publics) {
                 if (t.getId().equals(topologyId)) {
-                    found = true;
                     if (t.getCloudPlatform().equals(platform)) {
                         return;
                     } else {
@@ -21,9 +19,7 @@ public class TopologyUtil {
                     }
                 }
             }
-            if (!found) {
-                throw new RuntimeException("Not found platform with id: " + topologyId);
-            }
+            throw new RuntimeException("Not found platform with id: " + topologyId);
         }
     }
 }

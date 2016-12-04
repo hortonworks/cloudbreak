@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -45,10 +43,10 @@ public class InstanceGroupCommands implements CommandMarker {
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
             @CliOption(key = "ambariServer", mandatory = true, help = "Ambari server will be installed here if true") boolean ambariServer,
-            @CliOption(key = "templateId", mandatory = false, help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
-            @CliOption(key = "templateName", mandatory = false, help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
-            @CliOption(key = "securityGroupId", mandatory = false, help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
-            @CliOption(key = "securityGroupName", mandatory = false, help = "SecurityGroupName of the instanceGroup")
+            @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
+            @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
+            @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
+            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup")
             SecurityGroupName instanceGroupSecurityGroupName) throws Exception {
         try {
             String templateId;
@@ -64,7 +62,7 @@ public class InstanceGroupCommands implements CommandMarker {
             } else {
                 return "Template name or id is not defined for instanceGroup (use --templateName or --templateId)";
             }
-            String securityGroupId = null;
+            String securityGroupId;
             if (instanceGroupSecurityGroupId != null) {
                 securityGroupId = instanceGroupSecurityGroupId.getName();
             } else if (instanceGroupSecurityGroupName != null) {
@@ -81,8 +79,6 @@ public class InstanceGroupCommands implements CommandMarker {
             Long parsedTemplateId = Longs.tryParse(templateId);
             Long parsedsecurityGroupId = Longs.tryParse(securityGroupId);
             if (parsedTemplateId != null && parsedsecurityGroupId != null) {
-                Map<Long, Integer> map = new HashMap<>();
-                map.put(parsedTemplateId, nodeCount);
                 if (ambariServer) {
                     boolean ambariSpecified = shellContext.getInstanceGroups().values()
                             .stream().filter(e -> e.getType().equals("GATEWAY")).findAny().isPresent();
