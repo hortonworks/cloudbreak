@@ -311,7 +311,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     }
 
-    @CliAvailabilityIndicator({"stack node", "stack stop --id", "stack stop --name", "stack start --id", "stack start --name"})
+    @CliAvailabilityIndicator({"stack node --ADD", "stack node --REMOVE", "stack stop --id", "stack stop --name", "stack start --id", "stack start --name"})
     public boolean nodeAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
     }
