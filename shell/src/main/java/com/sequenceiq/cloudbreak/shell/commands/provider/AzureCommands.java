@@ -94,7 +94,8 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "sshKeyPath", help = "sshKeyPath of the template") File sshKeyPath,
             @CliOption(key = "sshKeyUrl", help = "sshKeyUrl of the template") String sshKeyUrl,
             @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
-            @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account") Boolean publicInAccount,
+            @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the credential") String description,
             @CliOption(key = "platformId", help = "Id of a platform the credential belongs to") Long platformId
     ) {
@@ -110,7 +111,8 @@ public class AzureCommands implements CommandMarker {
     public String createNewNetwork(
             @CliOption(key = "name", mandatory = true, help = "Name of the network") String name,
             @CliOption(key = "subnet", mandatory = true, help = "Subnet of the network in CIDR format") String subnet,
-            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the network") String description,
             @CliOption(key = "platformId", help = "Id of a platform the network belongs to") Long platformId
     ) {
@@ -125,7 +127,8 @@ public class AzureCommands implements CommandMarker {
                     help = "Name of the custom resource group in case of existing virtual network and subnet") String rgName,
             @CliOption(key = "networkId", mandatory = true, help = "Name of the custom network within the custom resource group") String networkId,
             @CliOption(key = "subnetId", mandatory = true, help = "Name of the custom subnet within the custom resource group") String subnetId,
-            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "publicInAccount", help = "Marks the network as visible for all members of the account",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "noPublicIp", help = "If true, no public IP is created for the instances") Boolean noPublicIp,
             @CliOption(key = "noFirewallRules", help = "If true, no new firewall rules will be created for the network") Boolean noFirewallRules,
             @CliOption(key = "description", help = "Description of the network") String description,
@@ -149,7 +152,8 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "volumeType", help = "volumeType of the template") AzureVolumeType volumeType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
-            @CliOption(key = "publicInAccount", help = "flags if the template is public in the account") Boolean publicInAccount,
+            @CliOption(key = "publicInAccount", help = "flags if the template is public in the account",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
             @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
     ) {
@@ -203,7 +207,8 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
             @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
-            @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account") Boolean publicInAccount,
+            @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "onFailureAction", help = "onFailureAction which is ROLLBACK or DO_NOTHING.") OnFailureAction onFailureAction,
             @CliOption(key = "adjustmentType", help = "adjustmentType which is EXACT or PERCENTAGE.") AdjustmentType adjustmentType,
             @CliOption(key = "ambariVersion", help = "Ambari version") String ambariVersion,
@@ -217,7 +222,7 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "attachedStorageType", help = "type of the storage creation") ArmAttachedStorageOption attachedStorageOption,
             @CliOption(key = "persistentStorage", help = "name of the persistent storage")
             String persistentStorage,
-            @CliOption(key = "wait", help = "Wait for stack creation", specifiedDefaultValue = "false") Boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
 
             orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
             if (SALT.equals(orchestratorType.getName())) {

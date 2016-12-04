@@ -6,7 +6,7 @@ import java.util.Map;
 public interface CredentialCommands {
 
     String create(String name, File sshKeyPath, String sshKeyUrl, String sshKeyString,
-            String description, Boolean publicInAccount, Long platformId, Map<String, Object> parameters, String platform);
+            String description, boolean publicInAccount, Long platformId, Map<String, Object> parameters, String platform);
 
     boolean createCredentialAvailable(String platform);
 }

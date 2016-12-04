@@ -185,7 +185,8 @@ public class MarathonCommands implements CommandMarker {
             @CliOption(key = "memory", mandatory = true, help = "Memory in Mb of the marathon constraint (16mb - 128Gb)") Double memory,
             @CliOption(key = "diskSize", mandatory = true, help = "Disk in Gb of the marathon constraint (10Gb - 1000Gb)") Double disk,
             @CliOption(key = "description", help = "Description of the marathon stack") String description,
-            @CliOption(key = "publicInAccount", help = "flags if the constraint is public in the account") Boolean publicInAccount) {
+            @CliOption(key = "publicInAccount", help = "flags if the constraint is public in the account",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount) {
         Long id;
         try {
             ConstraintTemplateRequest constraintTemplateRequest = new ConstraintTemplateRequest();
@@ -195,7 +196,6 @@ public class MarathonCommands implements CommandMarker {
             constraintTemplateRequest.setDisk(disk);
             constraintTemplateRequest.setMemory(memory);
             constraintTemplateRequest.setOrchestratorType(OrchestratorConstants.MARATHON);
-            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 id = cloudbreakClient.constraintTemplateEndpoint().postPublic(constraintTemplateRequest).getId();
             } else {

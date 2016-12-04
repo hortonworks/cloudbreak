@@ -140,10 +140,8 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
     }
 
     @Override
-    public String create(String name, String instanceType, Integer volumeCount, Integer volumeSize, String volumeType, Boolean publicInAccount,
+    public String create(String name, String instanceType, Integer volumeCount, Integer volumeSize, String volumeType, boolean publicInAccount,
             String description, Map<String, Object> parameters, Long platformId, String platform) {
-        publicInAccount = publicInAccount == null ? false : publicInAccount;
-
         try {
             Long id;
             TemplateRequest templateRequest = new TemplateRequest();

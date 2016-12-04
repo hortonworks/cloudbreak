@@ -171,7 +171,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     }
 
     @Override
-    public String create(String name, File sshKeyPath, String sshKeyUrl, String sshKeyString, String description, Boolean publicInAccount, Long platformId,
+    public String create(String name, File sshKeyPath, String sshKeyUrl, String sshKeyString, String description, boolean publicInAccount, Long platformId,
             Map<String, Object> parameters, String platform) {
         if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
             return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
@@ -206,7 +206,6 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
             }
             credentialRequest.setTopologyId(platformId);
             Long id;
-            publicInAccount = publicInAccount == null ? false : publicInAccount;
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().credentialEndpoint().postPublic(credentialRequest).getId();
             } else {
