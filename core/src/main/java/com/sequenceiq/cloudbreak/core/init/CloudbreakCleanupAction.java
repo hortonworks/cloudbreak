@@ -125,6 +125,7 @@ public class CloudbreakCleanupAction {
                 flow2Handler.restartFlow((String) flow[0]);
                 stackIds.add((Long) flow[1]);
             } catch (Exception e) {
+                LOGGER.error(String.format("Failed torestart flow %s on stack %s", flow[0].toString(), flow[1].toString()), e);
                 flowLogService.terminate((Long) flow[1], (String) flow[0]);
             }
         }
