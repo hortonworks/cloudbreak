@@ -862,11 +862,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setAmbariStackDetails(platformObject, setObject) {
             setObject.ambariStackDetails = {};
-            if (platformObject.cloudPlatform == 'AWS') {
-                setObject.ambariStackDetails.os = "redhat6";
-            } else {
-                setObject.ambariStackDetails.os = "redhat7";
-            }
         }
 
         function setRegion() {

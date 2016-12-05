@@ -18,8 +18,7 @@ public class AmbariStackDetailsJson {
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERSION, required = true)
     private String version;
-    @NotNull
-    @ApiModelProperty(value = AmbariStackDetailsDescription.OS, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.OS)
     private String os;
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_REPO_ID, required = true)

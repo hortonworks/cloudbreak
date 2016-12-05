@@ -12,16 +12,6 @@
 
     </div>
 </div>
-<div class="form-group" name="ambari_os1">
-    <label class="col-sm-3 control-label" for="ambari_os">{{msg.cluster_form_ambari_repo_os_label}}</label>
-    <div class="col-sm-8">
-        <select class="form-control" id="ambari_os" name="ambari_os" ng-model="cluster.ambariStackDetails.os">
-            <option style="display:none" value="">select a type</option>
-            <option value="redhat7">redhat7</option>
-            <option value="redhat6">redhat6</option>
-        </select>
-    </div>
-</div>
 <div class="form-group" name="ambari_stackRepoId1" ng-class="{ 'has-error': clusterCreationForm.ambari_stackRepoId.$dirty && clusterCreationForm.ambari_stackRepoId.$invalid }">
     <label class="col-sm-3 control-label" for="ambari_stackRepoId">{{msg.cluster_form_ambari_repo_stack_repoid_label}}</label>
     <div class="col-sm-8">
