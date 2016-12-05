@@ -724,16 +724,6 @@
                                                             <input type="string" name="ambari_version" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.version" id="ambari_version" placeholder="{{msg.cluster_form_ambari_repo_version_placeholder}}">
                                                         </div>
                                                     </div>
-                                                    <div class="form-group" name="ambari_os1">
-                                                        <label class="col-sm-3 control-label" for="ambari_os">{{msg.cluster_form_ambari_repo_os_label}}</label>
-                                                        <div class="col-sm-9">
-                                                            <select class="form-control" id="ambari_os" name="ambari_os" ng-model="reinstallClusterObject.ambariStackDetails.os">
-                                                                <option style="display:none" value="">select a type</option>
-                                                                <option value="redhat7">redhat7</option>
-                                                                <option value="redhat6">redhat6</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
                                                     <div class="form-group" name="ambari_stackRepoId1" ng-class="{ 'has-error': ambariStackDetailsreinstallpane.ambari_stackRepoId.$dirty && ambariStackDetailsreinstallpane.ambari_stackRepoId.$invalid }">
                                                         <label class="col-sm-3 control-label" for="ambari_stackRepoId">{{msg.cluster_form_ambari_repo_stack_repoid_label}}</label>
                                                         <div class="col-sm-9">

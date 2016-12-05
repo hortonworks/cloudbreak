@@ -4,6 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.AmbariStackDetailsDescription;
+
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
@@ -19,8 +20,7 @@ public class AmbariStackDetailsJson {
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERSION, required = true)
     private String version;
 
-    @NotNull
-    @ApiModelProperty(value = AmbariStackDetailsDescription.OS, required = true)
+    @ApiModelProperty(value = AmbariStackDetailsDescription.OS)
     private String os;
 
     @NotNull
