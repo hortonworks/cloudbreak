@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getProjectId
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getTarName;
 
 import java.io.IOException;
-import java.util.Date;
 
 import javax.inject.Inject;
 
@@ -26,6 +25,7 @@ import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -47,20 +47,19 @@ public class GcpProvisionSetup implements Setup {
 
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
-        long stackId = authenticatedContext.getCloudContext().getId();
         CloudCredential credential = authenticatedContext.getCloudCredential();
+        CloudContext cloudContext = authenticatedContext.getCloudContext();
         try {
             String projectId = getProjectId(credential);
             String imageName = image.getImageName();
-            Storage storage = buildStorage(credential, authenticatedContext.getCloudContext().getName());
             Compute compute = buildCompute(credential);
             ImageList list = compute.images().list(projectId).execute();
-            Long time = new Date().getTime();
             if (!containsSpecificImage(list, imageName)) {
+                Storage storage = buildStorage(credential, cloudContext.getName());
+                Bucket bucket = new Bucket();
+                bucket.setName(String.format("%s-%s-%d", projectId, cloudContext.getName(), cloudContext.getId()));
+                bucket.setStorageClass("STANDARD");
                 try {
-                    Bucket bucket = new Bucket();
-                    bucket.setName(projectId + time);
-                    bucket.setStorageClass("STANDARD");
                     Storage.Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
                     ins.execute();
                 } catch (GoogleJsonResponseException ex) {
@@ -69,18 +68,19 @@ public class GcpProvisionSetup implements Setup {
                     }
                 }
                 String tarName = getTarName(imageName);
-                Storage.Objects.Copy copy = storage.objects().copy(getBucket(imageName), tarName, projectId + time, tarName, new StorageObject());
+                Storage.Objects.Copy copy = storage.objects().copy(getBucket(imageName), tarName, bucket.getName(), tarName, new StorageObject());
                 copy.execute();
 
                 Image gcpApiImage = new Image();
                 gcpApiImage.setName(getImageName(imageName));
                 Image.RawDisk rawDisk = new Image.RawDisk();
-                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", projectId + time, tarName));
+                rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucket.getName(), tarName));
                 gcpApiImage.setRawDisk(rawDisk);
-                Compute.Images.Insert ins1 = compute.images().insert(projectId, gcpApiImage);
-                ins1.execute();
+                Compute.Images.Insert ins = compute.images().insert(projectId, gcpApiImage);
+                ins.execute();
             }
         } catch (Exception e) {
+            Long stackId = cloudContext.getId();
             String msg = String.format("Error occurred on %s stack during the setup: %s", stackId, e.getMessage());
             LOGGER.error(msg, e);
             throw new CloudConnectorException(msg, e);
