@@ -13,7 +13,7 @@ public enum StackCreationState implements FlowState {
     IMAGESETUP_STATE,
     IMAGE_CHECK_STATE(CheckImageAction.class),
     CREATE_CREDENTIAL_STATE,
-    START_PROVISIONING_STATE,
+    START_PROVISIONING_STATE(null, StartProvisioningRestartAction.class),
     PROVISIONING_FINISHED_STATE,
     COLLECTMETADATA_STATE,
     GET_TLS_INFO_STATE,
@@ -30,6 +30,11 @@ public enum StackCreationState implements FlowState {
 
     StackCreationState(Class<? extends AbstractAction> action) {
         this.action = action;
+    }
+
+    StackCreationState(Class<? extends AbstractAction> action, Class<? extends RestartAction> restartAction) {
+        this.action = action;
+        this.restartAction = restartAction;
     }
 
     @Override

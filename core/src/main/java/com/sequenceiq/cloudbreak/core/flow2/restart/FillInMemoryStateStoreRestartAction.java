@@ -30,15 +30,20 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
         try {
             Payload stackPayload = (Payload) payload;
             stack = stackService.getById(stackPayload.getStackId());
-            InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
-            if (stack.getCluster() != null) {
-                InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getCluster().getStatus()));
-            }
+           restart(flowId, flowChainId, event, payload, stack);
         } catch (Exception e) {
             if (stack != null) {
                 MDCBuilder.buildMdcContext(stack);
             }
             LOGGER.error("Failed to restore stack into InMemoryStateStore", e);
+        }
+        super.restart(flowId, flowChainId, event, payload);
+    }
+
+    protected void restart(String flowId, String flowChainId, String event, Object payload, Stack stack) {
+        InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
+        if (stack.getCluster() != null) {
+            InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getCluster().getStatus()));
         }
         super.restart(flowId, flowChainId, event, payload);
     }
