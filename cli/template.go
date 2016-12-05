@@ -49,8 +49,8 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 		VolumeType:    &skeleton.Compute.VolumeType,
 		VolumeSize:    skeleton.Compute.VolumeSize,
 		VolumeCount:   skeleton.Compute.VolumeCount,
-		Parameters:    map[string]interface{}{
-			"SpotPrice" : skeleton.Compute.SpotPrice,
+		Parameters: map[string]interface{}{
+			"SpotPrice": skeleton.Compute.SpotPrice,
 		},
 	}
 

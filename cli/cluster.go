@@ -610,7 +610,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 					InstanceCount: 2,
 					Recipes:       []Recipe{},
 				},
-				SpotPrice:     "0",
+				SpotPrice: "0",
 			},
 			WebAccess:    true,
 			InstanceRole: "CREATE",

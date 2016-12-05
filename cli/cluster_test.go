@@ -212,10 +212,11 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		return &cluster.PostStacksIDClusterOK{Payload: &models.ClusterResponse{ID: &clusterId}}, nil
 	}
 
-	createRecipes := func(skeleton ClusterSkeleton, master chan int64, worker chan int64, wg *sync.WaitGroup) {
+	createRecipes := func(skeleton ClusterSkeleton, master chan int64, worker chan int64, compute chan int64, wg *sync.WaitGroup) {
 		defer wg.Done()
 		close(master)
 		close(worker)
+		close(compute)
 	}
 
 	actualId = createClusterImpl(*skeleton, getBlueprint,
@@ -240,25 +241,25 @@ func TestResizeClusterImplStack(t *testing.T) {
 	getStack := func(string) *models.StackResponse {
 		return &models.StackResponse{ID: &expectedId}
 	}
-	var actialId int64
+	var actualId int64
 	var actualUpdate models.UpdateStack
 	putStack := func(params *stacks.PutStacksIDParams) error {
-		actialId = params.ID
+		actualId = params.ID
 		actualUpdate = *params.Body
 		return nil
 	}
 
 	expectedAdjustment := int32(2)
-	resizeClusterImpl("name", expectedAdjustment, getStack, putStack, nil)
+	resizeClusterImpl("name", WORKER, expectedAdjustment, getStack, putStack, nil)
 
-	if actialId != expectedId {
-		t.Errorf("id not match %d == %d", expectedId, actialId)
+	if actualId != expectedId {
+		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
 	if actualUpdate.InstanceGroupAdjustment.InstanceGroup != WORKER {
-		t.Errorf("type not math %s == %s", WORKER, actualUpdate.InstanceGroupAdjustment.InstanceGroup)
+		t.Errorf("type not match %s == %s", WORKER, actualUpdate.InstanceGroupAdjustment.InstanceGroup)
 	}
 	if actualUpdate.InstanceGroupAdjustment.ScalingAdjustment != expectedAdjustment {
-		t.Errorf("type not math %d == %d", expectedAdjustment, actualUpdate.InstanceGroupAdjustment.ScalingAdjustment)
+		t.Errorf("type not match %d == %d", expectedAdjustment, actualUpdate.InstanceGroupAdjustment.ScalingAdjustment)
 	}
 	if !*actualUpdate.InstanceGroupAdjustment.WithClusterEvent {
 		t.Error("with cluster event is false")
@@ -270,25 +271,25 @@ func TestResizeClusterImplCluster(t *testing.T) {
 	getStack := func(string) *models.StackResponse {
 		return &models.StackResponse{ID: &expectedId}
 	}
-	var actialId int64
+	var actualId int64
 	var actualUpdate models.UpdateCluster
 	putCluster := func(params *cluster.PutStacksIDClusterParams) error {
-		actialId = params.ID
+		actualId = params.ID
 		actualUpdate = *params.Body
 		return nil
 	}
 
 	expectedAdjustment := int32(0)
-	resizeClusterImpl("name", expectedAdjustment, getStack, nil, putCluster)
+	resizeClusterImpl("name", WORKER, expectedAdjustment, getStack, nil, putCluster)
 
-	if actialId != expectedId {
-		t.Errorf("id not match %d == %d", expectedId, actialId)
+	if actualId != expectedId {
+		t.Errorf("id does not match %d == %d", expectedId, actualId)
 	}
 	if actualUpdate.HostGroupAdjustment.HostGroup != WORKER {
-		t.Errorf("type not math %s == %s", WORKER, actualUpdate.HostGroupAdjustment.HostGroup)
+		t.Errorf("type does not match %s == %s", WORKER, actualUpdate.HostGroupAdjustment.HostGroup)
 	}
 	if actualUpdate.HostGroupAdjustment.ScalingAdjustment != expectedAdjustment {
-		t.Errorf("type not math %d == %d", expectedAdjustment, actualUpdate.HostGroupAdjustment.ScalingAdjustment)
+		t.Errorf("type does not match %d == %d", expectedAdjustment, actualUpdate.HostGroupAdjustment.ScalingAdjustment)
 	}
 	if !*actualUpdate.HostGroupAdjustment.WithStackUpdate {
 		t.Error("with cluster event is false")
