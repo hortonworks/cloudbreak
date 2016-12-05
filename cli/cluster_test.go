@@ -119,6 +119,7 @@ func TestCreateClusterImplMinimal(t *testing.T) {
 			ClusterAndAmbariUser:     "user",
 			ClusterAndAmbariPassword: "passwd",
 			Worker: InstanceConfig{InstanceCount: 3},
+			Compute: SpotInstanceConfig{InstanceConfig: InstanceConfig{InstanceCount: 3}},
 		},
 	}
 
@@ -184,6 +185,7 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		defer wg.Done()
 		c <- int64(1)
 		c <- int64(2)
+		c <- int64(3)
 	}
 	createBlueprint := func(s ClusterSkeleton, bp *models.BlueprintResponse, c chan int64, wg *sync.WaitGroup) {
 		defer wg.Done()

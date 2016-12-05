@@ -24,22 +24,35 @@ func TestCreateTemplateImpl(t *testing.T) {
 				VolumeSize:   &(&int32Wrapper{64}).i,
 				VolumeCount:  &(&int32Wrapper{2}).i,
 			},
+			Compute: SpotInstanceConfig{
+				InstanceConfig: InstanceConfig{
+					InstanceType: "compute",
+					VolumeType:   "compute-volume",
+					VolumeSize:   &(&int32Wrapper{64}).i,
+					VolumeCount:  &(&int32Wrapper{2}).i,
+				},
+			},
 		},
 	}
-	c := make(chan int64, 2)
+	c := make(chan int64, 3)
 	expectedMasterId := int64(1)
 	expectedWorkerId := int64(2)
+	expectedComputeId := int64(3)
 	var actualMasterTemplate *models.TemplateRequest
 	var actualWorkerTemplate *models.TemplateRequest
+	var actualComputeTemplate *models.TemplateRequest
 
 	postTemplate := func(params *templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error) {
 		var id int64
 		if strings.Contains(params.Body.Name, "mtempl") {
 			id = expectedMasterId
 			actualMasterTemplate = params.Body
-		} else {
+		} else if strings.Contains(params.Body.Name, "wtempl") {
 			id = expectedWorkerId
 			actualWorkerTemplate = params.Body
+		} else {
+			id = expectedComputeId
+			actualComputeTemplate = params.Body
 		}
 		resp := templates.PostTemplatesAccountOK{
 			Payload: &models.TemplateResponse{ID: &id},
@@ -51,6 +64,7 @@ func TestCreateTemplateImpl(t *testing.T) {
 
 	validateTemplate("master", skeleton.Master, expectedMasterId, actualMasterTemplate, c, t)
 	validateTemplate("worker", skeleton.Worker, expectedWorkerId, actualWorkerTemplate, c, t)
+	//validateTemplate("compute", skeleton.Compute, expectedComputeId, actualComputeTemplate, c, t)
 }
 
 func validateTemplate(kind string, config InstanceConfig, expId int64, actual *models.TemplateRequest, c chan int64, t *testing.T) {
@@ -66,6 +80,11 @@ func validateTemplate(kind string, config InstanceConfig, expId int64, actual *m
 	if kind == "worker" {
 		if m, _ := regexp.MatchString("wtempl([0-9]{10,20})", actual.Name); m == false {
 			t.Errorf("name not match wtempl([0-9]{10,20}) == %s", actual.Name)
+		}
+	}
+	if kind == "compute" {
+		if m, _ := regexp.MatchString("ctempl([0-9]{10,20})", actual.Name); m == false {
+			t.Errorf("name not match ctempl([0-9]{10,20}) == %s", actual.Name)
 		}
 	}
 	if actual.CloudPlatform != "AWS" {

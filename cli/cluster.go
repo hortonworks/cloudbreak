@@ -236,7 +236,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	credentialId := make(chan int64, 1)
 	go copyCredential(skeleton, credentialId, &wg)
 
-	templateIds := make(chan int64, 2)
+	templateIds := make(chan int64, 3)
 	go createTemplate(skeleton, templateIds, &wg)
 
 	var secGroupId = make(chan int64, 1)

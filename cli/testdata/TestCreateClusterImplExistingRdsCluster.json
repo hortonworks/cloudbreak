@@ -1,1 +1,1 @@
-{"blueprintId":3,"hostGroups":[{"constraint":{"hostCount":1,"instanceGroupName":"master"},"name":"master"},{"constraint":{"hostCount":0,"instanceGroupName":"worker"},"name":"worker"}],"name":"","password":"","rdsConfigId":1,"userName":""}
+{"blueprintId":3,"hostGroups":[{"constraint":{"hostCount":1,"instanceGroupName":"master"},"name":"master"},{"constraint":{"hostCount":0,"instanceGroupName":"worker"},"name":"worker"},{"constraint":{"hostCount":0,"instanceGroupName":"compute"},"name":"compute"}],"name":"","password":"","rdsConfigId":1,"userName":""}
