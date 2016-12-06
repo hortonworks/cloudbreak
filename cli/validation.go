@@ -28,9 +28,9 @@ func (s *ClusterSkeleton) Validate() error {
 	} else if s.Worker.InstanceCount < 1 {
 		res = append(res, swagerrors.New(1, "The instance count has to be greater than 0"))
 	}
-	if err := validate.RequiredNumber("InstanceCount", "compute", float64(s.Compute.InstanceCount)); err != nil {
-		res = append(res, err)
-	} else if s.Compute.InstanceCount < 0 {
+	if s.Compute.InstanceCount >= 0 {
+		res = append(res)
+	} else {
 		res = append(res, swagerrors.New(1, "The instance count has to be not less than 0"))
 	}
 	if err := validate.RequiredString("SSHKeyName", "body", string(s.SSHKeyName)); err != nil {
