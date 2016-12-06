@@ -50,6 +50,7 @@ deps-install() {
 	case "$extension" in
 		zip) unzip "$tmpfile" > /dev/null;;
 		tgz|gz) tar -zxf "$tmpfile" > /dev/null;;
+        *) cp "$tmpfile" .;;
 	esac
 	install="$(echo "$index" | grep "^# install: " || true)"
 	if [[ "$install" ]]; then
