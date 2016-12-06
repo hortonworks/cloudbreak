@@ -52,7 +52,7 @@ type InstanceConfig struct {
 	VolumeType    string   `json:"VolumeType" yaml:"VolumeType"`
 	VolumeSize    *int32   `json:"VolumeSize" yaml:"VolumeSize"`
 	VolumeCount   *int32   `json:"VolumeCount" yaml:"VolumeCount"`
-	InstanceCount int32    `json:"InstanceCount,omitempty" yaml:"InstanceCount,omitempty"`
+	InstanceCount int32    `json:"InstanceCount" yaml:"InstanceCount"`
 	Recipes       []Recipe `json:"Recipes" yaml:"Recipes"`
 }
 

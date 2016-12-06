@@ -316,7 +316,7 @@ func TestGenerateCreateSharedClusterSkeletonImplNoClusterName(t *testing.T) {
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplNoClusterName.json")
 	if skeleton.Json() != string(expected) {
-		t.Errorf("json not match %s == %s", string(expected), skeleton.Json())
+		t.Errorf("json does not match \n%s\n==\n%s", string(expected), skeleton.Json())
 	}
 }
 
@@ -343,7 +343,7 @@ func TestGenerateCreateSharedClusterSkeletonImplNotAvailable(t *testing.T) {
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplNotAvailable.json")
 	if skeleton.Json() != string(expected) {
-		t.Errorf("json not match %s == %s", string(expected), skeleton.Json())
+		t.Errorf("json does not match \n%s\n==\n%s", string(expected), skeleton.Json())
 	}
 }
 
@@ -379,7 +379,7 @@ func TestGenerateCreateSharedClusterSkeletonImplMinimalConfig(t *testing.T) {
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplMinimalConfig.json")
 	if skeleton.Json() != string(expected) {
-		t.Errorf("json not match %s == %s", string(expected), skeleton.Json())
+		t.Errorf("json not match \n%s\n==\n%s", string(expected), skeleton.Json())
 	}
 }
 
@@ -421,7 +421,7 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplFullConfig.json")
 	if skeleton.Json() != string(expected) {
-		t.Errorf("json not match %s == %s", string(expected), skeleton.Json())
+		t.Errorf("json does not match \n%s\n==\n%s", string(expected), skeleton.Json())
 	}
 }
 
