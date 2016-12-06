@@ -62,6 +62,7 @@ machine-env() {
     machine-deps
     echo ==== OK
     docker-machine env --shell bash $MACHINE_NAME > .profile.docker
+    echo "export PATH=$PWD/.deps/bin:\$PATH" >> .profile.docker
 
     debug docker ENV are saved to .profile.docker
     echo "=====> You can set docker ENV vars by:" 1>&2
