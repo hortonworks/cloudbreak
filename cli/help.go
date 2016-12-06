@@ -31,7 +31,7 @@ var AWSCreateClusterSkeletonHelp = `
     "InstanceType": "m3.xlarge",                                           // Instance type of worker instance group
     "VolumeType": "ephemeral",                                             // Volume type of worker instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 40,                                                      // Volume size of worker instance group
-    "VolumeCount": 2,                                                      // Volume count of master instance group
+    "VolumeCount": 2,                                                      // Volume count of worker instance group
     "InstanceCount": 1                                                     // Instance count of worker instance group, accepted value: >0
     "Recipes:" [                                                           // (Optional) List of recipes
       {
@@ -39,6 +39,20 @@ var AWSCreateClusterSkeletonHelp = `
         "Phase: "post"                                                     // Which phase to run the script on, accepted values: pre, post
       }
     ]
+  },
+  "Compute": {                                                             // Compute instance group
+    "InstanceType": "m3.xlarge",                                           // Instance type of compute instance group
+    "VolumeType": "ephemeral",                                             // Volume type of compute instance group, accepted values: gp2, standard, ephemeral
+    "VolumeSize": 40,                                                      // Volume size of compute instance group
+    "VolumeCount": 2,                                                      // Volume count of compute instance group
+    "InstanceCount": 1                                                     // Instance count of compute instance group, accepted value: >=0
+    "Recipes:" [                                                           // (Optional) List of recipes
+      {
+        "URI": "http://some-site.com/test.sh",                             // URI of the script
+        "Phase: "post"                                                     // Which phase to run the script on, accepted values: pre, post
+      }
+    ],
+    "SpotPrice": "0.231"						   // (Optional) Bid price to use for spot instances in compute instance group
   },
   "SSHKeyName": "my-existing-keypair-name",                                // Name of an existing EC2 KeyPair to enable SSH access to the cluster node instances.
   "RemoteAccess": "0.0.0.0/0",                                             // Allow connections from this address range. Must be a valid CIDR IP (for example: 0.0.0.0/0 will allow access from all)
