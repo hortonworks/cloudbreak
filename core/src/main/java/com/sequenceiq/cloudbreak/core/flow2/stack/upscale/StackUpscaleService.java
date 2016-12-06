@@ -162,7 +162,7 @@ public class StackUpscaleService {
     }
 
     public void handleStackUpscaleFailure(Stack stack, StackFailureEvent payload) {
-        LOGGER.error("Exception during the downscaling of stack", payload.getException());
+        LOGGER.error("Exception during the upscale of stack", payload.getException());
         try {
             String errorReason = payload.getException().getMessage();
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
