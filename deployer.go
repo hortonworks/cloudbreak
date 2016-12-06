@@ -150,6 +150,7 @@ func main() {
 		"include/env.bash",
 		"include/fn.bash",
 		"include/migrate.bash",
+		"include/machine.bash",
 		"include/module.bash",
 	}, Asset, false)
 

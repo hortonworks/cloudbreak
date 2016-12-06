@@ -456,6 +456,7 @@ main() {
     circle-init
     compose-init
     aws-init
+    machine-init
 
     debug "Cloudbreak Deployer $(bin-version)"
 
@@ -480,6 +481,9 @@ main() {
     cmd-export azure-deploy-dash
     cmd-export azure-configure-arm
 
+    cmd-export-ns machine "Docker-machine"
+    cmd-export machine-create
+    cmd-export machine-check
     
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export cbd-update update
