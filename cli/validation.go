@@ -33,6 +33,11 @@ func (s *ClusterSkeleton) Validate() error {
 	} else {
 		res = append(res, swagerrors.New(1, "The instance count has to be not less than 0"))
 	}
+	if s.Compute.SpotPrice != "" {
+		if f, err := strconv.ParseFloat(s.Compute.SpotPrice, 64); err != nil || f <= 0 {
+			res = append(res, swagerrors.New(1, "SpotPrice must be numeric and greater than 0"))
+		}
+	}
 	if err := validate.RequiredString("SSHKeyName", "body", string(s.SSHKeyName)); err != nil {
 		res = append(res, err)
 	}

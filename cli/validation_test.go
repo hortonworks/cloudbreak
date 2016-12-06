@@ -12,8 +12,8 @@ func TestClusterSkeletonValidateAllMissing(t *testing.T) {
 
 	if errors == nil {
 		t.Error("errors couldn't be nil")
-	} else if c := strings.Count(errors.Error(), "required"); c != 9 {
-		t.Errorf("required fields 9 != %d : %s", c, errors.Error())
+	} else if c := strings.Count(errors.Error(), "required"); c != 8 {
+		t.Errorf("required fields 8 != %d : %s", c, errors.Error())
 	}
 }
 

@@ -42,6 +42,11 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 		Parameters:    make(map[string]interface{}),
 	}
 
+	computeParameters := make(map[string]interface{})
+	if skeleton.Compute.SpotPrice != "" {
+		computeParameters["spotPrice"] = skeleton.Compute.SpotPrice
+	}
+
 	computeTemplateReqBody := models.TemplateRequest{
 		Name:          computeTemplateName,
 		CloudPlatform: "AWS",
@@ -49,9 +54,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 		VolumeType:    &skeleton.Compute.VolumeType,
 		VolumeSize:    skeleton.Compute.VolumeSize,
 		VolumeCount:   skeleton.Compute.VolumeCount,
-		Parameters: map[string]interface{}{
-			"SpotPrice": skeleton.Compute.SpotPrice,
-		},
+		Parameters:    computeParameters,
 	}
 
 	log.Infof("[CreateTemplate] sending master template create request with name: %s", masterTemplateName)
