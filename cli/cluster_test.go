@@ -118,7 +118,7 @@ func TestCreateClusterImplMinimal(t *testing.T) {
 			HDPVersion:               "hdp-version",
 			ClusterAndAmbariUser:     "user",
 			ClusterAndAmbariPassword: "passwd",
-			Worker: InstanceConfig{InstanceCount: 3},
+			Worker:  InstanceConfig{InstanceCount: 3},
 			Compute: SpotInstanceConfig{InstanceConfig: InstanceConfig{InstanceCount: 3}},
 		},
 	}
