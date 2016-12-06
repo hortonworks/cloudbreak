@@ -505,6 +505,7 @@ main() {
         cmd-export util-cloudbreak-shell-quiet
         cmd-export util-cloudbreak-shell-remote
         cmd-export util-token
+        cmd-export util-token-debug
         cmd-export util-local-dev
         cmd-export util-cleanup
         cmd-export util-smartsense
