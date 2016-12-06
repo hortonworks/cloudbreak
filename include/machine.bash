@@ -18,6 +18,7 @@ machine-create() {
     declare desc="Installs docker-machine xhyve driver"
     debug "$desc"
     
+    machine-deps
     docker-machine create \
         -d xhyve \
         --xhyve-memory-size $MACHINE_MEM \
