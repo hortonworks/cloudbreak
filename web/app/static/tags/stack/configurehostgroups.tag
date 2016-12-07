@@ -78,7 +78,7 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="securityGroupNameName{{$index}}">{{msg.cluster_form_securitygroup_label}}</label>
                                 <div class="col-sm-8">
-                                    <select class="form-control" id="securityGroupNameName{{$index}}" name="securityGroupNameName{{$index}}" ng-model="instanceGroup.securityGroupId" ng-options="securitygroup.id as securitygroup.name for securitygroup in $root.securitygroups | orderBy:'name'" ng-required="activeCredential">
+                                    <select class="form-control" id="securityGroupNameName{{$index}}" name="securityGroupNameName{{$index}}" ng-model="instanceGroup.securityGroupId" ng-options="securitygroup.id as securitygroup.name for securitygroup in $root.securitygroups | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" ng-required="activeCredential">
                                     </select>
                                 </div>
                             </div>
