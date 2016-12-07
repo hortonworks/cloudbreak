@@ -13,6 +13,20 @@
     </div>
 </div>
 <div class="form-group" ng-show="showAdvancedOptionForm">
+    <label class="col-sm-3 control-label" for="selectConfigStrategy">{{msg.cluster_form_custom_image}}</label>
+	<div class="col-sm-8">
+        <input type="checkbox" name="custom_image" id="custom_image" ng-model="cluster.custom_image">
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.custom_image">
+    <label class="col-sm-3 control-label" for="selectConfigStrategy">{{msg.cluster_form_custom_image_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="imageId" class="form-control" id="imageId" ng-model="cluster.imageId">
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm">
     <label class="col-sm-3 control-label" for="cluster_validateBlueprint">{{msg.cluster_form_blueprint_validate_label}}</label>
     <div class="col-sm-8">
         <input type="checkbox" name="cluster_validateBlueprint" id="cluster_validateBlueprint" ng-model="cluster.validateBlueprint">
