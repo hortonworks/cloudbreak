@@ -4,7 +4,6 @@
 ALTER TABLE securitygroup ADD COLUMN securitygroupid CHARACTER VARYING (255);
 ALTER TABLE securitygroup ADD COLUMN cloudplatform CHARACTER VARYING (255);
 
-UPDATE securitygroup SET cloudplatform='AWS' where cloudplatform is NULL;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
