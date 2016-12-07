@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -25,6 +24,7 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -160,11 +160,6 @@ public class StackService {
 
     public Set<StackResponse> retrievePrivateStacks(CbUser user) {
         return convertStacks(stackRepository.findForUser(user.getUserId()));
-    }
-
-    private Set<StackResponse> convertStacks(Set<Stack> stacks) {
-        return (Set<StackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
     }
 
     public Set<StackResponse> retrieveAccountStacks(CbUser user) {
@@ -396,6 +391,16 @@ public class StackService {
         }
     }
 
+    private Set<StackResponse> convertStacks(Set<Stack> stacks) {
+        return (Set<StackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(StackResponse.class)));
+    }
+
+    private Set<AutoscaleStackResponse> convertStacksForAutoscale(Set<Stack> stacks) {
+        return (Set<AutoscaleStackResponse>) conversionService.convert(stacks, TypeDescriptor.forObject(stacks),
+                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(AutoscaleStackResponse.class)));
+    }
+
     private void repairFailedNodes(Stack stack) {
         LOGGER.warn("Received request to replace failed nodes: " + stack.getId());
         flowManager.triggerManualRepairFlow(stack.getId());
@@ -507,8 +512,9 @@ public class StackService {
         return stackRepository.findAllAlive();
     }
 
-    public Set<StackResponse> retrieveAllStacks() {
-        return convertStacks(getAllAlive().stream().collect(Collectors.toSet()));
+    public Set<AutoscaleStackResponse> retrieveAllStacks() {
+        Set<Stack> aliveOnes = stackRepository.findAliveOnes();
+        return convertStacksForAutoscale(aliveOnes);
     }
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {

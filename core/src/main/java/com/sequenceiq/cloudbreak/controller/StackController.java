@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
@@ -189,7 +190,7 @@ public class StackController implements StackEndpoint {
     }
 
     @Override
-    public Set<StackResponse> getAll() {
+    public Set<AutoscaleStackResponse> getAll() {
         LOGGER.info("Get all stack, autoscale authorized only.");
         return stackService.retrieveAllStacks();
     }
