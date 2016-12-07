@@ -36,12 +36,11 @@ type RecipeResponse struct {
 
 	/* name of the resource
 
-	Required: true
 	Max Length: 100
 	Min Length: 1
 	Pattern: ([a-z][-a-z0-9]*[a-z0-9])
 	*/
-	Name string `json:"name"`
+	Name string `json:"name,omitempty"`
 
 	/* resource is visible in account
 	 */
@@ -102,8 +101,8 @@ func (m *RecipeResponse) validateDescription(formats strfmt.Registry) error {
 
 func (m *RecipeResponse) validateName(formats strfmt.Registry) error {
 
-	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
-		return err
+	if swag.IsZero(m.Name) { // not required
+		return nil
 	}
 
 	if err := validate.MinLength("name", "body", string(m.Name), 1); err != nil {

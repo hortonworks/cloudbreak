@@ -17,10 +17,8 @@ swagger:model AmbariStackDetails
 type AmbariStackDetails struct {
 
 	/* operating system for the stack, like redhat6
-
-	Required: true
-	*/
-	Os string `json:"os"`
+	 */
+	Os *string `json:"os,omitempty"`
 
 	/* name of the stack, like HDP
 
@@ -69,11 +67,6 @@ type AmbariStackDetails struct {
 func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateOs(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateStack(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -112,15 +105,6 @@ func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *AmbariStackDetails) validateOs(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("os", "body", string(m.Os)); err != nil {
-		return err
-	}
-
 	return nil
 }
 
