@@ -17,11 +17,11 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class ArmInstanceView {
 
-    private static final int MAX_STACK_NAME_IN_HOSTNAME = 3;
-
     private CloudInstance instance;
 
     private InstanceTemplate instanceTemplate;
+
+    private int stackNamePrefixLength;
 
     private InstanceGroupType type;
     private String attachedDiskStorage;
@@ -30,10 +30,11 @@ public class ArmInstanceView {
 
     private String stackName;
 
-    public ArmInstanceView(String stackName, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
+    public ArmInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
             String attachedDiskStorageType, String groupName) {
         this.instance = instance;
         this.instanceTemplate = instance.getTemplate();
+        this.stackNamePrefixLength = stackNamePrefixLength;
         this.type = type;
         this.attachedDiskStorage = attachedDiskStorage;
         this.attachedDiskStorageType = attachedDiskStorageType;
@@ -48,8 +49,8 @@ public class ArmInstanceView {
         String hostName = instance.getStringParameter(CloudInstance.DISCOVERY_NAME);
         if (hostName == null) {
             String shortenedStackname;
-            if (stackName.length() > MAX_STACK_NAME_IN_HOSTNAME) {
-                shortenedStackname = stackName.substring(0, MAX_STACK_NAME_IN_HOSTNAME);
+            if (stackName.length() > stackNamePrefixLength) {
+                shortenedStackname = stackName.substring(0, stackNamePrefixLength);
             } else {
                 shortenedStackname = stackName;
             }

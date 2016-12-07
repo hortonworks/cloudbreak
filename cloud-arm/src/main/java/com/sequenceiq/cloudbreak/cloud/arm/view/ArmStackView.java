@@ -15,7 +15,7 @@ public class ArmStackView {
     private Map<String, List<ArmInstanceView>> groups = new HashMap<>();
     private List<String> instanceGroups = new ArrayList<>();
 
-    public ArmStackView(String stackName, List<Group> groupList, ArmStorageView armStorageView) {
+    public ArmStackView(String stackName, int stackNamePrefixLength, List<Group> groupList, ArmStorageView armStorageView) {
         for (Group group : groupList) {
             String groupName = group.getType().name();
             List<ArmInstanceView> existingInstances = groups.get(groupName);
@@ -26,7 +26,7 @@ public class ArmStackView {
             for (CloudInstance instance : group.getInstances()) {
                 InstanceTemplate template = instance.getTemplate();
                 String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
-                ArmInstanceView azureInstance = new ArmInstanceView(stackName, instance, group.getType(), attachedDiskStorageName,
+                ArmInstanceView azureInstance = new ArmInstanceView(stackName, stackNamePrefixLength, instance, group.getType(), attachedDiskStorageName,
                         template.getVolumeType(), group.getName());
                 existingInstances.add(azureInstance);
             }
