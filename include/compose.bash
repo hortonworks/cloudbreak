@@ -68,7 +68,7 @@ compose-up() {
 compose-kill() {
     declare desc="Kills and removes all cloudbreak related container"
 
-    dockerCompose kill
+    dockerCompose stop
     dockerCompose rm -f
 }
 
