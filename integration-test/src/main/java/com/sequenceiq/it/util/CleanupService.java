@@ -177,7 +177,9 @@ public class CleanupService {
     }
 
     public boolean deleteRdsConfigs(CloudbreakClient cloudbreakClient, String rdsConfigId) {
-        cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));
+        if (rdsConfigId != null) {
+            cloudbreakClient.rdsConfigEndpoint().delete(Long.valueOf(rdsConfigId));
+        }
         return true;
     }
 }

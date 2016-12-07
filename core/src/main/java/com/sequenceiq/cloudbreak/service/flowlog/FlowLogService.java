@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.service.flowlog;
 
+import java.util.Map;
 import java.util.Queue;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.cedarsoftware.util.io.JsonWriter;
@@ -26,8 +28,12 @@ public class FlowLogService {
     @Inject
     private FlowChainLogRepository flowChainLogRepository;
 
+    @Inject
+    @Qualifier("JsonWriterOptions")
+    private Map<String, Object> writeOptions;
+
     public FlowLog save(String flowId, String flowChanId, String key, Payload payload, Class<?> flowType, FlowState currentState) {
-        String payloadJson = JsonWriter.objectToJson(payload);
+        String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
         FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, flowChanId, key, payloadJson, payload.getClass(), flowType, currentState.toString());
         return flowLogRepository.save(flowLog);
     }

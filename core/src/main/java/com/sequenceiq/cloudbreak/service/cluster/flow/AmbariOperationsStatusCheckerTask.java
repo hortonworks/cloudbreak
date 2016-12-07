@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -11,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
@@ -22,13 +22,13 @@ import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 @Component
 public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusCheckerTask<AmbariOperations> {
 
+    public static final BigDecimal COMPLETED = new BigDecimal(100.0);
+
+    public static final BigDecimal FAILED = new BigDecimal(-1.0);
+
+    public static final BigDecimal PENDING = BigDecimal.ZERO;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariOperationsStatusCheckerTask.class);
-
-    private static final BigDecimal COMPLETED = new BigDecimal(100.0);
-
-    private static final BigDecimal FAILED = new BigDecimal(-1.0);
-
-    private static final BigDecimal PENDING = new BigDecimal(0);
 
     private static final int MAX_RETRY = 3;
 
@@ -41,10 +41,9 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         boolean allFinished = true;
         for (Entry<String, Integer> request : installRequests.entrySet()) {
             AmbariClient ambariClient = t.getAmbariClient();
-            BigDecimal installProgress = Optional.fromNullable(ambariClient.getRequestProgress(request.getValue())).or(PENDING);
+            BigDecimal installProgress = Optional.ofNullable(ambariClient.getRequestProgress(request.getValue())).orElse(PENDING);
             LOGGER.info("Ambari operation: '{}', Progress: {}", request.getKey(), installProgress);
             notificationSender.send(getAmbariProgressNotification(installProgress.longValue(), t.getStack(), t.getAmbariOperationType()));
-            allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
             if (FAILED.compareTo(installProgress) == 0) {
                 boolean failed = true;
                 for (int i = 0; i < MAX_RETRY; i++) {
@@ -59,6 +58,7 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
                             request.getValue()));
                 }
             }
+            allFinished = allFinished && COMPLETED.compareTo(installProgress) == 0;
         }
         return allFinished;
     }

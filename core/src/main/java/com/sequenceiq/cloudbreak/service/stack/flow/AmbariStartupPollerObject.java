@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.List;
+
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.StackContext;
@@ -8,12 +10,12 @@ public class AmbariStartupPollerObject extends StackContext {
 
     private String ambariIp;
 
-    private AmbariClient ambariClient;
+    private List<AmbariClient> ambariClients;
 
-    public AmbariStartupPollerObject(Stack stack, String ambariIp, AmbariClient ambariClient) {
+    public AmbariStartupPollerObject(Stack stack, String ambariIp, List<AmbariClient> ambariClients) {
         super(stack);
         this.ambariIp = ambariIp;
-        this.ambariClient = ambariClient;
+        this.ambariClients = ambariClients;
     }
 
     public String getAmbariAddress() {
@@ -24,11 +26,11 @@ public class AmbariStartupPollerObject extends StackContext {
         this.ambariIp = ambariIp;
     }
 
-    public AmbariClient getAmbariClient() {
-        return ambariClient;
+    public List<AmbariClient> getAmbariClients() {
+        return ambariClients;
     }
 
-    public void setAmbariClient(AmbariClient ambariClient) {
-        this.ambariClient = ambariClient;
+    public void setAmbariClients(List<AmbariClient> ambariClient) {
+        this.ambariClients = ambariClient;
     }
 }

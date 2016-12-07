@@ -14,8 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.Before;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -36,6 +35,7 @@ import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.HostGroup;
+import com.sequenceiq.it.spark.ITResponse;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
@@ -43,6 +43,7 @@ import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServicesComponentsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
+import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
 import com.sequenceiq.it.util.ServerAddressGenerator;
@@ -51,7 +52,12 @@ import com.sequenceiq.it.verification.Verification;
 
 public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterCreationWithSaltSuccessTest.class);
+    private boolean clusterCreated;
+
+    @Before
+    public void setup() {
+        clusterCreated = false;
+    }
 
     @BeforeMethod
     public void setContextParameters() {
@@ -117,7 +123,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         distributeVerification.verify();
 
         verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
-        verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
+        verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(2).verify();
         verify(AMBARI_API_ROOT + "/check", "GET").exactTimes(1).verify();
         verify(AMBARI_API_ROOT + "/users/admin", "PUT").exactTimes(1).bodyContains("Users/password").bodyContains("Users/old_password").verify();
         verify(AMBARI_API_ROOT + "/blueprints/bp", "POST").exactTimes(1)
@@ -142,9 +148,15 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
     private void addAmbariMappings(int numberOfServers) {
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         post(AMBARI_API_ROOT + "/views/:view/versions/1.0.0/instances/*", new EmptyAmbariResponse());
-        get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse());
+        get(AMBARI_API_ROOT + "/clusters", (req, resp) -> {
+            ITResponse itResp = clusterCreated ? new AmbariClusterResponse() : new EmptyAmbariClusterResponse();
+            return itResp.handle(req, resp);
+        });
         post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
-        post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse(), gson()::toJson);
+        post(AMBARI_API_ROOT + "/clusters/:cluster", (req, resp) -> {
+            clusterCreated = true;
+            return new EmptyAmbariResponse().handle(req, resp);
+        }, gson()::toJson);
         get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), gson()::toJson);
         get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(numberOfServers), gson()::toJson);
         get(AMBARI_API_ROOT + "/blueprints/*", (request, response) -> responseFromJsonFile("blueprint/hdp-small-default.bp"));
