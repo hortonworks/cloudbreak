@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.ClusterCreationEvaluatorContext;
@@ -59,17 +59,18 @@ public class ClusterMonitor implements Monitor {
             CloudbreakClient cloudbreakClient = applicationContext.getBean(CloudbreakClientConfiguration.class).cloudbreakClient();
             ClusterService clusterService = applicationContext.getBean(ClusterService.class);
             List<Cluster> clusters = clusterService.findAll();
-            Set<StackResponse> allStack = cloudbreakClient.stackEndpoint().getAll();
+            Set<AutoscaleStackResponse> allStacks = cloudbreakClient.stackEndpoint().getAll();
 
-            for (StackResponse stack : allStack) {
-                String ambariIp = getAmbariIpFromStackResponse(stack);
-                Optional<Cluster> clusterOptional = clusters.stream().filter(c -> c.getStackId() != null && c.getStackId().equals(stack.getId())).findFirst();
+            for (AutoscaleStackResponse stack : allStacks) {
+                String ambariIp = stack.getAmbariServerIp();
+                Optional<Cluster> clusterOptional = clusters.stream()
+                        .filter(c -> c.getStackId() != null && c.getStackId().equals(stack.getStackId())).findFirst();
                 if (ambariIp != null) {
                     ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
                     clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack, clusterOptional));
                     executorService.submit(clusterCreationEvaluator);
                 } else {
-                    LOGGER.info("Could not find Ambari for stack: {}(ID:{})", stack.getName(), stack.getId());
+                    LOGGER.info("Could not find Ambari for stack: {}(ID:{})", stack.getName(), stack.getStackId());
                 }
             }
         } catch (Exception ex) {
@@ -82,13 +83,5 @@ public class ClusterMonitor implements Monitor {
         JobDataMap monitorContext = context.getJobDetail().getJobDataMap();
         applicationContext = (ApplicationContext) monitorContext.get(MonitorContext.APPLICATION_CONTEXT.name());
         executorService = applicationContext.getBean(ExecutorService.class);
-    }
-
-    private String getAmbariIpFromStackResponse(StackResponse stack) {
-        String result = null;
-        if (stack.getCluster() != null && stack.getCluster().getAmbariServerIp() != null) {
-            result = stack.getCluster().getAmbariServerIp();
-        }
-        return result;
     }
 }
