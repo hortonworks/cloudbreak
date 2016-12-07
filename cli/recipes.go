@@ -4,7 +4,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/recipes"
 	"github.com/hortonworks/hdc-cli/models"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -54,42 +53,20 @@ func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, worker
 }
 
 func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostRecipesAccountParams) (*recipes.PostRecipesAccountOK, error)) int64 {
-	recipeName := getRecipeName(recipe.URI)
 	recipeRequest := models.RecipeRequest{
-		Name:       recipeName,
 		URI:        &recipe.URI,
 		RecipeType: strings.ToUpper(recipe.Phase),
 	}
 
-	log.Infof("[createRecipe] creating recipe with name: %s", recipeName)
+	log.Infof("[createRecipe] creating recipe with URI: %s", recipe.URI)
 	resp, err := postPublicRecipe(&recipes.PostRecipesAccountParams{Body: &recipeRequest})
 
 	if err != nil {
 		logErrorAndExit(createRecipeImpl, err.Error())
 	}
 
-	log.Infof("[createRecipe] recipe created, name: %s, id: %d", resp.Payload.Name, resp.Payload.ID)
+	log.Infof("[createRecipe] recipe created, name: %s, uri: %s, id: %d", resp.Payload.Name, recipe.URI, *resp.Payload.ID)
 	return *resp.Payload.ID
-}
-
-func getRecipeName(url string) string {
-	name := "hrec" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	perIndex := strings.LastIndex(url, "/")
-	if -1 != perIndex {
-		if len(url) > perIndex+1 {
-			urlName := url[perIndex+1:]
-			if strings.Contains(urlName, ".") {
-				urlName = strings.Replace(urlName, ".", "", -1)
-			}
-			if strings.Contains(urlName, "?") {
-				urlName = urlName[0:strings.LastIndex(urlName, "?")]
-			}
-			if len(urlName) > 0 {
-				name += urlName
-			}
-		}
-	}
-	return name
 }
 
 func (c *Cloudbreak) GetPublicRecipes() []*models.RecipeResponse {
