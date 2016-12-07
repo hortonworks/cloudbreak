@@ -123,9 +123,9 @@ cb:
 
   ambari:
     repo:
-      version: 2.4.2.0-136
-      baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.2.0
-      gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      version: 2.4.2.2-1
+      baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.2.2-1
+      gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
       host: localhost
