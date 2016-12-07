@@ -104,6 +104,10 @@ public class SecurityGroup {
     @OneToMany(mappedBy = "securityGroup", cascade = { CascadeType.REMOVE, CascadeType.PERSIST }, orphanRemoval = true)
     private Set<SecurityRule> securityRules = new HashSet<>();
 
+    private String securityGroupId;
+
+    private String cloudPlatform;
+
     public Long getId() {
         return id;
     }
@@ -167,4 +171,21 @@ public class SecurityGroup {
     public void setSecurityRules(Set<SecurityRule> securityRules) {
         this.securityRules = securityRules;
     }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
+
 }

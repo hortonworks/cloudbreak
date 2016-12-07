@@ -97,14 +97,14 @@ public class StackToCloudStackConverter {
     private Security buildSecurity(InstanceGroup ig) {
         List<SecurityRule> rules = new ArrayList<>();
         if (ig.getSecurityGroup() == null) {
-            return new Security(rules);
+            return new Security(rules, null);
         }
         Long id = ig.getSecurityGroup().getId();
         List<com.sequenceiq.cloudbreak.domain.SecurityRule> securityRules = securityRuleRepository.findAllBySecurityGroupId(id);
         for (com.sequenceiq.cloudbreak.domain.SecurityRule securityRule : securityRules) {
             rules.add(new SecurityRule(securityRule.getCidr(), securityRule.getPorts(), securityRule.getProtocol()));
         }
-        return new Security(rules);
+        return new Security(rules, ig.getSecurityGroup().getSecurityGroupId());
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {

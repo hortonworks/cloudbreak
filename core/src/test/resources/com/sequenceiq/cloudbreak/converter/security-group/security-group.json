@@ -1,6 +1,7 @@
 {
   "name" : "security-group-01",
   "description" : "security group description",
+  "cloudPlatform" : "AWS",
   "securityRules" : [
     {
       "subnet" : "0.0.0.0/0",
