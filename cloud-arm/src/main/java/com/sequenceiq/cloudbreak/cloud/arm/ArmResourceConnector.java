@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
@@ -42,6 +43,9 @@ import groovyx.net.http.HttpResponseException;
 @Service
 public class ArmResourceConnector implements ResourceConnector {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmResourceConnector.class);
+
+    @Value("${cb.azure.host.name.prefix.length}")
+    private int stackNamePrefixLength;
 
     @Inject
     private ArmClient armClient;
@@ -251,8 +255,8 @@ public class ArmResourceConnector implements ResourceConnector {
     }
 
     private ArmStackView getArmStack(ArmCredentialView armCredentialView, CloudContext cloudContext, CloudStack cloudStack) {
-        return new ArmStackView(cloudContext.getName(), cloudStack.getGroups(), new ArmStorageView(armCredentialView, cloudContext, armStorage,
-                armStorage.getArmAttachedStorageOption(cloudStack.getParameters())));
+        return new ArmStackView(cloudContext.getName(), stackNamePrefixLength, cloudStack.getGroups(), new ArmStorageView(armCredentialView, cloudContext,
+                armStorage, armStorage.getArmAttachedStorageOption(cloudStack.getParameters())));
     }
 
     private void deleteContainer(AzureRMClient azureRMClient, String resourceGroup, String storageName, String
