@@ -126,7 +126,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -153,7 +153,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -176,7 +176,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -199,7 +199,7 @@ public class ArmTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security));
         cloudStack = new CloudStack(groups, network, image, parameters);
-        armStackView = new ArmStackView(groups, armStorageView);
+        armStackView = new ArmStackView("mystack", groups, armStorageView);
         //WHEN
         when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
