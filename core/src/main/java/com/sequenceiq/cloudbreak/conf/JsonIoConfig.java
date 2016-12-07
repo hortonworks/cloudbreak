@@ -1,10 +1,20 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import static com.cedarsoftware.util.io.JsonWriter.CUSTOM_WRITER_MAP;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.cedarsoftware.util.io.JsonReader;
+import com.cedarsoftware.util.io.JsonWriter;
 
 @Configuration
 public class JsonIoConfig {
@@ -24,5 +34,31 @@ public class JsonIoConfig {
         JsonReader.assignInstantiator("com.google.common.collect.RegularImmutableSet", new JsonReader.CollectionFactory());
         JsonReader.assignInstantiator("java.util.Collections$EmptySet", new JsonReader.CollectionFactory());
         JsonReader.assignInstantiator("java.util.Collections$SingletonSet", new JsonReader.CollectionFactory());
+    }
+
+    @Bean(name = "JsonWriterOptions")
+    public Map<String, Object> getCustomWriteOptions() {
+        Map<Class<?>, JsonWriter.JsonClassWriterBase> customWriters = new HashMap<>();
+        customWriters.put(Exception.class, new NonPrimitiveFormJsonWriter() {
+            @Override
+            public void write(Object o, boolean showType, Writer output) throws IOException {
+                output.write("\"detailMessage\":");
+                JsonWriter.writeJsonUtf8String(((Exception) o).getMessage(), output);
+            }
+        });
+
+        return Collections.singletonMap(CUSTOM_WRITER_MAP, customWriters);
+    }
+
+    private abstract static class NonPrimitiveFormJsonWriter implements JsonWriter.JsonClassWriter {
+        @Override
+        public boolean hasPrimitiveForm() {
+            return false;
+        }
+
+        @Override
+        public void writePrimitiveForm(Object o, Writer output) throws IOException {
+            throw new UnsupportedOperationException("Primitive form write not allowed");
+        }
     }
 }
