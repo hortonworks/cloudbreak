@@ -45,6 +45,9 @@ cb:
     default.inbound.security.group:
     vpc:
 
+  azure:
+    host.name.prefix.length: 3
+
   blueprint.defaults: hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp-etl-edw;hdp25-data-science;hdp25-edw-analytics;hdp25-etl-edw;hdp25-etl-edw-spark2
   template.defaults: minviable-gcp,minviable-azure,minviable-aws
   custom.user.data: |
@@ -123,9 +126,9 @@ cb:
 
   ambari:
     repo:
-      version: 2.4.2.0-136
-      baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.2.0
-      gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      version: 2.4.2.2-1
+      baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.2.2-1
+      gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
       host: localhost
