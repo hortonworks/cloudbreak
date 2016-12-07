@@ -29,7 +29,7 @@ type InstanceGroups struct {
 
 	Required: true
 	Maximum: 100000
-	Minimum: 1
+	Minimum: 0
 	*/
 	NodeCount int32 `json:"nodeCount"`
 
@@ -93,7 +93,7 @@ func (m *InstanceGroups) validateNodeCount(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.MinimumInt("nodeCount", "body", int64(m.NodeCount), 1, false); err != nil {
+	if err := validate.MinimumInt("nodeCount", "body", int64(m.NodeCount), 0, false); err != nil {
 		return err
 	}
 

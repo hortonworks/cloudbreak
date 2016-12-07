@@ -212,6 +212,33 @@ func (a *Client) GetConfigs(params *GetConfigsParams) (*GetConfigsOK, error) {
 }
 
 /*
+RepairCluster repairs the cluster
+
+Removing the failed nodes and starting new nodes to substitute them.
+*/
+func (a *Client) RepairCluster(params *RepairClusterParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewRepairClusterParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "repairCluster",
+		Method:             "POST",
+		PathPattern:        "/stacks/{id}/cluster/repair",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &RepairClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
 UpgradeCluster upgrades the ambari version
 
 Ambari is used to provision the Hadoop clusters.

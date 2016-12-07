@@ -139,6 +139,10 @@ type ClusterRequest struct {
 	 */
 	RdsConfigJSON *RDSConfig `json:"rdsConfigJson,omitempty"`
 
+	/* recovery mode of the cluster
+	 */
+	RecoveryMode *string `json:"recoveryMode,omitempty"`
+
 	/* SSSD config id for the cluster
 	 */
 	SssdConfigID *int64 `json:"sssdConfigId,omitempty"`
@@ -207,6 +211,11 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRecoveryMode(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -410,6 +419,37 @@ func (m *ClusterRequest) validatePassword(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("password", "body", string(m.Password), 100); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var clusterRequestTypeRecoveryModePropEnum []interface{}
+
+func (m *ClusterRequest) validateRecoveryModeEnum(path, location string, value string) error {
+	if clusterRequestTypeRecoveryModePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["MANUAL","AUTO"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			clusterRequestTypeRecoveryModePropEnum = append(clusterRequestTypeRecoveryModePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, clusterRequestTypeRecoveryModePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ClusterRequest) validateRecoveryMode(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RecoveryMode) { // not required
+		return nil
+	}
+
+	if err := m.validateRecoveryModeEnum("recoveryMode", "body", *m.RecoveryMode); err != nil {
 		return err
 	}
 
