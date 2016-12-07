@@ -14,8 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
-import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
@@ -45,16 +44,16 @@ public class ClusterCreationEvaluator implements Runnable {
 
     @Override
     public void run() {
-        StackResponse stack = context.getStack();
+        AutoscaleStackResponse stack = context.getStack();
         Optional<Cluster> clusterOptional = context.getClusterOptional();
         try {
             createOrUpdateCluster(stack, clusterOptional);
         } catch (AmbariHealtCheckFailed ahf) {
-            LOGGER.warn(String.format("Ambari health check failed for Cloudbreak stack: %s(ID:%s)", stack.getId(), stack.getName()), ahf);
+            LOGGER.warn(String.format("Ambari health check failed for Cloudbreak stack: %s(ID:%s)", stack.getStackId(), stack.getName()), ahf);
         } catch (TlsConfigurationException ex) {
-            LOGGER.warn(String.format("Could not prepare TLS configuration for Cloudbreak stack: %s(ID:%s)", stack.getId(), stack.getName()), ex);
+            LOGGER.warn(String.format("Could not prepare TLS configuration for Cloudbreak stack: %s(ID:%s)", stack.getStackId(), stack.getName()), ex);
         } catch (Exception ex) {
-            LOGGER.warn(String.format("Could not create cluster for Cloudbreak stack: %s(ID:%s)", stack.getId(), stack.getName()), ex);
+            LOGGER.warn(String.format("Could not create cluster for Cloudbreak stack: %s(ID:%s)", stack.getStackId(), stack.getName()), ex);
         }
     }
 
@@ -62,7 +61,7 @@ public class ClusterCreationEvaluator implements Runnable {
         this.context = context;
     }
 
-    private void createOrUpdateCluster(StackResponse stack, Optional<Cluster> clusterOptional) {
+    private void createOrUpdateCluster(AutoscaleStackResponse stack, Optional<Cluster> clusterOptional) {
         AmbariStack resolvedAmbari = createAmbariStack(stack);
         if (clusterOptional.isPresent()) {
             Cluster cluster = clusterOptional.get();
@@ -79,14 +78,13 @@ public class ClusterCreationEvaluator implements Runnable {
         }
     }
 
-    private AmbariStack createAmbariStack(StackResponse stack) {
-        ClusterResponse cluster = stack.getCluster();
-        String host = cluster.getAmbariServerIp();
+    private AmbariStack createAmbariStack(AutoscaleStackResponse stack) {
+        String host = stack.getAmbariServerIp();
         AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
         ambariAddressJson.setAmbariAddress(host);
         String gatewayPort = String.valueOf(stack.getGatewayPort());
-        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getId());
-        return new AmbariStack(new Ambari(host, gatewayPort, cluster.getUserName(), cluster.getPassword()), stack.getId(), securityConfig);
+        SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackId());
+        return new AmbariStack(new Ambari(host, gatewayPort, stack.getUserName(), stack.getPassword()), stack.getStackId(), securityConfig);
     }
 
     private void ambariHealthCheck(PeriscopeUser user, AmbariStack ambariStack) {

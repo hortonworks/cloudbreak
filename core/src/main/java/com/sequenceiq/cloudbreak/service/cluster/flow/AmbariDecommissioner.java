@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -94,6 +95,9 @@ public class AmbariDecommissioner {
 
     @Inject
     private HostGroupService hostGroupService;
+
+    @Inject
+    private HostMetadataRepository hostMetadataRepository;
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
@@ -182,6 +186,7 @@ public class AmbariDecommissioner {
         Set<String> deletedHosts = new HashSet<>();
         for (Map.Entry<String, HostMetadata> host : unhealthyHosts.entrySet()) {
             deleteHostFromAmbari(stack, host.getValue());
+            hostMetadataRepository.delete(host.getValue().getId());
             deletedHosts.add(host.getKey());
         }
         if (!healthyHosts.isEmpty()) {

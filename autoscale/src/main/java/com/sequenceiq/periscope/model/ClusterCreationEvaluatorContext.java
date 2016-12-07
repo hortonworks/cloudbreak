@@ -2,21 +2,21 @@ package com.sequenceiq.periscope.model;
 
 import java.util.Optional;
 
-import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.periscope.domain.Cluster;
 
 public class ClusterCreationEvaluatorContext {
 
-    private StackResponse stack;
+    private AutoscaleStackResponse stack;
 
     private Optional<Cluster> clusterOptional;
 
-    public ClusterCreationEvaluatorContext(StackResponse stack, Optional<Cluster> clusterOptional) {
+    public ClusterCreationEvaluatorContext(AutoscaleStackResponse stack, Optional<Cluster> clusterOptional) {
         this.stack = stack;
         this.clusterOptional = clusterOptional;
     }
 
-    public StackResponse getStack() {
+    public AutoscaleStackResponse getStack() {
         return stack;
     }
 

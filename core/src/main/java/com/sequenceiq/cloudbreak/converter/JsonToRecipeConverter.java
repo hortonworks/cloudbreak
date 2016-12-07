@@ -15,7 +15,21 @@ public class JsonToRecipeConverter extends AbstractConversionServiceAwareConvert
     @Override
     public Recipe convert(RecipeRequest json) {
         Recipe recipe = new Recipe();
-        recipe.setName(json.getName());
+        if (json.getName() != null) {
+            recipe.setName(json.getName());
+        } else {
+            String name = "hrec" + System.nanoTime();
+
+            if (json.getUri() != null) {
+                String[] splitUrl = json.getUri().split("/");
+                String lastPart = splitUrl[splitUrl.length - 1];
+                String[] lastPartQueryArray = lastPart.split("\\?");
+                name += lastPartQueryArray[0];
+
+            }
+            recipe.setName(name);
+
+        }
         recipe.setDescription(json.getDescription());
         recipe.setRecipeType(json.getRecipeType());
         recipe.setContent(json.getContent());
