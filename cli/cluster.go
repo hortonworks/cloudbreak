@@ -607,7 +607,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 					VolumeType:    "ephemeral",
 					VolumeCount:   &(&int32Wrapper{1}).i,
 					VolumeSize:    &(&int32Wrapper{40}).i,
-					InstanceCount: 2,
+					InstanceCount: 0,
 					Recipes:       []Recipe{},
 				},
 				SpotPrice: "0",
