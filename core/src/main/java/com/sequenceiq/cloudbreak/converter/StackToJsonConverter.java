@@ -47,6 +47,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         StackResponse stackJson = new StackResponse();
         try {
             Image image = imageService.getImage(source.getId());
+            stackJson.setImageId(image.getImageName());
             stackJson.setImage(getConversionService().convert(image, ImageJson.class));
         } catch (CloudbreakImageNotFoundException exc) {
             LOGGER.info(exc.getMessage());
