@@ -27,6 +27,7 @@ public class SecurityRuleJson implements JsonEntity {
     private String protocol;
     @ApiModelProperty(value = ModelDescriptions.SecurityRuleModelDescription.MODIFIABLE)
     private boolean modifiable;
+    private String securityGroupId;
 
     public SecurityRuleJson() {
     }
@@ -73,5 +74,13 @@ public class SecurityRuleJson implements JsonEntity {
 
     public void setModifiable(boolean modifiable) {
         this.modifiable = modifiable;
+    }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
     }
 }

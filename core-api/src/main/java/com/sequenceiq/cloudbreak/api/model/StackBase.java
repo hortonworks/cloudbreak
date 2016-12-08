@@ -55,6 +55,8 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.PARAMETERS)
     private Map<String, String> parameters = new HashMap<>();
 
+    private String imageId;
+
     public FailurePolicyJson getFailurePolicy() {
         return failurePolicy;
     }
@@ -169,4 +171,11 @@ public abstract class StackBase implements JsonEntity {
         this.hdpVersion = hdpVersion;
     }
 
+    public String getImageId() {
+        return imageId;
+    }
+
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
+    }
 }

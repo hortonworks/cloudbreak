@@ -6,9 +6,34 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         $rootScope.securitygroups = AccountSecurityGroup.query();
         $scope.showAlert = false;
         $scope.alertMessage = "";
-        initializeFormsAndScopeSecurityGroup();
+        $scope.securitygroup = {};
+        
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
+        if (firstVisiblePlatform != -1) {
+            $scope[["awsSecurityGroup", "azureSecurityGroup", "gcpSecurityGroup", "openstackSecurityGroup"][firstVisiblePlatform]] = true;
+        }
 
         $scope.createSecurityGroup = function() {
+            doCreateSecurityGroup();
+        }
+
+        $scope.createAwsSecurityGroup = function() {
+        	$scope.securitygroup.cloudPlatform = 'AWS';
+            doCreateSecurityGroup();
+        }
+        
+        $scope.createOpenStackSecurityGroup = function() {
+        	$scope.securitygroup.cloudPlatform = 'OPENSTACK';
+            doCreateSecurityGroup();
+        }
+        
+        $scope.createGcpSecurityGroup = function() {
+        	$scope.securitygroup.cloudPlatform = 'GCP';
+            doCreateSecurityGroup();
+        }
+        
+        $scope.createAzureSecurityGroup = function() {
+        	$scope.securitygroup.cloudPlatform = 'AZURE_RM';
             doCreateSecurityGroup();
         }
 
@@ -120,6 +145,11 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         }
 
         function initializeFormsAndScopeSecurityGroup() {
+         	$scope.awsSecurityGroupForm.$setPristine();
+            $scope.gcpSecurityGroupForm.$setPristine();
+            $scope.azureSecurityGroupForm.$setPristine();
+            $scope.openstackSecurityGroupForm.$setPristine();
+            
             $scope.securitygroup = {
                 name: "",
                 description: "",
@@ -141,6 +171,46 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         $scope.showErrorMessageAlert = function() {
             $scope.showAlert = true;
             $scope.alertMessage = $scope.statusMessage;
+        }
+
+        $scope.createAwsSecurityGroupRequest = function() {
+        	initializeFormsAndScopeSecurityGroup();
+            $scope.azureSecurityGroup = false;
+            $scope.awsSecurityGroup = true;
+            $scope.gcpSecurityGroup = false;
+            $scope.openstackSecurityGroup = false;
+        }
+        
+        $scope.createAzureSecurityGroupRequest = function() {
+            initializeFormsAndScopeSecurityGroup();
+            $scope.azureSecurityGroup = true;
+            $scope.awsSecurityGroup = false;
+            $scope.gcpSecurityGroup = false;
+            $scope.openstackSecurityGroup = false;
+        }
+
+        $scope.createGcpSecurityGroupRequest = function() {
+            initializeFormsAndScopeSecurityGroup();
+            $scope.azureSecurityGroup = false;
+            $scope.awsSecurityGroup = false;
+            $scope.gcpSecurityGroup = true;
+            $scope.openstackSecurityGroup = false;
+        }
+
+        $scope.createOpenstackSecurityGroupRequest = function() {
+            initializeFormsAndScopeSecurityGroup();
+            $scope.azureSecurityGroup = false;
+            $scope.awsSecurityGroup = false;
+            $scope.gcpSecurityGroup = false;
+            $scope.openstackSecurityGroup = true;
+        }
+        
+        $scope.selectSecurityGroupType1 = function() {
+            delete $scope.securitygroup.securityGroupId
+        }
+        
+        $scope.selectSecurityGroupType2 = function() {
+        	delete $scope.securitygroup.securityGroupId
         }
 
     }
