@@ -16,7 +16,7 @@ var AWSCreateClusterSkeletonHelp = `
   "HDPVersion": "2.5",                                    	               // HDP version
   "ClusterType": "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",     // Cluster type
   "Master": {                                                              // Master instance group
-    "InstanceType": "m4.xlarge",                                           // Instance type of master instance group
+    "InstanceType": "m4.4xlarge",                                          // Instance type of master instance group
     "VolumeType": "gp2",                                                   // Volume type of master instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 32,                                                      // Volume size of master instance group
     "VolumeCount": 1,                                                      // Volume count of master instance group

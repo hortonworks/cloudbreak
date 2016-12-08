@@ -112,7 +112,7 @@ To create a cluster fill the empty values or change the existing ones, e.g:
   "HDPVersion": "2.5",
   "ClusterType": "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
   "Master": {
-    "InstanceType": "m4.xlarge",
+    "InstanceType": "m4.4xlarge",
     "VolumeType": "gp2",
     "VolumeSize": 32,
     "VolumeCount": 1
@@ -123,6 +123,13 @@ To create a cluster fill the empty values or change the existing ones, e.g:
     "VolumeSize": 40,
     "VolumeCount": 2,
     "InstanceCount": 2
+  },
+  "Compute": {
+    "InstanceType": "m3.xlarge",
+    "VolumeType": "ephemeral",
+    "VolumeSize": 40,
+    "VolumeCount": 2,
+    "InstanceCount": 0
   },
   "SSHKeyName": "my-existing-keypair-name",
   "RemoteAccess": "0.0.0.0/0",
@@ -153,7 +160,7 @@ hdc describe-cluster --cluster-name my-cluster
   "HDPVersion": "2.5",
   "ClusterType": "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
   "Master": {
-    "InstanceType": "m4.xlarge",
+    "InstanceType": "m4.4xlarge",
     "VolumeType": "gp2",
     "VolumeSize": 32,
     "VolumeCount": 1
@@ -164,6 +171,13 @@ hdc describe-cluster --cluster-name my-cluster
     "VolumeSize": 40,
     "VolumeCount": 2,
     "InstanceCount": 2
+  },
+  "Compute": {
+    "InstanceType": "m3.xlarge",
+    "VolumeType": "ephemeral",
+    "VolumeSize": 40,
+    "VolumeCount": 2,
+    "InstanceCount": 0
   },
   "SSHKeyName": "my-existing-keypair-name",
   "RemoteAccess": "0.0.0.0/0",
