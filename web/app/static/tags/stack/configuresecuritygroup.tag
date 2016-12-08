@@ -9,8 +9,6 @@
     <label class="col-sm-3 control-label" for="cluster_security">{{msg.cluster_form_enable_security}}</label>
     <div class="col-sm-8">
         <input type="checkbox" name="cluster_security" id="cluster_security" ng-model="cluster.enableSecurity">
-        <div class="help-block" ng-show="cluster.enableSecurity"><i class="fa fa-warning"></i> {{msg.cluster_form_enable_security_hint}}
-        </div>
     </div>
 </div>
 <div class="form-group" name="kerberos_master_key1" ng-show="cluster.enableSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_master_key.$dirty && clusterCreationForm.kerberos_master_key.$invalid }">
