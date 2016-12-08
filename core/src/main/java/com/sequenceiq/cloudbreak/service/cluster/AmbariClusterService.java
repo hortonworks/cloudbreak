@@ -164,9 +164,6 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
-    @Inject
-    private AmbariAuthenticationProvider ambariAuthenticationProvider;
-
     @Override
     @Transactional(Transactional.TxType.NEVER)
     public Cluster create(CbUser user, Long stackId, Cluster cluster, List<Component> components) {
@@ -276,9 +273,7 @@ public class AmbariClusterService implements ClusterService {
         Cluster cluster = stack.getCluster();
         try {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
-                    ambariAuthenticationProvider.getAmbariUserName(cluster),
-                    ambariAuthenticationProvider.getAmbariPassword(cluster));
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
             String clusterJson = ambariClient.getClusterAsJson();
             if (clusterJson == null) {
                 throw new BadRequestException(String.format("Cluster response coming from Ambari server was null. [Ambari Server IP: '%s']", ambariIp));
@@ -474,9 +469,7 @@ public class AmbariClusterService implements ClusterService {
         }
         try {
             HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stackId, cluster.getAmbariIp());
-            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
-                    ambariAuthenticationProvider.getAmbariUserName(cluster),
-                    ambariAuthenticationProvider.getAmbariPassword(cluster));
+            AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
             Map<String, Integer> hostGroupCounter = new HashMap<>();
             Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
             Map<String, String> hostStatuses = ambariClient.getHostStatuses();
@@ -673,9 +666,7 @@ public class AmbariClusterService implements ClusterService {
     private void validateComponentsCategory(Stack stack, String hostGroup) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
-                ambariAuthenticationProvider.getAmbariUserName(cluster),
-                ambariAuthenticationProvider.getAmbariPassword(cluster));
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
         Blueprint blueprint = cluster.getBlueprint();
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
@@ -757,9 +748,7 @@ public class AmbariClusterService implements ClusterService {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
 
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
-                ambariAuthenticationProvider.getAmbariUserName(cluster),
-                ambariAuthenticationProvider.getAmbariPassword(cluster));
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
 
         List<String> targets = new ArrayList<>();
         Map<String, String> bpI = new HashMap<>();
@@ -843,10 +832,7 @@ public class AmbariClusterService implements ClusterService {
     private AmbariClient getAmbariClient(Long stackId) throws CloudbreakSecuritySetupException {
         Stack stack = stackService.getById(stackId);
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfig(stackId, stack.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(
-                httpClientConfig, stack.getGatewayPort(),
-                ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()),
-                ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(httpClientConfig, stack.getGatewayPort(), stack.getCluster());
         return ambariClient;
     }
 

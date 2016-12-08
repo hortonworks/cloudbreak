@@ -17,10 +17,22 @@ public class AmbariClientProvider {
 
     private static final String HTTP_PORT = "8080";
 
-    private static final String ADMIN_PRINCIPAL = "/admin";
-
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
+    /**
+     * Create a new Ambari client. If the kerberos security is enabled on the cluster it will
+     * automatically set the kerberos session. Clusters with kerberos security requires to
+     * set this session otherwise the client cannot modify any resources.
+     *
+     * @param clientConfig HTTP client config
+     * @param httpsPort port number@param cluster Cloudbreak cluster
+     * @return client
+     */
+    public AmbariClient getAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster) {
+        return getAmbariClient(clientConfig, httpsPort,
+                ambariAuthenticationProvider.getAmbariUserName(cluster), ambariAuthenticationProvider.getAmbariPassword(cluster));
+    }
 
     /**
      * Create a new Ambari client. If the kerberos security is enabled
@@ -61,49 +73,5 @@ public class AmbariClientProvider {
         return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
                 "admin", "admin",
                 clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
-    }
-
-    /**
-     * Create a new Ambari client. If the kerberos security is enabled on the cluster it will
-     * automatically set the kerberos session. Clusters with kerberos security requires to
-     * set this session otherwise the client cannot modify any resources.
-     *
-     * @param clientConfig HTTP client config
-     * @param httpsPort port number@param cluster Cloudbreak cluster
-     * @return client
-     */
-    public AmbariClient getSecureAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster) {
-        return getSecureAmbariClient(clientConfig, httpsPort, cluster,
-                ambariAuthenticationProvider.getAmbariUserName(cluster), ambariAuthenticationProvider.getAmbariPassword(cluster));
-    }
-
-    /**
-     * Create a new Ambari client like AmbariClientProvider.getSecureAmbariClient(),
-     * but get authentication details as parameter.
-     *
-     * @param clientConfig HTTP client config
-     * @param httpsPort port number
-     * @param cluster Cloudbreak cluster
-     * @param user user name
-     * @param password password
-     * @return client
-     */
-    public AmbariClient getSecureAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster, String user, String password) {
-        AmbariClient ambariClient = getAmbariClient(clientConfig, httpsPort, user, password);
-        if (cluster.isSecure()) {
-            LOGGER.info("Set kerberos session for Ambari: " + clientConfig.getApiAddress());
-            setKerberosSession(ambariClient, cluster);
-        }
-        return ambariClient;
-    }
-
-    /**
-     * Any Ambari client can be updated with a kerberos session to be able to modify
-     * cluster resources in a kerberos enabled cluster.
-     *
-     * @param client client to be updated
-     */
-    public void setKerberosSession(AmbariClient client, Cluster cluster) {
-        client.setKerberosSession(cluster.getKerberosAdmin() + ADMIN_PRINCIPAL, cluster.getKerberosPassword());
     }
 }

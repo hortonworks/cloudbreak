@@ -336,7 +336,7 @@ public class AmbariClusterConnector {
     }
 
     public void waitForAmbariHosts(Stack stack) throws CloudbreakSecuritySetupException {
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        AmbariClient ambariClient = getAmbariClient(stack);
         Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         waitForHosts(stack, ambariClient, hostMetadata);
     }
@@ -344,7 +344,7 @@ public class AmbariClusterConnector {
     public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
             throws CloudbreakException {
         List<String> upscaleHostNames = getHostNames(hostMetadata);
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        AmbariClient ambariClient = getAmbariClient(stack);
         PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
                 installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
         checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
@@ -359,33 +359,25 @@ public class AmbariClusterConnector {
     private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(),
-                ambariAuthenticationProvider.getAmbariUserName(cluster),
-                ambariAuthenticationProvider.getAmbariPassword(cluster));
+        return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
     }
 
-    private AmbariClient getSecureAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
+    private AmbariClient getAmbariClient(Stack stack, String user, String password) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
-    }
-
-    private AmbariClient getPrivateSecureAmbariClient(Stack stack, String user, String password) throws CloudbreakSecuritySetupException {
-        Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster, user, password);
+        return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), user, password);
     }
 
     public void credentialReplaceAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        AmbariClient ambariClient = getPrivateSecureAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
         try {
             ambariClient.createUser(newUserName, newPassword, true);
         } catch (Exception e) {
             if (e instanceof HttpResponseException && ((HttpResponseException) e).getStatusCode() == HttpStatus.INTERNAL_SERVER_ERROR.value()) {
                 try {
-                    ambariClient = getPrivateSecureAmbariClient(stack, newUserName, newPassword);
+                    ambariClient = getAmbariClient(stack, newUserName, newPassword);
                     ambariClient.ambariServerVersion();
                 } catch (Exception ie) {
                     throw e;
@@ -398,12 +390,12 @@ public class AmbariClusterConnector {
     public void credentialUpdateAmbariCluster(Long stackId, String newPassword) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
-        AmbariClient ambariClient = getPrivateSecureAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
+        AmbariClient ambariClient = getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
         try {
             ambariClient.changePassword(cluster.getUserName(), cluster.getPassword(), newPassword, true);
         } catch (Exception e) {
             if (e instanceof HttpResponseException && ((HttpResponseException) e).getStatusCode() == HttpStatus.FORBIDDEN.value()) {
-                ambariClient = getPrivateSecureAmbariClient(stack, cluster.getUserName(), newPassword);
+                ambariClient = getAmbariClient(stack, cluster.getUserName(), newPassword);
                 ambariClient.ambariServerVersion();
             }
         }

@@ -147,7 +147,7 @@ public class AmbariClusterConnectorTest {
         when(ambariClient.deleteUser(anyString())).thenReturn("");
         when(ambariClient.createUser(anyString(), anyString(), anyBoolean())).thenReturn("");
         when(ambariClient.changePassword(anyString(), anyString(), anyString(), anyBoolean())).thenReturn("");
-        when(ambariClientProvider.getSecureAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class), anyString(), anyString()))
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), anyString(), anyString()))
                 .thenReturn(ambariClient);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);

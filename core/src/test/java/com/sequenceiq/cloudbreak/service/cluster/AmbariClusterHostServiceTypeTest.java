@@ -86,9 +86,6 @@ public class AmbariClusterHostServiceTypeTest {
     @Mock
     private StatusToPollGroupConverter statusToPollGroupConverter;
 
-    @Mock
-    private AmbariAuthenticationProvider ambariAuthenticationProvider;
-
     @InjectMocks
     @Spy
     private AmbariClusterService underTest = new AmbariClusterService();
@@ -113,8 +110,6 @@ public class AmbariClusterHostServiceTypeTest {
         when(stackService.findLazy(anyLong())).thenReturn(stack);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         given(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).willReturn(new HttpClientConfig("", 8443, "/tmp"));
-        when(ambariAuthenticationProvider.getAmbariPassword(any(Cluster.class))).thenReturn("admin");
-        when(ambariAuthenticationProvider.getAmbariUserName(any(Cluster.class))).thenReturn("admin");
     }
 
     @Test(expected = BadRequestException.class)
@@ -150,7 +145,7 @@ public class AmbariClusterHostServiceTypeTest {
     @Test(expected = BadRequestException.class)
     public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         // GIVEN
-        doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class));
+        doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class));
         given(ambariClient.getClusterAsJson()).willReturn(null);
         // WHEN
         underTest.getClusterJson("123.12.3.4", 1L);
@@ -190,7 +185,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
@@ -213,7 +208,7 @@ public class AmbariClusterHostServiceTypeTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
-        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
         when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
@@ -254,7 +249,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
-        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
@@ -298,7 +293,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData1.getAmbariServer()).thenReturn(false);
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
-        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
@@ -346,7 +341,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
         when(instanceMetaData4.getAmbariServer()).thenReturn(false);
-        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
@@ -390,7 +385,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetaData1.getAmbariServer()).thenReturn(false);
         when(instanceMetaData2.getAmbariServer()).thenReturn(false);
         when(instanceMetaData3.getAmbariServer()).thenReturn(false);
-        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(String.class), any(String.class))).thenReturn(ambariClient);
+        when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(ambariClient.getBlueprintMap(cluster.getBlueprint().getBlueprintName())).thenReturn(singletonMap("slave_1", singletonList("DATANODE")));
         when(ambariClient.getDFSSpace()).thenReturn(dfsSpace);
