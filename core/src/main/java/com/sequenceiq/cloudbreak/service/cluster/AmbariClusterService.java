@@ -381,7 +381,6 @@ public class AmbariClusterService implements ClusterService {
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
                     Collections.singletonList(failedNodes));
             LOGGER.info(recoveryMessage);
-            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), recoveryMessage);
         }
     }
 
