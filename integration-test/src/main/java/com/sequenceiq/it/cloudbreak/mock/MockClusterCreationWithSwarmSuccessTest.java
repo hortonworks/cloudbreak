@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupJson;
+import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -74,14 +75,16 @@ public class MockClusterCreationWithSwarmSuccessTest extends AbstractMockIntegra
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");
-        clusterRequest.setKerberosAdmin(kerberosAdmin);
-        clusterRequest.setKerberosPassword(kerberosPassword);
-        clusterRequest.setKerberosMasterKey(kerberosMasterKey);
         clusterRequest.setEnableSecurity(enableSecurity);
         clusterRequest.setPassword(ambariPassword);
         clusterRequest.setUserName(ambariUser);
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
+        KerberosRequest kerberosRequest = new KerberosRequest();
+        kerberosRequest.setAdmin(kerberosAdmin);
+        kerberosRequest.setPassword(kerberosPassword);
+        kerberosRequest.setMasterKey(kerberosMasterKey);
+        clusterRequest.setKerberos(kerberosRequest);
 
         int numberOfServers = 0;
         for (HostGroup hostgroup : hostgroups) {

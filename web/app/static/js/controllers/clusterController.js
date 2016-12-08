@@ -398,6 +398,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         $scope.cluster.ambariStackDetails.verify = false;
                     }
                 }
+                if (!$scope.cluster.enableExSecurity) {
+                    delete $scope.cluster.kerberos.domain;
+                    delete $scope.cluster.kerberos.url;
+                    delete $scope.cluster.kerberos.realm;
+                    delete $scope.cluster.kerberos.principal;
+                } else if ($scope.cluster.enableExSecurity) {
+                    delete $scope.cluster.kerberos.masterKey;
+                    delete $scope.cluster.kerberos.admin;
+                }
             } else {
                 $scope.cluster.ambariStackDetails = null;
             }
@@ -453,9 +462,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     password: $scope.cluster.password,
                     userName: $scope.cluster.userName,
                     enableSecurity: $scope.cluster.enableSecurity || false,
-                    kerberosMasterKey: $scope.cluster.kerberosMasterKey || null,
-                    kerberosAdmin: $scope.cluster.kerberosAdmin || null,
-                    kerberosPassword: $scope.cluster.kerberosPassword || null,
                     validateBlueprint: $scope.cluster.validateBlueprint,
                     fileSystem: $scope.cluster.fileSystem || null,
                     configStrategy: $scope.cluster.configStrategy || null,
@@ -816,6 +822,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         });
 
+        function setSecurity() {
+            $scope.cluster.enableSecurity = false;
+            $scope.cluster.enableExSecurity = false;
+            $scope.cluster.kerberos = {};
+        }
+
         function setFileSystem() {
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
                 if ($rootScope.activeCredential.cloudPlatform == 'AZURE_RM') {
@@ -1133,6 +1145,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.selectSssd = {
                 show: false
             };
+            setSecurity();
             setFileSystem();
             initWizard();
             setNetwork();

@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Topology;
@@ -77,10 +78,10 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
@@ -102,7 +103,6 @@ public class AmbariClusterConnector {
     private static final String REALM = "NODE.DC1.CONSUL";
     private static final String DOMAIN = "node.dc1.consul";
     private static final String KEY_TYPE = "PERSISTED";
-    private static final String PRINCIPAL = "/admin";
     private static final String FQDN = "fqdn";
     private static final String ADMIN = "admin";
 
@@ -164,6 +164,10 @@ public class AmbariClusterConnector {
     private ComponentConfigProvider componentConfigProvider;
     @Inject
     private AmbariViewProvider ambariViewProvider;
+    @Inject
+    private KerberosHostResolver kerberosHostResolver;
+    @Inject
+    private KerberosPrincipalResolver kerberosPrincipalResolver;
 
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getDefaultAmbariClient(stack);
@@ -208,8 +212,10 @@ public class AmbariClusterConnector {
             String configStrategy = cluster.getConfigStrategy().name();
             String clusterTemplate;
             if (cluster.isSecure()) {
+                KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+                String principal = kerberosPrincipalResolver.resolvePrincipalForKerberos(kerberosConfig);
                 clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                        cluster.getPassword(), cluster.getKerberosAdmin() + PRINCIPAL, cluster.getKerberosPassword(), KEY_TYPE);
+                        cluster.getPassword(), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE);
             } else {
                 clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy, cluster.getPassword());
             }
@@ -281,7 +287,7 @@ public class AmbariClusterConnector {
     }
 
     public void waitForAmbariHosts(Stack stack) throws CloudbreakSecuritySetupException {
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        AmbariClient ambariClient = getAmbariClient(stack);
         Set<HostMetadata> hostMetadata = hostMetadataRepository.findHostsInCluster(stack.getCluster().getId());
         waitForHosts(stack, ambariClient, hostMetadata);
     }
@@ -289,7 +295,7 @@ public class AmbariClusterConnector {
     public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
             throws CloudbreakException {
         List<String> upscaleHostNames = getHostNames(hostMetadata);
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        AmbariClient ambariClient = getAmbariClient(stack);
         PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
                 installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
         checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
@@ -307,18 +313,12 @@ public class AmbariClusterConnector {
         return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster.getUserName(), cluster.getPassword());
     }
 
-    private AmbariClient getSecureAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
-        Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        return ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
-    }
-
     public Cluster credentialChangeAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         String oldUserName = cluster.getUserName();
         String oldPassword = cluster.getPassword();
-        AmbariClient ambariClient = getSecureAmbariClient(stack);
+        AmbariClient ambariClient = getAmbariClient(stack);
         if (newUserName.equals(oldUserName)) {
             if (!newPassword.equals(oldPassword)) {
                 ambariClient.changePassword(oldUserName, oldPassword, newPassword, true);
@@ -618,7 +618,9 @@ public class AmbariClusterConnector {
                     InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
                     gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
                     String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
-                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, domain.toUpperCase(), domain);
+                    String kerberosurl = kerberosHostResolver.resolveHostForKerberos(cluster, gatewayHost);
+                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, kerberosurl,
+                            domain.toUpperCase(), domain);
                 } else {
                     // TODO this won't work on mesos, but it doesn't work anyway
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);

@@ -2,11 +2,13 @@
 {% set realm = salt['grains.get']('domain') %}
 {% set password = salt['pillar.get']('kerberos:password') %}
 {% set user = salt['pillar.get']('kerberos:user') %}
+{% set url = salt['pillar.get']('kerberos:url') %}
 
 {% set kerberos = {} %}
 {% do kerberos.update({
     'master_key': master_key,
     'realm': realm|upper,
     'password': password,
-    'user': user
+    'user': user,
+    'url': url
 }) %}

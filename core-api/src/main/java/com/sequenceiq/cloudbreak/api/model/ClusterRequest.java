@@ -7,11 +7,13 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterRequest {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
@@ -45,12 +47,7 @@ public class ClusterRequest {
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
-    @Size(max = 50, min = 3, message = "The length of the Kerberos password has to be in range of 3 to 50")
-    private String kerberosMasterKey;
-    @Size(max = 15, min = 5, message = "The length of the Kerberos admin has to be in range of 5 to 15")
-    private String kerberosAdmin;
-    @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
-    private String kerberosPassword;
+    private KerberosRequest kerberos;
     @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
     private Boolean ldapRequired = false;
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
@@ -121,30 +118,6 @@ public class ClusterRequest {
 
     public void setEnableSecurity(Boolean enableSecurity) {
         this.enableSecurity = enableSecurity;
-    }
-
-    public String getKerberosMasterKey() {
-        return kerberosMasterKey;
-    }
-
-    public void setKerberosMasterKey(String kerberosMasterKey) {
-        this.kerberosMasterKey = kerberosMasterKey;
-    }
-
-    public String getKerberosAdmin() {
-        return kerberosAdmin;
-    }
-
-    public void setKerberosAdmin(String kerberosAdmin) {
-        this.kerberosAdmin = kerberosAdmin;
-    }
-
-    public String getKerberosPassword() {
-        return kerberosPassword;
-    }
-
-    public void setKerberosPassword(String kerberosPassword) {
-        this.kerberosPassword = kerberosPassword;
     }
 
     public Boolean getLdapRequired() {
@@ -265,5 +238,13 @@ public class ClusterRequest {
 
     public void setEmailTo(String emailTo) {
         this.emailTo = emailTo;
+    }
+
+    public KerberosRequest getKerberos() {
+        return kerberos;
+    }
+
+    public void setKerberos(KerberosRequest kerberos) {
+        this.kerberos = kerberos;
     }
 }

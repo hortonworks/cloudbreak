@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
@@ -74,9 +75,13 @@ public class ClusterHostServiceRunner {
             if (cluster.isSecure()) {
                 Map<String, Object> krb = new HashMap<>();
                 Map<String, String> kerberosConf = new HashMap<>();
-                kerberosConf.put("masterKey", cluster.getKerberosMasterKey());
-                kerberosConf.put("user", cluster.getKerberosAdmin());
-                kerberosConf.put("password", cluster.getKerberosPassword());
+                KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+                putIfNotNull(kerberosConf, kerberosConfig.getKerberosMasterKey(), "masterKey");
+                putIfNotNull(kerberosConf, kerberosConfig.getKerberosAdmin(), "user");
+                putIfNotNull(kerberosConf, kerberosConfig.getKerberosPassword(), "password");
+                putIfNotNull(kerberosConf, kerberosConfig.getKerberosUrl(), "url");
+                putIfNotNull(kerberosConf, kerberosConfig.getKerberosRealm(), "realm");
+                putIfNotNull(kerberosConf, kerberosConfig.getKerberosDomain(), "domain");
                 krb.put("kerberos", kerberosConf);
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }
@@ -146,6 +151,12 @@ public class ClusterHostServiceRunner {
             }
         }
         return agents;
+    }
+
+    private void putIfNotNull(Map<String, String> context, String variable, String key) {
+        if (variable != null) {
+            context.put(key, variable);
+        }
     }
 
 }
