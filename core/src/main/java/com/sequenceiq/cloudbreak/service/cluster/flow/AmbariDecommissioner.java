@@ -152,7 +152,7 @@ public class AmbariDecommissioner {
         eventService.fireCloudbreakInstanceGroupEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP.code(), asList(adjustment, hostGroupName)), hostGroupName);
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
         String blueprintName = stack.getCluster().getBlueprint().getBlueprintName();
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, blueprintName);
         if (isSuccess(pollingResult)) {
@@ -186,7 +186,7 @@ public class AmbariDecommissioner {
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
         boolean hostDeleted = false;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getSecureAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster());
+        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster());
         Set<String> components = getHadoopComponents(ambariClient, data.getHostGroup().getName(), stack.getCluster().getBlueprint().getBlueprintName());
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());

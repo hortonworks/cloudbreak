@@ -6,9 +6,11 @@
   "userName" : "user",
   "password" : "pass",
   "enableSecurity": false,
-  "kerberosMasterKey": "masterkey",
-  "kerberosAdmin" : "admin",
-  "kerberosPassword" : "passw",
+  "kerberos" : {
+    "masterKey": "masterkey",
+    "admin" : "admin",
+    "password" : "passw"
+  },
   "validateBlueprint" : true,
   "emailTo": "admin@example.com",
   "fileSystem" : {

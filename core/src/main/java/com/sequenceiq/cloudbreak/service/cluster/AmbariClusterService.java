@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -102,6 +103,9 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private FileSystemRepository fileSystemRepository;
+
+    @Inject
+    private KerberosConfigRepository kerberosConfigRepository;
 
     @Inject
     private ConstraintRepository constraintRepository;
@@ -175,6 +179,9 @@ public class AmbariClusterService implements ClusterService {
         }
         if (cluster.getFileSystem() != null) {
             fileSystemRepository.save(cluster.getFileSystem());
+        }
+        if (cluster.getKerberosConfig() != null) {
+            kerberosConfigRepository.save(cluster.getKerberosConfig());
         }
         cluster.setStack(stack);
         cluster.setOwner(user.getUserId());

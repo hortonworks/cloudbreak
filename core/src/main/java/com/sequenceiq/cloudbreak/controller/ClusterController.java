@@ -104,8 +104,7 @@ public class ClusterController implements ClusterEndpoint {
     @Override
     public IdJson post(Long stackId, ClusterRequest request) throws Exception {
         CbUser user = authenticatedUserService.getCbUser();
-        if (request.getEnableSecurity()
-                && (request.getKerberosMasterKey() == null || request.getKerberosAdmin() == null || request.getKerberosPassword() == null)) {
+        if (request.getEnableSecurity() && request.getKerberos() == null) {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
         MDCBuilder.buildUserMdcContext(user);

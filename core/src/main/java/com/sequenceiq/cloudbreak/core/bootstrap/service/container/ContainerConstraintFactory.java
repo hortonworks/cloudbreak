@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
@@ -144,8 +145,9 @@ public class ContainerConstraintFactory {
     }
 
     public ContainerConstraint getKerberosServerConstraint(Cluster cluster, String gatewayHostname) {
-        KerberosConfiguration kerberosConf = new KerberosConfiguration(cluster.getKerberosMasterKey(), cluster.getKerberosAdmin(),
-                cluster.getKerberosPassword());
+        KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+        KerberosConfiguration kerberosConf = new KerberosConfiguration(kerberosConfig.getKerberosMasterKey(), kerberosConfig.getKerberosAdmin(),
+                kerberosConfig.getKerberosPassword());
 
         Map<String, String> env = new HashMap<>();
         env.put("SERVICE_NAME", KERBEROS.getName());

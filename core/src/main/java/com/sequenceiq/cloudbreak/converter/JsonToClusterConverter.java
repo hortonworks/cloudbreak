@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
+import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 
 @Component
 public class JsonToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterRequest, Cluster> {
@@ -22,9 +24,18 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setPassword(source.getPassword());
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? false : enableSecurity);
-        cluster.setKerberosMasterKey(source.getKerberosMasterKey());
-        cluster.setKerberosAdmin(source.getKerberosAdmin());
-        cluster.setKerberosPassword(source.getKerberosPassword());
+        KerberosRequest kerberos = source.getKerberos();
+        KerberosConfig kerberosConfig = new KerberosConfig();
+        if (source.getKerberos() != null) {
+            kerberosConfig.setKerberosMasterKey(kerberos.getMasterKey());
+            kerberosConfig.setKerberosAdmin(kerberos.getAdmin());
+            kerberosConfig.setKerberosPassword(kerberos.getPassword());
+            kerberosConfig.setKerberosUrl(kerberos.getUrl());
+            kerberosConfig.setKerberosRealm(kerberos.getRealm());
+            kerberosConfig.setKerberosDomain(kerberos.getDomain());
+            kerberosConfig.setKerberosPrincipal(kerberos.getPrincipal());
+        }
+        cluster.setKerberosConfig(kerberosConfig);
         cluster.setLdapRequired(source.getLdapRequired());
         cluster.setConfigStrategy(source.getConfigStrategy());
         cluster.setEnableShipyard(source.getEnableShipyard());

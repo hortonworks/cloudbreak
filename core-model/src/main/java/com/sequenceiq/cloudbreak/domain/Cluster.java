@@ -120,9 +120,9 @@ public class Cluster implements ProvisionEntity {
     private String password;
 
     private Boolean secure;
-    private String kerberosMasterKey;
-    private String kerberosAdmin;
-    private String kerberosPassword;
+
+    @ManyToOne
+    private KerberosConfig kerberosConfig;
 
     private Boolean ldapRequired;
     private Boolean enableShipyard;
@@ -287,30 +287,6 @@ public class Cluster implements ProvisionEntity {
         this.secure = secure;
     }
 
-    public String getKerberosMasterKey() {
-        return kerberosMasterKey;
-    }
-
-    public void setKerberosMasterKey(String kerberosMasterKey) {
-        this.kerberosMasterKey = kerberosMasterKey;
-    }
-
-    public String getKerberosAdmin() {
-        return kerberosAdmin;
-    }
-
-    public void setKerberosAdmin(String kerberosAdmin) {
-        this.kerberosAdmin = kerberosAdmin;
-    }
-
-    public String getKerberosPassword() {
-        return kerberosPassword;
-    }
-
-    public void setKerberosPassword(String kerberosPassword) {
-        this.kerberosPassword = kerberosPassword;
-    }
-
     public Boolean isLdapRequired() {
         return ldapRequired == null ? false : ldapRequired;
     }
@@ -461,5 +437,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setLdapConfig(LdapConfig ldapConfig) {
         this.ldapConfig = ldapConfig;
+    }
+
+    public KerberosConfig getKerberosConfig() {
+        return kerberosConfig;
+    }
+
+    public void setKerberosConfig(KerberosConfig kerberosConfig) {
+        this.kerberosConfig = kerberosConfig;
     }
 }

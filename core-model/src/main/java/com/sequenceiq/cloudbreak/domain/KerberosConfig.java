@@ -1,0 +1,96 @@
+package com.sequenceiq.cloudbreak.domain;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+
+@Entity
+@Table(name = "KerberosConfig")
+public class KerberosConfig {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")
+    @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)
+    private Long id;
+
+    private String kerberosMasterKey;
+
+    private String kerberosAdmin;
+
+    private String kerberosPassword;
+
+    private String kerberosUrl;
+
+    private String kerberosRealm;
+
+    private String kerberosDomain;
+
+    private String kerberosPrincipal;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getKerberosMasterKey() {
+        return kerberosMasterKey;
+    }
+
+    public void setKerberosMasterKey(String kerberosMasterKey) {
+        this.kerberosMasterKey = kerberosMasterKey;
+    }
+
+    public String getKerberosAdmin() {
+        return kerberosAdmin;
+    }
+
+    public void setKerberosAdmin(String kerberosAdmin) {
+        this.kerberosAdmin = kerberosAdmin;
+    }
+
+    public String getKerberosPassword() {
+        return kerberosPassword;
+    }
+
+    public void setKerberosPassword(String kerberosPassword) {
+        this.kerberosPassword = kerberosPassword;
+    }
+
+    public String getKerberosUrl() {
+        return kerberosUrl;
+    }
+
+    public void setKerberosUrl(String kerberosUrl) {
+        this.kerberosUrl = kerberosUrl;
+    }
+
+    public String getKerberosRealm() {
+        return kerberosRealm;
+    }
+
+    public void setKerberosRealm(String kerberosRealm) {
+        this.kerberosRealm = kerberosRealm;
+    }
+
+    public String getKerberosDomain() {
+        return kerberosDomain;
+    }
+
+    public void setKerberosDomain(String kerberosDomain) {
+        this.kerberosDomain = kerberosDomain;
+    }
+
+    public String getKerberosPrincipal() {
+        return kerberosPrincipal;
+    }
+
+    public void setKerberosPrincipal(String kerberosPrincipal) {
+        this.kerberosPrincipal = kerberosPrincipal;
+    }
+}
