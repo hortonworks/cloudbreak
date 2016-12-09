@@ -3,7 +3,7 @@ compose-init() {
         echo "* removing old docker-compose binary" | yellow
         rm -f .deps/bin/docker-compose
     fi
-    deps-require docker-compose 1.7.1
+    deps-require docker-compose 1.9.0
     env-import CB_COMPOSE_PROJECT cbreak
     env-import COMPOSE_HTTP_TIMEOUT 120
     env-import CBD_LOG_NAME cbreak
