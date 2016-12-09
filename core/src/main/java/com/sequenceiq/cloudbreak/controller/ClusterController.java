@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -95,6 +97,9 @@ public class ClusterController implements ClusterEndpoint {
 
     @Autowired
     private ComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private DefaultHDPInfo defaultHDPInfo;
 
     @Override
     public IdJson post(Long stackId, ClusterRequest request) throws Exception {
@@ -224,6 +229,10 @@ public class ClusterController implements ClusterEndpoint {
                 HDPRepo hdpRepo = conversionService.convert(ambariStackDetailsJson, HDPRepo.class);
                 Component component = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(hdpRepo), stack);
                 components.add(component);
+            } else {
+                Component hdpRepoComponent = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
+                        new Json(defaultHDPInfo.getRepo()), stack);
+                components.add(hdpRepoComponent);
             }
         }
         return components;

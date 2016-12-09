@@ -40,6 +40,10 @@ public class HDPInfo implements Versioned {
 
     @Override
     public String toString() {
-        return "HDPInfo{version='" + version + "'}";
+        return "HDPInfo{"
+                + "version='" + version + '\''
+                + ", repo=" + repo
+                + ", images=" + images
+                + '}';
     }
 }
