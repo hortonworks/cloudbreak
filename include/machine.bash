@@ -6,6 +6,7 @@ machine-init() {
   env-import MACHINE_MEM 4096
   env-import MACHINE_CPU 2
   env-import MACHINE_OPTS "--xhyve-virtio-9p"
+  env-import DOCKER_PROFILE Profile
 }
 
 machine-deps() {
@@ -60,14 +61,17 @@ machine-env() {
     debug "$desc"
     
     machine-deps
-    echo ==== OK
-    docker-machine env --shell bash $MACHINE_NAME > .profile.docker
-    echo "export PATH=$PWD/.deps/bin:\$PATH" >> .profile.docker
-
-    debug docker ENV are saved to .profile.docker
-    echo "=====> You can set docker ENV vars by:" 1>&2
-    echo "source .profile.docker" | yellow
-
+    touch $DOCKER_PROFILE
     sed -i '/PUBLIC_IP/ d' Profile
-    echo "export PUBLIC_IP=$(docker-machine ip $MACHINE_NAME )" >> Profile
+
+    cat >> $DOCKER_PROFILE <<EOF
+eval \$(docker-machine env --shell bash $MACHINE_NAME)
+export PUBLIC_IP=\$(docker-machine ip $MACHINE_NAME)
+export DOCKER_MACHINE=$MACHINE_NAME
+export PATH=$PWD/.deps/bin:\$PATH
+EOF
+
+    debug docker ENV are saved to $DOCKER_PROFILE
+    echo "=====> You can set docker ENV vars by:" 1>&2
+    echo "source $DOCKER_PROFILE" | yellow
 }
