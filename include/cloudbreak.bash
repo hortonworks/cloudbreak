@@ -28,14 +28,11 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_TRAEFIK v1.0.0
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
-    env-import DOCKER_TAG_POSTGRES 9.4.1
     env-import DOCKER_TAG_POSTFIX latest
     env-import DOCKER_TAG_UAA 3.6.0
-    env-import DOCKER_TAG_UAADB v3.6.0
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
-    env-import DOCKER_TAG_CBDB 1.2.0
-    env-import DOCKER_TAG_PCDB 1.2.0
+    env-import DOCKER_TAG_POSTGRES 9.4.10-alpine
     env-import DOCKER_TAG_PERISCOPE 1.11.0-dev.16
     env-import DOCKER_TAG_CLOUDBREAK 1.11.0-dev.16
     env-import DOCKER_TAG_ULUWATU 1.11.0-dev.16
