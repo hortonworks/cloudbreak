@@ -11,7 +11,7 @@ machine-init() {
 machine-deps() {
   deps-require docker-machine 0.8.2
   deps-require docker-machine-driver-xhyve 0.3.1
-  
+  deps-require docker 1.12.3
 }
 
 machine-create() {
