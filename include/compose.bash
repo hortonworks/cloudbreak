@@ -231,7 +231,7 @@ consul:
         - https_proxy=$CB_HTTPS_PROXY
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
-        - "$CB_DB_ROOT_PATH/consul-data:/data"
+        - "consul-data:/data"
     ports:
         - "$PRIVATE_IP:53:8600/udp"
         - "8400:8400"
@@ -302,7 +302,7 @@ uaadb:
       - SERVICE_NAME=uaadb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
-        - "$CB_DB_ROOT_PATH/uaadb:/var/lib/postgresql/data"
+        - "uaadb:/var/lib/postgresql/data"
     image: hortonworks/cloudbreak-uaa-db:$DOCKER_TAG_UAADB
 
 identity:
@@ -336,7 +336,7 @@ cbdb:
       - SERVICE_NAME=cbdb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
-        - "$CB_DB_ROOT_PATH/cbdb:/var/lib/postgresql/data"
+        - "cbdb:/var/lib/postgresql/data"
     image: hortonworks/cloudbreak-server-db:$DOCKER_TAG_CBDB
 
 cloudbreak:
@@ -522,7 +522,7 @@ pcdb:
     ports:
         - "$PRIVATE_IP:5433:5432"
     volumes:
-        - "$CB_DB_ROOT_PATH/periscopedb:/var/lib/postgresql/data"
+        - "periscopedb:/var/lib/postgresql/data"
     image: hortonworks/cloudbreak-autoscale-db:$DOCKER_TAG_PCDB
 
 periscope:

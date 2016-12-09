@@ -118,12 +118,6 @@ is_linux() {
 cloudbreak-conf-db() {
     declare desc="Declares cloudbreak DB config"
 
-    if is_linux; then
-        env-import CB_DB_ROOT_PATH "/var/lib/cloudbreak"
-    else
-        env-import CB_DB_ROOT_PATH "/var/lib/boot2docker/cloudbreak"
-    fi
-
     env-import CB_DB_ENV_USER "postgres"
     env-import CB_DB_ENV_DB ""
     env-import CB_DB_ENV_PASS ""
@@ -146,16 +140,13 @@ cloudbreak-conf-cert() {
 cloudbreak-delete-dbs() {
     declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
 
-    cloudbreak-conf-db
-    if is_linux; then
-        rm -rf ${CB_DB_ROOT_PATH:? required}
-    else
-        local sshcommand='boot2docker ssh'
-        if [[ -n "$DOCKER_MACHINE" ]]; then
-          sshcommand='docker-machine ssh '$DOCKER_MACHINE
-        fi
-        $sshcommand ' sudo rm -rf '${CB_DB_ROOT_PATH:? required}'/*'
-    fi
+    docker volume rm uaadb cbdb periscopedb
+}
+
+cloudbreak-delete-consul-data() {
+    declare desc="deletes consul data-dir (volume)"
+
+    docker volume rm consul-data
 }
 
 cloudbreak-delete-certs() {
