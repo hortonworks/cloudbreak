@@ -52,6 +52,7 @@ func application(
 	RestoreAsset(".", bashPath)
 	bash, err := basher.NewContext(bashPath, os.Getenv("DEBUG") != "")
 
+	bash.Export("PATH", os.Getenv("PATH"))
 	bash.Export("DEBUG", os.Getenv("DEBUG"))
 	bash.Export("TRACE", os.Getenv("TRACE"))
 	bash.Export("HOME", os.Getenv("HOME"))
