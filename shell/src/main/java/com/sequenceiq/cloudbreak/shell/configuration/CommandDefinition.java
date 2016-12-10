@@ -114,7 +114,7 @@ public class CommandDefinition {
 
     @Bean
     ClusterCommands clusterCommands() {
-        return new ClusterCommands(shellContext, cloudbreakShellUtil);
+        return new ClusterCommands(shellContext, cloudbreakShellUtil, stackCommands());
     }
 
     @Bean

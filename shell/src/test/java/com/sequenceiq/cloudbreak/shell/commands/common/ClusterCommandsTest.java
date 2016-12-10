@@ -15,6 +15,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseStackCommands;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
@@ -36,11 +37,14 @@ public class ClusterCommandsTest {
     @Mock
     private ClusterEndpoint clusterEndpoint;
 
+    @Mock
+    private BaseStackCommands stackCommands;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
-        underTest = new ClusterCommands(shellContext, cloudbreakShellUtil);
+        underTest = new ClusterCommands(shellContext, cloudbreakShellUtil, stackCommands);
 
         given(shellContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.clusterEndpoint()).willReturn(clusterEndpoint);
@@ -55,7 +59,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedMarathonStackId()).willReturn(null);
 
         HostGroup hostGroup = new HostGroup("master");
-        String addNodeResult = underTest.addNode(hostGroup, +1);
+        String addNodeResult = underTest.addNode(hostGroup, +1, false);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackIdStr));
@@ -69,7 +73,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedMarathonStackId()).willReturn(stackId);
 
         HostGroup hostGroup = new HostGroup("master");
-        String addNodeResult = underTest.addNode(hostGroup, +1);
+        String addNodeResult = underTest.addNode(hostGroup, +1, false);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackId));
@@ -84,7 +88,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedMarathonStackId()).willReturn(null);
 
         HostGroup hostGroup = new HostGroup("master");
-        String removeNodeResult = underTest.removeNode(hostGroup, -1, false);
+        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackIdStr));
@@ -98,7 +102,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedMarathonStackId()).willReturn(stackId);
 
         HostGroup hostGroup = new HostGroup("master");
-        String removeNodeResult = underTest.removeNode(hostGroup, -1, false);
+        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackId));
