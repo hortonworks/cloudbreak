@@ -294,12 +294,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             shellContext.setHint(Hints.CREATE_CLUSTER);
 
             if (wait) {
-                CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.AVAILABLE.name());
-                if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
-                    throw shellContext.exceptionTransformer().transformToRuntimeException("Stack creation failed:" + waitResult.getReason());
-                } else {
-                    return "Stack creation finished with name: " + name;
-                }
+                waitUntilStackAvailable(id, "Stack creation failed:");
+                return "Stack creation finished with name: " + name;
             }
             return String.format("Stack creation started with id: '%s' and name: '%s'", id, name);
         } catch (Exception ex) {
@@ -396,7 +392,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the stack") Integer adjustment,
             @CliOption(key = "withClusterUpScale", help = "Do the upscale with the cluster together",
-                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withClusterUpScale) {
+                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withClusterUpScale,
+            @CliOption(key = "wait", help = "Wait until the operation completes",
+                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         try {
             if (adjustment < 1) {
                 return "The adjustment value in case of node addition should be at least 1.";
@@ -407,9 +405,20 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             instanceGroupAdjustmentJson.setWithClusterEvent(withClusterUpScale);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakShellUtil.checkResponse("upscaleStack",
-                    shellContext.cloudbreakClient().stackEndpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
-            return shellContext.getStackId();
+            String stackIdStr = shellContext.getStackId();
+            Long stackId = Long.valueOf(stackIdStr);
+            cloudbreakShellUtil.checkResponse("upscaleStack", shellContext.cloudbreakClient().stackEndpoint().put(stackId, updateStackJson));
+            if (!wait) {
+                return "Stack upscale started with id: " + stackIdStr;
+            }
+
+            waitUntilStackAvailable(stackId, "Stack upscale failed: ");
+            if (!withClusterUpScale) {
+                return "Stack upscale finished with id: " + stackIdStr;
+            }
+
+            waitUntilClusterAvailable(stackId, "Cluster upscale failed: ");
+            return "Stack and cluster upscale finished with id " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -418,7 +427,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliCommand(value = "stack node --REMOVE", help = "Remove nodes from the cluster")
     public String removeNode(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
-            @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be removed from the stack") Integer adjustment) {
+            @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be removed from the stack") Integer adjustment,
+            @CliOption(key = "wait", help = "Wait until the operation completes",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         try {
             if (adjustment > -1) {
                 return "The adjustment value in case of node removal should be negative.";
@@ -429,9 +440,14 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             instanceGroupAdjustmentJson.setWithClusterEvent(false);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakShellUtil.checkResponse("downscaleStack",
-                    shellContext.cloudbreakClient().stackEndpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
-            return shellContext.getStackId();
+            String stackIdStr = shellContext.getStackId();
+            Long stackId = Long.valueOf(stackIdStr);
+            cloudbreakShellUtil.checkResponse("downscaleStack", shellContext.cloudbreakClient().stackEndpoint().put(stackId, updateStackJson));
+            if (!wait) {
+                return "Stack downscale started with id: " + stackIdStr;
+            }
+            waitUntilStackAvailable(stackId, "Stack downscale failed: ");
+            return "Stack downscale finished with id: " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -556,6 +572,30 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             }
         } catch (Exception e) {
             // ignore
+        }
+    }
+
+    /**
+     * Waits until stack becomes available after some operation.
+     * @throws RuntimeException if the operation fails
+     */
+    public void waitUntilStackAvailable(Long stackId, String errorMessagePrefix) {
+        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(stackId, Status.AVAILABLE.name());
+        throwIfWaitFailed(errorMessagePrefix, waitResult);
+    }
+
+    /**
+     * Waits until cluster becomes available after some operation.
+     * @throws RuntimeException if the operation fails
+     */
+    public void waitUntilClusterAvailable(Long stackId, String errorMessagePrefix) {
+        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckClusterStatus(stackId, Status.AVAILABLE.name());
+        throwIfWaitFailed(errorMessagePrefix, waitResult);
+    }
+
+    private void throwIfWaitFailed(String errorMessagePrefix, CloudbreakShellUtil.WaitResult waitResult) {
+        if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(errorMessagePrefix + waitResult.getReason());
         }
     }
 

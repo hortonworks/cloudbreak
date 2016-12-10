@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseStackCommands;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
@@ -38,9 +39,12 @@ public class ClusterCommands implements BaseCommands {
 
     private CloudbreakShellUtil cloudbreakShellUtil;
 
-    public ClusterCommands(ShellContext shellContext, CloudbreakShellUtil cloudbreakShellUtil) {
+    private BaseStackCommands stackCommands;
+
+    public ClusterCommands(ShellContext shellContext, CloudbreakShellUtil cloudbreakShellUtil, BaseStackCommands stackCommands) {
         this.shellContext = shellContext;
         this.cloudbreakShellUtil = cloudbreakShellUtil;
+        this.stackCommands = stackCommands;
     }
 
     @CliAvailabilityIndicator(value = "cluster create")
@@ -365,7 +369,9 @@ public class ClusterCommands implements BaseCommands {
     @CliCommand(value = "cluster node --ADD", help = "Add new nodes to the cluster")
     public String addNode(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostGroup,
-            @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the cluster") Integer adjustment) {
+            @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the cluster") Integer adjustment,
+            @CliOption(key = "wait", help = "Wait until the operation completes",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         try {
             if (adjustment < 1) {
                 return "The adjustment value in case of node addition should be at least 1.";
@@ -376,10 +382,14 @@ public class ClusterCommands implements BaseCommands {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
-            cloudbreakShellUtil.checkResponse("upscaleCluster",
-                    shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
-            return "Cluster upscale started with stack id: " + stackId;
+            String stackIdStr = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            Long stackId = Long.valueOf(stackIdStr);
+            cloudbreakShellUtil.checkResponse("upscaleCluster", shellContext.cloudbreakClient().clusterEndpoint().put(stackId, updateClusterJson));
+            if (!wait) {
+                return "Cluster upscale started with stack id: " + stackIdStr;
+            }
+            stackCommands.waitUntilClusterAvailable(stackId, "Cluster upscale failed: ");
+            return "Cluster upscale finished with stack id " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -390,7 +400,9 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "The number of the nodes to be removed from the cluster.") Integer adjustment,
             @CliOption(key = "withStackDownScale", help = "Do the downscale with the stack together",
-                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withStackDownScale) {
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withStackDownScale,
+            @CliOption(key = "wait", help = "Wait until the operation completes",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         try {
             if (adjustment > -1) {
                 return "The adjustment value in case of node removal should be negative.";
@@ -401,10 +413,21 @@ public class ClusterCommands implements BaseCommands {
             hostGroupAdjustmentJson.setWithStackUpdate(withStackDownScale);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
-            cloudbreakShellUtil.checkResponse("downscaleCluster",
-                    shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
-            return "Cluster downscale started with stack id: " + stackId;
+            String stackIdStr = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            Long stackId = Long.valueOf(stackIdStr);
+            cloudbreakShellUtil.checkResponse("downscaleCluster", shellContext.cloudbreakClient().clusterEndpoint().put(stackId, updateClusterJson));
+
+            if (!wait) {
+                return "Cluster downscale started with stack id: " + stackIdStr;
+            }
+
+            stackCommands.waitUntilClusterAvailable(stackId, "Cluster downscale failed: ");
+            if (!withStackDownScale) {
+                return "Cluster downscale finished with stack id: " + stackIdStr;
+            }
+
+            stackCommands.waitUntilStackAvailable(stackId, "Stack downscale failed: ");
+            return "Cluster and stack downscale finished with stack id " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
