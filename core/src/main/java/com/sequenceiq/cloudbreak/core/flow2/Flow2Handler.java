@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.FlowTriggers.STACK_FORCE_TERM
 import static com.sequenceiq.cloudbreak.core.flow2.FlowTriggers.STACK_TERMINATE_TRIGGER_EVENT;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -38,6 +37,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
@@ -57,18 +57,19 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
 
-    private static final List<String> ALLOWED_PARALLEL_FLOWS = Collections.unmodifiableList(Arrays.asList(
+    private static final List<String> ALLOWED_PARALLEL_FLOWS = Arrays.asList(
             STACK_FORCE_TERMINATE_TRIGGER_EVENT, STACK_TERMINATE_TRIGGER_EVENT
-    ));
+    );
 
-    private static final List<Class<? extends FlowConfiguration>> RESTARTABLE_FLOWS = Collections.unmodifiableList(Arrays.asList(
+    private static final List<Class<? extends FlowConfiguration>> RESTARTABLE_FLOWS = Arrays.asList(
             StackCreationFlowConfig.class,
             StackSyncFlowConfig.class, StackTerminationFlowConfig.class, StackStopFlowConfig.class, StackStartFlowConfig.class,
+            StackUpscaleConfig.class,
             InstanceTerminationFlowConfig.class,
             ClusterCreationFlowConfig.class,
             ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class
-    ));
+    );
 
     @Inject
     private FlowLogService flowLogService;
@@ -119,7 +120,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flowId = UUID.randomUUID().toString();
                         flow = flowConfig.createFlow(flowId);
                         flow.initialize();
-                        flowLogService.save(flowId, flowChainId, key, payload, flowConfig.getClass(), flow.getCurrentState());
+                        flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                     } finally {
                         lock.unlock();
                     }
@@ -130,7 +131,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 LOGGER.debug("flow control event arrived: key: {}, flowid: {}, payload: {}", key, flowId, payload);
                 Flow flow = runningFlows.get(flowId);
                 if (flow != null) {
-                    flowLogService.save(flowId, flowChainId, key, payload, flow.getFlowConfigClass(), flow.getCurrentState());
+                    flowLogService.save(flowId, flowChainId, key, payload, flow.getVariables(), flow.getFlowConfigClass(), flow.getCurrentState());
                     flow.sendEvent(key, payload);
                 } else {
                     LOGGER.info("Cancelled flow finished running. Stack ID {}, flow ID {}, event {}", payload.getStackId(), flowId, key);
@@ -194,7 +195,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             if (flowLog.getFlowChainId() != null) {
                 flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
             }
-            flow.initialize(flowLog.getCurrentState());
+            Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
+            flow.initialize(flowLog.getCurrentState(), variables);
             Object payload = JsonReader.jsonToJava(flowLog.getPayload());
             RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
             if (restartAction != null) {

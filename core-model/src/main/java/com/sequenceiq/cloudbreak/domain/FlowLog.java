@@ -34,6 +34,9 @@ public class FlowLog {
 
     private Class<?> payloadType;
 
+    @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
+    private String variables;
+
     private Class<?> flowType;
 
     private String currentState;
@@ -52,7 +55,7 @@ public class FlowLog {
         this.finalized = finalized;
     }
 
-    public FlowLog(Long stackId, String flowId, String flowChainId, String nextEvent, String payload, Class<?> payloadType, Class<?> flowType,
+    public FlowLog(Long stackId, String flowId, String flowChainId, String nextEvent, String payload, Class<?> payloadType, String variables, Class<?> flowType,
             String currentState) {
         this.stackId = stackId;
         this.flowId = flowId;
@@ -60,6 +63,7 @@ public class FlowLog {
         this.nextEvent = nextEvent;
         this.payload = payload;
         this.payloadType = payloadType;
+        this.variables = variables;
         this.flowType = flowType;
         this.currentState = currentState;
     }
@@ -134,6 +138,10 @@ public class FlowLog {
 
     public void setFlowType(Class<?> flowType) {
         this.flowType = flowType;
+    }
+
+    public String getVariables() {
+        return variables;
     }
 
     public String getCurrentState() {
