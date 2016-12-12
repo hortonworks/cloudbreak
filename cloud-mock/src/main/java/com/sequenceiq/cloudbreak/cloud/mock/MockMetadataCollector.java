@@ -1,26 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
-import java.security.KeyManagementException;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-import javax.net.ssl.SSLContext;
-
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.ssl.SSLContexts;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.google.gson.Gson;
-import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -36,40 +23,6 @@ public class MockMetadataCollector implements MetadataCollector {
 
     @Value("${mock.spi.endpoint:https://localhost:9443}")
     private String mockServerAddress;
-
-    @PostConstruct
-    public void setUp() {
-        setObjectMapper();
-        disableSSLCheck();
-    }
-
-    private void setObjectMapper() {
-        final Gson gson = new Gson();
-        Unirest.setObjectMapper(new ObjectMapper() {
-            public <T> T readValue(String value, Class<T> valueType) {
-                return gson.fromJson(value, valueType);
-            }
-
-            public String writeValue(Object value) {
-                return gson.toJson(value);
-            }
-        });
-    }
-
-    private void disableSSLCheck() {
-        try {
-            SSLContext sslcontext = SSLContexts.custom()
-                    .loadTrustMaterial(null, new TrustSelfSignedStrategy())
-                    .build();
-            SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(sslcontext);
-            CloseableHttpClient httpclient = HttpClients.custom()
-                    .setSSLSocketFactory(sslsf)
-                    .build();
-            Unirest.setHttpClient(httpclient);
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
-            throw new RuntimeException("can't create ssl settings");
-        }
-    }
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {

@@ -31,7 +31,7 @@ public class CloudbreakITContextConstants {
 
     public static final String AMBARI_PORT_ID = "AMBARI_PORT";
 
-    public static final String ADDITIONAL_NODES = "ADDITIONAL_NODES";
+    public static final String MOCK_INSTANCE_MAP = "MOCK_INSTANCE_MAP";
 
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 

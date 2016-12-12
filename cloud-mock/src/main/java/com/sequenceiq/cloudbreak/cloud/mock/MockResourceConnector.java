@@ -5,8 +5,11 @@ import static com.sequenceiq.cloudbreak.cloud.model.ResourceStatus.CREATED;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -22,6 +25,10 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class MockResourceConnector implements ResourceConnector {
+
+    @Value("${mock.spi.endpoint:https://localhost:9443}")
+    private String mockServerAddress;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
@@ -89,6 +96,11 @@ public class MockResourceConnector implements ResourceConnector {
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             List<CloudInstance> vms) {
+        try {
+            Unirest.post(mockServerAddress + "/spi/terminate_instances").body(vms).asString();
+        } catch (UnirestException e) {
+            throw new RuntimeException("rest error", e);
+        }
         return new ArrayList<>();
     }
 

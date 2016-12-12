@@ -31,7 +31,7 @@ public class ServerAddressGenerator {
     public void iterateOver(ServerAddressGeneratorWithNumberFunction serverAddressGeneratorWithNumberFunction) {
         int i = from / ADDRESS_RANGE;
         int j = from % ADDRESS_RANGE;
-        int k = 0;
+        int k = from;
         int serverProduceCount = from + numberOfServers - 1;
         for (; i <= serverProduceCount / ADDRESS_RANGE; i++) {
             int subAddress = Integer.min(ADDRESS_RANGE, serverProduceCount - i * ADDRESS_RANGE);

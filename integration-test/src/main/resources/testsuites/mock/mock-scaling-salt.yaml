@@ -79,7 +79,7 @@ tests:
       - com.sequenceiq.it.cloudbreak.mock.MockClusterCreationWithSaltSuccessTest
 
 
-  - name: upscale
+  - name: upscale1
     parameters:
       instanceGroup: host_group_slave_1
       scalingAdjustment: 3
@@ -91,6 +91,13 @@ tests:
     parameters:
       instanceGroup: host_group_slave_1
       scalingAdjustment: -2
+    classes:
+        - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
+
+  - name: upscale2
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: 10
     classes:
         - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
 

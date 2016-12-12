@@ -1,4 +1,4 @@
-name: Mock_simple_swarm_smoketest
+name: Mock_salt_scaling
 parameters: {
   cloudProvider: MOCK,
   blueprintName: hdp-small-default
@@ -18,21 +18,21 @@ tests:
 
   - name: create mock credential
     parameters:
-      credentialName: it-mock-credential-swarm
+      credentialName: it-mock-credential-scaling-salt
       publicKeyFile: raw:ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC3JiQtcQT48nn7Ax+yJLJqaWKRzczeJAda6x4JHFRqJW15pAmrSG7ld33V89yHeizAziLfhYYhw6uwN4aDKixS/XreQxZWyK2k/namyr8crFC83n6NNxlDa9DGujg61X8JoE2SyPHSVwhizfyoEmnkeyXJlsn6YtEnKfq23P4Di+p6I9xj7Ay52EzRHKMRMH8Q4kscKfp0taQKdOD2rCO1eOJ7vwCdMLjZc4H6TISk+lwnAJlDfbIdy6SO2jKIJvwoSjehfitWgGp8dGIEcV59GmO2aGlSwCqAwF6S9qP7O++5B5irFKc0TxuIplDSPL/yuCycWvz81FJKLTaUdJ6l
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockCredentialCreationTest
 
   - name: create mock network
     parameters:
-      networkName: it-mock-network-swarm
+      networkName: it-mock-network-scaling-salt
       subnetCIDR: 10.0.36.0/24
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockNetworkCreationTest
 
   - name: create gateway template
     parameters:
-      mockName: it-mock-smoke-gateway-swarm
+      mockName: it-mock-smoke-gateway-scaling-salt
       mockInstanceType: small
       volumeType: ssd
       volumeCount: 1
@@ -43,7 +43,7 @@ tests:
 
   - name: create master template
     parameters:
-      mockName: it-mock-some-master-swarm
+      mockName: it-mock-some-master-scaling-salt
       mockInstanceType: large
       volumeType: ephemeral
       volumeCount: 2
@@ -54,30 +54,60 @@ tests:
 
   - name: create slave template
     parameters:
-      mockName: it-mock-smoke-slave-swarm
+      mockName: it-mock-smoke-slave-scaling-salt
       mockInstanceType: large
       volumeType: magnetic
       volumeCount: 3
       volumeSize: 200
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,300"
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
   - name: create cluster
     parameters: {
-      stackName: it-mock-stack-swarm,
+      stackName: it-mock-stack-scaling-salt,
       region: europe,
+      threshold: 4,
       availabilityZone: europe-b,
-      clusterName: it-mock-cluster-swarm,
+      clusterName: it-mock-cluster-scaling-salt,
       checkAmbari: false,
-      mockPort: 9443
+      mockPort: 9443,
+      orchestrator: SALT
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.mock.MockStackCreationWithSwarmSuccessTest
-      - com.sequenceiq.it.cloudbreak.mock.MockClusterCreationWithSwarmSuccessTest
+      - com.sequenceiq.it.cloudbreak.mock.MockStackCreationWithSaltSuccessTest
+      - com.sequenceiq.it.cloudbreak.mock.MockClusterCreationWithSaltSuccessTest
+
+  - name: upscale1
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: 600
+    classes:
+        - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
+
+  - name: downscale1
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: -150
+    classes:
+        - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
+
+  - name: upscale2
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: 400
+    classes:
+        - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
+
+  - name: upscale3
+    parameters:
+      instanceGroup: host_group_slave_1
+      scalingAdjustment: 1000
+    classes:
+        - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
 
   - name: stop ssh server
     parameters:
-      sshPort: 2120
+      sshPort: 2020
     classes:
       - com.sequenceiq.it.cloudbreak.StopSshServerTest

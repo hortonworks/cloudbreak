@@ -11,10 +11,11 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.it.spark.ITResponse;
-import com.sequenceiq.it.util.ServerAddressGenerator;
 
 import spark.Request;
 import spark.Response;
@@ -23,29 +24,28 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltApiRunPostResponse.class);
 
-    private int numberOfServers;
+    private Map<String, CloudVmMetaDataStatus> instanceMap;
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    public SaltApiRunPostResponse(int numberOfServers) {
-        this.numberOfServers = numberOfServers;
+    public SaltApiRunPostResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
+        this.instanceMap = instanceMap;
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
     }
 
     @Override
     public Object handle(Request request, Response response) throws Exception {
-        ServerAddressGenerator serverAddressGenerator = new ServerAddressGenerator(numberOfServers);
         if (request.body().contains("grains.append")) {
-            return grainsResponse(serverAddressGenerator);
+            return grainsResponse();
         }
         if (request.body().contains("grains.remove")) {
-            return grainsResponse(serverAddressGenerator);
+            return grainsResponse();
         }
         if (request.body().contains("network.interface_ip")) {
-            return networkInterfaceIp(serverAddressGenerator);
+            return networkInterfaceIp();
         }
         if (request.body().contains("saltutil.sync_grains")) {
-            return saltUtilSyncGrainsResponse(serverAddressGenerator);
+            return saltUtilSyncGrainsResponse();
         }
         if (request.body().contains("state.highstate")) {
             return stateHighState();
@@ -82,36 +82,57 @@ public class SaltApiRunPostResponse extends ITResponse {
         return responseFromJsonFile("saltapi/high_state_response.json");
     }
 
-    protected Object networkInterfaceIp(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
+    protected Object networkInterfaceIp() throws JsonProcessingException {
         NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
         List<Map<String, String>> result = new ArrayList<>();
-        serverAddressGenerator.iterateOver(address -> {
-            Map<String, String> networkHashMap = new HashMap<>();
-            networkHashMap.put("host-" + address.replace(".", "-"), address);
-            result.add(networkHashMap);
-        });
+
+        for (String instanceId : instanceMap.keySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
+            if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
+                String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
+                Map<String, String> networkHashMap = new HashMap<>();
+                networkHashMap.put("host-" + privateIp.replace(".", "-"), privateIp);
+                result.add(networkHashMap);
+            }
+        }
+
         networkInterfaceResponse.setResult(result);
         return getObjectMapper().writeValueAsString(networkInterfaceResponse);
     }
 
-    protected Object saltUtilSyncGrainsResponse(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
+    protected Object saltUtilSyncGrainsResponse() throws JsonProcessingException {
         ApplyResponse applyResponse = new ApplyResponse();
         ArrayList<Map<String, Object>> responseList = new ArrayList<>();
 
         Map<String, Object> hostMap = new HashMap<>();
-        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address.replace(".", "-"), address));
+
+        for (String instance : instanceMap.keySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instance);
+            if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
+                String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
+                hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
+            }
+        }
+
         responseList.add(hostMap);
 
         applyResponse.setResult(responseList);
         return getObjectMapper().writeValueAsString(applyResponse);
     }
 
-    protected Object grainsResponse(ServerAddressGenerator serverAddressGenerator) throws JsonProcessingException {
+    protected Object grainsResponse() throws JsonProcessingException {
         ApplyResponse applyResponse = new ApplyResponse();
         ArrayList<Map<String, Object>> responseList = new ArrayList<>();
 
         Map<String, Object> hostMap = new HashMap<>();
-        serverAddressGenerator.iterateOver(address -> hostMap.put("host-" + address.replace(".", "-"), address));
+
+        for (String instance : instanceMap.keySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instance);
+            if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
+                String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
+                hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
+            }
+        }
         responseList.add(hostMap);
 
         applyResponse.setResult(responseList);

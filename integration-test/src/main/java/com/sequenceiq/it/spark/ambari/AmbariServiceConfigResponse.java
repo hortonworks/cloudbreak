@@ -15,8 +15,11 @@ public class AmbariServiceConfigResponse extends ITResponse {
 
     private String resourceManagerAddress;
 
-    public AmbariServiceConfigResponse(String resourceManagerAddress) {
+    private int port;
+
+    public AmbariServiceConfigResponse(String resourceManagerAddress, int port) {
         this.resourceManagerAddress = resourceManagerAddress;
+        this.port = port;
     }
 
     @Override
@@ -32,9 +35,9 @@ public class AmbariServiceConfigResponse extends ITResponse {
         dfsReplication.put("type", "something");
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put("dfs.replication", "2");
-        propertyMap.put("dfs.namenode.http-address", resourceManagerAddress + ":" + resourceManagerAddress);
-        propertyMap.put("dfs.namenode.secondary.http-address", resourceManagerAddress + ":" + resourceManagerAddress);
-        propertyMap.put("yarn.resourcemanager.webapp.address", resourceManagerAddress + ":" + resourceManagerAddress);
+        propertyMap.put("dfs.namenode.http-address", resourceManagerAddress + ":" + port);
+        propertyMap.put("dfs.namenode.secondary.http-address", resourceManagerAddress + ":" + port);
+        propertyMap.put("yarn.resourcemanager.webapp.address", resourceManagerAddress + ":" + port);
         dfsReplication.put("properties", propertyMap);
         configList.add(dfsReplication);
 
