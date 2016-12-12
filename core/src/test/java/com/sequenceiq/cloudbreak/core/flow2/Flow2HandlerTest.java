@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.isNull;
@@ -90,7 +91,7 @@ public class Flow2HandlerTest {
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull(String.class));
-        verify(flowLogService, times(1)).save(anyString(), anyString(), eq("KEY"), any(Payload.class), eq(flowConfig.getClass()), eq(flowState));
+        verify(flowLogService, times(1)).save(anyString(), anyString(), eq("KEY"), any(Payload.class), anyMap(), eq(flowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(anyString(), any());
     }
 
@@ -101,7 +102,7 @@ public class Flow2HandlerTest {
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(0)).put(any(Flow.class), isNull(String.class));
-        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), Matchers.<Class>any(), any(FlowState.class));
+        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), anyMap(), Matchers.<Class>any(), any(FlowState.class));
     }
 
     @Test
@@ -111,7 +112,7 @@ public class Flow2HandlerTest {
         given(flow.getCurrentState()).willReturn(flowState);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).save(eq(FLOW_ID), anyString(), eq("KEY"), any(Payload.class), any(Class.class), eq(flowState));
+        verify(flowLogService, times(1)).save(eq(FLOW_ID), anyString(), eq("KEY"), any(Payload.class), anyMap(), any(Class.class), eq(flowState));
         verify(flow, times(1)).sendEvent(eq("KEY"), any());
     }
 
@@ -120,7 +121,7 @@ public class Flow2HandlerTest {
         BDDMockito.<FlowConfiguration>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
         dummyEvent.setKey("KEY");
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), Matchers.<Class>any(), any(FlowState.class));
+        verify(flowLogService, times(0)).save(anyString(), anyString(), anyString(), any(Payload.class), anyMap(), Matchers.<Class>any(), any(FlowState.class));
         verify(flow, times(0)).sendEvent(anyString(), any());
     }
 

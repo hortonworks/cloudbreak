@@ -32,9 +32,12 @@ public class FlowLogService {
     @Qualifier("JsonWriterOptions")
     private Map<String, Object> writeOptions;
 
-    public FlowLog save(String flowId, String flowChanId, String key, Payload payload, Class<?> flowType, FlowState currentState) {
+    public FlowLog save(String flowId, String flowChanId, String key, Payload payload, Map<Object, Object> variables, Class<?> flowType,
+            FlowState currentState) {
         String payloadJson = JsonWriter.objectToJson(payload, writeOptions);
-        FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, flowChanId, key, payloadJson, payload.getClass(), flowType, currentState.toString());
+        String variablesJson = JsonWriter.objectToJson(variables, writeOptions);
+        FlowLog flowLog = new FlowLog(payload.getStackId(), flowId, flowChanId, key, payloadJson, payload.getClass(), variablesJson, flowType,
+                currentState.toString());
         return flowLogRepository.save(flowLog);
     }
 

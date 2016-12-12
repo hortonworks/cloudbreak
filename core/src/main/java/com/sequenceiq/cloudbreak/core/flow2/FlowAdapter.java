@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.statemachine.StateMachine;
 import org.springframework.statemachine.access.StateMachineAccess;
@@ -37,18 +38,26 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
         flowMachine.start();
     }
 
-    public void initialize(String stateRepresentation) {
+    public void initialize(String stateRepresentation, Map<Object, Object> variables) {
         final S state  = stateConverter.convert(stateRepresentation);
         flowMachine.stop();
         List<? extends StateMachineAccess<S, E>> withAllRegions = flowMachine.getStateMachineAccessor().withAllRegions();
         for (StateMachineAccess<S, E> access : withAllRegions) {
             access.resetStateMachine(new DefaultStateMachineContext<>(state, null, null, null));
         }
+        if (variables != null) {
+            flowMachine.getExtendedState().getVariables().putAll(variables);
+        }
         flowMachine.start();
     }
 
     public S getCurrentState() {
         return flowMachine.getState().getId();
+    }
+
+    @Override
+    public Map<Object, Object> getVariables() {
+        return flowMachine.getExtendedState().getVariables();
     }
 
     @Override
