@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
@@ -60,12 +61,14 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
             @Optional("") String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("SWARM") String orchestrator,
-            @Optional("443") int mockPort, @Optional("2020") int sshPort)
+            @Optional("9443") int mockPort, @Optional("2020") int sshPort)
             throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         List<InstanceGroup> instanceGroups = itContext.getContextParam(CloudbreakITContextConstants.TEMPLATE_ID, List.class);
         List<InstanceGroupRequest> igMap = new ArrayList<>();
+
+        int numberOfServers = 0;
         for (InstanceGroup ig : instanceGroups) {
             InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
             instanceGroupRequest.setGroup(ig.getName());
@@ -73,7 +76,14 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             instanceGroupRequest.setTemplateId(Long.valueOf(ig.getTemplateId()));
             instanceGroupRequest.setType(InstanceGroupType.valueOf(ig.getType()));
             igMap.add(instanceGroupRequest);
+            numberOfServers += ig.getNodeCount();
         }
+
+        Map<String, CloudVmMetaDataStatus> instanceMap = new HashMap<>();
+
+        MockInstanceUtil mockInstanceUtil = new MockInstanceUtil(mockServerAddress, sshPort);
+        mockInstanceUtil.addInstance(instanceMap, numberOfServers);
+
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         String securityGroupId = itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID);
@@ -101,7 +111,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         }
         stackRequest.setParameters(map);
         port(mockPort);
-        addSPIEndpoints(sshPort);
+        addSPIEndpoints(instanceMap);
         initSpark();
 
         // WHEN
@@ -111,10 +121,11 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
+        itContext.putContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, instanceMap);
     }
 
-    private void addSPIEndpoints(int sshPort) {
-        post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(mockServerAddress, sshPort), gson()::toJson);
+    private void addSPIEndpoints(Map<String, CloudVmMetaDataStatus> instanceMap) {
+        post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(instanceMap), gson()::toJson);
     }
 
 }

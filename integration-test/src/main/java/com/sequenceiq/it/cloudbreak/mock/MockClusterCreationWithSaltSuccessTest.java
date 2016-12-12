@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -47,7 +49,6 @@ import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
-import com.sequenceiq.it.util.ServerAddressGenerator;
 import com.sequenceiq.it.verification.Verification;
 
 
@@ -73,7 +74,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("8080") String ambariPort, @Optional("admin") String ambariUser,
             @Optional("admin123!@#") String ambariPassword, @Optional("false") boolean emailNeeded,
             @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey, @Optional String kerberosAdmin, @Optional String kerberosPassword,
-            @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari, @Optional("443") int mockPort) throws Exception {
+            @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari, @Optional("9443") int mockPort) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
@@ -93,20 +94,22 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         clusterRequest.setUserName(ambariUser);
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
+
         KerberosRequest kerberosRequest = new KerberosRequest();
         kerberosRequest.setAdmin(kerberosAdmin);
         kerberosRequest.setPassword(kerberosPassword);
         kerberosRequest.setMasterKey(kerberosMasterKey);
         clusterRequest.setKerberos(kerberosRequest);
-        int numberOfServers = 0;
-        for (HostGroup hostgroup : hostgroups) {
-            numberOfServers += hostgroup.getHostCount();
-        }
-
         initSpark();
 
-        addSaltMappings(numberOfServers + 1);
-        addAmbariMappings(numberOfServers);
+        Map<String, CloudVmMetaDataStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
+
+        if (instanceMap == null || instanceMap.size() == 0) {
+            throw new IllegalStateException("instance map should not be empty!");
+        }
+
+        addSaltMappings(instanceMap);
+        addAmbariMappings(instanceMap);
 
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
         Long clusterId = clusterEndpoint.post(Long.valueOf(stackId), clusterRequest).getId();
@@ -115,13 +118,17 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
         CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
-        verifyCalls(numberOfServers, clusterName);
+        verifyCalls(instanceMap, clusterName);
     }
 
-    private void verifyCalls(int numberOfServers, String clusterName) {
+    private void verifyCalls(Map<String, CloudVmMetaDataStatus> instanceMap, String clusterName) {
         verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();
         Verification distributeVerification = verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").exactTimes(1);
-        new ServerAddressGenerator(numberOfServers).iterateOver(address -> distributeVerification.bodyContains("address\":\"" + address));
+
+        for (String instanceId : instanceMap.keySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
+            distributeVerification.bodyContains("address\":\"" + cloudVmMetaDataStatus.getMetaData().getPrivateIp());
+        }
         distributeVerification.verify();
 
         verify(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", "GET").exactTimes(1).verify();
@@ -147,11 +154,11 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(2).verify();
     }
 
-    private void addAmbariMappings(int numberOfServers) {
+    private void addAmbariMappings(Map<String, CloudVmMetaDataStatus> instanceMap) {
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         post(AMBARI_API_ROOT + "/views/:view/versions/1.0.0/instances/*", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/clusters", (req, resp) -> {
-            ITResponse itResp = clusterCreated ? new AmbariClusterResponse() : new EmptyAmbariClusterResponse();
+            ITResponse itResp = clusterCreated ? new AmbariClusterResponse(instanceMap) : new EmptyAmbariClusterResponse();
             return itResp.handle(req, resp);
         });
         post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
@@ -159,18 +166,21 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
             clusterCreated = true;
             return new EmptyAmbariResponse().handle(req, resp);
         }, gson()::toJson);
+        get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse(instanceMap));
+        post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
+        post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), gson()::toJson);
-        get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(numberOfServers), gson()::toJson);
+        get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), gson()::toJson);
         get(AMBARI_API_ROOT + "/blueprints/*", (request, response) -> responseFromJsonFile("blueprint/hdp-small-default.bp"));
         post(AMBARI_API_ROOT + "/blueprints/*", new EmptyAmbariResponse());
         put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
-        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(numberOfServers));
+        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap));
         put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion", new EmptyAmbariResponse());
     }
 
-    private void addSaltMappings(int numberOfServers) {
+    private void addSaltMappings(Map<String, CloudVmMetaDataStatus> instanceMap) {
         ObjectMapper objectMapper = new ObjectMapper();
         get(SALT_BOOT_ROOT + "/health", (request, response) -> {
             GenericResponse genericResponse = new GenericResponse();
@@ -178,7 +188,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
             return genericResponse;
         }, gson()::toJson);
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
-        post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(numberOfServers));
+        post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap));
         post(SALT_BOOT_ROOT + "/file", (request, response) -> {
             response.status(200);
             return response;
@@ -196,13 +206,15 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         post(SALT_BOOT_ROOT + "/hostname/distribute", (request, response) -> {
             GenericResponses genericResponses = new GenericResponses();
             ArrayList<GenericResponse> responses = new ArrayList<>();
-            new ServerAddressGenerator(numberOfServers).iterateOver(address -> {
+
+            for (String instanceId : instanceMap.keySet()) {
+                CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
                 GenericResponse genericResponse = new GenericResponse();
-                genericResponse.setAddress(address);
-                genericResponse.setStatus("host-" + address.replace(".", "-") + ".example.com");
+                genericResponse.setAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
+                genericResponse.setStatus("host-" + cloudVmMetaDataStatus.getMetaData().getPrivateIp().replace(".", "-") + ".example.com");
                 genericResponse.setStatusCode(200);
                 responses.add(genericResponse);
-            });
+            }
             genericResponses.setResponses(responses);
             return genericResponses;
         }, gson()::toJson);

@@ -1,7 +1,5 @@
 apply plugin: 'java'
 
-sourceCompatibility = 1.7
-
 repositories {
     maven { url 'http://repo.spring.io/libs-release' }
     mavenCentral()
