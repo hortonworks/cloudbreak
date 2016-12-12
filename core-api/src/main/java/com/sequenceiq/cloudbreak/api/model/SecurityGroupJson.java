@@ -36,6 +36,11 @@ public class SecurityGroupJson {
     @Valid
     @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_RULES, required = true)
     private List<SecurityRuleJson> securityRules = new LinkedList<>();
+    @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_GROUP_ID)
+    private String securityGroupId;
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    @NotNull
+    private String cloudPlatform;
 
     public Long getId() {
         return id;
@@ -91,5 +96,21 @@ public class SecurityGroupJson {
 
     public void setSecurityRules(List<SecurityRuleJson> securityRules) {
         this.securityRules = securityRules;
+    }
+
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
     }
 }
