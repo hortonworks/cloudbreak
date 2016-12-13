@@ -116,7 +116,7 @@ public class CleanupService {
         if (securityGroupId != null) {
             SecurityGroupEndpoint securityGroupEndpoint = cloudbreakClient.securityGroupEndpoint();
             SecurityGroupJson securityGroupJson = securityGroupEndpoint.get(Long.valueOf(securityGroupId));
-            if (!securityGroupJson.getName().equals(itProps.getDefaultSecurityGroup())) {
+            if (!itProps.isDefaultSecurityGroup(securityGroupJson.getName())) {
                 securityGroupEndpoint.delete(Long.valueOf(securityGroupId));
                 result = true;
             }

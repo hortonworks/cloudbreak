@@ -14,11 +14,13 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
 import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
+import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
 import com.sequenceiq.cloudbreak.shell.completion.OpenStackFacing;
 import com.sequenceiq.cloudbreak.shell.completion.OpenStackOrchestratorType;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -31,6 +33,7 @@ public class OpenStackCommands implements CommandMarker {
     private ShellContext shellContext;
     private CredentialCommands baseCredentialCommands;
     private NetworkCommands baseNetworkCommands;
+    private SecurityGroupCommands baseSecurityGroupCommands;
     private TemplateCommands baseTemplateCommands;
     private PlatformCommands basePlatformCommands;
     private StackCommands stackCommands;
@@ -38,11 +41,13 @@ public class OpenStackCommands implements CommandMarker {
     public OpenStackCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
             NetworkCommands baseNetworkCommands,
+            SecurityGroupCommands baseSecurityGroupCommands,
             TemplateCommands baseTemplateCommands,
             PlatformCommands basePlatformCommands,
             StackCommands stackCommands) {
         this.baseCredentialCommands = baseCredentialCommands;
         this.baseNetworkCommands = baseNetworkCommands;
+        this.baseSecurityGroupCommands = baseSecurityGroupCommands;
         this.shellContext = shellContext;
         this.baseTemplateCommands = baseTemplateCommands;
         this.basePlatformCommands = basePlatformCommands;
@@ -67,6 +72,11 @@ public class OpenStackCommands implements CommandMarker {
     @CliAvailabilityIndicator(value = {"network create --OPENSTACK --NEW", "network create --OPENSTACK --EXISTING", "network create --OPENSTACK --NEW_SUBNET"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
+    }
+
+    @CliAvailabilityIndicator(value = {"securitygroup create --OPENSTACK --NEW"})
+    public boolean createSecurityGroupAvailable() {
+        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "credential create --OPENSTACK")
@@ -188,6 +198,17 @@ public class OpenStackCommands implements CommandMarker {
             parameters.put("publicNetId", publicNetID);
         }
         return baseNetworkCommands.create(name, subnet, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "securitygroup create --OPENSTACK --NEW", help = "Create an OPENSTACK security group")
+    public String createNewSecurityGroup(
+            @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
+            @CliOption(key = "description", help = "Description of the security group") String description,
+            @CliOption(key = "rules", mandatory = true,
+                    help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
+            @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
+                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
+        return baseSecurityGroupCommands.create(name, description, null, PLATFORM, rules, publicInAccount);
     }
 
     @CliCommand(value = "template create --OPENSTACK", help = "Create a new OpenStack template")

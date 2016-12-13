@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.shell.commands.common;
+package com.sequenceiq.cloudbreak.shell.commands.base;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,34 +14,28 @@ import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupJson;
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleJson;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
+import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
-public class SecurityGroupCommands implements BaseCommands {
+public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCommands {
     private static final String CREATE_SUCCESS_MSG = "Security group created and selected successfully, with id: '%d' and name: '%s'";
 
     private ShellContext shellContext;
 
-    public SecurityGroupCommands(ShellContext shellContext) {
+    public BaseSecurityGroupCommands(ShellContext shellContext) {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = "securitygroup create")
-    public boolean createAvailable() {
+    @Override
+    public boolean createSecurityGroupAvailable(String platform) {
         return !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "securitygroup create", help = "Creates a new security group")
-    public String create(
-            @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
-            @CliOption(key = "description", help = "Description of the security group") String description,
-            @CliOption(key = "existingGpId", help = "Existing security group id.") String existingSecurityGroupId,
-            @CliOption(key = "platform", mandatory = true, help = "Platform of security group.") String platform,
-            @CliOption(key = "rules",
-                    help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
-            @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
-                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
+    @Override
+    public String create(String name, String description, String existingSecurityGroupId, String platform,
+            SecurityRules rules, Boolean publicInAccount) {
         try {
             IdJson id;
             SecurityGroupJson securityGroupJson = new SecurityGroupJson();
@@ -50,7 +44,8 @@ public class SecurityGroupCommands implements BaseCommands {
             securityGroupJson.setPublicInAccount(publicInAccount);
             if (existingSecurityGroupId != null && !existingSecurityGroupId.isEmpty()) {
                 securityGroupJson.setSecurityGroupId(existingSecurityGroupId);
-            } else if (rules != null && rules.getRules() != null) {
+            }
+            if (rules != null && rules.getRules() != null) {
                 Map<String, String> tcpRules = new HashMap<>();
                 Map<String, String> udpRules = new HashMap<>();
 
@@ -80,8 +75,6 @@ public class SecurityGroupCommands implements BaseCommands {
                 }
 
                 securityGroupJson.setSecurityRules(securityRuleJsonList);
-            } else {
-                throw new IllegalArgumentException(String.format("Either %s or %s needs to be provided.", "existingGpId", "rules"));
             }
             publicInAccount = publicInAccount == null ? false : publicInAccount;
 
@@ -232,5 +225,4 @@ public class SecurityGroupCommands implements BaseCommands {
     private void setHint() {
         shellContext.setHint(Hints.CREATE_STACK);
     }
-
 }
