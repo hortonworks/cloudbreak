@@ -29,6 +29,7 @@ public class HostGroupToJsonConverter extends AbstractConversionServiceAwareConv
         hostGroupBase.setConstraint(conversionService.convert(source.getConstraint(), ConstraintJson.class));
         hostGroupBase.setRecipeIds(getRecipeIds(source.getRecipes()));
         hostGroupBase.setMetadata(getHostMetadata(source.getHostMetadata()));
+        hostGroupBase.setRecoveryMode(source.getRecoveryMode());
         return hostGroupBase;
     }
 

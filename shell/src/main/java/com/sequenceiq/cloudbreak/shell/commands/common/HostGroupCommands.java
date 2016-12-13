@@ -11,6 +11,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -38,7 +39,8 @@ public class HostGroupCommands implements CommandMarker {
     public String createHostGroup(
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostgroup,
             @CliOption(key = "recipeIds", help = "A comma separated list of recipe ids") String recipeIds,
-            @CliOption(key = "recipeNames", help = "A comma separated list of recipe names") String recipeNames) {
+            @CliOption(key = "recipeNames", help = "A comma separated list of recipe names") String recipeNames,
+            @CliOption(key = "recoveryMode", help = "The recovery mode: AUTO or MANUAL", unspecifiedDefaultValue = "MANUAL") RecoveryMode recoverMode) {
         try {
             Set<Long> recipeIdSet = new HashSet<>();
             if (recipeIds != null) {
@@ -48,7 +50,7 @@ public class HostGroupCommands implements CommandMarker {
                 recipeIdSet.addAll(getRecipeIds(recipeNames, RecipeParameterType.NAME));
             }
             shellContext.putHostGroup(hostgroup.getName(),
-                    new HostgroupEntry(shellContext.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet));
+                    new HostgroupEntry(shellContext.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet, recoverMode));
             return shellContext.outputTransformer().render(shellContext.getHostGroups(), "hostgroup");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);

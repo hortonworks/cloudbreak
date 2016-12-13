@@ -108,6 +108,7 @@ public class ClusterCommands implements BaseCommands {
                     constraintJson.setConstraintTemplateName(((MarathonHostgroupEntry) entry.getValue()).getConstraintName());
                 } else {
                     hostGroupBase.setRecipeIds(((HostgroupEntry) entry.getValue()).getRecipeIdSet());
+                    hostGroupBase.setRecoveryMode(((HostgroupEntry) entry.getValue()).getRecoveryMode());
                     constraintJson.setInstanceGroupName(entry.getKey());
                 }
 

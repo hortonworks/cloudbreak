@@ -8,6 +8,7 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
 import com.google.common.primitives.Longs;
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
@@ -94,7 +95,7 @@ public class InstanceGroupCommands implements CommandMarker {
                     shellContext.putInstanceGroup(instanceGroup.getName(),
                             new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "CORE"));
                 }
-                shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<>()));
+                shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<>(), RecoveryMode.MANUAL));
                 if (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
                         && shellContext.getActiveHostGroups().size() != 0) {
                     shellContext.setHint(Hints.SELECT_NETWORK);

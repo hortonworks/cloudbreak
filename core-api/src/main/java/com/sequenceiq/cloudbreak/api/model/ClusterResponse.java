@@ -86,9 +86,6 @@ public class ClusterResponse {
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 
-    @ApiModelProperty(value = ClusterModelDescription.RECOVERY_MODE)
-    private RecoveryMode recoveryMode;
-
     public Boolean getEnableShipyard() {
         return enableShipyard;
     }
@@ -289,13 +286,5 @@ public class ClusterResponse {
 
     public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
-    }
-
-    public RecoveryMode getRecoveryMode() {
-        return recoveryMode;
-    }
-
-    public void setRecoveryMode(RecoveryMode recoveryMode) {
-        this.recoveryMode = recoveryMode;
     }
 }

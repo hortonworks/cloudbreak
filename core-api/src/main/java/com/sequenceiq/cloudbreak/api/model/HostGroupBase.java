@@ -26,6 +26,9 @@ public abstract class HostGroupBase {
     @ApiModelProperty(value = HostGroupModelDescription.RECIPE_IDS)
     private Set<Long> recipeIds;
 
+    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE)
+    private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
+
     public String getName() {
         return name;
     }
@@ -50,4 +53,11 @@ public abstract class HostGroupBase {
         this.recipeIds = recipeIds;
     }
 
+    public RecoveryMode getRecoveryMode() {
+        return recoveryMode;
+    }
+
+    public void setRecoveryMode(RecoveryMode recoveryMode) {
+        this.recoveryMode = recoveryMode;
+    }
 }

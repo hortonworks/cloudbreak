@@ -351,30 +351,34 @@ public class AmbariClusterService implements ClusterService {
     public void repairCluster(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException {
         Stack stack = stackService.get(stackId);
         Cluster cluster = stack.getCluster();
-        Map<String, List<String>> failedNodesMap = new HashMap<>();
+        Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
+        Map<String, List<String>> manualRecoveryNodesMap = new HashMap<>();
         for (String failedNode : failedNodes) {
             HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
             if (hostMetadata == null) {
                 throw new BadRequestException("No metadata information for the node: " + failedNode);
             }
-            String hostGroup = hostMetadata.getHostGroup().getName();
-            List<String> nodeList = failedNodesMap.get(hostGroup);
+            HostGroup hostGroup = hostMetadata.getHostGroup();
+            String hostGroupName = hostGroup.getName();
+            Map<String, List<String>> failedNodesMap = hostGroup.getRecoveryMode() == RecoveryMode.AUTO ? autoRecoveryNodesMap : manualRecoveryNodesMap;
+            List<String> nodeList = failedNodesMap.get(hostGroupName);
             if (nodeList == null) {
-                validateComponentsCategory(stack, hostGroup);
+                validateComponentsCategory(stack, hostGroupName);
                 nodeList = new ArrayList<>();
-                failedNodesMap.put(hostGroup, nodeList);
+                failedNodesMap.put(hostGroupName, nodeList);
             }
             nodeList.add(failedNode);
         }
-        if (cluster.getRecoveryMode() == RecoveryMode.AUTO) {
-            flowManager.triggerClusterRepairFlow(stackId, failedNodesMap);
+        if (!autoRecoveryNodesMap.isEmpty()) {
+            flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap);
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
-                    Collections.singletonList(failedNodes));
+                    Collections.singletonList(autoRecoveryNodesMap));
             LOGGER.info(recoveryMessage);
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), recoveryMessage);
-        } else {
+        }
+        if (!manualRecoveryNodesMap.isEmpty()) {
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
-                    Collections.singletonList(failedNodes));
+                    Collections.singletonList(manualRecoveryNodesMap));
             LOGGER.info(recoveryMessage);
         }
     }
