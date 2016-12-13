@@ -56,7 +56,7 @@ var AWSCreateClusterSkeletonHelp = `
   },
   "SSHKeyName": "my-existing-keypair-name",                                // Name of an existing EC2 KeyPair to enable SSH access to the cluster node instances.
   "RemoteAccess": "0.0.0.0/0",                                             // Allow connections from this address range. Must be a valid CIDR IP (for example: 0.0.0.0/0 will allow access from all)
-  "WebAccess": true,                                                       // Open access to web UI (Ambari, Spark, Zeppelin)
+  "WebAccess": true,                                                       // Open access to web UI (Ambari, Zeppelin)
   "ClusterAndAmbariUser": "admin",                                         // User name for Ambari and all services
   "ClusterAndAmbariPassword": "admin",                                     // Password for Ambari and all services
   "InstanceRole": "CREATE",                                                // (Optional) Instance role to access Amazon API, accepted values: "", null, CREATE, existing AWS instance role name

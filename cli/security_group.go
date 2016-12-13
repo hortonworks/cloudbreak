@@ -27,7 +27,7 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64,
 
 	defaultPorts := SECURITY_GROUP_DEFAULT_PORTS
 	if skeleton.WebAccess {
-		defaultPorts = append(defaultPorts, "8080", "18080", "18081", "9995", "6080", "21000", "10000")
+		defaultPorts = append(defaultPorts, "8080", "9995")
 	}
 
 	modifiable := false
