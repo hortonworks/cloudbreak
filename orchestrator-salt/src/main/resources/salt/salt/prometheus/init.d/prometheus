@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# /etc/rc.d/init.d/prometheus
+#
+# Prometheus monitoring server
+#
+#  chkconfig: 2345 20 80 Read
+#  description: Prometheus monitoring server
+#  processname: prometheus
+
+# Source function library.
+. /etc/rc.d/init.d/functions
+
+PROGNAME=prometheus
+PROG=/srv/prometheus/$PROGNAME
+USER=prometheus
+LOGFILE=/var/log/prometheus/prometheus.log
+DATADIR=/srv/prometheus/data
+LOCKFILE=/var/run/$PROGNAME.pid
+CONFIG_FILE=/etc/prometheus/prometheus.yml
+
+start() {
+    echo -n "Starting $PROGNAME: "
+    daemon --user $USER --pidfile="$LOCKFILE" "$PROG -config.file $CONFIG_FILE -storage.local.path $DATADIR &>$LOGFILE &"
+    echo $(pidofproc $PROGNAME) >$LOCKFILE
+    echo
+}
+
+stop() {
+    echo -n "Shutting down $PROGNAME: "
+    killproc $PROGNAME
+    rm -f $LOCKFILE
+    echo
+}
+
+
+case "$1" in
+    start)
+    start
+    ;;
+    stop)
+    stop
+    ;;
+    status)
+    status $PROGNAME
+    ;;
+    restart)
+    stop
+    start
+    ;;
+    reload)
+    echo "Sending SIGHUP to $PROGNAME"
+    kill -SIGHUP $(pidofproc $PROGNAME)
+    ;;
+    *)
+        echo "Usage: <servicename> {start|stop|status|reload|restart}"
+        exit 1
+    ;;
+esac
