@@ -21,10 +21,12 @@ base:
   'roles:ambari_server':
     - match: grain
     - ambari.server
+    - consul
 
   'roles:ambari_agent':
     - match: grain
     - ambari.agent
+    - consul
 
   'roles:smartsense':
     - match: grain
