@@ -17,12 +17,14 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
 import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
+import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
 import com.sequenceiq.cloudbreak.shell.completion.ArmOrchestratorType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -35,6 +37,7 @@ public class AzureCommands implements CommandMarker {
     private ShellContext shellContext;
     private CredentialCommands baseCredentialCommands;
     private NetworkCommands baseNetworkCommands;
+    private SecurityGroupCommands baseSecurityGroupCommands;
     private TemplateCommands baseTemplateCommands;
     private PlatformCommands basePlatformCommands;
     private StackCommands stackCommands;
@@ -42,11 +45,13 @@ public class AzureCommands implements CommandMarker {
     public AzureCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
             NetworkCommands baseNetworkCommands,
+            SecurityGroupCommands baseSecurityGroupCommands,
             TemplateCommands baseTemplateCommands,
             PlatformCommands basePlatformCommands,
             StackCommands stackCommands) {
         this.baseCredentialCommands = baseCredentialCommands;
         this.baseNetworkCommands = baseNetworkCommands;
+        this.baseSecurityGroupCommands = baseSecurityGroupCommands;
         this.shellContext = shellContext;
         this.baseTemplateCommands = baseTemplateCommands;
         this.basePlatformCommands = basePlatformCommands;
@@ -71,6 +76,11 @@ public class AzureCommands implements CommandMarker {
     @CliAvailabilityIndicator(value = { "network create --AZURE --NEW", "network create --AZURE --EXISTING_SUBNET" })
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
+    }
+
+    @CliAvailabilityIndicator(value = {"securitygroup create --AZURE --NEW"})
+    public boolean createSecurityGroupAvailable() {
+        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "credential create --AZURE")
@@ -134,6 +144,17 @@ public class AzureCommands implements CommandMarker {
         parameters.put("noPublicIp", noPublicIp != null ? noPublicIp : false);
         parameters.put("noFirewallRules", noFirewallRules != null ? noFirewallRules : false);
         return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "securitygroup create --AZURE --NEW", help = "Create an AZURE security group")
+    public String createNewSecurityGroup(
+            @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
+            @CliOption(key = "description", help = "Description of the security group") String description,
+            @CliOption(key = "rules",
+                    help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
+            @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
+                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
+        return baseSecurityGroupCommands.create(name, description, null, PLATFORM, rules, publicInAccount);
     }
 
     @CliCommand(value = "template create --AZURE", help = "Create a new Azure template")

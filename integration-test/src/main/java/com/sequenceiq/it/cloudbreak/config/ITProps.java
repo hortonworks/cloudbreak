@@ -12,7 +12,7 @@ public class ITProps {
     private Map<String, List<String>> testSuites;
     private List<String> testTypes;
     private List<String> suiteFiles;
-    private String defaultSecurityGroup;
+    private Map<String, String> defaultSecurityGroups;
 
     public void setCredentialNames(Map<String, String> credentialNames) {
         this.credentialNames = credentialNames;
@@ -66,11 +66,24 @@ public class ITProps {
         this.suiteFiles = suiteFiles;
     }
 
-    public String getDefaultSecurityGroup() {
-        return defaultSecurityGroup;
+    public Map<String, String> getDefaultSecurityGroups() {
+            return defaultSecurityGroups;
     }
 
-    public void setDefaultSecurityGroup(String defaultSecurityGroup) {
-        this.defaultSecurityGroup = defaultSecurityGroup;
+    public String getDefaultSecurityGroup(String cloudProvider) {
+        return defaultSecurityGroups.get(cloudProvider);
+    }
+
+    public boolean isDefaultSecurityGroup(String securityGroupName) {
+        for (String securityGroup : defaultSecurityGroups.values()) {
+            if (securityGroup.equals(securityGroupName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void setDefaultSecurityGroups(Map<String, String> defaultSecurityGroups) {
+        this.defaultSecurityGroups = defaultSecurityGroups;
     }
 }
