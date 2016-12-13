@@ -132,7 +132,6 @@ public class ModelDescriptions {
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
         public static final String RDS_CONFIG = "details of the external database for Hadoop components";
         public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
-        public static final String RECOVERY_MODE = "recovery mode of the cluster";
     }
 
     public static class ClusterTemplateModelDescription {
@@ -242,6 +241,7 @@ public class ModelDescriptions {
         public static final String CONSTRAINT_NAME = "name of a constraint template that defines the resource constraints for the hostgroup";
         public static final String HOST_COUNT = "number of hosts in the hostgroup";
         public static final String METADATA = "metadata of hosts";
+        public static final String RECOVERY_MODE = "recovery mode of the hostgroup's nodes";
     }
 
     public static class UserNamePasswordModelDescription {

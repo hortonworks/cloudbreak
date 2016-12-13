@@ -11,6 +11,7 @@ public class JsonToHostGroupConverter extends AbstractConversionServiceAwareConv
     public HostGroup convert(HostGroupRequest source) {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName(source.getName());
+        hostGroup.setRecoveryMode(source.getRecoveryMode());
         return hostGroup;
     }
 }

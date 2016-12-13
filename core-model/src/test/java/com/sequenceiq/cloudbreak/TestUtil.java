@@ -367,7 +367,6 @@ public class TestUtil {
         } catch (JsonProcessingException e) {
             cluster.setAttributes(null);
         }
-        cluster.setRecoveryMode(RecoveryMode.MANUAL);
         return cluster;
     }
 
@@ -383,6 +382,7 @@ public class TestUtil {
         constraint.setHostCount(instanceGroup.getNodeCount());
         hostGroup.setConstraint(constraint);
         hostGroup.setCluster(TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(), 1L));
+        hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;
     }
 

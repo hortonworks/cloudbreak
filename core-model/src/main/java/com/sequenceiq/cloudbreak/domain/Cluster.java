@@ -38,7 +38,6 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Type;
 
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
-import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -185,10 +184,6 @@ public class Cluster implements ProvisionEntity {
 
     @Column(columnDefinition = "TEXT")
     private String blueprintCustomProperties;
-
-    @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RecoveryMode recoveryMode;
 
     public Stack getStack() {
         return stack;
@@ -528,13 +523,5 @@ public class Cluster implements ProvisionEntity {
 
     public void setBlueprintCustomProperties(String blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties;
-    }
-
-    public RecoveryMode getRecoveryMode() {
-        return recoveryMode;
-    }
-
-    public void setRecoveryMode(RecoveryMode recoveryMode) {
-        this.recoveryMode = recoveryMode;
     }
 }
