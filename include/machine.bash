@@ -65,10 +65,10 @@ machine-env() {
     sed -i '/PUBLIC_IP/ d' Profile
 
     cat >> $DOCKER_PROFILE <<EOF
+export PATH=$PWD/.deps/bin:\$PATH
 eval \$(docker-machine env --shell bash $MACHINE_NAME)
 export PUBLIC_IP=\$(docker-machine ip $MACHINE_NAME)
 export DOCKER_MACHINE=$MACHINE_NAME
-export PATH=$PWD/.deps/bin:\$PATH
 EOF
 
     debug docker ENV are saved to $DOCKER_PROFILE
