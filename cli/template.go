@@ -44,7 +44,8 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 
 	computeParameters := make(map[string]interface{})
 	if skeleton.Compute.SpotPrice != "" {
-		computeParameters["spotPrice"] = skeleton.Compute.SpotPrice
+		floatPrice, _ := strconv.ParseFloat(skeleton.Compute.SpotPrice, 64)
+		computeParameters["spotPrice"] = floatPrice
 	}
 
 	computeTemplateReqBody := models.TemplateRequest{

@@ -154,7 +154,7 @@ func (c *ClusterSkeletonResult) fill(
 				if v.Group == COMPUTE {
 					c.Compute.fill(v, templateMap[v.Group])
 					if templateMap[v.Group].Parameters != nil && templateMap[v.Group].Parameters["spotPrice"] != nil {
-						c.Compute.SpotPrice = templateMap[v.Group].Parameters["spotPrice"].(string)
+						c.Compute.SpotPrice = string(templateMap[v.Group].Parameters["spotPrice"].(json.Number))
 					}
 				}
 			}
