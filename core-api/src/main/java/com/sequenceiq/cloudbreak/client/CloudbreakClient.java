@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.client;
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
@@ -64,45 +69,45 @@ public class CloudbreakClient {
 
     private WebTarget t;
 
-    private CredentialEndpoint credentialEndpoint;
+    private EndpointWrapper<CredentialEndpoint> credentialEndpoint;
 
-    private TemplateEndpoint templateEndpoint;
+    private EndpointWrapper<TemplateEndpoint> templateEndpoint;
 
-    private TopologyEndpoint topologyEndpoint;
+    private EndpointWrapper<TopologyEndpoint> topologyEndpoint;
 
-    private UsageEndpoint usageEndpoint;
+    private EndpointWrapper<UsageEndpoint> usageEndpoint;
 
-    private UserEndpoint userEndpoint;
+    private EndpointWrapper<UserEndpoint> userEndpoint;
 
-    private EventEndpoint eventEndpoint;
+    private EndpointWrapper<EventEndpoint> eventEndpoint;
 
-    private SecurityGroupEndpoint securityGroupEndpoint;
+    private EndpointWrapper<SecurityGroupEndpoint> securityGroupEndpoint;
 
-    private StackEndpoint stackEndpoint;
+    private EndpointWrapper<StackEndpoint> stackEndpoint;
 
-    private SubscriptionEndpoint subscriptionEndpoint;
+    private EndpointWrapper<SubscriptionEndpoint> subscriptionEndpoint;
 
-    private NetworkEndpoint networkEndpoint;
+    private EndpointWrapper<NetworkEndpoint> networkEndpoint;
 
-    private RecipeEndpoint recipeEndpoint;
+    private EndpointWrapper<RecipeEndpoint> recipeEndpoint;
 
-    private SssdConfigEndpoint sssdConfigEndpoint;
+    private EndpointWrapper<SssdConfigEndpoint> sssdConfigEndpoint;
 
-    private RdsConfigEndpoint rdsConfigEndpoint;
+    private EndpointWrapper<RdsConfigEndpoint> rdsConfigEndpoint;
 
-    private AccountPreferencesEndpoint accountPreferencesEndpoint;
+    private EndpointWrapper<AccountPreferencesEndpoint> accountPreferencesEndpoint;
 
-    private BlueprintEndpoint blueprintEndpoint;
+    private EndpointWrapper<BlueprintEndpoint> blueprintEndpoint;
 
-    private ClusterEndpoint clusterEndpoint;
+    private EndpointWrapper<ClusterEndpoint> clusterEndpoint;
 
-    private ConnectorEndpoint connectorEndpoint;
+    private EndpointWrapper<ConnectorEndpoint> connectorEndpoint;
 
-    private ConstraintTemplateEndpoint constraintTemplateEndpoint;
+    private EndpointWrapper<ConstraintTemplateEndpoint> constraintTemplateEndpoint;
 
-    private UtilEndpoint utilEndpoint;
+    private EndpointWrapper<UtilEndpoint> utilEndpoint;
 
-    private LdapConfigEndpoint ldapConfigEndpoint;
+    private EndpointWrapper<LdapConfigEndpoint> ldapConfigEndpoint;
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
         this.client = RestClientUtil.get(configKey);
@@ -131,9 +136,13 @@ public class CloudbreakClient {
         return ExpiringMap.builder().variableExpiration().expirationPolicy(ExpirationPolicy.CREATED).build();
     }
 
-    private synchronized void refresh() {
+    private void refresh() {
+        refresh(false);
+    }
+
+    synchronized void refresh(boolean force) {
         String token = tokenCache.get(TOKEN_KEY);
-        if (token == null) {
+        if (force || token == null) {
             AccessToken accessToken;
             if (secret != null) {
                 accessToken = identityClient.getToken(secret);
@@ -152,130 +161,180 @@ public class CloudbreakClient {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Bearer " + token);
         this.t = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
-        this.credentialEndpoint = newResource(CredentialEndpoint.class, headers);
-        this.templateEndpoint = newResource(TemplateEndpoint.class, headers);
-        this.topologyEndpoint = newResource(TopologyEndpoint.class, headers);
-        this.usageEndpoint = newResource(UsageEndpoint.class, headers);
-        this.eventEndpoint = newResource(EventEndpoint.class, headers);
-        this.securityGroupEndpoint = newResource(SecurityGroupEndpoint.class, headers);
-        this.stackEndpoint = newResource(StackEndpoint.class, headers);
-        this.subscriptionEndpoint = newResource(SubscriptionEndpoint.class, headers);
-        this.networkEndpoint = newResource(NetworkEndpoint.class, headers);
-        this.recipeEndpoint = newResource(RecipeEndpoint.class, headers);
-        this.sssdConfigEndpoint = newResource(SssdConfigEndpoint.class, headers);
-        this.rdsConfigEndpoint = newResource(RdsConfigEndpoint.class, headers);
-        this.accountPreferencesEndpoint = newResource(AccountPreferencesEndpoint.class, headers);
-        this.blueprintEndpoint = newResource(BlueprintEndpoint.class, headers);
-        this.clusterEndpoint = newResource(ClusterEndpoint.class, headers);
-        this.connectorEndpoint = newResource(ConnectorEndpoint.class, headers);
-        this.userEndpoint = newResource(UserEndpoint.class, headers);
-        this.constraintTemplateEndpoint = newResource(ConstraintTemplateEndpoint.class, headers);
-        this.utilEndpoint = newResource(UtilEndpoint.class, headers);
-        this.ldapConfigEndpoint = newResource(LdapConfigEndpoint.class, headers);
+        this.credentialEndpoint = newResource(this.credentialEndpoint, CredentialEndpoint.class, headers);
+        this.templateEndpoint = newResource(this.templateEndpoint, TemplateEndpoint.class, headers);
+        this.topologyEndpoint = newResource(this.topologyEndpoint, TopologyEndpoint.class, headers);
+        this.usageEndpoint = newResource(this.usageEndpoint, UsageEndpoint.class, headers);
+        this.eventEndpoint = newResource(this.eventEndpoint, EventEndpoint.class, headers);
+        this.securityGroupEndpoint = newResource(this.securityGroupEndpoint, SecurityGroupEndpoint.class, headers);
+        this.stackEndpoint = newResource(this.stackEndpoint, StackEndpoint.class, headers);
+        this.subscriptionEndpoint = newResource(this.subscriptionEndpoint, SubscriptionEndpoint.class, headers);
+        this.networkEndpoint = newResource(this.networkEndpoint, NetworkEndpoint.class, headers);
+        this.recipeEndpoint = newResource(this.recipeEndpoint, RecipeEndpoint.class, headers);
+        this.sssdConfigEndpoint = newResource(this.sssdConfigEndpoint, SssdConfigEndpoint.class, headers);
+        this.rdsConfigEndpoint = newResource(this.rdsConfigEndpoint, RdsConfigEndpoint.class, headers);
+        this.accountPreferencesEndpoint = newResource(this.accountPreferencesEndpoint, AccountPreferencesEndpoint.class, headers);
+        this.blueprintEndpoint = newResource(this.blueprintEndpoint, BlueprintEndpoint.class, headers);
+        this.clusterEndpoint = newResource(this.clusterEndpoint, ClusterEndpoint.class, headers);
+        this.connectorEndpoint = newResource(this.connectorEndpoint, ConnectorEndpoint.class, headers);
+        this.userEndpoint = newResource(this.userEndpoint, UserEndpoint.class, headers);
+        this.constraintTemplateEndpoint = newResource(this.constraintTemplateEndpoint, ConstraintTemplateEndpoint.class, headers);
+        this.utilEndpoint = newResource(this.utilEndpoint, UtilEndpoint.class, headers);
+        this.ldapConfigEndpoint = newResource(this.ldapConfigEndpoint, LdapConfigEndpoint.class, headers);
         LOGGER.info("Endpoints have been renewed for CloudbreakClient");
     }
 
-    private <C> C newResource(final Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
-        return WebResourceFactory.newResource(resourceInterface, t, false, headers, Collections.emptyList(), EMPTY_FORM);
+    private <C> EndpointWrapper<C> newResource(EndpointWrapper<C> endpointWrapper, final Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
+        EndpointWrapper<C> result = endpointWrapper;
+        if (result == null) {
+            result = new EndpointWrapper<C>(resourceInterface);
+        }
+        result.setEndpoint(WebResourceFactory.newResource(resourceInterface, t, false, headers, Collections.emptyList(), EMPTY_FORM));
+        return result;
     }
 
     public CredentialEndpoint credentialEndpoint() {
         refresh();
-        return credentialEndpoint;
+        return credentialEndpoint.getEndpointProxy();
     }
 
     public TemplateEndpoint templateEndpoint() {
         refresh();
-        return templateEndpoint;
+        return templateEndpoint.getEndpointProxy();
     }
 
     public TopologyEndpoint topologyEndpoint() {
         refresh();
-        return topologyEndpoint;
+        return topologyEndpoint.getEndpointProxy();
     }
 
     public UsageEndpoint usageEndpoint() {
         refresh();
-        return usageEndpoint;
+        return usageEndpoint.getEndpointProxy();
     }
 
     public UserEndpoint userEndpoint() {
         refresh();
-        return userEndpoint;
+        return userEndpoint.getEndpointProxy();
     }
 
     public EventEndpoint eventEndpoint() {
         refresh();
-        return eventEndpoint;
+        return eventEndpoint.getEndpointProxy();
     }
 
     public SecurityGroupEndpoint securityGroupEndpoint() {
         refresh();
-        return securityGroupEndpoint;
+        return securityGroupEndpoint.getEndpointProxy();
     }
 
     public StackEndpoint stackEndpoint() {
         refresh();
-        return stackEndpoint;
+        return stackEndpoint.getEndpointProxy();
     }
 
     public SubscriptionEndpoint subscriptionEndpoint() {
         refresh();
-        return subscriptionEndpoint;
+        return subscriptionEndpoint.getEndpointProxy();
     }
 
     public NetworkEndpoint networkEndpoint() {
         refresh();
-        return networkEndpoint;
+        return networkEndpoint.getEndpointProxy();
     }
 
     public RecipeEndpoint recipeEndpoint() {
         refresh();
-        return recipeEndpoint;
+        return recipeEndpoint.getEndpointProxy();
     }
 
     public SssdConfigEndpoint sssdConfigEndpoint() {
         refresh();
-        return sssdConfigEndpoint;
+        return sssdConfigEndpoint.getEndpointProxy();
     }
 
     public RdsConfigEndpoint rdsConfigEndpoint() {
         refresh();
-        return rdsConfigEndpoint;
+        return rdsConfigEndpoint.getEndpointProxy();
     }
 
     public AccountPreferencesEndpoint accountPreferencesEndpoint() {
         refresh();
-        return accountPreferencesEndpoint;
+        return accountPreferencesEndpoint.getEndpointProxy();
     }
 
     public BlueprintEndpoint blueprintEndpoint() {
         refresh();
-        return blueprintEndpoint;
+        return blueprintEndpoint.getEndpointProxy();
     }
 
     public ClusterEndpoint clusterEndpoint() {
         refresh();
-        return clusterEndpoint;
+        return clusterEndpoint.getEndpointProxy();
     }
 
     public ConnectorEndpoint connectorEndpoint() {
         refresh();
-        return connectorEndpoint;
+        return connectorEndpoint.getEndpointProxy();
     }
 
     public LdapConfigEndpoint ldapConfigEndpoint() {
         refresh();
-        return ldapConfigEndpoint;
+        return ldapConfigEndpoint.getEndpointProxy();
     }
 
     public ConstraintTemplateEndpoint constraintTemplateEndpoint() {
-        return constraintTemplateEndpoint;
+        return constraintTemplateEndpoint.getEndpointProxy();
     }
 
     public UtilEndpoint utilEndpoint() {
         refresh();
-        return utilEndpoint;
+        return utilEndpoint.getEndpointProxy();
+    }
+
+    private class EndpointWrapper<C> {
+        private Class<C> endpointType;
+
+        private C endpoint;
+
+        private C endPointProxy;
+
+        private InvocationHandler invocationHandler = new InvocationHandler() {
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                Object result;
+                try {
+                    result = method.invoke(endpoint, args);
+                } catch (InvocationTargetException ite) {
+                    if (ite.getTargetException() instanceof NotAuthorizedException) {
+                        LOGGER.warn("Unauthorized request on {}.{}(): {}, refreshing the auth token and try again...", endpointType.getCanonicalName(),
+                                method.getName(), ite.getTargetException().getMessage());
+                        refresh(true);
+                        try {
+                            result = method.invoke(endpoint, args);
+                        } catch (InvocationTargetException iite) {
+                            throw iite.getTargetException();
+                        }
+                    } else {
+                        throw ite.getTargetException();
+                    }
+                }
+                return result;
+            }
+        };
+
+        private EndpointWrapper(Class<C> endpointType) {
+            endPointProxy = (C) Proxy.newProxyInstance(endpointType.getClassLoader(), new Class[]{endpointType}, invocationHandler);
+            this.endpointType = endpointType;
+        }
+
+        private void setEndpoint(C endpoint) {
+            this.endpoint = endpoint;
+        }
+
+        private C getEndpointProxy() {
+            return endPointProxy;
+        }
     }
 
     public static class CloudbreakClientBuilder {
