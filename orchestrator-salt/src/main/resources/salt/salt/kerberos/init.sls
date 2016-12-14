@@ -14,10 +14,12 @@ install_kerberos:
 
 {% if kerberos.url is none or kerberos.url == '' %}
 
+{% if salt['cmd.retcode']('test -f /var/krb5-conf-initialized') == 1 %}
 /etc/krb5.conf:
   file.managed:
     - source: salt://kerberos/config/krb5.conf
     - template: jinja
+{% endif %}
 
 create_db:
   cmd.run:
@@ -54,9 +56,17 @@ start_kdc:
 
 {% else %}
 
+{% if salt['cmd.retcode']('test -f /var/krb5-conf-initialized') == 1 %}
 /etc/krb5.conf:
   file.managed:
     - source: salt://kerberos/config/krb5.conf-existing
     - template: jinja
+{% endif %}
 
 {% endif %}
+
+create_krb5_conf_initialized:
+  cmd.run:
+    - name: touch /var/krb5-conf-initialized
+    - shell: /bin/bash
+    - unless: test -f /var/krb5-conf-initialized
