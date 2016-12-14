@@ -147,6 +147,7 @@ func main() {
 		"include/color.bash",
 		"include/deployer.bash",
 		"include/deps.bash",
+		"include/db.bash",
 		"include/docker.bash",
 		"include/env.bash",
 		"include/fn.bash",

@@ -17,7 +17,7 @@ debug() {
           printf "[DEBUG][%-25s] %s\n" $(shorten_function "${FUNCNAME[1]}") "$*" | gray 1>&2
       else
         echo -e "[DEBUG] $*" | gray 1>&2
-      fi
+      fideployer.bash
   fi
 }
 
@@ -460,6 +460,7 @@ main() {
     compose-init
     aws-init
     machine-init
+    db-init
 
     debug "Cloudbreak Deployer $(bin-version)"
 
@@ -487,6 +488,11 @@ main() {
     cmd-export machine-create
     cmd-export machine-check
 
+    cmd-export-ns db "Db operations namespace"
+    cmd-export db-dump
+    cmd-export db-list-dumps
+    cmd-export db-init-volume-from-dump
+    
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export cbd-update update
         cmd-export deployer-generate generate

@@ -320,8 +320,8 @@ uaadb:
       - SERVICE_NAME=uaadb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
-        - "$CB_DB_ROOT_PATH/uaadb:/var/lib/postgresql/data"
-    image: hortonworks/cloudbreak-uaa-db:$DOCKER_TAG_UAADB
+        - "uaadb:/var/lib/postgresql/data"
+    image: postgres:$DOCKER_TAG_POSTGRES
 
 identity:
     labels:
@@ -354,8 +354,8 @@ cbdb:
       - SERVICE_NAME=cbdb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
-        - "$CB_DB_ROOT_PATH/cbdb:/var/lib/postgresql/data"
-    image: hortonworks/cloudbreak-server-db:$DOCKER_TAG_CBDB
+        - "cbdb:/var/lib/postgresql/data"
+    image: postgres:$DOCKER_TAG_POSTGRES
 
 cloudbreak:
     environment:
@@ -545,8 +545,8 @@ pcdb:
     ports:
         - "$PRIVATE_IP:5433:5432"
     volumes:
-        - "$CB_DB_ROOT_PATH/periscopedb:/var/lib/postgresql/data"
-    image: hortonworks/cloudbreak-autoscale-db:$DOCKER_TAG_PCDB
+        - "periscopedb:/var/lib/postgresql/data"
+    image: postgres:$DOCKER_TAG_POSTGRES
 
 periscope:
     environment:
