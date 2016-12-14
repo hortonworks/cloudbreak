@@ -6,9 +6,6 @@
   "userName" : "user",
   "password" : "pass",
   "enableSecurity": false,
-  "kerberosMasterKey": "masterkey",
-  "kerberosAdmin" : "admin",
-  "kerberosPassword" : "passw",
   "ldapRequired" : false,
   "emailTo": "admin@example.com",
   "validateBlueprint" : true

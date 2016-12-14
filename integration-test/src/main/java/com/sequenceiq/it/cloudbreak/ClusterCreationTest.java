@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -53,9 +54,6 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         ClusterRequest clusterRequest = new ClusterRequest();
         clusterRequest.setName(clusterName);
         clusterRequest.setDescription("Cluster for integration test");
-        clusterRequest.setKerberosAdmin(kerberosAdmin);
-        clusterRequest.setKerberosPassword(kerberosPassword);
-        clusterRequest.setKerberosMasterKey(kerberosMasterKey);
         clusterRequest.setEnableSecurity(enableSecurity);
         clusterRequest.setPassword(ambariPassword);
         clusterRequest.setUserName(ambariUser);
@@ -65,6 +63,12 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         if (Boolean.TRUE.equals(withRDSConfig)) {
             clusterRequest = setRDSConfiguration(itContext, clusterRequest);
         }
+        KerberosRequest kerberosRequest = new KerberosRequest();
+        kerberosRequest.setAdmin(kerberosAdmin);
+        kerberosRequest.setPassword(kerberosPassword);
+        kerberosRequest.setMasterKey(kerberosMasterKey);
+        clusterRequest.setKerberos(kerberosRequest);
+
         ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
         Long clusterId = clusterEndpoint.post(Long.valueOf(stackId), clusterRequest).getId();
         // THEN

@@ -11,18 +11,18 @@
         <input type="checkbox" name="cluster_security" id="cluster_security" ng-model="cluster.enableSecurity">
     </div>
 </div>
-<div class="form-group" name="kerberos_master_key1" ng-show="cluster.enableSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_master_key.$dirty && clusterCreationForm.kerberos_master_key.$invalid }">
+<div class="form-group" name="kerberos_master_key1" ng-show="cluster.enableSecurity && !cluster.enableExSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_master_key.$dirty && clusterCreationForm.kerberos_master_key.$invalid }">
     <label class="col-sm-3 control-label" for="kerberos_master_key">{{msg.cluster_form_kerberos_master_key}}</label>
     <div class="col-sm-8">
-        <input type="string" name="kerberos_master_key" class="form-control" ng-model="cluster.kerberosMasterKey" id="kerberos_master_key" placeholder="{{msg.cluster_form_kerberos_master_key_placeholder}}" ng-minlength="3" ng-maxlength="50" ng-required="cluster.enableSecurity">
+        <input type="string" name="kerberos_master_key" class="form-control" ng-model="cluster.kerberos.masterKey" id="kerberos_master_key" placeholder="{{msg.cluster_form_kerberos_master_key_placeholder}}" ng-minlength="3" ng-maxlength="50" ng-required="cluster.enableSecurity && !cluster.enableExSecurity">
         <div class="help-block" ng-show="clusterCreationForm.kerberos_master_key.$dirty && clusterCreationForm.kerberos_master_key.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_kerberos_master_key_invalid}}
         </div>
     </div>
 </div>
-<div class="form-group" name="kerberos_admin1" ng-show="cluster.enableSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_admin.$dirty && clusterCreationForm.kerberos_admin.$invalid }">
+<div class="form-group" name="kerberos_admin1" ng-show="cluster.enableSecurity && !cluster.enableExSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_admin.$dirty && clusterCreationForm.kerberos_admin.$invalid }">
     <label class="col-sm-3 control-label" for="kerberos_admin">{{msg.cluster_form_kerberos_admin}}</label>
     <div class="col-sm-8">
-        <input type="string" name="kerberos_admin" class="form-control" ng-model="cluster.kerberosAdmin" id="kerberos_admin" placeholder="{{msg.cluster_form_kerberos_admin_placeholder}}" ng-minlength="5" ng-maxlength="15" ng-required="cluster.enableSecurity">
+        <input type="string" name="kerberos_admin" class="form-control" ng-model="cluster.kerberos.admin" id="kerberos_admin" placeholder="{{msg.cluster_form_kerberos_admin_placeholder}}" ng-minlength="5" ng-maxlength="15" ng-required="cluster.enableSecurity && !cluster.enableExSecurity">
         <div class="help-block" ng-show="clusterCreationForm.kerberos_admin.$dirty && clusterCreationForm.kerberos_admin.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_kerberos_admin}}
         </div>
     </div>
@@ -30,8 +30,46 @@
 <div class="form-group" name="kerberos_password1" ng-show="cluster.enableSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_password.$dirty && clusterCreationForm.kerberos_password.$invalid }">
     <label class="col-sm-3 control-label" for="kerberos_password">{{msg.cluster_form_kerberos_password}}</label>
     <div class="col-sm-8">
-        <input type="string" name="kerberos_password" class="form-control" ng-model="cluster.kerberosPassword" id="kerberos_password" placeholder="{{msg.cluster_form_kerberos_password_placeholder}}" ng-minlength="5" ng-maxlength="50" ng-required="cluster.enableSecurity">
+        <input type="string" name="kerberos_password" class="form-control" ng-model="cluster.kerberos.password" id="kerberos_password" placeholder="{{msg.cluster_form_kerberos_password_placeholder}}" ng-minlength="5" ng-maxlength="50" ng-required="cluster.enableSecurity">
         <div class="help-block" ng-show="clusterCreationForm.kerberos_password.$dirty && clusterCreationForm.kerberos_password.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_kerberos_password}}
+        </div>
+    </div>
+</div>
+<div class="form-group" name="cluster_exsecurity1" ng-show="cluster.enableSecurity">
+    <label class="col-sm-3 control-label" for="cluster_exsecurity1">{{msg.cluster_form_enable_ex_security}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="cluster_exsecurity1" id="cluster_exsecurity1" ng-model="cluster.enableExSecurity">
+    </div>
+</div>
+<div class="form-group" name="kerberos_kerberosPrincipal" ng-show="cluster.enableExSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_kerberosPrincipal.$dirty && clusterCreationForm.kerberos_kerberosPrincipal.$invalid }">
+    <label class="col-sm-3 control-label" for="kerberos_kerberosPrincipal">{{msg.cluster_form_kerberos_principal}}</label>
+    <div class="col-sm-8">
+        <input type="string" name="kerberos_kerberosPrincipal" class="form-control" ng-model="cluster.kerberos.principal" id="kerberos_kerberosPrincipal" placeholder="{{msg.cluster_form_kerberos_principal_placeholder}}" ng-required="cluster.enableExSecurity">
+        <div class="help-block" ng-show="clusterCreationForm.kerberos_kerberosPrincipal.$dirty && clusterCreationForm.kerberos_kerberosPrincipal.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_kerberos_principal}}
+        </div>
+    </div>
+</div>
+<div class="form-group" name="kerberos_kerberosUrl" ng-show="cluster.enableExSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_kerberosUrl.$dirty && clusterCreationForm.kerberos_kerberosUrl.$invalid }">
+    <label class="col-sm-3 control-label" for="kerberos_kerberosUrl">{{msg.cluster_form_kerberos_url}}</label>
+    <div class="col-sm-8">
+        <input type="string" name="kerberos_kerberosUrl" class="form-control" ng-model="cluster.kerberos.url" id="kerberos_kerberosUrl" placeholder="{{msg.cluster_form_kerberos_url_placeholder}}" ng-required="cluster.enableExSecurity">
+        <div class="help-block" ng-show="clusterCreationForm.kerberos_kerberosUrl.$dirty && clusterCreationForm.kerberos_kerberosUrl.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_kerberos_url}}
+        </div>
+    </div>
+</div>
+<div class="form-group" name="kerberos_kerberosRealm" ng-show="cluster.enableExSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_kerberosRealm.$dirty && clusterCreationForm.kerberos_kerberosRealm.$invalid }">
+    <label class="col-sm-3 control-label" for="kerberos_kerberosRealm">{{msg.cluster_form_kerberos_kerberosRealm}}</label>
+    <div class="col-sm-8">
+        <input type="string" name="kerberos_kerberosRealm" class="form-control" ng-model="cluster.kerberos.realm" id="kerberos_kerberosRealm" placeholder="{{msg.cluster_form_kerberos_kerberosRealm_placeholder}}" ng-required="cluster.enableExSecurity">
+        <div class="help-block" ng-show="clusterCreationForm.kerberos_kerberosRealm.$dirty && clusterCreationForm.kerberos_kerberosRealm.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_kerberos_kerberosRealm}}
+        </div>
+    </div>
+</div>
+<div class="form-group" name="kerberos_kerberosDomain" ng-show="cluster.enableExSecurity" ng-class="{ 'has-error': clusterCreationForm.kerberos_kerberosDomain.$dirty && clusterCreationForm.kerberos_kerberosDomain.$invalid }">
+    <label class="col-sm-3 control-label" for="kerberos_kerberosDomain">{{msg.cluster_form_kerberos_kerberosDomain}}</label>
+    <div class="col-sm-8">
+        <input type="string" name="kerberos_kerberosDomain" class="form-control" ng-model="cluster.kerberos.domain" id="kerberos_kerberosDomain" placeholder="{{msg.cluster_form_kerberos_kerberosDomain_placeholder}}" ng-required="cluster.enableExSecurity">
+        <div class="help-block" ng-show="clusterCreationForm.kerberos_kerberosDomain.$dirty && clusterCreationForm.kerberos_kerberosDomain.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_kerberos_kerberosDomain}}
         </div>
     </div>
 </div>

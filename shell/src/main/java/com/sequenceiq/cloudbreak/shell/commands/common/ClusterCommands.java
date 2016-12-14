@@ -9,6 +9,7 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -83,9 +85,13 @@ public class ClusterCommands implements BaseCommands {
                     help = "the jdbc config parameters will be validated") Boolean validated,
             @CliOption(key = "enableSecurity", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false",
                     help = "Kerberos security status") Boolean enableSecurity,
-            @CliOption(key = "kerberosMasterKey", specifiedDefaultValue = "key", help = "Kerberos mater key") String kerberosMasterKey,
+            @CliOption(key = "kerberosMasterKey", specifiedDefaultValue = "key", help = "Kerberos master key") String kerberosMasterKey,
             @CliOption(key = "kerberosAdmin", specifiedDefaultValue = "admin", help = "Kerberos admin name") String kerberosAdmin,
             @CliOption(key = "kerberosPassword", specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
+            @CliOption(key = "kerberosUrl", mandatory = false, help = "Kerberos url") String kerberosUrl,
+            @CliOption(key = "kerberosRealm", mandatory = false, help = "Kerberos realm") String kerberosRealm,
+            @CliOption(key = "kerberosDomain", mandatory = false, help = "Kerberos domain") String kerberosDomain,
+            @CliOption(key = "kerberosPrincipal", mandatory = false, help = "Kerberos domain") String kerberosPrincipal,
             @CliOption(key = "ldapRequired", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
@@ -143,9 +149,29 @@ public class ClusterCommands implements BaseCommands {
                 }
                 clusterRequest.setFileSystem(fileSystemRequest);
             }
-            clusterRequest.setKerberosAdmin(kerberosAdmin);
-            clusterRequest.setKerberosMasterKey(kerberosMasterKey);
-            clusterRequest.setKerberosPassword(kerberosPassword);
+            KerberosRequest kerberosRequest = new KerberosRequest();
+            if (!Strings.isNullOrEmpty(kerberosAdmin)) {
+                kerberosRequest.setAdmin(kerberosAdmin);
+            }
+            if (!Strings.isNullOrEmpty(kerberosPassword)) {
+                kerberosRequest.setPassword(kerberosPassword);
+            }
+            if (!Strings.isNullOrEmpty(kerberosMasterKey)) {
+                kerberosRequest.setMasterKey(kerberosMasterKey);
+            }
+            if (!Strings.isNullOrEmpty(kerberosDomain)) {
+                kerberosRequest.setDomain(kerberosDomain);
+            }
+            if (!Strings.isNullOrEmpty(kerberosRealm)) {
+                kerberosRequest.setRealm(kerberosRealm);
+            }
+            if (!Strings.isNullOrEmpty(kerberosUrl)) {
+                kerberosRequest.setUrl(kerberosUrl);
+            }
+            if (!Strings.isNullOrEmpty(kerberosPrincipal)) {
+                kerberosRequest.setPrincipal(kerberosPrincipal);
+            }
+            clusterRequest.setKerberos(kerberosRequest);
             clusterRequest.setLdapRequired(ldapRequired);
             if (shellContext.getSssdConfigId() != null) {
                 clusterRequest.setSssdConfigId(Long.valueOf(shellContext.getSssdConfigId()));

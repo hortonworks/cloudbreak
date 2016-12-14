@@ -5,17 +5,19 @@ haveged:
   service.running:
     - enable: True
 
-/etc/krb5.conf:
-  file.managed:
-    - source: salt://kerberos/config/krb5.conf
-    - template: jinja
-
 install_kerberos:
   pkg.installed:
     - pkgs:
       - krb5-server
       - krb5-libs
       - krb5-workstation
+
+{% if kerberos.url is none or kerberos.url == '' %}
+
+/etc/krb5.conf:
+  file.managed:
+    - source: salt://kerberos/config/krb5.conf
+    - template: jinja
 
 create_db:
   cmd.run:
@@ -49,3 +51,12 @@ start_kdc:
     - name: krb5kdc
     - watch:
       - pkg: install_kerberos
+
+{% else %}
+
+/etc/krb5.conf:
+  file.managed:
+    - source: salt://kerberos/config/krb5.conf-existing
+    - template: jinja
+
+{% endif %}

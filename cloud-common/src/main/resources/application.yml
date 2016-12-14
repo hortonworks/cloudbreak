@@ -126,9 +126,9 @@ cb:
 
   ambari:
     repo:
-      version: 2.4.2.2-1
-      baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.4.2.2-1
-      gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      version: 2.4.0.1-1
+      baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.0.1
+      gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
       host: localhost
@@ -136,6 +136,19 @@ cb:
       name: postgres
       username: ambari
       password: bigdata
+
+  hdp:
+    version: 2.5.0.0
+    repoid: HDP-2.5
+    repo:
+      stack:
+        repoid: HDP-2.5
+        redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.0
+        redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.0.0
+      util:
+        repoid: HDP-UTILS-1.1.0.21
+        redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
+        redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
 
   smartsense.configure: false
   smartsense.id.pattern: A-9990%s-C-%s

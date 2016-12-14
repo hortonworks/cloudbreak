@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
+        @UniqueConstraint(columnNames = {"account", "name"})
 })
 @NamedQueries({
         @NamedQuery(
@@ -137,11 +137,8 @@ public class Cluster implements ProvisionEntity {
     @Column(nullable = false)
     private Boolean secure;
 
-    private String kerberosMasterKey;
-
-    private String kerberosAdmin;
-
-    private String kerberosPassword;
+    @ManyToOne
+    private KerberosConfig kerberosConfig;
 
     private Boolean ldapRequired;
 
@@ -315,30 +312,6 @@ public class Cluster implements ProvisionEntity {
 
     public void setSecure(Boolean secure) {
         this.secure = secure;
-    }
-
-    public String getKerberosMasterKey() {
-        return kerberosMasterKey;
-    }
-
-    public void setKerberosMasterKey(String kerberosMasterKey) {
-        this.kerberosMasterKey = kerberosMasterKey;
-    }
-
-    public String getKerberosAdmin() {
-        return kerberosAdmin;
-    }
-
-    public void setKerberosAdmin(String kerberosAdmin) {
-        this.kerberosAdmin = kerberosAdmin;
-    }
-
-    public String getKerberosPassword() {
-        return kerberosPassword;
-    }
-
-    public void setKerberosPassword(String kerberosPassword) {
-        this.kerberosPassword = kerberosPassword;
     }
 
     public Boolean isLdapRequired() {
@@ -523,5 +496,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setBlueprintCustomProperties(String blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties;
+
+    }
+
+    public KerberosConfig getKerberosConfig() {
+        return kerberosConfig;
+    }
+
+    public void setKerberosConfig(KerberosConfig kerberosConfig) {
+        this.kerberosConfig = kerberosConfig;
     }
 }

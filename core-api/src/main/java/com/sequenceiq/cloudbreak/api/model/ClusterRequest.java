@@ -59,17 +59,7 @@ public class ClusterRequest {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
     private String password;
 
-    @Size(max = 50, min = 3, message = "The length of the Kerberos password has to be in range of 3 to 50")
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_MASTER_KEY)
-    private String kerberosMasterKey;
-
-    @Size(max = 15, min = 5, message = "The length of the Kerberos admin has to be in range of 5 to 15")
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_ADMIN)
-    private String kerberosAdmin;
-
-    @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_PASSWORD)
-    private String kerberosPassword;
+    private KerberosRequest kerberos;
 
     @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
     private Boolean ldapRequired = Boolean.FALSE;
@@ -164,30 +154,6 @@ public class ClusterRequest {
 
     public void setEnableSecurity(Boolean enableSecurity) {
         this.enableSecurity = enableSecurity;
-    }
-
-    public String getKerberosMasterKey() {
-        return kerberosMasterKey;
-    }
-
-    public void setKerberosMasterKey(String kerberosMasterKey) {
-        this.kerberosMasterKey = kerberosMasterKey;
-    }
-
-    public String getKerberosAdmin() {
-        return kerberosAdmin;
-    }
-
-    public void setKerberosAdmin(String kerberosAdmin) {
-        this.kerberosAdmin = kerberosAdmin;
-    }
-
-    public String getKerberosPassword() {
-        return kerberosPassword;
-    }
-
-    public void setKerberosPassword(String kerberosPassword) {
-        this.kerberosPassword = kerberosPassword;
     }
 
     public Boolean getLdapRequired() {
@@ -325,5 +291,13 @@ public class ClusterRequest {
 
     public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
+    }
+
+    public KerberosRequest getKerberos() {
+        return kerberos;
+    }
+
+    public void setKerberos(KerberosRequest kerberos) {
+        this.kerberos = kerberos;
     }
 }
