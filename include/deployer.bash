@@ -293,7 +293,6 @@ is-sub-path() {
 deployer-delete() {
     declare desc="Deletes yaml files, and all dbs"
     cloudbreak-delete-dbs
-    cloudbreak-delete-consul-data
     rm -f *.yml
 }
 
