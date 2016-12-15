@@ -190,6 +190,12 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "),
         @NamedQuery(
+                name = "Stack.findAllAliveAndProvisioned",
+                query = "SELECT s FROM Stack s "
+                        + "WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
+                        + "AND s.stackStatus.status <> 'REQUESTED' "
+                        + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS' "),
+        @NamedQuery(
                 name = "Stack.findAliveOnes",
                 query = "SELECT s FROM Stack s "
                         + "LEFT JOIN FETCH s.cluster "
