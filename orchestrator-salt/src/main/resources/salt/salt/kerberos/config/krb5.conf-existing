@@ -18,5 +18,5 @@
  }
 
 [domain_realm]
- .{{ salt['pillar.get']('kerberos:domain') }} = {{ salt['pillar.get']('kerberos:realm')|upper }}
- {{ salt['pillar.get']('kerberos:domain') }} = {{ salt['pillar.get']('kerberos:realm')|upper }}
+ .{{ salt['grains.get']('domain') }} = {{ salt['pillar.get']('kerberos:realm')|upper }}
+ {{ salt['grains.get']('domain') }} = {{ salt['pillar.get']('kerberos:realm')|upper }}
