@@ -68,7 +68,7 @@ public class ClusterCreationEvaluator implements Runnable {
             if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
                 LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
                 ambariHealthCheck(cluster.getUser(), resolvedAmbari);
-                clusterService.update(cluster.getId(), resolvedAmbari);
+                clusterService.update(cluster.getId(), resolvedAmbari, false);
             }
         } else {
             LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());

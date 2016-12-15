@@ -48,7 +48,11 @@ public class ClusterService {
     }
 
     public Cluster update(long clusterId, AmbariStack stack) {
-        Cluster cluster = findOneById(clusterId);
+        return update(clusterId, stack, true);
+    }
+
+    public Cluster update(long clusterId, AmbariStack stack, boolean withPermissionCheck) {
+        Cluster cluster = withPermissionCheck ? findOneById(clusterId) : find(clusterId);
         cluster.update(stack);
         cluster = save(cluster);
         if (stack.getSecurityConfig() != null) {
