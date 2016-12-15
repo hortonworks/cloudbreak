@@ -81,7 +81,7 @@
                                     <div id="recipenames{{$index}}" name="recipenames{{$index}}">
                                         <div class="radio" ng-repeat="recipe in $root.recipes" style="padding-top: 0;">
                                             <div>
-                                                <input type="checkbox" style="margin-right: 10px;" ng-model="$index_recipe.id" name="{{$index}}_{{recipe.id}}" ng-change="changeRecipeRun(recipe.id, instanceGroup.group, $index_recipe.id)">{{recipe.name}}
+                                                <input type="checkbox" style="margin-right: 10px;" ng-model="$index_recipe.id" name="{{recipe.name}}" ng-change="changeRecipeRun(recipe.id, instanceGroup.group, $index_recipe.id)">{{recipe.name}}
                                             </div>
                                         </div>
                                     </div>
