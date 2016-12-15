@@ -85,8 +85,11 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "kerberosPassword", specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
             @CliOption(key = "kerberosUrl", mandatory = false, help = "Kerberos url") String kerberosUrl,
             @CliOption(key = "kerberosRealm", mandatory = false, help = "Kerberos realm") String kerberosRealm,
-            @CliOption(key = "kerberosDomain", mandatory = false, help = "Kerberos domain") String kerberosDomain,
+            @CliOption(key = "kerberosDomain", mandatory = false, help = "Kerberos domain", specifiedDefaultValue = "true", unspecifiedDefaultValue = "false")
+                    Boolean kerberosTcpAllowed,
             @CliOption(key = "kerberosPrincipal", mandatory = false, help = "Kerberos domain") String kerberosPrincipal,
+            @CliOption(key = "kerberosLdapUrl", mandatory = false, help = "Kerberos ldap url") String kerberosLdapUrl,
+            @CliOption(key = "kerberosContainerDn", mandatory = false, help = "Kerberos container dn") String kerberosContainerDn,
             @CliOption(key = "ldapRequired", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
@@ -151,9 +154,7 @@ public class ClusterCommands implements BaseCommands {
             if (!Strings.isNullOrEmpty(kerberosMasterKey)) {
                 kerberosRequest.setMasterKey(kerberosMasterKey);
             }
-            if (!Strings.isNullOrEmpty(kerberosDomain)) {
-                kerberosRequest.setDomain(kerberosDomain);
-            }
+            kerberosRequest.setTcpAllowed(kerberosTcpAllowed == null ? false : kerberosTcpAllowed);
             if (!Strings.isNullOrEmpty(kerberosRealm)) {
                 kerberosRequest.setRealm(kerberosRealm);
             }
@@ -162,6 +163,12 @@ public class ClusterCommands implements BaseCommands {
             }
             if (!Strings.isNullOrEmpty(kerberosPrincipal)) {
                 kerberosRequest.setPrincipal(kerberosPrincipal);
+            }
+            if (!Strings.isNullOrEmpty(kerberosLdapUrl)) {
+                kerberosRequest.setLdapUrl(kerberosLdapUrl);
+            }
+            if (!Strings.isNullOrEmpty(kerberosContainerDn)) {
+                kerberosRequest.setContainerDn(kerberosContainerDn);
             }
             clusterRequest.setKerberos(kerberosRequest);
             clusterRequest.setLdapRequired(ldapRequired);

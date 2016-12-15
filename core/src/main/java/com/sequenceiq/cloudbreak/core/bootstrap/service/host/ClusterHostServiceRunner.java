@@ -81,7 +81,6 @@ public class ClusterHostServiceRunner {
                 putIfNotNull(kerberosConf, kerberosConfig.getKerberosPassword(), "password");
                 putIfNotNull(kerberosConf, kerberosConfig.getKerberosUrl(), "url");
                 putIfNotNull(kerberosConf, kerberosConfig.getKerberosRealm(), "realm");
-                putIfNotNull(kerberosConf, kerberosConfig.getKerberosDomain(), "domain");
                 krb.put("kerberos", kerberosConf);
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }

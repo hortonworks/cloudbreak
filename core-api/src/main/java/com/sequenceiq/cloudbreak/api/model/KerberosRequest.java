@@ -18,8 +18,10 @@ public class KerberosRequest {
     private String password;
     private String url;
     private String realm;
-    private String domain;
     private String principal;
+    private String ldapUrl;
+    private String containerDn;
+    private Boolean tcpAllowed = false;
 
     public String getMasterKey() {
         return masterKey;
@@ -61,12 +63,12 @@ public class KerberosRequest {
         this.realm = realm;
     }
 
-    public String getDomain() {
-        return domain;
+    public Boolean getTcpAllowed() {
+        return tcpAllowed;
     }
 
-    public void setDomain(String domain) {
-        this.domain = domain;
+    public void setTcpAllowed(Boolean tcpAllowed) {
+        this.tcpAllowed = tcpAllowed;
     }
 
     public String getPrincipal() {
@@ -75,5 +77,21 @@ public class KerberosRequest {
 
     public void setPrincipal(String principal) {
         this.principal = principal;
+    }
+
+    public String getLdapUrl() {
+        return ldapUrl;
+    }
+
+    public void setLdapUrl(String ldapUrl) {
+        this.ldapUrl = ldapUrl;
+    }
+
+    public String getContainerDn() {
+        return containerDn;
+    }
+
+    public void setContainerDn(String containerDn) {
+        this.containerDn = containerDn;
     }
 }
