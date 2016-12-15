@@ -124,10 +124,14 @@ public class UsageService {
     private void openNewIfNotFound() {
         List<CloudbreakUsage> usages = usageRepository.findAllOpenAndStopped(Date.from(ZonedDateTime.now().toInstant()));
         Set<Long> stackIdsForOpenUsages = usages.stream().map(CloudbreakUsage::getStackId).collect(Collectors.toSet());
-        List<Stack> stacks = stackRepository.findAllAlive();
+        List<Stack> stacks = stackRepository.findAllAliveAndProvisioned();
         for (Stack stack : stacks) {
             if (!stackIdsForOpenUsages.contains(stack.getId())) {
-                openUsagesForStack(stackRepository.findById(stack.getId()));
+                Stack fullStack = stackRepository.findById(stack.getId());
+                openUsagesForStack(fullStack);
+                if (fullStack.getStatus() == Status.STOPPED) {
+                    stopUsagesForStack(fullStack);
+                }
             }
         }
     }

@@ -48,6 +48,8 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     List<Stack> findAllAlive();
 
+    List<Stack> findAllAliveAndProvisioned();
+
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 
     Set<Long> findStacksWithoutEvents();
