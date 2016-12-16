@@ -84,23 +84,29 @@ db-restore-volume-from-dump() {
     declare newDbName=${3:-$dumpDbName}
 
     debug "db: $newDbName in volume: $volName will be restore from: $dumpDbName dump"
-    local dbDoneFile=".${newDbName}.done"
+    local dbDoneFile="/var/lib/postgresql/data/.${newDbName}.done"
+    local dbCreatedFile="/var/lib/postgresql/data/.created"
+    
     local contName=cbreak_initdb
     debug "test if $dbDoneFile exists ..."
-    if docker run $REMOVE_CONTAINER -v $volName:/data alpine:$DOCKER_TAG_ALPINE test -e /data/$dbDoneFile &>/dev/null; then
-        debug "db initaliazation is already DONE"
+    if docker run --rm -v $volName:/var/lib/postgresql/data/ alpine:$DOCKER_TAG_ALPINE test -e $dbDoneFile &>/dev/null; then
+        info "db initaliazation is already DONE"
     else
-        debug "db initaliazation needed ..."
-
+        debug "creates volume: $volName"
         local contName=cbreak_restore
         docker run -d \
             --name $contName \
             -v $volName:/var/lib/postgresql/data \
             -v $DB_DUMP_VOLUME:/dump \
-            postgres:$DOCKER_TAG_POSTGRES
+            postgres:$DOCKER_TAG_POSTGRES \
+            bash -c "echo 'touch $dbCreatedFile' > /docker-entrypoint-initdb.d/created.sh && /docker-entrypoint.sh postgres"
 
-        db-wait-for-db-cont $contName
-        sleep 5
+        local maxtry=${RETRY:=30}
+        while (! docker exec $contName test -e $dbCreatedFile ) && (( maxtry -= 1 > 0 )); do
+            debug "waiting for DB: $newDbName created [tries left: $maxtry] ..."
+            sleep 1;
+        done
+
         db-wait-for-db-cont $contName
 
         if [[ $newDbName != "postgres" ]]; then
@@ -108,12 +114,12 @@ db-restore-volume-from-dump() {
             docker exec $contName psql -U postgres -c "create database $newDbName"
         fi
 
-        docker exec $contName psql -U postgres $newDbName -f /dump/$dumpDbName/latest/dump.sql
+        docker exec $contName psql -U postgres $newDbName -f /dump/$dumpDbName/latest/dump.sql > restore_vol_$volName.log
+        docker exec $contName touch $dbDoneFile
 
         docker stop $contName
         [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName
     fi
-
 }
 
 db-list-dumps() {

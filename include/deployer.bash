@@ -492,6 +492,7 @@ main() {
     cmd-export db-dump
     cmd-export db-list-dumps
     cmd-export db-init-volume-from-dump
+    cmd-export db-restore-volume-from-dump
     
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export cbd-update update
