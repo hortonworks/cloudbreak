@@ -15,6 +15,7 @@ base:
     - ambari.database
     - ambari.credentials
     - prometheus.server
+    - grafana.repo
 
   'roles:knox_gateway':
     - match: grain
