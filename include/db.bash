@@ -70,9 +70,9 @@ db-wait-for-db-cont() {
     declare desc="wait for db container readiness"
     declare contName=${1:? required db container name}
 
-    # todo max time
-    while ! docker exec $contName pg_isready &> /dev/null; do
-        debug "waiting for DB: $contName to start ..."
+    local maxtry=${RETRY:=30}
+    while (! docker exec $contName pg_isready &> /dev/null) && (( maxtry -= 1 > 0 )); do
+        debug "waiting for DB: $contName to start [tries left: $maxtry] ..."
         sleep 1;
     done
 }
