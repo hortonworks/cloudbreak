@@ -38,8 +38,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_ULUWATU 1.15.0-dev.131
     env-import DOCKER_TAG_SULTANS 1.15.0-dev.131
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.15.0-dev.131
-    env-import DOCKER_TAG_CBDB 1.2.0
-    env-import DOCKER_TAG_PCDB 1.2.0
+    env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
 
     env-import DOCKER_TAG_CBD_SMARTSENSE 0.1.0
 
