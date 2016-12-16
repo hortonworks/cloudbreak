@@ -545,7 +545,7 @@ pcdb:
     ports:
         - "$PRIVATE_IP:5433:5432"
     volumes:
-        - "periscopedb:/var/lib/postgresql/data"
+        - "pcdb:/var/lib/postgresql/data"
     image: postgres:$DOCKER_TAG_POSTGRES
 
 periscope:

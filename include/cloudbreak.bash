@@ -155,16 +155,13 @@ cloudbreak-conf-cert() {
 cloudbreak-delete-dbs() {
     declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
 
-    cloudbreak-conf-db
-    if is_linux; then
-        rm -rf ${CB_DB_ROOT_PATH:? required}
-    else
-        local sshcommand='boot2docker ssh'
-        if [[ -n "$DOCKER_MACHINE" ]]; then
-          sshcommand='docker-machine ssh '$DOCKER_MACHINE
-        fi
-        $sshcommand ' sudo rm -rf '${CB_DB_ROOT_PATH:? required}'/*'
-    fi
+    docker volume rm uaadb cbdb pcdb
+}
+
+cloudbreak-delete-consul-data() {
+    declare desc="deletes consul data-dir (volume)"
+
+    docker volume rm consul-data
 }
 
 cloudbreak-delete-certs() {
