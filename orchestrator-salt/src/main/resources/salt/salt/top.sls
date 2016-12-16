@@ -24,6 +24,7 @@ base:
     - ambari.server
     - consul
     - prometheus.server
+    - grafana
 
   'roles:ambari_agent':
     - match: grain
