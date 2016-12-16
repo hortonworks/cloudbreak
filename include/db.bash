@@ -1,20 +1,45 @@
-db-init(){
+db-init() {
     env-import DB_DUMP_VOLUME cbreak_dump
     env-import DB_DONE_FILE .cbreak.init.done
     env-import REMOVE_CONTAINER "--rm"
     cloudbreak-conf-tags
+    cloudbreak-conf-db
+}
+
+db-getpostgres-image-version() {
+    declare desc="Detects which docker image version is matching the db volume"
+    declare dbVolume=${1:? required: dbVolume}
+
+    local pgver=$(docker run --rm \
+        -v $dbVolume:/data \
+        alpine:$DOCKER_TAG_ALPINE cat /data/PG_VERSION
+    )
+    echo "${pgver}-alpine"
+
 }
 
 db-dump() {
     declare desc="creates an sql dump from the db volume"
     declare dbVolume=${1:? required: dbVolume}
 
+    if ! ( [[ $dbVolume =~ ^/ ]] || docker volume inspect $dbVolume &>/dev/null ); then
+        error "docker volume $dbVolume doesnt exists"
+        _exit 1
+    fi
+
+    if docker run --rm -v $dbVolume:/data alpine:$DOCKER_TAG_ALPINE test -f /data/PG_VERSION; then
+        debug "postgres DB exists on volume: $dbVolume"
+    else
+        error "$dbVolume doesnt contains a postgres DB"
+        _exit 1
+    fi
+
     local dumpContainer=cbreak_dump
     docker run -d \
         --name $dumpContainer \
         -v $dbVolume:/var/lib/postgresql/data \
         -v $DB_DUMP_VOLUME:/dump \
-        postgres:$DOCKER_TAG_POSTGRES
+        postgres:$(db-getpostgres-image-version $dbVolume)
 
     local timeStamp=$(date "+%Y%m%d_%H%M")
     local volDir="/dump/${dbVolume##*/}"
@@ -29,7 +54,7 @@ db-dump() {
         sleep 1;
     done
 
-    docker exec $dumpContainer sh -c 'pg_dumpall -U postgres | grep -v ROLE > '$dumpDir'/dump.sql'
+    docker exec $dumpContainer sh -c 'pg_dump -U postgres > '$dumpDir'/dump.sql'
 
     debug "create latest simlink $latestDir -> $dumpDir"
     docker exec $dumpContainer sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir"
