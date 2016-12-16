@@ -1,0 +1,210 @@
+{
+  "inputs": [],
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdp-druid-bi",
+      "stack_name": "HDP",
+      "stack_version": "2.6"
+    },
+    "configurations": [
+      {
+        "core-site": {
+          "fs.trash.interval": "4320"
+        }
+      },
+      {
+        "hdfs-site": {
+          "dfs.namenode.safemode.threshold-pct": "0.99"
+        }
+      },
+      {
+        "mapred-site": {
+          "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
+          "mapreduce.map.output.compress": "true",
+          "mapreduce.output.fileoutputformat.compress": "true"
+        }
+      },
+      {
+        "yarn-site": {
+          "yarn.acl.enable": "true"
+        }
+      },
+      {
+        "druid-common": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.discovery.curator.path": "/druid/discovery",
+            "druid.zk.paths.base": "/druid",
+            "druid.indexer.logs.directory": "/user/druid/logs",
+            "druid.indexer.logs.type": "hdfs",
+            "druid.storage.bucket":"",
+            "druid.storage.baseKey":"",
+            "druid.metadata.storage.type": "derby",
+            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527//user/druid/druid_state/derby;create=true",
+            "druid.selectors.coordinator.serviceName": "druid/coordinator",
+            "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
+            "druid.selectors.indexing.serviceName": "druid/overlord",
+            "druid.extensions.pullList": "[]",
+            "druid.storage.type": "s3"
+          }
+        }
+      },
+      {
+        "druid-overlord": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.indexer.storage.type": "metadata",
+            "druid.indexer.runner.type": "remote",
+            "druid.service": "druid/overlord",
+            "druid.port": "8090"
+          }
+        }
+      },
+      {
+        "druid-middlemanager": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.indexer.task.hadoopWorkingPath": "/tmp/druid-indexing",
+            "druid.server.http.numThreads": "50",
+            "druid.indexer.runner.startPort": "8100",
+            "druid.worker.capacity": "3",
+            "druid.processing.numThreads": "2",
+            "druid.indexer.runner.javaOpts": "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
+            "druid.service": "druid/middlemanager",
+            "druid.port": "8091"
+          }
+        }
+      },
+      {
+        "druid-coordinator": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.coordinator.merge.on": "false",
+            "druid.service": "druid/coordinator",
+            "druid.port": "8081"
+          }
+        }
+      },
+      {
+      "druid-historical" : {
+        "properties_attributes" : { },
+        "properties" : {
+          "druid.server.http.numThreads" : "50",
+          "druid.processing.numThreads" : "10",
+          "druid.service" : "druid/historical",
+          "druid.port" : "8083",
+          "druid.server.maxSize" : "300000000000"
+        }
+      }
+    },
+      {
+      "druid-broker" : {
+        "properties_attributes" : { },
+        "properties" : {
+          "druid.cache.type" : "local",
+          "druid.server.http.numThreads" : "50",
+          "druid.broker.http.numConnections" : "5",
+          "druid.cache.sizeInBytes" : "10000000",
+          "druid.broker.cache.populateCache" : "true",
+          "druid.broker.cache.useCache" : "true",
+          "druid.processing.numThreads" : "2",
+          "druid.service" : "druid/broker",
+          "druid.port" : "8082"
+        }
+      }
+    }
+    ],
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [],
+        "components": [
+          {
+            "name": "APP_TIMELINE_SERVER"
+          },
+          {
+            "name": "MAPREDUCE2_CLIENT"
+          },
+          {
+            "name": "METRICS_COLLECTOR"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NAMENODE"
+          },
+          {
+            "name": "RESOURCEMANAGER"
+          },
+          {
+            "name": "SECONDARY_NAMENODE"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "YARN_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "DRUID_OVERLORD"
+          },
+          {
+            "name": "DRUID_COORDINATOR"
+          }
+        ],
+        "cardinality": "1"
+      },
+      {
+        "name": "worker",
+        "configurations": [],
+        "components": [
+          {
+            "name": "DATANODE"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          },
+          {
+            "name": "DRUID_BROKER"
+          },
+          {
+            "name": "DRUID_HISTORICAL"
+          },
+          {
+          "name" : "HDFS_CLIENT"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          }
+        ],
+        "cardinality": "1+"
+      },
+      {
+        "name": "compute",
+        "configurations": [],
+        "components": [
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          },
+          {
+            "name": "DRUID_MIDDLEMANAGER"
+          }
+        ],
+        "cardinality": "1+"
+      }
+    ]
+  }
+}
