@@ -2,11 +2,17 @@
   "inputs": [],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp-etl-edw",
+      "blueprint_name": "hdp-edw-analytics",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
     "configurations": [
+      {
+        "hive-interactive-env": {
+          "enable_hive_interactive": "true",
+          "llap_queue_capacity": "75"
+        }
+      },
       {
         "core-site": {
           "fs.trash.interval": "4320"
@@ -64,6 +70,9 @@
             "name": "HIVE_SERVER"
           },
           {
+            "name": "HIVE_SERVER_INTERACTIVE"
+          },
+          {
             "name": "JOURNALNODE"
           },
           {
@@ -94,13 +103,13 @@
             "name": "SECONDARY_NAMENODE"
           },
           {
+            "name": "SLIDER"
+          },
+          {
             "name": "SPARK_CLIENT"
           },
           {
             "name": "SPARK_JOBHISTORYSERVER"
-          },
-          {
-            "name": "SQOOP"
           },
           {
             "name": "TEZ_CLIENT"
@@ -110,6 +119,9 @@
           },
           {
             "name": "YARN_CLIENT"
+          },
+          {
+            "name": "ZEPPELIN_MASTER"
           },
           {
             "name": "ZOOKEEPER_CLIENT"

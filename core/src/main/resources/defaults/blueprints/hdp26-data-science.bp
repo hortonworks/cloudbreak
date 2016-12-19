@@ -2,7 +2,7 @@
   "inputs": [],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp-etl-edw",
+      "blueprint_name": "hdp-data-science",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
@@ -110,6 +110,9 @@
           },
           {
             "name": "YARN_CLIENT"
+          },
+          {
+            "name": "ZEPPELIN_MASTER"
           },
           {
             "name": "ZOOKEEPER_CLIENT"
