@@ -2,7 +2,7 @@
   "inputs": [],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp-etl-edw",
+      "blueprint_name": "hdp-etl-edw-spark2",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
@@ -67,9 +67,6 @@
             "name": "JOURNALNODE"
           },
           {
-            "name": "LIVY_SERVER"
-          },
-          {
             "name": "MAPREDUCE2_CLIENT"
           },
           {
@@ -94,13 +91,10 @@
             "name": "SECONDARY_NAMENODE"
           },
           {
-            "name": "SPARK_CLIENT"
+            "name": "SPARK2_CLIENT"
           },
           {
-            "name": "SPARK_JOBHISTORYSERVER"
-          },
-          {
-            "name": "SQOOP"
+            "name": "SPARK2_JOBHISTORYSERVER"
           },
           {
             "name": "TEZ_CLIENT"
@@ -131,7 +125,7 @@
             "name": "TEZ_CLIENT"
           },
           {
-            "name": "SPARK_CLIENT"
+            "name": "SPARK2_CLIENT"
           },
           {
             "name": "DATANODE"
@@ -156,7 +150,7 @@
             "name": "TEZ_CLIENT"
           },
           {
-            "name": "SPARK_CLIENT"
+            "name": "SPARK2_CLIENT"
           },
           {
             "name": "METRICS_MONITOR"
