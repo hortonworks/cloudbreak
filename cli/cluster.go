@@ -262,7 +262,6 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		masterType := "GATEWAY"
 		workerType := "CORE"
 		computeType := "CORE"
-		ambariVersion := "2.4"
 		secGroupId := <-secGroupId
 		platform := "AWS"
 
@@ -302,6 +301,15 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		orchestrator := models.OrchestratorRequest{Type: "SALT"}
+
+		log.Infof("[CreateStack] selected HDPVersion %s", skeleton.HDPVersion)
+
+		var ambariVersion = "2.4"
+		if skeleton.HDPVersion == "2.6" {
+			ambariVersion = "2.5"
+		}
+
+		log.Infof("[CreateStack] selected ambariVersion %s", ambariVersion)
 
 		stackReq := models.StackRequest{
 			Name:            skeleton.ClusterName,
