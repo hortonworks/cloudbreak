@@ -26,9 +26,13 @@ public class KerberosConfig {
 
     private String kerberosRealm;
 
-    private String kerberosDomain;
+    private Boolean kerberosTcpAllowed;
 
     private String kerberosPrincipal;
+
+    private String kerberosLdapUrl;
+
+    private String kerberosContainerDn;
 
     public Long getId() {
         return id;
@@ -78,12 +82,12 @@ public class KerberosConfig {
         this.kerberosRealm = kerberosRealm;
     }
 
-    public String getKerberosDomain() {
-        return kerberosDomain;
+    public Boolean getKerberosTcpAllowed() {
+        return kerberosTcpAllowed;
     }
 
-    public void setKerberosDomain(String kerberosDomain) {
-        this.kerberosDomain = kerberosDomain;
+    public void setKerberosTcpAllowed(Boolean kerberosTcpAllowed) {
+        this.kerberosTcpAllowed = kerberosTcpAllowed;
     }
 
     public String getKerberosPrincipal() {
@@ -92,5 +96,21 @@ public class KerberosConfig {
 
     public void setKerberosPrincipal(String kerberosPrincipal) {
         this.kerberosPrincipal = kerberosPrincipal;
+    }
+
+    public String getKerberosLdapUrl() {
+        return kerberosLdapUrl;
+    }
+
+    public void setKerberosLdapUrl(String kerberosLdapUrl) {
+        this.kerberosLdapUrl = kerberosLdapUrl;
+    }
+
+    public String getKerberosContainerDn() {
+        return kerberosContainerDn;
+    }
+
+    public void setKerberosContainerDn(String kerberosContainerDn) {
+        this.kerberosContainerDn = kerberosContainerDn;
     }
 }

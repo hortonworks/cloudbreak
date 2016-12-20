@@ -89,6 +89,13 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvide
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosContainerDnResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDomainResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosHostResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosLdapResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosPrincipalResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosRealmResolver;
+import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosTypeResolver;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -208,6 +215,21 @@ public class AmbariClusterConnector {
 
     @Inject
     private KerberosPrincipalResolver kerberosPrincipalResolver;
+
+    @Inject
+    private KerberosLdapResolver kerberosLdapResolver;
+
+    @Inject
+    private KerberosContainerDnResolver kerberosContainerDnResolver;
+
+    @Inject
+    private KerberosTypeResolver kerberosTypeResolver;
+
+    @Inject
+    private KerberosDomainResolver kerberosDomainResolver;
+
+    @Inject
+    private KerberosRealmResolver kerberosRealmResolver;
 
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
@@ -733,11 +755,24 @@ public class AmbariClusterConnector {
                     InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
                     gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
                     String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
-                    String kerberosurl = kerberosHostResolver.resolveHostForKerberos(cluster, gatewayHost);
-                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, kerberosurl,
-                            domain.toUpperCase(), domain);
+                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
+                            kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),
+                            kerberosHostResolver.resolveHostForKerberos(cluster, gatewayHost),
+                            kerberosRealmResolver.getRealm(domain, cluster.getKerberosConfig()),
+                            kerberosDomainResolver.getDomains(domain),
+                            kerberosLdapResolver.resolveLdapUrlForKerberos(cluster.getKerberosConfig()),
+                            kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
+                            !cluster.getKerberosConfig().getKerberosTcpAllowed());
                 } else {
-                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText, gatewayHost, REALM, DOMAIN);
+                    // TODO this won't work on mesos, but it doesn't work anyway
+                    blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
+                            kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),
+                            gatewayHost,
+                            REALM,
+                            DOMAIN,
+                            kerberosLdapResolver.resolveLdapUrlForKerberos(cluster.getKerberosConfig()),
+                            kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
+                            !cluster.getKerberosConfig().getKerberosTcpAllowed());
                 }
                 blueprintText = addHBaseClient(blueprintText);
             }

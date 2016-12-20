@@ -40,8 +40,10 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             kerberosConfig.setKerberosPassword(kerberos.getPassword());
             kerberosConfig.setKerberosUrl(kerberos.getUrl());
             kerberosConfig.setKerberosRealm(kerberos.getRealm());
-            kerberosConfig.setKerberosDomain(kerberos.getDomain());
+            kerberosConfig.setKerberosTcpAllowed(kerberos.getTcpAllowed());
             kerberosConfig.setKerberosPrincipal(kerberos.getPrincipal());
+            kerberosConfig.setKerberosLdapUrl(kerberos.getLdapUrl());
+            kerberosConfig.setKerberosContainerDn(kerberos.getContainerDn());
         }
         cluster.setKerberosConfig(kerberosConfig);
         cluster.setLdapRequired(source.getLdapRequired());

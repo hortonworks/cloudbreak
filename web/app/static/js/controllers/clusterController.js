@@ -398,12 +398,20 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         $scope.cluster.ambariStackDetails.verify = false;
                     }
                 }
-                if (!$scope.cluster.enableExSecurity) {
+                if ($scope.cluster.enableExSecurity == 'NONE') {
                     delete $scope.cluster.kerberos.domain;
                     delete $scope.cluster.kerberos.url;
                     delete $scope.cluster.kerberos.realm;
                     delete $scope.cluster.kerberos.principal;
-                } else if ($scope.cluster.enableExSecurity) {
+                    delete $scope.cluster.kerberos.ldapUrl;
+                    delete $scope.cluster.kerberos.containerDn;
+                    delete $scope.cluster.kerberos.tcpAllowed;
+                } else if ($scope.cluster.enableExSecurity == 'MIT-KERB') {
+                    delete $scope.cluster.kerberos.masterKey;
+                    delete $scope.cluster.kerberos.admin;
+                    delete $scope.cluster.kerberos.ldapUrl;
+                    delete $scope.cluster.kerberos.containerDn;
+                } else if ($scope.cluster.enableExSecurity == 'AD-KERB') {
                     delete $scope.cluster.kerberos.masterKey;
                     delete $scope.cluster.kerberos.admin;
                 }
@@ -826,8 +834,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setSecurity() {
             $scope.cluster.enableSecurity = false;
-            $scope.cluster.enableExSecurity = false;
-            $scope.cluster.kerberos = {};
+            $scope.cluster.enableExSecurity = 'NONE';
+            $scope.cluster.kerberos = {
+                "tcpAllowed": false
+            };
         }
 
         function setFileSystem() {
