@@ -5,16 +5,14 @@
     {% set is_server = False %}
 {% endif %}
 {% set node_name = salt['grains.get']('nodename') %}
-{% set recursors = ['8.8.8.8'] %}
 {% set bootstrap_expect =  1 %}
 {% set retry_join = [salt['pillar.get']('ambari:server')] %}
 
 {% set consul = {} %}
 {% do consul.update({
-    'advertise_addr': advertise_addr,
+    'server': salt['pillar.get']('consul:server'),
     'is_server': is_server,
     'node_name': node_name,
-    'recursors': recursors,
     'bootstrap_expect': bootstrap_expect,
     'retry_join': retry_join
 }) %}
