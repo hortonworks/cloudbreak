@@ -20,10 +20,7 @@ public class ImageNameUtil {
     @Inject
     private Environment environment;
 
-    public String determineImageName(String platform, String region, String ambariVersion, String hdpVersion, String imageId) {
-        if (imageId != null && !imageId.isEmpty()) {
-            return imageId;
-        }
+    public String determineImageName(String platform, String region, String ambariVersion, String hdpVersion) {
         String image = getDefaultImage(platform, region);
         if (ambariVersion != null) {
             String specificImage = getSpecificImage(platform, region, ambariVersion, hdpVersion);
@@ -37,10 +34,7 @@ public class ImageNameUtil {
         return image;
     }
 
-    public String determineImageName(HDPInfo hdpInfo, String platform, String region, String imageId) {
-        if (imageId != null && !imageId.isEmpty()) {
-            return imageId;
-        }
+    public String determineImageName(HDPInfo hdpInfo, String platform, String region) {
         Map<String, String> regions = hdpInfo.getImages().get(platform);
         if (regions != null) {
             String image = regions.get(region);

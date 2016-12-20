@@ -19,6 +19,7 @@ tests:
   - name: create security group
     parameters:
       name: it-azurerm-credandsmoke-restricted-ambari-ssud
+      provider: AZURE_RM
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 

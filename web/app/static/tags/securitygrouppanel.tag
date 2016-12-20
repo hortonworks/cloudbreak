@@ -27,34 +27,22 @@
                          <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
-                                        <a id="awsSecurityGroupChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsSecurityGroup, 'btn-default':!awsSecurityGroup}" role="button" ng-click="createAwsSecurityGroupRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureSecurityGroupChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureSecurityGroup, 'btn-default':!azureSecurityGroup}" role="button" ng-click="createAzureSecurityGroupRequest()">{{msg.azure_label}}</a>
+                                        <a id="awsSecurityGroupChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'AWS'), 'btn-default':(selectedProvider != 'AWS')}" role="button" ng-click="createSecurityGroupRequest('AWS')">{{msg.aws_label}}</a>
+                                        <a id="azureSecurityGroupChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'AZURE_RM'), 'btn-default':!azureSecurityGroup}" role="button" ng-click="createSecurityGroupRequest('AZURE_RM')">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
-                                        <a id="gcpSecurityGroupChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':gcpSecurityGroup, 'btn-default':!gcpSecurityGroup}" role="button" ng-click="createGcpSecurityGroupRequest()">{{msg.gcp_label}}</a>
-                                        <a id="openstackSecurityGroupChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':openstackSecurityGroup, 'btn-default':!openstackSecurityGroup}" role="button" ng-click="createOpenstackSecurityGroupRequest()">{{msg.openstack_label}}</a>
+                                        <a id="gcpSecurityGroupChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'GCP'), 'btn-default':(selectedProvider != 'GCP')}" role="button" ng-click="createSecurityGroupRequest('GCP')">{{msg.gcp_label}}</a>
+                                        <a id="openstackSecurityGroupChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'OPENSTACK'), 'btn-default':(selectedProvider != 'OPENSTACK')}" role="button" ng-click="createSecurityGroupRequest('OPENSTACK')">{{msg.openstack_label}}</a>
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
-                            
-                            <form class="form-horizontal" role="form" name="azureSecurityGroupForm" ng-show="azureSecurityGroup && isVisible('AZURE_RM')">
-                                <div ng-include src="'tags/securitygroup/azuresecuritygroupform.tag'"></div>
+
+                            <form class="form-horizontal" role="form" name="securityGroupForm">
+                                <div ng-include src="'tags/securitygroup/securitygroupform.tag'"></div>
                             </form>
-                            
-                            <form class="form-horizontal" role="form" name="awsSecurityGroupForm" ng-show="awsSecurityGroup && isVisible('AWS')">
-                                <div ng-include src="'tags/securitygroup/awssecuritygroupform.tag'"></div>
-                            </form>
-                            
-                            <form class="form-horizontal" role="form" name="gcpSecurityGroupForm" ng-show="gcpSecurityGroup && isVisible('GCP')" >
-                                <div ng-include src="'tags/securitygroup/gcpsecuritygroupform.tag'"></div>
-                            </form>
-                            
-                            <form class="form-horizontal" role="form" name="openstackSecurityGroupForm" ng-show="openstackSecurityGroup && isVisible('OPENSTACK')" >
-                                <div ng-include src="'tags/securitygroup/openstacksecuritygroupform.tag'"></div>
-                            </form>
-                            
+
                         </div>
                     </div>
                 </div>
