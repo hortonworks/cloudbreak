@@ -5,6 +5,7 @@ base:
     - nodes.hosts
     - discovery.init
     - recipes.init
+    - consul.init
 
   'roles:kerberos_server':
     - match: grain

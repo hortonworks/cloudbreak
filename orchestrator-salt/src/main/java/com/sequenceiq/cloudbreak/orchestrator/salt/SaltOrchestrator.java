@@ -7,11 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -134,6 +130,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
             Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+            saltPillarRunnerFuture.get();
+
+            Map<String, Object> pillarJson = new HashMap<>();
+            pillarJson.put("consul", new HashMap<String, String>(){{ put("server", gatewayConfig.getPrivateAddress()); }});
+            SaltPillarProperties pillarProperties = new SaltPillarProperties("/consul/init.sls", pillarJson);
+            PillarSave consulServer = new PillarSave(sc, pillarProperties);
+            saltPillarRunner = runner(consulServer, exitCriteria, exitCriteriaModel);
+            saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
             PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
