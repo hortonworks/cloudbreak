@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
@@ -225,8 +226,14 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     @Override
+    public Response failureReport(Long stackId, FailureReport failureReport) throws CloudbreakSecuritySetupException {
+        clusterService.failureReport(stackId, failureReport.getFailedNodes());
+        return Response.accepted().build();
+    }
+
+    @Override
     public Response repairCluster(Long stackId, ClusterRepairRequest clusterRepairRequest) throws CloudbreakSecuritySetupException {
-        clusterService.repairCluster(stackId, clusterRepairRequest.getFailedNodes());
+        clusterService.repairCluster(stackId, clusterRepairRequest.getHostGroups(), clusterRepairRequest.isRemoveOnly());
         return Response.accepted().build();
     }
 

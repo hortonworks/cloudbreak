@@ -13,11 +13,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
-import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
+import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -81,7 +82,13 @@ public interface ClusterEndpoint {
     Response upgradeCluster(@PathParam(value = "id") Long stackId, AmbariRepoDetailsJson ambariRepoDetails);
 
     @POST
-    @Path("{id}/cluster/repair")
+    @Path("{id}/cluster/failurereport")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ClusterOpDescription.FAILURE_REPORT, produces = ContentType.JSON, notes = Notes.FAILURE_REPORT_NOTES)
+    Response failureReport(@PathParam(value = "id") Long stackId, FailureReport failureReport) throws Exception;
+
+    @POST
+    @Path("{id}/cluster/manualrepair")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.REPAIR_CLUSTER, produces = ContentType.JSON, notes = Notes.CLUSTER_REPAIR_NOTES)
     Response repairCluster(@PathParam(value = "id") Long stackId, ClusterRepairRequest clusterRepairRequest) throws Exception;

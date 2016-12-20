@@ -341,7 +341,13 @@ public class ModelDescriptions {
         public static final String ENDPOINT = "url of the endpoint";
     }
 
-    public static class RepairClusterRequest {
+    public static class FailureReport {
         public static final String FAILED_NODES = "List of failed nodes";
+    }
+
+    public static class RepairClusterRequest {
+        public static final String HOSTGROUPS = "List of hostgroups where the failed nodes will be repaired";
+        public static final String REMOVE_ONLY = "If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and "
+                + "new nodes will be started.";
     }
 }

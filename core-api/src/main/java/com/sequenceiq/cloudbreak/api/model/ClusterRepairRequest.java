@@ -12,14 +12,25 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class ClusterRepairRequest {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RepairClusterRequest.FAILED_NODES, required = true)
-    private List<String> failedNodes;
+    @ApiModelProperty(value = ModelDescriptions.RepairClusterRequest.HOSTGROUPS, required = true)
+    private List<String> hostGroups;
 
-    public List<String> getFailedNodes() {
-        return failedNodes;
+    @ApiModelProperty(value = ModelDescriptions.RepairClusterRequest.REMOVE_ONLY)
+    private boolean removeOnly;
+
+    public List<String> getHostGroups() {
+        return hostGroups;
     }
 
-    public void setFailedNodes(List<String> failedNodes) {
-        this.failedNodes = failedNodes;
+    public void setHostGroups(List<String> hostGroups) {
+        this.hostGroups = hostGroups;
+    }
+
+    public boolean isRemoveOnly() {
+        return removeOnly;
+    }
+
+    public void setRemoveOnly(boolean removeOnly) {
+        this.removeOnly = removeOnly;
     }
 }

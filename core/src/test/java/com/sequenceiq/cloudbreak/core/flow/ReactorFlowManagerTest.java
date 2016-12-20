@@ -92,7 +92,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerClusterUpgrade(stackId);
         flowManager.triggerManualRepairFlow(stackId);
         flowManager.triggerStackRepairFlow(stackId, new UnhealthyInstances());
-        flowManager.triggerClusterRepairFlow(stackId, new HashMap<>());
+        flowManager.triggerClusterRepairFlow(stackId, new HashMap<>(), true);
 
         int count = 0;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

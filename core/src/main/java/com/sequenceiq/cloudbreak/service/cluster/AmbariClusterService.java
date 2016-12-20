@@ -355,11 +355,12 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void repairCluster(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException {
+    public void failureReport(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException {
         Stack stack = stackService.get(stackId);
         Cluster cluster = stack.getCluster();
         Map<String, List<String>> autoRecoveryNodesMap = new HashMap<>();
-        Map<String, List<String>> manualRecoveryNodesMap = new HashMap<>();
+        Map<String, HostMetadata> autoRecoveryHostMetadata = new HashMap<>();
+        Map<String, HostMetadata> failedHostMetadata = new HashMap<>();
         for (String failedNode : failedNodes) {
             HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(cluster.getId(), failedNode);
             if (hostMetadata == null) {
@@ -367,26 +368,78 @@ public class AmbariClusterService implements ClusterService {
             }
             HostGroup hostGroup = hostMetadata.getHostGroup();
             String hostGroupName = hostGroup.getName();
-            Map<String, List<String>> failedNodesMap = hostGroup.getRecoveryMode() == RecoveryMode.AUTO ? autoRecoveryNodesMap : manualRecoveryNodesMap;
-            List<String> nodeList = failedNodesMap.get(hostGroupName);
-            if (nodeList == null) {
-                validateComponentsCategory(stack, hostGroupName);
-                nodeList = new ArrayList<>();
-                failedNodesMap.put(hostGroupName, nodeList);
+            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
+                if (nodeList == null) {
+                    validateComponentsCategory(stack, hostGroupName);
+                    nodeList = new ArrayList<>();
+                    autoRecoveryNodesMap.put(hostGroupName, nodeList);
+                }
+                nodeList.add(failedNode);
+                autoRecoveryHostMetadata.put(failedNode, hostMetadata);
+            } else if (hostGroup.getRecoveryMode() == RecoveryMode.MANUAL) {
+                failedHostMetadata.put(failedNode, hostMetadata);
             }
-            nodeList.add(failedNode);
         }
         if (!autoRecoveryNodesMap.isEmpty()) {
-            flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap);
+            flowManager.triggerClusterRepairFlow(stackId, autoRecoveryNodesMap, false);
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_AUTORECOVERY_REQUESTED.code(),
                     Collections.singletonList(autoRecoveryNodesMap));
-            LOGGER.info(recoveryMessage);
-            eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), recoveryMessage);
+            updateChangedHosts(cluster, autoRecoveryHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.WAITING_FOR_REPAIR, recoveryMessage);
         }
-        if (!manualRecoveryNodesMap.isEmpty()) {
+        if (!failedHostMetadata.isEmpty()) {
             String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_FAILED_NODES_REPORTED.code(),
-                    Collections.singletonList(manualRecoveryNodesMap));
+                    Collections.singletonList(failedHostMetadata.keySet()));
+            updateChangedHosts(cluster, failedHostMetadata, HostMetadataState.HEALTHY, HostMetadataState.UNHEALTHY, recoveryMessage);
+        }
+    }
+
+    @Override
+    public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) throws CloudbreakSecuritySetupException {
+        Stack stack = stackService.get(stackId);
+        Cluster cluster = stack.getCluster();
+        Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+
+        Map<String, List<String>> failedNodeMap = new HashMap<>();
+        for (HostGroup hg : hostGroups) {
+            List<String> failedNodes = new ArrayList<>();
+            if (repairedHostGroups.contains(hg.getName()) && hg.getRecoveryMode() == RecoveryMode.MANUAL) {
+                for (HostMetadata hmd : hg.getHostMetadata()) {
+                    if (hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
+                        if (!failedNodeMap.containsKey(hg.getName())) {
+                            failedNodeMap.put(hg.getName(), failedNodes);
+                        }
+                        failedNodes.add(hmd.getHostName());
+                    }
+                }
+            }
+        }
+        if (!failedNodeMap.isEmpty()) {
+            flowManager.triggerClusterRepairFlow(stackId, failedNodeMap, removeOnly);
+            String recoveryMessage = cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED.code(),
+                    Collections.singletonList(repairedHostGroups));
             LOGGER.info(recoveryMessage);
+            eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY", recoveryMessage);
+        }
+    }
+
+    private void updateChangedHosts(Cluster cluster, Map<String, HostMetadata> failedHostMetadata, HostMetadataState healthyState,
+            HostMetadataState unhealthyState, String recoveryMessage) {
+        Set<HostMetadata> hosts = hostMetadataRepository.findHostsInCluster(cluster.getId());
+        Set<HostMetadata> changedHosts = new HashSet<>();
+        for (HostMetadata host : hosts) {
+            if (host.getHostMetadataState() == unhealthyState && !failedHostMetadata.containsKey(host.getHostName())) {
+                host.setHostMetadataState(healthyState);
+                changedHosts.add(host);
+            } else if (host.getHostMetadataState() == healthyState && failedHostMetadata.containsKey(host.getHostName())) {
+                host.setHostMetadataState(unhealthyState);
+                changedHosts.add(host);
+            }
+        }
+        if (!changedHosts.isEmpty()) {
+            LOGGER.info(recoveryMessage);
+            eventService.fireCloudbreakEvent(cluster.getStack().getId(), "RECOVERY", recoveryMessage);
+            hostMetadataRepository.save(changedHosts);
         }
     }
 
@@ -853,6 +906,7 @@ public class AmbariClusterService implements ClusterService {
         AMBARI_CLUSTER_HOST_STATUS_UPDATED("ambari.cluster.host.status.updated"),
         AMBARI_CLUSTER_START_REQUESTED("ambari.cluster.start.requested"),
         AMBARI_CLUSTER_AUTORECOVERY_REQUESTED("ambari.cluster.autorecovery.requested"),
+        AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED("ambari.cluster.manualrecovery.requested"),
         AMBARI_CLUSTER_FAILED_NODES_REPORTED("ambari.cluster.failednodes.reported");
 
         private String code;
