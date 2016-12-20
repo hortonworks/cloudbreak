@@ -7,7 +7,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -28,6 +33,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -133,7 +139,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             saltPillarRunnerFuture.get();
 
             Map<String, Object> pillarJson = new HashMap<>();
-            pillarJson.put("consul", new HashMap<String, String>(){{ put("server", gatewayConfig.getPrivateAddress()); }});
+            pillarJson.put("consul", ImmutableMap.of("server", gatewayConfig.getPrivateAddress()));
             SaltPillarProperties pillarProperties = new SaltPillarProperties("/consul/init.sls", pillarJson);
             PillarSave consulServer = new PillarSave(sc, pillarProperties);
             saltPillarRunner = runner(consulServer, exitCriteria, exitCriteriaModel);
