@@ -12,10 +12,10 @@
 . /etc/rc.d/init.d/functions
 
 PROGNAME=prometheus
-PROG=/srv/prometheus/$PROGNAME
+PROG=/usr/local/bin/$PROGNAME
 USER=prometheus
 LOGFILE=/var/log/prometheus/prometheus.log
-DATADIR=/srv/prometheus/data
+DATADIR=/opt/prometheus/data
 LOCKFILE=/var/run/$PROGNAME.pid
 CONFIG_FILE=/etc/prometheus/prometheus.yml
 

@@ -34,6 +34,7 @@ base:
     - match: grain
     - ambari.agent
     - consul
+    - unbound
 
   'roles:smartsense':
     - match: grain
