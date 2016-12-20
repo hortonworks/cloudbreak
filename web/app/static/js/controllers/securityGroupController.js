@@ -7,33 +7,15 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         $scope.showAlert = false;
         $scope.alertMessage = "";
         $scope.securitygroup = {};
-        
+
         var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
         if (firstVisiblePlatform != -1) {
-            $scope[["awsSecurityGroup", "azureSecurityGroup", "gcpSecurityGroup", "openstackSecurityGroup"][firstVisiblePlatform]] = true;
+            $scope.selectedProvider = ["AWS", "AZURE_RM", "GCP", "OPENSTACK"][firstVisiblePlatform];
         }
+        initializeFormsAndScopeSecurityGroup();
 
-        $scope.createSecurityGroup = function() {
-            doCreateSecurityGroup();
-        }
-
-        $scope.createAwsSecurityGroup = function() {
-        	$scope.securitygroup.cloudPlatform = 'AWS';
-            doCreateSecurityGroup();
-        }
-        
-        $scope.createOpenStackSecurityGroup = function() {
-        	$scope.securitygroup.cloudPlatform = 'OPENSTACK';
-            doCreateSecurityGroup();
-        }
-        
-        $scope.createGcpSecurityGroup = function() {
-        	$scope.securitygroup.cloudPlatform = 'GCP';
-            doCreateSecurityGroup();
-        }
-        
-        $scope.createAzureSecurityGroup = function() {
-        	$scope.securitygroup.cloudPlatform = 'AZURE_RM';
+        $scope.createSecurityGroup = function(provider) {
+            $scope.securitygroup.cloudPlatform = provider;
             doCreateSecurityGroup();
         }
 
@@ -145,11 +127,10 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         }
 
         function initializeFormsAndScopeSecurityGroup() {
-         	$scope.awsSecurityGroupForm.$setPristine();
-            $scope.gcpSecurityGroupForm.$setPristine();
-            $scope.azureSecurityGroupForm.$setPristine();
-            $scope.openstackSecurityGroupForm.$setPristine();
-            
+            if ($scope.securityGroupForm != null) {
+                $scope.securityGroupForm.$setPristine();
+            }
+
             $scope.securitygroup = {
                 name: "",
                 description: "",
@@ -173,44 +154,13 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
             $scope.alertMessage = $scope.statusMessage;
         }
 
-        $scope.createAwsSecurityGroupRequest = function() {
+        $scope.createSecurityGroupRequest = function(provider) {
         	initializeFormsAndScopeSecurityGroup();
-            $scope.azureSecurityGroup = false;
-            $scope.awsSecurityGroup = true;
-            $scope.gcpSecurityGroup = false;
-            $scope.openstackSecurityGroup = false;
-        }
-        
-        $scope.createAzureSecurityGroupRequest = function() {
-            initializeFormsAndScopeSecurityGroup();
-            $scope.azureSecurityGroup = true;
-            $scope.awsSecurityGroup = false;
-            $scope.gcpSecurityGroup = false;
-            $scope.openstackSecurityGroup = false;
+        	$scope.selectedProvider = provider;
         }
 
-        $scope.createGcpSecurityGroupRequest = function() {
-            initializeFormsAndScopeSecurityGroup();
-            $scope.azureSecurityGroup = false;
-            $scope.awsSecurityGroup = false;
-            $scope.gcpSecurityGroup = true;
-            $scope.openstackSecurityGroup = false;
-        }
-
-        $scope.createOpenstackSecurityGroupRequest = function() {
-            initializeFormsAndScopeSecurityGroup();
-            $scope.azureSecurityGroup = false;
-            $scope.awsSecurityGroup = false;
-            $scope.gcpSecurityGroup = false;
-            $scope.openstackSecurityGroup = true;
-        }
-        
-        $scope.selectSecurityGroupType1 = function() {
+        $scope.selectSecurityGroupType = function() {
             delete $scope.securitygroup.securityGroupId
-        }
-        
-        $scope.selectSecurityGroupType2 = function() {
-        	delete $scope.securitygroup.securityGroupId
         }
 
     }

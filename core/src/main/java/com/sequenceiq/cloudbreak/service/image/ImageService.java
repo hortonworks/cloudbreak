@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -61,21 +62,26 @@ public class ImageService {
         try {
             Platform platform = platform(stack.cloudPlatform());
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
-            String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion, imageId);
             String tmpSshKey = tlsSecurityService.readPublicSshKey(stack.getId());
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, tmpSshKey, sshUser, params,
                     stack.getRelocateDocker() == null ? false : stack.getRelocateDocker());
             HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(ambariVersion, hdpVersion, imageCatalog);
-            if (hdpInfo != null) {
-                String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion(), imageId);
-                if (specificImage == null) {
-                    LOGGER.warn("Cannot find image in the catalog, fallback to default image, ambari: {}, hdp: {}", ambariVersion, hdpVersion);
-                    hdpInfo = null;
-                } else {
-                    LOGGER.info("Determined image from catalog: {}", specificImage);
-                    imageName = specificImage;
+            String imageName;
+            if (!StringUtils.isEmpty(imageId)) {
+                imageName = imageId;
+            } else {
+                imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion);
+                if (hdpInfo != null) {
+                    String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion());
+                    if (specificImage == null) {
+                        LOGGER.warn("Cannot find image in the catalog, fallback to default image, ambari: {}, hdp: {}", ambariVersion, hdpVersion);
+                        hdpInfo = null;
+                    } else {
+                        LOGGER.info("Determined image from catalog: {}", specificImage);
+                        imageName = specificImage;
+                    }
                 }
             }
             List<Component> components = new ArrayList<>();
