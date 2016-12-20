@@ -107,7 +107,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "scaling-adjustment",
-			Usage: "change the number of worker nodes, positive number for add more nodes, e.g: 1, negative for take down nodes, e.g: -1",
+			Usage: "change the number of worker or compute nodes, positive number for add more nodes, e.g: 1, negative for take down nodes, e.g: -1",
 		},
 	}
 	FlNodeType = StringFlag{

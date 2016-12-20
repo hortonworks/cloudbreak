@@ -170,7 +170,7 @@ func main() {
 		},
 		{
 			Name:   "resize-cluster",
-			Usage:  "change the number of worker nodes of an existing cluster",
+			Usage:  "change the number of worker or compute nodes of an existing cluster",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			After:  StopSpinner,

@@ -52,7 +52,7 @@ COMMANDS:
      describe-cluster    get a detailed description of a cluster
      list-cluster-types  list available cluster types and HDP versions
      list-clusters       list available clusters
-     resize-cluster      change the number of worker nodes of an existing cluster
+     resize-cluster      change the number of worker or cluster nodes of an existing cluster
      terminate-cluster   terminates a cluster
      help, h             Shows a list of commands or help for one command
 
