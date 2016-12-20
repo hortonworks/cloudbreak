@@ -2,7 +2,7 @@
   "inputs": [],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp-etl-edw-spark2",
+      "blueprint_name": "hdp26-etl-edw-spark2",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
