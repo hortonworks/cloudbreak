@@ -6,9 +6,6 @@
   "client_addr": "0.0.0.0",
   "disable_update_check": true,
   "retry_join": {{ retry_join | json }},
-  "addresses": {
-    "dns": "127.0.0.1"
-  },
   "ports": {
     "dns": 953,
     "http": 8500,
