@@ -182,8 +182,8 @@ public class ReactorFlowManager {
         notify(selector, new StackRepairTriggerEvent(stackId, unhealthyInstances));
     }
 
-    public void triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap) {
-        notify(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, new ClusterRepairTriggerEvent(stackId, failedNodesMap));
+    public void triggerClusterRepairFlow(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly) {
+        notify(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, new ClusterRepairTriggerEvent(stackId, failedNodesMap, removeOnly));
     }
 
     private void cancelRunningFlows(Long stackId) {

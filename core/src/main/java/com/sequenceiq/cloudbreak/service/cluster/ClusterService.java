@@ -65,5 +65,7 @@ public interface ClusterService {
 
     Map<String, String> getHostStatuses(Long stackId) throws CloudbreakSecuritySetupException;
 
-    void repairCluster(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException;
+    void failureReport(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException;
+
+    void repairCluster(Long stackId, List<String> hostGroups, boolean removeOnly) throws CloudbreakSecuritySetupException;
 }

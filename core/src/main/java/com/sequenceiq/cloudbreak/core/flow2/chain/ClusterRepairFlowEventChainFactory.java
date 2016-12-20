@@ -29,8 +29,10 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         for (Map.Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
             flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getStackId(),
                     failedNodes.getKey(), new HashSet<>(failedNodes.getValue()), ScalingType.DOWNSCALE_TOGETHER, event.accepted()));
-            flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getStackId(),
-                    failedNodes.getKey(), failedNodes.getValue().size(), ScalingType.UPSCALE_TOGETHER));
+            if (!event.isRemoveOnly()) {
+                flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getStackId(),
+                        failedNodes.getKey(), failedNodes.getValue().size(), ScalingType.UPSCALE_TOGETHER));
+            }
         }
         return flowChainTriggers;
     }
