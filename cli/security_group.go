@@ -23,11 +23,13 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64,
 	postSecGroup func(*securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error)) {
 
-	secGroupName := "secg" + strconv.FormatInt(time.Now().UnixNano(), 10)
-
+	var secGroupName string
 	defaultPorts := SECURITY_GROUP_DEFAULT_PORTS
 	if skeleton.WebAccess {
 		defaultPorts = append(defaultPorts, "8080", "9995")
+		secGroupName = "all-services-port" + strconv.FormatInt(time.Now().UnixNano(), 10)
+	} else {
+		secGroupName = "only-ssh-and-ssl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	}
 
 	modifiable := false

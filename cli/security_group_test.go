@@ -33,8 +33,8 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 	if actualId != expectedId {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
-	if m, _ := regexp.MatchString("secg([0-9]{10,20})", actualGroup.Name); m == false {
-		t.Errorf("name not match secg([0-9]{10,20}) == %s", actualGroup.Name)
+	if m, _ := regexp.MatchString("only-ssh-and-ssl([0-9]{10,20})", actualGroup.Name); m == false {
+		t.Errorf("name not match only-ssh-and-ssl([0-9]{10,20}) == %s", actualGroup.Name)
 	}
 	if len(actualGroup.SecurityRules) != 1 {
 		t.Fatal("missing security group rule")
