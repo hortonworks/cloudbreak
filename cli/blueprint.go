@@ -26,12 +26,12 @@ func init() {
 	BlueprintMap["hdp25-etl-edw-shared"] = "Enterprise ETL-EDW: Apache Hive 1.2.1"
 	BlueprintMap["hdp-etl-edw-tp"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
 	BlueprintMap["hdp26-etl-edw-spark2"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1"
-	BlueprintMap["hdp26-druid-bi"] = "BI: Druid 0.9.2 (Technical Preview)"
+	BlueprintMap["hdp-druid-bi"] = "BI: Druid 0.9.2 (Technical Preview)"
 }
 
 func getDefaultClusterType() string {
 	for _, v := range BlueprintMap {
-		if !strings.Contains(v, "Enterprise") && !strings.Contains(v, "Druid")  {
+		if !strings.Contains(v, "Enterprise") && !strings.Contains(v, "Druid") {
 			return v
 		}
 	}
