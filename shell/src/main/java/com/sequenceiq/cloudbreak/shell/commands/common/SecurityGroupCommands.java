@@ -36,44 +36,53 @@ public class SecurityGroupCommands implements BaseCommands {
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
             @CliOption(key = "description", help = "Description of the security group") String description,
-            @CliOption(key = "rules", mandatory = true,
+            @CliOption(key = "existingGpId", help = "Existing security group id.") String existingSecurityGroupId,
+            @CliOption(key = "platform", mandatory = true, help = "Platform of security group.") String platform,
+            @CliOption(key = "rules",
                     help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
             @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
                     specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
         try {
-            Map<String, String> tcpRules = new HashMap<>();
-            Map<String, String> udpRules = new HashMap<>();
-            for (Map<String, String> rule : rules.getRules()) {
-                if ("tcp".equals(rule.get("protocol"))) {
-                    tcpRules.put(rule.get("subnet"), rule.get("ports"));
-                } else {
-                    udpRules.put(rule.get("subnet"), rule.get("ports"));
-                }
-            }
             IdJson id;
             SecurityGroupJson securityGroupJson = new SecurityGroupJson();
             securityGroupJson.setName(name);
             securityGroupJson.setDescription(description);
             securityGroupJson.setPublicInAccount(publicInAccount);
-            List<SecurityRuleJson> securityRuleJsonList = new ArrayList<>();
+            if (existingSecurityGroupId != null && !existingSecurityGroupId.isEmpty()) {
+                securityGroupJson.setSecurityGroupId(existingSecurityGroupId);
+            } else if (rules != null && rules.getRules() != null) {
+                Map<String, String> tcpRules = new HashMap<>();
+                Map<String, String> udpRules = new HashMap<>();
 
-            for (Map.Entry<String, String> stringStringEntry : tcpRules.entrySet()) {
-                SecurityRuleJson securityRuleJson = new SecurityRuleJson();
-                securityRuleJson.setPorts(stringStringEntry.getValue());
-                securityRuleJson.setSubnet(stringStringEntry.getKey());
-                securityRuleJson.setProtocol("tcp");
-                securityRuleJsonList.add(securityRuleJson);
+                for (Map<String, String> rule : rules.getRules()) {
+                    if ("tcp".equals(rule.get("protocol"))) {
+                        tcpRules.put(rule.get("subnet"), rule.get("ports"));
+                    } else {
+                        udpRules.put(rule.get("subnet"), rule.get("ports"));
+                    }
+                }
+                List<SecurityRuleJson> securityRuleJsonList = new ArrayList<>();
+
+                for (Map.Entry<String, String> stringStringEntry : tcpRules.entrySet()) {
+                    SecurityRuleJson securityRuleJson = new SecurityRuleJson();
+                    securityRuleJson.setPorts(stringStringEntry.getValue());
+                    securityRuleJson.setSubnet(stringStringEntry.getKey());
+                    securityRuleJson.setProtocol("tcp");
+                    securityRuleJsonList.add(securityRuleJson);
+                }
+
+                for (Map.Entry<String, String> stringStringEntry : udpRules.entrySet()) {
+                    SecurityRuleJson securityRuleJson = new SecurityRuleJson();
+                    securityRuleJson.setPorts(stringStringEntry.getValue());
+                    securityRuleJson.setSubnet(stringStringEntry.getKey());
+                    securityRuleJson.setProtocol("udp");
+                    securityRuleJsonList.add(securityRuleJson);
+                }
+
+                securityGroupJson.setSecurityRules(securityRuleJsonList);
+            } else {
+                throw new IllegalArgumentException(String.format("Either %s or %s needs to be provided.", "existingGpId", "rules"));
             }
-
-            for (Map.Entry<String, String> stringStringEntry : udpRules.entrySet()) {
-                SecurityRuleJson securityRuleJson = new SecurityRuleJson();
-                securityRuleJson.setPorts(stringStringEntry.getValue());
-                securityRuleJson.setSubnet(stringStringEntry.getKey());
-                securityRuleJson.setProtocol("udp");
-                securityRuleJsonList.add(securityRuleJson);
-            }
-
-            securityGroupJson.setSecurityRules(securityRuleJsonList);
             publicInAccount = publicInAccount == null ? false : publicInAccount;
 
             if (publicInAccount) {
