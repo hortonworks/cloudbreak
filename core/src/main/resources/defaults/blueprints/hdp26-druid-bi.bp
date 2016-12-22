@@ -8,14 +8,106 @@
     },
     "configurations": [
       {
+        "core-site": {
+          "fs.trash.interval": "4320"
+        }
+      },
+      {
+        "hdfs-site": {
+          "dfs.namenode.safemode.threshold-pct": "0.99"
+        }
+      },
+      {
+        "mapred-site": {
+          "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
+          "mapreduce.map.output.compress": "true",
+          "mapreduce.output.fileoutputformat.compress": "true"
+        }
+      },
+      {
+        "yarn-site": {
+          "yarn.acl.enable": "true"
+        }
+      },
+      {
         "druid-common": {
           "properties_attributes": {},
           "properties": {
+            "druid.indexer.logs.directory": "/user/druid/logs",
+            "druid.indexer.logs.type": "hdfs",
+            "druid.metadata.storage.type": "derby",
+            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527//user/druid/druid_state/derby;create=true",
             "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
+            "druid.selectors.indexing.serviceName": "druid/overlord",
             "druid.storage.type": "s3"
           }
         }
+      },
+      {
+        "druid-overlord": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.indexer.storage.type": "metadata",
+            "druid.indexer.runner.type": "remote",
+            "druid.service": "druid/overlord",
+            "druid.port": "8090"
+          }
+        }
+      },
+      {
+        "druid-middlemanager": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.server.http.numThreads": "50",
+            "druid.worker.capacity": "3",
+            "druid.processing.numThreads": "2",
+            "druid.indexer.runner.javaOpts": "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
+            "druid.service": "druid/middlemanager",
+            "druid.port": "8091"
+          }
+        }
+      },
+      {
+        "druid-coordinator": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.coordinator.merge.on": "false",
+            "druid.port": "8081"
+          }
+        }
+      },
+      {
+      "druid-historical" : {
+        "properties_attributes" : { },
+        "properties" : {
+          "druid.server.http.numThreads" : "50",
+          "druid.processing.numThreads" : "10",
+          "druid.service" : "druid/historical",
+          "druid.port" : "8083",
+          "druid.server.maxSize" : "300000000000"
+        }
       }
+    },
+      {
+      "druid-broker" : {
+        "properties_attributes" : { },
+        "properties" : {
+          "druid.cache.type" : "local",
+          "druid.server.http.numThreads" : "50",
+          "druid.broker.http.numConnections" : "5",
+          "druid.processing.numThreads" : "2",
+          "druid.service" : "druid/broker",
+          "druid.port" : "8082"
+        }
+      }
+    },
+      {
+      "druid-router" : {
+        "properties_attributes" : { },
+        "properties" : {
+        }
+      }
+    }
     ],
     "host_groups": [
       {
