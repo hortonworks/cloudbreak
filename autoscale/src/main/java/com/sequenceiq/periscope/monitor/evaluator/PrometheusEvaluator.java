@@ -6,7 +6,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,12 +18,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
-import com.sequenceiq.periscope.domain.MetricAlert;
+import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.PrometheusResponse;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
-import com.sequenceiq.periscope.repository.MetricAlertRepository;
+import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
 
 @Component("PrometheusEvaluator")
@@ -33,14 +32,11 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrometheusEvaluator.class);
 
-    @Value("${prometheus.address}")
-    private String prometheusAddress;
-
     @Autowired
     private ClusterService clusterService;
 
     @Autowired
-    private MetricAlertRepository alertRepository;
+    private PrometheusAlertRepository alertRepository;
 
     private long clusterId;
 
@@ -52,14 +48,16 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     @Override
     public void run() {
         Cluster cluster = clusterService.find(clusterId);
+        //TODO needs to be updated after the Prometheus will be available through NGINX
+        String prometheusAddress = "http://" + cluster.getAmbari().getHost() + ":9090";
         MDCBuilder.buildMdcContext(cluster);
         RestTemplate restTemplate = new RestTemplate();
         try {
-            for (MetricAlert alert : alertRepository.findAllByCluster(clusterId)) {
+            for (PrometheusAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
-                LOGGER.info("Checking metric based alert: '{}'", alertName);
+                LOGGER.info("Checking Prometheus based alert: '{}'", alertName);
                 UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(prometheusAddress + "/api/v1/query")
-                        .queryParam("query", String.format("ALERTS{alertname=\"%s\"}[%dm]", alert.getDefinitionName(), alert.getPeriod())).build();
+                        .queryParam("query", String.format("ALERTS{alertname=\"%s\"}[%dm]", alert.getName(), alert.getPeriod())).build();
                 HttpHeaders headers = new HttpHeaders();
                 headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
                 HttpEntity<?> entity = new HttpEntity<>(headers);
@@ -97,7 +95,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to retrieve alert history", e);
+            LOGGER.error("Failed to retrieve alerts from Prometheus", e);
             publishEvent(new UpdateFailedEvent(clusterId));
         }
     }
