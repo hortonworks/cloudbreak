@@ -5,18 +5,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.endpoint.AlertEndpoint;
 import com.sequenceiq.periscope.api.model.MetricAlertJson;
+import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
 import com.sequenceiq.periscope.api.model.TimeAlertJson;
 import com.sequenceiq.periscope.domain.MetricAlert;
+import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.rest.converter.MetricAlertConverter;
+import com.sequenceiq.periscope.rest.converter.PrometheusAlertConverter;
 import com.sequenceiq.periscope.rest.converter.TimeAlertConverter;
 import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.utils.DateUtils;
@@ -24,14 +29,17 @@ import com.sequenceiq.periscope.utils.DateUtils;
 @Component
 public class AlertController implements AlertEndpoint {
 
-    @Autowired
+    @Inject
     private AlertService alertService;
 
-    @Autowired
+    @Inject
     private MetricAlertConverter metricAlertConverter;
 
-    @Autowired
+    @Inject
     private TimeAlertConverter timeAlertConverter;
+
+    @Inject
+    private PrometheusAlertConverter prometheusAlertConverter;
 
     @Override
     public MetricAlertJson createAlerts(Long clusterId, MetricAlertJson json) {
@@ -85,6 +93,34 @@ public class AlertController implements AlertEndpoint {
         alertService.deleteTimeAlert(clusterId, alertId);
     }
 
+    @Override
+    public PrometheusAlertJson createPrometheusAlert(Long clusterId, PrometheusAlertJson json) {
+        PrometheusAlert prometheusAlert = prometheusAlertConverter.convert(json);
+        return createPrometheusAlertResponse(alertService.createPrometheusAlert(clusterId, prometheusAlert));
+    }
+
+    @Override
+    public PrometheusAlertJson updatePrometheusAlert(Long clusterId, Long alertId, PrometheusAlertJson json) {
+        PrometheusAlert prometheusAlert = prometheusAlertConverter.convert(json);
+        return createPrometheusAlertResponse(alertService.updatePrometheusAlert(clusterId, alertId, prometheusAlert));
+    }
+
+    @Override
+    public List<PrometheusAlertJson> getPrometheusAlerts(Long clusterId) {
+        return alertService.getPrometheusAlerts(clusterId).stream()
+                .map(this::createPrometheusAlertResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    public void deletePrometheusAlarm(Long clusterId, Long alertId) {
+        alertService.deletePrometheusAlert(clusterId, alertId);
+    }
+
+    @Override
+    public List<AlertRuleDefinitionEntry> getPrometheusDefinitions(Long clusterId) {
+        return alertService.getPrometheusAlertDefinitions();
+    }
+
     private TimeAlert validateTimeAlert(TimeAlertJson json) throws ParseException {
         TimeAlert alert = timeAlertConverter.convert(json);
         DateUtils.getCronExpression(alert.getCron());
@@ -113,5 +149,9 @@ public class AlertController implements AlertEndpoint {
 
     private List<TimeAlertJson> createTimeAlertsResponse(List<TimeAlert> alarms) {
         return timeAlertConverter.convertAllToJson(alarms);
+    }
+
+    private PrometheusAlertJson createPrometheusAlertResponse(PrometheusAlert alarm) {
+        return prometheusAlertConverter.convert(alarm);
     }
 }

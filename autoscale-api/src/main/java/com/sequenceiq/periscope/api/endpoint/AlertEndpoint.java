@@ -2,7 +2,9 @@ package com.sequenceiq.periscope.api.endpoint;
 
 import static com.sequenceiq.periscope.doc.ApiDescription.ALERT_DESCRIPTION;
 import static com.sequenceiq.periscope.doc.ApiDescription.AlertNotes.METRIC_BASED_NOTES;
+import static com.sequenceiq.periscope.doc.ApiDescription.AlertNotes.PROMETHEUS_BASED_NOTES;
 import static com.sequenceiq.periscope.doc.ApiDescription.AlertNotes.TIME_BASED_NOTES;
+import static com.sequenceiq.periscope.doc.ApiDescription.AlertOpDescription.PROMETHEUS_BASED_DEFINITIONS;
 import static com.sequenceiq.periscope.doc.ApiDescription.JSON;
 
 import java.text.ParseException;
@@ -20,7 +22,9 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.api.model.MetricAlertJson;
+import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
 import com.sequenceiq.periscope.api.model.TimeAlertJson;
 import com.sequenceiq.periscope.doc.ApiDescription.AlertOpDescription;
 
@@ -87,4 +91,35 @@ public interface AlertEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.TIME_BASED_DELETE, produces = JSON, notes = TIME_BASED_NOTES)
     void deleteTimeAlert(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId);
+
+    @POST
+    @Path("prometheus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_POST, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
+    PrometheusAlertJson createPrometheusAlert(@PathParam(value = "clusterId") Long clusterId, @Valid PrometheusAlertJson json);
+
+    @PUT
+    @Path("prometheus/{alertId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_PUT, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
+    PrometheusAlertJson updatePrometheusAlert(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId,
+            @Valid PrometheusAlertJson json);
+
+    @GET
+    @Path("prometheus")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_GET, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
+    List<PrometheusAlertJson> getPrometheusAlerts(@PathParam(value = "clusterId") Long clusterId);
+
+    @DELETE
+    @Path(value = "prometheus/{alertId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_DELETE, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
+    void deletePrometheusAlarm(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId);
+
+    @GET
+    @Path(value = "prometheus/definitions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = AlertOpDescription.METRIC_BASED_DEFINITIONS, produces = JSON, notes = PROMETHEUS_BASED_DEFINITIONS)
+    List<AlertRuleDefinitionEntry> getPrometheusDefinitions(@PathParam(value = "clusterId") Long clusterId);
 }

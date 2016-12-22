@@ -43,7 +43,7 @@ public class ClusterService {
             securityConfig.setCluster(cluster);
             securityConfigRepository.save(securityConfig);
         }
-        alertService.addPeriscopeAlerts(cluster);
+//        alertService.addPeriscopeAlerts(cluster);
         return cluster;
     }
 

@@ -20,8 +20,10 @@ import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
+import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.model.ClusterCreationEvaluatorContext;
+import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
@@ -40,6 +42,9 @@ public class ClusterCreationEvaluator implements Runnable {
 
     @Inject
     private TlsSecurityService tlsSecurityService;
+
+    @Inject
+    private AlertService alertService;
 
     private ClusterCreationEvaluatorContext context;
 
@@ -66,10 +71,12 @@ public class ClusterCreationEvaluator implements Runnable {
         AmbariStack resolvedAmbari = createAmbariStack(stack);
         if (clusterOptional.isPresent()) {
             Cluster cluster = clusterOptional.get();
+            MDCBuilder.buildMdcContext(cluster);
             if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
-                LOGGER.info("Updating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
                 ambariHealthCheck(cluster.getUser(), resolvedAmbari);
+                LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
                 clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
+                alertService.addPrometheusAlertsToConsul(cluster);
             }
         } else {
             LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());

@@ -10,20 +10,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricAlert;
+import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
+import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
 import com.sequenceiq.periscope.utils.AmbariClientProvider;
 
@@ -40,29 +43,35 @@ public class AlertService {
 
     private static final String APP_ALERT = "pending_apps.ftl";
 
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
 
-    @Autowired
+    @Inject
     private MetricAlertRepository metricAlertRepository;
 
-    @Autowired
+    @Inject
     private TimeAlertRepository timeAlertRepository;
 
-    @Autowired
+    @Inject
+    private PrometheusAlertRepository prometheusAlertRepository;
+
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private Configuration freemarkerConfiguration;
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
-    @Value("${prometheus.address}")
-    private String prometheusAddress;
-
-    @Autowired
+    @Inject
     private AlertTypes alertTypes;
+
+    @Inject
+    private ConsulKeyValueService consulKeyValueService;
+
+    @Inject
+    private PrometheusAlertTemplateService prometheusAlertService;
 
     public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
@@ -181,6 +190,59 @@ public class AlertService {
                 LOGGER.error("Cannot create alert definitions", e);
             }
         }
+    }
+
+    public PrometheusAlert createPrometheusAlert(long clusterId, PrometheusAlert alert) {
+        Cluster cluster = clusterService.findOneById(clusterId);
+        alert.setCluster(cluster);
+        PrometheusAlert savedAlert = prometheusAlertRepository.save(alert);
+        cluster.addPrometheusAlert(savedAlert);
+        clusterRepository.save(cluster);
+        consulKeyValueService.addAlert(cluster, savedAlert);
+        LOGGER.info("Prometheus alert '{}' has been created for cluster 'ID:{}'", alert.getName(), cluster.getId());
+        return savedAlert;
+    }
+
+    public PrometheusAlert updatePrometheusAlert(long clusterId, long alertId, PrometheusAlert prometheusAlert) {
+        PrometheusAlert alert = findPrometheusAlertByCluster(clusterId, alertId);
+        alert.setName(prometheusAlert.getName());
+        alert.setAlertRule(prometheusAlert.getAlertRule());
+        alert.setPeriod(prometheusAlert.getPeriod());
+        alert.setDescription(prometheusAlert.getDescription());
+        alert.setAlertState(prometheusAlert.getAlertState());
+        PrometheusAlert savedAlert = prometheusAlertRepository.save(alert);
+        Cluster cluster = clusterService.find(clusterId);
+        consulKeyValueService.addAlert(cluster, savedAlert);
+        LOGGER.info("Prometheus alert '{}' has been updated for cluster 'ID:{}'", alert.getName(), cluster.getId());
+        return savedAlert;
+    }
+
+    public PrometheusAlert findPrometheusAlertByCluster(long clusterId, long alertId) {
+        return prometheusAlertRepository.findByCluster(alertId, clusterId);
+    }
+
+    public void deletePrometheusAlert(long clusterId, long alertId) {
+        PrometheusAlert alert = prometheusAlertRepository.findByCluster(alertId, clusterId);
+        Cluster cluster = clusterRepository.find(clusterId);
+        consulKeyValueService.deleteAlert(cluster, alert);
+        Set<PrometheusAlert> alerts = cluster.getPrometheusAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
+        cluster.setPrometheusAlerts(alerts);
+        prometheusAlertRepository.delete(alertId);
+        clusterRepository.save(cluster);
+        LOGGER.info("Prometheus alert '{}' has been deleted for cluster 'ID:{}'", alert.getName(), cluster.getId());
+    }
+
+    public void addPrometheusAlertsToConsul(Cluster cluster) {
+        Set<PrometheusAlert> alerts = prometheusAlertRepository.findAllByCluster(cluster.getId());
+        alerts.stream().forEach(alert -> consulKeyValueService.addAlert(cluster, alert));
+    }
+
+    public List<AlertRuleDefinitionEntry> getPrometheusAlertDefinitions() {
+        return prometheusAlertService.getAlertDefinitions();
+    }
+
+    public Set<PrometheusAlert> getPrometheusAlerts(long clusterId) {
+        return prometheusAlertRepository.findAllByCluster(clusterId);
     }
 
     private String getAlertDefinition(AmbariClient client, String name) throws Exception {
