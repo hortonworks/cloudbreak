@@ -3,14 +3,14 @@ include:
 
 download_prom_server:
   archive.extracted:
-    - name: /srv/prometheus/
+    - name: /usr/local/bin/
     - source: {{ salt['pillar.get']('prometheus:server:source') }}
     - source_hash: {{ salt['pillar.get']('prometheus:server:source_hash')}}
     - keep: True
     - archive_format: tar
-    - tar_options: z  --strip-components=1
+    - options: z --strip-components=1
 
-/srv/prometheus:
+/opt/prometheus:
     file.directory:
       - user: prometheus
       - group: prometheus
@@ -33,8 +33,6 @@ download_prom_server:
     - group: prometheus
     - makedirs: True
 
-
-
 prometheus_server_config:
   file.serialize:
     - name: /etc/prometheus/prometheus.yml
@@ -42,7 +40,6 @@ prometheus_server_config:
     - group: prometheus
     - mode: 640
     - dataset_pillar: prometheus:server:config
-
 
 {% if salt['grains.get']('init') == 'systemd' %}
 prometheus_server_service_script:
@@ -58,10 +55,10 @@ prometheus_server_service_script:
         [Service]
         Type=simple
         RemainAfterExit=no
-        WorkingDirectory=/srv/prometheus
+        WorkingDirectory=/opt/prometheus
         User=prometheus
         Group=prometheus
-        ExecStart=/srv/prometheus/prometheus -config.file=/etc/prometheus/prometheus.yaml  -storage.local.path=/srv/prometheus/data -log.level info
+        ExecStart=/usr/local/bin/prometheus -config.file=/etc/prometheus/prometheus.yaml  -storage.local.path=/opt/prometheus/data -log.level info
 
         [Install]
         WantedBy=multi-user.target
