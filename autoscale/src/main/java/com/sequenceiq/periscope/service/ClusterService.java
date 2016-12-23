@@ -43,16 +43,18 @@ public class ClusterService {
             securityConfig.setCluster(cluster);
             securityConfigRepository.save(securityConfig);
         }
-        alertService.addPeriscopeAlerts(cluster);
+//        alertService.addPeriscopeAlerts(cluster);
         return cluster;
     }
 
     public Cluster update(long clusterId, AmbariStack stack) {
-        return update(clusterId, stack, true);
+        return update(clusterId, stack, true, null);
     }
 
-    public Cluster update(long clusterId, AmbariStack stack, boolean withPermissionCheck) {
+    public Cluster update(long clusterId, AmbariStack stack, boolean withPermissionCheck, ClusterState clusterState) {
         Cluster cluster = withPermissionCheck ? findOneById(clusterId) : find(clusterId);
+        ClusterState newState = clusterState != null ? clusterState : cluster.getState();
+        cluster.setState(newState);
         cluster.update(stack);
         cluster = save(cluster);
         if (stack.getSecurityConfig() != null) {

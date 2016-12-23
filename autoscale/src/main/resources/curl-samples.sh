@@ -27,11 +27,11 @@ curl -X POST -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/configurations 
 curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"setup":[{"name":"default", "capacity":55}, {"name":"high", "capacity":45}]}' $HOST/clusters/50/configurations/queue | jq .
 
 # set metric alarms
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"allocatedmemory","description":"Allocated memory","period":3,"alertDefinition":"allocated_memory", "alertState":"CRITICAL"}' $HOST/clusters/50/alerts/metric | jq .
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"NameNodeCapacity","description":"NameNode Capacity","period":3,"alertRule":"Hadoop_NameNode_CapacityUsedGB{}/Hadoop_NameNode_CapacityTotalGB{}*100 > 90", "alertState":"CRITICAL"}' $HOST/as/api/v1/clusters/1000/alerts/prometheus | jq .
 curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"allocatedmemory","description":"Allocated memory","period":3,"alertDefinition":"allocated_memory", "alertState":"WARN"}' $HOST/clusters/50/alerts/metric | jq .
 curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"allocatedmemory","description":"Low free global resource rate","period":5,"alertDefinition":"allocated_memory"}' $HOST/clusters/50/alerts/metric/150 | jq .
-curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/metric | jq .
-curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/metric/150 | jq .
+curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/as/api/v1/clusters/1000/alerts/prometheus | jq .
+curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/as/api/v1/clusters/1000/alerts/prometheus/1100 | jq .
 
 # set time alerts
 curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"cron-worktime","description":"Number of nodes during worktime","timeZone":"Europe/Budapest","cron":"0 54 10 ? * MON-FRI"}' $HOST/clusters/50/alerts/time | jq .

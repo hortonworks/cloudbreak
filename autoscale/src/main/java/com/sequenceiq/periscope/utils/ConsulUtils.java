@@ -155,16 +155,24 @@ public final class ConsulUtils {
         }
     }
 
-    public static ConsulClient createClient(HttpClientConfig httpClientConfig) {
-        return createClient(httpClientConfig, DEFAULT_TIMEOUT_MS);
+    public static ConsulClient createClient(HttpClientConfig httpClientConfig, boolean https) {
+        return createClient(httpClientConfig, DEFAULT_TIMEOUT_MS, https);
     }
 
-    public static ConsulClient createClient(HttpClientConfig httpClientConfig, int timeout) {
-        return new ConsulClient("https://" + httpClientConfig.getApiAddress(), httpClientConfig.getApiPort(),
+    public static ConsulClient createClient(HttpClientConfig httpClientConfig, int timeout, boolean https) {
+        String protocol = "https";
+        ConsulClient consulClient = null;
+        if (https) {
+        consulClient = new ConsulClient(protocol + "://" + httpClientConfig.getApiAddress(), httpClientConfig.getApiPort(),
                 httpClientConfig.getClientCert(),
                 httpClientConfig.getClientKey(),
                 httpClientConfig.getServerCert(),
                 timeout);
+        } else {
+            protocol = "http";
+            consulClient = new ConsulClient(protocol + "://" + httpClientConfig.getApiAddress(), httpClientConfig.getApiPort(), timeout);
+        }
+        return consulClient;
     }
 
     public static void agentForceLeave(List<ConsulClient> clients, String nodeName) {

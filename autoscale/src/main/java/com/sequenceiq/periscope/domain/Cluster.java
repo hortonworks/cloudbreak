@@ -61,6 +61,9 @@ public class Cluster {
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Set<TimeAlert> timeAlerts = new HashSet<>();
 
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private Set<PrometheusAlert> prometheusAlerts = new HashSet<>();
+
     @Column(name = "min_size")
     private int minSize = DEFAULT_MIN_SIZE;
 
@@ -219,6 +222,18 @@ public class Cluster {
 
     public void addTimeAlert(TimeAlert alert) {
         this.timeAlerts.add(alert);
+    }
+
+    public Set<PrometheusAlert> getPrometheusAlerts() {
+        return prometheusAlerts;
+    }
+
+    public void setPrometheusAlerts(Set<PrometheusAlert> prometheusAlerts) {
+        this.prometheusAlerts = prometheusAlerts;
+    }
+
+    public void addPrometheusAlert(PrometheusAlert alert) {
+        this.prometheusAlerts.add(alert);
     }
 }
 

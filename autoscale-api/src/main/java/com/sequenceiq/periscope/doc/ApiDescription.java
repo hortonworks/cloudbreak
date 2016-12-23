@@ -21,6 +21,12 @@ public class ApiDescription {
         public static final String TIME_BASED_PUT = "modify alert which time based";
         public static final String TIME_BASED_GET = "retrieve alert which time based";
         public static final String TIME_BASED_DELETE = "delete alert which time based";
+
+        public static final String PROMETHEUS_BASED_POST = "create alert which prometheus based";
+        public static final String PROMETHEUS_BASED_PUT = "modify alert which prometheus based";
+        public static final String PROMETHEUS_BASED_GET = "retrieve alert which prometheus based";
+        public static final String PROMETHEUS_BASED_DELETE = "delete alert which prometheus based";
+        public static final String PROMETHEUS_BASED_DEFINITIONS = "retrieve Prometheus alert rule definitions";
     }
 
     public static class AlertNotes {
@@ -30,6 +36,7 @@ public class ApiDescription {
                 + "Metric based alerts are using the default (or custom) Ambari metrics. These metrics have a default Threshold value configured in Ambari - "
                 + "nevertheless these thresholds can be configured, changed or altered in Ambari. In order to change the default threshold for a metric "
                 + "please go to Ambari UI and select the Alerts tab and the metric. The values can be changed in the Threshold section. ";
+        public static final String PROMETHEUS_BASED_NOTES = "Prometheus based alerts are using Prometheus under the hood. ";
     }
 
     public static class ConfigurationOpDescription {
@@ -117,6 +124,12 @@ public class ApiDescription {
 
     public static class MetricAlertJsonProperties {
         public static final String ALERTDEFINITION = "Definition of the alert";
+        public static final String PERIOD = "Period of the alert";
+        public static final String ALERTSTATE = "State of the alert";
+    }
+
+    public static class PrometheusAlertJsonProperties {
+        public static final String ALERTRULE = "Definition of the alert rule that could be processed by Prometheus";
         public static final String PERIOD = "Period of the alert";
         public static final String ALERTSTATE = "State of the alert";
     }
