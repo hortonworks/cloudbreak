@@ -34,7 +34,7 @@
           "properties_attributes": {},
           "properties": {
             "druid.metadata.storage.type": "derby",
-            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527//druid;create=true",
+            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true",
             "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
             "druid.selectors.indexing.serviceName": "druid/overlord",
             "druid.storage.type": "s3"
