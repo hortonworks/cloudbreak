@@ -6,4 +6,4 @@
     - source: salt://unbound/config/01-consul.conf
     - template: jinja
     - context:
-        consul_server_addresses: {{ consul.server }}
+        consul_server_address: {{ consul.server }}
