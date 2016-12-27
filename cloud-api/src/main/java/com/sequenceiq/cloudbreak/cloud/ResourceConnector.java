@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -135,4 +136,12 @@ public interface ResourceConnector {
      */
 
     TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack);
+
+    /**
+     * Gets the Cloud platform related stack template
+     *
+     * @return the platform related stack template
+     * @throws TemplatingDoesNotSupportedException if template not supported by provider
+     */
+    String getStackTemplate() throws TemplatingDoesNotSupportedException;
 }

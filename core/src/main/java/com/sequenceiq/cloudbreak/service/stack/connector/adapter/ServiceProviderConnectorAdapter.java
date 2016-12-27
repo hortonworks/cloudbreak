@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.CheckPlatformVariantResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackRequest;
@@ -130,6 +132,28 @@ public class ServiceProviderConnectorAdapter {
     public void rollback(Stack stack, Set<Resource> resourceSet) {
         LOGGER.info("Rollback the whole stack for {}", stack.getId());
         deleteStack(stack, stack.getCredential());
+    }
+
+    public String getTemplate(Stack stack) {
+        LOGGER.debug("Get template for: {}");
+        Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
+        CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
+                location);
+        CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
+        GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
+        eventBus.notify(getPlatformTemplateRequest.selector(), Event.wrap(getPlatformTemplateRequest));
+        try {
+            GetPlatformTemplateResult res = getPlatformTemplateRequest.await();
+            LOGGER.info("Get template result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get template", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getTemplate();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting template: " + cloudContext, e);
+            throw new OperationException(e);
+        }
     }
 
     public PlatformParameters getPlatformParameters(Stack stack) {

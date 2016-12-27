@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -56,6 +57,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         MockitoAnnotations.initMocks(this);
         when(imageService.getImage(anyLong())).thenReturn(new Image("testimage", new HashMap<>()));
         when(componentConfigProvider.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
+        when(componentConfigProvider.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
     }
 
     @Test

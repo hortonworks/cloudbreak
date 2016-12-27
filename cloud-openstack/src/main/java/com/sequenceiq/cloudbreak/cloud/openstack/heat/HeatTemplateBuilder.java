@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.NovaInstanceView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.OpenStackGroupView;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 @Service
@@ -47,24 +48,24 @@ public class HeatTemplateBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String build(Location location, String stackName, List<Group> groups, Image instanceUserData, boolean existingNetwork,
-            boolean existingSubnet, NeutronNetworkView neutronNetworkView) {
+    public String build(ModelContext modelContext) {
         try {
-            List<NovaInstanceView> novaInstances = new OpenStackGroupView(stackName, groups).getFlatNovaView();
+            List<NovaInstanceView> novaInstances = new OpenStackGroupView(modelContext.stackName, modelContext.groups).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
-            model.put("cb_stack_name", openStackUtil.adjustStackNameLength(stackName));
+            model.put("cb_stack_name", openStackUtil.adjustStackNameLength(modelContext.stackName));
             model.put("agents", novaInstances);
-            model.put("core_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.CORE)));
-            model.put("gateway_user_data", formatUserData(instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
-            model.put("groups", groups);
-            model.put("existingNetwork", existingNetwork);
-            model.put("existingSubnet", existingSubnet);
-            model.put("network", neutronNetworkView);
-            AvailabilityZone az = location.getAvailabilityZone();
+            model.put("core_user_data", formatUserData(modelContext.instanceUserData.getUserData(InstanceGroupType.CORE)));
+            model.put("gateway_user_data", formatUserData(modelContext.instanceUserData.getUserData(InstanceGroupType.GATEWAY)));
+            model.put("groups", modelContext.groups);
+            model.put("existingNetwork", modelContext.existingNetwork);
+            model.put("existingSubnet", modelContext.existingSubnet);
+            model.put("network", modelContext.neutronNetworkView);
+            AvailabilityZone az = modelContext.location.getAvailabilityZone();
             if (az != null && az.value() != null) {
                 model.put("availability_zone", az.value());
             }
-            String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8"), model);
+            Template template = new Template(openStackHeatTemplatePath, modelContext.templateString, freemarkerConfiguration);
+            String generatedTemplate = processTemplateIntoString(template, model);
             LOGGER.debug("Generated Heat template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
@@ -101,6 +102,73 @@ public class HeatTemplateBuilder {
             sb.append("            ").append(line).append("\n");
         }
         return sb.toString();
+    }
+
+    public String getTemplate() {
+        try {
+            return freemarkerConfiguration.getTemplate(openStackHeatTemplatePath, "UTF-8").toString();
+        } catch (IOException e) {
+            throw new CloudConnectorException("can't get openstack heat template", e);
+        }
+    }
+
+    public static class ModelContext {
+
+        private Location location;
+
+        private String stackName;
+
+        private List<Group> groups;
+
+        private Image instanceUserData;
+
+        private boolean existingNetwork;
+
+        private boolean existingSubnet;
+
+        private NeutronNetworkView neutronNetworkView;
+
+        private String templateString;
+
+        public ModelContext withLocation(Location location) {
+            this.location = location;
+            return this;
+        }
+
+        public ModelContext withStackName(String stackName) {
+            this.stackName = stackName;
+            return this;
+        }
+
+        public ModelContext withGroups(List<Group> groups) {
+            this.groups = groups;
+            return this;
+        }
+
+        public ModelContext withInstanceUserData(Image instanceUserData) {
+            this.instanceUserData = instanceUserData;
+            return this;
+        }
+
+        public ModelContext withExistingNetwork(boolean existingNetwork) {
+            this.existingNetwork = existingNetwork;
+            return this;
+        }
+
+        public ModelContext withExistingSubnet(boolean existingSubnet) {
+            this.existingSubnet = existingSubnet;
+            return this;
+        }
+
+        public ModelContext withNeutronNetworkView(NeutronNetworkView neutronNetworkView) {
+            this.neutronNetworkView = neutronNetworkView;
+            return this;
+        }
+
+        public ModelContext withTemplateString(String templateString) {
+            this.templateString = templateString;
+            return this;
+        }
     }
 
 }
