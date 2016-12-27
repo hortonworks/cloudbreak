@@ -63,8 +63,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         // WHEN
         Stack stack = underTest.convert(getRequest("stack/stack.json"));
         // THEN
-        assertAllFieldsNotNull(stack, Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort",
-                "template", "network", "securityConfig", "securityGroup", "version", "created", "platformVariant", "cloudPlatform", "saltPassword"));
+        assertAllFieldsNotNull(stack, Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template",
+                "network", "securityConfig", "securityGroup", "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate"));
         Assert.assertEquals("eu-west-1", stack.getRegion());
     }
 

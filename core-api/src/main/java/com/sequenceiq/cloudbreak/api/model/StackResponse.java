@@ -46,6 +46,9 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorResponse orchestrator;
 
+    @ApiModelProperty(StackModelDescription.STACK_TEMPLATE)
+    private String stackTemplate;
+
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
@@ -169,5 +172,13 @@ public class StackResponse extends StackBase {
 
     public void setFailurePolicy(FailurePolicyResponse failurePolicy) {
         this.failurePolicy = failurePolicy;
+    }
+
+    public String getStackTemplate() {
+        return stackTemplate;
+    }
+
+    public void setStackTemplate(String stackTemplate) {
+        this.stackTemplate = stackTemplate;
     }
 }

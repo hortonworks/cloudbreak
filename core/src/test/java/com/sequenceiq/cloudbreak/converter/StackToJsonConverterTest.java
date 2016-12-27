@@ -163,6 +163,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         stack.setParameters(new HashMap<>());
         stack.setCloudPlatform("OPENSTACK");
         stack.setGatewayPort(9443);
+        stack.setStackTemplate("{}");
         return stack;
     }
 }

@@ -17,13 +17,16 @@ public class CloudStack {
 
     private final Image image;
 
+    private String template;
+
     private final Map<String, String> parameters;
 
-    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters) {
+    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, String template) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
         this.parameters = ImmutableMap.copyOf(parameters);
+        this.template = template;
     }
 
     public List<Group> getGroups() {
@@ -54,5 +57,9 @@ public class CloudStack {
         sb.append(", image=").append(image);
         sb.append('}');
         return sb.toString();
+    }
+
+    public String getTemplate() {
+        return template;
     }
 }

@@ -108,7 +108,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("cb-sec-group_" + "t"));
         assertThat(templateString, containsString("app_net_id"));
@@ -127,7 +138,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("cb-sec-group_" + "t"));
         assertThat(templateString, not(containsString("app_net_id")));
@@ -146,7 +168,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
         assertThat(templateString, containsString("app_net_id"));
@@ -165,7 +198,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
         assertThat(templateString, containsString("app_net_id"));
@@ -184,7 +228,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
         assertThat(templateString, not(containsString("app_net_id")));
@@ -203,7 +258,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
         assertThat(templateString, containsString("app_net_id"));
@@ -222,7 +288,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView(null);
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
         assertThat(templateString, not(containsString("app_net_id")));
@@ -241,7 +318,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
         assertThat(templateString, not(containsString("app_net_id")));
@@ -260,7 +348,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, not(containsString("name: cb-sec-group_" + "t")));
         assertThat(templateString, not(containsString("app_net_id")));
@@ -279,7 +378,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, not(containsString("name: cb-sec-group_" + "t")));
         assertThat(templateString, containsString("app_net_id"));
@@ -298,7 +408,18 @@ public class HeatTemplateBuilderTest {
         NeutronNetworkView neutronNetworkView = createNeutronNetworkView("floating_pool_id");
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
-        String templateString = heatTemplateBuilder.build(location(), stackName, groups, image, existingNetwork, existingSubnet, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnet);
+        modelContext.withGroups(groups);
+        modelContext.withInstanceUserData(image);
+        modelContext.withLocation(location());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(heatTemplateBuilder.getTemplate());
+
+        String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
         assertThat(templateString, not(containsString("name: cb-sec-group_" + "t")));
         assertThat(templateString, not(containsString("app_net_id")));

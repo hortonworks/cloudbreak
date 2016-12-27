@@ -64,7 +64,7 @@ public class CloudFormationTemplateBuilderTest {
 
     private CloudFormationTemplateBuilder.ModelContext modelContext;
 
-    private String awsCloudFormationTemplatePath;
+    private String awsCloudFormationTemplate;
 
     private String snapshotId;
 
@@ -81,7 +81,8 @@ public class CloudFormationTemplateBuilderTest {
         Configuration configuration = factoryBean.getObject();
         ReflectionTestUtils.setField(cloudFormationTemplateBuilder, "freemarkerConfiguration", configuration);
 
-        awsCloudFormationTemplatePath = "templates/aws-cf-stack.ftl";
+        String awsCloudFormationTemplatePath = "templates/aws-cf-stack.ftl";
+        awsCloudFormationTemplate = configuration.getTemplate(awsCloudFormationTemplatePath, "UTF-8").toString();
         snapshotId = "";
         authenticatedContext = authenticatedContext();
         existingSubnetCidr = "testSubnet";
@@ -104,7 +105,7 @@ public class CloudFormationTemplateBuilderTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        cloudStack = new CloudStack(groups, network, image, parameters);
+        cloudStack = new CloudStack(groups, network, image, parameters, null);
 
 
 
@@ -129,7 +130,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -158,7 +159,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -192,7 +193,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -226,7 +227,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -260,7 +261,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -294,7 +295,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -328,7 +329,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -362,7 +363,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -396,7 +397,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -430,7 +431,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -464,7 +465,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -498,7 +499,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -532,7 +533,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -566,7 +567,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -600,7 +601,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -634,7 +635,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN
@@ -668,7 +669,7 @@ public class CloudFormationTemplateBuilderTest {
                 .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                 .withEnableInstanceProfile(enableInstanceProfile)
                 .withInstanceProfileAvailable(instanceProfileAvailable)
-                .withTemplatePath(awsCloudFormationTemplatePath);
+                .withTemplate(awsCloudFormationTemplate);
 
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
         //THEN

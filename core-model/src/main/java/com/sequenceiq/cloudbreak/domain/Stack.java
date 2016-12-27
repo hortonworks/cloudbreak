@@ -297,6 +297,9 @@ public class Stack implements ProvisionEntity {
     @OneToOne
     private Orchestrator orchestrator;
 
+    @Column
+    private String stackTemplate;
+
     private Long created;
 
     private Boolean relocateDocker;
@@ -705,5 +708,13 @@ public class Stack implements ProvisionEntity {
 
     public boolean isInstanceGroupsSpecified() {
         return instanceGroups != null && !instanceGroups.isEmpty();
+    }
+
+    public String getStackTemplate() {
+        return stackTemplate;
+    }
+
+    public void setStackTemplate(String stackTemplate) {
+        this.stackTemplate = stackTemplate;
     }
 }

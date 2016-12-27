@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 @Service("ArmTemplateBuilder")
@@ -79,7 +80,7 @@ public class ArmTemplateBuilder {
             model.put("existingSubnetName", armUtils.getCustomSubnetId(network));
             model.put("noPublicIp", armUtils.isPrivateIp(network));
             model.put("noFirewallRules", armUtils.isNoSecurityGroups(network));
-            String generatedTemplate = processTemplateIntoString(freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8"), model);
+            String generatedTemplate = processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
@@ -95,7 +96,28 @@ public class ArmTemplateBuilder {
         }
     }
 
+    public String getTemplateString() {
+        return getTemplate().toString();
+    }
+
+    public Template getTemplate(CloudStack stack) {
+        try {
+            return new Template(armTemplatePath, stack.getTemplate(), freemarkerConfiguration);
+        } catch (IOException e) {
+            throw new CloudConnectorException("can't create template object", e);
+        }
+    }
+
+    private Template getTemplate() {
+        try {
+            return freemarkerConfiguration.getTemplate(armTemplatePath, "UTF-8");
+        } catch (IOException e) {
+            throw new CloudConnectorException("can't get arm template", e);
+        }
+    }
+
     private String base64EncodedUserData(String data) {
         return new String(Base64.encodeBase64(String.format("%s", data).getBytes()));
     }
+
 }

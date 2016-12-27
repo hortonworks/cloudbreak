@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -57,8 +58,18 @@ public class OpenStackResourceConnector implements ResourceConnector {
         NeutronNetworkView neutronNetworkView = new NeutronNetworkView(stack.getNetwork());
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
-        String heatTemplate = heatTemplateBuilder.build(authenticatedContext.getCloudContext().getLocation(),
-                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnetCidr != null);
+        modelContext.withGroups(stack.getGroups());
+        modelContext.withInstanceUserData(stack.getImage());
+        modelContext.withLocation(authenticatedContext.getCloudContext().getLocation());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(stack.getTemplate());
+
+        String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
 
@@ -139,8 +150,18 @@ public class OpenStackResourceConnector implements ResourceConnector {
         NeutronNetworkView neutronNetworkView = new NeutronNetworkView(stack.getNetwork());
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
-        String heatTemplate = heatTemplateBuilder.build(authenticatedContext.getCloudContext().getLocation(),
-                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnetCidr != null);
+        modelContext.withGroups(stack.getGroups());
+        modelContext.withInstanceUserData(stack.getImage());
+        modelContext.withLocation(authenticatedContext.getCloudContext().getLocation());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(stack.getTemplate());
+
+        String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
@@ -154,8 +175,18 @@ public class OpenStackResourceConnector implements ResourceConnector {
         NeutronNetworkView neutronNetworkView = new NeutronNetworkView(stack.getNetwork());
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
-        String heatTemplate = heatTemplateBuilder.build(authenticatedContext.getCloudContext().getLocation(),
-                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnetCidr != null);
+        modelContext.withGroups(stack.getGroups());
+        modelContext.withInstanceUserData(stack.getImage());
+        modelContext.withLocation(authenticatedContext.getCloudContext().getLocation());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(stack.getTemplate());
+
+        String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
@@ -167,13 +198,28 @@ public class OpenStackResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+        return heatTemplateBuilder.getTemplate();
+    }
+
+    @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         String stackName = utils.getStackName(authenticatedContext);
         NeutronNetworkView neutronNetworkView = new NeutronNetworkView(stack.getNetwork());
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
-        String heatTemplate = heatTemplateBuilder.build(authenticatedContext.getCloudContext().getLocation(),
-                stackName, stack.getGroups(), stack.getImage(), existingNetwork, existingSubnetCidr != null, neutronNetworkView);
+
+        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        modelContext.withExistingNetwork(existingNetwork);
+        modelContext.withExistingSubnet(existingSubnetCidr != null);
+        modelContext.withGroups(stack.getGroups());
+        modelContext.withInstanceUserData(stack.getImage());
+        modelContext.withLocation(authenticatedContext.getCloudContext().getLocation());
+        modelContext.withStackName(stackName);
+        modelContext.withNeutronNetworkView(neutronNetworkView);
+        modelContext.withTemplateString(stack.getTemplate());
+
+        String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
                 authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
@@ -204,7 +250,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             }
             groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null));
         }
-        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters());
+        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTemplate());
     }
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {
