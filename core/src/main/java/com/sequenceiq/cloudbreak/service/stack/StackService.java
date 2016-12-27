@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
+import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -294,7 +295,9 @@ public class StackService {
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
             }
+            String template = connector.getTemplate(stack);
             savedStack = stackRepository.save(stack);
+            addTemplateForStack(stack, template);
             MDCBuilder.buildMdcContext(savedStack);
             if (!"BYOS".equals(stack.cloudPlatform())) {
                 instanceGroupRepository.save(savedStack.getInstanceGroups());
@@ -607,6 +610,16 @@ public class StackService {
 
         public String code() {
             return code;
+        }
+    }
+
+    private void addTemplateForStack(Stack stack, String template) {
+        StackTemplate stackTemplate = new StackTemplate(template, cbVersion);
+        try {
+            Component stackTemplateComponent = new Component(ComponentType.STACK_TEMPLATE, ComponentType.STACK_TEMPLATE.name(), new Json(stackTemplate), stack);
+            componentConfigProvider.store(stackTemplateComponent);
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Could not create Cloudbreak details component.", e);
         }
     }
 

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -111,6 +112,11 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(stackId);
             if (cloudbreakDetails != null) {
                 stackJson.setCloudbreakDetails(getConversionService().convert(cloudbreakDetails, CloudbreakDetailsJson.class));
+            }
+
+            StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stackId);
+            if (stackTemplate != null) {
+                stackJson.setStackTemplate(stackTemplate.getTemplate());
             }
         } catch (Exception e) {
             LOGGER.error("Failed to convert dynamic component.", e);

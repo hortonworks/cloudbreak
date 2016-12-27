@@ -706,4 +706,5 @@ public class Stack implements ProvisionEntity {
     public boolean isInstanceGroupsSpecified() {
         return instanceGroups != null && !instanceGroups.isEmpty();
     }
+
 }

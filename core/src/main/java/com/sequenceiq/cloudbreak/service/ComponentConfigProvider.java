@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Component;
@@ -91,6 +92,18 @@ public class ComponentConfigProvider {
             return component.getAttributes().get(CloudbreakDetails.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read Cloudbreak details for stack.", e);
+        }
+    }
+
+    public StackTemplate getStackTemplate(Long stackId) {
+        try {
+            Component component = getComponent(stackId, ComponentType.STACK_TEMPLATE, ComponentType.STACK_TEMPLATE.name());
+            if (component == null) {
+                return null;
+            }
+            return component.getAttributes().get(StackTemplate.class);
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read template for stack.", e);
         }
     }
 

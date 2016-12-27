@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 
 import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 @Service("CloudFormationTemplateBuilder")
@@ -73,7 +74,7 @@ public class CloudFormationTemplateBuilder {
             model.put("snapshotId", context.snapshotId);
         }
         try {
-            String template = processTemplateIntoString(freemarkerConfiguration.getTemplate(context.templatePath, "UTF-8"), model);
+            String template = processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process CloudFormation freemarker template", e);
@@ -112,7 +113,7 @@ public class CloudFormationTemplateBuilder {
 
         private boolean mapPublicIpOnLaunch;
 
-        private String templatePath;
+        private String template;
 
         private boolean enableInstanceProfile;
 
@@ -171,8 +172,8 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
-        public ModelContext withTemplatePath(String templatePath) {
-            this.templatePath = templatePath;
+        public ModelContext withTemplate(String template) {
+            this.template = template;
             return this;
         }
 
