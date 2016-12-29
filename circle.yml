@@ -16,7 +16,7 @@ dependencies:
 
 test:
   override:
-    - case $CIRCLE_NODE_INDEX in 0) ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace ;; 1) cd integration-test && make without-build ;; esac:
+    - case $CIRCLE_NODE_INDEX in 0) ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace ;; 1) cd integration-test && make without-build && make revert-db ;; esac:
         parallel: true
         timeout: 1200
 
