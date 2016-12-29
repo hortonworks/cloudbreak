@@ -42,3 +42,6 @@ remove-test-containers:
 
 docker-build:
 	./scripts/docker-build.sh
+
+revert-db:
+	./scripts/revert-db.sh
