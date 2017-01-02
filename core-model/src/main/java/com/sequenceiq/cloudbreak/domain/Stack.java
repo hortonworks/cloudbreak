@@ -22,6 +22,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -47,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
@@ -300,6 +302,10 @@ public class Stack implements ProvisionEntity {
     private Long created;
 
     private Boolean relocateDocker;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json tags;
 
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
@@ -707,4 +713,11 @@ public class Stack implements ProvisionEntity {
         return instanceGroups != null && !instanceGroups.isEmpty();
     }
 
+    public Json getTags() {
+        return tags;
+    }
+
+    public void setTags(Json tags) {
+        this.tags = tags;
+    }
 }

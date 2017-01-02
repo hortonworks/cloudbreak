@@ -59,6 +59,12 @@ public abstract class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.PRINCIPAL_REGEX)
     private String principalRegex;
 
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_SEARCH_ATTRIBUTE)
+    private String userSearchAttribute;
+
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.DOMAIN)
+    private String domain;
+
     public String getName() {
         return name;
     }
@@ -153,5 +159,21 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     public void setPrincipalRegex(String principalRegex) {
         this.principalRegex = principalRegex;
+    }
+
+    public String getUserSearchAttribute() {
+        return userSearchAttribute;
+    }
+
+    public void setUserSearchAttribute(String userSearchAttribute) {
+        this.userSearchAttribute = userSearchAttribute;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }

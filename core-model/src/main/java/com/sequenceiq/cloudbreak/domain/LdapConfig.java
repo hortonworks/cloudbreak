@@ -80,11 +80,15 @@ public class LdapConfig implements ProvisionEntity {
 
     private String userSearchFilter;
 
+    private String userSearchAttribute;
+
     private String groupSearchBase;
 
     private String groupSearchFilter;
 
     private String principalRegex;
+
+    private String domain;
 
     public Long getId() {
         return id;
@@ -212,5 +216,21 @@ public class LdapConfig implements ProvisionEntity {
 
     public void setPrincipalRegex(String principalRegex) {
         this.principalRegex = principalRegex;
+    }
+
+    public String getUserSearchAttribute() {
+        return userSearchAttribute;
+    }
+
+    public void setUserSearchAttribute(String userSearchAttribute) {
+        this.userSearchAttribute = userSearchAttribute;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }

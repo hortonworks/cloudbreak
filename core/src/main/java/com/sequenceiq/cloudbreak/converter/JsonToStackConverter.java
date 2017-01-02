@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
@@ -51,6 +52,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         Stack stack = new Stack();
         stack.setName(source.getName());
         stack.setRegion(getRegion(source));
+        stack.setTags(getTags(source.getTags()));
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED.getStatus(), "", DetailedStackStatus.PROVISION_REQUESTED));
@@ -62,6 +64,17 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setOrchestrator(conversionService.convert(source.getOrchestrator(), Orchestrator.class));
         stack.setRelocateDocker(source.getRelocateDocker() == null ? true : source.getRelocateDocker());
         return stack;
+    }
+
+    private Json getTags(Map<String, String> tags) {
+        try {
+            if (tags == null || tags.isEmpty()) {
+                return new Json(new HashMap<>());
+            }
+            return new Json(tags);
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to convert dynamic tags.");
+        }
     }
 
     private String getRegion(StackRequest source) {

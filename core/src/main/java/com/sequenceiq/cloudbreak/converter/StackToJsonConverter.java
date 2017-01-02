@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
@@ -95,7 +98,21 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setCreated(source.getCreated());
         stackJson.setGatewayPort(source.getGatewayPort());
         convertComponentConfig(stackJson, source.getId());
+        convertTags(stackJson, source.getTags());
         return stackJson;
+    }
+
+    private void convertTags(StackResponse stackJson, Json tag) {
+        try {
+            Map<String, String> tags = new HashMap<>();
+            if (tag.getValue() != null) {
+                stackJson.setTags(tag.get(Map.class));
+            } else {
+                stackJson.setTags(tags);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to convert dynamic tags.", e);
+        }
     }
 
     private StackResponse convertComponentConfig(StackResponse stackJson, Long stackId) {
