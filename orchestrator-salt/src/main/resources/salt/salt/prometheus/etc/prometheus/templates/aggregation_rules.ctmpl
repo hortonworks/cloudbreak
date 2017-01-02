@@ -1,0 +1,5 @@
+{{range tree "rules/aggregation"}}
+#{{.Key}}
+{{.Value}}
+
+{{end}}

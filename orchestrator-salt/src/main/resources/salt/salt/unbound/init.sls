@@ -7,3 +7,11 @@
     - template: jinja
     - context:
         consul_server_address: {{ consul.server }}
+
+unbound:
+  pkg:
+    - installed
+  service.running:
+    - watch:
+      - pkg: unbound
+      - file: /etc/unbound/conf.d/01-consul.conf
