@@ -27,6 +27,23 @@ download_prom_server:
     - group: prometheus
     - makedirs: True
 
+
+/etc/prometheus/templates/aggregation_rules.ctmpl:
+  file.managed:
+    - makedirs: True
+    - source: salt://prometheus/etc/prometheus/templates/aggregation_rules.ctmpl
+    - user: prometheus
+    - group: prometheus
+    - mode: 640
+
+/etc/prometheus/templates/alerting_rules.ctmpl:
+  file.managed:
+    - makedirs: True
+    - source: salt://prometheus/etc/prometheus/templates/alerting_rules.ctmpl
+    - user: prometheus
+    - group: prometheus
+    - mode: 640
+
 /etc/prometheus/rules:
   file.directory:
     - user: prometheus
@@ -70,9 +87,20 @@ prometheus_server_service_script:
     - template: jinja
     - mode: 755
 
+/etc/init.d/consul_template_prometheus:
+  file.managed:
+    - makedirs: True
+    - source: salt://prometheus/init.d/consul_template_prometheus
+    - template: jinja
+    - mode: 755
 {% endif %}
 
 prometheus_server_service:
   service.running:
     - name: prometheus
+    - enable: True
+
+consul_template_prometheus_service:
+  service.running:
+    - name: consul_template_prometheus
     - enable: True

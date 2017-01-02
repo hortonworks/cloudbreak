@@ -19,12 +19,12 @@ prometheus:
         # Here it's Prometheus itself.
 
         scrape_configs:
-          - job_name: 'prometheus'
+          - job_name: 'datanode'
             metrics_path: /prom/metrics
             consul_sd_configs:
               - server:    'consul.service.consul:8500'
                 datacenter: 'dc1'
-                services: [ 'prometheus' ]
+                services: [ 'datanode' ]
             relabel_configs:
               - source_labels: ['__meta_consul_service']
                 regex:         '(.*)'
@@ -38,3 +38,30 @@ prometheus:
                 regex:         '(.*)'
                 target_label:  'instance'
                 replacement:   '$1'
+              - source_labels: ['__meta_consul_tags']
+                regex:         ',(installed|maintenance),'
+                target_label:  'service_status'
+                replacement:   '$1'
+          - job_name: 'namenode'
+            metrics_path: /prom/metrics
+            consul_sd_configs:
+              - server:    'consul.service.consul:8500'
+                datacenter: 'dc1'
+                services: [ 'namenode' ]
+            relabel_configs:
+               - source_labels: ['__meta_consul_service']
+                 regex:         '(.*)'
+                 target_label:  'job'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_tags']
+                 regex:         '.*,jobname=(.*?),.*'
+                 target_label:  'job'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_node']
+                 regex:         '(.*)'
+                 target_label:  'instance'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_tags']
+                 regex:         ',(installed|maintenance),'
+                 target_label:  'service_status'
+                 replacement:   '$1'
