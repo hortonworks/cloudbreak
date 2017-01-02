@@ -28,7 +28,7 @@ download_prom_server:
     - makedirs: True
 
 
-etc/prometheus/templates/aggregation_rules.ctmpl:
+/etc/prometheus/templates/aggregation_rules.ctmpl:
 file.managed:
   - makedirs: True
   - source: salt://prometheus/etc/prometheus/templates/aggregation_rules.ctmpl
@@ -37,7 +37,7 @@ file.managed:
   - group: prometheus
   - mode: 640
 
-etc/prometheus/templates/alerting_rules.ctmpl:
+/etc/prometheus/templates/alerting_rules.ctmpl:
 file.managed:
   - makedirs: True
   - source: salt://prometheus/etc/prometheus/templates/alerting_rules.ctmpl
