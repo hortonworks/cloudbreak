@@ -20,6 +20,11 @@ install-mariadb:
       - mariadb
 {% endif %}
 
+install-ambari-consul-bridge:
+  cmd.run:
+    - name: curl -Lo /usr/lib/ambari-server/ambari-consul-bridge.jar https://s3-eu-west-1.amazonaws.com/maven.sequenceiq.com/releases/org/apache/ambari-consul-bridge/0.0.1/ambari-consul-bridge-0.0.1.jar
+    - unless: ls -1 /usr/lib/ambari-server/ambari-consul-bridge.jar
+
 /var/lib/ambari-server/jdbc-drivers:
   cmd.run:
     - name: cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers
