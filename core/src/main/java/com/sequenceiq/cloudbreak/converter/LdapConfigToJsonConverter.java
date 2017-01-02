@@ -25,6 +25,8 @@ public class LdapConfigToJsonConverter extends AbstractConversionServiceAwareCon
         json.setUserSearchBase(config.getUserSearchBase());
         json.setUserSearchFilter(config.getUserSearchFilter());
         json.setPrincipalRegex(config.getPrincipalRegex());
+        json.setUserSearchAttribute(config.getUserSearchAttribute());
+        json.setDomain(config.getDomain());
 
         return json;
     }

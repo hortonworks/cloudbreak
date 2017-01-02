@@ -461,6 +461,8 @@ public class TestUtil {
         config.setBindDn("cn=admin,dc=example,dc=org");
         config.setBindPassword("admin");
         config.setServerHost("localhost");
+        config.setUserSearchAttribute("cn=admin,dc=example,dc=org");
+        config.setDomain("ad.hdc.com");
         config.setServerPort(389);
         config.setServerSSL(false);
         return config;

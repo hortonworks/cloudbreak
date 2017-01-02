@@ -10,5 +10,7 @@
   "userSearchFilter": "(&amp;(objectclass=person)(sAMAccountName={2}))",
   "groupSearchBase": "cn=groups,dc=example,dc=org",
   "groupSearchFilter": "(&amp;(objectclass=person)(sAMAccountName={2}))",
-  "principalRegex": "(.*)"
+  "principalRegex": "(.*)",
+  "userSearchAttribute": "cn=groups,dc=example,dc=org",
+  "domain": "ad.hdc.com"
 }

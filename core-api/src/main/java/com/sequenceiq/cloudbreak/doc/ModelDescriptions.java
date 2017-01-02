@@ -98,7 +98,8 @@ public class ModelDescriptions {
         public static final String CLOUDBREAK_DETAILS = "details of the Cloudbreak that provisioned the stack";
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
-        public static final String INSTANCE_GROUP_ADJUSTMENT = "instnce group adjustment";
+        public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
+        public static final String TAGS = "stack related tags";
     }
 
     public static class ClusterModelDescription {
@@ -327,6 +328,8 @@ public class ModelDescriptions {
         public static final String GROUP_SEARCH_BASE = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)";
         public static final String GROUP_SEARCH_FILTER = "filter for group search for authorization";
         public static final String PRINCIPAL_REGEX = "parses the principal for insertion into templates via regex.";
+        public static final String USER_SEARCH_ATTRIBUTE = "attribute name for simplified search filter (e.g. sAMAccountName).";
+        public static final String DOMAIN = "domain in LDAP server (e.g. ad.seq.com).";
     }
 
     public static class RDSConfigModelDescription {
