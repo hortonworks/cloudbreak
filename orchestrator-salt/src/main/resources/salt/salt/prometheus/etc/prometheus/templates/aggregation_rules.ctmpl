@@ -1,0 +1,9 @@
+{{if key "etc/prometheus/rules/aggregation"}}
+{{range tree "etc/prometheus/rules/aggregation"}}
+#{{.Key}}
+{{.Value}}
+
+{{end}}
+{{else}}
+
+{{end}}

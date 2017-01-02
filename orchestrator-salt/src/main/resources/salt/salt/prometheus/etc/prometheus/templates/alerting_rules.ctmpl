@@ -1,0 +1,9 @@
+{{if key "etc/prometheus/rules/alerting"}}
+{{range tree "etc/prometheus/rules/alerting"}}
+#{{.Key}}
+{{.Value}}
+
+{{end}}
+{{else}}
+
+{{end}}
