@@ -96,11 +96,11 @@ integrationtest:
        GCP: default-gcp-network
        AWS: default-aws-network
        AZURE_RM: default-azure-rm-network
-    defaultSecurityGroups: 
-       GCP: default-gcp-all-services-port
-       AWS: default-aws-all-services-port
-       AZURE_RM: default-azure_rm-all-services-port
-       OPENSTACK: default-openstack-all-services-port
+    defaultSecurityGroups:
+       GCP: UNSECURE-gcp-all-services-open
+       AWS: UNSECURE-aws-all-services-open
+       AZURE_RM: UNSECURE-azure_rm-all-services-open
+       OPENSTACK: UNSECURE-openstack-all-services-open
     testSuites:
         # Full smoke tests with cluster creation, stop-start, upscale-downscale
         FULL_SMOKE_TEST:

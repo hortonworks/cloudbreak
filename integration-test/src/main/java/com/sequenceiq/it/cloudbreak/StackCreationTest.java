@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.scaling.ScalingUtil;
 
 public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
 
@@ -83,5 +84,6 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
+        ScalingUtil.putInstanceCountToContext(itContext, stackId);
     }
 }

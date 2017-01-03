@@ -53,5 +53,6 @@ public class StackAndClusterUpscaleTest extends AbstractCloudbreakIntegrationTes
         // THEN
         ScalingUtil.checkStackScaled(stackEndpoint, stackId, expectedNodeCountStack);
         ScalingUtil.checkClusterScaled(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
+        ScalingUtil.putInstanceCountToContext(itContext, stackId);
     }
 }
