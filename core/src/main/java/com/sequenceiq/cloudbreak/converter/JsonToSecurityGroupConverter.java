@@ -21,8 +21,9 @@ public class JsonToSecurityGroupConverter extends AbstractConversionServiceAware
         entity.setName(source.getName());
         entity.setDescription(source.getDescription());
         entity.setStatus(ResourceStatus.USER_MANAGED);
-
+        entity.setSecurityGroupId(source.getSecurityGroupId());
         entity.setSecurityRules(convertSecurityRules(source.getSecurityRules(), entity));
+        entity.setCloudPlatform(source.getCloudPlatform());
         return entity;
     }
 

@@ -6,9 +6,16 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         $rootScope.securitygroups = AccountSecurityGroup.query();
         $scope.showAlert = false;
         $scope.alertMessage = "";
+        $scope.securitygroup = {};
+
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
+        if (firstVisiblePlatform != -1) {
+            $scope.selectedProvider = ["AWS", "AZURE_RM", "GCP", "OPENSTACK"][firstVisiblePlatform];
+        }
         initializeFormsAndScopeSecurityGroup();
 
-        $scope.createSecurityGroup = function() {
+        $scope.createSecurityGroup = function(provider) {
+            $scope.securitygroup.cloudPlatform = provider;
             doCreateSecurityGroup();
         }
 
@@ -132,6 +139,10 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         }
 
         function initializeFormsAndScopeSecurityGroup() {
+            if ($scope.securityGroupForm != null) {
+                $scope.securityGroupForm.$setPristine();
+            }
+
             $scope.securitygroup = {
                 name: "",
                 description: "",
@@ -153,6 +164,15 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         $scope.showErrorMessageAlert = function() {
             $scope.showAlert = true;
             $scope.alertMessage = $scope.statusMessage;
+        }
+
+        $scope.createSecurityGroupRequest = function(provider) {
+        	initializeFormsAndScopeSecurityGroup();
+        	$scope.selectedProvider = provider;
+        }
+
+        $scope.selectSecurityGroupType = function() {
+            delete $scope.securitygroup.securityGroupId
         }
 
     }

@@ -18,12 +18,14 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
 import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
+import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
 import com.sequenceiq.cloudbreak.shell.completion.AwsInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.AwsOrchestratorType;
 import com.sequenceiq.cloudbreak.shell.completion.AwsVolumeType;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -38,6 +40,8 @@ public class AwsCommands implements CommandMarker {
 
     private NetworkCommands baseNetworkCommands;
 
+    private SecurityGroupCommands baseSecurityGroupCommands;
+
     private TemplateCommands baseTemplateCommands;
 
     private PlatformCommands basePlatformCommands;
@@ -47,11 +51,13 @@ public class AwsCommands implements CommandMarker {
     public AwsCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
             NetworkCommands baseNetworkCommands,
+            SecurityGroupCommands baseSecurityGroupCommands,
             TemplateCommands baseTemplateCommands,
             PlatformCommands basePlatformCommands,
             StackCommands stackCommands) {
         this.baseCredentialCommands = baseCredentialCommands;
         this.baseNetworkCommands = baseNetworkCommands;
+        this.baseSecurityGroupCommands = baseSecurityGroupCommands;
         this.shellContext = shellContext;
         this.baseTemplateCommands = baseTemplateCommands;
         this.basePlatformCommands = basePlatformCommands;
@@ -76,6 +82,11 @@ public class AwsCommands implements CommandMarker {
     @CliAvailabilityIndicator(value = {"network create --AWS --NEW_SUBNET", "network create --AWS --NEW", "network create --AWS --EXISTING_SUBNET"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM);
+    }
+
+    @CliAvailabilityIndicator(value = {"securitygroup create --AWS --NEW", "securitygroup create --AWS --EXISTING"})
+    public boolean createSecurityGroupAvailable() {
+        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"credential create --AWS", "template create --EC2"})
@@ -160,6 +171,27 @@ public class AwsCommands implements CommandMarker {
         parameters.put("vpcId", vpcId);
         parameters.put("subnetId", subnetId);
         return baseNetworkCommands.create(name, null, publicInAccount, description, platformId, parameters, PLATFORM);
+    }
+
+    @CliCommand(value = "securitygroup create --AWS --NEW", help = "Create an AWS security group")
+    public String createNewSecurityGroup(
+            @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
+            @CliOption(key = "description", help = "Description of the security group") String description,
+            @CliOption(key = "rules", mandatory = true,
+                    help = "Security rules in the following format: ';' separated list of <cidr>:<protocol>:<comma separated port list>") SecurityRules rules,
+            @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
+                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
+        return baseSecurityGroupCommands.create(name, description, null, PLATFORM, rules, publicInAccount);
+    }
+
+    @CliCommand(value = "securitygroup create --AWS --EXISTING", help = "Create an AWS security group which use existing security group")
+    public String createExistingSecurityGroup(
+            @CliOption(key = "name", mandatory = true, help = "Name of the security group") String name,
+            @CliOption(key = "description", help = "Description of the security group") String description,
+            @CliOption(key = "securityGroupId", mandatory = true, help = "Existing security group id.") String existingSecurityGroupId,
+            @CliOption(key = "publicInAccount", help = "Marks the securitygroup as visible for all members of the account",
+                    specifiedDefaultValue = "true", unspecifiedDefaultValue = "false") Boolean publicInAccount) {
+        return baseSecurityGroupCommands.create(name, description, existingSecurityGroupId, PLATFORM, null, publicInAccount);
     }
 
     @CliCommand(value = "template create --AWS", help = "Create a new AWS template")

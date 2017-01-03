@@ -20,12 +20,29 @@
                 </p>
 
                 <!-- ............ CREATE FORM ............................................. -->
-                <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
                 <div class="panel panel-default">
                     <div id="panel-create-securitygroup-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                         <div class="panel-body">
-                            <div ng-include src="'tags/securitygroup/securitygroupform.tag'"></div>
+                         <div class="row " style="padding-bottom: 10px">
+                                <div class="btn-segmented-control" id="providerSelector2">
+                                    <div class="btn-group btn-group-justified">
+                                        <a id="awsSecurityGroupChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'AWS'), 'btn-default':(selectedProvider != 'AWS')}" role="button" ng-click="createSecurityGroupRequest('AWS')">{{msg.aws_label}}</a>
+                                        <a id="azureSecurityGroupChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'AZURE_RM'), 'btn-default':!azureSecurityGroup}" role="button" ng-click="createSecurityGroupRequest('AZURE_RM')">{{msg.azure_label}}</a>
+                                    </div>
+                                    <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
+                                        <a id="gcpSecurityGroupChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'GCP'), 'btn-default':(selectedProvider != 'GCP')}" role="button" ng-click="createSecurityGroupRequest('GCP')">{{msg.gcp_label}}</a>
+                                        <a id="openstackSecurityGroupChange" ng-if="isVisible('OPENSTACK')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'OPENSTACK'), 'btn-default':(selectedProvider != 'OPENSTACK')}" role="button" ng-click="createSecurityGroupRequest('OPENSTACK')">{{msg.openstack_label}}</a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
+
+                            <form class="form-horizontal" role="form" name="securityGroupForm">
+                                <div ng-include src="'tags/securitygroup/securitygroupform.tag'"></div>
+                            </form>
+
                         </div>
                     </div>
                 </div>
@@ -43,6 +60,7 @@
                         <div class="panel-heading">
                             <h5>
                                 <a href="" data-toggle="collapse" data-parent="#securitygroup-list-accordion" data-target="#panel-securitygroup-collapse{{securitygroup.id}}"><i class="fa fa-file-o fa-fw"></i>{{securitygroup.name}}</a>
+                                <span class="label label-info pull-right" >{{securitygroup.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="securitygroup.publicInAccount"></i>
                             </h5>
                         </div>

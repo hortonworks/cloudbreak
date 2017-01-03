@@ -268,7 +268,12 @@ A security group gives developers and systems administrators an easy way to crea
 #### Security group creation example
 
 ```
-securitygroup create --name secgroup_example --description securitygroup-example --rules 0.0.0.0/0:tcp:8080,9090;10.0.33.0/24:tcp:1234,1235
+securitygroup create --AWS --NEW --name secgroup_example --description securitygroup-example --rules 0.0.0.0/0:tcp:8080,9090;10.0.33.0/24:tcp:1234,1235
+```
+or
+
+```
+securitygroup create --AWS --EXISTING --name secgroup_example_2 --description securitygroup-example --securityGroupId sg-example2
 ```
 
 #### Viewing created security group

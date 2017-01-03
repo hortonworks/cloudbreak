@@ -363,7 +363,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         securityGroupId: cluster.securityGroupId,
                         availabilityZone: cluster.availabilityZone || null,
                         orchestrator: cluster.orchestrator || null,
-                        platformVariant: cluster.platformVariant
+                        platformVariant: cluster.platformVariant,
+                        imageId: cluster.customImage == true ? cluster.imageId :null
                     }
                     if (cluster.public) {
                         AccountStack.save(stack, function(result) {

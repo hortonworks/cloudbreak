@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.shell.commands.base.BaseNetworkCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BasePlatformCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseStackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseTemplateCommands;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseSecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.BasicCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.BlueprintCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.ClusterCommands;
@@ -19,7 +20,6 @@ import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.LdapConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
-import com.sequenceiq.cloudbreak.shell.commands.common.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.SssdConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AwsCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AzureCommands;
@@ -73,8 +73,8 @@ public class CommandDefinition {
     }
 
     @Bean
-    SecurityGroupCommands securityGroupCommands() {
-        return new SecurityGroupCommands(shellContext);
+    BaseSecurityGroupCommands baseSecurityGroupCommands() {
+        return new BaseSecurityGroupCommands(shellContext);
     }
 
     @Bean
@@ -119,25 +119,25 @@ public class CommandDefinition {
 
     @Bean
     public AwsCommands awsCredentialCommands() {
-        return new AwsCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(),
+        return new AwsCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
                 baseTemplateCommands(), basePlatformCommands(), stackCommands());
     }
 
     @Bean
     public AzureCommands azureCredentialCommands() {
-        return new AzureCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(),
+        return new AzureCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
                 baseTemplateCommands(), basePlatformCommands(), stackCommands());
     }
 
     @Bean
     public GcpCommands gcpCredentialCommands() {
-        return new GcpCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(),
+        return new GcpCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
                 baseTemplateCommands(), basePlatformCommands(), stackCommands());
     }
 
     @Bean
     public OpenStackCommands openStackCredentialCommands() {
-        return new OpenStackCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(),
+        return new OpenStackCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
                 baseTemplateCommands(), basePlatformCommands(), stackCommands());
     }
 }

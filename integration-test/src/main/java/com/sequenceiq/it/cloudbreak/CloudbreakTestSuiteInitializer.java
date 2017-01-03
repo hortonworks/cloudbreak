@@ -114,7 +114,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         putNetworkToContext(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).networkEndpoint(), cloudProvider, networkName);
         putSecurityGroupToContext(itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).securityGroupEndpoint(),
-                securityGroupName);
+                cloudProvider, securityGroupName);
         putCredentialToContext(
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
                 credentialName);
@@ -181,10 +181,10 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private void putSecurityGroupToContext(SecurityGroupEndpoint endpoint, String securityGroupName) {
+    private void putSecurityGroupToContext(SecurityGroupEndpoint endpoint, String cloudProvider, String securityGroupName) {
         endpoint.getPublics();
         if (StringUtils.isEmpty(securityGroupName)) {
-            securityGroupName = itProps.getDefaultSecurityGroup();
+            securityGroupName = itProps.getDefaultSecurityGroup(cloudProvider);
         }
         if (StringUtils.hasLength(securityGroupName)) {
             try {

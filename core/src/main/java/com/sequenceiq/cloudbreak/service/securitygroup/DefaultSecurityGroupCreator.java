@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -54,32 +55,41 @@ public class DefaultSecurityGroupCreator {
     private Set<SecurityGroup> createDefaultSecurityGroupInstances(CbUser user) {
         Set<SecurityGroup> securityGroups = new HashSet<>();
         //create default strict security group
-        createDefaultStringSecurityGroup(user, securityGroups);
+        createDefaultStringSecurityGroup(user, CloudConstants.AWS, securityGroups);
+        createDefaultStringSecurityGroup(user, CloudConstants.AZURE_RM, securityGroups);
+        createDefaultStringSecurityGroup(user, CloudConstants.GCP, securityGroups);
+        createDefaultStringSecurityGroup(user, CloudConstants.OPENSTACK, securityGroups);
         //create default security group which opens all of the known services' ports
-        createDefaultAllKnownServicesSecurityGroup(user, securityGroups);
+        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.AWS, securityGroups);
+        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.AZURE_RM, securityGroups);
+        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.GCP, securityGroups);
+        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.OPENSTACK, securityGroups);
         return securityGroups;
     }
 
-    private void createDefaultStringSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups) {
+    private void createDefaultStringSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups) {
         List<Port> strictSecurityGroupPorts = new ArrayList<>();
+        String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
         strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
         strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
         strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
         String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
 
-        addSecurityGroup(user, securityGroups, "only-ssh-and-ssl", strictSecurityGroupPorts, strictSecurityGroupDesc);
+        addSecurityGroup(user, platform, securityGroups, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
     }
 
-    private void createDefaultAllKnownServicesSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups) {
+    private void createDefaultAllKnownServicesSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups) {
+        String securityGroupName = "default-" + platform.toLowerCase() + "-all-services-port";
         //new ArrayList -> otherwise the list will be the static 'ports' list from NetworkUtils and we don't want to add nginx port to 'ports' static list.
         List<Port> portsWithoutAclRules = new ArrayList<>(NetworkUtils.getPortsWithoutAclRules());
         portsWithoutAclRules.add(0, new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
         String allPortsOpenDesc = getPortsOpenDesc(portsWithoutAclRules);
-        addSecurityGroup(user, securityGroups, "all-services-port", portsWithoutAclRules, allPortsOpenDesc);
+        addSecurityGroup(user, platform, securityGroups, securityGroupName, portsWithoutAclRules, allPortsOpenDesc);
     }
 
-    private void addSecurityGroup(CbUser user, Set<SecurityGroup> securityGroups, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
-        SecurityGroup onlySshAndSsl = createSecurityGroup(user, name, securityGroupDesc);
+    private void addSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups, String name,
+            List<Port> securityGroupPorts, String securityGroupDesc) {
+        SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Collections.singletonList(sshAndSslRule)));
         securityGroups.add(securityGroupService.create(user, onlySshAndSsl));
@@ -94,13 +104,14 @@ public class DefaultSecurityGroupCreator {
         return allPortsOpenDescBuilder.toString();
     }
 
-    private SecurityGroup createSecurityGroup(CbUser user, String name, String description) {
+    private SecurityGroup createSecurityGroup(CbUser user, String platform, String name, String description) {
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setName(name);
         securityGroup.setOwner(user.getUserId());
         securityGroup.setAccount(user.getAccount());
         securityGroup.setDescription(description);
         securityGroup.setPublicInAccount(true);
+        securityGroup.setCloudPlatform(platform);
         securityGroup.setStatus(ResourceStatus.DEFAULT);
         return securityGroup;
     }

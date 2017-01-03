@@ -26,6 +26,7 @@ tests:
   - name: create security group
     parameters:
       name: it-restricted-ambari-osn
+      provider: OPENSTACK
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 

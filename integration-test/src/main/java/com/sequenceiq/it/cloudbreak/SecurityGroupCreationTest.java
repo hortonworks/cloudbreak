@@ -13,8 +13,9 @@ import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
-    @Parameters({ "name", "ports" })
-    public void testSecurityGroupCreation(@Optional("it-restricted-ambari") String name, @Optional("22,443,9443,8080") String ports) throws Exception {
+    @Parameters({ "name", "ports", "provider" })
+    public void testSecurityGroupCreation(@Optional("it-restricted-ambari") String name, @Optional("22,443,9443,8080") String ports,
+            @Optional("MOCK") String provider) throws Exception {
         // GIVEN
         // WHEN
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
@@ -25,6 +26,7 @@ public class SecurityGroupCreationTest extends AbstractCloudbreakIntegrationTest
         securityRuleRequest.setSubnet("0.0.0.0/0");
         securityRuleRequest.setPorts(ports);
         securityGroupRequest.setSecurityRules(Collections.singletonList(securityRuleRequest));
+        securityGroupRequest.setCloudPlatform(provider);
 
         String id = getCloudbreakClient().securityGroupEndpoint().postPrivate(securityGroupRequest).getId().toString();
         // THEN

@@ -67,6 +67,8 @@ public class TestUtil {
 
     public static final String DUMMY_DESCRIPTION = "dummyDescription";
 
+    public static final String DUMMY_SECURITY_GROUP_ID = "dummySecurityGroupId";
+
     public static final String N1_HIGHCPU_16_INSTANCE = "n1-highcpu-16";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
@@ -552,6 +554,8 @@ public class TestUtil {
         securityGroup.setName(DUMMY_NAME);
         securityGroup.setStatus(ResourceStatus.DEFAULT);
         securityGroup.setSecurityRules(securityRules);
+        securityGroup.setSecurityGroupId(DUMMY_SECURITY_GROUP_ID);
+        securityGroup.setCloudPlatform(AWS);
         return securityGroup;
     }
 

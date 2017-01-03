@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 
+import java.util.Arrays;
 import java.util.Collections;
 
 import org.junit.Before;
@@ -40,7 +41,7 @@ public class JsonToSecurityGroupConverterTest extends AbstractJsonConverterTest<
         // WHEN
         SecurityGroup result = underTest.convert(getRequest("security-group/security-group.json"));
         // THEN
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Arrays.asList("id", "owner", "account", "securityGroupId"));
     }
 
     @Override

@@ -14,6 +14,7 @@ tests:
   - name: create security group
     parameters:
       name: it-restricted-ambari-gcp
+      provider: GCP
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 

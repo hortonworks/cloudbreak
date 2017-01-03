@@ -22,6 +22,13 @@ public abstract class SecurityGroupBase {
     @Size(max = 1000)
     private String description;
 
+    @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_GROUP_ID)
+    private String securityGroupId;
+
+    @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
+    @NotNull
+    private String cloudPlatform;
+
     public String getName() {
         return name;
     }
@@ -38,4 +45,19 @@ public abstract class SecurityGroupBase {
         this.description = description;
     }
 
+    public String getSecurityGroupId() {
+        return securityGroupId;
+    }
+
+    public void setSecurityGroupId(String securityGroupId) {
+        this.securityGroupId = securityGroupId;
+    }
+
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    public void setCloudPlatform(String cloudPlatform) {
+        this.cloudPlatform = cloudPlatform;
+    }
 }
