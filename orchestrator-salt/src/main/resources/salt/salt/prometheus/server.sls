@@ -32,7 +32,6 @@ download_prom_server:
   file.managed:
     - makedirs: True
     - source: salt://prometheus/etc/prometheus/templates/aggregation_rules.ctmpl
-    - template: jinja
     - user: prometheus
     - group: prometheus
     - mode: 640
@@ -41,7 +40,6 @@ download_prom_server:
   file.managed:
     - makedirs: True
     - source: salt://prometheus/etc/prometheus/templates/alerting_rules.ctmpl
-    - template: jinja
     - user: prometheus
     - group: prometheus
     - mode: 640
