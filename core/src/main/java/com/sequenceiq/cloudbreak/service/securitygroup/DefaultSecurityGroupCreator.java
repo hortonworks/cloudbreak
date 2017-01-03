@@ -9,7 +9,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -30,6 +33,8 @@ import com.sequenceiq.cloudbreak.service.network.Port;
 @Service
 public class DefaultSecurityGroupCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSecurityGroupCreator.class);
+    private static final String[] PLATFORMS_WITH_SEC_GROUP_SUPPORT = {CloudConstants.AWS, CloudConstants.AZURE_RM,
+            CloudConstants.GCP, CloudConstants.OPENSTACK};
     private static final String TCP_PROTOCOL = "tcp";
 
     @Inject
@@ -41,49 +46,40 @@ public class DefaultSecurityGroupCreator {
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
 
-    public Set<SecurityGroup> createDefaultSecurityGroups(CbUser user) {
+    public void createDefaultSecurityGroups(CbUser user) {
+        Set<SecurityGroup> defaultSecurityGroups = groupRepository.findAllDefaultInAccount(user.getAccount());
+        Map<String, SecurityGroup> defSecGroupMap = defaultSecurityGroups.stream().collect(Collectors.toMap(SecurityGroup::getName, Function.identity()));
         Set<SecurityGroup> securityGroups = new HashSet<>();
-        Set<SecurityGroup> defaultNetworks = groupRepository.findAllDefaultInAccount(user.getAccount());
-        if (defaultNetworks.isEmpty()) {
-            LOGGER.info("Creating default security groups and rules.");
-            securityGroups = createDefaultSecurityGroupInstances(user);
+        for (String platform : PLATFORMS_WITH_SEC_GROUP_SUPPORT) {
+            //create default strict security group
+            createDefaultStrictSecurityGroup(user, platform, securityGroups, defSecGroupMap);
+            //create default security group which opens all of the known services' ports
+            createDefaultAllKnownServicesSecurityGroup(user, platform, securityGroups, defSecGroupMap);
         }
-        return securityGroups;
     }
 
-    private Set<SecurityGroup> createDefaultSecurityGroupInstances(CbUser user) {
-        Set<SecurityGroup> securityGroups = new HashSet<>();
-        //create default strict security group
-        createDefaultStringSecurityGroup(user, CloudConstants.AWS, securityGroups);
-        createDefaultStringSecurityGroup(user, CloudConstants.AZURE_RM, securityGroups);
-        createDefaultStringSecurityGroup(user, CloudConstants.GCP, securityGroups);
-        createDefaultStringSecurityGroup(user, CloudConstants.OPENSTACK, securityGroups);
-        //create default security group which opens all of the known services' ports
-        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.AWS, securityGroups);
-        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.AZURE_RM, securityGroups);
-        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.GCP, securityGroups);
-        createDefaultAllKnownServicesSecurityGroup(user, CloudConstants.OPENSTACK, securityGroups);
-        return securityGroups;
-    }
-
-    private void createDefaultStringSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups) {
-        List<Port> strictSecurityGroupPorts = new ArrayList<>();
+    private void createDefaultStrictSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups, Map<String, SecurityGroup> defSecGroupMap) {
         String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
-        strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
-        strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
-        strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
-        String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
-
-        addSecurityGroup(user, platform, securityGroups, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
+        if (!defSecGroupMap.containsKey(securityGroupName)) {
+            List<Port> strictSecurityGroupPorts = new ArrayList<>();
+            strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
+            strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
+            strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
+            String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
+            addSecurityGroup(user, platform, securityGroups, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
+        }
     }
 
-    private void createDefaultAllKnownServicesSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups) {
+    private void createDefaultAllKnownServicesSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups,
+            Map<String, SecurityGroup> defSecGroupMap) {
         String securityGroupName = "default-" + platform.toLowerCase() + "-all-services-port";
-        //new ArrayList -> otherwise the list will be the static 'ports' list from NetworkUtils and we don't want to add nginx port to 'ports' static list.
-        List<Port> portsWithoutAclRules = new ArrayList<>(NetworkUtils.getPortsWithoutAclRules());
-        portsWithoutAclRules.add(0, new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
-        String allPortsOpenDesc = getPortsOpenDesc(portsWithoutAclRules);
-        addSecurityGroup(user, platform, securityGroups, securityGroupName, portsWithoutAclRules, allPortsOpenDesc);
+        if (!defSecGroupMap.containsKey(securityGroupName)) {
+            //new ArrayList -> otherwise the list will be the static 'ports' list from NetworkUtils and we don't want to add nginx port to 'ports' static list.
+            List<Port> portsWithoutAclRules = new ArrayList<>(NetworkUtils.getPortsWithoutAclRules());
+            portsWithoutAclRules.add(0, new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
+            String allPortsOpenDesc = getPortsOpenDesc(portsWithoutAclRules);
+            addSecurityGroup(user, platform, securityGroups, securityGroupName, portsWithoutAclRules, allPortsOpenDesc);
+        }
     }
 
     private void addSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups, String name,
