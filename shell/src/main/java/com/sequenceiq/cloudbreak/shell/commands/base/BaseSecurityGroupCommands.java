@@ -50,6 +50,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
             SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
             securityGroupRequest.setName(name);
             securityGroupRequest.setDescription(description);
+            securityGroupRequest.setCloudPlatform(platform);
             List<SecurityRuleRequest> securityRuleRequestList = new ArrayList<>();
             if (existingSecurityGroupId != null && !existingSecurityGroupId.isEmpty()) {
                 securityGroupRequest.setSecurityGroupId(existingSecurityGroupId);
