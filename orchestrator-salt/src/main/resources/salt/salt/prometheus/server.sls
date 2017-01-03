@@ -29,22 +29,22 @@ download_prom_server:
 
 
 /etc/prometheus/templates/aggregation_rules.ctmpl:
-file.managed:
-  - makedirs: True
-  - source: salt://prometheus/etc/prometheus/templates/aggregation_rules.ctmpl
-  - template: jinja
-  - user: prometheus
-  - group: prometheus
-  - mode: 640
+  file.managed:
+    - makedirs: True
+    - source: salt://prometheus/etc/prometheus/templates/aggregation_rules.ctmpl
+    - template: jinja
+    - user: prometheus
+    - group: prometheus
+    - mode: 640
 
 /etc/prometheus/templates/alerting_rules.ctmpl:
-file.managed:
-  - makedirs: True
-  - source: salt://prometheus/etc/prometheus/templates/alerting_rules.ctmpl
-  - template: jinja
-  - user: prometheus
-  - group: prometheus
-  - mode: 640
+  file.managed:
+    - makedirs: True
+    - source: salt://prometheus/etc/prometheus/templates/alerting_rules.ctmpl
+    - template: jinja
+    - user: prometheus
+    - group: prometheus
+    - mode: 640
 
 /etc/prometheus/rules:
   file.directory:
