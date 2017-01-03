@@ -58,10 +58,6 @@
             "type" : "string",
             "defaultValue" : "${credential.publicKey}"
         },
-        "loadBalancerName" : {
-            "type" : "string",
-            "defaultValue" : "${stackname}lb"
-        },
         "region" : {
           "type" : "string",
           "defaultValue" : "${region}"
@@ -76,16 +72,6 @@
            "defaultValue": "${subnet1Prefix}"
         },
         </#if>
-        <#list groups?keys as instanceGroup>
-        <#list groups[instanceGroup] as instance>
-        <#if instanceGroup == "GATEWAY">
-        "gatewaystaticipname": {
-            "type": "string",
-            "defaultValue": "${stackname}${instance.instanceId}"
-        },
-        </#if>
-        </#list>
-        </#list>
         "sshIPConfigName": {
             "type": "string",
             "defaultValue": "${stackname}ipcn"
@@ -100,13 +86,6 @@
       <#else>
       "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkNamePrefix'))]",
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
-      </#if>
-      <#if !noPublicIp>
-      "staticIpRef": "[resourceId('Microsoft.Network/publicIPAddresses', parameters('gatewaystaticipname'))]",
-      "ilbBackendAddressPoolName": "${stackname}bapn",
-      "lbID": "[resourceId('Microsoft.Network/loadBalancers', parameters('loadBalancerName'))]",
-      "sshIPConfig": "[concat(variables('lbID'),'/frontendIPConfigurations/', parameters('sshIPConfigName'))]",
-      "ilbBackendAddressPoolID": "[concat(variables('lbID'),'/backendAddressPools/', variables('ilbBackendAddressPoolName'))]",
       </#if>
       <#list igs as group>
       "${group?replace('_', '')}secGroupName": "${group?replace('_', '')}${stackname}sg",
@@ -182,76 +161,20 @@
                    }<#if (port_index + 1) != securities[group]?size>,</#if>
                    </#list>
                    ]
-
                }
              },
              </#list>
              </#if>
              <#list groups?keys as instanceGroup>
              <#list groups[instanceGroup] as instance>
-                 <#if instanceGroup == "GATEWAY" && !noPublicIp>
+                 <#if !noPublicIp>
                  {
                    "apiVersion": "2015-05-01-preview",
                    "type": "Microsoft.Network/publicIPAddresses",
                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
                    "properties": {
-                       "publicIPAllocationMethod": "Static"
-                   }
-                 },
-                 {
-                    "apiVersion": "2015-05-01-preview",
-                    "type": "Microsoft.Network/loadBalancers",
-                    "name": "[parameters('loadBalancerName')]",
-                    "location": "[parameters('region')]",
-                    "dependsOn": [
-                        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
-                    ],
-                    "properties": {
-                        "frontendIPConfigurations": [
-                        {
-                            "name": "[parameters('sshIPConfigName')]",
-                            "properties": {
-                                "publicIPAddress": {
-                                    "id": "[variables('staticIpRef')]"
-                                }
-                            }
-                        }
-                        ],
-                        "backendAddressPools": [
-                        {
-                            "name": "[variables('ilbBackendAddressPoolName')]"
-                        }
-                        ]
-                        <#if !noFirewallRules>
-                        ,"inboundNatRules": [
-                        <#list securities[instance.groupName] as port>
-                        {
-                            "name": "endpoint${port_index}inr",
-                            "properties": {
-                                "frontendIPConfiguration": {
-                                    "id": "[variables('sshIPConfig')]"
-                                },
-                                "protocol": "${port.protocol}",
-                                "frontendPort": "${port.port}",
-                                "backendPort": "${port.port}",
-                                "enableFloatingIP": false
-                            }
-                        }<#if (port_index + 1) != securities[instance.groupName]?size>,</#if>
-                        </#list>
-                        ]
-                        </#if>
-                    }
-                 },
-                 </#if>
-                 <#if instanceGroup == "CORE" && !noPublicIp>
-                 {
-                   "apiVersion": "2015-05-01-preview",
-                   "type": "Microsoft.Network/publicIPAddresses",
-                   "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
-                   "location": "[parameters('region')]",
-                   "properties": {
-                       "publicIPAllocationMethod": "Static"
+                       "publicIPAllocationMethod": "Dynamic"
                    }
                  },
                  </#if>
@@ -266,12 +189,7 @@
                        </#if>
                        <#if !noPublicIp>
                        <#if !noFirewallRules>,</#if>
-                       <#if instanceGroup == "CORE">
                        "[concat('Microsoft.Network/publicIPAddresses/', parameters('publicIPNamePrefix'), '${instance.instanceId}')]"
-                       </#if>
-                       <#if instanceGroup == "GATEWAY">
-                       "[concat('Microsoft.Network/loadBalancers/', parameters('loadBalancerName'))]"
-                       </#if>
                        </#if>
                        <#if !existingVPC>
                        <#if !noFirewallRules || !noPublicIp>,</#if>
@@ -289,7 +207,7 @@
                                "name": "ipconfig1",
                                "properties": {
                                    "privateIPAllocationMethod": "Dynamic",
-                                   <#if instanceGroup == "CORE" && !noPublicIp>
+                                   <#if !noPublicIp>
                                    "publicIPAddress": {
                                        "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('publicIPNamePrefix'), '${instance.instanceId}'))]"
                                    },
@@ -297,22 +215,6 @@
                                    "subnet": {
                                        "id": "[variables('subnet1Ref')]"
                                    }
-                                   <#if instanceGroup == "GATEWAY" && !noPublicIp>
-                                   ,"loadBalancerBackendAddressPools": [
-                                       {
-                                           "id": "[variables('ilbBackendAddressPoolID')]"
-                                       }
-                                   ]
-                                   <#if !noFirewallRules>
-                                   ,"loadBalancerInboundNatRules": [
-                                   <#list securities[instance.groupName] as port>
-                                       {
-                                           "id": "[concat(variables('lbID'),'/inboundNatRules/', 'endpoint${port_index}inr')]"
-                                       }<#if (port_index + 1) != securities[instance.groupName]?size>,</#if>
-                                   </#list>
-                                   ]
-                                   </#if>
-                                   </#if>
                                }
                            }
                        ]

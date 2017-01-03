@@ -10,6 +10,7 @@ import static com.amazonaws.services.cloudformation.model.StackStatus.ROLLBACK_I
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -82,6 +83,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -94,6 +96,8 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+
+import freemarker.template.Configuration;
 
 @Service
 public class AwsResourceConnector implements ResourceConnector {
@@ -115,6 +119,9 @@ public class AwsResourceConnector implements ResourceConnector {
     private static final List<StackStatus> ERROR_STATUSES = asList(CREATE_FAILED, ROLLBACK_IN_PROGRESS, ROLLBACK_FAILED, ROLLBACK_COMPLETE);
 
     private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
+
+    @Inject
+    private Configuration freemarkerConfiguration;
 
     @Inject
     private AwsClient awsClient;
@@ -194,7 +201,7 @@ public class AwsResourceConnector implements ResourceConnector {
                     .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                     .withEnableInstanceProfile(awsInstanceProfileView.isEnableInstanceProfileStrategy())
                     .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
-                    .withTemplatePath(awsCloudformationTemplatePath)
+                    .withTemplate(stack.getTemplate())
                     .withDefaultSubnet(subnet)
                     .withCloudbreakPublicIp(cloudbreakPublicIp)
                     .withDefaultInboundSecurityGroup(inboundSecurityGroup)
@@ -609,6 +616,15 @@ public class AwsResourceConnector implements ResourceConnector {
         AwsNetworkView networkView = new AwsNetworkView(network);
         boolean sameVPC = deployingToSameVPC(networkView, networkView.isExistingVPC());
         return new TlsInfo(sameVPC);
+    }
+
+    @Override
+    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+        try {
+            return freemarkerConfiguration.getTemplate(awsCloudformationTemplatePath, "UTF-8").toString();
+        } catch (IOException e) {
+            throw new CloudConnectorException("can't get freemarker template", e);
+        }
     }
 
     private void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient) {

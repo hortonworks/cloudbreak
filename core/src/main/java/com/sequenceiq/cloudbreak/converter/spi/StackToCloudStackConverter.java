@@ -66,7 +66,7 @@ public class StackToCloudStackConverter {
             LOGGER.info(e.getMessage());
         }
         Network network = buildNetwork(stack);
-        return new CloudStack(instanceGroups, network, image, stack.getParameters());
+        return new CloudStack(instanceGroups, network, image, stack.getParameters(), stack.getStackTemplate());
     }
 
     public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequests) {

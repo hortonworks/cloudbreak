@@ -294,6 +294,8 @@ public class StackService {
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
             }
+            String template = connector.getTemplate(stack);
+            stack.setStackTemplate(template);
             savedStack = stackRepository.save(stack);
             MDCBuilder.buildMdcContext(savedStack);
             if (!"BYOS".equals(stack.cloudPlatform())) {

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.arm.view.ArmStorageView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -272,6 +273,11 @@ public class ArmResourceConnector implements ResourceConnector {
     @Override
     public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
         return new TlsInfo(false);
+    }
+
+    @Override
+    public String getStackTemplate() throws TemplatingDoesNotSupportedException {
+        return armTemplateBuilder.getTemplateString();
     }
 
     private ArmStackView getArmStack(ArmCredentialView armCredentialView, CloudContext cloudContext, CloudStack cloudStack) {
