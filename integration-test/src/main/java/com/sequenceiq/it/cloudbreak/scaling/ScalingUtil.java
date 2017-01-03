@@ -1,6 +1,9 @@
 package com.sequenceiq.it.cloudbreak.scaling;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +14,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
 public class ScalingUtil {
@@ -68,5 +73,32 @@ public class ScalingUtil {
 
         AmbariClient ambariClient = new AmbariClient(ambariIp, port, ambariUser, ambariPassword);
         return ambariClient.getClusterHosts().size();
+    }
+
+    public static Map getNodeCountByHostgroup(StackResponse stackResponse) {
+        Map<String, Integer> instanceCount = new HashMap<>();
+
+        List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
+
+        for (InstanceGroupResponse instanceGroup : instanceGroups) {
+            if (!instanceGroup.getGroup().equals("cbgateway")) {
+                instanceCount.put(instanceGroup.getGroup(), instanceGroup.getNodeCount());
+            }
+        }
+        return instanceCount;
+    }
+
+    public static void putInstanceCountToContext(IntegrationTestContext itContext, String stackId) {
+        List<Map<String, Integer>> tmpInstanceCount = new ArrayList<>();
+        StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+
+        if (itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class) != null) {
+            tmpInstanceCount = itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class);
+            tmpInstanceCount.add(ScalingUtil.getNodeCountByHostgroup(stackResponse));
+        } else {
+            tmpInstanceCount.add(ScalingUtil.getNodeCountByHostgroup(stackResponse));
+        }
+        itContext.putContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, tmpInstanceCount);
     }
 }

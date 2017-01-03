@@ -27,9 +27,10 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "awsTemplateName", "awsInstanceType", "awsVolumeType", "awsVolumeCount", "awsVolumeSize" })
+    @Parameters({ "awsTemplateName", "awsInstanceType", "awsVolumeType", "awsVolumeCount", "awsVolumeSize", "awsSpotPrice" })
     public void testAwsTemplateCreation(@Optional("it-aws-template") String awsTemplateName, @Optional("m3.medium") String awsInstanceType,
-            @Optional("standard") String awsVolumeType, @Optional("1") String awsVolumeCount, @Optional("10") String awsVolumeSize) throws Exception {
+            @Optional("standard") String awsVolumeType, @Optional("1") String awsVolumeCount, @Optional("10") String awsVolumeSize,
+            @Optional Float awsSpotPrice) throws Exception {
         // GIVEN
         // WHEN
         TemplateRequest templateRequest = new TemplateRequest();
@@ -42,6 +43,9 @@ public class AwsTemplateCreationTest extends AbstractCloudbreakIntegrationTest {
         templateRequest.setVolumeType(awsVolumeType);
         Map<String, Object> map = new HashMap<>();
         map.put("encrypted", false);
+        if (awsSpotPrice != null) {
+            map.put("spotPrice", awsSpotPrice);
+        }
         templateRequest.setParameters(map);
         templateRequest.setCloudPlatform("AWS");
         String id = getCloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId().toString();

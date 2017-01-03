@@ -37,6 +37,8 @@ public class CloudbreakITContextConstants {
 
     public static final String RDS_CONFIG_ID = "RDS_CONFIG_ID";
 
+    public static final String INSTANCE_COUNT = "INSTANCE_COUNT";
+
     private CloudbreakITContextConstants() {
     }
 }

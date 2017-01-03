@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -46,5 +47,8 @@ public class StackScalingTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         // THEN
         ScalingUtil.checkStackScaled(stackEndpoint, stackId, expectedNodeCount);
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+
+        itContext.putContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, ScalingUtil.getNodeCountByHostgroup(stackResponse));
     }
 }
