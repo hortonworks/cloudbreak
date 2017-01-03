@@ -41,6 +41,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
             SecurityGroupJson securityGroupJson = new SecurityGroupJson();
             securityGroupJson.setName(name);
             securityGroupJson.setDescription(description);
+            securityGroupJson.setCloudPlatform(platform);
             securityGroupJson.setPublicInAccount(publicInAccount);
             if (existingSecurityGroupId != null && !existingSecurityGroupId.isEmpty()) {
                 securityGroupJson.setSecurityGroupId(existingSecurityGroupId);
