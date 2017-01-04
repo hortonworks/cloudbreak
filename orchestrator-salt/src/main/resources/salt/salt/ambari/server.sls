@@ -20,6 +20,16 @@ install-mariadb:
       - mariadb
 {% endif %}
 
+/opt/hadoop-classpath.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/hadoop-classpath.sh
+    - mode: 744
+
+extend_hadoop_classpath:
+  cmd.run:
+    - name: /opt/hadoop-classpath.sh
+
 /var/lib/ambari-server/jdbc-drivers:
   cmd.run:
     - name: cp -R /opt/jdbc-drivers /var/lib/ambari-server/jdbc-drivers

@@ -14,11 +14,6 @@ ambari-agent:
 
 {% endif %}
 
-/etc/environment:
-  file.append:
-    - text: "HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*"
-    - unless: cat /etc/environment | grep HADOOP_CLASSPATH
-
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/internal_hostname.sh
