@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
@@ -133,9 +134,16 @@ public class RecipeEngine {
         FileSystemConfiguration fsConfiguration = getFileSystemConfiguration(fs);
         List<RecipeScript> recipeScripts = fsConfigurator.getScripts(fsConfiguration);
         List<Recipe> fsRecipes = recipeBuilder.buildRecipes(scriptName, recipeScripts);
-        for (Recipe recipe : fsRecipes) {
+        for (int i = 0; i < fsRecipes.size(); i++) {
+            RecipeScript recipeScript = recipeScripts.get(i);
+            Recipe recipe = fsRecipes.get(i);
             for (HostGroup hostGroup : hostGroups) {
-                hostGroup.addRecipe(recipe);
+                if (ExecutionType.ALL_NODES == recipeScript.getExecutionType()) {
+                    hostGroup.addRecipe(recipe);
+                } else if (ExecutionType.ONE_NODE == recipeScript.getExecutionType() && isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
+                    hostGroup.addRecipe(recipe);
+                    break;
+                }
             }
         }
     }

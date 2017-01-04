@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.gcs;
 
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
+import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ONE_NODE;
 import static com.sequenceiq.cloudbreak.api.model.FileSystemType.GCS;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.POST_INSTALL;
+import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.PRE_INSTALL;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,8 +27,9 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
         String privateKey = getPrivateKey(fsConfig);
         Map<String, String> properties = Collections.singletonMap("P12KEY", privateKey);
         List<FileSystemScriptConfig> fsScriptConfigs = new ArrayList<>();
-        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector.sh", POST_INSTALL, ALL_NODES));
-        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", POST_INSTALL, ALL_NODES, properties));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", PRE_INSTALL, ALL_NODES, properties));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector-local.sh", PRE_INSTALL, ALL_NODES));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector-hdfs.sh", POST_INSTALL, ONE_NODE));
         return fsScriptConfigs;
     }
 

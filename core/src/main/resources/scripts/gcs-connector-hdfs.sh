@@ -6,10 +6,11 @@
 : ${TEZ_TAR_NAME:=tez.tar.gz}
 : ${TMP_EXTRACT_DIR:=temp_extract_dir}
 
-enable_gcs_connector() {
+enable_gcs_connector_hdfs() {
   SOURCE_JAR="$SOURCE_DIR/$STORAGE_JAR"
   if [ ! -f "$SOURCE_JAR" ]; then
-    echo 'GC storage jar not found in the source directory, downloading it'
+    echo 'GC storage jar not found in the source directory, downloading it to /tmp'
+    SOURCE_JAR="/tmp/$STORAGE_JAR"
     curl -Lko "$SOURCE_JAR" "https://storage.googleapis.com/hadoop-lib/gcs/gcs-connector-latest-hadoop2.jar"
   fi
 
@@ -61,11 +62,10 @@ enable_gcs_connector() {
   done
 }
 
-main(){
-
+main() {
   if [ ! -f "/var/gcs-connector-enabled" ]; then
-    enable_gcs_connector
-    echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/gcs-connector-enabled
+    enable_gcs_connector_hdfs
+    echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/gcs-connector-hdfs-enabled
   else
     echo "The gcs-connector.sh has been executed previously."
   fi
