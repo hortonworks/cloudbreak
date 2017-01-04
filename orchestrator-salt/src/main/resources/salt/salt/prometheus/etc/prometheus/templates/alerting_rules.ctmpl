@@ -1,5 +1,5 @@
-{{if key "etc/prometheus/rules/alerting"}}
-{{range tree "etc/prometheus/rules/alerting"}}
+{{if key "rules/alerting"}}
+{{range tree "rules/alerting"}}
 #{{.Key}}
 {{.Value}}
 

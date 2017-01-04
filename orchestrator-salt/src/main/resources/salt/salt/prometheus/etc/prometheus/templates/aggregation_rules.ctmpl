@@ -1,5 +1,5 @@
-{{if key "etc/prometheus/rules/aggregation"}}
-{{range tree "etc/prometheus/rules/aggregation"}}
+{{if key "rules/aggregation"}}
+{{range tree "rules/aggregation"}}
 #{{.Key}}
 {{.Value}}
 
