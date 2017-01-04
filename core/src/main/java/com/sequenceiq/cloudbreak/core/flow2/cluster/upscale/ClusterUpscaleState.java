@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
-import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 
 enum ClusterUpscaleState implements FlowState {
     INIT_STATE,
@@ -13,17 +14,13 @@ enum ClusterUpscaleState implements FlowState {
     CLUSTER_UPSCALE_FAILED_STATE,
     FINAL_STATE;
 
-    private Class<? extends AbstractAction> clazz;
+    private Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     ClusterUpscaleState() {
     }
 
-    ClusterUpscaleState(Class<? extends AbstractAction> clazz) {
-        this.clazz = clazz;
-    }
-
     @Override
-    public Class<? extends AbstractAction> action() {
-        return clazz;
+    public Class<? extends RestartAction> restartAction() {
+        return restartAction;
     }
 }

@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -259,13 +260,18 @@ public class AmbariClusterService implements ClusterService {
         for (Map.Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
             if (hostGroup != null) {
-                for (String hostName : hostGroupEntry.getValue()) {
-                    HostMetadata hostMetadataEntry = new HostMetadata();
-                    hostMetadataEntry.setHostName(hostName);
-                    hostMetadataEntry.setHostGroup(hostGroup);
-                    hostMetadataEntry.setHostMetadataState(HostMetadataState.CONTAINER_RUNNING);
-                    hostGroup.getHostMetadata().add(hostMetadataEntry);
-                }
+                Set<String> existingHosts = hostMetadataRepository.findEmptyContainerHostsInHostGroup(hostGroup.getId()).stream()
+                        .map(HostMetadata::getHostName)
+                        .collect(Collectors.toSet());
+                hostGroupEntry.getValue().stream()
+                        .filter(hostName -> !existingHosts.contains(hostName))
+                        .forEach(hostName -> {
+                            HostMetadata hostMetadataEntry = new HostMetadata();
+                            hostMetadataEntry.setHostName(hostName);
+                            hostMetadataEntry.setHostGroup(hostGroup);
+                            hostMetadataEntry.setHostMetadataState(HostMetadataState.CONTAINER_RUNNING);
+                            hostGroup.getHostMetadata().add(hostMetadataEntry);
+                        });
                 hostGroupService.save(hostGroup);
             }
         }

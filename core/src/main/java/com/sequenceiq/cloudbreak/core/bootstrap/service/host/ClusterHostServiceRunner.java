@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -131,17 +133,14 @@ public class ClusterHostServiceRunner {
         HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(clusterId, hostGroupName);
         if (hostGroup.getConstraint().getInstanceGroup() != null) {
             Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
-            Set<InstanceMetaData> unusedHostsInInstanceGroup = instanceMetaDataRepository.findUnusedHostsInInstanceGroup(instanceGroupId);
             Map<String, String> hostNames = new HashMap<>();
-            for (InstanceMetaData instanceMetaData : unusedHostsInInstanceGroup) {
-                hostNames.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp());
-                if (hostNames.size() >= adjustment) {
-                    break;
-                }
-            }
+            instanceMetaDataRepository.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
+                    .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
+                    .limit(adjustment.longValue())
+                    .forEach(im -> hostNames.put(im.getDiscoveryFQDN(), im.getPrivateIp()));
             return hostNames;
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     private Set<Node> collectNodes(Stack stack) {
