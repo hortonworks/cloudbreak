@@ -46,8 +46,8 @@ prometheus:
             metrics_path: /prom/metrics
             consul_sd_configs:
               - server:    'consul.service.consul:8500'
-                 datacenter: 'dc1'
-                 services: [ 'namenode' ]
+                datacenter: 'dc1'
+                services: [ 'namenode' ]
             relabel_configs:
                - source_labels: ['__meta_consul_service']
                  regex:         '(.*)'
