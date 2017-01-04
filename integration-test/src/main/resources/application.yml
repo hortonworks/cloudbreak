@@ -100,6 +100,7 @@ integrationtest:
        GCP: default-gcp-all-services-port
        AWS: default-aws-all-services-port
        AZURE_RM: default-azure_rm-all-services-port
+       OPENSTACK: default-openstack-all-services-port
     testSuites:
         # Full smoke tests with cluster creation, stop-start, upscale-downscale
         FULL_SMOKE_TEST:
