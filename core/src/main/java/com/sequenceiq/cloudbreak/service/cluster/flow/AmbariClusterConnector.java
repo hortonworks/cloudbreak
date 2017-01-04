@@ -381,11 +381,14 @@ public class AmbariClusterConnector {
 
     public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
             throws CloudbreakException {
-        List<String> upscaleHostNames = getHostNames(hostMetadata);
         AmbariClient ambariClient = getAmbariClient(stack);
-        PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
-                installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
-        checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
+        List<String> existingHosts = ambariClient.getClusterHosts();
+        List<String> upscaleHostNames = getHostNames(hostMetadata).stream().filter(hostName -> !existingHosts.contains(hostName)).collect(Collectors.toList());
+        if (!upscaleHostNames.isEmpty()) {
+            PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
+                    installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
+            checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
+        }
     }
 
     private AmbariClient getDefaultAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
