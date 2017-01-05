@@ -176,7 +176,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
-        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap));
+        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "SUCCESSFUL"));
         put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion", new EmptyAmbariResponse());
     }
 

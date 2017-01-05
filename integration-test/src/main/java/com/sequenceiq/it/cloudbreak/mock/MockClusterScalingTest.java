@@ -49,6 +49,7 @@ import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClustersHostsResponse;
+import com.sequenceiq.it.spark.ambari.AmbariComponentStatusOnHostResponse;
 import com.sequenceiq.it.spark.ambari.AmbariHostsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariServiceConfigResponse;
 import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
@@ -218,8 +219,10 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster", new AmbariClusterResponse(instanceMap));
         get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), gson()::toJson);
-        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap));
+        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "INSTALLED"));
+        put(AMBARI_API_ROOT + "/clusters/:cluster/services/*", new AmbariClusterRequestsResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClusterRequestsResponse());
+        get(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname/host_components/*", new AmbariComponentStatusOnHostResponse());
         get(AMBARI_API_ROOT + "/clusters/ambari_cluster/configurations/service_config_versions", new AmbariServiceConfigResponse(mockServerAddress, port),
                 gson()::toJson);
         get(AMBARI_API_ROOT + "/blueprints/*", (request, response) -> {
@@ -251,6 +254,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             return rootNode;
         });
         put(AMBARI_API_ROOT + "/clusters/:cluster/host_components", new AmbariClusterRequestsResponse());
+        delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname/host_components/*", new EmptyAmbariResponse());
         delete(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname", new AmbariClusterRequestsResponse());
         post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
     }

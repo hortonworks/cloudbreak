@@ -1,5 +1,6 @@
 package com.sequenceiq.it.spark.ambari.model;
 
+import java.util.Collection;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,18 +10,18 @@ public class Hosts {
 
     @JsonProperty("host_name")
     @SerializedName("host_name")
-    private List<String> hostName;
+    private Collection<String> hostName;
 
     @JsonProperty("host_status")
     @SerializedName("host_status")
     private String hostStatus;
 
-    public Hosts(List<String> hostName, String hostStatus) {
+    public Hosts(Collection<String> hostName, String hostStatus) {
         this.hostName = hostName;
         this.hostStatus = hostStatus;
     }
 
-    public List<String> getHostName() {
+    public Collection<String> getHostName() {
         return hostName;
     }
 
