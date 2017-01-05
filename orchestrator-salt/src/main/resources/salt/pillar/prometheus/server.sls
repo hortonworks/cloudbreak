@@ -20,7 +20,7 @@ prometheus:
 
         scrape_configs:
           - job_name: 'datanode'
-            metrics_path: /prom/metrics
+            metrics_path: /exporter/20104/metrics
             consul_sd_configs:
               - server:    'consul.service.consul:8500'
                 datacenter: 'dc1'
@@ -43,7 +43,7 @@ prometheus:
                 target_label:  'service_status'
                 replacement:   '$1'
           - job_name: 'namenode'
-            metrics_path: /prom/metrics
+            metrics_path: /exporter/20103/metrics
             consul_sd_configs:
               - server:    'consul.service.consul:8500'
                 datacenter: 'dc1'
