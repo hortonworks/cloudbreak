@@ -19,6 +19,7 @@ import com.sequenceiq.periscope.api.model.TimeAlertJson;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.rest.converter.MetricAlertConverter;
 import com.sequenceiq.periscope.rest.converter.PrometheusAlertConverter;
 import com.sequenceiq.periscope.rest.converter.TimeAlertConverter;
@@ -116,8 +117,8 @@ public class AlertController implements AlertEndpoint {
     }
 
     @Override
-    public List<Map<String, Object>> getPrometheusDefinitions(Long clusterId) {
-        return null;
+    public List<AlertRuleDefinitionEntry> getPrometheusDefinitions(Long clusterId) {
+        return alertService.getPrometheusAlertDefinitions();
     }
 
     private TimeAlert validateTimeAlert(TimeAlertJson json) throws ParseException {

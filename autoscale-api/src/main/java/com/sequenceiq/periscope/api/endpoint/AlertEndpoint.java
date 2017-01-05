@@ -22,6 +22,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.api.model.MetricAlertJson;
 import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
 import com.sequenceiq.periscope.api.model.TimeAlertJson;
@@ -120,5 +121,5 @@ public interface AlertEndpoint {
     @Path(value = "prometheus/definitions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_DEFINITIONS, produces = JSON, notes = PROMETHEUS_BASED_DEFINITIONS)
-    List<Map<String, Object>> getPrometheusDefinitions(@PathParam(value = "clusterId") Long clusterId);
+    List<AlertRuleDefinitionEntry> getPrometheusDefinitions(@PathParam(value = "clusterId") Long clusterId);
 }

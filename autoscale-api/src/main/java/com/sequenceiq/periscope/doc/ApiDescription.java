@@ -129,8 +129,9 @@ public class ApiDescription {
     }
 
     public static class PrometheusAlertJsonProperties {
-        public static final String ALERTRULE = "Definition of the alert rule that could be processed by Prometheus";
+        public static final String ALERTRULE = "Name of the predefined Prometheus alert rule that could be parameterized by the period and threshold fields.";
         public static final String PERIOD = "Period of the alert";
+        public static final String THRESHOLD = "Threshold of the alert in percent";
         public static final String ALERTSTATE = "State of the alert";
     }
 

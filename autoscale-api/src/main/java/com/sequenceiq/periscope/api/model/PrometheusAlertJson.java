@@ -7,22 +7,26 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("PromhetheusAlert")
 public class PrometheusAlertJson extends AbstractAlertJson {
+    private static final int DEFAULT_PERIOD = 1;
 
     @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.ALERTRULE)
-    private String alertRule;
+    private String alertRuleName;
 
     @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.PERIOD)
-    private int period;
+    private int period = DEFAULT_PERIOD;
+
+    @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.THRESHOLD)
+    private double threshold;
 
     @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.ALERTSTATE)
     private AlertState alertState;
 
-    public String getAlertRule() {
-        return alertRule;
+    public String getAlertRuleName() {
+        return alertRuleName;
     }
 
-    public void setAlertRule(String alertRule) {
-        this.alertRule = alertRule;
+    public void setAlertRuleName(String alertRuleName) {
+        this.alertRuleName = alertRuleName;
     }
 
     public int getPeriod() {
@@ -33,11 +37,28 @@ public class PrometheusAlertJson extends AbstractAlertJson {
         this.period = period;
     }
 
+    public double getThreshold() {
+        return threshold;
+    }
+
+    public void setThreshold(double threshold) {
+        this.threshold = threshold;
+    }
+
     public AlertState getAlertState() {
         return alertState;
     }
 
     public void setAlertState(AlertState alertState) {
         this.alertState = alertState;
+    }
+
+    @Override
+    public String toString() {
+        return "PrometheusAlertJson{"
+                + "alertRuleName='" + alertRuleName
+                + "', period=" + period
+                + ", threshold=" + threshold
+                + ", alertState=" + alertState + '}';
     }
 }

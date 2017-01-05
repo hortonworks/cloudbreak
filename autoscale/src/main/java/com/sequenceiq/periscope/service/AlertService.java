@@ -14,7 +14,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -24,6 +23,7 @@ import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
@@ -64,14 +64,14 @@ public class AlertService {
     @Inject
     private AmbariClientProvider ambariClientProvider;
 
-    @Value("${prometheus.address}")
-    private String prometheusAddress;
-
     @Inject
     private AlertTypes alertTypes;
 
     @Inject
     private ConsulKeyValueService consulKeyValueService;
+
+    @Inject
+    private PrometheusAlertTemplateService prometheusAlertService;
 
     public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
@@ -235,6 +235,10 @@ public class AlertService {
     public void addPrometheusAlertsToConsul(Cluster cluster) {
         Set<PrometheusAlert> alerts = prometheusAlertRepository.findAllByCluster(cluster.getId());
         alerts.stream().forEach(alert -> consulKeyValueService.addAlert(cluster, alert));
+    }
+
+    public List<AlertRuleDefinitionEntry> getPrometheusAlertDefinitions() {
+        return prometheusAlertService.getAlertDefinitions();
     }
 
     public Set<PrometheusAlert> getPrometheusAlerts(long clusterId) {
