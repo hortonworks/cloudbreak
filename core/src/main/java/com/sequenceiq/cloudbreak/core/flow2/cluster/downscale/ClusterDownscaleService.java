@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -18,11 +20,15 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -49,6 +55,9 @@ public class ClusterDownscaleService {
     @Inject
     private CloudbreakEventService cloudbreakEventService;
 
+    @Inject
+    private HostGroupService hostGroupService;
+
     public void clusterDownscaleStarted(Stack stack, String hostGroupName, Integer scalingAdjustment, Set<String> hostNames) {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
@@ -63,8 +72,16 @@ public class ClusterDownscaleService {
         }
     }
 
-    public void updateMetadata(Long stackId, Set<String> hostNames) {
+    public void updateMetadata(Long stackId, Set<String> hostNames, String hostGroupName) {
         Stack stack = stackService.getById(stackId);
+        Cluster cluster = stack.getCluster();
+        hostNames.forEach(hn -> {
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
+            List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()
+                    .filter(md -> hostNames.contains(md.getHostName())).collect(Collectors.toList());
+            hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
+            hostGroupService.save(hostGroup);
+        });
         if (!CloudConstants.BYOS.equals(stack.cloudPlatform())) {
             MDCBuilder.buildMdcContext(stack);
             LOGGER.info("Start updating metadata");

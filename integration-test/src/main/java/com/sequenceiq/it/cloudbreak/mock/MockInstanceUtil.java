@@ -30,7 +30,7 @@ public class MockInstanceUtil {
         serverAddressGenerator.setFrom(instanceMap.size());
 
         serverAddressGenerator.iterateOver((address, number) -> {
-            String instanceId = "instance-" + address;
+            String instanceId = "host-" + address.replace(".", "-") + ".example.com";
             InstanceTemplate instanceTemplate = new InstanceTemplate("medium", "group", Integer.toUnsignedLong(number),
                     new ArrayList<>(), InstanceStatus.CREATED, null);
             CloudInstance cloudInstanceWithId = new CloudInstance(instanceId, instanceTemplate);

@@ -26,7 +26,7 @@ public class AmbariHostsResponse extends ITResponse {
         List<Map<String, ?>> itemList = new ArrayList<>();
         for (String instanceId : instanceMap.keySet()) {
             if (InstanceStatus.STARTED == instanceMap.get(instanceId).getCloudVmInstanceStatus().getStatus()) {
-                Hosts hosts = new Hosts(Collections.singletonList("host" + instanceId), "HEALTHY");
+                Hosts hosts = new Hosts(Collections.singletonList(instanceId), "HEALTHY");
                 itemList.add(Collections.singletonMap("Hosts", hosts));
             }
         }

@@ -40,12 +40,7 @@ public class DecommissionHandler implements ClusterEventHandler<DecommissionRequ
         try {
             Stack stack = stackService.getById(request.getStackId());
             MDCBuilder.buildMdcContext(stack);
-            Set<String> hostNames;
-            if (request.getHostNames() == null) {
-                hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, request.getHostGroupName(), request.getScalingAdjustment());
-            } else {
-                hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, request.getHostGroupName(), request.getHostNames());
-            }
+            Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, request.getHostGroupName(), request.getHostNames());
             result = new DecommissionResult(request, hostNames);
         } catch (Exception e) {
             result = new DecommissionResult(e.getMessage(), e, request);

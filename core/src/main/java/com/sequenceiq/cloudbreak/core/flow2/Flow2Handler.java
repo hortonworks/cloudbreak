@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
@@ -70,7 +71,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             ClusterCreationFlowConfig.class,
             ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
-            ClusterUpscaleFlowConfig.class
+            ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class
     );
 
     @Inject

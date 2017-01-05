@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 
@@ -26,15 +28,26 @@ public class ClusterDownscaleActions {
     @Inject
     private ClusterDownscaleService clusterDownscaleService;
 
-    @Bean(name = "DECOMMISSION_STATE")
-    public Action decommissionAction() {
+    @Bean(name = "COLLECT_CANDIDATES_STATE")
+    public Action collectCandidatesAction() {
         return new AbstractClusterAction<ClusterDownscaleTriggerEvent>(ClusterDownscaleTriggerEvent.class) {
             @Override
             protected void doExecute(ClusterContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterDownscaleService.clusterDownscaleStarted(context.getStack(), payload.getHostGroupName(), payload.getAdjustment(),
                         payload.getHostNames());
-                DecommissionRequest request = new DecommissionRequest(context.getStack().getId(), payload.getHostGroupName(), payload.getAdjustment(),
-                        payload.getHostNames());
+                CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStack().getId(), payload.getHostGroupName(),
+                        payload.getAdjustment(), payload.getHostNames());
+                sendEvent(context.getFlowId(), request.selector(), request);
+            }
+        };
+    }
+
+    @Bean(name = "DECOMMISSION_STATE")
+    public Action decommissionAction() {
+        return new AbstractClusterAction<CollectDownscaleCandidatesResult>(CollectDownscaleCandidatesResult.class) {
+            @Override
+            protected void doExecute(ClusterContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) throws Exception {
+                DecommissionRequest request = new DecommissionRequest(context.getStack().getId(), payload.getHostGroupName(), payload.getHostNames());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
         };
@@ -45,7 +58,7 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<DecommissionResult>(DecommissionResult.class) {
             @Override
             protected void doExecute(ClusterContext context, DecommissionResult payload, Map<Object, Object> variables) throws Exception {
-                clusterDownscaleService.updateMetadata(context.getStack().getId(), payload.getHostNames());
+                clusterDownscaleService.updateMetadata(context.getStack().getId(), payload.getHostNames(), payload.getRequest().getHostGroupName());
                 sendEvent(context);
             }
 
