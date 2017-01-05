@@ -20,8 +20,8 @@ LOCKFILE=/var/run/$PROGNAME.pid
 start() {
     echo -n "Starting $PROGNAME: "
     daemon --user $USER --pidfile="$LOCKFILE" "$PROG -consul consul.service.consul:8500 \
-     -template /etc/prometheus/templates/alerting_rules.ctmpl:/etc/prometheus/rules/alerting.rule:'kill -HUP $(pidof prometheus)' \
-     -template /etc/prometheus/templates/aggregation_rules.ctmpl:/etc/prometheus/rules/aggregation.rule:'kill -HUP $(pidof prometheus)' \
+     -template /etc/prometheus/templates/alerting_rules.ctmpl:/etc/prometheus/rules/alerting.rule:'pkill -HUP prometheus' \
+     -template /etc/prometheus/templates/aggregation_rules.ctmpl:/etc/prometheus/rules/aggregation.rule:'pkill -HUP prometheus' \
      -retry '10s' &>$LOGFILE &"
     echo $(pidofproc $PROGNAME) >$LOCKFILE
     echo

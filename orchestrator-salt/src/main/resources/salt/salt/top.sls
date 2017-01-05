@@ -3,6 +3,9 @@ base:
     - discovery
     - java
     - metadata
+    - consul
+    - unbound
+    - nginx
 
   'roles:kerberos_server':
     - match: grain
@@ -25,16 +28,13 @@ base:
 
   'roles:ambari_server':
     - match: grain
-    - ambari.server
-    - consul
     - prometheus.server
+    - ambari.server
     - grafana
 
   'roles:ambari_agent':
     - match: grain
     - ambari.agent
-    - consul
-    - unbound
 
   'roles:smartsense':
     - match: grain
