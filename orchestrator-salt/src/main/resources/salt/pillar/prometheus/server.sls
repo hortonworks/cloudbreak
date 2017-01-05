@@ -65,3 +65,22 @@ prometheus:
                  regex:         ',(installed|maintenance),'
                  target_label:  'service_status'
                  replacement:   '$1'
+          - job_name: 'node'
+            metrics_path: /exporter/9100/metrics
+            consul_sd_configs:
+              - server:    'consul.service.consul:8500'
+                datacenter: 'dc1'
+                services: [ 'node-exporter' ]
+            relabel_configs:
+               - source_labels: ['__meta_consul_service']
+                 regex:         '(.*)'
+                 target_label:  'job'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_tags']
+                 regex:         '.*,jobname=(.*?),.*'
+                 target_label:  'job'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_node']
+                 regex:         '(.*)'
+                 target_label:  'instance'
+                 replacement:   '$1'
