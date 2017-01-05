@@ -87,9 +87,20 @@ prometheus_server_service_script:
     - template: jinja
     - mode: 755
 
+/etc/init.d/consul_template_prometheus:
+  file.managed:
+    - makedirs: True
+    - source: salt://prometheus/init.d/consul_template_prometheus
+    - template: jinja
+    - mode: 755
 {% endif %}
 
 prometheus_server_service:
   service.running:
     - name: prometheus
+    - enable: True
+
+consul_template_prometheus_service:
+  service.running:
+    - name: consul_template_prometheus
     - enable: True

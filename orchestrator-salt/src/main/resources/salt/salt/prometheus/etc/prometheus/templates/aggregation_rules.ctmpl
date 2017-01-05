@@ -1,9 +1,5 @@
-{{if key "rules/aggregation"}}
 {{range tree "rules/aggregation"}}
 #{{.Key}}
 {{.Value}}
-
-{{end}}
-{{else}}
 
 {{end}}

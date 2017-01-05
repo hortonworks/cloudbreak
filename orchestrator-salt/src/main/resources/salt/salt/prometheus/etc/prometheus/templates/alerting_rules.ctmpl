@@ -1,9 +1,5 @@
-{{if key "rules/alerting"}}
 {{range tree "rules/alerting"}}
 #{{.Key}}
 {{.Value}}
-
-{{end}}
-{{else}}
 
 {{end}}
