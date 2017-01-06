@@ -110,7 +110,7 @@ To create a cluster fill the empty values or change the existing ones, e.g:
 {
   "ClusterName": "my-cluster",
   "HDPVersion": "2.5",
-  "ClusterType": "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
+  "ClusterType": "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0",
   "Master": {
     "InstanceType": "m4.4xlarge",
     "VolumeType": "gp2",
@@ -158,7 +158,7 @@ hdc describe-cluster --cluster-name my-cluster
 {
   "ClusterName": "my-cluster",
   "HDPVersion": "2.5",
-  "ClusterType": "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0",
+  "ClusterType": "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0",
   "Master": {
     "InstanceType": "m4.4xlarge",
     "VolumeType": "gp2",
