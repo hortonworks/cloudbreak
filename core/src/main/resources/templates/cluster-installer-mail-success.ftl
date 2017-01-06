@@ -194,7 +194,7 @@
                                     </tr>
                                     <tr >
                                         <td style="font-size:11px; line-height:16px; font-family:Arial, Helvetica, sans-serif; text-align:left; color:#ffffff; " class="block" >
-                                            <div class="mktEditable" id="footer" >&copy; 2011-2016 Hortonworks Inc. All Rights Reserved. | <a href="http://hortonworks.com/privacy-policy/" style="color: white;text-decoration: none;">Privacy Policy</a><br></div>
+                                            <div class="mktEditable" id="footer" >&copy; 2011-2017 Hortonworks Inc. All Rights Reserved. | <a href="http://hortonworks.com/privacy-policy/" style="color: white;text-decoration: none;">Privacy Policy</a><br></div>
                                         </td>
                                         <td style="text-align:right; padding-top:5px; " valign="middle" class="block top-pad" >
                                             <div class="mktEditable" id="social-icons" ><a href="https://www.facebook.com/hortonworks"><img src="http://info.hortonworks.com/rs/h2source/images/facebook-icon-white.jpg" alt="Facebook" border="0"></a>&nbsp;<a href="https://twitter.com/hortonworks"><img src="http://info.hortonworks.com/rs/h2source/images/twitter-icon-white.jpg" alt="Twitter" border="0"></a>&nbsp;<a href="https://www.linkedin.com/company/hortonworks"><img src="http://info.hortonworks.com/rs/h2source/images/linkedin-icon-white.jpg" alt="Linkedin" border="0"></a></div>
