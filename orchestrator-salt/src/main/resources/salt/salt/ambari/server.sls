@@ -76,6 +76,16 @@ set_install_timeout:
     - pattern: "agent.package.install.task.timeout=1800"
     - repl: "agent.package.install.task.timeout=3600"
 
+/opt/javaagent.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/javaagent.sh
+    - mode: 744
+
+modify_hadoop_env_template:
+  cmd.run:
+    - name: /opt/javaagent.sh
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-server.service:
