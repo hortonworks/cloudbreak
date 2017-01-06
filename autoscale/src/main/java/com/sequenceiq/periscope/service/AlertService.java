@@ -65,9 +65,6 @@ public class AlertService {
     private AmbariClientProvider ambariClientProvider;
 
     @Inject
-    private AlertTypes alertTypes;
-
-    @Inject
     private ConsulKeyValueService consulKeyValueService;
 
     @Inject
@@ -156,24 +153,41 @@ public class AlertService {
         try {
             return findMetricAlertByCluster(clusterId, alertId);
         } catch (Exception e) {
-            return findTimeAlertByCluster(clusterId, alertId);
+            LOGGER.info("Could not found Metric alert with id: '{}', for cluster: '{}'!", clusterId, alertId);
         }
+        try {
+            return findTimeAlertByCluster(clusterId, alertId);
+        } catch (Exception e) {
+            LOGGER.info("Could not found Time alert with id: '{}', for cluster: '{}'!", clusterId, alertId);
+        }
+        try {
+            return findPrometheusAlertByCluster(clusterId, alertId);
+        } catch (Exception e) {
+            LOGGER.info("Could not found Prometheus alert with id: '{}', for cluster: '{}'!", clusterId, alertId);
+        }
+
+        throw new NotFoundException(String.format("Could not found alert with id: '%s', for cluster: '%s'!", clusterId, alertId));
     }
 
     public void save(BaseAlert alert) {
         if (alert instanceof MetricAlert) {
             metricAlertRepository.save((MetricAlert) alert);
-        } else {
+        } else if (alert instanceof TimeAlert) {
             timeAlertRepository.save((TimeAlert) alert);
+        } else if (alert instanceof PrometheusAlert) {
+            prometheusAlertRepository.save((PrometheusAlert) alert);
         }
     }
 
     public List<Map<String, Object>> getAlertDefinitions(long clusterId) {
+        Cluster cluster = clusterService.findOneById(clusterId);
         List<Map<String, Object>> ret = new ArrayList<>();
-        for (String alert : alertTypes.getAlerts().split(",")) {
+        List<Map<String, String>> alertDefinitions = ambariClientProvider.createAmbariClient(cluster).getAlertDefinitions();
+        for (Map<String, String> alertDefinition : alertDefinitions) {
             Map<String, Object> tmp = new HashMap<>();
-            tmp.put("name", alert.split(":")[1]);
-            tmp.put("label", alert.split(":")[0]);
+            for (Map.Entry<String, String> stringStringEntry : alertDefinition.entrySet()) {
+                tmp.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+            }
             ret.add(tmp);
         }
         return ret;

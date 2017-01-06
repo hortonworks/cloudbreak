@@ -133,6 +133,7 @@ public class ApiDescription {
         public static final String PERIOD = "Period of the alert";
         public static final String THRESHOLD = "Threshold of the alert in percent";
         public static final String ALERTSTATE = "State of the alert";
+        public static final String ALERTOPERATOR = "Operator of the alert's query.";
     }
 
     public static class BaseAlertJsonProperties {

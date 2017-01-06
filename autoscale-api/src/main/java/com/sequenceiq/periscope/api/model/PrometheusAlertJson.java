@@ -21,6 +21,9 @@ public class PrometheusAlertJson extends AbstractAlertJson {
     @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.ALERTSTATE)
     private AlertState alertState;
 
+    @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.ALERTOPERATOR)
+    private AlertOperator alertOperator;
+
     public String getAlertRuleName() {
         return alertRuleName;
     }
@@ -53,12 +56,22 @@ public class PrometheusAlertJson extends AbstractAlertJson {
         this.alertState = alertState;
     }
 
+    public AlertOperator getAlertOperator() {
+        return alertOperator;
+    }
+
+    public void setAlertOperator(AlertOperator alertOperator) {
+        this.alertOperator = alertOperator;
+    }
+
     @Override
     public String toString() {
         return "PrometheusAlertJson{"
                 + "alertRuleName='" + alertRuleName
                 + "', period=" + period
                 + ", threshold=" + threshold
-                + ", alertState=" + alertState + '}';
+                + ", alertState=" + alertState
+                + ", alertOperator=" + alertOperator
+                + '}';
     }
 }

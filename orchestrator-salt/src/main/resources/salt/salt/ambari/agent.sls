@@ -39,11 +39,6 @@ reduce_connect_retry_delay:
     - text: "SPARK_CLASSPATH=${SPARK_CLASSPATH}:/usr/lib/hadoop/lib/*"
     - unless: cat /etc/environment | grep SPARK_CLASSPATH
 
-/etc/jmx_exporter/jmx_exporter.yaml:
-  file.managed:
-    - makedirs: True
-    - source: salt://ambari/scripts/exporter.yaml
-
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/internal_hostname.sh

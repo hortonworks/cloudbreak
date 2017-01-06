@@ -8,6 +8,7 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.periscope.api.model.AlertOperator;
 import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.service.PrometheusAlertTemplateService;
@@ -16,7 +17,7 @@ import com.sequenceiq.periscope.service.PrometheusAlertTemplateService;
 public class PrometheusAlertConverter extends AbstractConverter<PrometheusAlertJson, PrometheusAlert> {
 
     @Inject
-    private PrometheusAlertTemplateService prometheusAlertTemplateService;
+    private PrometheusAlertTemplateService templateService;
 
     @Override
     public PrometheusAlert convert(PrometheusAlertJson source) {
@@ -28,7 +29,8 @@ public class PrometheusAlertConverter extends AbstractConverter<PrometheusAlertJ
         double threshold = source.getThreshold();
         String alertRuleName = source.getAlertRuleName();
         try {
-            String alertRule = prometheusAlertTemplateService.createAlert(alertRuleName, alert.getName(), String.valueOf(threshold), alert.getPeriod());
+            String operator = source.getAlertOperator() != null ? source.getAlertOperator().getOperator() : AlertOperator.MORE_THAN.getOperator();
+            String alertRule = templateService.createAlert(alertRuleName, alert.getName(), String.valueOf(threshold), alert.getPeriod(), operator);
             alert.setAlertRule(alertRule);
         } catch (Exception e) {
             throw new ConversionFailedException(

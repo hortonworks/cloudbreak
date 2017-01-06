@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,10 +31,12 @@ public class ConsulKeyValueService {
         Ambari ambari = cluster.getAmbari();
         try {
             //TODO needs to be updated after the Consul will be available through NGINX and HTTPS
-            ConsulClient consulClient = ConsulUtils.createClient(new HttpClientConfig(ambari.getHost(), DEFAULT_CONSUL_API_PORT), false);
-            String alertKey = getKeyNameForAlert(alert);
-            consulClient.setKVValue(alertKey, alert.getAlertRule());
-            LOGGER.info("Alert has been added to Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
+            if (RUNNING.equals(cluster.getState())) {
+                ConsulClient consulClient = ConsulUtils.createClient(new HttpClientConfig(ambari.getHost(), DEFAULT_CONSUL_API_PORT), false);
+                String alertKey = getKeyNameForAlert(alert);
+                consulClient.setKVValue(alertKey, alert.getAlertRule());
+                LOGGER.info("Alert has been added to Consul KV store with name: '{}' on host: '{}'.", alertKey, ambari.getHost());
+            }
         } catch (Exception e) {
             LOGGER.warn("Alert could not be added to Consul KV store:", e);
         }
