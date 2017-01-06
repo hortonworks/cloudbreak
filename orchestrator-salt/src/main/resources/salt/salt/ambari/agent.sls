@@ -19,11 +19,6 @@ ambari-agent:
     - text: "HADOOP_CLASSPATH=$HADOOP_CLASSPATH:/usr/lib/hadoop/lib/*"
     - unless: cat /etc/environment | grep HADOOP_CLASSPATH
 
-/etc/jmx_exporter/jmx_exporter.yaml:
-  file.managed:
-    - makedirs: True
-    - source: salt://ambari/scripts/exporter.yaml
-
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/internal_hostname.sh
