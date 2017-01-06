@@ -47,7 +47,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureAmbariRepository')">{{msg.cluster_form_ambari_hdprepo_tag}} <i class="fa fa-angle-double-right"></i></button>
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureAmbariRepository')">{{msg.cluster_form_ambari_repo_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
         </div>
     </div>

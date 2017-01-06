@@ -397,6 +397,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         sssdConfigId: cluster.sssdConfigId || null,
                         validateBlueprint: cluster.validateBlueprint,
                         fileSystem: cluster.fileSystem || null,
+                        ambariRepoDetailsJson: cluster.ambariRepoDetailsJson === 'undefined' ? null : cluster.ambariRepoDetailsJson,
                         ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails,
                         ambariDatabaseDetails: cluster.ambariDatabaseDetails === 'undefined' ? null : cluster.ambariDatabaseDetails,
                         configStrategy: cluster.configStrategy
