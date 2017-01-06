@@ -62,7 +62,7 @@
 
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureAmbariRepository')">
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureHdpRepository')">
                     <i class="fa fa-angle-double-left"></i> {{msg.cluster_form_ambari_hdprepo_tag}}
                 </button>
             </div>

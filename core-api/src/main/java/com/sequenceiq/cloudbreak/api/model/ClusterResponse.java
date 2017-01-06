@@ -60,8 +60,6 @@ public class ClusterResponse {
 
     private Set<HostGroupResponse> hostGroups;
 
-    private AmbariStackDetailsJson ambariStackDetails;
-
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_ID)
     private Long rdsConfigId;
 
@@ -205,14 +203,6 @@ public class ClusterResponse {
 
     public void setAmbariServerIp(String ambariServerIp) {
         this.ambariServerIp = ambariServerIp;
-    }
-
-    public AmbariStackDetailsJson getAmbariStackDetails() {
-        return ambariStackDetails;
-    }
-
-    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
-        this.ambariStackDetails = ambariStackDetails;
     }
 
     public Long getRdsConfigId() {
