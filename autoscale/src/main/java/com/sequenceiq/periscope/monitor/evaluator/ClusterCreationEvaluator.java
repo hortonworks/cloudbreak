@@ -75,7 +75,7 @@ public class ClusterCreationEvaluator implements Runnable {
             if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
                 ambariHealthCheck(cluster.getUser(), resolvedAmbari);
                 LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
-                clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
+                cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
                 alertService.addPrometheusAlertsToConsul(cluster);
             }
         } else {

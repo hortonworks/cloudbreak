@@ -34,11 +34,12 @@ public class PrometheusAlertTemplateService {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    public String createAlert(String alertRuleTemplateName, String name, String threshold, int period) throws Exception {
+    public String createAlert(String alertRuleTemplateName, String name, String threshold, int period, String operator) throws Exception {
         Map<String, String> model = new HashMap<>();
         model.put("alertName", name);
         model.put("threshold", threshold);
         model.put("period", String.valueOf(period));
+        model.put("operator", operator);
         Template template = freemarkerConfiguration.getTemplate(ALERT_PATH + alertRuleTemplateName + FILE_EXTENSTION, "UTF-8");
         return processTemplateIntoString(template, model);
     }

@@ -3,11 +3,13 @@ package com.sequenceiq.periscope.monitor;
 import java.util.Collections;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.MetricEvaluator;
 
-//@Component
+@Component
 public class MetricMonitor extends AbstractMonitor implements Monitor {
 
     @Override

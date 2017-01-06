@@ -33,8 +33,8 @@ curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/metric | 
 curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/clusters/50/alerts/metric/150 | jq .
 
 # set prometheus alarms
-curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"cputhresholdexceeded","description":"CPU usage","period": 3,"threshold": 51.5,"alertRuleName":"cpu_threshold_exceeded", "alertState":"CRITICAL"}' $HOST/as/api/v1/clusters/1250/alerts/prometheus | jq .
-curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"cputhresholdexceeded","description":"CPU usage", "period": 3,"threshold": 51.5,"alertRuleName":"cpu_threshold_exceeded", "alertState":"CRITICAL"}' $HOST/as/api/v1/clusters/1250/alerts/prometheus/1400 | jq .
+curl -X POST -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"cputhresholdexceeded","description":"CPU usage","period": 3,"threshold": 51.5,"alertRuleName":"cpu_threshold_exceeded", "alertState":"CRITICAL", "alertOperator":"MORE_THAN"}' $HOST/as/api/v1/clusters/1250/alerts/prometheus | jq .
+curl -X PUT -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"alertName":"cputhresholdexceeded","description":"CPU usage", "period": 3,"threshold": 51.5,"alertRuleName":"cpu_threshold_exceeded", "alertState":"CRITICAL", "alertOperator":"MORE_THAN"}' $HOST/as/api/v1/clusters/1250/alerts/prometheus/1400 | jq .
 curl -X GET -H "Authorization: Bearer $TOKEN" $HOST/as/api/v1/clusters/1250/alerts/prometheus
 curl -X DELETE -H "Authorization: Bearer $TOKEN" $HOST/as/api/v1/clusters/1250/alerts/prometheus/1353 | jq .
 

@@ -3,9 +3,12 @@ package com.sequenceiq.periscope.monitor.evaluator;
 import java.util.List;
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.periscope.domain.BaseAlert;
@@ -19,8 +22,8 @@ import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.AmbariClientProvider;
 import com.sequenceiq.periscope.utils.ClusterUtils;
 
-//@Component("MetricEvaluator")
-//@Scope("prototype")
+@Component("MetricEvaluator")
+@Scope("prototype")
 public class MetricEvaluator extends AbstractEventPublisher implements EvaluatorExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MetricEvaluator.class);
@@ -29,13 +32,13 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
 
     private static final String ALERT_TS = "timestamp";
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private MetricAlertRepository alertRepository;
 
-    @Autowired
+    @Inject
     private AmbariClientProvider ambariClientProvider;
 
     private long clusterId;
