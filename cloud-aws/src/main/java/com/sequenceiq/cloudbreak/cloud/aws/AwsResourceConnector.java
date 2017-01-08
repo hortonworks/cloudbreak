@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -120,6 +121,8 @@ public class AwsResourceConnector implements ResourceConnector {
 
     private static final String CFS_OUTPUT_EIPALLOCATION_ID = "EIPAllocationID";
 
+    private static final String S3_ACCESS_ROLE = "S3AccessRole";
+
     @Inject
     private Configuration freemarkerConfiguration;
 
@@ -224,6 +227,7 @@ public class AwsResourceConnector implements ResourceConnector {
         }
 
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
+        saveS3AccessRoleArn(ac, stack, cFStackName, cfClient, resourceNotifier);
         List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
     }
@@ -262,15 +266,42 @@ public class AwsResourceConnector implements ResourceConnector {
         return cloudResources;
     }
 
+    private void saveS3AccessRoleArn(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
+            PersistenceNotifier resourceNotifier) {
+        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
+        if (awsInstanceProfileView.isEnableInstanceProfileStrategy() &&  !awsInstanceProfileView.isInstanceProfileAvailable()) {
+            String s3AccessRoleArn = getCreatedS3AccessRoleArn(cFStackName, client);
+            CloudResource s3AccessRoleArnCloudResource = new CloudResource.Builder().type(ResourceType.S3_ACCESS_ROLE_ARN).name(s3AccessRoleArn).build();
+            resourceNotifier.notifyAllocation(s3AccessRoleArnCloudResource, ac.getCloudContext());
+        }
+    }
+
+    private String getCreatedS3AccessRoleArn(String cFStackName, AmazonCloudFormationClient client) {
+        Map<String, String> outputs = getOutputs(cFStackName, client);
+        if (outputs.containsKey(S3_ACCESS_ROLE)) {
+            return outputs.get(S3_ACCESS_ROLE);
+        } else {
+            String outputKeyNotFound = String.format("S3AccessRole arn could not be found in the Cloudformation stack('%s') output.", cFStackName);
+            throw new CloudConnectorException(outputKeyNotFound);
+        }
+    }
+
     private String getElasticIpAllocationId(String cFStackName, AmazonCloudFormationClient client) {
+        Map<String, String> outputs = getOutputs(cFStackName, client);
+        if (outputs.containsKey(CFS_OUTPUT_EIPALLOCATION_ID)) {
+            return outputs.get(CFS_OUTPUT_EIPALLOCATION_ID);
+        } else {
+            String outputKeyNotFound = String.format("Allocation Id of Elastic IP could not be found in the Cloudformation stack('%s') output.", cFStackName);
+            throw new CloudConnectorException(outputKeyNotFound);
+        }
+    }
+
+    private Map<String, String> getOutputs(String cFStackName, AmazonCloudFormationClient client) {
         DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
-        String outputNotFound = String.format("Couldn't get Cloudformation stack's('%s') output to obtain Elastic Ip meta information.", cFStackName);
+        String outputNotFound = String.format("Couldn't get Cloudformation stack's('%s') output", cFStackName);
         List<Output> cfStackOutputs = client.describeStacks(describeStacksRequest).getStacks()
                 .stream().findFirst().orElseThrow(getCloudConnectorExceptionSupplier(outputNotFound)).getOutputs();
-        String outputKeyNotFound = String.format("Allocation Id of Elastic IP could not be found in the Cloudformation stack('%s') output.", cFStackName);
-        return cfStackOutputs.stream()
-                .filter(output -> CFS_OUTPUT_EIPALLOCATION_ID.equals(output.getOutputKey())).findFirst()
-                .orElseThrow(getCloudConnectorExceptionSupplier(outputKeyNotFound)).getOutputValue();
+        return cfStackOutputs.stream().collect(Collectors.toMap(Output::getOutputKey, Output::getOutputValue));
     }
 
     private void associateElasticIpToInstance(AmazonEC2Client amazonEC2Client, String eipAllocationId, List<String> instanceIds) {

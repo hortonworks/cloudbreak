@@ -5,7 +5,7 @@
   "Description" : "Deploys a Hortonworks Data Platform cluster on AWS.",
 
   "Parameters" : {
-  
+
     "StackName" : {
       "Description" : "Name of the CloudFormation stack that is used to tag instances",
       "Type" : "String",
@@ -402,17 +402,23 @@
     </#if>
     </#list>
   }
-  
-  <#if mapPublicIpOnLaunch>
+  <#if mapPublicIpOnLaunch || (enableInstanceProfile && !existingRole)>
   ,
   "Outputs" : {
+  <#if mapPublicIpOnLaunch>
     "AmbariUrl" : {
         "Value" : { "Fn::Join" : ["", ["https://", { "Ref" : "EIP" }, "/ambari/"]] }
     },
     "EIPAllocationID" : {
         "Value" : {"Fn::GetAtt" : [ "EIP" , "AllocationId" ]}
     }
+  </#if>
+  <#if enableInstanceProfile && !existingRole>
+    <#if mapPublicIpOnLaunch>,</#if>
+    "S3AccessRole": {
+        "Value" : {"Fn::GetAtt" : ["S3AccessRole", "Arn"] }
+    }
+  </#if>
   }
   </#if>
-
 }
