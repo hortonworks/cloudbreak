@@ -4,6 +4,7 @@ public enum ResourceType {
     // AWS
     CLOUDFORMATION_STACK,
     AWS_RESERVED_IP,
+    S3_ACCESS_ROLE_ARN,
 
     // OPENSTACK
     HEAT_STACK,

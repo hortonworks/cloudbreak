@@ -61,6 +61,9 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.CLOUDBREAK_DETAILS)
     private CloudbreakDetailsJson cloudbreakDetails;
 
+    @ApiModelProperty(StackModelDescription.S3_ACCESS_ROLE_ARN)
+    private String s3AccessRoleArn;
+
     public String getAccount() {
         return account;
     }
@@ -180,5 +183,13 @@ public class StackResponse extends StackBase {
 
     public void setStackTemplate(String stackTemplate) {
         this.stackTemplate = stackTemplate;
+    }
+
+    public String getS3AccessRoleArn() {
+        return s3AccessRoleArn;
+    }
+
+    public void setS3AccessRoleArn(String s3AccessRoleArn) {
+        this.s3AccessRoleArn = s3AccessRoleArn;
     }
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -26,8 +27,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
+import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
@@ -97,6 +100,12 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
         stackJson.setCreated(source.getCreated());
         stackJson.setGatewayPort(source.getGatewayPort());
+        List<Resource> resourcesByType = source.getResourcesByType(ResourceType.S3_ACCESS_ROLE_ARN);
+        Optional<Resource> accessRoleArnOptional = resourcesByType.stream().findFirst();
+        if (accessRoleArnOptional.isPresent()) {
+            String s3AccessRoleArn = accessRoleArnOptional.get().getResourceName();
+            stackJson.setS3AccessRoleArn(s3AccessRoleArn);
+        }
         convertComponentConfig(stackJson, source.getId());
         convertTags(stackJson, source.getTags());
         return stackJson;
