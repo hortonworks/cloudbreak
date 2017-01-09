@@ -36,6 +36,10 @@ type LdapConfigResponse struct {
 	*/
 	Description *string `json:"description,omitempty"`
 
+	/* domain in LDAP server (e.g. ad.seq.com).
+	 */
+	Domain *string `json:"domain,omitempty"`
+
 	/* template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)
 	 */
 	GroupSearchBase *string `json:"groupSearchBase,omitempty"`
@@ -81,6 +85,10 @@ type LdapConfigResponse struct {
 	/* determines if LDAP or LDAP over SSL is to be used
 	 */
 	ServerSSL *bool `json:"serverSSL,omitempty"`
+
+	/* attribute name for simplified search filter (e.g. sAMAccountName).
+	 */
+	UserSearchAttribute *string `json:"userSearchAttribute,omitempty"`
 
 	/* template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)
 

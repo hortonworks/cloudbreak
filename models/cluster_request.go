@@ -85,26 +85,9 @@ type ClusterRequest struct {
 	*/
 	HostGroups []*HostGroupRequest `json:"hostGroups,omitempty"`
 
-	/* kerberos admin user
-
-	Max Length: 15
-	Min Length: 5
-	*/
-	KerberosAdmin string `json:"kerberosAdmin,omitempty"`
-
-	/* kerberos master key
-
-	Max Length: 50
-	Min Length: 3
-	*/
-	KerberosMasterKey string `json:"kerberosMasterKey,omitempty"`
-
-	/* kerberos admin password
-
-	Max Length: 50
-	Min Length: 5
-	*/
-	KerberosPassword string `json:"kerberosPassword,omitempty"`
+	/* kerberos
+	 */
+	Kerberos *KerberosRequest `json:"kerberos,omitempty"`
 
 	/* LDAP config id for the cluster
 	 */
@@ -138,10 +121,6 @@ type ClusterRequest struct {
 	/* details of the external database for Hadoop components
 	 */
 	RdsConfigJSON *RDSConfig `json:"rdsConfigJson,omitempty"`
-
-	/* recovery mode of the cluster
-	 */
-	RecoveryMode *string `json:"recoveryMode,omitempty"`
 
 	/* SSSD config id for the cluster
 	 */
@@ -190,32 +169,12 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateKerberosAdmin(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberosMasterKey(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateKerberosPassword(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validatePassword(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateRecoveryMode(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -336,57 +295,6 @@ func (m *ClusterRequest) validateHostGroups(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterRequest) validateKerberosAdmin(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.KerberosAdmin) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("kerberosAdmin", "body", string(m.KerberosAdmin), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("kerberosAdmin", "body", string(m.KerberosAdmin), 15); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterRequest) validateKerberosMasterKey(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.KerberosMasterKey) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("kerberosMasterKey", "body", string(m.KerberosMasterKey), 3); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("kerberosMasterKey", "body", string(m.KerberosMasterKey), 50); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterRequest) validateKerberosPassword(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.KerberosPassword) { // not required
-		return nil
-	}
-
-	if err := validate.MinLength("kerberosPassword", "body", string(m.KerberosPassword), 5); err != nil {
-		return err
-	}
-
-	if err := validate.MaxLength("kerberosPassword", "body", string(m.KerberosPassword), 50); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *ClusterRequest) validateName(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("name", "body", string(m.Name)); err != nil {
@@ -419,37 +327,6 @@ func (m *ClusterRequest) validatePassword(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaxLength("password", "body", string(m.Password), 100); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-var clusterRequestTypeRecoveryModePropEnum []interface{}
-
-func (m *ClusterRequest) validateRecoveryModeEnum(path, location string, value string) error {
-	if clusterRequestTypeRecoveryModePropEnum == nil {
-		var res []string
-		if err := json.Unmarshal([]byte(`["MANUAL","AUTO"]`), &res); err != nil {
-			return err
-		}
-		for _, v := range res {
-			clusterRequestTypeRecoveryModePropEnum = append(clusterRequestTypeRecoveryModePropEnum, v)
-		}
-	}
-	if err := validate.Enum(path, location, value, clusterRequestTypeRecoveryModePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *ClusterRequest) validateRecoveryMode(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.RecoveryMode) { // not required
-		return nil
-	}
-
-	if err := m.validateRecoveryModeEnum("recoveryMode", "body", *m.RecoveryMode); err != nil {
 		return err
 	}
 

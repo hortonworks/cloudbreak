@@ -100,10 +100,6 @@ type ClusterResponse struct {
 	 */
 	RdsConfigID *int64 `json:"rdsConfigId,omitempty"`
 
-	/* recovery mode of the cluster
-	 */
-	RecoveryMode *string `json:"recoveryMode,omitempty"`
-
 	/* secure
 	 */
 	Secure *bool `json:"secure,omitempty"`
@@ -144,11 +140,6 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateRecoveryMode(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -238,37 +229,6 @@ func (m *ClusterResponse) validateHostGroups(formats strfmt.Registry) error {
 			}
 		}
 
-	}
-
-	return nil
-}
-
-var clusterResponseTypeRecoveryModePropEnum []interface{}
-
-func (m *ClusterResponse) validateRecoveryModeEnum(path, location string, value string) error {
-	if clusterResponseTypeRecoveryModePropEnum == nil {
-		var res []string
-		if err := json.Unmarshal([]byte(`["MANUAL","AUTO"]`), &res); err != nil {
-			return err
-		}
-		for _, v := range res {
-			clusterResponseTypeRecoveryModePropEnum = append(clusterResponseTypeRecoveryModePropEnum, v)
-		}
-	}
-	if err := validate.Enum(path, location, value, clusterResponseTypeRecoveryModePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *ClusterResponse) validateRecoveryMode(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.RecoveryMode) { // not required
-		return nil
-	}
-
-	if err := m.validateRecoveryModeEnum("recoveryMode", "body", *m.RecoveryMode); err != nil {
-		return err
 	}
 
 	return nil

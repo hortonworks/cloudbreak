@@ -18,18 +18,22 @@ swagger:model ClusterRepairRequest
 */
 type ClusterRepairRequest struct {
 
-	/* List of failed nodes
+	/* List of hostgroups where the failed nodes will be repaired
 
 	Required: true
 	*/
-	FailedNodes []string `json:"failedNodes"`
+	HostGroups []string `json:"hostGroups"`
+
+	/* If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and new nodes will be started.
+	 */
+	RemoveOnly *bool `json:"removeOnly,omitempty"`
 }
 
 // Validate validates this cluster repair request
 func (m *ClusterRepairRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateFailedNodes(formats); err != nil {
+	if err := m.validateHostGroups(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -40,15 +44,15 @@ func (m *ClusterRepairRequest) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *ClusterRepairRequest) validateFailedNodes(formats strfmt.Registry) error {
+func (m *ClusterRepairRequest) validateHostGroups(formats strfmt.Registry) error {
 
-	if err := validate.Required("failedNodes", "body", m.FailedNodes); err != nil {
+	if err := validate.Required("hostGroups", "body", m.HostGroups); err != nil {
 		return err
 	}
 
-	for i := 0; i < len(m.FailedNodes); i++ {
+	for i := 0; i < len(m.HostGroups); i++ {
 
-		if err := validate.RequiredString("failedNodes"+"."+strconv.Itoa(i), "body", string(m.FailedNodes[i])); err != nil {
+		if err := validate.RequiredString("hostGroups"+"."+strconv.Itoa(i), "body", string(m.HostGroups[i])); err != nil {
 			return err
 		}
 

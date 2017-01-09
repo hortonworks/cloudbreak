@@ -4,6 +4,7 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"strconv"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
@@ -46,6 +47,10 @@ type HostGroupResponse struct {
 	Unique: true
 	*/
 	RecipeIds []int64 `json:"recipeIds,omitempty"`
+
+	/* recovery mode of the hostgroup's nodes
+	 */
+	RecoveryMode *string `json:"recoveryMode,omitempty"`
 }
 
 // Validate validates this host group response
@@ -68,6 +73,11 @@ func (m *HostGroupResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRecipeIds(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRecoveryMode(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -139,6 +149,37 @@ func (m *HostGroupResponse) validateRecipeIds(formats strfmt.Registry) error {
 			return err
 		}
 
+	}
+
+	return nil
+}
+
+var hostGroupResponseTypeRecoveryModePropEnum []interface{}
+
+func (m *HostGroupResponse) validateRecoveryModeEnum(path, location string, value string) error {
+	if hostGroupResponseTypeRecoveryModePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["MANUAL","AUTO"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			hostGroupResponseTypeRecoveryModePropEnum = append(hostGroupResponseTypeRecoveryModePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, hostGroupResponseTypeRecoveryModePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *HostGroupResponse) validateRecoveryMode(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RecoveryMode) { // not required
+		return nil
+	}
+
+	if err := m.validateRecoveryModeEnum("recoveryMode", "body", *m.RecoveryMode); err != nil {
+		return err
 	}
 
 	return nil

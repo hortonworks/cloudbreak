@@ -185,6 +185,33 @@ func (a *Client) PutStacksIDCluster(params *PutStacksIDClusterParams) error {
 }
 
 /*
+FailureReport failures report
+
+Endpoint to report the failed nodes in the given cluster. If recovery mode for the node's hostgroup is AUTO then autorecovery would be started. If recovery mode for the node's hostgroup is MANUAL, the nodes will be marked as unhealthy.
+*/
+func (a *Client) FailureReport(params *FailureReportParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewFailureReportParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "failureReport",
+		Method:             "POST",
+		PathPattern:        "/stacks/{id}/cluster/failurereport",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &FailureReportReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
 GetConfigs gets cluster properties with blueprint outputs
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
@@ -225,7 +252,7 @@ func (a *Client) RepairCluster(params *RepairClusterParams) error {
 	_, err := a.transport.Submit(&client.Operation{
 		ID:                 "repairCluster",
 		Method:             "POST",
-		PathPattern:        "/stacks/{id}/cluster/repair",
+		PathPattern:        "/stacks/{id}/cluster/manualrepair",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

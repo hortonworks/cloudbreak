@@ -23,7 +23,7 @@ type SecurityRuleRequest struct {
 	/* comma separated list of accessible ports
 
 	Required: true
-	Pattern: ^[0-9]+(,[0-9]+)*$
+	Pattern: ^[1-9][0-9]{0,4}(-[1-9][0-9]{0,4}){0,1}(,[1-9][0-9]{0,4}(-[1-9][0-9]{0,4}){0,1})*$
 	*/
 	Ports string `json:"ports"`
 
@@ -72,7 +72,7 @@ func (m *SecurityRuleRequest) validatePorts(formats strfmt.Registry) error {
 		return err
 	}
 
-	if err := validate.Pattern("ports", "body", string(m.Ports), `^[0-9]+(,[0-9]+)*$`); err != nil {
+	if err := validate.Pattern("ports", "body", string(m.Ports), `^[1-9][0-9]{0,4}(-[1-9][0-9]{0,4}){0,1}(,[1-9][0-9]{0,4}(-[1-9][0-9]{0,4}){0,1})*$`); err != nil {
 		return err
 	}
 

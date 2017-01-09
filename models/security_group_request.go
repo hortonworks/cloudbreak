@@ -17,6 +17,12 @@ swagger:model SecurityGroupRequest
 */
 type SecurityGroupRequest struct {
 
+	/* type of cloud provider
+
+	Required: true
+	*/
+	CloudPlatform string `json:"cloudPlatform"`
+
 	/* description of the resource
 
 	Max Length: 1000
@@ -33,6 +39,10 @@ type SecurityGroupRequest struct {
 	*/
 	Name string `json:"name"`
 
+	/* Exisiting security group id
+	 */
+	SecurityGroupID *string `json:"securityGroupId,omitempty"`
+
 	/* list of security rules that relates to the security group
 	 */
 	SecurityRules []*SecurityRuleRequest `json:"securityRules,omitempty"`
@@ -41,6 +51,11 @@ type SecurityGroupRequest struct {
 // Validate validates this security group request
 func (m *SecurityGroupRequest) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateCloudPlatform(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
@@ -60,6 +75,15 @@ func (m *SecurityGroupRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *SecurityGroupRequest) validateCloudPlatform(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("cloudPlatform", "body", string(m.CloudPlatform)); err != nil {
+		return err
+	}
+
 	return nil
 }
 

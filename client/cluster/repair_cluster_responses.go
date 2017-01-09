@@ -51,7 +51,7 @@ func (o *RepairClusterDefault) Code() int {
 }
 
 func (o *RepairClusterDefault) Error() string {
-	return fmt.Sprintf("[POST /stacks/{id}/cluster/repair][%d] repairCluster default ", o._statusCode)
+	return fmt.Sprintf("[POST /stacks/{id}/cluster/manualrepair][%d] repairCluster default ", o._statusCode)
 }
 
 func (o *RepairClusterDefault) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {

@@ -21,6 +21,12 @@ type SecurityGroupResponse struct {
 	 */
 	Account *string `json:"account,omitempty"`
 
+	/* type of cloud provider
+
+	Required: true
+	*/
+	CloudPlatform string `json:"cloudPlatform"`
+
 	/* description of the resource
 
 	Max Length: 1000
@@ -51,6 +57,10 @@ type SecurityGroupResponse struct {
 	*/
 	PublicInAccount bool `json:"publicInAccount"`
 
+	/* Exisiting security group id
+	 */
+	SecurityGroupID *string `json:"securityGroupId,omitempty"`
+
 	/* list of security rules that relates to the security group
 	 */
 	SecurityRules []*SecurityRuleResponse `json:"securityRules,omitempty"`
@@ -59,6 +69,11 @@ type SecurityGroupResponse struct {
 // Validate validates this security group response
 func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateCloudPlatform(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateDescription(formats); err != nil {
 		// prop
@@ -83,6 +98,15 @@ func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *SecurityGroupResponse) validateCloudPlatform(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("cloudPlatform", "body", string(m.CloudPlatform)); err != nil {
+		return err
+	}
+
 	return nil
 }
 

@@ -19,7 +19,7 @@ swagger:model UpdateStack
 */
 type UpdateStack struct {
 
-	/* instnce group adjustment
+	/* instance group adjustment
 	 */
 	InstanceGroupAdjustment *InstanceGroupAdjustment `json:"instanceGroupAdjustment,omitempty"`
 
