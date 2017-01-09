@@ -45,6 +45,7 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64,
 	secGroup := models.SecurityGroupRequest{
 		Name:          secGroupName,
 		SecurityRules: secRules,
+		CloudPlatform: "AWS",
 	}
 
 	log.Infof("[CreateSecurityGroup] sending security group create request with name: %s", secGroupName)
