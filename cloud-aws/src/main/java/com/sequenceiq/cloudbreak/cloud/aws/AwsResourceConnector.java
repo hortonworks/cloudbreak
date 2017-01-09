@@ -659,7 +659,6 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     private void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient) {
-
         for (Group group : stack.getGroups()) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
             LOGGER.info("Polling Auto Scaling group until new instances are ready. [stack: {}, asGroup: {}]", ac.getCloudContext().getId(),
