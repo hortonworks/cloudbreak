@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.task;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -16,7 +18,10 @@ import com.amazonaws.services.autoscaling.model.DescribeScalingActivitiesRequest
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusRequest;
 import com.amazonaws.services.ec2.model.DescribeInstanceStatusResult;
+import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsRequest;
+import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult;
 import com.amazonaws.services.ec2.model.InstanceStatus;
+import com.amazonaws.services.ec2.model.SpotInstanceRequest;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
@@ -37,6 +42,12 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     private static final int COMPLETED = 100;
 
     private static final String CANCELLED = "Cancelled";
+
+    private static final String WAIT_FOR_SPOT_INSTANCES_STATUS_CODE = "WaitingForSpotInstanceId";
+
+    private static final String SPOT_ID_PATTERN = "sir-[a-z0-9]{8}";
+
+    private static final String LOW_SPOT_PRICE_STATUS_CODE = "price-too-low";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
@@ -75,6 +86,7 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
             LOGGER.debug("Instances in AS group: {}, needed: {}", instanceIds.size(), requiredInstances);
             List<Activity> activities = getAutoScalingActivities();
             if (latestActivity.isPresent()) {
+                checkForSpotRequest(latestActivity.get(), amazonEC2Client);
                 activities = activities.stream().filter(activity -> activity.getStartTime().after(latestActivity.get().getStartTime()))
                         .collect(Collectors.toList());
             }
@@ -111,6 +123,25 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
             }
         }
         return true;
+    }
+
+    private void checkForSpotRequest(Activity activity, AmazonEC2Client amazonEC2Client) {
+        if (WAIT_FOR_SPOT_INSTANCES_STATUS_CODE.equals(activity.getStatusCode())) {
+            Pattern pattern = Pattern.compile(SPOT_ID_PATTERN);
+            Matcher matcher = pattern.matcher(activity.getStatusMessage());
+            if (matcher.find()) {
+                String spotId = matcher.group(0);
+                DescribeSpotInstanceRequestsResult spotResult = amazonEC2Client.describeSpotInstanceRequests(
+                        new DescribeSpotInstanceRequestsRequest().withSpotInstanceRequestIds(spotId));
+                Optional<SpotInstanceRequest> request = spotResult.getSpotInstanceRequests().stream().findFirst();
+                if (request.isPresent()) {
+                    if (LOW_SPOT_PRICE_STATUS_CODE.equals(request.get().getStatus().getCode())) {
+                        throw new CloudConnectorException(request.get().getStatus().getMessage());
+                    }
+                }
+
+            }
+        }
     }
 
     private List<Activity> getAutoScalingActivities() {
