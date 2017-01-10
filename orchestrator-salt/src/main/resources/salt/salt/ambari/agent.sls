@@ -14,6 +14,11 @@ ambari-agent:
 
 {% endif %}
 
+/etc/environment:
+  file.append:
+    - text: "SPARK_CLASSPATH=${SPARK_CLASSPATH}:/usr/lib/hadoop/lib/*"
+    - unless: cat /etc/environment | grep SPARK_CLASSPATH
+
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
     - source: salt://ambari/scripts/internal_hostname.sh
