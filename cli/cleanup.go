@@ -55,7 +55,7 @@ func (c *Cloudbreak) cleanupTemplates(wg *sync.WaitGroup) {
 
 func cleanupTemplatesImpl(getTemplates func() []*models.TemplateResponse, deleteTemplate func(string) error) {
 	for _, template := range getTemplates() {
-		if strings.Contains(template.Name, "mtempl") || strings.Contains(template.Name, "wtempl") {
+		if strings.Contains(template.Name, "mtempl") || strings.Contains(template.Name, "wtempl") || strings.Contains(template.Name, "ctempl") {
 			if err := deleteTemplate(template.Name); err != nil {
 				log.Warnf("[cleanupTemplates] failed to delete template: %s", template.Name)
 				continue
