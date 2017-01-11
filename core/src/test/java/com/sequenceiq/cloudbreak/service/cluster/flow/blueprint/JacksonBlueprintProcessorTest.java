@@ -245,6 +245,17 @@ public class JacksonBlueprintProcessorTest {
         Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
     }
 
+    @Test
+    public void addToBlueprint() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-zeppelin-shiro.bp");
+        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
+        configs.add(new BlueprintConfigurationEntry("zeppelin-env", "shiro_ini_content", "changed"));
+        String result = underTest.addConfigEntries(testBlueprint, configs, false);
+
+        Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
+
+    }
+
     private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {
         boolean componentExists = false;
         Iterator<JsonNode> components = hostGroupNode.path("components").elements();
