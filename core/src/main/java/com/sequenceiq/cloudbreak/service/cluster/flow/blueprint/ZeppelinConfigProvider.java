@@ -37,7 +37,7 @@ public class ZeppelinConfigProvider {
         if (blueprintProcessor.componentExistsInBlueprint(ZEPPELIN_MASTER, blueprintText)) {
             LOGGER.info("Zeppelin exists in Blueprint");
             List<BlueprintConfigurationEntry> configs = getConfigs(stack);
-            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, false);
         }
         return blueprintText;
     }
