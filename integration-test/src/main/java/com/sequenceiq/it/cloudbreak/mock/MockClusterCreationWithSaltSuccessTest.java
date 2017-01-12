@@ -49,6 +49,7 @@ import com.sequenceiq.it.spark.ambari.AmbariStatusResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariClusterResponse;
 import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
+import com.sequenceiq.it.util.HostNameUtil;
 import com.sequenceiq.it.verification.Verification;
 
 
@@ -211,7 +212,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
                 CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
-                genericResponse.setStatus("host-" + cloudVmMetaDataStatus.getMetaData().getPrivateIp().replace(".", "-") + ".example.com");
+                genericResponse.setStatus(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()));
                 genericResponse.setStatusCode(200);
                 responses.add(genericResponse);
             }

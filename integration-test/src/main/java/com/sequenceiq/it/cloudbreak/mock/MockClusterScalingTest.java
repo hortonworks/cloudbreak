@@ -57,6 +57,7 @@ import com.sequenceiq.it.spark.ambari.EmptyAmbariResponse;
 import com.sequenceiq.it.spark.salt.SaltApiRunPostResponse;
 import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
 import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
+import com.sequenceiq.it.util.HostNameUtil;
 
 public class MockClusterScalingTest extends AbstractMockIntegrationTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterScalingTest.class);
@@ -165,7 +166,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
                 String address = nodeArray.get(i).getAsString();
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(address);
-                genericResponse.setStatus("host-" + address.replace(".", "-") + ".example.com");
+                genericResponse.setStatus(HostNameUtil.generateHostNameByIp(address));
                 genericResponse.setStatusCode(200);
                 responses.add(genericResponse);
             }
@@ -243,7 +244,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
 
             for (String instanceId : instanceMap.keySet()) {
                 CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
-                ObjectNode node = liveNodesRoot.putObject("host-" + cloudVmMetaDataStatus.getMetaData().getPrivateIp().replace(".", "-") + ".example.com");
+                ObjectNode node = liveNodesRoot.putObject(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()));
                 node.put("remaining", "10000000");
                 node.put("usedSpace", Integer.valueOf(100000).toString());
                 node.put("adminState", "In Service");
