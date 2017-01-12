@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<topology>
+    <gateway>
+        <provider>
+            <role>authentication</role>
+            <name>ShiroProvider</name>
+            <enabled>true</enabled>
+            <param>
+                <name>sessionTimeout</name>
+                <value>30</value>
+            </param>
+            <param>
+                <name>main.ldapRealm</name>
+                <value>org.apache.hadoop.gateway.shirorealm.KnoxLdapRealm</value>
+            </param>
+            <param>
+                <name>main.ldapContextFactory</name>
+                <value>org.apache.hadoop.gateway.shirorealm.KnoxLdapContextFactory</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.contextFactory</name>
+                <value>$ldapContextFactory</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.userDnTemplate</name>
+                <value>uid={0},ou=people,dc=hadoop,dc=apache,dc=org</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.contextFactory.url</name>
+                <value>ldap://localhost:33389</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.contextFactory.authenticationMechanism</name>
+                <value>simple</value>
+            </param>
+            <param>
+                <name>urls./**</name>
+                <value>authcBasic</value>
+            </param>
+        </provider>
+
+        <provider>
+            <role>identity-assertion</role>
+            <name>Default</name>
+            <enabled>true</enabled>
+        </provider>
+
+        <!--
+        Defines rules for mapping host names internal to a Hadoop cluster to externally accessible host names.
+        For example, a hadoop service running in AWS may return a response that includes URLs containing the
+        some AWS internal host name.  If the client needs to make a subsequent request to the host identified
+        in those URLs they need to be mapped to external host names that the client Knox can use to connect.
+
+        If the external hostname and internal host names are same turn of this provider by setting the value of
+        enabled parameter as false.
+
+        The name parameter specifies the external host names in a comma separated list.
+        The value parameter specifies corresponding internal host names in a comma separated list.
+
+        Note that when you are using Sandbox, the external hostname needs to be localhost, as seen in out
+        of box sandbox.xml.  This is because Sandbox uses port mapping to allow clients to connect to the
+        Hadoop services using localhost.  In real clusters, external host names would almost never be localhost.
+        -->
+        <provider>
+            <role>hostmap</role>
+            <name>static</name>
+            <enabled>true</enabled>
+            <param><name>localhost</name><value>sandbox,sandbox.hortonworks.com</value></param>
+        </provider>
+
+    </gateway>
+
+    <!-- curl -iku {{ salt['pillar.get']('ambari:username') }}:{{ salt['pillar.get']('ambari:password') }} -X GET 'https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/webhdfs/v1/?op=LISTSTATUS' -->
+
+    <service>
+        <role>WEBHDFS</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:50070/webhdfs</url>
+    </service>
+
+    <service>
+        <role>AMBARI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
+    </service>
+
+    <service>
+        <role>ZEPPELINWS</role>
+        <url>ws://{{ salt['grains.get']('fqdn') }}:9995/ws</url>
+    </service>
+
+    <service>
+        <role>RANGER</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:6080</url>
+    </service>
+
+
+    <!-- UI -->
+
+    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/hdfs/ -->
+
+    <service>
+        <role>HDFSUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:50070</url>
+    </service>
+
+    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/ambari/ -->
+
+    <service>
+        <role>AMBARIUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
+    </service>
+
+    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/yarn/ -->
+
+    <service>
+        <role>YARNUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:8088</url>
+    </service>
+
+    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/jobhistory/ -->
+
+    <service>
+        <role>JOBHISTORYUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:19888</url>
+    </service>
+
+    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/sparkhistory/ -->
+
+    <service>
+        <role>SPARKHISTORYUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:18080/</url>
+    </service>
+
+    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/zeppelin/ -->
+
+    <service>
+        <role>ZEPPELINUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:9995</url>
+    </service>
+
+    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/ranger/ -->
+
+    <service>
+        <role>RANGERUI</role>
+        <url>http://{{ salt['grains.get']('fqdn') }}:6080</url>
+    </service>
+
+</topology>

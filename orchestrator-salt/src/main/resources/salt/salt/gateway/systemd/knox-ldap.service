@@ -1,0 +1,18 @@
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=Knox LDAP
+After=network.target network.service
+
+[Service]
+Type=forking
+PIDFile=/var/run/knox/ldap.pid
+User=knox
+Restart=on-failure
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+ExecStart=/usr/hdp/current/knox-server/bin/ldap.sh start
+ExecStop=/usr/hdp/current/knox-server/bin/ldap.sh stop
