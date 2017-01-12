@@ -72,6 +72,21 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
+    public String ambariServerContainer() {
+        return "server";
+    }
+
+    @Override
+    public String ambariClientContainer() {
+        return "client";
+    }
+
+    @Override
+    public String ambariDbContainer() {
+        return "db";
+    }
+
+    @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {
         return false;
     }

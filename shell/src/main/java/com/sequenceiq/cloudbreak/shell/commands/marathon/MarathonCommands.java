@@ -45,7 +45,7 @@ public class MarathonCommands implements CommandMarker {
     @Inject
     private ResponseTransformer responseTransformer;
 
-    @CliAvailabilityIndicator({ "mode" })
+    @CliAvailabilityIndicator({ "marathonmode" })
     public boolean isHintCommandAvailable() {
         return true;
     }

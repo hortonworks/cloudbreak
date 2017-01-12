@@ -19,6 +19,7 @@ import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
@@ -65,6 +66,14 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     private static final String ENV_KEY_VALUE_SEPARATOR = "=";
 
+    @Value("${cb.docker.container.ambari.agent:}")
+    private String ambariAgent;
+
+    @Value("${cb.docker.container.ambari.server:}")
+    private String ambariServer;
+
+    @Value("${cb.docker.container.ambari.db:}")
+    private String postgresDockerImageName;
 
     /**
      * Bootstraps a Swarm based container orchestration cluster with a Consul discovery backend with the Munchausen tool.
@@ -441,5 +450,20 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     private String imageName(ContainerConfig containerConfig) {
         return containerConfig.getName() + ":" + containerConfig.getVersion();
+    }
+
+    @Override
+    public String ambariServerContainer() {
+        return ambariServer;
+    }
+
+    @Override
+    public String ambariClientContainer() {
+        return ambariAgent;
+    }
+
+    @Override
+    public String ambariDbContainer() {
+        return postgresDockerImageName;
     }
 }

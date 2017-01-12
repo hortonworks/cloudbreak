@@ -21,7 +21,6 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
-import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -234,7 +233,7 @@ public class RecipeEngine {
         return false;
     }
 
-    private boolean recipesSupportedOnOrchestrator(Orchestrator orchestrator) {
-        return !OrchestratorConstants.MARATHON.equals(orchestrator.getType());
+    private boolean recipesSupportedOnOrchestrator(Orchestrator orchestrator) throws CloudbreakException {
+        return !orchestratorTypeResolver.resolveType(orchestrator).containerOrchestrator();
     }
 }

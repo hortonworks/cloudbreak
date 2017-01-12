@@ -59,10 +59,21 @@ public class BlueprintCommands implements BaseCommands {
                 }
                 shellContext.addBlueprint(id);
                 if (shellContext.cloudbreakClient().blueprintEndpoint().getPublics().isEmpty()) {
-                    shellContext.setHint(
-                            shellContext.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);
+                    if (shellContext.isMarathonMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
+                    } else if (shellContext.isYarnMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
+                    } else {
+                        shellContext.setHint(Hints.CONFIGURE_INSTANCEGROUP);
+                    }
                 } else {
-                    shellContext.setHint(shellContext.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.SELECT_STACK);
+                    if (shellContext.isMarathonMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
+                    } else if (shellContext.isYarnMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
+                    } else {
+                        shellContext.setHint(Hints.SELECT_STACK);
+                    }
                 }
                 message = String.format("Blueprint created with id: '%s' and name: '%s'", id, name);
             } else {
@@ -104,8 +115,14 @@ public class BlueprintCommands implements BaseCommands {
                 if (shellContext.cloudbreakClient().blueprintEndpoint().get(id) != null) {
                     shellContext.addBlueprint(id.toString());
                     shellContext.resetMarathonHostGroups();
-                    shellContext.setHint(
-                            shellContext.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);
+                    shellContext.resetYarnHostGroups();
+                    if (shellContext.isMarathonMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
+                    } else if (shellContext.isYarnMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
+                    } else {
+                        shellContext.setHint(Hints.CONFIGURE_INSTANCEGROUP);
+                    }
                     return String.format("Blueprint has been selected, id: %s", id);
                 }
             } else if (name != null) {
@@ -113,8 +130,14 @@ public class BlueprintCommands implements BaseCommands {
                 if (blueprint != null) {
                     shellContext.addBlueprint(blueprint.getId().toString());
                     shellContext.resetMarathonHostGroups();
-                    shellContext.setHint(
-                            shellContext.isMarathonMode() ? Hints.CONFIGURE_MARATHON_HOSTGROUP : Hints.CONFIGURE_INSTANCEGROUP);
+                    shellContext.resetYarnHostGroups();
+                    if (shellContext.isMarathonMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
+                    } else if (shellContext.isYarnMode()) {
+                        shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
+                    } else {
+                        shellContext.setHint(Hints.CONFIGURE_INSTANCEGROUP);
+                    }
                     return String.format("Blueprint has been selected, name: %s", name);
                 }
             }

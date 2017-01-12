@@ -12,12 +12,13 @@ angular.module('uluwatuControllers').controller('templateController', [
         $scope.gcpTemplateForm = {};
         $scope.openstackTemplateForm = {};
         $scope.mesosTemplateForm = {};
+        $scope.yarnTemplateForm = {};
         $scope.awsInstanceType = {};
         $scope.showAlert = false;
         $scope.alertMessage = "";
         var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "BYOS", "GCP", "OPENSTACK"]);
         if (firstVisiblePlatform != -1) {
-            $scope[["awsTemplate", "azureTemplate", "mesosTemplate", "gcpTemplate", "openstackTemplate"][firstVisiblePlatform]] = true;
+            $scope[["awsTemplate", "azureTemplate", "mesosTemplate", "gcpTemplate", "openstackTemplate", "yarntemplate"][firstVisiblePlatform]] = true;
         }
 
         $scope.createAwsTemplateRequest = function() {
@@ -26,6 +27,7 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
             $scope.mesosTemplate = false;
+            $scope.yarnTemplate = false;
         }
 
         $scope.createAzureTemplateRequest = function() {
@@ -34,6 +36,7 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
             $scope.mesosTemplate = false;
+            $scope.yarnTemplate = false;
         }
 
         $scope.createGcpTemplateRequest = function() {
@@ -42,6 +45,7 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.gcpTemplate = true;
             $scope.openstackTemplate = false;
             $scope.mesosTemplate = false;
+            $scope.yarnTemplate = false;
         }
 
         $scope.createOpenstackTemplateRequest = function() {
@@ -50,6 +54,7 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = true;
             $scope.mesosTemplate = false;
+            $scope.yarnTemplate = false;
         }
 
         $scope.createMesosTemplateRequest = function() {
@@ -58,8 +63,17 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.gcpTemplate = false;
             $scope.openstackTemplate = false;
             $scope.mesosTemplate = true;
+            $scope.yarnTemplate = false;
         }
 
+        $scope.createYarnTemplateRequest = function() {
+            $scope.azureTemplate = false;
+            $scope.awsTemplate = false;
+            $scope.gcpTemplate = false;
+            $scope.openstackTemplate = false;
+            $scope.mesosTemplate = false;
+            $scope.yarnTemplate = true;
+        }
 
         $scope.createAwsTemplate = function() {
             $scope.awsTemp.cloudPlatform = 'AWS';
@@ -214,6 +228,35 @@ angular.module('uluwatuControllers').controller('templateController', [
             }
         }
 
+        $scope.createYarnTemplate = function() {
+            $scope.yarnTemp.orchestratorType = "YARN";
+            if ($scope.yarnTemp.public) {
+                AccountConstraint.save($scope.yarnTemp, function(result) {
+                    handleYarnTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.yarn_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
+            } else {
+                UserConstraint.save($scope.yarnTemp, function(result) {
+                    handleYarnTemplateSuccess(result)
+                }, function(error) {
+                    $scope.showError(error, $rootScope.msg.yarn_template_failed);
+                    $scope.showErrorMessageAlert();
+                });
+            }
+
+            function handleYarnTemplateSuccess(result) {
+                $scope.yarnTemp.id = result.id;
+                $rootScope.constraints.push($scope.yarnTemp);
+                initializeYarnTemp();
+                $scope.showSuccess($filter("format")($rootScope.msg.yarn_template_success, String(result.id)));
+                $scope.yarnTemplateForm.$setPristine();
+                collapseCreateTemplateFormPanel();
+                $scope.unShowErrorMessageAlert();
+            }
+        }
+
         $scope.deleteTemplate = function(template) {
             GlobalTemplate.delete({
                 id: template.id
@@ -356,6 +399,14 @@ angular.module('uluwatuControllers').controller('templateController', [
             }
         }
 
+        function initializeYarnTemp() {
+            $scope.yarnTemp = {
+                cpu: 2,
+                memory: 4096,
+                disk: 500
+            }
+        }
+
         function initializeOpenstackTemp() {
             $scope.openstackTemp = {
                 volumeCount: 1,
@@ -409,5 +460,6 @@ angular.module('uluwatuControllers').controller('templateController', [
         initializeGcpTemp();
         initializeOpenstackTemp();
         initializeMesosTemp();
+        initializeYarnTemp();
     }
 ]);

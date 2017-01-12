@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
@@ -110,7 +109,7 @@ public class ClusterBootstrapper {
 
         if (orchestratorType.hostOrchestrator()) {
             bootstrapOnHost(stack);
-        } else if (OrchestratorConstants.MARATHON.equals(stackOrchestratorType)) {
+        } else if (orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             LOGGER.info("Skipping bootstrap of the machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
         } else if (orchestratorType.containerOrchestrator()) {
             bootstrapContainers(stack);

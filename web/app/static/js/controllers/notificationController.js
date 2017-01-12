@@ -132,9 +132,10 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         }
 
         function getActCluster(notification) {
-            return $filter('filter')($rootScope.clusters, {
-                id: notification.stackId
-            })[0];
+            if ($rootScope.clusters != null) {
+                return $filter('filter')($rootScope.clusters, {id: notification.stackId})[0];
+            }
+            return null;
         }
 
         function handleStatusChange(notification, refresh) {

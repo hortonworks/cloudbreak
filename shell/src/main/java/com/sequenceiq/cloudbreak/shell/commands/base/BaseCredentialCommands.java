@@ -40,7 +40,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     @Override
     @CliAvailabilityIndicator(value = { "credential delete --id", "credential delete --name" })
     public boolean deleteAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "credential delete --id", help = "Delete the credential by its id")
@@ -74,7 +74,8 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     @Override
     @CliAvailabilityIndicator(value = { "credential select --id", "credential select --name" })
     public boolean selectAvailable() {
-        return shellContext.isCredentialAccessible() && !shellContext.isMarathonMode();
+
+        return shellContext.isCredentialAccessible() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "credential select --id", help = "Select the credential by its id")
@@ -114,7 +115,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     @Override
     @CliAvailabilityIndicator(value = "credential list")
     public boolean listAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -131,7 +132,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     @Override
     @CliAvailabilityIndicator(value = { "credential show --id", "credential show --name" })
     public boolean showAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "credential show --id", help = "Show the credential by its id")
@@ -167,7 +168,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
 
     @Override
     public boolean createCredentialAvailable(String platform) {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override

@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 
@@ -34,5 +35,8 @@ public class OrchestratorTypeResolver {
         }
     }
 
+    public OrchestratorType resolveType(Orchestrator orchestrator) throws CloudbreakException {
+        return resolveType(orchestrator.getType());
+    }
 
 }

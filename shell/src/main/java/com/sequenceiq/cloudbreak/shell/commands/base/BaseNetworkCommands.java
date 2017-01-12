@@ -28,7 +28,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @CliAvailabilityIndicator(value = { "network delete --id", "network delete --name" })
     @Override
     public boolean deleteAvailable() {
-        return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode();
+        return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "network delete --id", help = "Delete the network by its id")
@@ -66,7 +66,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @CliAvailabilityIndicator(value = { "network select --id", "network select --name" })
     @Override
     public boolean selectAvailable() {
-        return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode();
+        return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "network select --id", help = "Select the network by its id")
@@ -105,7 +105,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @CliAvailabilityIndicator(value = "network list")
     @Override
     public boolean listAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "network list", help = "Shows the currently available networks configurations")
@@ -122,7 +122,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @CliAvailabilityIndicator(value = { "network show --id", "network show --name" })
     @Override
     public boolean showAvailable() {
-        return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode();
+        return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "network show --id", help = "Show the network by its id")
@@ -155,7 +155,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
 
     @Override
     public boolean createNetworkAvailable(String platform) {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override

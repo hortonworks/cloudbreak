@@ -441,7 +441,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
             }
 
             this.delete = function(cluster, successHandler, failureHandler) {
-                if (cluster.orchestrator != null && cluster.orchestrator.type === "MARATHON") {
+                var isByos = cluster.orchestrator.type === "MARATHON" || cluster.orchestrator.type === "YARN";
+                if (cluster.orchestrator != null && isByos) {
                     Cluster.delete({
                         id: cluster.id
                     }, function(result) {

@@ -51,13 +51,13 @@ import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -239,6 +239,9 @@ public class AmbariClusterConnector {
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
 
+    @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient defaultAmbariClient = getDefaultAmbariClient(stack);
         AmbariClient cloudbreakAmbariClient = getAmbariClient(stack);
@@ -326,13 +329,13 @@ public class AmbariClusterConnector {
     }
 
     private String updateBlueprintConfiguration(Stack stack, String blueprintText, Set<RDSConfig> rdsConfigs, FileSystem fs)
-            throws IOException, CloudbreakImageNotFoundException {
+            throws IOException, CloudbreakImageNotFoundException, CloudbreakException {
         if (fs != null) {
             blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
         }
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
-        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+        if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stack.getId());
             if (hdpRepo != null && hdpRepo.getHdpVersion() != null) {
                 blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, hdpRepo.getHdpVersion());
@@ -717,9 +720,9 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException, CloudbreakImageNotFoundException {
+    private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException, CloudbreakImageNotFoundException, CloudbreakException {
         HDPRepo hdpRepo = null;
-        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+        if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             hdpRepo = componentConfigProvider.getHDPRepo(stack.getId());
         }
         if (hdpRepo != null) {

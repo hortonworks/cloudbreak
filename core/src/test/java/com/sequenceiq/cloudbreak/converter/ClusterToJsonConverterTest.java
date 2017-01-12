@@ -35,11 +35,15 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -86,12 +90,16 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     @Mock
     private AmbariViewProvider ambariViewProvider;
 
+    @Mock
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
     @Before
-    public void setUp() {
+    public void setUp() throws CloudbreakException {
         underTest = new ClusterToJsonConverter();
         MockitoAnnotations.initMocks(this);
+        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 

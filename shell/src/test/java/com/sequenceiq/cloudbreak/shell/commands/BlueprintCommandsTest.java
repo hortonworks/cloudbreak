@@ -53,6 +53,7 @@ public class BlueprintCommandsTest {
         dummyResult = new BlueprintResponse();
         dummyResult.setId(BLUEPRINT_ID);
         given(mockContext.isMarathonMode()).willReturn(false);
+        given(mockContext.isYarnMode()).willReturn(false);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());

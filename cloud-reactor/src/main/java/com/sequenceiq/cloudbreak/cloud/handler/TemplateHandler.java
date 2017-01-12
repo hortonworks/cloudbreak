@@ -33,7 +33,11 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
         String template;
         try {
             CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
-            template = connector.resources().getStackTemplate();
+            if (connector != null) {
+                template = connector.resources().getStackTemplate();
+            } else {
+                throw new TemplatingDoesNotSupportedException();
+            }
         } catch (TemplatingDoesNotSupportedException e) {
             template = null;
         }
