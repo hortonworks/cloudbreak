@@ -51,6 +51,21 @@ public class DummyContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
+    public String ambariServerContainer() {
+        return "server";
+    }
+
+    @Override
+    public String ambariClientContainer() {
+        return "client";
+    }
+
+    @Override
+    public String ambariDbContainer() {
+        return "db";
+    }
+
+    @Override
     public String name() {
         return "DUMMY";
     }

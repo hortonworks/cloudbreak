@@ -1,6 +1,7 @@
 include 'core-model'
 include 'core'
 include 'integration-test'
+include 'orchestrator-yarn'
 include 'orchestrator-swarm'
 include 'orchestrator-salt'
 include 'orchestrator-marathon'

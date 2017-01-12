@@ -48,6 +48,9 @@ cb:
   azure:
     host.name.prefix.length: 3
 
+  yarn:
+    domain: default.com
+
   blueprint.defaults: hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp-etl-edw;hdp25-data-science;hdp25-edw-analytics;hdp25-etl-edw;hdp25-etl-edw-spark2
   template.defaults: minviable-gcp,minviable-azure,minviable-aws
   custom.user.data: |
@@ -67,6 +70,9 @@ cb:
       ambari.server: hortonworks/ambari-server:2.4.0-v1
       ambari.agent: hortonworks/ambari-agent:2.4.0-v1
       ambari.db: postgres:9.4.1
+      yarn.ambari.server: registry.eng.hortonworks.com/cloudbreak/yarn-cloudbreak-ambari-server:0.1
+      yarn.ambari.agent: registry.eng.hortonworks.com/cloudbreak/yarn-cloudbreak-ambari-agent:0.1
+      yarn.ambari.db: registry.eng.hortonworks.com/cloudbreak/yarn-cloudbreak-postgres:0.1
       registrator: gliderlabs/registrator:v6
       docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.6
       kerberos: sequenceiq/kerberos:1.1

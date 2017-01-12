@@ -82,11 +82,8 @@ public class ClusterContainerRunnerTest {
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(containerConfigService, "ambariAgent", "sequence/testcont:0.1.1");
-        ReflectionTestUtils.setField(containerConfigService, "ambariServer", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "registratorDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "consulWatchPlugnDockerImageName", "sequence/testcont:0.1.1");
-        ReflectionTestUtils.setField(containerConfigService, "postgresDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "kerberosDockerImageName", "sequence/testcont:0.1.1");
         ReflectionTestUtils.setField(containerConfigService, "logrotateDockerImageName", "sequence/testcont:0.1.1");
     }

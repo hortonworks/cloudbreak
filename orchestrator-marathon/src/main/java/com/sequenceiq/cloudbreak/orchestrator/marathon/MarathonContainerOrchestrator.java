@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -62,6 +63,15 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     private static final String SPACE = " ";
 
     private static final Integer STATUS_NOT_FOUND = 404;
+
+    @Value("${cb.docker.container.ambari.agent:}")
+    private String ambariAgent;
+
+    @Value("${cb.docker.container.ambari.server:}")
+    private String ambariServer;
+
+    @Value("${cb.docker.container.ambari.db:}")
+    private String postgresDockerImageName;
 
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
@@ -351,5 +361,20 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
         return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap());
+    }
+
+    @Override
+    public String ambariServerContainer() {
+        return ambariServer;
+    }
+
+    @Override
+    public String ambariClientContainer() {
+        return ambariAgent;
+    }
+
+    @Override
+    public String ambariDbContainer() {
+        return postgresDockerImageName;
     }
 }

@@ -24,6 +24,9 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
@@ -41,6 +44,9 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
     @Mock
     private StackParameterService stackParameterService;
 
+    @Mock
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+
     @Before
     public void setUp() {
         underTest = new JsonToStackConverter();
@@ -48,7 +54,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
     }
 
     @Test
-    public void testConvert() {
+    public void testConvert() throws CloudbreakException {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
@@ -60,6 +66,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
+        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         // WHEN
         Stack stack = underTest.convert(getRequest("stack/stack.json"));
         // THEN
@@ -69,7 +77,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
     }
 
     @Test(expected = BadRequestException.class)
-    public void testForNoRegionAndNoDefaultRegion() {
+    public void testForNoRegionAndNoDefaultRegion() throws CloudbreakException {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
@@ -80,6 +88,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
+        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
 
         // WHEN
         StackRequest stackRequest = getRequest("stack/stack.json");
@@ -91,7 +101,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
     }
 
     @Test
-    public void testForNoRegionAndDefaultRegion() {
+    public void testForNoRegionAndDefaultRegion() throws CloudbreakException {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
@@ -103,6 +113,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
+        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
 
         // WHEN
         StackRequest stackRequest = getRequest("stack/stack.json");

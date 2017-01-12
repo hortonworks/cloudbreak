@@ -31,12 +31,14 @@ public class InstanceGroupCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "instancegroup configure")
     public boolean createAvailable() {
-        return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable()) && !shellContext.isMarathonMode();
+        return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())
+                && !shellContext.isMarathonMode()
+                && !shellContext.isYarnMode();
     }
 
     @CliAvailabilityIndicator(value = "instancegroup show")
     public boolean showAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "instancegroup configure", help = "Configure instance groups")

@@ -227,6 +227,9 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
                 if (resource.orchestrator.type === "MARATHON") {
                     return $scope.isVisible("BYOS")
                 }
+                if (resource.orchestrator.type === "YARN") {
+                    return $scope.isVisible("BYOS")
+                }
             }
         }
 

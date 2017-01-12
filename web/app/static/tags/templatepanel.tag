@@ -28,6 +28,7 @@
                                         <a id="awsTemplateChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsTemplate, 'btn-default':!awsTemplate}" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
                                         <a id="azureTemplateChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureTemplate, 'btn-default':!azureTemplate}" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
                                         <a id="mesosTemplateChange" ng-if="isVisible('BYOS')" ng-class="{'btn':true, 'btn-info':mesosTemplate, 'btn-default':!mesosTemplate}" role="button" ng-click="createMesosTemplateRequest()">{{msg.mesos_label}}</a>
+                                        <a id="yarnTemplateChange" ng-if="isVisible('BYOS')" ng-class="{'btn':true, 'btn-info':yarnTemplate, 'btn-default':!yarnTemplate}" role="button" ng-click="createYarnTemplateRequest()">{{msg.yarn_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpTemplateChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':gcpTemplate, 'btn-default':!gcpTemplate}" role="button" ng-click="createGcpTemplateRequest()">{{msg.gcp_label}}</a>
@@ -54,6 +55,9 @@
                             </form>
                             <form class="form-horizontal" role="form" name="mesosTemplateForm" ng-show="mesosTemplate && isVisible('BYOS')">
                                 <div ng-include src="'tags/template/mesosform.tag'"></div>
+                            </form>
+                            <form class="form-horizontal" role="form" name="yarnTemplateForm" ng-show="yarnTemplate && isVisible('BYOS')">
+                                <div ng-include src="'tags/template/yarnform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -119,6 +123,9 @@
 
                             <div class="panel-body">
                                 <div ng-include src="'tags/template/mesoslist.tag'"></div>
+                            </div>
+                            <div class="panel-body">
+                                <div ng-include src="'tags/template/yarnlist.tag'"></div>
                             </div>
                         </div>
                     </div>

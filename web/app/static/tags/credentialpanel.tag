@@ -32,6 +32,7 @@
                                         <a id="awsChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsCredential, 'btn-default':!awsCredential}" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
                                         <a id="azureRmChange" ng-if="isVisible('AZURE_RM')" type="button" ng-class="{'btn':true, 'btn-info':azureRmCredential, 'btn-default':!azureRmCredential}" ng-click="createAzureRmCredentialRequest()">{{msg.azure_rm_label}}</a>
                                         <a id="mesosChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':mesosCredential, 'btn-default':!mesosCredential}" ng-click="importMesosStackRequest()">{{msg.mesos_label}}</a>
+                                        <a id="yarnChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':yarnCredential, 'btn-default':!yarnCredential}" ng-click="importYarnStackRequest()">{{msg.yarn_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpChange" ng-if="isVisible('GCP')" type="button" ng-class="{'btn':true, 'btn-info':gcpCredential, 'btn-default':!gcpCredential}" ng-click="createGcpCredentialRequest()">{{msg.gcp_label}}</a>
@@ -58,6 +59,9 @@
                             </form>
                             <form class="form-horizontal" role="form" name="mesosImportStackForm" ng-show="mesosCredential && !credentialInCreation && isVisible('BYOS')">
                                 <div ng-include src="'tags/credential/mesosform.tag'"></div>
+                            </form>
+                            <form class="form-horizontal" role="form" name="yarnImportStackForm" ng-show="yarnCredential && !credentialInCreation && isVisible('BYOS')">
+                                <div ng-include src="'tags/credential/yarnform.tag'"></div>
                             </form>
                         </div>
                     </div>
@@ -126,8 +130,11 @@
                                 </a>
                             </p>
 
-                            <div class="panel-body">
+                            <div class="panel-body" ng-if="importedStack.orchestrator.type == 'MARATHON'">
                                 <div ng-include src="'tags/credential/mesoslist.tag'"></div>
+                            </div>
+                            <div class="panel-body" ng-if="importedStack.orchestrator.type == 'YARN'">
+                                <div ng-include src="'tags/credential/yarnlist.tag'"></div>
                             </div>
                         </div>
                     </div>

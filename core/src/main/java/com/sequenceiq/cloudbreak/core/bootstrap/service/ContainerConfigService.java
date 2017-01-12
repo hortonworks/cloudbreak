@@ -10,10 +10,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.config.ContainerConfigBuilder;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -24,11 +27,11 @@ public class ContainerConfigService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ContainerConfigService.class);
 
-    @Value("${cb.docker.container.ambari.agent:}")
-    private String ambariAgent;
+    @Value("${cb.docker.container.yarn.ambari.agent:}")
+    private String yarnAmbariAgent;
 
-    @Value("${cb.docker.container.ambari.server:}")
-    private String ambariServer;
+    @Value("${cb.docker.container.yarn.ambari.server:}")
+    private String yarnAmbariServer;
 
     @Value("${cb.docker.container.registrator:}")
     private String registratorDockerImageName;
@@ -36,8 +39,8 @@ public class ContainerConfigService {
     @Value("${cb.docker.container.docker.consul.watch.plugn:}")
     private String consulWatchPlugnDockerImageName;
 
-    @Value("${cb.docker.container.ambari.db:}")
-    private String postgresDockerImageName;
+    @Value("${cb.docker.container.yarn.ambari.db:}")
+    private String yarnPostgresDockerImageName;
 
     @Value("${cb.docker.container.kerberos:}")
     private String kerberosDockerImageName;
@@ -63,6 +66,9 @@ public class ContainerConfigService {
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
+    @Inject
+    private ContainerOrchestratorResolver containerOrchestratorResolver;
+
     public ContainerConfig get(Stack stack, DockerContainer dc) {
         try {
             Component component = componentConfigProvider.getComponent(stack.getId(), ComponentType.CONTAINER, dc.name());
@@ -73,24 +79,25 @@ public class ContainerConfigService {
                 LOGGER.info("Container component definition found in database: {}", component);
             }
             return component.getAttributes().get(ContainerConfig.class);
-        } catch (IOException e) {
+        } catch (CloudbreakException | IOException e) {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s", stack.getId(),
                     dc.getName()));
         }
     }
 
-    private Component create(Stack stack, DockerContainer dc) {
+    private Component create(Stack stack, DockerContainer dc) throws CloudbreakException {
         try {
             ContainerConfig config;
+            ContainerOrchestrator orchestrator = containerOrchestratorResolver.get(stack.getOrchestrator().getType());
             switch (dc) {
                 case AMBARI_SERVER:
-                    config = new ContainerConfigBuilder.Builder(ambariServer).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariServerContainer()).build();
                     break;
                 case AMBARI_AGENT:
-                    config = new ContainerConfigBuilder.Builder(ambariAgent).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariClientContainer()).build();
                     break;
                 case AMBARI_DB:
-                    config = new ContainerConfigBuilder.Builder(postgresDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariDbContainer()).build();
                     break;
                 case KERBEROS:
                     config = new ContainerConfigBuilder.Builder(kerberosDockerImageName).build();

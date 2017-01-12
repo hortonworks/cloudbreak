@@ -34,7 +34,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
 
     @CliAvailabilityIndicator(value = "platform list")
     public boolean listAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "platform list", help = "Shows the currently available platforms")
@@ -50,7 +50,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
 
     @CliAvailabilityIndicator(value = "platform show")
     public boolean showAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
     @CliAvailabilityIndicator(value = "platform delete")
     @Override
     public boolean deleteAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override

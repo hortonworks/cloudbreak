@@ -54,7 +54,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator(value = "stack list")
     @Override
     public boolean listAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack list", help = "Shows all of your stacks")
@@ -70,7 +70,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator({"stack show --id", "stack show --name"})
     @Override
     public boolean showAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack show --id", help = "Show the stack by its id")
@@ -101,7 +101,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator(value = {"stack delete --id", "stack delete --name"})
     @Override
     public boolean deleteAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -175,7 +175,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator(value = {"stack select --id", "stack select --name"})
     @Override
     public boolean selectAvailable() {
-        return shellContext.isStackAccessible() && !shellContext.isMarathonMode();
+        return shellContext.isStackAccessible() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -234,7 +234,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 && shellContext.getActiveCloudPlatform().equals(platform)
                 && shellContext.getActiveNetworkId() != null
                 && (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
-                && shellContext.getActiveHostGroups().size() != 0) && !shellContext.isMarathonMode();
+                && shellContext.getActiveHostGroups().size() != 0) && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -308,7 +308,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliAvailabilityIndicator({"stack node --ADD", "stack node --REMOVE", "stack stop --id", "stack stop --name", "stack start --id", "stack start --name"})
     public boolean nodeAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
+        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     private String stop(StackResponse stackResponse) {
@@ -457,7 +457,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliAvailabilityIndicator(value = "stack metadata")
     public boolean metadataAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack metadata", help = "Shows the stack metadata")
@@ -482,7 +482,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliAvailabilityIndicator(value = "stack sync")
     public boolean syncAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
+        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack sync", help = "Sync the stack")

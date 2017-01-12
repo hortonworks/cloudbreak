@@ -92,6 +92,12 @@ public class ShellContext {
 
     private Map<String, MarathonHostgroupEntry> marathonHostgroups = new HashMap<>();
 
+    private Long selectedYarnStackId;
+
+    private String selectedYarnStackName;
+
+    private Map<String, YarnHostgroupEntry> yarnHostgroups = new HashMap<>();
+
     private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
 
     @Inject
@@ -118,6 +124,7 @@ public class ShellContext {
         this.activeInstanceGroups = new HashSet<>();
         this.constraintTemplates = new HashSet<>();
         this.marathonHostgroups = new HashMap<>();
+        this.yarnHostgroups = new HashMap<>();
     }
 
     public ResponseTransformer responseTransformer() {
@@ -262,6 +269,34 @@ public class ShellContext {
         this.marathonHostgroups = new HashMap<>();
     }
 
+    public Long getSelectedYarnStackId() {
+        return selectedYarnStackId;
+    }
+
+    public String getSelectedYarnStackName() {
+        return selectedYarnStackName;
+    }
+
+    public void setSelectedYarnStackName(String selectedYarnStackName) {
+        this.selectedYarnStackName = selectedYarnStackName;
+    }
+
+    public boolean isSelectedYarnStackAvailable() {
+        return selectedYarnStackId != null;
+    }
+
+    public void resetSelectedYarnStackId() {
+        selectedYarnStackId = null;
+    }
+
+    public void setSelectedYarnStackId(Long selectedYarnStackId) {
+        this.selectedYarnStackId = selectedYarnStackId;
+    }
+
+    public void resetYarnHostGroups() {
+        this.yarnHostgroups = new HashMap<>();
+    }
+
     public Set<String> getConstraints() {
         return constraintTemplates;
     }
@@ -296,6 +331,15 @@ public class ShellContext {
 
     public Map<String, MarathonHostgroupEntry> getMarathonHostGroups() {
         return marathonHostgroups;
+    }
+
+    public Map<String, YarnHostgroupEntry> putYarnHostGroup(String name, YarnHostgroupEntry hostgroupEntry) {
+        this.yarnHostgroups.put(name, hostgroupEntry);
+        return this.yarnHostgroups;
+    }
+
+    public Map<String, YarnHostgroupEntry> getYarnHostGroups() {
+        return yarnHostgroups;
     }
 
     public boolean isCredentialAvailable() {
@@ -618,6 +662,10 @@ public class ShellContext {
 
     public boolean isMarathonMode() {
         return getFocusType().equals(FocusType.MARATHON);
+    }
+
+    public boolean isYarnMode() {
+        return getFocusType().equals(FocusType.YARN);
     }
 
     private void addProperty(PropertyKey key, String value) {

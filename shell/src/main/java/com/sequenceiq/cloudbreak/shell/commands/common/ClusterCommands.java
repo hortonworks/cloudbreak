@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.MarathonHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.NodeCountEntry;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.model.YarnHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 
 public class ClusterCommands implements BaseCommands {
@@ -52,11 +53,19 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator(value = "cluster create")
     public boolean createAvailable() {
-        return shellContext.isBlueprintAvailable()
-                && ((shellContext.isStackAvailable()
-                && shellContext.getActiveHostGroups().size() == shellContext.getHostGroups().keySet().size())
-                || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable()
-                && shellContext.getActiveHostGroups().size() == shellContext.getMarathonHostGroups().size()));
+        if (!shellContext.isBlueprintAvailable()) {
+            return false;
+        }
+
+        if (shellContext.isMarathonMode()) {
+            return shellContext.isSelectedMarathonStackAvailable()
+                    && shellContext.getActiveHostGroups().size() == shellContext.getMarathonHostGroups().size();
+        } else if (shellContext.isYarnMode()) {
+            return shellContext.isSelectedYarnStackAvailable()
+                    && shellContext.getActiveHostGroups().size() == shellContext.getYarnHostGroups().size();
+        } else {
+            return shellContext.getActiveHostGroups().size() == shellContext.getHostGroups().keySet().size();
+        }
     }
 
     @CliCommand(value = "cluster create", help = "Create a new cluster based on a blueprint and optionally a recipe")
@@ -105,8 +114,14 @@ public class ClusterCommands implements BaseCommands {
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         try {
             Set<HostGroupRequest> hostGroupList = new HashSet<>();
-            Set<? extends Map.Entry<String, ? extends NodeCountEntry>> entries = shellContext.isMarathonMode()
-                    ? shellContext.getMarathonHostGroups().entrySet() : shellContext.getHostGroups().entrySet();
+            Set<? extends Map.Entry<String, ? extends NodeCountEntry>> entries;
+            if (shellContext.isMarathonMode()) {
+                entries = shellContext.getMarathonHostGroups().entrySet();
+            } else if (shellContext.isYarnMode()) {
+                entries = shellContext.getYarnHostGroups().entrySet();
+            } else {
+                entries = shellContext.getHostGroups().entrySet();
+            }
             for (Map.Entry<String, ? extends NodeCountEntry> entry : entries) {
                 HostGroupRequest hostGroupBase = new HostGroupRequest();
                 hostGroupBase.setName(entry.getKey());
@@ -116,6 +131,8 @@ public class ClusterCommands implements BaseCommands {
                 constraintJson.setHostCount(entry.getValue().getNodeCount());
                 if (shellContext.isMarathonMode()) {
                     constraintJson.setConstraintTemplateName(((MarathonHostgroupEntry) entry.getValue()).getConstraintName());
+                } else if (shellContext.isYarnMode()) {
+                    constraintJson.setConstraintTemplateName(((YarnHostgroupEntry) entry.getValue()).getConstraintName());
                 } else {
                     hostGroupBase.setRecipeIds(((HostgroupEntry) entry.getValue()).getRecipeIdSet());
                     hostGroupBase.setRecoveryMode(((HostgroupEntry) entry.getValue()).getRecoveryMode());
@@ -128,7 +145,13 @@ public class ClusterCommands implements BaseCommands {
 
             ClusterRequest clusterRequest = new ClusterRequest();
             clusterRequest.setEnableShipyard(enableShipyard);
-            clusterRequest.setName(shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackName() : shellContext.getStackName());
+            if (shellContext.isMarathonMode()) {
+                clusterRequest.setName(shellContext.getSelectedMarathonStackName());
+            } else if (shellContext.isYarnMode()) {
+                clusterRequest.setName(shellContext.getSelectedYarnStackName());
+            } else {
+                clusterRequest.setName(shellContext.getStackName());
+            }
             clusterRequest.setDescription(description);
             clusterRequest.setUserName(userName);
             clusterRequest.setPassword(password);
@@ -142,7 +165,7 @@ public class ClusterCommands implements BaseCommands {
                 clusterRequest.setConfigStrategy(strategy);
             }
 
-            if (!shellContext.isMarathonMode()) {
+            if (!shellContext.isMarathonMode() && !shellContext.isYarnMode()) {
                 FileSystemRequest fileSystemRequest = new FileSystemRequest();
                 fileSystemRequest.setName(shellContext.getStackName());
                 fileSystemRequest.setDefaultFs(shellContext.getDefaultFileSystem() == null ? true : shellContext.getDefaultFileSystem());
@@ -252,7 +275,14 @@ public class ClusterCommands implements BaseCommands {
                 return "connectionURL, databaseType, connectionUserName, connectionPassword and hdpVersion must be all set.";
             }
 
-            String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            String stackId;
+            if (shellContext.isMarathonMode()) {
+                stackId = shellContext.getSelectedMarathonStackId().toString();
+            } else if (shellContext.isYarnMode()) {
+                stackId = shellContext.getSelectedYarnStackId().toString();
+            } else {
+                stackId = shellContext.getStackId();
+            }
             shellContext.cloudbreakClient().clusterEndpoint().post(Long.valueOf(stackId), clusterRequest);
             shellContext.setHint(Hints.NONE);
             shellContext.resetFileSystemConfiguration();
@@ -275,7 +305,8 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator(value = {"cluster stop", "cluster start"})
     public boolean startStopAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
+        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+                || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
     @CliCommand(value = "cluster stop", help = "Stop your cluster")
@@ -283,7 +314,14 @@ public class ClusterCommands implements BaseCommands {
         try {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.STOPPED);
-            String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            String stackId;
+            if (shellContext.isMarathonMode()) {
+                stackId = shellContext.getSelectedMarathonStackId().toString();
+            } else if (shellContext.isYarnMode()) {
+                stackId = shellContext.getSelectedYarnStackId().toString();
+            } else {
+                stackId = shellContext.getStackId();
+            }
             cloudbreakShellUtil.checkResponse("stopCluster",
                     shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
             return "Cluster is stopping";
@@ -297,7 +335,14 @@ public class ClusterCommands implements BaseCommands {
         try {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.STARTED);
-            String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            String stackId;
+            if (shellContext.isMarathonMode()) {
+                stackId = shellContext.getSelectedMarathonStackId().toString();
+            } else if (shellContext.isYarnMode()) {
+                stackId = shellContext.getSelectedYarnStackId().toString();
+            } else {
+                stackId = shellContext.getStackId();
+            }
             cloudbreakShellUtil.checkResponse("startCluster",
                     shellContext.cloudbreakClient().clusterEndpoint().put(Long.valueOf(stackId), updateClusterJson));
             return "Cluster is starting";
@@ -313,13 +358,21 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator(value = {"cluster delete"})
     public boolean deleteAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
+        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+                || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
     @CliCommand(value = "cluster delete", help = "Delete the cluster by stack id")
     public String delete() {
         try {
-            String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            String stackId;
+            if (shellContext.isMarathonMode()) {
+                stackId = shellContext.getSelectedMarathonStackId().toString();
+            } else if (shellContext.isYarnMode()) {
+                stackId = shellContext.getSelectedYarnStackId().toString();
+            } else {
+                stackId = shellContext.getStackId();
+            }
             shellContext.cloudbreakClient().clusterEndpoint().delete(Long.valueOf(stackId));
             return "Cluster deletion started with stack id: " + stackId;
         } catch (Exception ex) {
@@ -370,13 +423,21 @@ public class ClusterCommands implements BaseCommands {
     @CliAvailabilityIndicator(value = {"cluster show", "cluster show --id", "cluster show --name"})
     @Override
     public boolean showAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
+        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+                || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
     @CliCommand(value = "cluster show", help = "Shows the cluster by stack id")
     public String show() {
         try {
-            String stackId = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            String stackId;
+            if (shellContext.isMarathonMode()) {
+                stackId = shellContext.getSelectedMarathonStackId().toString();
+            } else if (shellContext.isYarnMode()) {
+                stackId = shellContext.getSelectedYarnStackId().toString();
+            } else {
+                stackId = shellContext.getStackId();
+            }
             ClusterResponse clusterResponse = shellContext.cloudbreakClient().clusterEndpoint().get(Long.valueOf(stackId));
             return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
@@ -403,12 +464,13 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator(value = {"cluster node --ADD", "cluster node --REMOVE"})
     public boolean nodeAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable());
+        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+                || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
     @CliAvailabilityIndicator(value = {"cluster fileSystem"})
     public boolean fileSystemAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
+        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "cluster node --ADD", help = "Add new nodes to the cluster")
@@ -427,7 +489,14 @@ public class ClusterCommands implements BaseCommands {
             hostGroupAdjustmentJson.setWithStackUpdate(false);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            String stackIdStr = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            String stackIdStr;
+            if (shellContext.isMarathonMode()) {
+                stackIdStr = shellContext.getSelectedMarathonStackId().toString();
+            } else if (shellContext.isYarnMode()) {
+                stackIdStr = shellContext.getSelectedYarnStackId().toString();
+            } else {
+                stackIdStr = shellContext.getStackId();
+            }
             Long stackId = Long.valueOf(stackIdStr);
             cloudbreakShellUtil.checkResponse("upscaleCluster", shellContext.cloudbreakClient().clusterEndpoint().put(stackId, updateClusterJson));
             if (!wait) {
@@ -458,7 +527,14 @@ public class ClusterCommands implements BaseCommands {
             hostGroupAdjustmentJson.setWithStackUpdate(withStackDownScale);
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
-            String stackIdStr = shellContext.isMarathonMode() ? shellContext.getSelectedMarathonStackId().toString() : shellContext.getStackId();
+            String stackIdStr;
+            if (shellContext.isMarathonMode()) {
+                stackIdStr = shellContext.getSelectedMarathonStackId().toString();
+            } else if (shellContext.isYarnMode()) {
+                stackIdStr = shellContext.getSelectedYarnStackId().toString();
+            } else {
+                stackIdStr = shellContext.getStackId();
+            }
             Long stackId = Long.valueOf(stackIdStr);
             cloudbreakShellUtil.checkResponse("downscaleCluster", shellContext.cloudbreakClient().clusterEndpoint().put(stackId, updateClusterJson));
 
@@ -480,7 +556,7 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator(value = "cluster sync")
     public boolean syncAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
+        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "cluster sync", help = "Sync the cluster")
@@ -498,7 +574,7 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator(value = "cluster upgrade")
     public boolean upgradeAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode();
+        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "cluster upgrade")

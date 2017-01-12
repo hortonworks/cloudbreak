@@ -29,4 +29,10 @@ public interface ContainerOrchestrator extends ContainerOrchestrationBootstrap {
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
+    String ambariServerContainer();
+
+    String ambariClientContainer();
+
+    String ambariDbContainer();
+
 }

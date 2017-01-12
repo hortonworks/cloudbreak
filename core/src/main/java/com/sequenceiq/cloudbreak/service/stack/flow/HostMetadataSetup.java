@@ -12,8 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -40,20 +41,23 @@ public class HostMetadataSetup {
     @Inject
     private HostOrchestratorResolver hostOrchestratorResolver;
 
-    public void setupHostMetadata(Long stackId) throws CloudbreakSecuritySetupException {
+    @Inject
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+
+    public void setupHostMetadata(Long stackId) throws CloudbreakException {
         LOGGER.info("Setting up host metadata for the cluster.");
         Stack stack = stackService.getById(stackId);
-        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+        if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
             updateWithHostData(stack, Collections.emptySet());
             instanceMetaDataRepository.save(allInstanceMetaData);
         }
     }
 
-    public void setupNewHostMetadata(Long stackId, Set<String> newAddresses) throws CloudbreakSecuritySetupException {
+    public void setupNewHostMetadata(Long stackId, Set<String> newAddresses) throws CloudbreakException {
         LOGGER.info("Extending host metadata.");
         Stack stack = stackService.getById(stackId);
-        if (!OrchestratorConstants.MARATHON.equals(stack.getOrchestrator().getType())) {
+        if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> newInstanceMetadata = stack.getRunningInstanceMetaData().stream()
                     .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                     .collect(Collectors.toSet());

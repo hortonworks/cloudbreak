@@ -30,7 +30,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
 
     @Override
     public boolean createSecurityGroupAvailable(String platform) {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -90,7 +90,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
     @CliAvailabilityIndicator(value = { "securitygroup delete --id", "securitygroup delete --name" })
     @Override
     public boolean deleteAvailable() {
-        return !shellContext.getSecurityGroups().isEmpty() && !shellContext.isMarathonMode();
+        return !shellContext.getSecurityGroups().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -150,7 +150,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
     @CliAvailabilityIndicator(value = "securitygroup list")
     @Override
     public boolean listAvailable() {
-        return !shellContext.isMarathonMode();
+        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "securitygroup list", help = "Shows the currently available security groups")
@@ -171,7 +171,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
     @CliAvailabilityIndicator(value = { "securitygroup show --id", "securitygroup show --name" })
     @Override
     public boolean showAvailable() {
-        return !shellContext.getSecurityGroups().isEmpty() && !shellContext.isMarathonMode();
+        return !shellContext.getSecurityGroups().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override

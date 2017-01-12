@@ -701,7 +701,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.upscaleCluster.numberOfInstances = 1;
                 return;
             }
-            if ($rootScope.activeCluster.orchestrator != null && $rootScope.activeCluster.orchestrator.type === "MARATHON") {
+            var isByos = $rootScope.activeCluster.orchestrator.type === "MARATHON" || $rootScope.activeCluster.orchestrator.type === "YARN";
+            if ($rootScope.activeCluster.orchestrator != null && isByos) {
                 var scaleJson = {
                     "hostGroupAdjustment": {
                         "hostGroup": $scope.upscaleCluster.hostGroup,
@@ -1321,7 +1322,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.ambariServerSelected = function() {
             var result = false
             var activeStack = $rootScope.activeStack;
-            if (activeStack && activeStack.orchestrator && activeStack.orchestrator.type === "MARATHON") {
+            if (activeStack && activeStack.orchestrator && (activeStack.orchestrator.type === "MARATHON" || activeStack.orchestrator.type === "YARN")) {
                 return true;
             }
             angular.forEach($scope.cluster.instanceGroups, function(ig) {
@@ -1333,7 +1334,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.noProxyBeforeAmbari = function() {
-            return $rootScope.activeCluster.orchestrator.type === 'MARATHON' || $rootScope.activeCluster.cloudbreakDetails === null || !$rootScope.activeCluster.cloudbreakDetails
+            return $rootScope.activeCluster.orchestrator.type === 'MARATHON' || $rootScope.activeCluster.orchestrator.type === 'YARN' || $rootScope.activeCluster.cloudbreakDetails === null || !$rootScope.activeCluster.cloudbreakDetails
         }
 
         $scope.getUserDefinedTags = function() {
