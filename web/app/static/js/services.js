@@ -337,7 +337,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                     blueprintId: cluster.blueprintId,
                     networkId: cluster.networkId,
                     fileSystem: cluster.fileSystem,
-                    platform: platform
+                    platform: platform,
+                    credentialId: cluster.credentialId
                 }
                 if (cluster.validateBlueprint === true) {
                     StackValidation.save(stackValidation, function(result) {

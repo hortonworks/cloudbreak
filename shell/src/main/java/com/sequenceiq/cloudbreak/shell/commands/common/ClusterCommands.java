@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -146,6 +147,12 @@ public class ClusterCommands implements BaseCommands {
                 fileSystemRequest.setName(shellContext.getStackName());
                 fileSystemRequest.setDefaultFs(shellContext.getDefaultFileSystem() == null ? true : shellContext.getDefaultFileSystem());
                 fileSystemRequest.setType(shellContext.getFileSystemType());
+
+                Map<String, String> fileSystemParameters = new HashMap<>();
+                for (String key: shellContext.getFileSystemParameters().keySet()) {
+                    fileSystemParameters.put(key, (String) shellContext.getFileSystemParameters().get(key));
+                }
+                fileSystemRequest.setProperties(fileSystemParameters);
 
                 if (shellContext.getDefaultFileSystem() == null && shellContext.getFileSystemType() == null) {
                     fileSystemRequest = null;

@@ -4,7 +4,8 @@ public enum FileSystemType {
     DASH(DashFileSystemConfiguration.class),
     WASB_INTEGRATED(WasbIntegratedFileSystemConfiguration.class),
     GCS(GcsFileSystemConfiguration.class),
-    WASB(WasbFileSystemConfiguration.class);
+    WASB(WasbFileSystemConfiguration.class),
+    ADLS(AdlsFileSystemConfiguration.class);
 
     private Class clazz;
 

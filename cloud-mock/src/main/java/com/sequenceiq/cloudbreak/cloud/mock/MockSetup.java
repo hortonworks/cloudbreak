@@ -21,6 +21,7 @@ import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -85,6 +86,6 @@ public class MockSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(FileSystem fileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
     }
 }

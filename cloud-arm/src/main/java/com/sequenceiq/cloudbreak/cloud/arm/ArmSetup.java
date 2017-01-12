@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.arm;
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmStorage.IMAGES;
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
+import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.microsoft.azure.AzureEnvironment;
+import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.microsoft.azure.management.datalake.store.DataLakeStoreAccountManagementClient;
+import com.microsoft.azure.management.datalake.store.implementation.DataLakeStoreAccountManagementClientImpl;
+import com.microsoft.azure.management.datalake.store.models.DataLakeStoreAccount;
 import com.microsoft.azure.storage.CloudStorageAccount;
 import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -21,12 +28,16 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.CopyStatus;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
+import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
@@ -145,8 +156,16 @@ public class ArmSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(FileSystem fileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
         String fileSystemType = fileSystem.getType();
+        if (fileSystemType.equalsIgnoreCase(FileSystemType.ADLS.name())) {
+            validateAdlsFileSystem(credential, fileSystem);
+        } else {
+            validateWasbFileSystem(fileSystem, fileSystemType);
+        }
+    }
+
+    private void validateWasbFileSystem(FileSystem fileSystem, String fileSystemType) throws URISyntaxException, InvalidKeyException, StorageException {
         String accountName = fileSystem.getParameter(WasbFileSystemConfiguration.ACCOUNT_NAME, String.class);
         String accountKey = fileSystem.getParameter(WasbFileSystemConfiguration.ACCOUNT_KEY, String.class);
         String connectionString = "DefaultEndpointsProtocol=https;AccountName=" + accountName + ";AccountKey=" + accountKey;
@@ -164,6 +183,33 @@ public class ArmSetup implements Setup {
                 throw new CloudConnectorException("The provided account does not belong to a valid storage account");
             }
         }
+    }
+
+    private void validateAdlsFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
+
+        Map<String, Object> credentialAttributes = credential.getParameters();
+        String clientSecret = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
+        String subscriptionId = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.SUBSCRIPTION_ID));
+        String clientId = fileSystem.getStringParameter(AdlsFileSystemConfiguration.CLIENT_ID);
+        String tenantId = fileSystem.getStringParameter(AdlsFileSystemConfiguration.TENANT_ID);
+        String accountName = fileSystem.getStringParameter(FileSystemConfiguration.ACCOUNT_NAME);
+
+        ApplicationTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, clientSecret, AzureEnvironment.AZURE);
+        DataLakeStoreAccountManagementClient adlsClient = new DataLakeStoreAccountManagementClientImpl(creds);
+        adlsClient.withSubscriptionId(subscriptionId);
+        List<DataLakeStoreAccount> dataLakeStoreAccounts = adlsClient.accounts().list();
+        boolean validAccountname = false;
+
+        for (DataLakeStoreAccount account : dataLakeStoreAccounts) {
+            if (account.name().equalsIgnoreCase(accountName)) {
+                validAccountname = true;
+                break;
+            }
+        }
+        if (!validAccountname) {
+            throw new CloudConnectorException("The provided file system account name does not belong to a valid ADLS account");
+        }
+
     }
 
     private boolean resourceGroupExist(AzureRMClient client, String groupName) {

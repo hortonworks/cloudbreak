@@ -21,16 +21,17 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
-import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
+import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.HostGroupBase;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -38,11 +39,13 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Component;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -103,6 +106,9 @@ public class ClusterController implements ClusterEndpoint {
     @Inject
     private DefaultHDPInfo defaultHDPInfo;
 
+    @Autowired
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
         CbUser user = authenticatedUserService.getCbUser();
@@ -114,7 +120,10 @@ public class ClusterController implements ClusterEndpoint {
         if (!stack.isAvailable() && CloudConstants.BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
-        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), request.getFileSystem());
+        Credential credential = stack.getCredential();
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+
+        fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
         validateRdsConfigParams(request);
         if (request.getRdsConfigJson() != null) {
             validateRdsConnection(request);

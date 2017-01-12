@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
+import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -532,6 +533,11 @@ public class AmbariClusterConnector {
         if (CloudConstants.AZURE_RM.equals(stack.getPlatformVariant())) {
             String resourceGroupName = stack.getResourceByType(ResourceType.ARM_TEMPLATE).getResourceName();
             fsConfiguration.addProperty(FileSystemConfiguration.RESOURCE_GROUP_NAME, resourceGroupName);
+        }
+        // we have to lookup secret key from the credential because it is not stored in client side
+        if (fsConfiguration instanceof AdlsFileSystemConfiguration) {
+            String credential = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
+            ((AdlsFileSystemConfiguration) fsConfiguration).setCredential(credential);
         }
     }
 

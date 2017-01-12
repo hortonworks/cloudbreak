@@ -21,11 +21,14 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -76,6 +79,9 @@ public class StackController implements StackEndpoint {
 
     @Autowired
     private CredentialService credentialService;
+
+    @Autowired
+    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) {
@@ -209,7 +215,9 @@ public class StackController implements StackEndpoint {
         MDCBuilder.buildUserMdcContext(user);
         StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
         stackService.validateStack(stackValidation);
-        fileSystemValidator.validateFileSystem(request.getPlatform(), request.getFileSystem());
+        Credential credential = credentialService.get(request.getCredentialId());
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem());
         return Response.status(Response.Status.ACCEPTED).build();
     }
 
