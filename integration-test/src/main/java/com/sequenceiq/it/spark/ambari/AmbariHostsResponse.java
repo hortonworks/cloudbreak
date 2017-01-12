@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.it.spark.ITResponse;
 import com.sequenceiq.it.spark.ambari.model.Hosts;
+import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Request;
 import spark.Response;
@@ -25,8 +26,9 @@ public class AmbariHostsResponse extends ITResponse {
         response.type("text/plain");
         List<Map<String, ?>> itemList = new ArrayList<>();
         for (String instanceId : instanceMap.keySet()) {
-            if (InstanceStatus.STARTED == instanceMap.get(instanceId).getCloudVmInstanceStatus().getStatus()) {
-                Hosts hosts = new Hosts(Collections.singletonList(instanceId), "HEALTHY");
+            CloudVmMetaDataStatus status = instanceMap.get(instanceId);
+            if (InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
+                Hosts hosts = new Hosts(Collections.singletonList(HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp())), "HEALTHY");
                 itemList.add(Collections.singletonMap("Hosts", hosts));
             }
         }

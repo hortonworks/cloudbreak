@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.it.spark.ITResponse;
+import com.sequenceiq.it.util.HostNameUtil;
 
 import spark.Request;
 import spark.Response;
@@ -29,9 +30,10 @@ public class AmbariClustersHostsResponse extends ITResponse {
         ArrayNode items = rootNode.putArray("items");
 
         for (String instanceId : instanceMap.keySet()) {
-            if (InstanceStatus.STARTED == instanceMap.get(instanceId).getCloudVmInstanceStatus().getStatus()) {
+            CloudVmMetaDataStatus status = instanceMap.get(instanceId);
+            if (InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
                 ObjectNode item = items.addObject();
-                item.putObject("Hosts").put("host_name", instanceId);
+                item.putObject("Hosts").put("host_name", HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp()));
                 ArrayNode components = item.putArray("host_components");
                 components.addObject()
                         .putObject("HostRoles")
