@@ -48,38 +48,38 @@ public final class NetworkUtils {
     private static List<Port> ports = new ArrayList<>();
 
     static {
-        ports.add(new Port(SSH, "22", "tcp"));
-        ports.add(new Port(HTTPS, "443", "tcp"));
-        ports.add(new Port(AMBARI, "8080", "tcp"));
-        ports.add(new Port(CONSUL, "8500", "tcp"));
-        ports.add(new Port(NAMENODE, "50070", "tcp"));
-        ports.add(new Port(RESOURCEMANAGER_WEB, "8088", "tcp"));
-        ports.add(new Port(RESOURCEMANAGER_SCHEDULER, "8030", "tcp"));
-        ports.add(new Port(RESOURCEMANAGER_IPC, "8050", "tcp"));
-        ports.add(new Port(JOB_HISTORY_SERVER, "19888", "tcp"));
-        ports.add(new Port(HBASE_MASTER_WEB, "16010", "tcp"));
-        ports.add(new Port(HBASE_MASTER, "60000", "tcp"));
-        ports.add(new Port(HBASE_REGION, "16020", "tcp"));
-        ports.add(new Port(HBASE_REGION_INFO, "16030", "tcp"));
-        ports.add(new Port(HIVE_METASTORE, "9083", "tcp"));
-        ports.add(new Port(HIVE_SERVER, "10000", "tcp"));
-        ports.add(new Port(HIVE_SERVER_HTTP, "10001", "tcp"));
-        ports.add(new Port(ACCUMULO_MASTER, "9999", "tcp"));
-        ports.add(new Port(ACCUMULO_TSERVER, "9997", "tcp"));
-        ports.add(new Port(ATLAS, "21000", "tcp"));
-        ports.add(new Port(KNOX_GW, "8443", "tcp"));
-        ports.add(new Port(FALCON, "15000", "tcp"));
-        ports.add(new Port(STORM, "8744", "tcp"));
-        ports.add(new Port(OOZIE, "11000", "tcp"));
-        ports.add(new Port(SPARK_HISTORY_SERVER, "18080", "tcp"));
-        ports.add(new Port(CONTAINER_LOGS, "8042", "tcp"));
-        ports.add(new Port(ZEPPELIN_WEB_SOCKET, "9996", "tcp"));
-        ports.add(new Port(ZEPPELIN_UI, "9995", "tcp"));
-        ports.add(new Port(RANGER, "6080", "tcp"));
-        ports.add(new Port(KIBANA, "3080", "tcp"));
-        ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
-        ports.add(new Port(SWARM, "3376", "tcp"));
-        ports.add(new Port(SHIPYARD, "7070", "tcp"));
+        ports.add(new Port(SSH, "22", "tcp", null));
+        ports.add(new Port(HTTPS, "443", "tcp", null));
+        ports.add(new Port(AMBARI, "8080", "tcp", null));
+        ports.add(new Port(CONSUL, "8500", "tcp", null));
+        ports.add(new Port(NAMENODE, "50070", "tcp", "/hdfs/"));
+        ports.add(new Port(RESOURCEMANAGER_WEB, "8088", "tcp", "/yarn/"));
+        ports.add(new Port(RESOURCEMANAGER_SCHEDULER, "8030", "tcp", null));
+        ports.add(new Port(RESOURCEMANAGER_IPC, "8050", "tcp", null));
+        ports.add(new Port(JOB_HISTORY_SERVER, "19888", "tcp", "/jobhistory/"));
+        ports.add(new Port(HBASE_MASTER_WEB, "16010", "tcp", null));
+        ports.add(new Port(HBASE_MASTER, "60000", "tcp", null));
+        ports.add(new Port(HBASE_REGION, "16020", "tcp", null));
+        ports.add(new Port(HBASE_REGION_INFO, "16030", "tcp", null));
+        ports.add(new Port(HIVE_METASTORE, "9083", "tcp", null));
+        ports.add(new Port(HIVE_SERVER, "10000", "tcp", null));
+        ports.add(new Port(HIVE_SERVER_HTTP, "10001", "tcp", null));
+        ports.add(new Port(ACCUMULO_MASTER, "9999", "tcp", null));
+        ports.add(new Port(ACCUMULO_TSERVER, "9997", "tcp", null));
+        ports.add(new Port(ATLAS, "21000", "tcp", null));
+        ports.add(new Port(KNOX_GW, "8443", "tcp", null));
+        ports.add(new Port(FALCON, "15000", "tcp", null));
+        ports.add(new Port(STORM, "8744", "tcp", null));
+        ports.add(new Port(OOZIE, "11000", "tcp", null));
+        ports.add(new Port(SPARK_HISTORY_SERVER, "18080", "tcp", "/sparkhistory/"));
+        ports.add(new Port(CONTAINER_LOGS, "8042", "tcp", null));
+        ports.add(new Port(ZEPPELIN_WEB_SOCKET, "9996", "tcp", null));
+        ports.add(new Port(ZEPPELIN_UI, "9995", "tcp", "/zeppelin/"));
+        ports.add(new Port(RANGER, "6080", "tcp", "/ranger/"));
+        ports.add(new Port(KIBANA, "3080", "tcp", null));
+        ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp", null));
+        ports.add(new Port(SWARM, "3376", "tcp", null));
+        ports.add(new Port(SHIPYARD, "7070", "tcp", null));
     }
 
     private NetworkUtils() {
@@ -101,7 +101,7 @@ public final class NetworkUtils {
                     for (String portNumber : rule.getPorts()) {
                         Port port = getPortByPortNumberAndProtocol(portNumber, rule.getProtocol());
                         if (port != null) {
-                            result.add(new Port(port.getExposedService(), portNumber, portNumber, rule.getProtocol(), aclRules));
+                            result.add(new Port(port.getExposedService(), portNumber, portNumber, rule.getProtocol(), aclRules, port.getKnoxUrl()));
                         }
                     }
                 }

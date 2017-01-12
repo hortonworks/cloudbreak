@@ -19,6 +19,10 @@ base:
     - smartsense.server-upgrade
     - ambari.server-upgrade
 
+  'roles:gateway':
+    - match: grain
+    - gateway
+
   'roles:ambari_server':
     - match: grain
     - ambari.server

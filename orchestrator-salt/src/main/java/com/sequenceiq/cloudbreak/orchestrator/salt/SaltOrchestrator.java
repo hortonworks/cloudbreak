@@ -79,6 +79,9 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${rest.debug:false}")
     private boolean restDebug;
 
+    @Value("${cb.knox.gateway.enable:false}")
+    private boolean knoxGateway;
+
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
 
@@ -152,6 +155,10 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
 
             LOGGER.info("Pillar saved, setting up grains...");
+
+            if (knoxGateway) {
+                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "gateway"), exitCriteriaModel);
+            }
 
             // ambari server
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);

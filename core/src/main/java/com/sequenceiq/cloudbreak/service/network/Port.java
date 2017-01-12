@@ -17,19 +17,22 @@ public class Port {
 
     private final String protocol;
 
+    private final String knoxUrl;
+
     private final List<EndpointRule> aclRules;
 
-    public Port(ExposedService exposedService, String port, String protocol) {
-        this(exposedService, port, port, protocol, new ArrayList<>());
+    public Port(ExposedService exposedService, String port, String protocol, String knoxUrl) {
+        this(exposedService, port, port, protocol, new ArrayList<>(), knoxUrl);
     }
 
-    public Port(ExposedService exposedService, String port, String localPort, String protocol, List<EndpointRule> aclRules) {
+    public Port(ExposedService exposedService, String port, String localPort, String protocol, List<EndpointRule> aclRules, String knoxUrl) {
         this.localPort = localPort;
         this.port = port;
         this.name = exposedService.getPortName();
         this.protocol = protocol;
         this.aclRules = aclRules;
         this.exposedService = exposedService;
+        this.knoxUrl = knoxUrl;
     }
 
     public String getLocalPort() {
@@ -54,5 +57,9 @@ public class Port {
 
     public ExposedService getExposedService() {
         return exposedService;
+    }
+
+    public String getKnoxUrl() {
+        return knoxUrl;
     }
 }

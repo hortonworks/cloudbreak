@@ -92,6 +92,13 @@ public class ClusterHostServiceRunner {
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
+
+            Map<String, Object> gateway = new HashMap<>();
+            gateway.put("address", gatewayConfig.getPublicAddress());
+            gateway.put("username", cluster.getUserName());
+            gateway.put("password", cluster.getPassword());
+            servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+
             AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stack.getId());
             if (ambariRepo != null) {
                 servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));

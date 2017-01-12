@@ -6,6 +6,10 @@ base:
     - discovery.init
     - recipes.init
 
+  'roles:gateway':
+    - match: grain
+    - gateway.init
+
   'roles:kerberos_server':
     - match: grain
     - kerberos.init

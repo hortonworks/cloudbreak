@@ -1,0 +1,18 @@
+[Install]
+WantedBy=multi-user.target
+
+[Unit]
+Description=Knox Gateway
+After=network.target network.service
+
+[Service]
+Type=forking
+PIDFile=/var/run/knox/gateway.pid
+User=knox
+Restart=on-failure
+TimeoutSec=5min
+IgnoreSIGPIPE=no
+KillMode=process
+GuessMainPID=no
+ExecStart=/usr/hdp/current/knox-server/bin/gateway.sh start
+ExecStop=/usr/hdp/current/knox-server/bin/gateway.sh stop

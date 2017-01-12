@@ -15,6 +15,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -53,6 +54,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private static final int SECONDS_PER_MINUTE = 60;
 
     private static final int MILLIS_PER_SECOND = 1000;
+
+    @Value("${cb.knox.gateway.enable:false}")
+    private boolean knoxGateway;
 
     @Inject
     private BlueprintValidator blueprintValidator;
@@ -224,8 +228,13 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
             for (Port port : ports) {
                 if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
-                    result.put(port.getExposedService().getPortName(),
-                            String.format("%s:%s%s", address, port.getPort(), port.getExposedService().getPostFix()));
+                    String url;
+                    if (knoxGateway) {
+                        url = String.format("https://%s:8443/gateway/hdc%s", address, port.getKnoxUrl());
+                    } else {
+                        url = String.format("http://%s:%s%s", address, port.getPort(), port.getExposedService().getPostFix());
+                    }
+                    result.put(port.getExposedService().getPortName(), url);
                 }
             }
         }

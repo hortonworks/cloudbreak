@@ -12,6 +12,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -26,7 +27,11 @@ public class ZeppelinConfigProvider {
 
     private static final String ZEPPELIN_MASTER = "ZEPPELIN_MASTER";
 
-    private static final String ZEPPELIN_MASTER_CONFIG_FILE = "zeppelin-env";
+    //This is needed since the API has hanged beetween AMbari 2.4 and 2.5
+    private static final String[] ZEPPELIN_MASTER_CONFIG_FILES = {"zeppelin-shiro-ini", "zeppelin-env"};
+
+    @Value("${cb.knox.gateway.enable:false}")
+    private boolean knoxGateway;
 
     @Inject
     private Configuration freemarkerConfiguration;
@@ -48,8 +53,11 @@ public class ZeppelinConfigProvider {
         try {
             Map<String, Object> model = new HashMap<>();
             model.put("zeppelin_admin_password", stack.getCluster().getPassword());
+            model.put("knoxGateway", knoxGateway);
             String shiroIniContent = processTemplateIntoString(freemarkerConfiguration.getTemplate("hdp/zeppelin/shiro_ini_content.ftl", "UTF-8"), model);
-            configs.add(new BlueprintConfigurationEntry(ZEPPELIN_MASTER_CONFIG_FILE, "shiro_ini_content", shiroIniContent));
+            for (String configFile : ZEPPELIN_MASTER_CONFIG_FILES) {
+                configs.add(new BlueprintConfigurationEntry(configFile, "shiro_ini_content", shiroIniContent));
+            }
         } catch (TemplateException | IOException e) {
             LOGGER.error("Failed to read zeppelin config", e);
         }
