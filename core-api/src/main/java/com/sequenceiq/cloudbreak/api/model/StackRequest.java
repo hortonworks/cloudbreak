@@ -25,6 +25,12 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
     private FailurePolicyRequest failurePolicy;
 
+    @ApiModelProperty(value = StackModelDescription.CREDENTIAL)
+    private CredentialRequest credential;
+
+    @ApiModelProperty(value = StackModelDescription.NETWORK)
+    private NetworkRequest network;
+
     @ApiModelProperty(value = StackModelDescription.IMAGE_CATALOG)
     private String imageCatalog;
 
@@ -60,4 +66,19 @@ public class StackRequest extends StackBase {
         this.instanceGroups = instanceGroups;
     }
 
+    public CredentialRequest getCredential() {
+        return credential;
+    }
+
+    public void setCredential(CredentialRequest credential) {
+        this.credential = credential;
+    }
+
+    public NetworkRequest getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(NetworkRequest network) {
+        this.network = network;
+    }
 }

@@ -21,6 +21,12 @@ public class InstanceGroupResponse extends InstanceGroupBase {
     @ApiModelProperty(ModelDescriptions.InstanceGroupModelDescription.METADATA)
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
+    @ApiModelProperty(ModelDescriptions.InstanceGroupModelDescription.TEMPLATE)
+    private TemplateResponse template;
+
+    @ApiModelProperty(ModelDescriptions.InstanceGroupModelDescription.SECURITYGROUP)
+    private SecurityGroupResponse securityGroup;
+
     @JsonProperty("id")
     public Long getId() {
         return id;
@@ -39,5 +45,21 @@ public class InstanceGroupResponse extends InstanceGroupBase {
     @JsonIgnore
     public void setMetadata(Set<InstanceMetaDataJson> metadata) {
         this.metadata = metadata;
+    }
+
+    public TemplateResponse getTemplate() {
+        return template;
+    }
+
+    public void setTemplate(TemplateResponse template) {
+        this.template = template;
+    }
+
+    public SecurityGroupResponse getSecurityGroup() {
+        return securityGroup;
+    }
+
+    public void setSecurityGroup(SecurityGroupResponse securityGroup) {
+        this.securityGroup = securityGroup;
     }
 }

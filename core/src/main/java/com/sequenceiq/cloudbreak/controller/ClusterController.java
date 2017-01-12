@@ -122,8 +122,10 @@ public class ClusterController implements ClusterEndpoint {
             request.setRdsConfigId(rdsConfig.getId());
         }
         Cluster cluster = conversionService.convert(request, Cluster.class);
-        cluster = clusterDecorator.decorate(cluster, stackId, user, request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
-                request.getSssdConfigId(), request.getRdsConfigId(), request.getLdapConfigId());
+        cluster = clusterDecorator.decorate(cluster, stackId, user,
+                request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
+                request.getSssdConfigId(), request.getRdsConfigId(), request.getLdapConfigId(),
+                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJson(), request.getLdapConfig());
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
         }

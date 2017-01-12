@@ -101,6 +101,8 @@ public class ModelDescriptions {
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String TAGS = "stack related tags";
+        public static final String CREDENTIAL = "stack related credential";
+        public static final String NETWORK = "stack related network";
     }
 
     public static class ClusterModelDescription {
@@ -109,6 +111,7 @@ public class ModelDescriptions {
         public static final String CLUSTER_NAME = "name of the cluster";
         public static final String CLUSTER_ID = "id of the cluster";
         public static final String BLUEPRINT_ID = "blueprint id for the cluster";
+        public static final String BLUEPRINT = "blueprint for the cluster";
         public static final String VALIDATE_BLUEPRINT = "validate blueprint";
         public static final String HOURS = "duration - how long the cluster is running in hours";
         public static final String MINUTES = "duration - how long the cluster is running in minutes (minus hours)";
@@ -118,12 +121,15 @@ public class ModelDescriptions {
         public static final String CONFIG_STRATEGY = "config recommendation strategy";
         public static final String LDAP_REQUIRED = "flag for default LDAP support";
         public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
+        public static final String SSSDCONFIG = "SSSD config for the cluster";
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
         public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_ID = "RDS configuration id for the cluster";
+        public static final String RDSCONFIG = "RDS configuration for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
+        public static final String LDAP_CONFIG = "LDAP config for the cluster";
         public static final String HOSTGROUP_ADJUSTMENT = "host group adjustment";
         public static final String ADJUSTMENT_TYPE = "type of  adjustment";
         public static final String STATUS_REQUEST = "request status";
@@ -224,6 +230,8 @@ public class ModelDescriptions {
     public static class InstanceGroupModelDescription {
         public static final String INSTANCE_GROUP_NAME = "name of the instance group";
         public static final String INSTANCE_GROUP_TYPE = "type of the instance group";
+        public static final String TEMPLATE = "instancegroup related template";
+        public static final String SECURITYGROUP = "instancegroup related securitygroup";
         public static final String NODE_COUNT = "number of nodes";
         public static final String TEMPLATE_ID = "referenced template id";
         public static final String STATUS = "status of the instance";
@@ -238,6 +246,7 @@ public class ModelDescriptions {
 
     public static class HostGroupModelDescription {
         public static final String RECIPE_IDS = "referenced recipe ids";
+        public static final String RECIPES = "referenced recipes";
         public static final String HOST_GROUP_NAME = "name of the host group";
         public static final String CONSTRAINT = "instance group or resource constraint for a hostgroup";
         public static final String INSTANCE_GROUP = "name of an instance group where the hostgroup will be deployed";

@@ -26,9 +26,11 @@ public class ClusterRequest {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @NotNull
-    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_ID, required = true)
+    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
+
+    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT)
+    private BlueprintRequest blueprint;
 
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
@@ -67,8 +69,14 @@ public class ClusterRequest {
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
 
+    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG)
+    private SssdConfigRequest sssdConfig;
+
     @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
+
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG)
+    private LdapConfigRequest ldapConfig;
 
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
@@ -299,5 +307,29 @@ public class ClusterRequest {
 
     public void setKerberos(KerberosRequest kerberos) {
         this.kerberos = kerberos;
+    }
+
+    public SssdConfigRequest getSssdConfig() {
+        return sssdConfig;
+    }
+
+    public void setSssdConfig(SssdConfigRequest sssdConfig) {
+        this.sssdConfig = sssdConfig;
+    }
+
+    public LdapConfigRequest getLdapConfig() {
+        return ldapConfig;
+    }
+
+    public void setLdapConfig(LdapConfigRequest ldapConfig) {
+        this.ldapConfig = ldapConfig;
+    }
+
+    public BlueprintRequest getBlueprint() {
+        return blueprint;
+    }
+
+    public void setBlueprint(BlueprintRequest blueprint) {
+        this.blueprint = blueprint;
     }
 }

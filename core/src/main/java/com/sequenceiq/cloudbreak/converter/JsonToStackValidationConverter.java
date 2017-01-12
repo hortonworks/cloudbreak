@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.access.AccessDeniedException;
@@ -34,6 +35,7 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
     private NetworkService networkService;
 
     @Inject
+    @Qualifier("conversionService")
     private ConversionService conversionService;
 
     @Override
@@ -43,15 +45,29 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         stackValidation.setInstanceGroups(instanceGroups);
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
         try {
-            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
-            stackValidation.setBlueprint(blueprint);
+            if (stackValidationRequest.getBlueprintId() != null) {
+                Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
+                stackValidation.setBlueprint(blueprint);
+            } else if (stackValidationRequest.getBlueprint() != null) {
+                Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);
+                stackValidation.setBlueprint(blueprint);
+            } else {
+                throw new BadRequestException("Blueprint does not configured for the validation request!");
+            }
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
         }
         try {
-            Network network = networkService.get(stackValidationRequest.getNetworkId());
-            stackValidation.setNetwork(network);
+            if (stackValidationRequest.getNetworkId() != null) {
+                Network network = networkService.get(stackValidationRequest.getNetworkId());
+                stackValidation.setNetwork(network);
+            } else if (stackValidationRequest.getNetwork() != null) {
+                Network network = conversionService.convert(stackValidationRequest.getNetwork(), Network.class);
+                stackValidation.setNetwork(network);
+            } else {
+                throw new BadRequestException("Network does not configured for the validation request!");
+            }
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to network '%s' is denied or network doesn't exist.", stackValidationRequest.getNetworkId()), e);
@@ -64,7 +80,7 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         for (final HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();
             hostGroup.setName(json.getName());
-            Constraint constraint = conversionService.convert(json.getConstraint(), Constraint.class);
+            Constraint constraint = getConversionService().convert(json.getConstraint(), Constraint.class);
             final String instanceGroupName = json.getConstraint().getInstanceGroupName();
             if (instanceGroupName != null) {
                 InstanceGroup instanceGroup =

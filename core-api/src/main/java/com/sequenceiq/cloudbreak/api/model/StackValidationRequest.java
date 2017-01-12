@@ -19,13 +19,17 @@ public class StackValidationRequest implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private Set<InstanceGroupRequest> instanceGroups = new HashSet<>();
 
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID, required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.BLUEPRINT)
+    private BlueprintRequest blueprint;
+
+    @ApiModelProperty(value = StackModelDescription.NETWORK_ID)
     private Long networkId;
+
+    @ApiModelProperty(value = StackModelDescription.NETWORK)
+    private NetworkRequest network;
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
@@ -79,5 +83,21 @@ public class StackValidationRequest implements JsonEntity {
 
     public void setPlatform(String platform) {
         this.platform = platform;
+    }
+
+    public BlueprintRequest getBlueprint() {
+        return blueprint;
+    }
+
+    public void setBlueprint(BlueprintRequest blueprint) {
+        this.blueprint = blueprint;
+    }
+
+    public NetworkRequest getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(NetworkRequest network) {
+        this.network = network;
     }
 }

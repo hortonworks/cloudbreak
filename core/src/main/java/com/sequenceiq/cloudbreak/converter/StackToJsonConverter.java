@@ -11,15 +11,16 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -39,9 +40,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToJsonConverter.class);
-
-    @Inject
-    private ConversionService conversionService;
 
     @Inject
     private ImageService imageService;
@@ -70,6 +68,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         } else {
             stackJson.setCloudPlatform(source.cloudPlatform());
             stackJson.setCredentialId(source.getCredential().getId());
+            stackJson.setCredential(getConversionService().convert(source.getCredential(), CredentialResponse.class));
         }
         stackJson.setStatus(source.getStatus());
         stackJson.setStatusReason(source.getStatusReason());
@@ -91,12 +90,13 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             stackJson.setNetworkId(null);
         } else {
             stackJson.setNetworkId(source.getNetwork().getId());
+            stackJson.setNetwork(getConversionService().convert(source.getNetwork(), NetworkResponse.class));
         }
         stackJson.setRelocateDocker(source.getRelocateDocker());
         stackJson.setParameters(source.getParameters());
         stackJson.setPlatformVariant(source.getPlatformVariant());
         if (source.getOrchestrator() != null) {
-            stackJson.setOrchestrator(conversionService.convert(source.getOrchestrator(), OrchestratorResponse.class));
+            stackJson.setOrchestrator(getConversionService().convert(source.getOrchestrator(), OrchestratorResponse.class));
         }
         stackJson.setCreated(source.getCreated());
         stackJson.setGatewayPort(source.getGatewayPort());
@@ -114,10 +114,14 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
     private void convertTags(StackResponse stackJson, Json tag) {
         try {
             Map<String, String> tags = new HashMap<>();
-            if (tag.getValue() != null) {
-                stackJson.setTags(tag.get(Map.class));
+            if (tag != null) {
+                if (tag.getValue() != null) {
+                    stackJson.setTags(tag.get(Map.class));
+                } else {
+                    stackJson.setTags(tags);
+                }
             } else {
-                stackJson.setTags(tags);
+                stackJson.setTags(new HashMap<>());
             }
         } catch (Exception e) {
             LOGGER.error("Failed to convert dynamic tags.", e);

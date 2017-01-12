@@ -22,8 +22,12 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
+import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -115,6 +119,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
+        clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
+        clusterResponse.setRdsConfig(getConversionService().convert(source.getRdsConfig(), RDSConfigResponse.class));
+        clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
+        clusterResponse.setSssdConfig(getConversionService().convert(source.getSssdConfig(), SssdConfigResponse.class));
         if (source.getBlueprintCustomProperties() != null) {
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }

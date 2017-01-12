@@ -7,6 +7,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 
@@ -22,6 +24,8 @@ public class InstanceGroupToJsonConverter extends AbstractConversionServiceAware
         instanceGroupResponse.setTemplateId(entity.getTemplate().getId());
         instanceGroupResponse.setType(entity.getInstanceGroupType());
         instanceGroupResponse.setMetadata(convertEntitiesToJson(entity.getInstanceMetaData()));
+        instanceGroupResponse.setTemplate(getConversionService().convert(entity.getTemplate(), TemplateResponse.class));
+        instanceGroupResponse.setSecurityGroup(getConversionService().convert(entity.getSecurityGroup(), SecurityGroupResponse.class));
         if (entity.getSecurityGroup() != null) {
             instanceGroupResponse.setSecurityGroupId(entity.getSecurityGroup().getId());
         }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -17,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component
@@ -31,10 +31,10 @@ public class TemplateValidator {
     private Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 
-    public void validateTemplateRequest(TemplateRequest value) {
+    public void validateTemplateRequest(Template value) {
         VmType vmType = null;
         VolumeParameterType volumeParameterType = null;
-        Platform platform = Platform.platform(value.getCloudPlatform());
+        Platform platform = Platform.platform(value.cloudPlatform());
         Map<Platform, Collection<VmType>> machines = virtualMachines.get();
         if (machines.containsKey(platform) && !machines.get(platform).isEmpty()) {
             for (VmType type : machines.get(platform)) {
@@ -60,14 +60,14 @@ public class TemplateValidator {
         validateVolume(value, vmType, platform, volumeParameterType);
     }
 
-    private void validateVolume(TemplateRequest value, VmType vmType, Platform platform, VolumeParameterType volumeParameterType) {
+    private void validateVolume(Template value, VmType vmType, Platform platform, VolumeParameterType volumeParameterType) {
         validateVolumeType(value, platform);
         validateVolumeCount(value, vmType, volumeParameterType);
         validateVolumeSize(value, vmType, volumeParameterType);
         validateMaximumVolumeSize(value, vmType);
     }
 
-    private void validateMaximumVolumeSize(TemplateRequest value, VmType vmType) {
+    private void validateMaximumVolumeSize(Template value, VmType vmType) {
         if (vmType != null) {
             String maxSize = vmType.getMetaDataValue(VmTypeMeta.MAXIMUM_PERSISTENT_DISKS_SIZE_GB);
             if (maxSize != null) {
@@ -75,13 +75,13 @@ public class TemplateValidator {
                 if (Integer.valueOf(maxSize) < fullSize) {
                     throw new BadRequestException(
                             String.format("The %s platform does not support %s Gb full volume size. The maximum size of disks could be %s Gb.",
-                                    value.getCloudPlatform(), fullSize, maxSize));
+                                    value.cloudPlatform(), fullSize, maxSize));
                 }
             }
         }
     }
 
-    private void validateVolumeType(TemplateRequest value, Platform platform) {
+    private void validateVolumeType(Template value, Platform platform) {
         DiskType diskType = DiskType.diskType(value.getVolumeType());
         Map<Platform, Collection<DiskType>> diskTypes = cloudParameterService.getDiskTypes().getDiskTypes();
         if (diskTypes.containsKey(platform) && !diskTypes.get(platform).isEmpty()) {
@@ -91,7 +91,7 @@ public class TemplateValidator {
         }
     }
 
-    private void validateVolumeCount(TemplateRequest value, VmType vmType, VolumeParameterType volumeParameterType) {
+    private void validateVolumeCount(Template value, VmType vmType, VolumeParameterType volumeParameterType) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {
@@ -106,7 +106,7 @@ public class TemplateValidator {
         }
     }
 
-    private void validateVolumeSize(TemplateRequest value, VmType vmType, VolumeParameterType volumeParameterType) {
+    private void validateVolumeSize(Template value, VmType vmType, VolumeParameterType volumeParameterType) {
         if (vmType != null && needToCheckVolume(volumeParameterType, value.getVolumeCount())) {
             VolumeParameterConfig config = vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
             if (config != null) {

@@ -32,7 +32,9 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -68,6 +70,12 @@ public class StackController implements StackEndpoint {
 
     @Autowired
     private StackValidator stackValidator;
+
+    @Autowired
+    private NetworkService networkService;
+
+    @Autowired
+    private CredentialService credentialService;
 
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) {
@@ -223,7 +231,7 @@ public class StackController implements StackEndpoint {
         stackValidator.validate(stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId());
+        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user);
         stack.setPublicInAccount(publicInAccount);
         validateAccountPreferences(stack, user);
         if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
