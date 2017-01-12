@@ -7,6 +7,4 @@ import io.swagger.annotations.ApiModel;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RecipeRequest extends RecipeBase {
-
-
 }

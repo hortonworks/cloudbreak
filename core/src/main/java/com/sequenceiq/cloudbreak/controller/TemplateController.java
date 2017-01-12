@@ -119,8 +119,8 @@ public class TemplateController implements TemplateEndpoint {
     }
 
     private TemplateResponse createTemplate(CbUser user, TemplateRequest templateRequest, boolean publicInAccount) {
-        templateValidator.validateTemplateRequest(templateRequest);
         Template template = convert(templateRequest, publicInAccount);
+        templateValidator.validateTemplateRequest(template);
         template = templateDecorator.decorate(template);
         template = templateService.create(user, template);
         return conversionService.convert(template, TemplateResponse.class);

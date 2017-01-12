@@ -35,6 +35,9 @@ public class ClusterResponse {
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
+    private BlueprintResponse blueprint;
+
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
@@ -58,10 +61,16 @@ public class ClusterResponse {
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
     private Long sssdConfigId;
 
+    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG)
+    private SssdConfigResponse sssdConfig;
+
     private Set<HostGroupResponse> hostGroups;
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_ID)
     private Long rdsConfigId;
+
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG)
+    private RDSConfigResponse rdsConfig;
 
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
     private Map<String, String> serviceEndPoints = new HashMap<>();
@@ -74,6 +83,9 @@ public class ClusterResponse {
 
     @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
+
+    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG)
+    private LdapConfigResponse ldapConfig;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes;
@@ -276,5 +288,37 @@ public class ClusterResponse {
 
     public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
+    }
+
+    public SssdConfigResponse getSssdConfig() {
+        return sssdConfig;
+    }
+
+    public void setSssdConfig(SssdConfigResponse sssdConfig) {
+        this.sssdConfig = sssdConfig;
+    }
+
+    public RDSConfigResponse getRdsConfig() {
+        return rdsConfig;
+    }
+
+    public void setRdsConfig(RDSConfigResponse rdsConfig) {
+        this.rdsConfig = rdsConfig;
+    }
+
+    public LdapConfigResponse getLdapConfig() {
+        return ldapConfig;
+    }
+
+    public void setLdapConfig(LdapConfigResponse ldapConfig) {
+        this.ldapConfig = ldapConfig;
+    }
+
+    public BlueprintResponse getBlueprint() {
+        return blueprint;
+    }
+
+    public void setBlueprint(BlueprintResponse blueprint) {
+        this.blueprint = blueprint;
     }
 }

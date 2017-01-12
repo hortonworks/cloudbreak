@@ -36,6 +36,12 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.STATUS_REASON)
     private String statusReason;
 
+    @ApiModelProperty(StackModelDescription.CREDENTIAL)
+    private CredentialResponse credential;
+
+    @ApiModelProperty(StackModelDescription.NETWORK)
+    private NetworkResponse network;
+
     @Valid
     @ApiModelProperty
     private List<InstanceGroupResponse> instanceGroups = new ArrayList<>();
@@ -191,5 +197,21 @@ public class StackResponse extends StackBase {
 
     public void setS3AccessRoleArn(String s3AccessRoleArn) {
         this.s3AccessRoleArn = s3AccessRoleArn;
+    }
+
+    public CredentialResponse getCredential() {
+        return credential;
+    }
+
+    public void setCredential(CredentialResponse credential) {
+        this.credential = credential;
+    }
+
+    public NetworkResponse getNetwork() {
+        return network;
+    }
+
+    public void setNetwork(NetworkResponse network) {
+        this.network = network;
     }
 }

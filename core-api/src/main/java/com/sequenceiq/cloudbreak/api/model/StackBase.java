@@ -36,15 +36,13 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
 
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID, required = true)
+    @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID)
     private Long credentialId;
 
     @ApiModelProperty(StackModelDescription.FAILURE_ACTION)
     private OnFailureAction onFailureAction = OnFailureAction.DO_NOTHING;
 
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.NETWORK_ID, required = true)
+    @ApiModelProperty(value = StackModelDescription.NETWORK_ID)
     private Long networkId;
 
     @ApiModelProperty(StackModelDescription.RELOCATE_DOCKER)

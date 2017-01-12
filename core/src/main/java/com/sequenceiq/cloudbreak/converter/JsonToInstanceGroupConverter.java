@@ -11,7 +11,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
+import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -23,6 +26,9 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
 
     @Inject
     private SecurityGroupService securityGroupService;
+
+    @Inject
+    private TemplateValidator templateValidator;
 
     @Override
     public InstanceGroup convert(InstanceGroupRequest json) {
@@ -43,9 +49,19 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
                     json.getSecurityGroupId()), e);
         }
         try {
-            instanceGroup.setTemplate(templateService.get(json.getTemplateId()));
+            if (json.getTemplateId() != null) {
+                instanceGroup.setTemplate(templateService.get(json.getTemplateId()));
+            }
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(String.format("Access to template '%s' is denied or template doesn't exist.", json.getTemplateId()), e);
+        }
+        if (json.getTemplate() != null) {
+            Template template = getConversionService().convert(json.getTemplate(), Template.class);
+            templateValidator.validateTemplateRequest(template);
+            instanceGroup.setTemplate(template);
+        }
+        if (json.getSecurityGroup() != null) {
+            instanceGroup.setSecurityGroup(getConversionService().convert(json.getSecurityGroup(), SecurityGroup.class));
         }
         return instanceGroup;
     }

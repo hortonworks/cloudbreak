@@ -15,8 +15,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class InstanceGroupBase implements JsonEntity {
 
-    @NotNull
-    @ApiModelProperty(value = InstanceGroupModelDescription.TEMPLATE_ID, required = true)
+    @ApiModelProperty(value = InstanceGroupModelDescription.TEMPLATE_ID)
     private Long templateId;
 
     @ApiModelProperty(value = InstanceGroupModelDescription.SECURITY_GROUP_ID)

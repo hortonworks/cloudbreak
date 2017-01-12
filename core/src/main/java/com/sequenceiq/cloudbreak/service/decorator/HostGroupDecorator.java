@@ -13,6 +13,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -39,7 +40,9 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         USER,
         CONSTRAINT,
         RECIPE_IDS,
-        REQUEST_TYPE
+        REQUEST_TYPE,
+        RECIPES,
+        PUBLIC_IN_ACCOUNT
     }
 
     @Inject
@@ -76,6 +79,8 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         ConstraintJson constraintJson = (ConstraintJson) data[DecorationData.CONSTRAINT.ordinal()];
         Set<Long> recipeIds = (Set<Long>) data[DecorationData.RECIPE_IDS.ordinal()];
         boolean postRequest = (boolean) data[DecorationData.REQUEST_TYPE.ordinal()];
+        Set<RecipeRequest> recipes = (Set<RecipeRequest>) data[DecorationData.RECIPES.ordinal()];
+        Boolean publicInAccount = (Boolean) data[DecorationData.PUBLIC_IN_ACCOUNT.ordinal()];
 
         LOGGER.debug("Decorating hostgroup on [{}] request.", postRequest ? "POST" : "PUT");
         Constraint constraint = conversionService.convert(constraintJson, Constraint.class);
@@ -91,6 +96,13 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
             for (Long recipeId : recipeIds) {
                 Recipe recipe = recipeService.get(recipeId);
                 subject.getRecipes().add(recipe);
+            }
+        } else if (recipes != null && !recipes.isEmpty()) {
+            for (RecipeRequest recipe : recipes) {
+                Recipe convert = conversionService.convert(recipe, Recipe.class);
+                convert.setPublicInAccount(publicInAccount);
+                convert = recipeService.create(user, convert);
+                subject.getRecipes().add(convert);
             }
         }
 

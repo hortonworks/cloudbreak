@@ -16,6 +16,9 @@ public class HostGroupResponse extends HostGroupBase {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
+    @ApiModelProperty(value = HostGroupModelDescription.RECIPES)
+    private Set<RecipeResponse> recipes;
+
     @ApiModelProperty(value = HostGroupModelDescription.METADATA)
     private Set<HostMetadataResponse> metadata = new HashSet<>();
 
@@ -33,5 +36,13 @@ public class HostGroupResponse extends HostGroupBase {
 
     public void setMetadata(Set<HostMetadataResponse> metadata) {
         this.metadata = metadata;
+    }
+
+    public Set<RecipeResponse> getRecipes() {
+        return recipes;
+    }
+
+    public void setRecipes(Set<RecipeResponse> recipes) {
+        this.recipes = recipes;
     }
 }

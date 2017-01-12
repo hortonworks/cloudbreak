@@ -103,7 +103,8 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         ClusterResponse result = underTest.convert(getSource());
         // THEN
         assertEquals(1L, (long) result.getId());
-        assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties"));
+        assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
+                "blueprint", "sssdConfig", "rdsConfig", "ldapConfig"));
     }
 
     @Test

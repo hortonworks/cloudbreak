@@ -14,7 +14,6 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
@@ -27,8 +26,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
@@ -37,9 +38,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
-
-    @Inject
-    private ConversionService conversionService;
 
     @Inject
     private StackParameterService stackParameterService;
@@ -61,8 +59,14 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setParameters(getValidParameters(source));
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
         stack.setPlatformVariant(source.getPlatformVariant());
-        stack.setOrchestrator(conversionService.convert(source.getOrchestrator(), Orchestrator.class));
+        stack.setOrchestrator(getConversionService().convert(source.getOrchestrator(), Orchestrator.class));
         stack.setRelocateDocker(source.getRelocateDocker() == null ? true : source.getRelocateDocker());
+        if (source.getCredential() != null) {
+            stack.setCredential(getConversionService().convert(source.getCredential(), Credential.class));
+        }
+        if (source.getNetwork() != null) {
+            stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
+        }
         return stack;
     }
 

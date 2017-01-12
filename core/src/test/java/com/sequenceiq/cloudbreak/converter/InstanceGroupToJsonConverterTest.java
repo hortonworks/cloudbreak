@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
@@ -46,7 +47,7 @@ public class InstanceGroupToJsonConverterTest extends AbstractEntityConverterTes
         // THEN
         assertEquals(1, result.getNodeCount());
         assertEquals(InstanceGroupType.CORE, result.getType());
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Lists.newArrayList("template", "securityGroup"));
     }
 
     @Override
