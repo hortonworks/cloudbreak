@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.validation.FileSystemValidationResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.FileSystemRequestToFileSystemConverter;
@@ -38,7 +39,7 @@ public class FileSystemValidator {
     @Inject
     private FileSystemRequestToFileSystemConverter converter;
 
-    public void validateFileSystem(String platform, FileSystemRequest fileSystemRequest) {
+    public void validateFileSystem(String platform, CloudCredential cloudCredential, FileSystemRequest fileSystemRequest) {
         if (fileSystemRequest == null) {
             return;
         }
@@ -46,7 +47,7 @@ public class FileSystemValidator {
         LOGGER.debug("Sending fileSystemRequest to {} to validate the file system", platform);
         CloudContext cloudContext = new CloudContext(null, null, platform, null, null, null);
         FileSystem fileSystem = converter.convert(fileSystemRequest);
-        FileSystemValidationRequest request = new FileSystemValidationRequest(fileSystem, cloudContext);
+        FileSystemValidationRequest request = new FileSystemValidationRequest(fileSystem, cloudCredential, cloudContext);
         eventBus.notify(request.selector(), Event.wrap(request));
         try {
             FileSystemValidationResult result = request.await();

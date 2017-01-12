@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -302,7 +303,7 @@ public class AwsSetup implements Setup {
     }
 
     @Override
-    public void validateFileSystem(FileSystem fileSystem) throws Exception {
+    public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
     }
 
     private void validateExistingKeyPair(AuthenticatedContext authenticatedContext, AwsCredentialView credentialView, String region) {

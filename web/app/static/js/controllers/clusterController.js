@@ -543,6 +543,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 if (!$scope.isUndefined($scope.cluster.fileSystem.properties.accountName) && !$scope.isUndefined($scope.cluster.fileSystem.properties.accountKey)) {
                     return false;
                 }
+            } else if ($scope.cluster.fileSystem.type == 'ADLS') {
+                if (!$scope.isUndefined($scope.cluster.fileSystem.properties.accountName)) {
+                    return false;
+                }
             } else if ($scope.cluster.fileSystem.type == 'GCS') {
                 if (!$scope.isUndefined($scope.cluster.fileSystem.properties.projectId) && !$scope.isUndefined($scope.cluster.fileSystem.properties.serviceAccountEmail) && !$scope.isUndefined($scope.cluster.fileSystem.properties.privateKeyEncoded) && !$scope.isUndefined($scope.cluster.fileSystem.properties.defaultBucketName)) {
                     return false;
@@ -868,8 +872,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
                 if ($rootScope.activeCredential.cloudPlatform == 'AZURE_RM') {
                     $scope.cluster.fileSystem = {};
-                    $scope.cluster.fileSystem.type = "WASB";
-                    $scope.cluster.fileSystem.defaultFs = true;
+                    $scope.cluster.fileSystem.type = "ADLS";
+                    $scope.cluster.fileSystem.defaultFs = false;
+                    $scope.cluster.fileSystem.properties = {};
+                    $scope.cluster.fileSystem.properties.tenantId = $rootScope.activeCredential.parameters.tenantId;
+                    $scope.cluster.fileSystem.properties.clientId = $rootScope.activeCredential.parameters.accessKey;
                     $scope.cluster.relocateDocker = true;
                     $scope.cluster.parameters.persistentStorage = "cbstore";
                     $scope.cluster.parameters.attachedStorageOption = "SINGLE";

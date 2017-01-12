@@ -298,6 +298,10 @@ public class ShellContext {
         setCredentialAccessible();
     }
 
+    public CredentialResponse getCredentialById(String id) {
+        return cloudbreakClient.credentialEndpoint().get(Long.valueOf(id));
+    }
+
     private void fillTemplates(List<TemplateResponse> templateList) {
         for (TemplateResponse t : templateList) {
             this.activeTemplateNames.add(t.getName());

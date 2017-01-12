@@ -6,6 +6,7 @@
             <option value="DASH" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_dash_label}}</option>
             <option value="WASB" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_wasb_label}}</option>
             <option value="GCS" ng-if="activeCredential.cloudPlatform == 'GCP'">{{msg.filesystem_gcs_label}}</option>
+            <option value="ADLS" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_adls_label}}</option>
         </select>
 
         <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') &&  cluster.fileSystem.type == 'LOCAL'"><i class="fa fa-warning"></i> {{msg.filesystem_local_label_azure_warning}}</div>
@@ -50,6 +51,17 @@
         </div>
     </div>
 </div>
+  <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'ADLS'">
+    <label class="col-sm-3 control-label" for="adlsaccountname">{{msg.filesystem_adls_account_name_label}}
+        <i class="fa fa-question-circle" popover-placement="top" popover={{msg.filesystem_adls_account_name_label_popover}} popover-trigger="mouseenter"></i>
+    </label>
+
+    <div class="col-sm-8">
+        <input class="form-control" type="text" name="adlsaccountname" id="adlsaccountname" ng-model="cluster.fileSystem.properties.accountName" ng-pattern="/^[a-z0-9]{3,24}$/" ng-minlength="3" ng-maxlength="24" ng-required="cluster.fileSystem.type == 'ADLS'">
+        <div class="help-block" ng-show="clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_adls_account_name_warning}}
+        </div>
+    </div>
+</div>
 <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type == 'GCS'">
     <label class="col-sm-3 control-label" for="projectId">{{msg.credential_gcp_form_project_id_label}}</label>
     <div class="col-sm-8">
@@ -80,7 +92,7 @@
     </div>
 </div>
 
-<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type != 'LOCAL'">
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type != 'LOCAL' && cluster.fileSystem.type != 'ADLS'">
     <label class="col-sm-3 control-label" for="asdefaultfs">{{msg.filesystem_default_fs}}</label>
     <div class="col-sm-8">
         <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">

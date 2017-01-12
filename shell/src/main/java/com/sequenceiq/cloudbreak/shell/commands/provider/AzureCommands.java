@@ -12,6 +12,7 @@ import org.springframework.shell.core.annotation.CliOption;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
@@ -210,6 +211,42 @@ public class AzureCommands implements CommandMarker {
         props.put("accountKey", accountKey);
         shellContext.setFileSystemParameters(props);
         return "Windows Azure Blob Storage filesystem configured";
+    }
+
+    @CliCommand(value = "cluster fileSystem --ADLS", help = "Set Windows Azure Data Lake Storage filesystem on cluster")
+    public String setAdlsFileSystem(
+            //@CliOption(key = "defaultFileSystem", mandatory = false, specifiedDefaultValue = "false", unspecifiedDefaultValue = "false",
+            //        help = "Use as default filesystem") Boolean defaultFileSystem,
+            @CliOption(key = "accountName", mandatory = true, help = "name of the storage account") String accountName) {
+        shellContext.setDefaultFileSystem(false);
+        shellContext.setFileSystemType(FileSystemType.ADLS);
+
+        String credentialId = shellContext.getCredentialId();
+        CredentialResponse credential;
+        try {
+            credential = shellContext.getCredentialById(credentialId);
+        } catch (Exception e) {
+            throw shellContext.exceptionTransformer()
+                    .transformToRuntimeException(e);
+        }
+        Map<String, Object> parameters = credential.getParameters();
+        String tenantId = (String) parameters.get("tenantId");
+        String accessKey = (String) parameters.get("accessKey");
+        String secretKey = (String) parameters.get("secretKey");
+
+
+        Map<String, Object> props = new HashMap<>();
+        props.put("accountName", accountName);
+        props.put("tenantId", tenantId);
+        props.put("clientId", accessKey);
+        props.put("credential", secretKey);
+
+        if (accountName == null || tenantId == null || accessKey == null || secretKey == null) {
+            throw shellContext.exceptionTransformer()
+                    .transformToRuntimeException("One or more required parameters for ADLS are not set!");
+        }
+        shellContext.setFileSystemParameters(props);
+        return "Windows Azure Data Lake Storage filesystem configured";
     }
 
     @CliCommand(value = "platform create --AZURE", help = "Create a new Azure platform configuration")

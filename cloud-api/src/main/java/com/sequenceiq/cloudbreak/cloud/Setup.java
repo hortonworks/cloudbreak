@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -47,9 +48,11 @@ public interface Setup {
     /**
      * Hadoop supports multiple filesystems instead of HDFS. These filesystems can be validated before cluster creation.
      *
+     *
+     * @param credential credenital to enable validation
      * @param fileSystem filesystem to validate
      * @throws Exception exception is thrown when the filesystem does not meet the desired requirements
      */
-    void validateFileSystem(FileSystem fileSystem) throws Exception;
+    void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception;
 
 }
