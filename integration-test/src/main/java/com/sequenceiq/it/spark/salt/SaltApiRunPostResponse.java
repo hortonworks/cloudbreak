@@ -91,7 +91,7 @@ public class SaltApiRunPostResponse extends ITResponse {
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
                 Map<String, String> networkHashMap = new HashMap<>();
-                networkHashMap.put("instance-" + privateIp, privateIp);
+                networkHashMap.put("host-" + privateIp.replace(".", "-"), privateIp);
                 result.add(networkHashMap);
             }
         }
@@ -110,7 +110,7 @@ public class SaltApiRunPostResponse extends ITResponse {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instance);
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                hostMap.put("instance-" + privateIp, privateIp);
+                hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
             }
         }
 
@@ -130,7 +130,7 @@ public class SaltApiRunPostResponse extends ITResponse {
             CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instance);
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
-                hostMap.put("instance-" + privateIp, privateIp);
+                hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
             }
         }
         responseList.add(hostMap);
