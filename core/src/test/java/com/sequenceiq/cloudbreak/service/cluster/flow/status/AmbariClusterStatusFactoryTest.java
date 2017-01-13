@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.BDDMockito;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.ambari.client.AmbariClient;
@@ -142,7 +143,7 @@ public class AmbariClusterStatusFactoryTest {
     public void testCreateClusterStatusShouldReturnUnknownWhenAmbariThrowsException() {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
-        BDDMockito.given(ambariClient.getComponentsCategory(TEST_BLUEPRINT)).willThrow(new RuntimeException());
+        BDDMockito.given(ambariClient.getComponentsCategory(Mockito.anyList())).willThrow(new RuntimeException());
         // WHEN
         ClusterStatus actualResult = underTest.createClusterStatus(ambariClient, TEST_BLUEPRINT);
         // THEN
