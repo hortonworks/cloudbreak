@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -26,7 +27,7 @@ public class AmbariClusterStatusFactory {
         if (!isAmbariServerRunning(ambariClient)) {
             clusterStatus = ClusterStatus.AMBARISERVER_NOT_RUNNING;
         } else if (blueprint != null) {
-            clusterStatus = determineClusterStatus(ambariClient, blueprint);
+            clusterStatus = determineClusterStatus(ambariClient);
         } else {
             clusterStatus = ClusterStatus.AMBARISERVER_RUNNING;
         }
@@ -43,7 +44,7 @@ public class AmbariClusterStatusFactory {
         return result;
     }
 
-    private ClusterStatus determineClusterStatus(AmbariClient ambariClient, String blueprint) {
+    private ClusterStatus determineClusterStatus(AmbariClient ambariClient) {
         ClusterStatus clusterStatus;
         try {
             Map<String, List<Integer>> ambariOperations = ambariClient.getRequests("IN_PROGRESS", "PENDING");
@@ -53,8 +54,10 @@ public class AmbariClusterStatusFactory {
                 Set<ClusterStatus> orderedPartialStatuses = new TreeSet<>();
                 Set<ClusterStatus> orderedFullStatuses = new TreeSet<>();
                 Set<String> unsupportedStatuses = new HashSet<>();
-                Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
                 Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
+                Set<String> componentNames = new HashSet<>();
+                hostComponentsStates.entrySet().forEach(e -> componentNames.addAll(e.getValue().keySet()));
+                Map<String, String> componentsCategory = ambariClient.getComponentsCategory(new ArrayList<>(componentNames));
                 for (Map.Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
                     Map<String, String> componentStateMap = hostComponentsEntry.getValue();
                     for (Map.Entry<String, String> componentStateEntry : componentStateMap.entrySet()) {
