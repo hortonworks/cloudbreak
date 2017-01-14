@@ -30,6 +30,7 @@ base:
     - match: grain
     - prometheus.server
     - ambari.server
+    - service-registration
     - grafana
 
   'roles:ambari_agent':

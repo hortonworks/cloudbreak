@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.domain;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -10,6 +11,8 @@ import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 
 import com.sequenceiq.periscope.api.model.AlertState;
+import com.sequenceiq.periscope.model.json.Json;
+import com.sequenceiq.periscope.model.json.JsonToString;
 
 @Entity
 @DiscriminatorValue("PROMETHEUS")
@@ -29,6 +32,10 @@ public class PrometheusAlert extends BaseAlert {
     private AlertState alertState;
 
     private int period;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json parameters;
 
     public Cluster getCluster() {
         return cluster;
@@ -60,5 +67,13 @@ public class PrometheusAlert extends BaseAlert {
 
     public void setPeriod(int period) {
         this.period = period;
+    }
+
+    public Json getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Json parameters) {
+        this.parameters = parameters;
     }
 }
