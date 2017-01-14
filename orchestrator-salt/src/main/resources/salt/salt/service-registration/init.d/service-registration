@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+# /etc/init.d/service-registration
+# description: service-registration daemon
+# processname: service-registration
+
+# chkconfig: 345 80 30
+# description: service-registration daemon
+# processname: service-registration
+
+NAME=service-registration
+PROG=/usr/local/bin/$NAME
+
+get_pid() {
+    ps -o pid= -C $NAME
+}
+
+is_running() {
+    [ -n "$(ps -o pid= -C $NAME)" ]
+}
+
+case "$1" in
+    start)
+    if is_running; then
+        echo "Already started"
+    else
+        echo "Starting ${NAME}"
+        $PROG &> /dev/null &
+    fi
+    ;;
+    stop)
+    if is_running; then
+        echo -n "Stopping ${NAME}.."
+        kill `get_pid`
+        for i in {1..10}
+        do
+            if ! is_running; then
+                break
+            fi
+            echo -n "."
+            sleep 1
+        done
+        echo
+        if is_running; then
+            echo "Not stopped; may still be shutting down or shutdown may have failed"
+            exit 1
+        else
+            echo "Stopped"
+        fi
+    else
+        echo "Not running"
+    fi
+    ;;
+    restart)
+    $0 stop
+    if is_running; then
+        echo "Unable to stop, will not attempt to start"
+        exit 1
+    fi
+    $0 start
+    ;;
+    status)
+    if is_running; then
+        echo "Running"
+    else
+        echo "Stopped"
+        exit 1
+    fi
+    ;;
+    *)
+    echo "Usage: $0 {start|stop|restart|status}"
+    exit 1
+    ;;
+esac
+
+exit 0
