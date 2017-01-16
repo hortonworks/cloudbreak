@@ -32,3 +32,11 @@ func TestSafeStringConvertIsNotNil(t *testing.T) {
 		t.Errorf("expected %s != %s", expected, resp)
 	}
 }
+
+func TestEscapeStringToJson(t *testing.T) {
+	password := EscapeStringToJson("§±!@#$%^&*()_+-=[]{};'\\:\"/.,?><`~")
+	expectedPassword := "§±!@#$%^&*()_+-=[]{};'\\\\:\\\"/.,?><`~"
+	if password != expectedPassword {
+		t.Errorf("expected %s != %s", expectedPassword, password)
+	}
+}

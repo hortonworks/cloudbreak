@@ -8,13 +8,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
-	"github.com/ernesto-jimenez/httplogger"
-	swaggerclient "github.com/go-swagger/go-swagger/client"
-	"github.com/go-swagger/go-swagger/httpkit"
-	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
-	"github.com/go-swagger/go-swagger/strfmt"
-	apiclient "github.com/hortonworks/hdc-cli/client"
 	"io/ioutil"
 	"net"
 	"net/http"
@@ -22,6 +15,14 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/ernesto-jimenez/httplogger"
+	swaggerclient "github.com/go-swagger/go-swagger/client"
+	"github.com/go-swagger/go-swagger/httpkit"
+	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
+	"github.com/go-swagger/go-swagger/strfmt"
+	apiclient "github.com/hortonworks/hdc-cli/client"
 )
 
 var PREFIX_TRIM []string = []string{"http://", "https://"}
@@ -65,8 +66,7 @@ func NewOAuth2HTTPClient(address string, username string, password string) *Clou
 }
 
 func getOAuth2Token(identityUrl string, username string, password string, clientId string) (string, error) {
-
-	form := url.Values{"credentials": {fmt.Sprintf(`{"username":"%s","password":"%s"}`, username, password)}}
+	form := url.Values{"credentials": {fmt.Sprintf(`{"username":"%s","password":"%s"}`, username, EscapeStringToJson(password))}}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s?response_type=token&client_id=%s", identityUrl, clientId), strings.NewReader(form.Encode()))
 	if err != nil {
 		return "", err

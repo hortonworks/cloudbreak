@@ -40,7 +40,8 @@ func TestReadConfig(t *testing.T) {
 	defer os.RemoveAll(tempDirName)
 
 	os.MkdirAll(tempDirName+string(filepath.Separator)+Hdc_dir, 0700)
-	ioutil.WriteFile(tempDirName+string(filepath.Separator)+Hdc_dir+string(filepath.Separator)+Config_file, []byte("username: user\npassword: password\nserver: server\noutput: output\n"), 0700)
+	password := "§±!@#$%^&*()_+-=[]{};'\\:\"/.,?><`~"
+	ioutil.WriteFile(tempDirName+string(filepath.Separator)+Hdc_dir+string(filepath.Separator)+Config_file, []byte("username: user\npassword: "+password+"\nserver: server\noutput: output\n"), 0700)
 
 	config, err := ReadConfig(tempDirName)
 
@@ -53,8 +54,8 @@ func TestReadConfig(t *testing.T) {
 	if config.Username != "user" {
 		t.Errorf("user not match user == %s", config.Username)
 	}
-	if config.Password != "password" {
-		t.Errorf("password not match password == %s", config.Password)
+	if config.Password != password {
+		t.Errorf("password not match %s == %s", password, config.Password)
 	}
 	if config.Output != "output" {
 		t.Errorf("server not match output == %s", config.Output)

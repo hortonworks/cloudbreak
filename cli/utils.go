@@ -1,5 +1,7 @@
 package cli
 
+import "strings"
+
 func SafeInt32Convert(value *int32) int32 {
 	if value == nil {
 		return 0
@@ -12,4 +14,8 @@ func SafeStringConvert(value *string) string {
 		return ""
 	}
 	return *value
+}
+
+func EscapeStringToJson(input string) string {
+	return strings.Replace(strings.Replace(input, "\\", "\\\\", -1), "\"", "\\\"", -1)
 }
