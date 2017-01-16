@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.PostConstruct;
 
@@ -42,13 +43,15 @@ public class AwsTagPreparationService {
         }
     }
 
-    public Collection<Tag> prepareTags(AuthenticatedContext ac) {
+    public Collection<Tag> prepareTags(AuthenticatedContext ac, Map<String, String> userDefinedTags) {
         List<com.amazonaws.services.cloudformation.model.Tag> tags = new ArrayList<>();
         tags.add(prepareTag(CLOUDBREAK_CLUSTER_TAG, ac.getCloudContext().getName()));
         if (!Strings.isNullOrEmpty(defaultCloudformationTag)) {
             tags.add(prepareTag(CLOUDBREAK_ID, defaultCloudformationTag));
         }
-        tags.addAll(customTags.entrySet().stream().map(entry -> prepareTag(entry.getKey(), entry.getValue())).collect(Collectors.toList()));
+        tags.addAll(Stream.concat(customTags.entrySet().stream(), userDefinedTags.entrySet().stream())
+                .map(entry -> prepareTag(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList()));
         return tags;
     }
 

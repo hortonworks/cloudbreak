@@ -21,11 +21,14 @@ public class CloudStack {
 
     private final Map<String, String> parameters;
 
-    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, String template) {
+    private final Map<String, String> tags;
+
+    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
         this.parameters = ImmutableMap.copyOf(parameters);
+        this.tags = ImmutableMap.copyOf(tags);
         this.template = template;
     }
 
@@ -43,6 +46,10 @@ public class CloudStack {
 
     public Map<String, String> getParameters() {
         return parameters;
+    }
+
+    public Map<String, String> getTags() {
+        return tags;
     }
 
     public Security getCloudSecurity() {

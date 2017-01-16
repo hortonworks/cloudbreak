@@ -245,7 +245,7 @@ public class AwsResourceConnector implements ResourceConnector {
                 .withStackName(cFStackName)
                 .withOnFailure(OnFailure.DO_NOTHING)
                 .withTemplateBody(cfTemplate)
-                .withTags(awsTagPreparationService.prepareTags(ac))
+                .withTags(awsTagPreparationService.prepareTags(ac, stack.getTags()))
                 .withCapabilities(CAPABILITY_IAM)
                 .withParameters(getStackParameters(ac, stack, cFStackName, subnet));
     }
