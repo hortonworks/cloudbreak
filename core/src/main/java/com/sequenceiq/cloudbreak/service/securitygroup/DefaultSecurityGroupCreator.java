@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -27,12 +25,10 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
 
 @Service
 public class DefaultSecurityGroupCreator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(DefaultSecurityGroupCreator.class);
     private static final String[] PLATFORMS_WITH_SEC_GROUP_SUPPORT = {CloudConstants.AWS, CloudConstants.AZURE_RM,
             CloudConstants.GCP, CloudConstants.OPENSTACK};
     private static final String TCP_PROTOCOL = "tcp";
@@ -53,8 +49,6 @@ public class DefaultSecurityGroupCreator {
         for (String platform : PLATFORMS_WITH_SEC_GROUP_SUPPORT) {
             //create default strict security group
             createDefaultStrictSecurityGroup(user, platform, securityGroups, defSecGroupMap);
-            //create default security group which opens all of the known services' ports
-            createDefaultAllKnownServicesSecurityGroup(user, platform, securityGroups, defSecGroupMap);
         }
     }
 
@@ -67,18 +61,6 @@ public class DefaultSecurityGroupCreator {
             strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
             String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
             addSecurityGroup(user, platform, securityGroups, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
-        }
-    }
-
-    private void createDefaultAllKnownServicesSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups,
-            Map<String, SecurityGroup> defSecGroupMap) {
-        String securityGroupName = "default-" + platform.toLowerCase() + "-all-services-port";
-        if (!defSecGroupMap.containsKey(securityGroupName)) {
-            //new ArrayList -> otherwise the list will be the static 'ports' list from NetworkUtils and we don't want to add nginx port to 'ports' static list.
-            List<Port> portsWithoutAclRules = new ArrayList<>(NetworkUtils.getPortsWithoutAclRules());
-            portsWithoutAclRules.add(0, new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
-            String allPortsOpenDesc = getPortsOpenDesc(portsWithoutAclRules);
-            addSecurityGroup(user, platform, securityGroups, securityGroupName, portsWithoutAclRules, allPortsOpenDesc);
         }
     }
 
