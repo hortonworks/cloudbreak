@@ -70,7 +70,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         return stack;
     }
 
-    private Json getTags(Map<String, String> tags) {
+    private Json getTags(Map<String, Object> tags) {
         try {
             if (tags == null || tags.isEmpty()) {
                 return new Json(new HashMap<>());

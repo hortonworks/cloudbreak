@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -73,7 +75,23 @@ public class StackToCloudStackConverter {
         }
         Network network = buildNetwork(stack);
         StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stack.getId());
-        return new CloudStack(instanceGroups, network, image, stack.getParameters(), stackTemplate.getTemplate());
+        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), stackTemplate.getTemplate());
+    }
+
+    public Map<String, String> getUserDefinedTags(Stack stack) {
+        Map<String, String> result = Maps.newHashMap();
+        try {
+            if (stack.getTags() != null) {
+                Map<String, String> userDefined = (Map<String, String>) stack.getTags().get(Map.class).get("userDefined");
+                if (userDefined != null) {
+                    result = userDefined;
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Exception during converting user defined tags.", e);
+        } finally {
+            return result;
+        }
     }
 
     public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequests) {

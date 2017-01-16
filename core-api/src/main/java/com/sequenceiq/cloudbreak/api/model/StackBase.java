@@ -58,7 +58,7 @@ public abstract class StackBase implements JsonEntity {
     private Map<String, String> parameters = new HashMap<>();
 
     @ApiModelProperty(StackModelDescription.TAGS)
-    private Map<String, String> tags = new HashMap<>();
+    private Map<String, Object> tags = new HashMap<>();
 
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
@@ -158,11 +158,11 @@ public abstract class StackBase implements JsonEntity {
         this.hdpVersion = hdpVersion;
     }
 
-    public Map<String, String> getTags() {
+    public Map<String, Object> getTags() {
         return tags;
     }
 
-    public void setTags(Map<String, String> tags) {
+    public void setTags(Map<String, Object> tags) {
         this.tags = tags;
     }
 }

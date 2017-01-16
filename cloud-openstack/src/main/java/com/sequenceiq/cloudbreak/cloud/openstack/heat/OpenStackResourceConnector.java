@@ -250,7 +250,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             }
             groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null));
         }
-        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTemplate());
+        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), null, stack.getTemplate());
     }
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {

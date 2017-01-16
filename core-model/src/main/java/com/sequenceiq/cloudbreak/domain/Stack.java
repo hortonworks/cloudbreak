@@ -720,4 +720,5 @@ public class Stack implements ProvisionEntity {
     public void setTags(Json tags) {
         this.tags = tags;
     }
+
 }

@@ -197,5 +197,6 @@ public class CloudFormationTemplateBuilder {
             this.gatewayPort = gatewayPort;
             return this;
         }
+
     }
 }

@@ -113,7 +113,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
 
     private void convertTags(StackResponse stackJson, Json tag) {
         try {
-            Map<String, String> tags = new HashMap<>();
+            Map<String, Object> tags = new HashMap<>();
             if (tag != null) {
                 if (tag.getValue() != null) {
                     stackJson.setTags(tag.get(Map.class));

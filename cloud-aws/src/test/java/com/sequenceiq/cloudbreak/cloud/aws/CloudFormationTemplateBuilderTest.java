@@ -107,10 +107,9 @@ public class CloudFormationTemplateBuilderTest {
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
-        cloudStack = new CloudStack(groups, network, image, parameters, null);
-
-
-
+        Map<String, String> tags = new HashMap<>();
+        tags.put("testtagkey", "testtagvalue");
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, null);
     }
 
     @Test
@@ -139,7 +138,8 @@ public class CloudFormationTemplateBuilderTest {
         assertThat(templateString, containsString("AmbariNodes" + name));
         assertThat(templateString, containsString("AmbariNodeLaunchConfig" + name));
         assertThat(templateString, containsString("ClusterNodeSecurityGroup" + name));
-
+        assertThat(templateString, not(containsString("testtagkey")));
+        assertThat(templateString, not(containsString("testtagvalue")));
     }
 
     @Test
