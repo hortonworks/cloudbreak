@@ -11,9 +11,6 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
 
-	"github.com/hortonworks/hdc-cli/client/blueprints"
-	"github.com/hortonworks/hdc-cli/client/recipes"
-	"github.com/hortonworks/hdc-cli/client/templates"
 	"strconv"
 )
 
@@ -30,108 +27,43 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeletonResult, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 
-	return fetchClusterImpl(stack, reduced,
-		c.Cloudbreak.Blueprints.GetBlueprintsID,
-		c.Cloudbreak.Templates.GetTemplatesID,
-		c.GetSecurityDetails,
-		c.GetCredentialById,
-		c.GetNetworkById,
-		c.GetRDSConfigById,
-		c.Cloudbreak.Recipes.GetRecipesID)
+	return fetchClusterImpl(stack)
 }
 
-func fetchClusterImpl(stack *models.StackResponse, reduced bool,
-	getBlueprint func(*blueprints.GetBlueprintsIDParams) (*blueprints.GetBlueprintsIDOK, error),
-	getTemplate func(*templates.GetTemplatesIDParams) (*templates.GetTemplatesIDOK, error),
-	getSecurityDetails func(*models.StackResponse) (map[string][]*models.SecurityRuleResponse, error),
-	getCredential func(int64) (*models.CredentialResponse, error),
-	getNetwork func(int64) *models.NetworkResponse,
-	getRdsConfig func(int64) *models.RDSConfigResponse,
-	getRecipe func(*recipes.GetRecipesIDParams) (*recipes.GetRecipesIDOK, error)) (*ClusterSkeletonResult, error) {
-
-	var wg sync.WaitGroup
-
-	wg.Add(1)
+func fetchClusterImpl(stack *models.StackResponse) (*ClusterSkeletonResult, error) {
 	var blueprint *models.BlueprintResponse = nil
-	go func() {
-		defer wg.Done()
-		if stack.Cluster != nil && stack.Cluster.BlueprintID != nil {
-			respBlueprint, _ := getBlueprint(&blueprints.GetBlueprintsIDParams{ID: *stack.Cluster.BlueprintID})
-			blueprint = respBlueprint.Payload
-		}
-	}()
+	if stack.Cluster != nil {
+		blueprint = stack.Cluster.Blueprint
+	}
 
-	var templateMap map[string]*models.TemplateResponse = nil
-	var securityMap map[string][]*models.SecurityRuleResponse = nil
-	var credential *models.CredentialResponse = nil
-	var network *models.NetworkResponse = nil
-	var rdsConfig *models.RDSConfigResponse = nil
-	var recipeMap map[string][]*models.RecipeResponse = nil
-	// some operations does not require all info
-	if !reduced {
-		templateMap = make(map[string]*models.TemplateResponse)
-		for i, v := range stack.InstanceGroups {
-			wg.Add(1)
-			go func(i int, instanceGroup *models.InstanceGroupResponse) {
-				defer wg.Done()
-				respTemplate, err := getTemplate(&templates.GetTemplatesIDParams{ID: *instanceGroup.TemplateID})
-				if err == nil {
-					templateMap[instanceGroup.Group] = respTemplate.Payload
-				} else {
-					log.Warnf("[FetchCluster] failed to get the instance group info of %s", instanceGroup.Group)
-				}
-			}(i, v)
-		}
+	var templateMap = make(map[string]*models.TemplateResponse)
+	for _, v := range stack.InstanceGroups {
+		templateMap[v.Group] = v.Template
+	}
 
-		if stack.Cluster != nil {
-			recipeMap = make(map[string][]*models.RecipeResponse)
-			for i, hg := range stack.Cluster.HostGroups {
-				wg.Add(1)
-				go func(i int, hg *models.HostGroupResponse) {
-					defer wg.Done()
-					for _, id := range hg.RecipeIds {
-						recipe, err := getRecipe(&recipes.GetRecipesIDParams{id})
-						if err == nil {
-							recipeMap[hg.Name] = append(recipeMap[hg.Name], recipe.Payload)
-						} else {
-							log.Warnf("[FetchCluster] failed to get the recipe info of id: %d", id)
-						}
-					}
-
-				}(i, hg)
+	var recipeMap = make(map[string][]*models.RecipeResponse)
+	if stack.Cluster != nil {
+		for _, hg := range stack.Cluster.HostGroups {
+			for _, recipe := range hg.Recipes {
+				recipeMap[hg.Name] = append(recipeMap[hg.Name], recipe)
 			}
-		}
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			securityMap, _ = getSecurityDetails(stack)
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			cred, _ := getCredential(*stack.CredentialID)
-			credential = cred
-		}()
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			network = getNetwork(*stack.NetworkID)
-		}()
-
-		if stack.Cluster != nil && stack.Cluster.RdsConfigID != nil {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				rdsConfig = getRdsConfig(*stack.Cluster.RdsConfigID)
-			}()
 		}
 	}
 
-	// synchronize here
-	wg.Wait()
+	var securityMap = make(map[string][]*models.SecurityRuleResponse)
+	for _, v := range stack.InstanceGroups {
+		for _, sr := range v.SecurityGroup.SecurityRules {
+			securityMap[sr.Subnet] = append(securityMap[sr.Subnet], sr)
+		}
+	}
+
+	var credential *models.CredentialResponse = stack.Credential
+	var network *models.NetworkResponse = stack.Network
+
+	var rdsConfig *models.RDSConfigResponse = nil
+	if stack.Cluster != nil {
+		rdsConfig = stack.Cluster.RdsConfig
+	}
 
 	clusterSkeleton := &ClusterSkeletonResult{}
 	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig, recipeMap)
