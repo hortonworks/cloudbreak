@@ -5,6 +5,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_RESOURCES_COLLECTED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_RESOURCES_FAILURE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleState.DOWNSCALE_COLLECT_RESOURCES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleState.DOWNSCALE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleState.DOWNSCALE_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleState.DOWNSCALE_STATE;
@@ -21,10 +24,12 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownscaleState, StackDownscaleEvent> {
     private static final List<Transition<StackDownscaleState, StackDownscaleEvent>> TRANSITIONS =
             new Transition.Builder<StackDownscaleState, StackDownscaleEvent>()
-                .defaultFailureEvent(DOWNSCALE_FAILURE_EVENT)
-                .from(INIT_STATE).to(DOWNSCALE_STATE).event(DOWNSCALE_EVENT).noFailureEvent()
-                .from(DOWNSCALE_STATE).to(DOWNSCALE_FINISHED_STATE).event(DOWNSCALE_FINISHED_EVENT).defaultFailureEvent()
-                .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE).event(DOWNSCALE_FINALIZED_EVENT).defaultFailureEvent()
+                .from(INIT_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE).event(DOWNSCALE_EVENT).noFailureEvent()
+                .from(DOWNSCALE_COLLECT_RESOURCES_STATE).to(DOWNSCALE_STATE).event(DOWNSCALE_RESOURCES_COLLECTED_EVENT)
+                    .failureEvent(DOWNSCALE_RESOURCES_FAILURE_EVENT)
+                .from(DOWNSCALE_STATE).to(DOWNSCALE_FINISHED_STATE).event(DOWNSCALE_FINISHED_EVENT)
+                    .failureEvent(DOWNSCALE_FAILURE_EVENT)
+                .from(DOWNSCALE_FINISHED_STATE).to(FINAL_STATE).event(DOWNSCALE_FINALIZED_EVENT).noFailureEvent()
                 .build();
 
     private static final FlowEdgeConfig<StackDownscaleState, StackDownscaleEvent> EDGE_CONFIG =

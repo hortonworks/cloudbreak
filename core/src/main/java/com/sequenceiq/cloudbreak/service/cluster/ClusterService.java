@@ -47,6 +47,8 @@ public interface ClusterService {
 
     Cluster updateClusterStatusByStackId(Long stackId, Status status);
 
+    Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status);
+
     Cluster updateCluster(Cluster cluster);
 
     Cluster updateClusterMetadata(Long stackId);

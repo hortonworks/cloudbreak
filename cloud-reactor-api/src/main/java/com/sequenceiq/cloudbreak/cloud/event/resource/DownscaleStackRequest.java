@@ -8,17 +8,28 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
-public class DownscaleStackRequest<T> extends CloudStackRequest<T> {
+public class DownscaleStackRequest extends CloudStackRequest<DownscaleStackResult> {
 
-    private List<CloudResource> cloudResources;
+    private final List<CloudResource> cloudResources;
 
-    private List<CloudInstance> instances;
+    private final List<CloudInstance> instances;
+
+    private final Object resourcesToScale;
 
     public DownscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> cloudResources,
             List<CloudInstance> instances) {
         super(cloudContext, cloudCredential, cloudStack);
         this.cloudResources = cloudResources;
         this.instances = instances;
+        this.resourcesToScale = null;
+    }
+
+    public DownscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> cloudResources,
+            List<CloudInstance> instances, Object resourcesToScale) {
+        super(cloudContext, cloudCredential, cloudStack);
+        this.cloudResources = cloudResources;
+        this.instances = instances;
+        this.resourcesToScale = resourcesToScale;
     }
 
     public List<CloudResource> getCloudResources() {
@@ -27,5 +38,9 @@ public class DownscaleStackRequest<T> extends CloudStackRequest<T> {
 
     public List<CloudInstance> getInstances() {
         return instances;
+    }
+
+    public Object getResourcesToScale() {
+        return resourcesToScale;
     }
 }

@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
  * <p/>
  * Compute resource can be rolled back based on the different failure policies configured. Network resource failure immediately results in a failing deployment.
  */
-public abstract class AbstractResourceConnector implements ResourceConnector {
+public abstract class AbstractResourceConnector implements ResourceConnector<List<CloudResource>> {
 
     @Inject
     private NetworkResourceService networkResourceService;
@@ -117,8 +117,14 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack,
+    public List<CloudResource> collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
             List<CloudResource> resources, List<CloudInstance> vms) {
+        return getDeleteResources(resources, vms);
+    }
+
+    @Override
+    public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
+            List<CloudResource> resourcesToRemove) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 
@@ -126,8 +132,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), resources, false);
 
         //compute
-        List<CloudResource> deleteResources = getDeleteResources(resources, vms);
-        return computeResourceService.deleteResources(context, auth, deleteResources, true);
+        return computeResourceService.deleteResources(context, auth, resourcesToRemove, true);
     }
 
     @Override

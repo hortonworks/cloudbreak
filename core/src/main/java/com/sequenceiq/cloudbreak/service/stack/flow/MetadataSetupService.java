@@ -41,7 +41,8 @@ public class MetadataSetupService {
     @Inject
     private ClusterService clusterService;
 
-    public Set<InstanceMetaData> saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
+    public int saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
+        int newInstances = 0;
         boolean ambariServerFound = false;
         Set<InstanceMetaData> updatedInstanceMetadata = new HashSet<>();
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
@@ -52,6 +53,9 @@ public class MetadataSetupService {
             Long privateId = cloudInstance.getTemplate().getPrivateId();
             String instanceId = cloudInstance.getInstanceId();
             InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
+            if (instanceMetaDataEntry.getInstanceId() == null) {
+                newInstances++;
+            }
             // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
             String group = instanceMetaDataEntry.getInstanceGroup() == null ? cloudInstance.getTemplate().getGroupName() : instanceMetaDataEntry
                     .getInstanceGroup().getGroupName();
@@ -76,7 +80,7 @@ public class MetadataSetupService {
             instanceMetaDataRepository.save(instanceMetaDataEntry);
             updatedInstanceMetadata.add(instanceMetaDataEntry);
         }
-        return updatedInstanceMetadata;
+        return newInstances;
     }
 
     private InstanceMetaData createInstanceMetadataIfAbsent(Set<InstanceMetaData> allInstanceMetadata, Long privateId, String instanceId) {

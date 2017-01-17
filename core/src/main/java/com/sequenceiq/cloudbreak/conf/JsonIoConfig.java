@@ -23,6 +23,7 @@ public class JsonIoConfig {
     public void setupJsonReader() {
         JsonReader.assignInstantiator("com.google.common.collect.RegularImmutableMap", new JsonReader.MapFactory());
         JsonReader.assignInstantiator("com.google.common.collect.EmptyImmutableBiMap", new JsonReader.MapFactory());
+        JsonReader.assignInstantiator("com.google.common.collect.SingletonImmutableBiMap", new JsonReader.MapFactory());
         JsonReader.assignInstantiator("java.util.Collections$EmptyMap", new JsonReader.MapFactory());
         JsonReader.assignInstantiator("java.util.Collections$SingletonMap", new JsonReader.MapFactory());
 

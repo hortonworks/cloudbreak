@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
-public class OpenStackResourceConnector implements ResourceConnector {
+public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackResourceConnector.class);
 
@@ -169,8 +169,14 @@ public class OpenStackResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
+            List<CloudResource> resources, List<CloudInstance> vms) {
+        return null;
+    }
+
+    @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack cloudStack, List<CloudResource> resources,
-            List<CloudInstance> vms) {
+            List<CloudInstance> vms, Object resourcesToRemove) {
         CloudStack stack = removeDeleteRequestedInstances(cloudStack);
         String stackName = utils.getStackName(authenticatedContext);
         NeutronNetworkView neutronNetworkView = new NeutronNetworkView(stack.getNetwork());

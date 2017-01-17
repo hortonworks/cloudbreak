@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -127,18 +128,21 @@ public class StackUpscaleService {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
     }
 
+    @Transactional
     public Set<String> finishExtendMetadata(Stack stack, String instanceGroupName, CollectMetadataResult payload) {
         List<CloudVmMetaDataStatus> coreInstanceMetaData = payload.getResults();
-        metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
+        int newinstances = metadataSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, CREATED);
         Set<String> upscaleCandidateAddresses = new HashSet<>();
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : coreInstanceMetaData) {
             upscaleCandidateAddresses.add(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
         }
         InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), instanceGroupName);
-        int nodeCount = instanceGroup.getNodeCount() + coreInstanceMetaData.size();
-        instanceGroup.setNodeCount(nodeCount);
-        instanceGroupRepository.save(instanceGroup);
-        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
+        int nodeCount = instanceGroup.getNodeCount() + newinstances;
+        if (newinstances != 0) {
+            instanceGroup.setNodeCount(nodeCount);
+            instanceGroupRepository.save(instanceGroup);
+        }
+        clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 messagesService.getMessage("stack.metadata.setup.billing.changed"));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_METADATA_EXTEND, AVAILABLE.name());

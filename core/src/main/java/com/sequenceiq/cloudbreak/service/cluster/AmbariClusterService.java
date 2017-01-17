@@ -522,6 +522,12 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
+    @Transactional(Transactional.TxType.NOT_SUPPORTED)
+    public Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) {
+        return updateClusterStatusByStackId(stackId, status, "");
+    }
+
+    @Override
     @Transactional(Transactional.TxType.NEVER)
     public Cluster updateCluster(Cluster cluster) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());

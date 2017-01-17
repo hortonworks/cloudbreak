@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.arm.context;
 
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 
-public class ImageCheckerContext extends ArmStatusCheckerContext {
-
-    private String groupName;
+public class ImageCheckerContext extends GroupNameContext {
 
     private String storageName;
 
@@ -13,15 +11,10 @@ public class ImageCheckerContext extends ArmStatusCheckerContext {
     private String sourceBlob;
 
     public ImageCheckerContext(ArmCredentialView armCredentialView, String groupName, String storageName, String containerName, String sourceBlob) {
-        super(armCredentialView);
-        this.groupName = groupName;
+        super(armCredentialView, groupName);
         this.storageName = storageName;
         this.containerName = containerName;
         this.sourceBlob = sourceBlob;
-    }
-
-    public String getGroupName() {
-        return groupName;
     }
 
     public String getStorageName() {
