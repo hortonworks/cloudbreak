@@ -44,11 +44,12 @@ func TestFetchClusterImplReduced(t *testing.T) {
 
 func TestFetchClusterImplNotReduced(t *testing.T) {
 	stack := &models.StackResponse{
-		CredentialID: int64(1),
+		CredentialID: &(&int64Wrapper{int64(1)}).i,
+		NetworkID:    &(&int64Wrapper{int64(1)}).i,
 		InstanceGroups: []*models.InstanceGroupResponse{
 			{
 				Group:      MASTER,
-				TemplateID: int64(1),
+				TemplateID: &(&int64Wrapper{int64(1)}).i,
 			},
 		},
 		Cluster: &models.ClusterResponse{RdsConfigID: &(&int64Wrapper{int64(1)}).i},
@@ -298,28 +299,6 @@ func TestResizeClusterImplCluster(t *testing.T) {
 	}
 }
 
-func TestGenerateCreateSharedClusterSkeletonImplNoClusterName(t *testing.T) {
-	skeleton := &ClusterSkeleton{}
-
-	getBlueprint := func(name string) *models.BlueprintResponse {
-		return &models.BlueprintResponse{
-			Name: "blueprint",
-			AmbariBlueprint: models.AmbariBlueprint{
-				Blueprint: models.Blueprint{
-					Name: &(&stringWrapper{"blueprint"}).s,
-				},
-			},
-		}
-	}
-
-	generateCreateSharedClusterSkeletonImpl(skeleton, "", "", getBlueprint, nil, nil, nil, nil)
-
-	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplNoClusterName.json")
-	if skeleton.Json() != string(expected) {
-		t.Errorf("json does not match \n%s\n==\n%s", string(expected), skeleton.Json())
-	}
-}
-
 func TestGenerateCreateSharedClusterSkeletonImplNotAvailable(t *testing.T) {
 	skeleton := &ClusterSkeleton{}
 
@@ -335,8 +314,9 @@ func TestGenerateCreateSharedClusterSkeletonImplNotAvailable(t *testing.T) {
 	}
 	getCluster := func(string) *models.StackResponse {
 		return &models.StackResponse{
-			Status:  &(&stringWrapper{"CREATED"}).s,
-			Cluster: &models.ClusterResponse{Status: &(&stringWrapper{"CREATED"}).s}}
+			Status:    &(&stringWrapper{"CREATED"}).s,
+			NetworkID: &(&int64Wrapper{int64(1)}).i,
+			Cluster:   &models.ClusterResponse{Status: &(&stringWrapper{"CREATED"}).s}}
 	}
 
 	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, nil, nil, nil)
@@ -362,8 +342,9 @@ func TestGenerateCreateSharedClusterSkeletonImplMinimalConfig(t *testing.T) {
 	}
 	getCluster := func(string) *models.StackResponse {
 		return &models.StackResponse{
-			ID:     &(&int64Wrapper{int64(1)}).i,
-			Status: &(&stringWrapper{"AVAILABLE"}).s,
+			ID:        &(&int64Wrapper{int64(1)}).i,
+			NetworkID: &(&int64Wrapper{int64(1)}).i,
+			Status:    &(&stringWrapper{"AVAILABLE"}).s,
 		}
 	}
 	getClusterConfig := func(id int64, params []*models.BlueprintParameter) []*models.BlueprintInput {
@@ -399,9 +380,10 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 	}
 	getCluster := func(string) *models.StackResponse {
 		return &models.StackResponse{
-			ID:      &(&int64Wrapper{int64(1)}).i,
-			Status:  &(&stringWrapper{"AVAILABLE"}).s,
-			Cluster: &models.ClusterResponse{RdsConfigID: &(&int64Wrapper{int64(2)}).i},
+			ID:        &(&int64Wrapper{int64(1)}).i,
+			Status:    &(&stringWrapper{"AVAILABLE"}).s,
+			NetworkID: &(&int64Wrapper{int64(1)}).i,
+			Cluster:   &models.ClusterResponse{RdsConfigID: &(&int64Wrapper{int64(2)}).i},
 		}
 	}
 	getClusterConfig := func(id int64, params []*models.BlueprintParameter) []*models.BlueprintInput {

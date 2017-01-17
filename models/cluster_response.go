@@ -6,7 +6,7 @@ package models
 import (
 	"encoding/json"
 
-	strfmt "github.com/go-swagger/go-swagger/strfmt"
+	"github.com/go-swagger/go-swagger/strfmt"
 	"github.com/go-swagger/go-swagger/swag"
 
 	"github.com/go-swagger/go-swagger/errors"
@@ -23,13 +23,13 @@ type ClusterResponse struct {
 	 */
 	AmbariServerIP *string `json:"ambariServerIp,omitempty"`
 
-	/* ambari stack details
-	 */
-	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
-
 	/* Additional information for ambari cluster
 	 */
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
+
+	/* blueprint for the cluster
+	 */
+	Blueprint *BlueprintResponse `json:"blueprint,omitempty"`
 
 	// TODO WARNING: do not replace it with string, otherwise it cannot be serialized
 	/* blueprint custom properties
@@ -76,6 +76,10 @@ type ClusterResponse struct {
 	 */
 	ID *int64 `json:"id,omitempty"`
 
+	/* LDAP config for the cluster
+	 */
+	LdapConfig *LdapConfigResponse `json:"ldapConfig,omitempty"`
+
 	/* LDAP config id for the cluster
 	 */
 	LdapConfigID *int64 `json:"ldapConfigId,omitempty"`
@@ -96,6 +100,10 @@ type ClusterResponse struct {
 	 */
 	Password *string `json:"password,omitempty"`
 
+	/* RDS configuration for the cluster
+	 */
+	RdsConfig *RDSConfigResponse `json:"rdsConfig,omitempty"`
+
 	/* RDS configuration id for the cluster
 	 */
 	RdsConfigID *int64 `json:"rdsConfigId,omitempty"`
@@ -107,6 +115,10 @@ type ClusterResponse struct {
 	/* most important services in the cluster
 	 */
 	ServiceEndPoints map[string]string `json:"serviceEndPoints,omitempty"`
+
+	/* SSSD config for the cluster
+	 */
+	SssdConfig *SssdConfigResponse `json:"sssdConfig,omitempty"`
 
 	/* SSSD config id for the cluster
 	 */

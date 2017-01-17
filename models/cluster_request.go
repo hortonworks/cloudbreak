@@ -31,16 +31,18 @@ type ClusterRequest struct {
 	 */
 	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
 
+	/* blueprint for the cluster
+	 */
+	Blueprint *BlueprintRequest `json:"blueprint,omitempty"`
+
 	// TODO WARNING: do not replace it with string, otherwise it cannot be serialized
 	/* blueprint custom properties
 	 */
 	BlueprintCustomProperties []Configurations `json:"blueprintCustomProperties,omitempty"`
 
 	/* blueprint id for the cluster
-
-	Required: true
-	*/
-	BlueprintID int64 `json:"blueprintId"`
+	 */
+	BlueprintID *int64 `json:"blueprintId,omitempty"`
 
 	/* blueprint inputs in the cluster
 
@@ -89,6 +91,10 @@ type ClusterRequest struct {
 	 */
 	Kerberos *KerberosRequest `json:"kerberos,omitempty"`
 
+	/* LDAP config for the cluster
+	 */
+	LdapConfig *LdapConfigRequest `json:"ldapConfig,omitempty"`
+
 	/* LDAP config id for the cluster
 	 */
 	LdapConfigID *int64 `json:"ldapConfigId,omitempty"`
@@ -122,6 +128,10 @@ type ClusterRequest struct {
 	 */
 	RdsConfigJSON *RDSConfig `json:"rdsConfigJson,omitempty"`
 
+	/* SSSD config for the cluster
+	 */
+	SssdConfig *SssdConfigRequest `json:"sssdConfig,omitempty"`
+
 	/* SSSD config id for the cluster
 	 */
 	SssdConfigID *int64 `json:"sssdConfigId,omitempty"`
@@ -143,11 +153,6 @@ type ClusterRequest struct {
 // Validate validates this cluster request
 func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	var res []error
-
-	if err := m.validateBlueprintID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
 
 	if err := m.validateBlueprintInputs(formats); err != nil {
 		// prop
@@ -187,15 +192,6 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *ClusterRequest) validateBlueprintID(formats strfmt.Registry) error {
-
-	if err := validate.Required("blueprintId", "body", int64(m.BlueprintID)); err != nil {
-		return err
-	}
-
 	return nil
 }
 

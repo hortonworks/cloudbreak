@@ -33,15 +33,21 @@ type InstanceGroups struct {
 	*/
 	NodeCount int32 `json:"nodeCount"`
 
+	/* instancegroup related securitygroup
+	 */
+	SecurityGroup *SecurityGroupRequest `json:"securityGroup,omitempty"`
+
 	/* security group resource id for the instance group
 	 */
 	SecurityGroupID *int64 `json:"securityGroupId,omitempty"`
 
-	/* referenced template id
+	/* instancegroup related template
+	 */
+	Template *TemplateRequest `json:"template,omitempty"`
 
-	Required: true
-	*/
-	TemplateID int64 `json:"templateId"`
+	/* referenced template id
+	 */
+	TemplateID *int64 `json:"templateId,omitempty"`
 
 	/* type of the instance group
 	 */
@@ -58,11 +64,6 @@ func (m *InstanceGroups) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateNodeCount(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTemplateID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -98,15 +99,6 @@ func (m *InstanceGroups) validateNodeCount(formats strfmt.Registry) error {
 	}
 
 	if err := validate.MaximumInt("nodeCount", "body", int64(m.NodeCount), 100000, false); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *InstanceGroups) validateTemplateID(formats strfmt.Registry) error {
-
-	if err := validate.Required("templateId", "body", int64(m.TemplateID)); err != nil {
 		return err
 	}
 

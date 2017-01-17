@@ -38,6 +38,12 @@ type HostGroupRequest struct {
 	*/
 	RecipeIds []int64 `json:"recipeIds,omitempty"`
 
+	/* referenced recipes
+
+	Unique: true
+	*/
+	Recipes []*RecipeRequest `json:"recipes,omitempty"`
+
 	/* recovery mode of the hostgroup's nodes
 	 */
 	RecoveryMode *string `json:"recoveryMode,omitempty"`
@@ -58,6 +64,11 @@ func (m *HostGroupRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRecipeIds(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRecipes(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -108,6 +119,30 @@ func (m *HostGroupRequest) validateRecipeIds(formats strfmt.Registry) error {
 
 		if err := validate.Required("recipeIds"+"."+strconv.Itoa(i), "body", int64(m.RecipeIds[i])); err != nil {
 			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (m *HostGroupRequest) validateRecipes(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Recipes) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("recipes", "body", m.Recipes); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Recipes); i++ {
+
+		if m.Recipes[i] != nil {
+
+			if err := m.Recipes[i].Validate(formats); err != nil {
+				return err
+			}
 		}
 
 	}

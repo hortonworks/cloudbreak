@@ -33,11 +33,13 @@ type StackRequest struct {
 	*/
 	CloudPlatform *string `json:"cloudPlatform,omitempty"`
 
-	/* credential resource id for the stack
+	/* stack related credential
+	 */
+	Credential *CredentialRequest `json:"credential,omitempty"`
 
-	Required: true
-	*/
-	CredentialID int64 `json:"credentialId"`
+	/* credential resource id for the stack
+	 */
+	CredentialID *int64 `json:"credentialId,omitempty"`
 
 	/* failure policy in case of failures
 	 */
@@ -66,11 +68,13 @@ type StackRequest struct {
 	*/
 	Name string `json:"name"`
 
-	/* network resource id for the stack
+	/* stack related network
+	 */
+	Network *NetworkRequest `json:"network,omitempty"`
 
-	Required: true
-	*/
-	NetworkID int64 `json:"networkId"`
+	/* network resource id for the stack
+	 */
+	NetworkID *int64 `json:"networkId,omitempty"`
 
 	/* action on failure
 	 */
@@ -105,22 +109,12 @@ type StackRequest struct {
 func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCredentialID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateInstanceGroups(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateNetworkID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -143,15 +137,6 @@ func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *StackRequest) validateCredentialID(formats strfmt.Registry) error {
-
-	if err := validate.Required("credentialId", "body", int64(m.CredentialID)); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -190,15 +175,6 @@ func (m *StackRequest) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("name", "body", string(m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *StackRequest) validateNetworkID(formats strfmt.Registry) error {
-
-	if err := validate.Required("networkId", "body", int64(m.NetworkID)); err != nil {
 		return err
 	}
 

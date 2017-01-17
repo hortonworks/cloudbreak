@@ -16,11 +16,13 @@ swagger:model StackValidationRequest
 */
 type StackValidationRequest struct {
 
-	/* blueprint id for the cluster
+	/* blueprint for the cluster
+	 */
+	Blueprint *BlueprintRequest `json:"blueprint,omitempty"`
 
-	Required: true
-	*/
-	BlueprintID int64 `json:"blueprintId"`
+	/* blueprint id for the cluster
+	 */
+	BlueprintID *int64 `json:"blueprintId,omitempty"`
 
 	/* file system
 	 */
@@ -40,11 +42,13 @@ type StackValidationRequest struct {
 	*/
 	InstanceGroups []*InstanceGroups `json:"instanceGroups"`
 
-	/* network resource id for the stack
+	/* stack related network
+	 */
+	Network *NetworkRequest `json:"network,omitempty"`
 
-	Required: true
-	*/
-	NetworkID int64 `json:"networkId"`
+	/* network resource id for the stack
+	 */
+	NetworkID *int64 `json:"networkId,omitempty"`
 
 	/* type of cloud provider
 
@@ -57,22 +61,12 @@ type StackValidationRequest struct {
 func (m *StackValidationRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateBlueprintID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateHostGroups(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateNetworkID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -85,15 +79,6 @@ func (m *StackValidationRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *StackValidationRequest) validateBlueprintID(formats strfmt.Registry) error {
-
-	if err := validate.Required("blueprintId", "body", int64(m.BlueprintID)); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -140,15 +125,6 @@ func (m *StackValidationRequest) validateInstanceGroups(formats strfmt.Registry)
 			}
 		}
 
-	}
-
-	return nil
-}
-
-func (m *StackValidationRequest) validateNetworkID(formats strfmt.Registry) error {
-
-	if err := validate.Required("networkId", "body", int64(m.NetworkID)); err != nil {
-		return err
 	}
 
 	return nil

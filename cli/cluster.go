@@ -73,7 +73,7 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 			wg.Add(1)
 			go func(i int, instanceGroup *models.InstanceGroupResponse) {
 				defer wg.Done()
-				respTemplate, err := getTemplate(&templates.GetTemplatesIDParams{ID: instanceGroup.TemplateID})
+				respTemplate, err := getTemplate(&templates.GetTemplatesIDParams{ID: *instanceGroup.TemplateID})
 				if err == nil {
 					templateMap[instanceGroup.Group] = respTemplate.Payload
 				} else {
@@ -110,14 +110,14 @@ func fetchClusterImpl(stack *models.StackResponse, reduced bool,
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			cred, _ := getCredential(stack.CredentialID)
+			cred, _ := getCredential(*stack.CredentialID)
 			credential = cred
 		}()
 
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			network = getNetwork(stack.NetworkID)
+			network = getNetwork(*stack.NetworkID)
 		}()
 
 		if stack.Cluster != nil && stack.Cluster.RdsConfigID != nil {
@@ -265,24 +265,28 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		secGroupId := <-secGroupId
 		platform := "AWS"
 
+		mTemplateId := <-templateIds
+		wTemplateId := <-templateIds
+		cTemplateId := <-templateIds
+
 		instanceGroups := []*models.InstanceGroups{
 			{
 				Group:           MASTER,
-				TemplateID:      <-templateIds,
+				TemplateID:      &mTemplateId,
 				NodeCount:       1,
 				Type:            &masterType,
 				SecurityGroupID: &secGroupId,
 			},
 			{
 				Group:           WORKER,
-				TemplateID:      <-templateIds,
+				TemplateID:      &wTemplateId,
 				NodeCount:       skeleton.Worker.InstanceCount,
 				Type:            &workerType,
 				SecurityGroupID: &secGroupId,
 			},
 			{
 				Group:           COMPUTE,
-				TemplateID:      <-templateIds,
+				TemplateID:      &cTemplateId,
 				NodeCount:       skeleton.Compute.InstanceCount,
 				Type:            &computeType,
 				SecurityGroupID: &secGroupId,
@@ -311,16 +315,19 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		log.Infof("[CreateStack] selected ambariVersion %s", ambariVersion)
 
+		credId := <-credentialId
+		netId := <-networkId
+
 		stackReq := models.StackRequest{
 			Name:            skeleton.ClusterName,
-			CredentialID:    <-credentialId,
+			CredentialID:    &credId,
 			FailurePolicy:   &models.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
 			OnFailureAction: &failureAction,
 			InstanceGroups:  instanceGroups,
 			Parameters:      stackParameters,
 			CloudPlatform:   &platform,
 			PlatformVariant: &platform,
-			NetworkID:       <-networkId,
+			NetworkID:       &netId,
 			AmbariVersion:   &ambariVersion,
 			HdpVersion:      &skeleton.HDPVersion,
 			Orchestrator:    &orchestrator,
@@ -414,9 +421,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			inputs = append(inputs, &models.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
 		}
 
+		bpId := <-blueprintId
+
 		clusterReq := models.ClusterRequest{
 			Name:                      skeleton.ClusterName,
-			BlueprintID:               <-blueprintId,
+			BlueprintID:               &bpId,
 			HostGroups:                hostGroups,
 			UserName:                  skeleton.ClusterAndAmbariUser,
 			Password:                  skeleton.ClusterAndAmbariPassword,
@@ -570,7 +579,7 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			network := getNetwork(stack.NetworkID)
+			network := getNetwork(*stack.NetworkID)
 			if network.Parameters["internetGatewayId"] == nil {
 				skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
 			}
