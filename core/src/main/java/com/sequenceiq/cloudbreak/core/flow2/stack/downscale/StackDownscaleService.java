@@ -54,7 +54,7 @@ public class StackDownscaleService {
     public void finishStackDownscale(StackScalingFlowContext context, String instanceGroupName, Set<String> instanceIds) {
         Stack stack = context.getStack();
         InstanceGroup g = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
-        stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
+        int nodeCount = stackScalingService.updateRemovedResourcesState(stack, instanceIds, g);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_COMPLETED,
                 "Downscale of the cluster infrastructure finished successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DOWNSCALE_SUCCESS, AVAILABLE.name());
@@ -64,7 +64,7 @@ public class StackDownscaleService {
                     stack.getAmbariIp(), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
-        usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, g.getNodeCount());
+        usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
     }
 
     public void handleStackDownscaleError(Exception errorDetails) {

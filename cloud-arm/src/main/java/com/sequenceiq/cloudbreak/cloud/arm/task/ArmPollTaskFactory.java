@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.arm.ArmClient;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ArmInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.NetworkInterfaceCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.PublicIpCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ResourceGroupCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.StorageCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
@@ -23,6 +24,11 @@ public class ArmPollTaskFactory {
     public PollTask<Boolean> newNetworkInterfaceDeleteStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient,
             NetworkInterfaceCheckerContext networkInterfaceCheckerContext) {
         return createPollTask(ArmNetworkInterfaceDeleteStatusCheckerTask.NAME, authenticatedContext, armClient, networkInterfaceCheckerContext);
+    }
+
+    public PollTask<Boolean> newPublicIpDeleteStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient,
+            PublicIpCheckerContext publicIpCheckerContext) {
+        return createPollTask(ArmPublicIpDeleteStatusCheckerTask.NAME, authenticatedContext, armClient, publicIpCheckerContext);
     }
 
     public PollTask<Boolean> newResourceGroupDeleteStatusCheckerTask(AuthenticatedContext authenticatedContext, ArmClient armClient, ResourceGroupCheckerContext

@@ -1,26 +1,48 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.DownscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
+import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
 public class RemoveInstanceHandler implements CloudPlatformEventHandler<RemoveInstanceRequest> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(RemoveInstanceHandler.class);
+
+    @Inject
+    private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+
+    @Inject
+    private PollTaskFactory statusCheckFactory;
+
+    @Inject
+    private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    @Qualifier("DownscaleStackHandler")
-    private DownscaleStackExecuter downscaleStackExecuter;
 
     @Override
     public Class<RemoveInstanceRequest> type() {
@@ -32,9 +54,21 @@ public class RemoveInstanceHandler implements CloudPlatformEventHandler<RemoveIn
         RemoveInstanceRequest request = removeInstanceRequestEvent.getData();
         RemoveInstanceResult result;
         try {
-            DownscaleStackResult downScaleResult = downscaleStackExecuter.execute(request);
-            result = new RemoveInstanceResult(downScaleResult, request);
+            CloudContext cloudContext = request.getCloudContext();
+            CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
+            List<CloudResourceStatus> resourceStatus = connector.resources().downscale(ac, request.getCloudStack(), request.getCloudResources(),
+                    request.getInstances(), Collections.emptyMap());
+            List<CloudResource> resources = ResourceLists.transform(resourceStatus);
+            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
+            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
+            if (!task.completed(statePollerResult)) {
+                statePollerResult = syncPollingScheduler.schedule(task);
+            }
+            LOGGER.info("Instance remove successfully finished for {}", cloudContext);
+            result = new RemoveInstanceResult(new DownscaleStackResult(request, ResourceLists.transform(statePollerResult.getResults())), request);
         } catch (Exception e) {
+            LOGGER.error("Failed to handle RemoveInstanceRequest.", e);
             result = new RemoveInstanceResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event(removeInstanceRequestEvent.getHeaders(), result));

@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cloud.event.resource;
 
-import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
+import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+
 public class RemoveInstanceResult extends CloudPlatformResult<RemoveInstanceRequest> implements InstancePayload {
 
-    public RemoveInstanceResult(DownscaleStackResult result, RemoveInstanceRequest<?> request) {
+    public RemoveInstanceResult(DownscaleStackResult result, RemoveInstanceRequest request) {
         init(result.getStatus(), result.getStatusReason(), result.getErrorDetails(), request);
     }
 

@@ -101,7 +101,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import freemarker.template.Configuration;
 
 @Service
-public class AwsResourceConnector implements ResourceConnector {
+public class AwsResourceConnector implements ResourceConnector<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
 
     private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
@@ -607,28 +607,36 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
-        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(auth.getCloudCredential()),
-                auth.getCloudContext().getLocation().getRegion().value());
-        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
-                auth.getCloudContext().getLocation().getRegion().value());
+    public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
+            List<CloudResource> resources, List<CloudInstance> vms) {
+        return null;
+    }
 
-        String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
-                auth.getCloudContext().getLocation().getRegion().value());
+    @Override
+    public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
+            Object resourcesToRemove) {
         List<String> instanceIds = new ArrayList<>();
         for (CloudInstance vm : vms) {
             instanceIds.add(vm.getInstanceId());
         }
+        String asGroupName = cfStackUtil.getAutoscalingGroupName(auth, vms.get(0).getTemplate().getGroupName(),
+                auth.getCloudContext().getLocation().getRegion().value());
         DetachInstancesRequest detachInstancesRequest = new DetachInstancesRequest().withAutoScalingGroupName(asGroupName).withInstanceIds(instanceIds)
                 .withShouldDecrementDesiredCapacity(true);
+        AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(new AwsCredentialView(auth.getCloudCredential()),
+                auth.getCloudContext().getLocation().getRegion().value());
         try {
             amazonASClient.detachInstances(detachInstancesRequest);
         } catch (AmazonServiceException e) {
-            if (instanceIds.size() != 1 || !"ValidationError".equals(e.getErrorCode()) || !e.getErrorMessage().contains("not part of Auto Scaling")) {
+            if (!"ValidationError".equals(e.getErrorCode())
+                    || !e.getErrorMessage().contains("not part of Auto Scaling")
+                    || instanceIds.stream().anyMatch(id -> !e.getErrorMessage().contains(id))) {
                 throw e;
             }
             LOGGER.info(e.getErrorMessage());
         }
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(auth.getCloudCredential()),
+                auth.getCloudContext().getLocation().getRegion().value());
         try {
             amazonEC2Client.terminateInstances(new TerminateInstancesRequest().withInstanceIds(instanceIds));
         } catch (AmazonServiceException e) {

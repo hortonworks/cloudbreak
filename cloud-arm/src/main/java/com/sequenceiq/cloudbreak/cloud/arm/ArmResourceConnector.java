@@ -2,10 +2,18 @@ package com.sequenceiq.cloudbreak.cloud.arm;
 
 import static com.sequenceiq.cloudbreak.cloud.arm.ArmUtils.NOT_FOUND;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -20,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.arm.context.NetworkInterfaceCheckerContext;
+import com.sequenceiq.cloudbreak.cloud.arm.context.PublicIpCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ResourceGroupCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.context.VirtualMachineCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
@@ -44,8 +53,22 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import groovyx.net.http.HttpResponseException;
 
 @Service
-public class ArmResourceConnector implements ResourceConnector {
+public class ArmResourceConnector implements ResourceConnector<Map<String, Map<String, Object>>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ArmResourceConnector.class);
+
+    private static final Double PUBLIC_ADDRESS_BATCH_RATIO = 100D / 30;
+
+    private static final Collection<String> PUBLIC_ADDRESSES_PATH = Arrays.asList("properties", "ipConfigurations");
+
+    private static final Collection<String> PUBLIC_ADDRESS_PATH = Arrays.asList("properties", "publicIPAddress", "id");
+
+    private static final String NETWORK_INTERFACES_NAMES = "NETWORK_INTERFACES_NAMES";
+
+    private static final String STORAGE_PROFILE_DISK_NAMES = "STORAGE_PROFILE_DISK_NAMES";
+
+    private static final String ATTACHED_DISK_STORAGE_NAME = "ATTACHED_DISK_STORAGE_NAME";
+
+    private static final String PUBLIC_ADDRESS_NAME = "PUBLIC_ADDRESS_NAME";
 
     @Value("${cb.azure.host.name.prefix.length}")
     private int stackNamePrefixLength;
@@ -206,66 +229,116 @@ public class ArmResourceConnector implements ResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> downscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms) {
+    public Map<String, Map<String, Object>> collectResourcesToRemove(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
+            List<CloudInstance> vms) {
         AzureRMClient client = armClient.getClient(ac.getCloudCredential());
         ArmCredentialView armCredentialView = new ArmCredentialView(ac.getCloudCredential());
         String stackName = armUtils.getStackName(ac.getCloudContext());
-
-        String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
-        String diskContainer = armStorage.getDiskContainerName(ac.getCloudContext());
-
-        for (CloudInstance instance : vms) {
-            List<String> networkInterfacesNames = new ArrayList<>();
-            List<String> storageProfileDiskNames = new ArrayList<>();
-            String instanceId = instance.getInstanceId();
-            Long privateId = instance.getTemplate().getPrivateId();
-            ArmDiskType armDiskType = ArmDiskType.getByValue(instance.getTemplate().getVolumeType());
-            String attachedDiskStorageName = armStorage.getAttachedDiskStorageName(armStorage.getArmAttachedStorageOption(stack.getParameters()),
-                    armCredentialView, privateId, ac.getCloudContext(), armDiskType);
+        List<Map> runningNetworkInterfaces = Collections.emptyList();
+        double nodeNumber = stack.getGroups().stream().mapToInt(g -> g.getInstances().size()).sum();
+        if (nodeNumber / vms.size() < PUBLIC_ADDRESS_BATCH_RATIO) {
             try {
-                Map<String, Object> virtualMachine = client.getVirtualMachine(stackName, instanceId);
-
-                Map properties = (Map) virtualMachine.get("properties");
-
-                Map networkProfile = (Map) properties.get("networkProfile");
-
-                List<Map> networkInterfaces = (List<Map>) networkProfile.get("networkInterfaces");
-                for (Map networkInterface : networkInterfaces) {
-                    networkInterfacesNames.add(getNameFromConnectionString(networkInterface.get("id").toString()));
-                }
-
-                Map storageProfile = (Map) properties.get("storageProfile");
-
-                Map osDisk = (Map) storageProfile.get("osDisk");
-                List<Map> dataDisks = (List<Map>) storageProfile.get("dataDisks");
-
-                for (Map datadisk : dataDisks) {
-                    Map vhds = (Map) datadisk.get("vhd");
-                    storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
-                }
-                Map vhds = (Map) osDisk.get("vhd");
-                storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
-            } catch (HttpResponseException e) {
-                if (e.getStatusCode() != NOT_FOUND) {
-                    throw new CloudConnectorException(e.getResponse().getData().toString(), e);
-                }
+                runningNetworkInterfaces = (List<Map>) client.getNetworkInterfaces(stackName);
             } catch (Exception e) {
                 throw new CloudConnectorException(String.format("Could not downscale: %s", stackName), e);
             }
+        }
+        Map<String, Map<String, Object>> resp = new HashMap<>();
+        for (CloudInstance instance : vms) {
+            resp.put(instance.getInstanceId(), collectInstanceResources(ac, stack, client, armCredentialView, stackName, runningNetworkInterfaces, instance));
+        }
+        return resp;
+    }
+
+    private Map<String, Object> collectInstanceResources(AuthenticatedContext ac, CloudStack stack, AzureRMClient client, ArmCredentialView armCredentialView,
+            String stackName, List<Map> runningNetworkInterfaces, CloudInstance instance) {
+        String instanceId = instance.getInstanceId();
+        Long privateId = instance.getTemplate().getPrivateId();
+        ArmDiskType armDiskType = ArmDiskType.getByValue(instance.getTemplate().getVolumeType());
+        String attachedDiskStorageName = armStorage.getAttachedDiskStorageName(armStorage.getArmAttachedStorageOption(stack.getParameters()),
+                armCredentialView, privateId, ac.getCloudContext(), armDiskType);
+        Map<String, Object> resourcesToScale = new HashMap<>();
+        resourcesToScale.put(ATTACHED_DISK_STORAGE_NAME, attachedDiskStorageName);
+        try {
+            Map<String, Object> virtualMachine = client.getVirtualMachine(stackName, instanceId);
+            Map properties = (Map) virtualMachine.get("properties");
+            Map networkProfile = (Map) properties.get("networkProfile");
+            List<String> networkInterfacesNames = new ArrayList<>();
+            List<String> publicIpAddressNames = new ArrayList<>();
+            List<Map> networkInterfaces = (List<Map>) networkProfile.get("networkInterfaces");
+            for (Map networkInterface : networkInterfaces) {
+                String interfaceId = networkInterface.get("id").toString();
+                String interfaceName = getNameFromConnectionString(interfaceId);
+                networkInterfacesNames.add(interfaceName);
+                Map interfaceDetails = runningNetworkInterfaces.isEmpty()
+                        ? (Map) client.getNetworkInterface(stackName, interfaceName)
+                        : runningNetworkInterfaces.stream().filter(i -> interfaceId.equals(i.get("id"))).findFirst().get();
+                Set<String> ipNames = (Set<String>) Optional.ofNullable(getValueFromMap(interfaceDetails, new ArrayDeque<>(PUBLIC_ADDRESSES_PATH), List.class))
+                        .orElse(Collections.emptyList()).stream()
+                        .map(c -> getValueFromMap((Map) c, new ArrayDeque<>(PUBLIC_ADDRESS_PATH), String.class))
+                        .filter(o -> o != null)
+                        .map(i -> getNameFromConnectionString((String) i))
+                        .collect(Collectors.toSet());
+                publicIpAddressNames.addAll(ipNames);
+            }
+            resourcesToScale.put(NETWORK_INTERFACES_NAMES, networkInterfacesNames);
+            resourcesToScale.put(PUBLIC_ADDRESS_NAME, publicIpAddressNames);
+
+            Map storageProfile = (Map) properties.get("storageProfile");
+            List<Map> dataDisks = (List<Map>) storageProfile.get("dataDisks");
+            List<String> storageProfileDiskNames = new ArrayList<>();
+            for (Map datadisk : dataDisks) {
+                Map vhds = (Map) datadisk.get("vhd");
+                storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
+            }
+            Map osDisk = (Map) storageProfile.get("osDisk");
+            Map vhds = (Map) osDisk.get("vhd");
+            storageProfileDiskNames.add(getNameFromConnectionString(vhds.get("uri").toString()));
+            resourcesToScale.put(STORAGE_PROFILE_DISK_NAMES, storageProfileDiskNames);
+        } catch (HttpResponseException e) {
+            if (e.getStatusCode() != NOT_FOUND) {
+                throw new CloudConnectorException(e.getResponse().getData().toString(), e);
+            }
+        } catch (Exception e) {
+            throw new CloudConnectorException(String.format("Could not downscale: %s", stackName), e);
+        }
+        return resourcesToScale;
+    }
+
+    private <R> R getValueFromMap(Map<?, ?> source, Deque<String> keys, Class<R> type) {
+        String key = keys.pop();
+        Object value = source.get(key);
+        if (!keys.isEmpty() && value instanceof Map) {
+            value = getValueFromMap((Map<?, ?>) value, keys, type);
+        }
+        return value == null || !type.isInstance(value) ? null : type.cast(value);
+    }
+
+    @Override
+    public List<CloudResourceStatus> downscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
+            Map<String, Map<String, Object>> resourcesToRemove) {
+        AzureRMClient client = armClient.getClient(ac.getCloudCredential());
+        String stackName = armUtils.getStackName(ac.getCloudContext());
+        String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
+        String diskContainer = armStorage.getDiskContainerName(ac.getCloudContext());
+        for (CloudInstance instance : vms) {
+            String instanceId = instance.getInstanceId();
+            Map<String, Object> instanceResources = resourcesToRemove.get(instanceId);
             try {
                 deallocateVirtualMachine(ac, client, stackName, instanceId);
                 deleteVirtualMachine(ac, client, stackName, instanceId);
-                deleteNetworkInterfaces(ac, client, stackName, networkInterfacesNames);
-                deleteDisk(storageProfileDiskNames, client, resourceGroupName, attachedDiskStorageName, diskContainer);
+                deleteNetworkInterfaces(ac, client, stackName, (List<String>) instanceResources.get(NETWORK_INTERFACES_NAMES));
+                deletePublicIps(ac, client, stackName, (List<String>) instanceResources.get(PUBLIC_ADDRESS_NAME));
+                deleteDisk((List<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES), client, resourceGroupName,
+                        (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
                 if (armStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
-                    armStorage.deleteStorage(ac, client, attachedDiskStorageName, resourceGroupName);
+                    armStorage.deleteStorage(ac, client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                 }
             } catch (CloudConnectorException e) {
                 throw e;
             } catch (Exception e) {
                 throw new CloudConnectorException(String.format("Failed to cleanup resources after downscale: %s", stackName), e);
             }
-
         }
         return check(ac, resources);
     }
@@ -320,15 +393,27 @@ public class ArmResourceConnector implements ResourceConnector {
                 PollTask<Boolean> task = armPollTaskFactory.newNetworkInterfaceDeleteStatusCheckerTask(authenticatedContext, armClient,
                         new NetworkInterfaceCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
                                 stackName, networkInterfacesName));
-
                 syncPollingScheduler.schedule(task);
-
             } catch (HttpResponseException e) {
                 if (e.getStatusCode() != NOT_FOUND) {
                     throw new CloudConnectorException(e.getResponse().getData().toString(), e);
                 }
             } catch (Exception e) {
                 throw new CloudConnectorException(String.format("Could not delete network interface: %s", networkInterfacesName), e);
+            }
+        }
+    }
+
+    private void deletePublicIps(AuthenticatedContext authenticatedContext, AzureRMClient client, String stackName, List<String> publicIpNames) {
+        for (String publicIpName : publicIpNames) {
+            try {
+                client.deletePublicIpAddress(stackName, publicIpName);
+                PollTask<Boolean> task = armPollTaskFactory.newPublicIpDeleteStatusCheckerTask(authenticatedContext, armClient,
+                        new PublicIpCheckerContext(new ArmCredentialView(authenticatedContext.getCloudCredential()),
+                                stackName, publicIpName));
+                syncPollingScheduler.schedule(task);
+            } catch (Exception e) {
+                throw new CloudConnectorException(String.format("Could not delete public IP address: %s", publicIpName), e);
             }
         }
     }

@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
-public class MockResourceConnector implements ResourceConnector {
+public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Value("${mock.spi.endpoint:https://localhost:9443}")
     private String mockServerAddress;
@@ -95,8 +95,14 @@ public class MockResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public Object collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
+            List<CloudResource> resources, List<CloudInstance> vms) {
+        return null;
+    }
+
+    @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-            List<CloudInstance> vms) {
+            List<CloudInstance> vms, Object resourcesToRemove) {
         try {
             Unirest.post(mockServerAddress + "/spi/terminate_instances").body(vms).asString();
         } catch (UnirestException e) {

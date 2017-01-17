@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-@Component("DownscaleStackHandler")
-public class DownscaleStackHandler implements DownscaleStackExecuter, CloudPlatformEventHandler<DownscaleStackRequest> {
+@Component
+public class DownscaleStackHandler implements CloudPlatformEventHandler<DownscaleStackRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(DownscaleStackHandler.class);
 
     @Inject
@@ -51,20 +51,13 @@ public class DownscaleStackHandler implements DownscaleStackExecuter, CloudPlatf
     public void accept(Event<DownscaleStackRequest> downscaleStackRequestEvent) {
         LOGGER.info("Received event: {}", downscaleStackRequestEvent);
         DownscaleStackRequest request = downscaleStackRequestEvent.getData();
-        DownscaleStackResult result = execute(request);
-        LOGGER.info("DownscaleStackRequest finished");
-        eventBus.notify(result.selector(), new Event(downscaleStackRequestEvent.getHeaders(), result));
-    }
-
-    @Override
-    public DownscaleStackResult execute(DownscaleStackRequest request) {
         DownscaleStackResult result;
         try {
             CloudContext cloudContext = request.getCloudContext();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             List<CloudResourceStatus> resourceStatus = connector.resources().downscale(ac, request.getCloudStack(), request.getCloudResources(),
-                    request.getInstances());
+                    request.getInstances(), request.getResourcesToScale());
             List<CloudResource> resources = ResourceLists.transform(resourceStatus);
             PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
             ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
@@ -78,6 +71,6 @@ public class DownscaleStackHandler implements DownscaleStackExecuter, CloudPlatf
             result = new DownscaleStackResult(e.getMessage(), e, request);
         }
         request.getResult().onNext(result);
-        return result;
+        eventBus.notify(result.selector(), new Event(downscaleStackRequestEvent.getHeaders(), result));
     }
 }

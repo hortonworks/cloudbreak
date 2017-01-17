@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +14,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -112,28 +116,35 @@ public class StackScalingService {
         }
     }
 
-    public void updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
-        int nodeCount = instanceGroup.getNodeCount() - instanceIds.size();
-        instanceGroup.setNodeCount(nodeCount);
-        instanceGroupRepository.save(instanceGroup);
-
+    @Transactional
+    public int updateRemovedResourcesState(Stack stack, Set<String> instanceIds, InstanceGroup instanceGroup) {
+        int nodesRemoved = 0;
         for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
             if (instanceIds.contains(instanceMetaData.getInstanceId())) {
                 long timeInMillis = Calendar.getInstance().getTimeInMillis();
                 instanceMetaData.setTerminationDate(timeInMillis);
                 instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
                 instanceMetaDataRepository.save(instanceMetaData);
+                nodesRemoved++;
             }
+        }
+        int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
+        if (nodesRemoved != 0) {
+            instanceGroup.setNodeCount(nodeCount);
+            instanceGroupRepository.save(instanceGroup);
         }
         LOGGER.info("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
         eventService.fireCloudbreakEvent(stack.getId(), BillingStatus.BILLING_CHANGED.name(),
                 cloudbreakMessagesService.getMessage(Msg.STACK_SCALING_BILLING_CHANGED.code()));
+        return nodeCount;
     }
 
     public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         Map<String, String> instanceIds = new HashMap<>();
         int i = 0;
-        for (InstanceMetaData metaData : stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData()) {
+        List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData());
+        Collections.sort(instanceMetaDatas, Comparator.comparing(InstanceMetaData::getStartDate));
+        for (InstanceMetaData metaData : instanceMetaDatas) {
             if (!metaData.getAmbariServer()
                     && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated() || metaData.isFailed())) {
                 instanceIds.put(metaData.getInstanceId(), metaData.getDiscoveryFQDN());
