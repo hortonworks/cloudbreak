@@ -43,7 +43,7 @@ public class IdentityClient {
 
     public AccessToken getToken(String user, String password) {
         MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
-        formData.add("credentials", String.format("{\"username\":\"%s\",\"password\":\"%s\"}", user, password));
+        formData.add("credentials", String.format("{\"username\":\"%s\",\"password\":\"%s\"}", user, password.replace("\\", "\\\\").replace("\"", "\\\"")));
         try {
             Response resp = authorizeWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE).post(Entity.form(formData));
             String token;
