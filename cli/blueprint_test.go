@@ -56,7 +56,8 @@ func TestCreateBlueprintImplDefaultBlueprint(t *testing.T) {
 
 	id := int64(123)
 	blueprint := models.BlueprintResponse{
-		ID: &id,
+		ID:              &id,
+		AmbariBlueprint: models.AmbariBlueprint{},
 	}
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
 		return nil, nil
@@ -79,7 +80,8 @@ func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
 	blueprintId := make(chan int64, 1)
 	id := int64(123)
 	blueprint := models.BlueprintResponse{
-		ID: &id,
+		ID:              &id,
+		AmbariBlueprint: models.AmbariBlueprint{},
 	}
 	expected := int64(321)
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {

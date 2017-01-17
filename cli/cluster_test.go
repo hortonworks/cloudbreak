@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
-	"sync"
 	"testing"
 
 	"github.com/hortonworks/hdc-cli/client/blueprints"
@@ -180,25 +179,15 @@ func TestCreateClusterImplExistingRds(t *testing.T) {
 
 func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStack *models.StackRequest, actualCluster *models.ClusterRequest) {
 	getBlueprint := func(name string) *models.BlueprintResponse {
-		return nil
+		return &models.BlueprintResponse{
+			AmbariBlueprint: models.AmbariBlueprint{},
+		}
 	}
-	createTemplate := func(s ClusterSkeleton, c chan int64, wg *sync.WaitGroup) {
-		defer wg.Done()
-		c <- int64(1)
-		c <- int64(2)
-		c <- int64(3)
+	getCredential := func(name string) models.CredentialResponse {
+		return models.CredentialResponse{}
 	}
-	createBlueprint := func(s ClusterSkeleton, bp *models.BlueprintResponse, c chan int64, wg *sync.WaitGroup) {
-		defer wg.Done()
-		c <- int64(3)
-	}
-	createFuncs := []func(skeleton ClusterSkeleton, c chan int64, wg *sync.WaitGroup){}
-	for i := 0; i < 3; i++ {
-		x := i
-		createFuncs = append(createFuncs, func(s ClusterSkeleton, c chan int64, wg *sync.WaitGroup) {
-			defer wg.Done()
-			c <- int64(x + 10)
-		})
+	getNetwork := func(name string) models.NetworkResponse {
+		return models.NetworkResponse{}
 	}
 	id := int64(1)
 	getRdsConfig := func(string) models.RDSConfigResponse {
@@ -215,16 +204,8 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		return &cluster.PostStacksIDClusterOK{Payload: &models.ClusterResponse{ID: &clusterId}}, nil
 	}
 
-	createRecipes := func(skeleton ClusterSkeleton, master chan int64, worker chan int64, compute chan int64, wg *sync.WaitGroup) {
-		defer wg.Done()
-		close(master)
-		close(worker)
-		close(compute)
-	}
-
 	actualId = createClusterImpl(*skeleton, getBlueprint,
-		createFuncs[0], createTemplate, createFuncs[1], createFuncs[2], createBlueprint,
-		postStack, getRdsConfig, postCluster, createRecipes)
+		getCredential, getNetwork, postStack, getRdsConfig, postCluster)
 
 	return
 }

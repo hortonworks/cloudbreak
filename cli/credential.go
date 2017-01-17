@@ -87,6 +87,29 @@ func createCredentialImpl(name string, defaultCredential models.CredentialRespon
 	postAccountCredential func(*credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error),
 	postUserCredential func(*credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error)) int64 {
 
+	credReq := createCredentialRequest(name, defaultCredential, existingKey)
+
+	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
+	var id int64
+	if public {
+		resp, err := postAccountCredential(&credentials.PostCredentialsAccountParams{Body: credReq})
+		if err != nil {
+			logErrorAndExit(createCredentialImpl, err.Error())
+		}
+		id = *resp.Payload.ID
+	} else {
+		resp, err := postUserCredential(&credentials.PostCredentialsUserParams{Body: credReq})
+		if err != nil {
+			logErrorAndExit(createCredentialImpl, err.Error())
+		}
+		id = *resp.Payload.ID
+	}
+
+	log.Infof("[CreateCredential] credential created, id: %d", id)
+	return id
+}
+
+func createCredentialRequest(name string, defaultCredential models.CredentialResponse, existingKey string) *models.CredentialRequest {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = defaultCredential.Parameters["roleArn"]
@@ -99,24 +122,7 @@ func createCredentialImpl(name string, defaultCredential models.CredentialRespon
 		Parameters:    credentialMap,
 	}
 
-	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
-	var id int64
-	if public {
-		resp, err := postAccountCredential(&credentials.PostCredentialsAccountParams{Body: &credReq})
-		if err != nil {
-			logErrorAndExit(createCredentialImpl, err.Error())
-		}
-		id = *resp.Payload.ID
-	} else {
-		resp, err := postUserCredential(&credentials.PostCredentialsUserParams{Body: &credReq})
-		if err != nil {
-			logErrorAndExit(createCredentialImpl, err.Error())
-		}
-		id = *resp.Payload.ID
-	}
-
-	log.Infof("[CreateCredential] credential created, id: %d", id)
-	return id
+	return &credReq
 }
 
 func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models.CredentialResponse, error) {

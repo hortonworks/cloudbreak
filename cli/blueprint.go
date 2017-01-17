@@ -114,6 +114,19 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintRe
 
 	defer timeTrack(time.Now(), "create blueprint")
 
+	bpRequest := createBlueprintRequest(skeleton, blueprint)
+
+	resp, err := postPublicBlueprint(&blueprints.PostPublicParams{Body: bpRequest})
+
+	if err != nil {
+		logErrorAndExit(createBlueprintImpl, err.Error())
+	}
+
+	log.Infof("[CreateBlueprint] blueprint created, id: %d", resp.Payload.ID)
+	channel <- *resp.Payload.ID
+}
+
+func createBlueprintRequest(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse) *models.BlueprintRequest {
 	blueprintName := "b" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	bpRequest := models.BlueprintRequest{
@@ -122,14 +135,7 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintRe
 		Properties:      skeleton.Configurations,
 	}
 
-	resp, err := postPublicBlueprint(&blueprints.PostPublicParams{Body: &bpRequest})
-
-	if err != nil {
-		logErrorAndExit(createBlueprintImpl, err.Error())
-	}
-
-	log.Infof("[CreateBlueprint] blueprint created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	return &bpRequest
 }
 
 func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {

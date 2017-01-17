@@ -14,6 +14,7 @@ import (
 	"github.com/hortonworks/hdc-cli/client/blueprints"
 	"github.com/hortonworks/hdc-cli/client/recipes"
 	"github.com/hortonworks/hdc-cli/client/templates"
+	"strconv"
 )
 
 func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
@@ -202,15 +203,11 @@ func CreateCluster(c *cli.Context) error {
 
 	stackId := createClusterImpl(skeleton,
 		oAuth2Client.GetBlueprintByName,
-		oAuth2Client.CopyDefaultCredential,
-		oAuth2Client.CreateTemplate,
-		oAuth2Client.CreateSecurityGroup,
-		oAuth2Client.CreateNetwork,
-		oAuth2Client.CreateBlueprint,
+		oAuth2Client.GetCredential,
+		oAuth2Client.GetNetwork,
 		oAuth2Client.Cloudbreak.Stacks.PostStacksUser,
 		oAuth2Client.GetRDSConfigByName,
-		oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster,
-		oAuth2Client.CreateRecipe)
+		oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster)
 
 	oAuth2Client.waitForClusterToFinish(stackId, c)
 	return nil
@@ -218,42 +215,13 @@ func CreateCluster(c *cli.Context) error {
 
 func createClusterImpl(skeleton ClusterSkeleton,
 	getBlueprint func(string) *models.BlueprintResponse,
-	copyCredential func(ClusterSkeleton, chan int64, *sync.WaitGroup),
-	createTemplate func(ClusterSkeleton, chan int64, *sync.WaitGroup),
-	createSecurityGroup func(ClusterSkeleton, chan int64, *sync.WaitGroup),
-	createNetwork func(ClusterSkeleton, chan int64, *sync.WaitGroup),
-	createBlueprint func(ClusterSkeleton, *models.BlueprintResponse, chan int64, *sync.WaitGroup),
+	getCredential func(string) models.CredentialResponse,
+	getNetwork func(name string) models.NetworkResponse,
 	postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
 	getRdsConfig func(string) models.RDSConfigResponse,
-	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error),
-	createRecipes func(ClusterSkeleton, chan int64, chan int64, chan int64, *sync.WaitGroup)) int64 {
+	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error)) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
-
-	var wg sync.WaitGroup
-	wg.Add(6)
-
-	credentialId := make(chan int64, 1)
-	go copyCredential(skeleton, credentialId, &wg)
-
-	templateIds := make(chan int64, 3)
-	go createTemplate(skeleton, templateIds, &wg)
-
-	var secGroupId = make(chan int64, 1)
-	go createSecurityGroup(skeleton, secGroupId, &wg)
-
-	networkId := make(chan int64, 1)
-	go createNetwork(skeleton, networkId, &wg)
-
-	blueprintId := make(chan int64, 1)
-	go createBlueprint(skeleton, blueprint, blueprintId, &wg)
-
-	masterRecipeIds := make(chan int64, len(skeleton.Master.Recipes))
-	workerRecipeIds := make(chan int64, len(skeleton.Worker.Recipes))
-	computeRecipeIds := make(chan int64, len(skeleton.Compute.Recipes))
-	go createRecipes(skeleton, masterRecipeIds, workerRecipeIds, computeRecipeIds, &wg)
-
-	go wg.Wait()
 
 	// create stack
 
@@ -262,34 +230,29 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		masterType := "GATEWAY"
 		workerType := "CORE"
 		computeType := "CORE"
-		secGroupId := <-secGroupId
 		platform := "AWS"
-
-		mTemplateId := <-templateIds
-		wTemplateId := <-templateIds
-		cTemplateId := <-templateIds
 
 		instanceGroups := []*models.InstanceGroups{
 			{
-				Group:           MASTER,
-				TemplateID:      &mTemplateId,
-				NodeCount:       1,
-				Type:            &masterType,
-				SecurityGroupID: &secGroupId,
+				Group:         MASTER,
+				NodeCount:     1,
+				Type:          &masterType,
+				Template:      createMasterTemplateRequest(skeleton),
+				SecurityGroup: createSecurityGroupRequest(skeleton),
 			},
 			{
-				Group:           WORKER,
-				TemplateID:      &wTemplateId,
-				NodeCount:       skeleton.Worker.InstanceCount,
-				Type:            &workerType,
-				SecurityGroupID: &secGroupId,
+				Group:         WORKER,
+				NodeCount:     skeleton.Worker.InstanceCount,
+				Type:          &workerType,
+				Template:      createWorkerTemplateRequest(skeleton),
+				SecurityGroup: createSecurityGroupRequest(skeleton),
 			},
 			{
-				Group:           COMPUTE,
-				TemplateID:      &cTemplateId,
-				NodeCount:       skeleton.Compute.InstanceCount,
-				Type:            &computeType,
-				SecurityGroupID: &secGroupId,
+				Group:         COMPUTE,
+				NodeCount:     skeleton.Compute.InstanceCount,
+				Type:          &computeType,
+				Template:      createComputeTemplateRequest(skeleton),
+				SecurityGroup: createSecurityGroupRequest(skeleton),
 			},
 		}
 
@@ -315,19 +278,19 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		log.Infof("[CreateStack] selected ambariVersion %s", ambariVersion)
 
-		credId := <-credentialId
-		netId := <-networkId
+		credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
+		credReq := createCredentialRequest(credentialName, getCredential("aws-access"), skeleton.SSHKeyName)
 
 		stackReq := models.StackRequest{
 			Name:            skeleton.ClusterName,
-			CredentialID:    &credId,
+			Credential:      credReq,
 			FailurePolicy:   &models.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
 			OnFailureAction: &failureAction,
 			InstanceGroups:  instanceGroups,
 			Parameters:      stackParameters,
 			CloudPlatform:   &platform,
 			PlatformVariant: &platform,
-			NetworkID:       &netId,
+			Network:         createNetworkRequest(skeleton, getNetwork),
 			AmbariVersion:   &ambariVersion,
 			HdpVersion:      &skeleton.HDPVersion,
 			Orchestrator:    &orchestrator,
@@ -362,35 +325,21 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			HostCount:         int32(skeleton.Compute.InstanceCount),
 		}
 
-		var masterRecipes []int64
-		for id := range masterRecipeIds {
-			masterRecipes = append(masterRecipes, id)
-		}
-		var workerRecipes []int64
-		for id := range workerRecipeIds {
-			workerRecipes = append(workerRecipes, id)
-		}
-
-		var computeRecipes []int64
-		for id := range computeRecipeIds {
-			computeRecipes = append(computeRecipes, id)
-		}
-
 		hostGroups := []*models.HostGroupRequest{
 			{
 				Name:       MASTER,
 				Constraint: &masterConstraint,
-				RecipeIds:  masterRecipes,
+				Recipes:    createRecipeRequests(skeleton.Master.Recipes),
 			},
 			{
 				Name:       WORKER,
 				Constraint: &workerConstraint,
-				RecipeIds:  workerRecipes,
+				Recipes:    createRecipeRequests(skeleton.Worker.Recipes),
 			},
 			{
 				Name:       COMPUTE,
 				Constraint: &computeConstraint,
-				RecipeIds:  computeRecipes,
+				Recipes:    createRecipeRequests(skeleton.Compute.Recipes),
 			},
 		}
 
@@ -421,11 +370,9 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			inputs = append(inputs, &models.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
 		}
 
-		bpId := <-blueprintId
-
 		clusterReq := models.ClusterRequest{
 			Name:                      skeleton.ClusterName,
-			BlueprintID:               &bpId,
+			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
 			HostGroups:                hostGroups,
 			UserName:                  skeleton.ClusterAndAmbariUser,
 			Password:                  skeleton.ClusterAndAmbariPassword,

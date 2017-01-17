@@ -53,13 +53,10 @@ func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, worker
 }
 
 func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostRecipesAccountParams) (*recipes.PostRecipesAccountOK, error)) int64 {
-	recipeRequest := models.RecipeRequest{
-		URI:        &recipe.URI,
-		RecipeType: strings.ToUpper(recipe.Phase),
-	}
+	recipeRequest := createRecipeRequest(recipe)
 
 	log.Infof("[createRecipe] creating recipe with URI: %s", recipe.URI)
-	resp, err := postPublicRecipe(&recipes.PostRecipesAccountParams{Body: &recipeRequest})
+	resp, err := postPublicRecipe(&recipes.PostRecipesAccountParams{Body: recipeRequest})
 
 	if err != nil {
 		logErrorAndExit(createRecipeImpl, err.Error())
@@ -67,6 +64,25 @@ func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostRecip
 
 	log.Infof("[createRecipe] recipe created, name: %s, uri: %s, id: %d", resp.Payload.Name, recipe.URI, *resp.Payload.ID)
 	return *resp.Payload.ID
+}
+
+func createRecipeRequests(recipes []Recipe) []*models.RecipeRequest {
+	var requests = make([]*models.RecipeRequest, 0)
+
+	for _, r := range recipes {
+		requests = append(requests, createRecipeRequest(r))
+	}
+
+	return requests
+}
+
+func createRecipeRequest(recipe Recipe) *models.RecipeRequest {
+	recipeRequest := models.RecipeRequest{
+		URI:        &recipe.URI,
+		RecipeType: strings.ToUpper(recipe.Phase),
+	}
+
+	return &recipeRequest
 }
 
 func (c *Cloudbreak) GetPublicRecipes() []*models.RecipeResponse {

@@ -23,6 +23,20 @@ func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan 
 func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64,
 	postSecGroup func(*securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error)) {
 
+	secGroup := createSecurityGroupRequest(skeleton)
+
+	log.Infof("[CreateSecurityGroup] sending security group create request with name: %s", secGroup.Name)
+	resp, err := postSecGroup(&securitygroups.PostSecuritygroupsAccountParams{Body: secGroup})
+
+	if err != nil {
+		logErrorAndExit(createSecurityGroupImpl, err.Error())
+	}
+
+	log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)
+	channel <- *resp.Payload.ID
+}
+
+func createSecurityGroupRequest(skeleton ClusterSkeleton) *models.SecurityGroupRequest {
 	var secGroupName string
 	defaultPorts := SECURITY_GROUP_DEFAULT_PORTS
 	if skeleton.WebAccess {
@@ -48,15 +62,7 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64,
 		CloudPlatform: "AWS",
 	}
 
-	log.Infof("[CreateSecurityGroup] sending security group create request with name: %s", secGroupName)
-	resp, err := postSecGroup(&securitygroups.PostSecuritygroupsAccountParams{Body: &secGroup})
-
-	if err != nil {
-		logErrorAndExit(createSecurityGroupImpl, err.Error())
-	}
-
-	log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	return &secGroup
 }
 
 func (c *Cloudbreak) GetSecurityDetails(stack *models.StackResponse) (map[string][]*models.SecurityRuleResponse, error) {

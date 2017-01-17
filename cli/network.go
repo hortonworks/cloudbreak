@@ -33,6 +33,20 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
 	postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error),
 	getNetwork func(string) models.NetworkResponse) {
 
+	network := createNetworkRequest(skeleton, getNetwork)
+
+	log.Infof("[CreateNetwork] sending network create request with name: %s", network.Name)
+	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: network})
+
+	if err != nil {
+		logErrorAndExit(createNetworkImpl, err.Error())
+	}
+
+	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
+	channel <- *resp.Payload.ID
+}
+
+func createNetworkRequest(skeleton ClusterSkeleton, getNetwork func(string) models.NetworkResponse) *models.NetworkRequest {
 	networkName := "net" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	vpc := skeleton.Network
@@ -52,15 +66,7 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
 		Parameters:    vpcParams,
 	}
 
-	log.Infof("[CreateNetwork] sending network create request with name: %s", networkName)
-	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: &network})
-
-	if err != nil {
-		logErrorAndExit(createNetworkImpl, err.Error())
-	}
-
-	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	return &network
 }
 
 func CreateNetworkCommand(c *cli.Context) error {
