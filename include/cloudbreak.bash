@@ -274,7 +274,7 @@ util-cloudbreak-shell-remote(){
         -e CLOUDBREAK_ADDRESS=\'https://$PUBLIC_IP\' \
         -e IDENTITY_ADDRESS=\'https://$PUBLIC_IP/identity\' \
         -e SEQUENCEIQ_USER=\'$UAA_DEFAULT_USER_EMAIL\' \
-        -e SEQUENCEIQ_PASSWORD=\'$UAA_DEFAULT_USER_PW\' \
+        -e SEQUENCEIQ_PASSWORD=\'$(escape-string-env $UAA_DEFAULT_USER_PW \')\' \
         -w /data \
         -v $PWD:/data \
         $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL --cert.validation=false
@@ -297,12 +297,29 @@ _cloudbreak-shell() {
         -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
         -e IDENTITY_ADDRESS=http://identity.service.consul:$UAA_PORT \
         -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
-        -e SEQUENCEIQ_PASSWORD=$UAA_DEFAULT_USER_PW \
+        -e SEQUENCEIQ_PASSWORD="$UAA_DEFAULT_USER_PW" \
         -w /data \
         -v $PWD:/data \
         $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL
 
     docker-kill-all-sidekicks
+}
+
+escape-string-env() {
+    declare desc="Escape yaml string by delimiter type"
+    : ${2:=required}
+    local in=$1
+    local delimiter=$2
+
+    if [[ $delimiter == "'" ]]; then
+        out=`echo $in | sed -e "s/'/'\\\\\\''/g"`
+    elif [[ $delimiter == '"' ]]; then
+        out=`echo $in | sed -e 's/\\\\/\\\\\\\/g' -e 's/"/\\\"/g' -e 's/[$]/\$/g' -e "s/\\\`/\\\\\\\\\\\\\\\`/g" -e 's/!/\\\\!/g'`
+    else
+        out="$in"
+    fi
+
+    echo $out
 }
 
 gen-password() {
