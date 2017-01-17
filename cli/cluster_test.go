@@ -11,34 +11,12 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 )
 
-func TestCreateClusterImplMinimal(t *testing.T) {
-	skeleton := &ClusterSkeleton{
-		ClusterSkeletonBase: ClusterSkeletonBase{
-			ClusterName:              "cluster-name",
-			HDPVersion:               "hdp-version",
-			ClusterAndAmbariUser:     "user",
-			ClusterAndAmbariPassword: "passwd",
-			Worker:  InstanceConfig{InstanceCount: 3},
-			Compute: SpotInstanceConfig{InstanceConfig: InstanceConfig{InstanceCount: 3}},
-		},
-	}
-
-	actualId, actualStack, actualCluster := executeStackCreation(skeleton)
-
-	expectedId := int64(20)
-	if actualId != expectedId {
-		t.Errorf("id not match %d == %d", expectedId, actualId)
-	}
-
-	validateRequests(actualStack, "TestCreateClusterImplMinimalStack", t)
-	validateRequests(actualCluster, "TestCreateClusterImplMinimalCluster", t)
-}
-
 func TestCreateClusterImplFull(t *testing.T) {
 	inputs := make(map[string]string)
 	inputs["key"] = "value"
 	skeleton := &ClusterSkeleton{
 		ClusterSkeletonBase: ClusterSkeletonBase{
+			ClusterName:   "test-cluster",
 			ClusterInputs: inputs,
 			InstanceRole:  "role",
 		},
@@ -104,8 +82,32 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		return &cluster.PostStacksIDClusterOK{Payload: &models.ClusterResponse{ID: &clusterId}}, nil
 	}
 
-	actualId = createClusterImpl(*skeleton, getBlueprint,
-		getCredential, getNetwork, postStack, getRdsConfig, postCluster)
+	createFuncs := []func(skeleton ClusterSkeleton) *models.TemplateRequest{}
+	for i := 0; i < 3; i++ {
+		createFuncs = append(createFuncs, func(s ClusterSkeleton) *models.TemplateRequest {
+			return &models.TemplateRequest{Name: "templ", CloudPlatform: "AWS", InstanceType: "m3.xlarge",
+				VolumeCount: &(&int32Wrapper{int32(1)}).i, VolumeSize: &(&int32Wrapper{int32(100)}).i}
+		})
+	}
+	createSecurityGroupRequest := func(skeleton ClusterSkeleton) *models.SecurityGroupRequest {
+		return &models.SecurityGroupRequest{CloudPlatform: "AWS", Name: "secg", SecurityRules: make([]*models.SecurityRuleRequest, 0)}
+	}
+	createCredentialRequest := func(name string, defaultCredential models.CredentialResponse, existingKey string) *models.CredentialRequest {
+		return &models.CredentialRequest{Name: "cred", CloudPlatform: "AWS", PublicKey: "key"}
+	}
+	createNetworkRequest := func(skeleton ClusterSkeleton, getNetwork func(string) models.NetworkResponse) *models.NetworkRequest {
+		return &models.NetworkRequest{Name: "net", CloudPlatform: "AWS"}
+	}
+	createRecipeRequests := func(recipes []Recipe) []*models.RecipeRequest {
+		return make([]*models.RecipeRequest, 0)
+	}
+	createBlueprintRequest := func(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse) *models.BlueprintRequest {
+		return &models.BlueprintRequest{Name: "blueprint"}
+	}
+
+	actualId = createClusterImpl(*skeleton, createFuncs[0], createFuncs[1], createFuncs[2],
+		createSecurityGroupRequest, createCredentialRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest,
+		getBlueprint, getCredential, getNetwork, postStack, getRdsConfig, postCluster)
 
 	return
 }

@@ -24,7 +24,7 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 	return stack.Payload
 }
 
-func (c *Cloudbreak) FetchCluster(stack *models.StackResponse, reduced bool) (*ClusterSkeletonResult, error) {
+func (c *Cloudbreak) FetchCluster(stack *models.StackResponse) (*ClusterSkeletonResult, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 
 	return fetchClusterImpl(stack)
@@ -92,9 +92,9 @@ func DescribeCluster(c *cli.Context) error {
 
 func describeClusterImpl(clusterName string, format string,
 	getCluster func(string) *models.StackResponse,
-	fetchCluster func(*models.StackResponse, bool) (*ClusterSkeletonResult, error)) *ClusterSkeletonResult {
+	fetchCluster func(*models.StackResponse) (*ClusterSkeletonResult, error)) *ClusterSkeletonResult {
 	stack := getCluster(clusterName)
-	clusterSkeleton, _ := fetchCluster(stack, false)
+	clusterSkeleton, _ := fetchCluster(stack)
 	if format == "table" {
 		clusterSkeleton.Master.Recipes = []Recipe{}
 		clusterSkeleton.Worker.Recipes = []Recipe{}
@@ -134,6 +134,14 @@ func CreateCluster(c *cli.Context) error {
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	stackId := createClusterImpl(skeleton,
+		createMasterTemplateRequest,
+		createWorkerTemplateRequest,
+		createComputeTemplateRequest,
+		createSecurityGroupRequest,
+		createCredentialRequest,
+		createNetworkRequest,
+		createRecipeRequests,
+		createBlueprintRequest,
 		oAuth2Client.GetBlueprintByName,
 		oAuth2Client.GetCredential,
 		oAuth2Client.GetNetwork,
@@ -146,6 +154,14 @@ func CreateCluster(c *cli.Context) error {
 }
 
 func createClusterImpl(skeleton ClusterSkeleton,
+	createMasterTemplateRequest func(skeleton ClusterSkeleton) *models.TemplateRequest,
+	createWorkerTemplateRequest func(skeleton ClusterSkeleton) *models.TemplateRequest,
+	createComputeTemplateRequest func(skeleton ClusterSkeleton) *models.TemplateRequest,
+	createSecurityGroupRequest func(skeleton ClusterSkeleton) *models.SecurityGroupRequest,
+	createCredentialRequest func(name string, defaultCredential models.CredentialResponse, existingKey string) *models.CredentialRequest,
+	createNetworkRequest func(skeleton ClusterSkeleton, getNetwork func(string) models.NetworkResponse) *models.NetworkRequest,
+	createRecipeRequests func(recipes []Recipe) []*models.RecipeRequest,
+	createBlueprintRequest func(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse) *models.BlueprintRequest,
 	getBlueprint func(string) *models.BlueprintResponse,
 	getCredential func(string) models.CredentialResponse,
 	getNetwork func(name string) models.NetworkResponse,
