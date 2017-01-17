@@ -84,6 +84,7 @@ public class TerminationService {
     private void terminateInstanceGroups(Stack stack) {
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             instanceGroup.setSecurityGroup(null);
+            instanceGroup.setTemplate(null);
             instanceGroupRepository.save(instanceGroup);
         }
 

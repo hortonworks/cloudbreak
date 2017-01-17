@@ -76,8 +76,8 @@ public class ReactorFlowManagerTest {
         flowManager.triggerStackStart(stackId);
         flowManager.triggerClusterStop(stackId);
         flowManager.triggerClusterStart(stackId);
-        flowManager.triggerTermination(stackId);
-        flowManager.triggerForcedTermination(stackId);
+        flowManager.triggerTermination(stackId, false);
+        flowManager.triggerForcedTermination(stackId, false);
         flowManager.triggerStackUpscale(stackId, instanceGroupAdjustment);
         flowManager.triggerStackDownscale(stackId, instanceGroupAdjustment);
         flowManager.triggerStackRemoveInstance(stackId, "instanceId");

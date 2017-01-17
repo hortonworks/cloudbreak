@@ -176,10 +176,14 @@ public class CredentialService {
         }
         List<Stack> stacks = stackRepository.findByCredential(credential.getId());
         if (stacks.isEmpty()) {
-            archiveCredential(credential);
+            delete(credential);
         } else {
             throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
         }
+    }
+
+    public void delete(Credential credential) {
+        archiveCredential(credential);
     }
 
     private String generateArchiveName(String name) {

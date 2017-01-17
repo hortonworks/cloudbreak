@@ -140,35 +140,35 @@ public class StackController implements StackEndpoint {
     }
 
     @Override
-    public void delete(Long id, Boolean forced) {
+    public void delete(Long id, Boolean forced, Boolean deleteDependencies) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         if (forced) {
-            stackService.forceDelete(id, user);
+            stackService.forceDelete(id, user, deleteDependencies);
         } else {
-            stackService.delete(id, user);
+            stackService.delete(id, user, deleteDependencies);
         }
     }
 
     @Override
-    public void deletePrivate(String name, Boolean forced) {
+    public void deletePrivate(String name, Boolean forced, Boolean deleteDependencies) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         if (forced) {
-            stackService.forceDelete(name, user);
+            stackService.forceDelete(name, user, deleteDependencies);
         } else {
-            stackService.delete(name, user);
+            stackService.delete(name, user, deleteDependencies);
         }
     }
 
     @Override
-    public void deletePublic(String name, Boolean forced) {
+    public void deletePublic(String name, Boolean forced, Boolean deleteDependencies) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         if (forced) {
-            stackService.forceDelete(name, user);
+            stackService.forceDelete(name, user, deleteDependencies);
         } else {
-            stackService.delete(name, user);
+            stackService.delete(name, user, deleteDependencies);
         }
     }
 

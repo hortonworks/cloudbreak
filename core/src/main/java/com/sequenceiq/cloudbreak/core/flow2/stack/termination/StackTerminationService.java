@@ -47,7 +47,10 @@ public class StackTerminationService {
     @Inject
     private UsageService usageService;
 
-    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload) {
+    @Inject
+    private DependecyDeletionService dependecyDeletionService;
+
+    public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
         LOGGER.info("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
         terminationService.finalizeTermination(stack.getId(), true);
@@ -60,9 +63,12 @@ public class StackTerminationService {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
         }
         usageService.closeUsagesForStack(stack);
+        if (deleteDependencies) {
+            dependecyDeletionService.deleteDependencies(stack);
+        }
     }
 
-    public void handleStackTerminationError(Stack stack, StackFailureEvent payload, boolean forced) {
+    public void handleStackTerminationError(Stack stack, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
         String stackUpdateMessage;
         Msg eventMessage;
         DetailedStackStatus status;
@@ -79,6 +85,9 @@ public class StackTerminationService {
             stackUpdateMessage = "Stack was force terminated.";
             status = DetailedStackStatus.DELETE_COMPLETED;
             eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
+            if (deleteDependencies) {
+                dependecyDeletionService.deleteDependencies(stack);
+            }
         }
         flowMessageService.fireEventAndLog(stack.getId(), eventMessage, status.name(), stackUpdateMessage);
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {

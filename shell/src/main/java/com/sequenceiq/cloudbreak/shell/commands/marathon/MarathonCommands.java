@@ -158,7 +158,7 @@ public class MarathonCommands implements CommandMarker {
             @CliOption(key = "id", help = "Id of the marathon stack") Long id) {
         try {
             if (id != null) {
-                cloudbreakClient.stackEndpoint().delete(id, true);
+                cloudbreakClient.stackEndpoint().delete(id, true, false);
                 if (Objects.equals(id, shellContext.getSelectedMarathonStackId())) {
                     shellContext.resetSelectedMarathonStackId();
                     shellContext.setHint(Hints.MARATHON_CLUSTER);
@@ -166,7 +166,7 @@ public class MarathonCommands implements CommandMarker {
                 return String.format("Marathon stack has been deleted, id: %s", id);
             } else if (name != null) {
                 StackResponse aPublic = cloudbreakClient.stackEndpoint().getPublic(name);
-                cloudbreakClient.stackEndpoint().deletePublic(name, true);
+                cloudbreakClient.stackEndpoint().deletePublic(name, true, false);
                 if (Objects.equals(aPublic.getId(), shellContext.getSelectedMarathonStackId())) {
                     shellContext.resetSelectedMarathonStackId();
                 }

@@ -267,20 +267,20 @@ public class StackService {
         return stack;
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, CbUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        delete(stack, user);
+        delete(stack, user, deleteDependencies);
     }
 
-    public void forceDelete(String name, CbUser user) {
+    public void forceDelete(String name, CbUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        forceDelete(stack, user);
+        forceDelete(stack, user, deleteDependencies);
     }
 
     @Transactional(Transactional.TxType.NEVER)
@@ -334,20 +334,20 @@ public class StackService {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, CbUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        delete(stack, user);
+        delete(stack, user, deleteDependencies);
     }
 
-    public void forceDelete(Long id, CbUser user) {
+    public void forceDelete(Long id, CbUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        forceDelete(stack, user);
+        forceDelete(stack, user, deleteDependencies);
     }
 
     public void removeInstance(CbUser user, Long stackId, String instanceId) {
@@ -569,14 +569,14 @@ public class StackService {
         }
     }
 
-    private void delete(Stack stack, CbUser user) {
+    private void delete(Stack stack, CbUser user, Boolean deleteDependencies) {
         LOGGER.info("Stack delete requested.");
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
             if (!"BYOS".equals(stack.cloudPlatform())) {
-                flowManager.triggerTermination(stack.getId());
+                flowManager.triggerTermination(stack.getId(), deleteDependencies);
             } else {
                 terminationService.finalizeTermination(stack.getId(), false);
             }
@@ -585,13 +585,13 @@ public class StackService {
         }
     }
 
-    private void forceDelete(Stack stack, CbUser user) {
+    private void forceDelete(Stack stack, CbUser user, Boolean deleteDependencies) {
         LOGGER.info("Stack forced delete requested.");
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be force deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
-            flowManager.triggerForcedTermination(stack.getId());
+            flowManager.triggerForcedTermination(stack.getId(), deleteDependencies);
         } else {
             LOGGER.info("Stack is already deleted.");
         }

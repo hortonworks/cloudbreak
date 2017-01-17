@@ -15,14 +15,14 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Component("StackTerminationAction")
-public class StackTerminationAction extends AbstractStackTerminationAction<StackEvent> {
+public class StackTerminationAction extends AbstractStackTerminationAction<TerminationEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackTerminationAction.class);
 
     @Inject
@@ -38,11 +38,12 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Stack
     private TerminationService terminationService;
 
     public StackTerminationAction() {
-        super(StackEvent.class);
+        super(TerminationEvent.class);
     }
 
     @Override
-    protected void doExecute(StackTerminationContext context, StackEvent payload, Map<Object, Object> variables) {
+    protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
+        variables.put("DELETEDEPENDENCIES", payload.getDeleteDependencies());
         doExecute(context);
     }
 

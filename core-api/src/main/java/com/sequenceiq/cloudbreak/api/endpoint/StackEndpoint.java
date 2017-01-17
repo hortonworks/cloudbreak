@@ -85,19 +85,22 @@ public interface StackEndpoint {
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    void deletePublic(@PathParam(value = "name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+    void deletePublic(@PathParam(value = "name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    void deletePrivate(@PathParam(value = "name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+    void deletePrivate(@PathParam(value = "name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES)
-    void delete(@PathParam(value = "id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+    void delete(@PathParam(value = "id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @PUT
     @Path("{id}")

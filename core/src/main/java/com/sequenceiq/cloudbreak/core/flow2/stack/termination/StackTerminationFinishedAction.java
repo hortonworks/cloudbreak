@@ -25,7 +25,8 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminateStackResult payload, Map<Object, Object> variables) {
-        stackTerminationService.finishStackTermination(context, payload);
+        Boolean deleteDependencies = Boolean.valueOf(String.valueOf(variables.get("DELETEDEPENDENCIES")));
+        stackTerminationService.finishStackTermination(context, payload, deleteDependencies == null ? false : deleteDependencies);
         sendEvent(context);
     }
 
