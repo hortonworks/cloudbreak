@@ -11,7 +11,12 @@
         bootstrap_expect: {{ consul.bootstrap_expect }}
         retry_join: {{ consul.retry_join }}
 
-start-consul:
+consul:
   service.running:
     - enable: True
-    - name: consul_agent
+
+{% if consul.is_server == True %}
+consul-template:
+  service.running:
+    - enable: True
+{% endif %}

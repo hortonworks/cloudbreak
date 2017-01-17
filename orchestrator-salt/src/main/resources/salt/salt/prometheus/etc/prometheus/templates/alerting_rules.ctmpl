@@ -1,5 +1,0 @@
-{{range tree "rules/alerting"}}
-#{{.Key}}
-{{.Value}}
-
-{{end}}
