@@ -37,6 +37,17 @@
         }
       },
       {
+        "druid-common": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.metadata.storage.type": "derby",
+            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true",
+            "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
+            "druid.selectors.indexing.serviceName": "druid/overlord"
+          }
+        }
+      },
+      {
       "druid-overlord" : {
         "properties_attributes" : { },
         "properties" : {
@@ -148,6 +159,18 @@
           {
             "name" : "DRUID_OVERLORD",
             "provision_action": "INSTALL_ONLY"
+          },
+          {
+            "name" : "DRUID_COORDINATOR",
+            "provision_action": "INSTALL_ONLY"
+          },
+          {
+            "name" : "DRUID_ROUTER",
+            "provision_action": "INSTALL_ONLY"
+          },
+          {
+            "name" : "DRUID_BROKER",
+            "provision_action": "INSTALL_ONLY"
           }
         ],
         "cardinality": "1"
@@ -176,6 +199,10 @@
           },
           {
             "name" : "DRUID_MIDDLEMANAGER",
+            "provision_action": "INSTALL_ONLY"
+          },
+          {
+            "name" : "DRUID_HISTORICAL",
             "provision_action": "INSTALL_ONLY"
           }
         ],
