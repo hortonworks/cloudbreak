@@ -165,7 +165,7 @@ public class CleanupService {
     public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) {
         boolean result = false;
         if (stackId != null) {
-            cloudbreakClient.stackEndpoint().delete(Long.valueOf(stackId), false);
+            cloudbreakClient.stackEndpoint().delete(Long.valueOf(stackId), false, false);
             result = true;
         }
         return result;

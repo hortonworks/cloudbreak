@@ -135,7 +135,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String delete(Long id, String name, boolean wait) {
         try {
             if (id != null) {
-                shellContext.cloudbreakClient().stackEndpoint().delete(id, false);
+                shellContext.cloudbreakClient().stackEndpoint().delete(id, false, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
                 shellContext.removeStack(id.toString());
                 if (wait) {
@@ -150,7 +150,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 }
             } else if (name != null) {
                 StackResponse response = shellContext.cloudbreakClient().stackEndpoint().getPublic(name);
-                shellContext.cloudbreakClient().stackEndpoint().deletePublic(name, false);
+                shellContext.cloudbreakClient().stackEndpoint().deletePublic(name, false, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
 
                 if (wait) {

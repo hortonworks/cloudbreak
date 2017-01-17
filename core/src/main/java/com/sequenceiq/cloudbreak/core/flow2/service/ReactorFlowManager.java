@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
 import reactor.bus.Event;
@@ -91,16 +92,16 @@ public class ReactorFlowManager {
         notify(selector, event);
     }
 
-    public void triggerTermination(Long stackId) {
+    public void triggerTermination(Long stackId, Boolean deleteDependencies) {
         String selector = FlowTriggers.STACK_TERMINATE_TRIGGER_EVENT;
-        StackEvent event = new StackEvent(selector, stackId);
+        TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
         notify(selector, event);
         cancelRunningFlows(stackId);
     }
 
-    public void triggerForcedTermination(Long stackId) {
+    public void triggerForcedTermination(Long stackId, Boolean deleteDependencies) {
         String selector = FlowTriggers.STACK_FORCE_TERMINATE_TRIGGER_EVENT;
-        StackEvent event = new StackEvent(selector, stackId);
+        TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
         notify(selector, event);
         cancelRunningFlows(stackId);
     }

@@ -64,7 +64,7 @@ public class ScheduledAccountPreferencesValidator {
     private void terminateStack(Stack stack) {
         if (!stack.isDeleteCompleted()) {
             LOGGER.info("Trigger termination of stack: '{}', owner: '{}', account: '{}'.", stack.getName(), stack.getOwner(), stack.getAccount());
-            flowManager.triggerTermination(stack.getId());
+            flowManager.triggerTermination(stack.getId(), false);
         }
     }
 }
