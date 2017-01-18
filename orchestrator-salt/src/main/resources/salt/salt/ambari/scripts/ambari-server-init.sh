@@ -59,12 +59,21 @@ silent_security_setup() {
   ambari-server setup-security --security-option=encrypt-passwords --master-key=bigdata --master-key-persist=true
 }
 
+read_tarballs() {
+  mkdir -p /tmp/preload
+  cp -fn $(find /usr/hdp/ -name "mapreduce.tar.gz") /tmp/preload &
+  cp -fn $(find /usr/hdp/ -name "tez.tar.gz") /tmp/preload &
+  cp -fn $(find /usr/hdp/ -name "slider.tar.gz") /tmp/preload &
+  cp -fn $(find /usr/hdp/ -name "pig.tar.gz") /tmp/preload &
+}
+
 main() {
   # consul-register-service ambari-server $(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
   if [ ! -f "/var/ambari-init-executed" ]; then
     config_jdbc_drivers
     config_remote_jdbc
     silent_security_setup
+    read_tarballs
   fi
   echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/ambari-init-executed
 }
