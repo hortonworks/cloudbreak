@@ -1,10 +1,9 @@
 base:
   '*':
-    - discovery
-    - java
-    - metadata
     - consul
     - unbound
+    - java
+    - metadata
     - nginx
 
   'roles:kerberos_server':
