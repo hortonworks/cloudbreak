@@ -63,6 +63,7 @@ public class PillarSave implements OrchestratorBootstrap {
         Map<String, Object> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
+        map.put("domain", hostname.replaceFirst(hostname.split("\\.")[0] + ".", ""));
         map.put("custom_domain", useCustomDomain);
         map.put("public_address", StringUtils.isEmpty(publicAddress) ? Boolean.FALSE : Boolean.TRUE);
         return map;

@@ -12,7 +12,7 @@ include:
     - group: prometheus
     - makedirs: True
 
-/etc/prometheus/:
+/etc/prometheus/rules:
   file.directory:
     - user: prometheus
     - group: prometheus
