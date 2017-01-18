@@ -324,6 +324,23 @@ deployer-regenerate() {
     generate_uaa_config
 }
 
+escape-string-yaml() {
+    declare desc="Escape yaml string by delimiter type"
+    : ${2:=required}
+    local in=$1
+    local delimiter=$2
+
+    if [[ $delimiter == "'" ]]; then
+        out=`echo $in | sed -e "s/'/''/g"`
+    elif [[ $delimiter == '"' ]]; then
+		out=`echo $in | sed -e 's/\\\\/\\\\\\\/g' -e 's/"/\\\"/g'`
+    else
+        out="$in"
+    fi
+
+    echo $out
+}
+
 deployer-login() {
     declare desc="Shows Uluwatu (Cloudbreak UI) login url and credentials"
 
@@ -340,7 +357,7 @@ deployer-login() {
     mkdir -p $HOME/.hdc
     cat > $HOME/.hdc/config <<EOF
 username: $UAA_DEFAULT_USER_EMAIL
-password: $UAA_DEFAULT_USER_PW
+password: "$(escape-string-yaml $UAA_DEFAULT_USER_PW \")"
 server: $ULU_HOST_ADDRESS
 EOF
 
