@@ -187,8 +187,8 @@ compose-generate-yaml() {
     fi
 }
 
-escape-string-yaml() {
-    declare desc="Escape yaml string by delimiter type"
+escape-string-compose-yaml() {
+    declare desc="Escape compose yaml string by delimiter type"
     : ${2:=required}
     local in=$1
     local delimiter=$2
@@ -306,7 +306,7 @@ mail:
     environment:
         - SERVICE_NAME=smtp
         - maildomain=example.com
-        - 'smtp_user=admin:$(escape-string-yaml $UAA_DEFAULT_USER_PW \')'
+        - 'smtp_user=admin:$(escape-string-compose-yaml $UAA_DEFAULT_USER_PW \')'
     image: catatnight/postfix:$DOCKER_TAG_POSTFIX
 
 uaadb:
@@ -375,7 +375,7 @@ cloudbreak:
         - CB_OPENSTACK_IMAGE
         - CB_HBM2DDL_STRATEGY
         - "CB_SMTP_SENDER_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME"
-        - 'CB_SMTP_SENDER_PASSWORD=$(escape-string-yaml $CLOUDBREAK_SMTP_SENDER_PASSWORD \')'
+        - 'CB_SMTP_SENDER_PASSWORD=$(escape-string-compose-yaml $CLOUDBREAK_SMTP_SENDER_PASSWORD \')'
         - "CB_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST"
         - "CB_SMTP_SENDER_PORT=$CLOUDBREAK_SMTP_SENDER_PORT"
         - "CB_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM"
@@ -450,7 +450,7 @@ sultans:
         - SL_SMTP_SENDER_HOST=$CLOUDBREAK_SMTP_SENDER_HOST
         - SL_SMTP_SENDER_PORT=$CLOUDBREAK_SMTP_SENDER_PORT
         - SL_SMTP_SENDER_USERNAME=$CLOUDBREAK_SMTP_SENDER_USERNAME
-        - "SL_SMTP_SENDER_PASSWORD=$(escape-string-yaml $CLOUDBREAK_SMTP_SENDER_PASSWORD \")"
+        - "SL_SMTP_SENDER_PASSWORD=$(escape-string-compose-yaml $CLOUDBREAK_SMTP_SENDER_PASSWORD \")"
         - SL_SMTP_SENDER_FROM=$CLOUDBREAK_SMTP_SENDER_FROM
         - HWX_CLOUD_COLLECTOR=$CLOUDBREAK_TELEMETRY_MAIL_ADDRESS
         - HWX_CLOUD_USER=$UAA_DEFAULT_USER_EMAIL
