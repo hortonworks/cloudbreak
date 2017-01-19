@@ -30,7 +30,6 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTFIX latest
     env-import DOCKER_TAG_UAA 3.6.5
-    env-import DOCKER_TAG_UAADB v3.6.0
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.0.3
     env-import DOCKER_TAG_PERISCOPE 1.15.0-dev.131
