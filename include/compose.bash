@@ -310,17 +310,17 @@ mail:
         - 'smtp_user=admin:$(escape-string-compose-yaml $LOCAL_SMTP_PASSWORD \')'
     image: catatnight/postfix:$DOCKER_TAG_POSTFIX
 
-uaadb:
+commondb:
     labels:
       - traefik.enable=false
     privileged: true
     ports:
-        - "$PRIVATE_IP:5434:5432"
+        - "$PRIVATE_IP:5432:5432"
     environment:
-      - SERVICE_NAME=uaadb
+      - SERVICE_NAME=commondb
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
-        - "uaadb:/var/lib/postgresql/data"
+        - "$COMMON_DB_VOL:/var/lib/postgresql/data"
     image: postgres:$DOCKER_TAG_POSTGRES
 
 identity:
@@ -344,18 +344,6 @@ identity:
     volumes:
       - ./uaa.yml:/uaa/uaa.yml
     image: hortonworks/cloudbreak-uaa:$DOCKER_TAG_UAA
-
-cbdb:
-    labels:
-      - traefik.enable=false
-    ports:
-        - "$PRIVATE_IP:5432:5432"
-    environment:
-      - SERVICE_NAME=cbdb
-        #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
-    volumes:
-        - "cbdb:/var/lib/postgresql/data"
-    image: postgres:$DOCKER_TAG_POSTGRES
 
 cloudbreak:
     environment:
@@ -396,7 +384,7 @@ cloudbreak:
         - CB_DB_ENV_PASS
         - CB_DB_ENV_DB
         - CB_DB_ENV_SCHEMA
-        - "CB_DB_SERVICEID=cbdb.service.consul"
+        - "CB_DB_SERVICEID=commondb.service.consul"
         - "CB_MAIL_SMTP_AUTH=$CLOUDBREAK_SMTP_AUTH"
         - "CB_MAIL_SMTP_STARTTLS_ENABLE=$CLOUDBREAK_SMTP_STARTTLS_ENABLE"
         - "CB_MAIL_SMTP_TYPE=$CLOUDBREAK_SMTP_TYPE"
@@ -536,18 +524,6 @@ uluwatu:
     dns: $PRIVATE_IP
     image: $DOCKER_IMAGE_CLOUDBREAK_WEB:$DOCKER_TAG_ULUWATU
 
-pcdb:
-    labels:
-      - traefik.enable=false
-    environment:
-        - SERVICE_NAME=pcdb
-     #- SERVICE_NAMEE_CHECK_CMD='psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
-    ports:
-        - "$PRIVATE_IP:5433:5432"
-    volumes:
-        - "pcdb:/var/lib/postgresql/data"
-    image: postgres:$DOCKER_TAG_POSTGRES
-
 periscope:
     environment:
         - http_proxy=$CB_HTTP_PROXY
@@ -574,7 +550,7 @@ periscope:
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
         - PERISCOPE_ADDRESS_RESOLVING_TIMEOUT
-        - PERISCOPE_DB_SERVICEID=pcdb.service.consul
+        - PERISCOPE_DB_SERVICEID=commondb.service.consul
         - PERISCOPE_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
         - PERISCOPE_SCHEMA_SCRIPTS_LOCATION

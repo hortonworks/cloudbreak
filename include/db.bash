@@ -38,7 +38,7 @@ db-dump() {
         --name $contName \
         -v $dbVolume:/var/lib/postgresql/data \
         -v $DB_DUMP_VOLUME:/dump \
-        postgres:$(db-getpostgres-image-version $dbVolume)
+        postgres:$(db-getpostgres-image-version $dbVolume) | debug-cat
 
     local timeStamp=$(date "+%Y%m%d_%H%M")
     local volDir="/dump/${dbVolume##*/}"
@@ -50,20 +50,23 @@ db-dump() {
 
     db-wait-for-db-cont $contName
 
-    docker exec $contName sh -c 'pg_dump -U postgres > '$dumpDir'/dump.sql'
+    docker exec $contName sh -c 'pg_dump -U postgres > '$dumpDir'/dump.sql' | debug-cat
 
     debug "create latest simlink $latestDir -> $dumpDir"
-    docker exec $contName sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir"
+    docker exec $contName sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir" 
 
     docker stop $contName
     [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName
 }
 
-db-init-volume-from-dump() {
-    declare desc="initialize the DB if needed, from a previous dump"
-    declare volName=${1:? required: volName}
-    declare dbName=${2:? required dbName}
-    # call TODO
+db-merge-3-to-1() {
+    declare desc="Merge 3 db into 1 single common db"
+
+    cloudbreak-config
+    for db in cbdb uaadb periscopedb; do
+        db-dump $CB_DB_ROOT_PATH/$db
+        db-restore-volume-from-dump $COMMON_DB_VOL $db
+    done
 }
 
 db-wait-for-db-cont() {
@@ -79,8 +82,8 @@ db-wait-for-db-cont() {
 
 db-restore-volume-from-dump() {
     declare desc="initialize the DB if needed, from a previous dump"
-    declare volName=${1:? required: volName}
-    declare dumpDbName=${2:? required dumpDbName}
+    declare volName=${1:? required: new volName}
+    declare dumpDbName=${2:? required dumpDbName cbdb/pcdb/uaadb}
     declare newDbName=${3:-$dumpDbName}
 
     debug "db: $newDbName in volume: $volName will be restore from: $dumpDbName dump"
@@ -99,7 +102,8 @@ db-restore-volume-from-dump() {
             -v $volName:/var/lib/postgresql/data \
             -v $DB_DUMP_VOLUME:/dump \
             postgres:$DOCKER_TAG_POSTGRES \
-            bash -c "echo 'touch $dbCreatedFile' > /docker-entrypoint-initdb.d/created.sh && /docker-entrypoint.sh postgres"
+            bash -c "echo 'touch $dbCreatedFile' > /docker-entrypoint-initdb.d/created.sh && /docker-entrypoint.sh postgres" \
+              | debug-cat
 
         local maxtry=${RETRY:=30}
         while (! docker exec $contName test -e $dbCreatedFile ) && (( maxtry -= 1 > 0 )); do
@@ -111,7 +115,7 @@ db-restore-volume-from-dump() {
 
         if [[ $newDbName != "postgres" ]]; then
             debug "create new database: $dbName"
-            docker exec $contName psql -U postgres -c "create database $newDbName"
+            docker exec $contName psql -U postgres -c "create database $newDbName" | debug-cat
         fi
 
         docker exec $contName psql -U postgres $newDbName -f /dump/$dumpDbName/latest/dump.sql > restore_vol_$volName.log

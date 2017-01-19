@@ -127,20 +127,21 @@ cloudbreak-conf-db() {
         env-import CB_DB_ROOT_PATH "/var/lib/boot2docker/cloudbreak"
     fi
 
+    env-import COMMON_DB_VOL common
     env-import CB_DB_ENV_USER "postgres"
-    env-import CB_DB_ENV_DB ""
+    env-import CB_DB_ENV_DB "cbdb"
     env-import CB_DB_ENV_PASS ""
     env-import CB_DB_ENV_SCHEMA "public"
     env-import CB_HBM2DDL_STRATEGY "validate"
 
     env-import PERISCOPE_DB_USER "postgres"
-    env-import PERISCOPE_DB_NAME ""
+    env-import PERISCOPE_DB_NAME "periscopedb"
     env-import PERISCOPE_DB_PASS ""
     env-import PERISCOPE_DB_SCHEMA_NAME "public"
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
 
-    env-import IDENTITY_DB_URL "uaadb.service.consul:5434"
-    env-import IDENTITY_DB_NAME "postgres"
+    env-import IDENTITY_DB_URL "commondb.service.consul:5432"
+    env-import IDENTITY_DB_NAME "uaadb"
     env-import IDENTITY_DB_USER "postgres"
     env-import IDENTITY_DB_PASS ""
 }
@@ -433,7 +434,7 @@ spring_profiles: postgresql
 
 database:
   driverClassName: org.postgresql.Driver
-  url: jdbc:postgresql://\${IDENTITY_DB_URL}/\${IDENTITY_DB_NAME:postgres}
+  url: jdbc:postgresql://\${IDENTITY_DB_URL}/\${IDENTITY_DB_NAME}
   username: \${IDENTITY_DB_USER:postgres}
   password: \${IDENTITY_DB_PASS:}
 
