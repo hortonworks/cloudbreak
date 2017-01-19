@@ -80,6 +80,7 @@ public class ArmTemplateBuilder {
             model.put("existingSubnetName", armUtils.getCustomSubnetId(network));
             model.put("noPublicIp", armUtils.isPrivateIp(network));
             model.put("noFirewallRules", armUtils.isNoSecurityGroups(network));
+            model.put("userDefinedTags", cloudStack.getTags());
             String generatedTemplate = processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;

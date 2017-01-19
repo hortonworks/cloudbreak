@@ -104,6 +104,13 @@
                     </#list>
                  ],
                  </#if>
+                 <#if userDefinedTags?? && userDefinedTags?has_content>
+                 "tags": {
+                      <#list userDefinedTags?keys as key>
+                      "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                      </#list>
+                 },
+                 </#if>
                  "name": "[parameters('virtualNetworkNamePrefix')]",
                  "location": "[parameters('region')]",
                  "properties": {
@@ -130,6 +137,13 @@
                "type": "Microsoft.Network/networkSecurityGroups",
                "name": "[variables('${group?replace('_', '')}secGroupName')]",
                "location": "[parameters('region')]",
+               <#if userDefinedTags?? && userDefinedTags?has_content>
+               "tags": {
+                    <#list userDefinedTags?keys as key>
+                    "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                    </#list>
+               },
+               </#if>
                "properties": {
                "securityRules": [
                    {
@@ -173,6 +187,13 @@
                    "type": "Microsoft.Network/publicIPAddresses",
                    "name": "[concat(parameters('publicIPNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
+                   <#if userDefinedTags?? && userDefinedTags?has_content>
+                   "tags": {
+                        <#list userDefinedTags?keys as key>
+                        "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                        </#list>
+                   },
+                   </#if>
                    "properties": {
                        "publicIPAllocationMethod": "Dynamic"
                    }
@@ -183,6 +204,13 @@
                    "type": "Microsoft.Network/networkInterfaces",
                    "name": "[concat(parameters('nicNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
+                   <#if userDefinedTags?? && userDefinedTags?has_content>
+                   "tags": {
+                        <#list userDefinedTags?keys as key>
+                        "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                        </#list>
+                   },
+                   </#if>
                    "dependsOn": [
                        <#if !noFirewallRules>
                        "[concat('Microsoft.Network/networkSecurityGroups/', variables('${instance.groupName?replace('_', '')}secGroupName'))]"
@@ -228,6 +256,13 @@
                    "dependsOn": [
                        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
                    ],
+                   <#if userDefinedTags?? && userDefinedTags?has_content>
+                   "tags": {
+                        <#list userDefinedTags?keys as key>
+                        "${key}": "${userDefinedTags[key]}"<#if (key_index + 1) != userDefinedTags?size>,</#if>
+                        </#list>
+                   },
+                   </#if>
                    "properties": {
                        "hardwareProfile": {
                            "vmSize": "${instance.flavor}"

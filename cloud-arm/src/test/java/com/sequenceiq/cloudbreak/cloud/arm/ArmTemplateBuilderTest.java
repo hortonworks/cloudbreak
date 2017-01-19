@@ -26,6 +26,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
@@ -158,6 +159,34 @@ public class ArmTemplateBuilderTest {
         gson.fromJson(templateString, Map.class);
         assertThat(templateString, not(containsString("publicIPAddress")));
         assertThat(templateString, not(containsString("networkSecurityGroups")));
+    }
+
+    @Test
+    public void buildNoPublicIpNoFirewallWithTags() {
+        //GIVEN
+        Network network = new Network(new Subnet("testSubnet"));
+        when(armUtils.isPrivateIp(any())).then(invocation -> true);
+        when(armUtils.isNoSecurityGroups(any())).then(invocation -> true);
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
+        Map<String, String> userDefinedTags = Maps.newHashMap();
+        userDefinedTags.put("testtagkey1", "testtagvalue1");
+        userDefinedTags.put("testtagkey2", "testtagvalue2");
+        cloudStack = new CloudStack(groups, network, image, parameters, userDefinedTags, armTemplateBuilder.getTemplateString());
+        armStackView = new ArmStackView("mystack", 3, groups, armStorageView);
+        //WHEN
+        when(armStorage.getImageStorageName(any(ArmCredentialView.class), any(CloudContext.class), Mockito.anyString(),
+                any(ArmAttachedStorageOption.class))).thenReturn("test");
+        when(armStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+        String templateString = armTemplateBuilder.build(stackName, armCredentialView, armStackView, cloudContext, cloudStack);
+        //THEN
+        gson.fromJson(templateString, Map.class);
+        assertThat(templateString, not(containsString("publicIPAddress")));
+        assertThat(templateString, not(containsString("networkSecurityGroups")));
+        assertThat(templateString, containsString("testtagkey"));
+        assertThat(templateString, containsString("testtagvalue"));
     }
 
     @Test
