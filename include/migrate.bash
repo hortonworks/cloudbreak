@@ -18,7 +18,7 @@ create-migrate-log() {
 }
 
 migrate-startdb() {
-    compose-up --no-recreate cbdb pcdb uaadb
+    compose-up --no-recreate commondb
 }
 
 migrateDebug() {
@@ -33,7 +33,7 @@ migrateError() {
 migrate-execute-mybatis-migrations() {
     local docker_image_name=$1 && shift
     local service_name=$1 && shift
-    local container_name=$(compose-get-container $service_name)
+    local container_name=$(compose-get-container commondb)
     migrateDebug "Migration command on $service_name with params: '$*' will be executed on container: $container_name"
     if [[ ! "$container_name" ]]; then
         migrateError "DB container with matching name is not running. Expected name: .*$service_name.*"
@@ -55,6 +55,7 @@ migrate-execute-mybatis-migrations() {
     fi
     migrateDebug "Scripts location:  $new_scripts_location"
     local migrateResult=$(docker run \
+        -e DB_ENV_POSTGRES_SCHEMA=$service_name \
         --label cbreak.sidekick=true \
         --link $container_name:db \
         -v $new_scripts_location:/migrate/scripts \
@@ -81,7 +82,7 @@ migrate-one-db() {
             local scripts_location=${CB_SCHEMA_SCRIPTS_LOCATION}
             local docker_image_name=${DOCKER_IMAGE_CLOUDBREAK}:${DOCKER_TAG_CLOUDBREAK}
             ;;
-        pcdb)
+        periscopedb)
             local scripts_location=${PERISCOPE_SCHEMA_SCRIPTS_LOCATION}
             local docker_image_name=${DOCKER_IMAGE_CLOUDBREAK_PERISCOPE}:${DOCKER_TAG_PERISCOPE}
             ;;
@@ -106,8 +107,8 @@ execute-migration() {
         migrate-one-db uaadb pending
         migrate-one-db cbdb up
         migrate-one-db cbdb pending
-        migrate-one-db pcdb up
-        migrate-one-db pcdb pending
+        migrate-one-db periscopedb up
+        migrate-one-db periscopedb pending
     else
         VERBOSE_MIGRATION=true
         migrate-one-db "$@"
