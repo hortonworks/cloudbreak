@@ -2,6 +2,42 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
+## [v1.6.2]
+
+### Fixed
+
+- return login error if user has multiple accounts in LDAP/AD
+- extra logging when creating the Ambari client
+- avoid deploy failures, due to concurrency in Salt highstate
+- incorrect error message collection from nodes during Salt highstate
+- reduce host name length on Azure in order to be sure that the fully qualified hostname is under 64 chars
+- do not overwrite manually changed kerberos config
+- 'securitygroup create' shell command caused a validation error due to missing provider value
+- autocreate default security groups for every provider
+- fix bower retry in web dockerfile to avoid UI build fails
+- Cloudbreak does not work with CentOS on AWS
+- Shiro config of Zepplein is always overwritten by Cloudbreak 
+- fix cluster sync when a new service is added to Ambari through the wizard
+- rename all open port security group to denote unsecure
+- remove all port open security group as default
+
+### Added
+
+- Azure VMs supporting private deployments (when VMs have private ip only)
+- do not use the same host names for every cluster on Azure
+- configurable stack name prefix length in Azure host names
+- set up default HDP version
+- implement existing MIT KDC
+- existing AD support
+- support exsisting security group on AWS
+- separate security groups per provider
+- ability to specify image id on API to launch a cluster from that base AMI
+
+### Changed
+
+- OS parameter is optional when providing the HDP repo
+- modularize integration test Makefile to sh scripts 
+
 ## [v1.6.1]
 
 ### Fixed
