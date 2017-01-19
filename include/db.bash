@@ -35,6 +35,8 @@ db-dump() {
     fi
 
     local contName=cbreak_dump
+    docker rm -f $contName 2>/dev/null || :
+
     docker run -d \
         --name $contName \
         -v $dbVolume:/var/lib/postgresql/data \
@@ -98,12 +100,14 @@ db-restore-volume-from-dump() {
     local dbCreatedFile="/var/lib/postgresql/data/.created"
     
     local contName=cbreak_initdb
+    docker rm -f $contName 2>/dev/null || :
     debug "test if $dbDoneFile exists ..."
     if docker run --rm -v $volName:/var/lib/postgresql/data/ alpine:$DOCKER_TAG_ALPINE test -e $dbDoneFile &>/dev/null; then
         info "db initaliazation is already DONE"
     else
         debug "creates volume: $volName"
         local contName=cbreak_restore
+        docker rm -f $contName 2>/dev/null || :
         docker run -d \
             --name $contName \
             -v $volName:/var/lib/postgresql/data \
