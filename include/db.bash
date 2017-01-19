@@ -26,7 +26,7 @@ db-dump() {
         _exit 1
     fi
 
-    if docker run --rm -v $dbVolume:/data alpine:$DOCKER_TAG_ALPINE test -f /data/PG_VERSION; then
+    if docker run --rm -v $dbVolume:/data alpine:$DOCKER_TAG_ALPINE test -f /data/PG_VERSION &> /dev/null; then
         debug "postgres DB exists on volume: $dbVolume"
     else
         error "$dbVolume doesnt contains a postgres DB"
@@ -53,10 +53,10 @@ db-dump() {
     docker exec $contName sh -c 'pg_dump -U postgres > '$dumpDir'/dump.sql' | debug-cat
 
     debug "create latest simlink $latestDir -> $dumpDir"
-    docker exec $contName sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir" 
+    docker exec $contName sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir" 2>&1 | debug-cat
 
-    docker stop $contName
-    [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName
+    docker stop $contName | debug-cat
+    [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName | debug-cat
 }
 
 db-merge-3-to-1() {
@@ -106,7 +106,7 @@ db-restore-volume-from-dump() {
               | debug-cat
 
         local maxtry=${RETRY:=30}
-        while (! docker exec $contName test -e $dbCreatedFile ) && (( maxtry -= 1 > 0 )); do
+        while (! docker exec $contName test -e $dbCreatedFile &> /dev/null ) && (( maxtry -= 1 > 0 )); do
             debug "waiting for DB: $newDbName created [tries left: $maxtry] ..."
             sleep 1;
         done
@@ -119,7 +119,7 @@ db-restore-volume-from-dump() {
         fi
 
         docker exec $contName psql -U postgres $newDbName -f /dump/$dumpDbName/latest/dump.sql > restore_vol_$volName.log
-        docker exec $contName touch $dbDoneFile
+        docker exec $contName touch $dbDoneFile | debug-cat
 
         docker stop $contName
         [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName
