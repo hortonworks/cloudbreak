@@ -102,7 +102,7 @@ type StackRequest struct {
 
 	/* stack related tags
 	 */
-	Tags map[string]string `json:"tags,omitempty"`
+	Tags map[string]interface{} `json:"tags,omitempty"`
 }
 
 // Validate validates this stack request
@@ -125,11 +125,6 @@ func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateParameters(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateTags(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -219,19 +214,6 @@ func (m *StackRequest) validateParameters(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Required("parameters", "body", m.Parameters); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *StackRequest) validateTags(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.Tags) { // not required
-		return nil
-	}
-
-	if err := validate.Required("tags", "body", m.Tags); err != nil {
 		return err
 	}
 

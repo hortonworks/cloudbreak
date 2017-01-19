@@ -15,10 +15,12 @@ import (
 // with the default values initialized.
 func NewDeleteStacksAccountNameParams() *DeleteStacksAccountNameParams {
 	var (
-		forcedDefault bool = bool(false)
+		deleteDependenciesDefault bool = bool(false)
+		forcedDefault             bool = bool(false)
 	)
 	return &DeleteStacksAccountNameParams{
-		Forced: &forcedDefault,
+		DeleteDependencies: &deleteDependenciesDefault,
+		Forced:             &forcedDefault,
 	}
 }
 
@@ -27,10 +29,18 @@ for the delete stacks account name operation typically these are written to a ht
 */
 type DeleteStacksAccountNameParams struct {
 
+	/*DeleteDependencies*/
+	DeleteDependencies *bool
 	/*Forced*/
 	Forced *bool
 	/*Name*/
 	Name string
+}
+
+// WithDeleteDependencies adds the deleteDependencies to the delete stacks account name params
+func (o *DeleteStacksAccountNameParams) WithDeleteDependencies(deleteDependencies *bool) *DeleteStacksAccountNameParams {
+	o.DeleteDependencies = deleteDependencies
+	return o
 }
 
 // WithForced adds the forced to the delete stacks account name params
@@ -49,6 +59,22 @@ func (o *DeleteStacksAccountNameParams) WithName(name string) *DeleteStacksAccou
 func (o *DeleteStacksAccountNameParams) WriteToRequest(r client.Request, reg strfmt.Registry) error {
 
 	var res []error
+
+	if o.DeleteDependencies != nil {
+
+		// query param deleteDependencies
+		var qrDeleteDependencies bool
+		if o.DeleteDependencies != nil {
+			qrDeleteDependencies = *o.DeleteDependencies
+		}
+		qDeleteDependencies := swag.FormatBool(qrDeleteDependencies)
+		if qDeleteDependencies != "" {
+			if err := r.SetQueryParam("deleteDependencies", qDeleteDependencies); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	if o.Forced != nil {
 

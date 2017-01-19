@@ -92,7 +92,7 @@ var fileSystemTypeTypePropEnum []interface{}
 func (m *FileSystem) validateTypeEnum(path, location string, value string) error {
 	if fileSystemTypeTypePropEnum == nil {
 		var res []string
-		if err := json.Unmarshal([]byte(`["DASH","WASB_INTEGRATED","GCS","WASB"]`), &res); err != nil {
+		if err := json.Unmarshal([]byte(`["DASH","WASB_INTEGRATED","GCS","WASB","ADLS"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {

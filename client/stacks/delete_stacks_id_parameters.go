@@ -15,10 +15,12 @@ import (
 // with the default values initialized.
 func NewDeleteStacksIDParams() *DeleteStacksIDParams {
 	var (
-		forcedDefault bool = bool(false)
+		deleteDependenciesDefault bool = bool(false)
+		forcedDefault             bool = bool(false)
 	)
 	return &DeleteStacksIDParams{
-		Forced: &forcedDefault,
+		DeleteDependencies: &deleteDependenciesDefault,
+		Forced:             &forcedDefault,
 	}
 }
 
@@ -27,10 +29,18 @@ for the delete stacks ID operation typically these are written to a http.Request
 */
 type DeleteStacksIDParams struct {
 
+	/*DeleteDependencies*/
+	DeleteDependencies *bool
 	/*Forced*/
 	Forced *bool
 	/*ID*/
 	ID int64
+}
+
+// WithDeleteDependencies adds the deleteDependencies to the delete stacks ID params
+func (o *DeleteStacksIDParams) WithDeleteDependencies(deleteDependencies *bool) *DeleteStacksIDParams {
+	o.DeleteDependencies = deleteDependencies
+	return o
 }
 
 // WithForced adds the forced to the delete stacks ID params
@@ -49,6 +59,22 @@ func (o *DeleteStacksIDParams) WithID(id int64) *DeleteStacksIDParams {
 func (o *DeleteStacksIDParams) WriteToRequest(r client.Request, reg strfmt.Registry) error {
 
 	var res []error
+
+	if o.DeleteDependencies != nil {
+
+		// query param deleteDependencies
+		var qrDeleteDependencies bool
+		if o.DeleteDependencies != nil {
+			qrDeleteDependencies = *o.DeleteDependencies
+		}
+		qDeleteDependencies := swag.FormatBool(qrDeleteDependencies)
+		if qDeleteDependencies != "" {
+			if err := r.SetQueryParam("deleteDependencies", qDeleteDependencies); err != nil {
+				return err
+			}
+		}
+
+	}
 
 	if o.Forced != nil {
 
