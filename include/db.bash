@@ -20,6 +20,7 @@ db-getpostgres-image-version() {
 db-dump() {
     declare desc="creates an sql dump from the db volume"
     declare dbVolume=${1:? required: dbVolume}
+    declare dbName=${2:-postgres}
 
     if ! ( [[ $dbVolume =~ ^/ ]] || docker volume inspect $dbVolume &>/dev/null ); then
         error "docker volume $dbVolume doesnt exists"
@@ -41,7 +42,13 @@ db-dump() {
         postgres:$(db-getpostgres-image-version $dbVolume) | debug-cat
 
     local timeStamp=$(date "+%Y%m%d_%H%M")
-    local volDir="/dump/${dbVolume##*/}"
+    local volDir="/dump"
+    if [[ "$dbName" == "postgres" ]] ; then
+        volDir+="/${dbVolume##*/}"
+    else
+        volDir+="/${dbName}"
+    fi
+
     local dumpDir="$volDir/${timeStamp}"
     local latestDir="$volDir/latest"
     
@@ -50,7 +57,7 @@ db-dump() {
 
     db-wait-for-db-cont $contName
 
-    docker exec $contName sh -c 'pg_dump -U postgres > '$dumpDir'/dump.sql' | debug-cat
+    docker exec $contName sh -c 'pg_dump -U postgres '$dbName' > '$dumpDir'/dump.sql' | debug-cat
 
     debug "create latest simlink $latestDir -> $dumpDir"
     docker exec $contName sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir" 2>&1 | debug-cat
