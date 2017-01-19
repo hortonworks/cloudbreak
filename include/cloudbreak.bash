@@ -434,8 +434,8 @@ spring_profiles: postgresql
 database:
   driverClassName: org.postgresql.Driver
   url: jdbc:postgresql://\${IDENTITY_DB_URL}/\${IDENTITY_DB_NAME}
-  username: \${IDENTITY_DB_USER:postgres}
-  password: \${IDENTITY_DB_PASS:}
+  username: \${IDENTITY_DB_USER}
+  password: \${IDENTITY_DB_PASS}
 
 zones:
  internal:
