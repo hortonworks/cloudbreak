@@ -249,7 +249,7 @@ consul:
         - https_proxy=$CB_HTTPS_PROXY
     volumes:
         - "/var/run/docker.sock:/var/run/docker.sock"
-        - "$CB_DB_ROOT_PATH/consul-data:/data"
+        - consul-data:/data
     ports:
         - "$PRIVATE_IP:53:8600/udp"
         - "8400:8400"
