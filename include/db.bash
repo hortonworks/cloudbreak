@@ -72,6 +72,13 @@ db-merge-3-to-1() {
     declare desc="Merge 3 db into 1 single common db"
 
     cloudbreak-config
+    
+    if docker volume inspect $COMMON_DB_VOL &>/dev/null; then
+        debug "no db merge 3 to 1 is needed"
+        return
+    fi
+    
+    info $desc
     for db in cbdb uaadb periscopedb; do
         db-dump $CB_DB_ROOT_PATH/$db
         db-restore-volume-from-dump $COMMON_DB_VOL $db
