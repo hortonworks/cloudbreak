@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/stacks"
 	"github.com/hortonworks/hdc-cli/models"
@@ -64,7 +65,8 @@ func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 	var skeleton ClusterSkeleton
 	err = json.Unmarshal(content, &skeleton)
 	if err != nil {
-		logErrorAndExit(assembleClusterSkeleton, err.Error())
+		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
+		logErrorAndExit(assembleClusterSkeleton, msg)
 	}
 
 	log.Infof("[AssembleClusterSkeleton] assemble cluster based on skeleton: %s", skeleton.Json())
