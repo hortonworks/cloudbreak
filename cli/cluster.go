@@ -324,6 +324,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			inputs = append(inputs, &models.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
 		}
 
+		enableKnoxGateway := true
 		clusterReq := models.ClusterRequest{
 			Name:                      skeleton.ClusterName,
 			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
@@ -334,6 +335,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			RdsConfigID:               rdsId,
 			BlueprintInputs:           inputs,
 			BlueprintCustomProperties: skeleton.Configurations,
+			EnableKnoxGateway:         &enableKnoxGateway,
 		}
 
 		resp, err := postCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})

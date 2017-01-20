@@ -69,6 +69,10 @@ type ClusterRequest struct {
 	 */
 	EmailTo *string `json:"emailTo,omitempty"`
 
+	/* enable Knox gateway security
+	 */
+	EnableKnoxGateway *bool `json:"enableKnoxGateway,omitempty"`
+
 	/* enable Kerberos security
 	 */
 	EnableSecurity *bool `json:"enableSecurity,omitempty"`

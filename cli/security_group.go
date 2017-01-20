@@ -11,7 +11,7 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 )
 
-var SECURITY_GROUP_DEFAULT_PORTS = []string{"22", "443", "9443"}
+var SECURITY_GROUP_DEFAULT_PORTS = []string{"22", "9443"}
 
 func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
 	defer timeTrack(time.Now(), "create security group")
@@ -40,7 +40,7 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton) *models.SecurityGroupR
 	var secGroupName string
 	defaultPorts := SECURITY_GROUP_DEFAULT_PORTS
 	if skeleton.WebAccess {
-		defaultPorts = append(defaultPorts, "8080", "9995")
+		defaultPorts = append(defaultPorts, "8443")
 		secGroupName = "all-services-port" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	} else {
 		secGroupName = "only-ssh-and-ssl" + strconv.FormatInt(time.Now().UnixNano(), 10)

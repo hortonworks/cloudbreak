@@ -243,7 +243,7 @@ func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 
 	sm := make(map[string][]*models.SecurityRuleResponse)
 	rules := make([]*models.SecurityRuleResponse, 0)
-	rules = append(rules, &models.SecurityRuleResponse{Ports: "22,443,9443"})
+	rules = append(rules, &models.SecurityRuleResponse{Ports: "22,9443"})
 	sm["master"] = rules
 
 	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil)

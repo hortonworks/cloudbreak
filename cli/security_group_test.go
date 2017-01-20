@@ -74,7 +74,7 @@ func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
 		t.Fatal("missing security group rule")
 	}
 	rule := actualGroup.SecurityRules[0]
-	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "8080", "9995")
+	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "8443")
 	if rule.Ports != strings.Join(expectedPorts, ",") {
 		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), rule.Ports)
 	}
