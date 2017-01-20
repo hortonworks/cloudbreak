@@ -229,6 +229,10 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
 		credReq := createCredentialRequest(credentialName, getCredential("aws-access"), skeleton.SSHKeyName)
+		userDefinedTags := make(map[string]interface{})
+		if len(skeleton.Tags) > 0 {
+			userDefinedTags[USER_TAGS] = skeleton.Tags
+		}
 
 		stackReq := models.StackRequest{
 			Name:            skeleton.ClusterName,
@@ -243,6 +247,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			AmbariVersion:   &ambariVersion,
 			HdpVersion:      &skeleton.HDPVersion,
 			Orchestrator:    &orchestrator,
+			Tags:            userDefinedTags,
 		}
 
 		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
@@ -489,7 +494,6 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 				skeleton.HiveMetastore.Name = rdsConfig.Name
 			}()
 		}
-
 		wg.Wait()
 	}
 }
@@ -528,6 +532,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 			WebAccess:    true,
 			InstanceRole: "CREATE",
 			Network:      &Network{},
+			Tags:         make(map[string]string, 0),
 		},
 		HiveMetastore:  &HiveMetastore{},
 		Configurations: []models.Configurations{},

@@ -64,6 +64,10 @@ var AWSCreateClusterSkeletonHelp = `
     "VpcId": "vpc-12345678",                                               // Identifier of an existing VPC where the cluster will be provisioned
     "SubnetId": "subnet-12345678"                                          // Identifier of an existing subnet where the cluster will be provisioned
   },
+  "Tags": {                                                                // (Optional) User defined tags for the cloud provider resources, like instances
+    "tag-1": "value-1",
+    "tag-2": "value-2"
+  },
   "HiveMetastore": {                                                       // (Optional) You can specify an existing Hive metastore or register a new one
    "Name": "my-hive-metastore",                                            // Name of the Hive metastore, if it's an existing one only provide the name, otherwise one will be created with this name
    "Username": "hive-metastore-username",                                  // Username of the Hive metastore

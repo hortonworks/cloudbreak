@@ -3,12 +3,13 @@ package cli
 import "github.com/hortonworks/hdc-cli/models"
 
 const (
-	MASTER   = "master"
-	WORKER   = "worker"
-	COMPUTE  = "compute"
-	POSTGRES = "POSTGRES"
-	PRE      = "pre"
-	POST     = "post"
+	MASTER    = "master"
+	WORKER    = "worker"
+	COMPUTE   = "compute"
+	POSTGRES  = "POSTGRES"
+	PRE       = "pre"
+	POST      = "post"
+	USER_TAGS = "userDefined"
 )
 
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5, 2.6}
@@ -31,6 +32,7 @@ type ClusterSkeletonBase struct {
 	InstanceRole             string             `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
 	Network                  *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
 	ClusterInputs            map[string]string  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
+	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
 }
 
 type ClusterSkeleton struct {

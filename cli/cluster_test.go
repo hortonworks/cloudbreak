@@ -19,6 +19,7 @@ func TestCreateClusterImplFull(t *testing.T) {
 			ClusterName:   "test-cluster",
 			ClusterInputs: inputs,
 			InstanceRole:  "role",
+			Tags:          map[string]string{"tag-key": "tag-value"},
 		},
 		HiveMetastore: &HiveMetastore{},
 	}

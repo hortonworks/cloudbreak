@@ -185,6 +185,17 @@ func (c *ClusterSkeletonResult) fill(
 		c.Configurations = stack.Cluster.BlueprintCustomProperties
 	}
 
+	var tags = make(map[string]string, 0)
+	if len(stack.Tags) > 0 {
+		userTags := stack.Tags[USER_TAGS]
+		if userTags != nil {
+			for k, v := range userTags.(map[string]interface{}) {
+				tags[k] = v.(string)
+			}
+		}
+	}
+	c.Tags = tags
+
 	return nil
 }
 
