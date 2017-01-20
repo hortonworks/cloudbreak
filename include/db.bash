@@ -64,24 +64,31 @@ db-dump() {
     debug "create latest simlink $latestDir -> $dumpDir"
     docker exec $contName sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir" 2>&1 | debug-cat
 
-    docker stop $contName | debug-cat
-    [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName | debug-cat
+    db-stop-database $contName
 }
 
-db-merge-3-to-1() {
-    declare desc="Merge 3 db into 1 single common db"
+db-initialize-databases() {
+    declare desc="Initialize and migrate databases"
 
     cloudbreak-config
     
     if docker volume inspect $COMMON_DB_VOL &>/dev/null; then
-        debug "no db merge 3 to 1 is needed"
+        debug "no db initialization and migration is needed"
         return
     fi
     
     info $desc
     for db in cbdb uaadb periscopedb; do
-        db-dump $CB_DB_ROOT_PATH/$db
-        db-restore-volume-from-dump $COMMON_DB_VOL $db
+        if docker run --rm -v $CB_DB_ROOT_PATH/$db:/data alpine:$DOCKER_TAG_ALPINE test -f /data/PG_VERSION &> /dev/null; then
+            db-dump $CB_DB_ROOT_PATH/$db
+            db-restore-volume-from-dump $COMMON_DB_VOL $db
+        else
+            debug "no data to migrate from $CB_DB_ROOT_PATH/$db"
+            local contName=cbreak_create
+            db-start-database $contName $COMMON_DB_VOL
+            db-create-database $contName $db
+            db-stop-database $contName
+        fi
     done
 }
 
@@ -96,6 +103,49 @@ db-wait-for-db-cont() {
     done
 }
 
+db-start-database() {
+    declare desc="Start a postgresql database and wait for readyness"
+    declare contName=${1:? required: contName}
+    declare volName=${2:? required: volName}
+    local dbCreatedFile="/var/lib/postgresql/data/.created"
+
+    docker rm -f $contName 2>/dev/null || :
+    docker run -d \
+        --name $contName \
+        -v $volName:/var/lib/postgresql/data \
+        -v $DB_DUMP_VOLUME:/dump \
+        postgres:$DOCKER_TAG_POSTGRES \
+        bash -c "echo 'touch $dbCreatedFile' > /docker-entrypoint-initdb.d/created.sh && /docker-entrypoint.sh postgres" \
+            | debug-cat
+
+    local maxtry=${RETRY:=30}
+    while (! docker exec $contName test -e $dbCreatedFile &> /dev/null ) && (( maxtry -= 1 > 0 )); do
+        debug "waiting for DB [tries left: $maxtry] ..."
+        sleep 1;
+    done
+
+    db-wait-for-db-cont $contName
+}
+
+db-stop-database() {
+    declare desc="Stop a postgresql database if needed"
+    declare contName=${1:? required: contName}
+
+    docker stop $contName | debug-cat
+    [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName | debug-cat
+}
+
+db-create-database() {
+    declare desc="Creates new empty database"
+    declare contName=${1:? required: contName}
+    declare newDbName=${2:? required: newDbName}
+
+    if [[ $newDbName != "postgres" ]]; then
+        debug "create new database: $newDbName"
+        docker exec $contName psql -U postgres -c "create database $newDbName" | debug-cat
+    fi
+}
+
 db-restore-volume-from-dump() {
     declare desc="initialize the DB if needed, from a previous dump"
     declare volName=${1:? required: new volName}
@@ -104,7 +154,6 @@ db-restore-volume-from-dump() {
 
     debug "db: $newDbName in volume: $volName will be restore from: $dumpDbName dump"
     local dbDoneFile="/var/lib/postgresql/data/.${newDbName}.done"
-    local dbCreatedFile="/var/lib/postgresql/data/.created"
     
     local contName=cbreak_initdb
     docker rm -f $contName 2>/dev/null || :
@@ -114,33 +163,14 @@ db-restore-volume-from-dump() {
     else
         debug "creates volume: $volName"
         local contName=cbreak_restore
-        docker rm -f $contName 2>/dev/null || :
-        docker run -d \
-            --name $contName \
-            -v $volName:/var/lib/postgresql/data \
-            -v $DB_DUMP_VOLUME:/dump \
-            postgres:$DOCKER_TAG_POSTGRES \
-            bash -c "echo 'touch $dbCreatedFile' > /docker-entrypoint-initdb.d/created.sh && /docker-entrypoint.sh postgres" \
-              | debug-cat
 
-        local maxtry=${RETRY:=30}
-        while (! docker exec $contName test -e $dbCreatedFile &> /dev/null ) && (( maxtry -= 1 > 0 )); do
-            debug "waiting for DB: $newDbName created [tries left: $maxtry] ..."
-            sleep 1;
-        done
-
-        db-wait-for-db-cont $contName
-
-        if [[ $newDbName != "postgres" ]]; then
-            debug "create new database: $dbName"
-            docker exec $contName psql -U postgres -c "create database $newDbName" | debug-cat
-        fi
+        db-start-database $contName $volName
+        db-create-database $contName $newDbName
 
         docker exec $contName psql -U postgres $newDbName -f /dump/$dumpDbName/latest/dump.sql > restore_vol_$volName.log
         docker exec $contName touch $dbDoneFile | debug-cat
 
-        docker stop $contName
-        [[ "$REMOVE_CONTAINER" ]] && docker rm -f $contName
+        db-stop-database $contName
     fi
 }
 

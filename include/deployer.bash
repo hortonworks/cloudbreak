@@ -391,7 +391,7 @@ start-wait-cmd() {
 start-requested-services() {
     declare services="$@"
 
-    db-merge-3-to-1
+    db-initialize-databases
     deployer-generate
 
     if ! [[ "$services" ]]; then
