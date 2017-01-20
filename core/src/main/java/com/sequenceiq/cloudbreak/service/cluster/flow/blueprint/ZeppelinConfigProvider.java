@@ -12,9 +12,9 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 import freemarker.template.Configuration;
@@ -30,9 +30,6 @@ public class ZeppelinConfigProvider {
     //This is needed since the API has hanged beetween AMbari 2.4 and 2.5
     private static final String[] ZEPPELIN_MASTER_CONFIG_FILES = {"zeppelin-shiro-ini", "zeppelin-env"};
 
-    @Value("${cb.knox.gateway.enable:false}")
-    private boolean knoxGateway;
-
     @Inject
     private Configuration freemarkerConfiguration;
 
@@ -42,18 +39,18 @@ public class ZeppelinConfigProvider {
     public String addToBlueprint(Stack stack, String blueprintText) {
         if (blueprintProcessor.componentExistsInBlueprint(ZEPPELIN_MASTER, blueprintText)) {
             LOGGER.info("Zeppelin exists in Blueprint");
-            List<BlueprintConfigurationEntry> configs = getConfigs(stack);
+            List<BlueprintConfigurationEntry> configs = getConfigs(stack.getCluster());
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, false);
         }
         return blueprintText;
     }
 
-    private List<BlueprintConfigurationEntry> getConfigs(Stack stack) {
+    private List<BlueprintConfigurationEntry> getConfigs(Cluster cluster) {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         try {
             Map<String, Object> model = new HashMap<>();
-            model.put("zeppelin_admin_password", stack.getCluster().getPassword());
-            model.put("knoxGateway", knoxGateway);
+            model.put("zeppelin_admin_password", cluster.getPassword());
+            model.put("knoxGateway", cluster.getEnableKnoxGateway());
             String shiroIniContent = processTemplateIntoString(freemarkerConfiguration.getTemplate("hdp/zeppelin/shiro_ini_content.ftl", "UTF-8"), model);
             for (String configFile : ZEPPELIN_MASTER_CONFIG_FILES) {
                 configs.add(new BlueprintConfigurationEntry(configFile, "shiro_ini_content", shiroIniContent));

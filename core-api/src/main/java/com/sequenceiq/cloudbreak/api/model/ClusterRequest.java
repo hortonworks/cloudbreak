@@ -49,6 +49,9 @@ public class ClusterRequest {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_SECURITY)
     private Boolean enableSecurity = Boolean.FALSE;
 
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_KNOX_GATEWAY)
+    private Boolean enableKnoxGateway = Boolean.FALSE;
+
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
@@ -162,6 +165,14 @@ public class ClusterRequest {
 
     public void setEnableSecurity(Boolean enableSecurity) {
         this.enableSecurity = enableSecurity;
+    }
+
+    public Boolean getEnableKnoxGateway() {
+        return enableKnoxGateway;
+    }
+
+    public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
+        this.enableKnoxGateway = enableKnoxGateway;
     }
 
     public Boolean getLdapRequired() {

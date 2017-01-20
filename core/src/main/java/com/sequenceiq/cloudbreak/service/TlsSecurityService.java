@@ -193,11 +193,12 @@ public class TlsSecurityService {
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, String publicIp, Integer gatewayPort,
-            String privateIp, String hostname, SaltClientConfig saltClientConfig) throws CloudbreakSecuritySetupException {
+            String privateIp, String hostname, SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
         prepareCertDir(stackId);
         HttpClientConfig conf = buildTLSClientConfig(stackId, publicIp);
         return new GatewayConfig(publicIp, privateIp, hostname, gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(),
-                conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem());
+                conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
+                knoxGatewayEnabled);
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {

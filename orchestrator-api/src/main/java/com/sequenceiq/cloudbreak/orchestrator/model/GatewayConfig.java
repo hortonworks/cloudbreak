@@ -24,13 +24,15 @@ public class GatewayConfig {
 
     private final String signatureKey;
 
-    public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir) {
-        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null, null, null, null);
+    private final Boolean knoxGatewayEnabled;
+
+    public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir, Boolean knoxGatewayEnabled) {
+        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null, null, null, null, knoxGatewayEnabled);
     }
 
     public GatewayConfig(String publicAddress, String privateAddress, String hostname,
             Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
-            String signatureKey) {
+            String signatureKey, Boolean knoxGatewayEnabled) {
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
         this.hostname = hostname;
@@ -42,6 +44,7 @@ public class GatewayConfig {
         this.saltPassword = saltPassword;
         this.saltBootPassword = saltBootPassword;
         this.signatureKey = signatureKey;
+        this.knoxGatewayEnabled = knoxGatewayEnabled;
     }
 
     public String getPublicAddress() {
@@ -92,12 +95,17 @@ public class GatewayConfig {
         return signatureKey;
     }
 
+    public Boolean getKnoxGatewayEnabled() {
+        return knoxGatewayEnabled;
+    }
+
     @Override
     public String toString() {
         return "GatewayConfig{"
                 + "publicAddress='" + publicAddress + '\''
                 + ", privateAddress='" + privateAddress + '\''
                 + ", certificateDir='" + certificateDir + '\''
+                + ", knoxGatewayEnabled='" + knoxGatewayEnabled + '\''
                 + '}';
     }
 }

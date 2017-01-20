@@ -79,9 +79,6 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${rest.debug:false}")
     private boolean restDebug;
 
-    @Value("${cb.knox.gateway.enable:false}")
-    private boolean knoxGateway;
-
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
 
@@ -156,7 +153,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             LOGGER.info("Pillar saved, setting up grains...");
 
-            if (knoxGateway) {
+            if (gatewayConfig.getKnoxGatewayEnabled()) {
                 runSaltCommand(sc, new GrainAddRunner(server, allNodes, "gateway"), exitCriteriaModel);
             }
 

@@ -332,6 +332,10 @@ public class TestUtil {
         return stack(AVAILABLE, gcpCredential());
     }
 
+    public static Cluster cluster() {
+        return cluster(TestUtil.blueprint(), stack(AVAILABLE, gcpCredential()), 0L);
+    }
+
     public static List<Cluster> generateCluster(int count) {
         List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < count; i++) {
@@ -359,6 +363,7 @@ public class TestUtil {
         cluster.setPassword("admin");
         cluster.setSssdConfig(sssdConfig);
         cluster.setEnableShipyard(true);
+        cluster.setEnableKnoxGateway(false);
         RDSConfig rdsConfig = new RDSConfig();
         cluster.setRdsConfig(rdsConfig);
         cluster.setLdapConfig(ldapConfig());
