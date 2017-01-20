@@ -153,4 +153,4 @@ cb:
   smartsense.configure: false
   smartsense.id.pattern: A-9990%s-C-%s
 
-  image.catalog.url: https://s3-eu-west-1.amazonaws.com/cloudbreak-info/test-cb-image-catalog.json
+  image.catalog.url: https://s3-eu-west-1.amazonaws.com/cloudbreak-info/cb-image-catalog.json

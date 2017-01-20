@@ -121,15 +121,17 @@ public class ClusterBootstrapperTest {
         ReflectionTestUtils.setField(containerConfigService, "munchausenImageName", "sequence/testcont:0.1.1");
 
         when(gatewayConfigService.getGatewayConfig(any()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
-        when(gatewayConfigService.getGatewayConfig(any(), any()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1"));
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
+        when(gatewayConfigService.getGatewayConfig(any(), any(), any()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
         when(gatewayConfigService.getGatewayIp(any(Stack.class), any(InstanceMetaData.class))).thenReturn("10.0.0.1");
     }
 
     @Test
     public void bootstrapClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(ContainerBootstrapApiContext.class), anyInt(),
                 anyInt()))
@@ -143,7 +145,7 @@ public class ClusterBootstrapperTest {
         when(orchestratorRepository.save(any(Orchestrator.class))).thenReturn(new Orchestrator());
         underTest.bootstrapContainers(stack);
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any());
+        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any(), any());
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
         verify(containerBootstrapApiPollingService, times(1)).pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -156,6 +158,8 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenTimeOutComesInClusterAvailabilityPoller() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
         when(containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(ContainerBootstrapApiContext.class), anyInt(),
                 anyInt()))
@@ -169,7 +173,7 @@ public class ClusterBootstrapperTest {
 
         underTest.bootstrapContainers(stack);
 
-        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any());
+        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any(), any());
         verify(clusterBootstrapperErrorHandler, times(1))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
         verify(containerBootstrapApiPollingService, times(1)).pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -182,6 +186,8 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledMockContainerOrchestrator());
         when(containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(ContainerBootstrapApiContext.class), anyInt(),
                 anyInt()))
@@ -199,6 +205,8 @@ public class ClusterBootstrapperTest {
     @Test(expected = CloudbreakException.class)
     public void bootstrapClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedMockContainerOrchestrator());
         when(containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(ContainerBootstrapApiContext.class), anyInt(),
                 anyInt()))
@@ -216,6 +224,8 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapClusterWhenEverythingWorksNormallyWithMoreBootstrapSegment() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
+
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new TwoLengthMockContainerOrchestrator());
         when(containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(any(StatusCheckerTask.class), any(ContainerBootstrapApiContext.class), anyInt(),
                 anyInt()))
@@ -230,7 +240,7 @@ public class ClusterBootstrapperTest {
 
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
-        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any());
+        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any(), any());
         verify(containerBootstrapApiPollingService, times(1)).pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
                 any(ContainerBootstrapApiContext.class), anyInt(), anyInt());
         verify(containerClusterAvailabilityPollingService, times(3)).pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
@@ -240,6 +250,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenEverythingWorksNormally() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
@@ -257,7 +268,7 @@ public class ClusterBootstrapperTest {
 
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
-        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any());
+        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any(), any());
         verify(containerClusterAvailabilityPollingService, times(2)).pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
                 any(ContainerOrchestratorClusterContext.class), anyInt(), anyInt());
     }
@@ -265,6 +276,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenBootstrapHappeningInTwoSegments() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new TwoLengthMockContainerOrchestrator());
@@ -281,7 +293,7 @@ public class ClusterBootstrapperTest {
         underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
-        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any());
+        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any(), any());
         verify(containerClusterAvailabilityPollingService, times(3)).pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
                 any(ContainerOrchestratorClusterContext.class), anyInt(), anyInt());
     }
@@ -289,6 +301,7 @@ public class ClusterBootstrapperTest {
     @Test
     public void bootstrapNewNodesInClusterWhenClusterAvailabilityDropTimeout() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new MockContainerOrchestrator());
@@ -306,7 +319,7 @@ public class ClusterBootstrapperTest {
 
         verify(clusterBootstrapperErrorHandler, times(1))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
-        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any());
+        verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any(), any());
         verify(containerClusterAvailabilityPollingService, times(2)).pollWithTimeoutSingleFailure(any(StatusCheckerTask.class),
                 any(ContainerOrchestratorClusterContext.class), anyInt(), anyInt());
     }
@@ -314,6 +327,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CancellationException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorDropCancelledException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new CancelledNewNodesMockContainerOrchestrator());
@@ -333,6 +347,7 @@ public class ClusterBootstrapperTest {
     @Test(expected = CloudbreakException.class)
     public void bootstrapNewNodesInClusterWhenOrchestratorDropFailedException() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
+        stack.setCluster(TestUtil.cluster());
 
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
         when(containerOrchestratorResolver.get("SWARM")).thenReturn(new FailedNewNodesMockContainerOrchestrator());

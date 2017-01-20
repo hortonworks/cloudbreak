@@ -152,6 +152,9 @@ public class Cluster implements ProvisionEntity {
 
     private String emailTo;
 
+    @Column(nullable = false)
+    private Boolean enableKnoxGateway;
+
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
 
@@ -448,6 +451,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setEmailTo(String emailTo) {
         this.emailTo = emailTo;
+    }
+
+    public Boolean getEnableKnoxGateway() {
+        return enableKnoxGateway;
+    }
+
+    public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
+        this.enableKnoxGateway = enableKnoxGateway;
     }
 
     public ConfigStrategy getConfigStrategy() {

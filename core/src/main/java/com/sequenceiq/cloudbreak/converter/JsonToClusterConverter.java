@@ -32,6 +32,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setPassword(source.getPassword());
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? false : enableSecurity);
+        cluster.setEnableKnoxGateway(source.getEnableKnoxGateway());
         KerberosRequest kerberos = source.getKerberos();
         KerberosConfig kerberosConfig = new KerberosConfig();
         if (source.getKerberos() != null) {

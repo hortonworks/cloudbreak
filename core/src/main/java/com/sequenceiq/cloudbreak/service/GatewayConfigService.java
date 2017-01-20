@@ -22,13 +22,13 @@ public class GatewayConfigService {
     public GatewayConfig getGatewayConfig(Stack stack) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        return getGatewayConfig(stack, gatewayInstance);
+        return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getEnableKnoxGateway());
     }
 
-    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance)
+    public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Boolean knoxGatewayEnabled)
             throws CloudbreakSecuritySetupException {
         return tlsSecurityService.buildGatewayConfig(stack.getId(), getGatewayIp(stack, gatewayInstance),
-                stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), getSaltClientConfig(stack));
+                stack.getGatewayPort(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(), getSaltClientConfig(stack), knoxGatewayEnabled);
     }
 
     public String getGatewayIp(Stack stack) {

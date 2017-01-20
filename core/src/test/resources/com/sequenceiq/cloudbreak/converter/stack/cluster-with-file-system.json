@@ -6,6 +6,7 @@
   "userName" : "user",
   "password" : "pass",
   "enableSecurity": false,
+  "enableKnoxGateway": false,
   "kerberos" : {
     "masterKey": "masterkey",
     "admin" : "admin",
