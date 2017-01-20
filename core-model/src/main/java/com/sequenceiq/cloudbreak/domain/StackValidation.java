@@ -11,6 +11,8 @@ public class StackValidation implements ProvisionEntity {
 
     private Network network;
 
+    private Credential credential;
+
     public Set<HostGroup> getHostGroups() {
         return hostGroups;
     }
@@ -41,5 +43,13 @@ public class StackValidation implements ProvisionEntity {
 
     public void setNetwork(Network network) {
         this.network = network;
+    }
+
+    public Credential getCredential() {
+        return credential;
+    }
+
+    public void setCredential(Credential credential) {
+        this.credential = credential;
     }
 }

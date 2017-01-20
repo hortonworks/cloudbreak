@@ -35,9 +35,11 @@ public class StackValidationRequest implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String platform;
 
-    @NotNull
-    @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID, required = true)
+    @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID)
     private Long credentialId;
+
+    @ApiModelProperty(value = StackModelDescription.CREDENTIAL)
+    private CredentialRequest credential;
 
     private FileSystemRequest fileSystem;
 
@@ -111,5 +113,13 @@ public class StackValidationRequest implements JsonEntity {
 
     public void setCredentialId(Long credentialId) {
         this.credentialId = credentialId;
+    }
+
+    public CredentialRequest getCredential() {
+        return credential;
+    }
+
+    public void setCredential(CredentialRequest credential) {
+        this.credential = credential;
     }
 }

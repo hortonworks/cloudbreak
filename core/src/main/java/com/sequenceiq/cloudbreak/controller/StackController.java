@@ -28,16 +28,13 @@ import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemVali
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidationFailed;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesValidator;
-import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
-import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -73,12 +70,6 @@ public class StackController implements StackEndpoint {
 
     @Autowired
     private StackValidator stackValidator;
-
-    @Autowired
-    private NetworkService networkService;
-
-    @Autowired
-    private CredentialService credentialService;
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -215,8 +206,7 @@ public class StackController implements StackEndpoint {
         MDCBuilder.buildUserMdcContext(user);
         StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
         stackService.validateStack(stackValidation);
-        Credential credential = credentialService.get(request.getCredentialId());
-        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
+        CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
         fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem());
         return Response.status(Response.Status.ACCEPTED).build();
     }

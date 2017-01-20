@@ -18,11 +18,13 @@ import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Constraint;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 
 @Component
@@ -33,6 +35,9 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
 
     @Inject
     private NetworkService networkService;
+
+    @Inject
+    private CredentialService credentialService;
 
     @Inject
     @Qualifier("conversionService")
@@ -67,6 +72,20 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
                 stackValidation.setNetwork(network);
             } else {
                 throw new BadRequestException("Network does not configured for the validation request!");
+            }
+        } catch (AccessDeniedException e) {
+            throw new AccessDeniedException(
+                    String.format("Access to network '%s' is denied or network doesn't exist.", stackValidationRequest.getNetworkId()), e);
+        }
+        try {
+            if (stackValidationRequest.getCredentialId() != null) {
+                Credential credential = credentialService.get(stackValidationRequest.getCredentialId());
+                stackValidation.setCredential(credential);
+            } else if (stackValidationRequest.getCredential() != null) {
+                Credential credential = conversionService.convert(stackValidationRequest.getCredential(), Credential.class);
+                stackValidation.setCredential(credential);
+            } else {
+                throw new BadRequestException("Credential does not configured for the validation request!");
             }
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
