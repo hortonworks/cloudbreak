@@ -154,14 +154,22 @@ cloudbreak-conf-cert() {
 }
 
 cloudbreak-delete-dbs() {
-    declare desc="deletes all cloudbreak related dbs: cbdb,pcdb,uaadb"
+    declare desc="deletes all cloudbreak db (volume)"
 
+    if [[ $(docker-compose -p cbreak ps -q $COMMON_DB | wc -l) -eq 1 ]]; then
+        error "Database container is running, delete not allowed"
+        _exit 1
+    fi
     docker volume rm $COMMON_DB_VOL 1>/dev/null || :
 }
 
 cloudbreak-delete-consul-data() {
     declare desc="deletes consul data-dir (volume)"
 
+    if [[ $(docker-compose -p cbreak ps -q consul | wc -l) -eq 1 ]]; then
+        error "Consul container is running, delete not allowed"
+        _exit 1
+    fi
     docker volume rm consul-data 1>/dev/null || :
 }
 
