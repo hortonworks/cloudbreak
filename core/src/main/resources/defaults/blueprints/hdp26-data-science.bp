@@ -28,7 +28,8 @@
         "mapred-site": {
           "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
           "mapreduce.map.output.compress": "true",
-          "mapreduce.output.fileoutputformat.compress": "true"
+          "mapreduce.output.fileoutputformat.compress": "true",
+          "hive.server2.transport.mode": "http"
         }
       },
       {

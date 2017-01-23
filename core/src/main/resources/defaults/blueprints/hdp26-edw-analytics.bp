@@ -27,7 +27,8 @@
         "hive-site": {
           "hive.exec.compress.output": "true",
           "hive.merge.mapfiles": "true",
-          "hive.server2.tez.initialize.default.sessions": "true"
+          "hive.server2.tez.initialize.default.sessions": "true",
+          "hive.server2.transport.mode": "http"
         }
       },
       {
