@@ -330,6 +330,16 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                 });
             }
 
+            function userDefined(userDefinedTags) {
+                var tmp = {};
+                angular.forEach(userDefinedTags, function(item) {
+                    var key = item.key;
+                    var keyValue = item.value;
+                    tmp[key] = keyValue;
+                });
+                return tmp;
+            }
+
             this.save = function(cluster, platform, successHandler, failureHandler) {
                 var stackValidation = {
                     instanceGroups: cluster.instanceGroups,
@@ -364,6 +374,9 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         securityGroupId: cluster.securityGroupId,
                         availabilityZone: cluster.availabilityZone || null,
                         orchestrator: cluster.orchestrator || null,
+                        tags: {
+                            "userDefined": userDefined(cluster.userDefinedTags)
+                        },
                         platformVariant: cluster.platformVariant,
                         imageId: cluster.customImage == true ? cluster.imageId :null
                     }

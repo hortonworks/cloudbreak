@@ -11,7 +11,7 @@ a:hover {
     padding-top: 60px;
 }
 
-.legend>span {
+.legend > span {
     margin: 2px;
     padding: 4px 0px 4px 10px;
     line-height: 1.8;
@@ -216,7 +216,6 @@ input[type="date"]::-webkit-input-placeholder {
     line-height: 1.10 !important;
 }
 
-
 /* Include this file in your html if you are using the CSP mode. */
 
 [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak, .ng-hide {
@@ -228,16 +227,15 @@ ng\:form {
 }
 
 .ng-animate-block-transitions {
-    transition: 0s all!important;
-    -webkit-transition: 0s all!important;
+    transition: 0s all !important;
+    -webkit-transition: 0s all !important;
 }
-
 
 /* show the element during a show/hide animation when the
 * animation is ongoing, but the .ng-hide class is active */
 
 .ng-hide-add-active, .ng-hide-remove {
-    display: block!important;
+    display: block !important;
 }
 
 .host-group-table {
@@ -300,4 +298,14 @@ a.list-group-item, button.list-group-item {
     display: block;
     -webkit-margin-start: 0px;
     -webkit-margin-end: 0px;
+}
+
+#active-cluster-panel .cluster-tag {
+    font-weight: normal;
+    padding-top: 3px;
+    margin: 0px;
+    position: relative;
+    top: -2px;
+    left: 5px;
+    margin-right: 10px;
 }

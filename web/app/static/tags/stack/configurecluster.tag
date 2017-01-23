@@ -6,6 +6,40 @@
         </div>
     </div>
 </div>
+
+<div class="form-group" ng-class="{ 'has-error': clusterCreationForm.userDefinedTags.$dirty && clusterCreationForm.userDefinedTags.$invalid }">
+    <label class="col-sm-3 control-label" for="userDefinedTags">Tags</label>
+    <div class="col-sm-8" name="userDefinedTags" id="userDefinedTags">
+        <div class="col-sm-12" ng-repeat="tag in cluster.userDefinedTags" style="padding-bottom: 15px;    padding-left: 0px;" ng-class="{ 'has-error': (clusterCreationForm.tagname{{$index}}.$dirty && clusterCreationForm.tagname{{$index}}.$invalid) || (clusterCreationForm.tagkey{{$index}}.$dirty && clusterCreationForm.tagkey{{$index}}.$invalid) }">
+            <div>
+                <div class="form-inline">
+
+                    <div class="col-md-4 input-group" >
+                        <span class="input-group-addon">key</span>
+                        <input type="text" class="form-control" id="tagkey{{$index}}" name="tagkey{{$index}}" required ng-model="tag.key" ng-maxlength="127" ng-minlength="3" ng-required="true" placeholder="(REQUIRED) Max 127 chars">
+                    </div>
+                    <div class="col-md-offset-1 col-md-4 input-group">
+                        <span class="input-group-addon">value</span>
+                        <input type="text" class="form-control" id="tagname{{$index}}" name="tagname{{$index}}" required ng-model="tag.value" ng-maxlength="255" ng-minlength="3" ng-required="true" placeholder="(OPTIONAL) Max 255 chars">
+                    </div>
+                    <div class="col-md-2 pull-right">
+                        <a class="btn btn-info btn-block" role="button" ng-click="removeUserDefinedTag(tag)" style="margin-top: 0px;margin-bottom: 0px;"> - Remove</a>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="help-block" ng-show="(clusterCreationForm.tagname{{$index}}.$dirty && clusterCreationForm.tagname{{$index}}.$invalid) || (clusterCreationForm.tagkey{{$index}}.$dirty && clusterCreationForm.tagkey{{$index}}.$invalid)">
+                    <i class="fa fa-warning"></i> Please set the custom tag because it is required
+                </div>
+            </div>
+        </div>
+        <div class="row col-md-4" style="padding-top: 0px;padding-bottom: 0px;">
+            <a class="btn btn-success btn-block" role="button" ng-click="addUserDefinedTag()"> + Add</a>
+        </div>
+    </div>
+
+    <!-- .col-sm-9 -->
+</div>
 <div class="form-group" ng-show="showAdvancedOptionForm" ng-class="{ 'has-error': clusterCreationForm.cl_clusterUserName.$dirty && clusterCreationForm.cl_clusterUserName.$invalid }">
     <label class="col-sm-3 control-label" for="cl_clusterUserName">{{msg.cluster_form_ambari_user_label}}</label>
     <div class="col-sm-8">
