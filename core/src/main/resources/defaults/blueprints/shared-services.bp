@@ -86,7 +86,8 @@
           "hive.server2.tez.initialize.default.sessions":"true",
           "hive.server2.authentication.ldap.url":"{{ LDAP_URL }}",
           "hive.server2.authentication.ldap.Domain":"{{ LDAP_DOMAIN }}",
-          "hive.server2.authentication":"LDAP"
+          "hive.server2.authentication":"LDAP",
+          "hive.server2.transport.mode": "http"
         }
       },
       {

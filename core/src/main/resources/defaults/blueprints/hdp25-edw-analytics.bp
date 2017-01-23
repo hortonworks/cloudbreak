@@ -20,7 +20,8 @@
       },
       {
         "hdfs-site": {
-          "dfs.namenode.safemode.threshold-pct": "0.99"
+          "dfs.namenode.safemode.threshold-pct": "0.99",
+          "hive.server2.transport.mode": "http"
         }
       },
       {

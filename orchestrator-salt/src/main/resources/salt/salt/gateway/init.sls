@@ -5,13 +5,13 @@ knox:
 
 knox-master-secret:
   cmd.run:
-    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master admin
+    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master {{ salt['pillar.get']('gateway:password') }}
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/master
 
 knox-create-cert:
   cmd.run:
-    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-cert --hostname {{ salt['grains.get']('fqdn') }}
+    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-cert --hostname {{ salt['pillar.get']('gateway:address') }}
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/gateway.jks
 
