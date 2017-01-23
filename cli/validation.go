@@ -86,6 +86,16 @@ func (s *ClusterSkeleton) Validate() error {
 		}
 	}
 
+	if err := validateMasterRecoveryMode("master", s.Master.RecoveryMode); err != nil {
+		res = append(res, err)
+	}
+	if err := validateRecoveryMode("worker", s.Worker.RecoveryMode); err != nil {
+		res = append(res, err)
+	}
+	if err := validateSpotRecoveryMode("compute", s.Compute.RecoveryMode, s.Compute.SpotPrice); err != nil {
+		res = append(res, err)
+	}
+
 	if len(res) > 0 {
 		return swagerrors.CompositeValidationError(res...)
 	}
@@ -182,4 +192,28 @@ func isVersionSupported(version float64) bool {
 		}
 	}
 	return false
+}
+
+func validateMasterRecoveryMode(hostGroup string, recoveryMode string) error {
+	if recoveryMode != "MANUAL" {
+		return errors.New(fmt.Sprintf("Invalid recoveryMode [%s] on hostgroup [%s], supported revorery mode on master hostgroups is MANUAL only",
+			recoveryMode, hostGroup))
+	}
+	return nil
+}
+
+func validateRecoveryMode(hostGroup string, recoveryMode string) error {
+	if recoveryMode != "MANUAL" && recoveryMode != "AUTO" {
+		return errors.New(fmt.Sprintf("Invalid recoveryMode [%s] on Hostgroup [%s], supported revorery modes are MANUAL or AUTO", recoveryMode, hostGroup))
+	}
+	return nil
+}
+
+func validateSpotRecoveryMode(hostGroup string, recoveryMode string, spotPrice string) error {
+	if spotPrice != "" && recoveryMode != "MANUAL" {
+		return errors.New(
+			fmt.Sprintf("Invalid recoveryMode [%s] on Hostgroup [%s] with spotprice [%s], supported revorery mode for nodes with spotprice is MANUAL only",
+				recoveryMode, hostGroup, spotPrice))
+	}
+	return validateRecoveryMode(hostGroup, recoveryMode)
 }

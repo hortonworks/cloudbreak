@@ -42,11 +42,13 @@ func fetchClusterImpl(stack *models.StackResponse) (*ClusterSkeletonResult, erro
 	}
 
 	var recipeMap = make(map[string][]*models.RecipeResponse)
+	var recoveryModeMap = make(map[string]string)
 	if stack.Cluster != nil {
 		for _, hg := range stack.Cluster.HostGroups {
 			for _, recipe := range hg.Recipes {
 				recipeMap[hg.Name] = append(recipeMap[hg.Name], recipe)
 			}
+			recoveryModeMap[hg.Name] = *hg.RecoveryMode
 		}
 	}
 
@@ -66,7 +68,7 @@ func fetchClusterImpl(stack *models.StackResponse) (*ClusterSkeletonResult, erro
 	}
 
 	clusterSkeleton := &ClusterSkeletonResult{}
-	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig, recipeMap)
+	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig, recipeMap, recoveryModeMap)
 
 	return clusterSkeleton, nil
 }
@@ -281,19 +283,22 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		hostGroups := []*models.HostGroupRequest{
 			{
-				Name:       MASTER,
-				Constraint: &masterConstraint,
-				Recipes:    createRecipeRequests(skeleton.Master.Recipes),
+				Name:         MASTER,
+				Constraint:   &masterConstraint,
+				Recipes:      createRecipeRequests(skeleton.Master.Recipes),
+				RecoveryMode: &skeleton.Master.RecoveryMode,
 			},
 			{
-				Name:       WORKER,
-				Constraint: &workerConstraint,
-				Recipes:    createRecipeRequests(skeleton.Worker.Recipes),
+				Name:         WORKER,
+				Constraint:   &workerConstraint,
+				Recipes:      createRecipeRequests(skeleton.Worker.Recipes),
+				RecoveryMode: &skeleton.Worker.RecoveryMode,
 			},
 			{
-				Name:       COMPUTE,
-				Constraint: &computeConstraint,
-				Recipes:    createRecipeRequests(skeleton.Compute.Recipes),
+				Name:         COMPUTE,
+				Constraint:   &computeConstraint,
+				Recipes:      createRecipeRequests(skeleton.Compute.Recipes),
+				RecoveryMode: &skeleton.Compute.RecoveryMode,
 			},
 		}
 
@@ -511,6 +516,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 				VolumeCount:  &(&int32Wrapper{1}).i,
 				VolumeSize:   &(&int32Wrapper{32}).i,
 				Recipes:      []Recipe{},
+				RecoveryMode: "MANUAL",
 			},
 			Worker: InstanceConfig{
 				InstanceType:  "m3.xlarge",
@@ -519,6 +525,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 				VolumeSize:    &(&int32Wrapper{40}).i,
 				InstanceCount: 2,
 				Recipes:       []Recipe{},
+				RecoveryMode:  "AUTO",
 			},
 			Compute: SpotInstanceConfig{
 				InstanceConfig: InstanceConfig{
@@ -528,6 +535,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 					VolumeSize:    &(&int32Wrapper{40}).i,
 					InstanceCount: 0,
 					Recipes:       []Recipe{},
+					RecoveryMode:  "AUTO",
 				},
 				SpotPrice: "0",
 			},

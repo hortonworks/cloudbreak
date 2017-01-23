@@ -25,7 +25,8 @@ var AWSCreateClusterSkeletonHelp = `
         "URI": "http://some-site.com/test.sh",                             // URI of the script
         "Phase: "pre"                                                      // Which phase to run the script on, accepted values: pre, post
       }
-    ]
+    ],
+    "RecoveryMode": "MANUAL"                                               // Recovery mode: for master hostgroups only MANUAL is supported
   },
   "Worker": {                                                              // Worker instance group
     "InstanceType": "m3.xlarge",                                           // Instance type of worker instance group
@@ -39,6 +40,7 @@ var AWSCreateClusterSkeletonHelp = `
         "Phase: "post"                                                     // Which phase to run the script on, accepted values: pre, post
       }
     ]
+    "RecoveryMode": "AUTO"                                                 // Recovery mode: AUTO or MANUAL
   },
   "Compute": {                                                             // Compute instance group
     "InstanceType": "m3.xlarge",                                           // Instance type of compute instance group
@@ -52,7 +54,8 @@ var AWSCreateClusterSkeletonHelp = `
         "Phase: "post"                                                     // Which phase to run the script on, accepted values: pre, post
       }
     ],
-    "SpotPrice": "0.231"                                                   // (Optional) Bid price to use for spot instances in compute instance group
+    "SpotPrice": "0.231",                                                  // (Optional) Bid price to use for spot instances in compute instance group
+    "RecoveryMode": "MANUAL"                                               // Recovery mode: AUTO or MANUAL, if spotprice is given only manual is supported
   },
   "SSHKeyName": "my-existing-keypair-name",                                // Name of an existing EC2 KeyPair to enable SSH access to the cluster node instances.
   "RemoteAccess": "0.0.0.0/0",                                             // Allow connections from this address range. Must be a valid CIDR IP (for example: 0.0.0.0/0 will allow access from all)

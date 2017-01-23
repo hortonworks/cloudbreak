@@ -81,7 +81,8 @@ func (c *ClusterSkeletonResult) fill(
 	securityMap map[string][]*models.SecurityRuleResponse,
 	network *models.NetworkResponse,
 	rdsConfig *models.RDSConfigResponse,
-	recipeMap map[string][]*models.RecipeResponse) error {
+	recipeMap map[string][]*models.RecipeResponse,
+	recoveryModeMap map[string]string) error {
 
 	if stack == nil {
 		return errors.New("Stack definition is not returned from Cloudbreak")
@@ -117,6 +118,9 @@ func (c *ClusterSkeletonResult) fill(
 			}
 			c.ClusterInputs = inputs
 		}
+		c.Master.RecoveryMode = recoveryModeMap[MASTER]
+		c.Worker.RecoveryMode = recoveryModeMap[WORKER]
+		c.Compute.RecoveryMode = recoveryModeMap[COMPUTE]
 	}
 
 	c.HDPVersion = SafeStringConvert(stack.HdpVersion)
