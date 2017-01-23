@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -250,7 +251,7 @@ public class OpenStackResourceConnector implements ResourceConnector {
             }
             groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null));
         }
-        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), null, stack.getTemplate());
+        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), Maps.newHashMap(), stack.getTemplate());
     }
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {
