@@ -1197,7 +1197,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 configStrategy: $scope.configStrategies[1],
                 ldapRequired: false,
                 sssdConfigId: null,
-                enableShipyard: false
+                enableShipyard: false,
+                userDefinedTags: []
             };
             $scope.selectSssd = {
                 show: false
@@ -1218,6 +1219,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 variants = $rootScope.params.platformVariants[$rootScope.activeCredential.cloudPlatform];
             }
             return variants;
+        }
+
+        $scope.addUserDefinedTag = function () {
+            $scope.cluster.userDefinedTags.push({"key": "", "value": ""});
+        }
+
+        $scope.removeUserDefinedTag = function (tag) {
+            var index = $scope.cluster.userDefinedTags.indexOf(tag);
+            if (index > -1) {
+                $scope.cluster.userDefinedTags.splice(index, 1);
+            }
         }
 
         $scope.showDetails = function() {
@@ -1322,6 +1334,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.noProxyBeforeAmbari = function() {
             return $rootScope.activeCluster.orchestrator.type === 'MARATHON' || $rootScope.activeCluster.cloudbreakDetails === null || !$rootScope.activeCluster.cloudbreakDetails
+        }
+
+        $scope.getUserDefinedTags = function() {
+            return ($rootScope.activeCluster.tags && $rootScope.activeCluster.tags.userDefined) ? $rootScope.activeCluster.tags.userDefined : [];
         }
     }
 ]);

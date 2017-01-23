@@ -3,7 +3,10 @@
     <div class="panel panel-default">
         <div class="panel-heading panel-heading-nav">
             <a href="" id="cluster-details-back-btn" class="btn btn-info btn-fa-2x" role="button" ng-click="deselectActiveCluster()"><i class="fa fa-angle-left fa-2x fa-fw-forced"></i></a>
-            <h4>{{activeCluster.name}}</h4>
+            <h4>
+                {{activeCluster.name}}
+                <span id="cluster-tag-id" class="label label-info cluster-tag" ng-repeat="(key, value) in getUserDefinedTags()">{{key}} : {{value}}</span>
+            </h4>
         </div>
         <div id="cluster-details-panel-collapse">
             <div class="panel-body">
