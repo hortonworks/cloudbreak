@@ -317,7 +317,7 @@ commondb:
     ports:
         - "$PRIVATE_IP:5432:5432"
     environment:
-      - SERVICE_NAME=commondb
+      - SERVICE_NAME=$COMMON_DB
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
         - "$COMMON_DB_VOL:/var/lib/postgresql/data"
@@ -384,7 +384,7 @@ cloudbreak:
         - CB_DB_ENV_PASS
         - CB_DB_ENV_DB
         - CB_DB_ENV_SCHEMA
-        - "CB_DB_SERVICEID=commondb.service.consul"
+        - "CB_DB_SERVICEID=$COMMON_DB.service.consul"
         - "CB_MAIL_SMTP_AUTH=$CLOUDBREAK_SMTP_AUTH"
         - "CB_MAIL_SMTP_STARTTLS_ENABLE=$CLOUDBREAK_SMTP_STARTTLS_ENABLE"
         - "CB_MAIL_SMTP_TYPE=$CLOUDBREAK_SMTP_TYPE"
@@ -550,7 +550,7 @@ periscope:
         - ENDPOINTS_BEANS_ENABLED=false
         - ENDPOINTS_ENV_ENABLED=false
         - PERISCOPE_ADDRESS_RESOLVING_TIMEOUT
-        - PERISCOPE_DB_SERVICEID=commondb.service.consul
+        - PERISCOPE_DB_SERVICEID=$COMMON_DB.service.consul
         - PERISCOPE_CLOUDBREAK_SERVICEID=cloudbreak.service.consul
         - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
         - PERISCOPE_SCHEMA_SCRIPTS_LOCATION

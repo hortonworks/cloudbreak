@@ -18,7 +18,7 @@ create-migrate-log() {
 }
 
 migrate-startdb() {
-    compose-up --no-recreate commondb
+    compose-up --no-recreate $COMMON_DB
 }
 
 migrateDebug() {
@@ -33,7 +33,7 @@ migrateError() {
 migrate-execute-mybatis-migrations() {
     local docker_image_name=$1 && shift
     local service_name=$1 && shift
-    local container_name=$(compose-get-container commondb)
+    local container_name=$(compose-get-container $COMMON_DB)
     migrateDebug "Migration command on $service_name with params: '$*' will be executed on container: $container_name"
     if [[ ! "$container_name" ]]; then
         migrateError "DB container with matching name is not running. Expected name: .*$service_name.*"

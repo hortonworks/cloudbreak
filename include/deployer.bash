@@ -396,10 +396,9 @@ start-requested-services() {
 
     if ! [[ "$services" ]]; then
         debug "All services must be started"
-        local dbServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep "db$" | xargs)
-        local otherServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep -v "db$" | xargs)
-        if [[ $(docker-compose -p cbreak ps -q $dbServices | wc -l) -eq 3 ]]; then
-            debug "DB services: $dbServices are already running, start only other services"
+        if [[ $(docker-compose -p cbreak ps -q $COMMON_DB | wc -l) -eq 1 ]]; then
+            debug "DB services: $COMMON_DB are already running, start only other services"
+            local otherServices=$(sed -n "/^[a-z]/ s/:.*//p" docker-compose.yml | grep -v "db$" | xargs)
             services="${otherServices}"
         fi
     fi

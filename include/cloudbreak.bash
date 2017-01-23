@@ -126,6 +126,7 @@ cloudbreak-conf-db() {
         env-import CB_DB_ROOT_PATH "/var/lib/boot2docker/cloudbreak"
     fi
 
+    env-import COMMON_DB commondb
     env-import COMMON_DB_VOL common
     env-import CB_DB_ENV_USER "postgres"
     env-import CB_DB_ENV_DB "cbdb"
@@ -139,7 +140,7 @@ cloudbreak-conf-db() {
     env-import PERISCOPE_DB_SCHEMA_NAME "public"
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
 
-    env-import IDENTITY_DB_URL "commondb.service.consul:5432"
+    env-import IDENTITY_DB_URL "${COMMON_DB}.service.consul:5432"
     env-import IDENTITY_DB_NAME "uaadb"
     env-import IDENTITY_DB_USER "postgres"
     env-import IDENTITY_DB_PASS ""
