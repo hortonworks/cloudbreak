@@ -17,7 +17,7 @@ debug() {
           printf "[DEBUG][%-25s] %s\n" $(shorten_function "${FUNCNAME[1]}") "$*" | gray 1>&2
       else
         echo -e "[DEBUG] $*" | gray 1>&2
-      fideployer.bash
+      fi
   fi
 }
 
