@@ -150,6 +150,9 @@ public class Cluster implements ProvisionEntity {
     @Column(nullable = false)
     private Boolean emailNeeded;
 
+    @Column(nullable = false)
+    private Boolean topologyValidation = Boolean.TRUE;
+
     private String emailTo;
 
     @Column(nullable = false)
@@ -516,5 +519,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setKerberosConfig(KerberosConfig kerberosConfig) {
         this.kerberosConfig = kerberosConfig;
+    }
+
+    public Boolean getTopologyValidation() {
+        return topologyValidation;
+    }
+
+    public void setTopologyValidation(Boolean topologyValidation) {
+        this.topologyValidation = topologyValidation;
     }
 }

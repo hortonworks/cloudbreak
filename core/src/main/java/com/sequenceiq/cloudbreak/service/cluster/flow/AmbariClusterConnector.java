@@ -786,7 +786,7 @@ public class AmbariClusterConnector {
                 blueprintText = addHBaseClient(blueprintText);
             }
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
-            ambariClient.addBlueprint(blueprintText);
+            ambariClient.addBlueprint(blueprintText, cluster.getTopologyValidation());
         } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {
                 LOGGER.info("Ambari blueprint already exists for stack: {}", stack.getId());
