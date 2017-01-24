@@ -5,6 +5,7 @@ import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 
 import javax.inject.Inject;
@@ -61,12 +62,16 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
 
     private final Image image;
 
-    public ResourceCreateThread(long privateId, Group group, ResourceBuilderContext context, AuthenticatedContext auth, Image image) {
+    private final Map<String, String> tags;
+
+    public ResourceCreateThread(long privateId, Group group, ResourceBuilderContext context, AuthenticatedContext auth, Image image,
+            Map<String, String> tags) {
         this.privateId = privateId;
         this.group = group;
         this.context = context;
         this.auth = auth;
         this.image = image;
+        this.tags = tags;
     }
 
     @Override
@@ -85,7 +90,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
                     throw new CancellationException(format("Building of %s has been cancelled", list));
                 }
 
-                List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list);
+                List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list, tags);
                 updateResource(auth, resources);
                 context.addComputeResources(privateId, resources);
                 PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);

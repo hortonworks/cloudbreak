@@ -68,7 +68,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
 
         //compute
         List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack.getGroups(), stack.getImage(),
-                adjustmentType, threshold);
+                stack.getTags(), adjustmentType, threshold);
         networkStatuses.addAll(computeStatuses);
 
         return networkStatuses;
@@ -113,7 +113,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
         context.addGroupResources(scalingGroup.getName(), groupResourceService.getGroupResources(platform, resources));
 
         //compute
-        return computeResourceService.buildResourcesForUpscale(context, auth, Collections.singletonList(scalingGroup), stack.getImage());
+        return computeResourceService.buildResourcesForUpscale(context, auth, Collections.singletonList(scalingGroup), stack.getImage(), stack.getTags());
     }
 
     @Override

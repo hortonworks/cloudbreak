@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -60,7 +61,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
 
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, final AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource) throws Exception {
+            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
         List<CloudResource> resources = new ArrayList<>();
         final List<CloudResource> syncedResources = Collections.synchronizedList(resources);
         List<Future<Void>> futures = new ArrayList<>();

@@ -53,43 +53,13 @@ public class ComputeResourceService {
     private CloudFailureHandler cloudFailureHandler;
 
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image,
-            AdjustmentType adjustmentType, Long threshold) {
-        return buildResources(ctx, auth, groups, image, false, adjustmentType, threshold);
+            Map<String, String> tags, AdjustmentType adjustmentType, Long threshold) {
+        return new ResourceBuilder(ctx, auth).buildResources(groups, image, false, tags, adjustmentType, threshold);
     }
 
-    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image) {
-        return buildResources(ctx, auth, groups, image, true, AdjustmentType.BEST_EFFORT, null);
-    }
-
-    private List<CloudResourceStatus> buildResources(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image, Boolean upscale,
-            AdjustmentType adjustmentType, Long threshold) {
-        List<CloudResourceStatus> results = new ArrayList<>();
-        int fullNodeCount = getFullNodeCount(groups);
-
-        CloudContext cloudContext = auth.getCloudContext();
-        List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
-        List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
-        for (Group group : getOrderedCopy(groups)) {
-            List<CloudInstance> instances = group.getInstances();
-            for (CloudInstance instance : instances) {
-                ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instance.getTemplate().getPrivateId(), group, ctx, auth, image);
-                Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
-                futures.add(future);
-                if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {
-                    Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
-                    results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
-                    results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
-                    cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), group,
-                            fullNodeCount, ctx, resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
-                }
-            }
-            Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
-            results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
-            results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
-            cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), group, fullNodeCount, ctx,
-                    resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
-        }
-        return results;
+    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, List<Group> groups, Image image,
+            Map<String, String> tags) {
+        return new ResourceBuilder(ctx, auth).buildResources(groups, image, true, tags, AdjustmentType.BEST_EFFORT, null);
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
@@ -124,14 +94,6 @@ public class ComputeResourceService {
     public List<CloudVmInstanceStatus> startInstances(ResourceBuilderContext context, AuthenticatedContext auth,
             List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         return stopStart(context, auth, resources, cloudInstances);
-    }
-
-    private int getFullNodeCount(List<Group> groups) {
-        int fullNodeCount = 0;
-        for (Group group : groups) {
-            fullNodeCount += group.getInstancesSize();
-        }
-        return fullNodeCount;
     }
 
     private List<CloudVmInstanceStatus> stopStart(ResourceBuilderContext context,
@@ -204,15 +166,6 @@ public class ComputeResourceService {
         return selected;
     }
 
-    private List<Group> getOrderedCopy(List<Group> groups) {
-        Ordering<Group> byLengthOrdering = new Ordering<Group>() {
-            public int compare(Group left, Group right) {
-                return Ints.compare(left.getInstances().size(), right.getInstances().size());
-            }
-        };
-        return byLengthOrdering.sortedCopy(groups);
-    }
-
     private <T> T createThread(String name, Object... args) {
         return (T) applicationContext.getBean(name, args);
     }
@@ -240,6 +193,68 @@ public class ComputeResourceService {
             result.addAll(list);
         }
         return result;
+    }
+
+    private class ResourceBuilder {
+
+        private final ResourceBuilderContext ctx;
+
+        private final AuthenticatedContext auth;
+
+        ResourceBuilder(ResourceBuilderContext ctx, AuthenticatedContext auth) {
+            this.ctx = ctx;
+            this.auth = auth;
+        }
+
+        public List<CloudResourceStatus> buildResources(List<Group> groups, Image image, Boolean upscale, Map<String, String> tags,
+                AdjustmentType adjustmentType, Long threshold) {
+            List<CloudResourceStatus> results = new ArrayList<>();
+            int fullNodeCount = getFullNodeCount(groups);
+
+            CloudContext cloudContext = auth.getCloudContext();
+            List<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
+            List<ComputeResourceBuilder> builders = resourceBuilders.compute(cloudContext.getPlatform());
+            for (Group group : getOrderedCopy(groups)) {
+                List<CloudInstance> instances = group.getInstances();
+                for (CloudInstance instance : instances) {
+                    ResourceCreateThread thread = createThread(ResourceCreateThread.NAME, instance.getTemplate().getPrivateId(), group, ctx, auth, image, tags);
+                    Future<ResourceRequestResult<List<CloudResourceStatus>>> future = resourceBuilderExecutor.submit(thread);
+                    futures.add(future);
+                    if (isRequestFullWithCloudPlatform(builders.size(), futures.size(), ctx)) {
+                        Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
+                        results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
+                        results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+                        cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), group,
+                                fullNodeCount, ctx, resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
+                    }
+                }
+                Map<FutureResult, List<List<CloudResourceStatus>>> futureResultListMap = waitForRequests(futures);
+                results.addAll(flatList(futureResultListMap.get(FutureResult.SUCCESS)));
+                results.addAll(flatList(futureResultListMap.get(FutureResult.FAILED)));
+                cloudFailureHandler.rollback(auth, flatList(futureResultListMap.get(FutureResult.FAILED)), group, fullNodeCount, ctx,
+                        resourceBuilders, new ScaleContext(upscale, adjustmentType, threshold));
+            }
+            return results;
+        }
+
+        private int getFullNodeCount(List<Group> groups) {
+            int fullNodeCount = 0;
+            for (Group group : groups) {
+                fullNodeCount += group.getInstancesSize();
+            }
+            return fullNodeCount;
+        }
+
+        private List<Group> getOrderedCopy(List<Group> groups) {
+            Ordering<Group> byLengthOrdering = new Ordering<Group>() {
+                public int compare(Group left, Group right) {
+                    return Ints.compare(left.getInstances().size(), right.getInstances().size());
+                }
+            };
+            return byLengthOrdering.sortedCopy(groups);
+        }
+
+
     }
 
 }

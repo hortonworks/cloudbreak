@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
@@ -35,7 +36,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResources) throws Exception {
+            List<CloudResource> buildableResources, Map<String, String> tags) throws Exception {
         String projectId = context.getProjectId();
         Location location = context.getLocation();
 

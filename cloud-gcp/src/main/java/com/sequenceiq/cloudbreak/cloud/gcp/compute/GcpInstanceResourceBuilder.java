@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource) throws Exception {
+            List<CloudResource> buildableResource, Map<String, String> customTags) throws Exception {
         InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
         String projectId = context.getProjectId();
         Location location = context.getLocation();
@@ -91,6 +92,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         tagList.add(groupname);
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
+        customTags.entrySet().stream().forEach(e -> tagList.add(e.getKey() + "-" + e.getValue()));
         tags.setItems(tagList);
         instance.setTags(tags);
 
