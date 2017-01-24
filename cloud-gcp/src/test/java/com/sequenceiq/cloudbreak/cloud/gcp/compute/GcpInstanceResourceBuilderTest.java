@@ -145,7 +145,7 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources);
+        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
         // THEN
         verify(compute).instances();
@@ -165,7 +165,7 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources);
+        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
         // THEN
         verify(compute).instances();
@@ -185,7 +185,7 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources);
+        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
         // THEN
         verify(compute).instances();

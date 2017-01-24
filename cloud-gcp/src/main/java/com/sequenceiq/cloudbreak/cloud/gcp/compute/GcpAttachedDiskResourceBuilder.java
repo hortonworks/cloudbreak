@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
@@ -57,7 +58,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public List<CloudResource> build(GcpContext context, long privateId, final AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource) throws Exception {
+            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
         CloudInstance instance = group.getReferenceInstanceConfiguration();
         InstanceTemplate template = instance.getTemplate();
         Volume volume = template.getVolumes().get(0);

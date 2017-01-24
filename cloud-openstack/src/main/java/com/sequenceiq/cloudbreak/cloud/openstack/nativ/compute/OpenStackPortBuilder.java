@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 public class OpenStackPortBuilder extends AbstractOpenStackComputeResourceBuilder {
     @Override
     public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
-            List<CloudResource> buildableResource) throws Exception {
+            List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
         CloudResource resource = buildableResource.get(0);
         try {
             OSClient osClient = createOSClient(auth);
