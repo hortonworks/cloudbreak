@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartFlowConfig
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stop.ClusterStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.upgrade.ClusterUpgradeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
@@ -52,24 +53,25 @@ public class OfflineStateGenerator {
 
     private static final List<FlowConfiguration<? extends FlowEvent>> CONFIGS =
             Arrays.asList(
+                    new ClusterCreationFlowConfig(),
+                    new ClusterCredentialChangeFlowConfig(),
+                    new ClusterDownscaleFlowConfig(),
+                    new ClusterResetFlowConfig(),
+                    new ClusterStartFlowConfig(),
+                    new ClusterStopFlowConfig(),
+                    new ClusterSyncFlowConfig(),
                     new ClusterTerminationFlowConfig(),
+                    new ClusterUpgradeFlowConfig(),
+                    new ClusterUpscaleFlowConfig(),
                     new InstanceTerminationFlowConfig(),
+                    new ManualStackRepairTriggerFlowConfig(),
                     new StackCreationFlowConfig(),
+                    new StackDownscaleConfig(),
                     new StackStartFlowConfig(),
                     new StackStopFlowConfig(),
                     new StackSyncFlowConfig(),
-                    new ClusterSyncFlowConfig(),
-                    new StackUpscaleConfig(),
-                    new ClusterDownscaleFlowConfig(),
-                    new StackDownscaleConfig(),
                     new StackTerminationFlowConfig(),
-                    new ClusterUpscaleFlowConfig(),
-                    new ClusterStartFlowConfig(),
-                    new ClusterStopFlowConfig(),
-                    new ClusterResetFlowConfig(),
-                    new ClusterCredentialChangeFlowConfig(),
-                    new ClusterCreationFlowConfig(),
-                    new ManualStackRepairTriggerFlowConfig()
+                    new StackUpscaleConfig()
             );
 
     private static final ApplicationContext APP_CONTEXT = new CustomApplicationContext();
