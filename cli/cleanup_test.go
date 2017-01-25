@@ -229,7 +229,7 @@ func TestCleanupSecurityGroupImplNotGenerated(t *testing.T) {
 
 func TestCleanupSecurityGroupImplGenerated(t *testing.T) {
 	items := make([]*models.SecurityGroupResponse, 0)
-	items = append(items, &models.SecurityGroupResponse{Name: "all-services-port"})
+	items = append(items, &models.SecurityGroupResponse{Name: "hdc-sg-master-"})
 	getItems := func() []*models.SecurityGroupResponse {
 		return items
 	}

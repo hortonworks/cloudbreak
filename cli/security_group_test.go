@@ -27,14 +27,14 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 		return &resp, nil
 	}
 
-	createSecurityGroupImpl(skeleton, c, postSecGroup)
+	createSecurityGroupImpl(skeleton, MASTER, c, postSecGroup)
 
 	actualId := <-c
 	if actualId != expectedId {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
-	if m, _ := regexp.MatchString("only-ssh-and-ssl([0-9]{10,20})", actualGroup.Name); m == false {
-		t.Errorf("name not match only-ssh-and-ssl([0-9]{10,20}) == %s", actualGroup.Name)
+	if m, _ := regexp.MatchString("hdc-sg-master-([0-9]{10,20})", actualGroup.Name); m == false {
+		t.Errorf("name not match hdc-sg-master-([0-9]{10,20}) == %s", actualGroup.Name)
 	}
 	if len(actualGroup.SecurityRules) != 1 {
 		t.Fatal("missing security group rule")
@@ -46,7 +46,7 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 	if rule.Protocol != "tcp" {
 		t.Errorf("rule protocol not match tcp == %s", rule.Protocol)
 	}
-	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS)
+	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "9443")
 	if rule.Ports != strings.Join(expectedPorts, ",") {
 		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), rule.Ports)
 	}
@@ -68,13 +68,13 @@ func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
 		return &resp, nil
 	}
 
-	createSecurityGroupImpl(skeleton, c, postSecGroup)
+	createSecurityGroupImpl(skeleton, MASTER, c, postSecGroup)
 
 	if len(actualGroup.SecurityRules) != 1 {
 		t.Fatal("missing security group rule")
 	}
 	rule := actualGroup.SecurityRules[0]
-	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "8443")
+	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "9443", "8443")
 	if rule.Ports != strings.Join(expectedPorts, ",") {
 		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), rule.Ports)
 	}

@@ -109,7 +109,7 @@ func (c *Cloudbreak) cleanupSecurityGroups(wg *sync.WaitGroup) {
 func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupResponse, deleteGroup func(string) error) {
 	for _, secGroup := range getGroups() {
 		secGroupName := secGroup.Name
-		if len(secGroupName) > 15 && (secGroupName[0:17] == "all-services-port" || secGroupName[0:16] == "only-ssh-and-ssl") {
+		if len(secGroupName) > 6 && (secGroupName[0:7] == "hdc-sg-") {
 			if err := deleteGroup(secGroupName); err != nil {
 				log.Warnf("[cleanupSecurityGroups] failed to delete security group: %s", secGroupName)
 				continue

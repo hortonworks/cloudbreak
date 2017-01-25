@@ -177,8 +177,8 @@ func (c *ClusterSkeletonResult) fill(
 	for k, v := range securityMap {
 		keys = append(keys, k)
 		for _, sr := range v {
-			log.Debugf("SecurityRule: %s", sr.Ports)
-			if strings.Join(SECURITY_GROUP_DEFAULT_PORTS, ",") != sr.Ports {
+			log.Infof("SecurityRule: %s", sr.Ports)
+			if strings.Contains(sr.Ports, SECURITY_GROUP_GATEWAY_KNOX_PORT) {
 				c.WebAccess = true
 			}
 		}

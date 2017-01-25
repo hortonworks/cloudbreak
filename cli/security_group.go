@@ -6,24 +6,27 @@ import (
 	"sync"
 	"time"
 
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/securitygroups"
 	"github.com/hortonworks/hdc-cli/models"
 )
 
-var SECURITY_GROUP_DEFAULT_PORTS = []string{"22", "9443"}
+var SECURITY_GROUP_DEFAULT_PORTS = []string{"22"}
+var SECURITY_GROUP_GATEWAY_NGINX_PORT = "9443"
+var SECURITY_GROUP_GATEWAY_KNOX_PORT = "8443"
 
-func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
+func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, group string, channel chan int64, wg *sync.WaitGroup) {
 	defer timeTrack(time.Now(), "create security group")
 	defer wg.Done()
 
-	createSecurityGroupImpl(skeleton, channel, c.Cloudbreak.Securitygroups.PostSecuritygroupsAccount)
+	createSecurityGroupImpl(skeleton, group, channel, c.Cloudbreak.Securitygroups.PostSecuritygroupsAccount)
 }
 
-func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64,
+func createSecurityGroupImpl(skeleton ClusterSkeleton, group string, channel chan int64,
 	postSecGroup func(*securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error)) {
 
-	secGroup := createSecurityGroupRequest(skeleton)
+	secGroup := createSecurityGroupRequest(skeleton, group)
 
 	log.Infof("[CreateSecurityGroup] sending security group create request with name: %s", secGroup.Name)
 	resp, err := postSecGroup(&securitygroups.PostSecuritygroupsAccountParams{Body: secGroup})
@@ -36,14 +39,16 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, channel chan int64,
 	channel <- *resp.Payload.ID
 }
 
-func createSecurityGroupRequest(skeleton ClusterSkeleton) *models.SecurityGroupRequest {
-	var secGroupName string
-	defaultPorts := SECURITY_GROUP_DEFAULT_PORTS
-	if skeleton.WebAccess {
-		defaultPorts = append(defaultPorts, "8443")
-		secGroupName = "all-services-port" + strconv.FormatInt(time.Now().UnixNano(), 10)
-	} else {
-		secGroupName = "only-ssh-and-ssl" + strconv.FormatInt(time.Now().UnixNano(), 10)
+func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models.SecurityGroupRequest {
+	secGroupName := fmt.Sprintf("hdc-sg-%s-%s", strings.ToLower(group), strconv.FormatInt(time.Now().UnixNano(), 10))
+
+	openPorts := SECURITY_GROUP_DEFAULT_PORTS
+
+	if group == MASTER {
+		openPorts = append(openPorts, SECURITY_GROUP_GATEWAY_NGINX_PORT)
+		if skeleton.WebAccess {
+			openPorts = append(openPorts, SECURITY_GROUP_GATEWAY_KNOX_PORT)
+		}
 	}
 
 	modifiable := false
@@ -51,7 +56,7 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton) *models.SecurityGroupR
 		{
 			Subnet:     skeleton.RemoteAccess,
 			Protocol:   "tcp",
-			Ports:      strings.Join(defaultPorts, ","),
+			Ports:      strings.Join(openPorts, ","),
 			Modifiable: &modifiable,
 		},
 	}

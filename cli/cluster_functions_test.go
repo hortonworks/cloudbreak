@@ -219,7 +219,7 @@ func TestFillWithSecurityMap(t *testing.T) {
 
 	sm := make(map[string][]*models.SecurityRuleResponse)
 	rules := make([]*models.SecurityRuleResponse, 0)
-	rules = append(rules, &models.SecurityRuleResponse{Ports: "ports"})
+	rules = append(rules, &models.SecurityRuleResponse{Ports: "22,9443,8443"})
 	sm["master"] = rules
 	sm["worker"] = rules
 

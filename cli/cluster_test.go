@@ -90,7 +90,7 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 				VolumeCount: &(&int32Wrapper{int32(1)}).i, VolumeSize: &(&int32Wrapper{int32(100)}).i}
 		})
 	}
-	createSecurityGroupRequest := func(skeleton ClusterSkeleton) *models.SecurityGroupRequest {
+	createSecurityGroupRequest := func(skeleton ClusterSkeleton, group string) *models.SecurityGroupRequest {
 		return &models.SecurityGroupRequest{CloudPlatform: "AWS", Name: "secg", SecurityRules: make([]*models.SecurityRuleRequest, 0)}
 	}
 	createCredentialRequest := func(name string, defaultCredential models.CredentialResponse, existingKey string) *models.CredentialRequest {
