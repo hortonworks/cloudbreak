@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.view;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,10 +21,20 @@ public class NovaInstanceView {
 
     private final InstanceGroupType type;
 
+    private final Map<String, String> tags;
+
     public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type) {
         this.stackName = stackName;
         this.instance = instance;
         this.type = type;
+        this.tags = Collections.emptyMap();
+    }
+
+    public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type, Map<String, String> tags) {
+        this.stackName = stackName;
+        this.instance = instance;
+        this.type = type;
+        this.tags = tags;
     }
 
     public String getFlavor() {
@@ -84,6 +95,7 @@ public class NovaInstanceView {
 
     private Map<String, String> generateMetadata() {
         Map<String, String> metadata = new HashMap<>();
+        metadata.putAll(tags);
         metadata.put(OpenStackUtils.CB_INSTANCE_GROUP_NAME, instance.getGroupName());
         metadata.put(OpenStackUtils.CB_INSTANCE_PRIVATE_ID, Long.toString(getPrivateId()));
         return metadata;

@@ -50,7 +50,7 @@ public class HeatTemplateBuilder {
 
     public String build(ModelContext modelContext) {
         try {
-            List<NovaInstanceView> novaInstances = new OpenStackGroupView(modelContext.stackName, modelContext.groups).getFlatNovaView();
+            List<NovaInstanceView> novaInstances = new OpenStackGroupView(modelContext.stackName, modelContext.groups, modelContext.tags).getFlatNovaView();
             Map<String, Object> model = new HashMap<>();
             model.put("cb_stack_name", openStackUtil.adjustStackNameLength(modelContext.stackName));
             model.put("agents", novaInstances);
@@ -130,6 +130,8 @@ public class HeatTemplateBuilder {
 
         private String templateString;
 
+        private Map<String, String> tags = new HashMap<>();
+
         public ModelContext withLocation(Location location) {
             this.location = location;
             return this;
@@ -167,6 +169,11 @@ public class HeatTemplateBuilder {
 
         public ModelContext withTemplateString(String templateString) {
             this.templateString = templateString;
+            return this;
+        }
+
+        public ModelContext withTags(Map<String, String> tags) {
+            this.tags = tags;
             return this;
         }
     }

@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -69,6 +68,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -161,6 +161,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -192,6 +193,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -225,6 +227,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         modelContext.withStackName(stackName);
         modelContext.withNeutronNetworkView(neutronNetworkView);
         modelContext.withTemplateString(stack.getTemplate());
+        modelContext.withTags(stack.getTags());
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
@@ -257,7 +260,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             }
             groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null));
         }
-        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), Maps.newHashMap(), stack.getTemplate());
+        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(), stack.getTemplate());
     }
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {

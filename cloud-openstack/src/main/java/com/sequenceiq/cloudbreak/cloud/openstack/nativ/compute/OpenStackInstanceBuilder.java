@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.compute;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -56,12 +57,13 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
             NovaInstanceView novaInstanceView = new NovaInstanceView(context.getName(), template, group.getType());
             String imageId = osClient.images().list(Collections.singletonMap("name", image.getImageName())).get(0).getId();
+            Map<String, String> metadata = mergeMetadata(novaInstanceView.getMetadataMap(), tags);
             ServerCreateBuilder serverCreateBuilder = Builders.server()
                     .name(resource.getName())
                     .image(imageId)
                     .flavor(getFlavorId(osClient, novaInstanceView.getFlavor()))
                     .keypairName(osCredential.getKeyPairName())
-                    .addMetadata(novaInstanceView.getMetadataMap())
+                    .addMetadata(metadata)
                     .addNetworkPort(port.getStringParameter(OpenStackConstants.PORT_ID))
                     .userData(new String(Base64.encodeBase64(image.getUserData(group.getType()).getBytes())));
             BlockDeviceMappingBuilder blockDeviceMappingBuilder = Builders.blockDeviceMapping()
@@ -91,6 +93,13 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
             LOGGER.error("Failed to create OpenStack instance with privateId: {}", privateId, ex);
             throw new OpenStackResourceException("Instance creation failed", resourceType(), resource.getName(), ex);
         }
+    }
+
+    private Map<String, String> mergeMetadata(Map<String, String> metadataMap, Map<String, String> tags) {
+        Map<String, String> result = new HashMap<>();
+        result.putAll(tags);
+        result.putAll(metadataMap);
+        return result;
     }
 
     @Override
