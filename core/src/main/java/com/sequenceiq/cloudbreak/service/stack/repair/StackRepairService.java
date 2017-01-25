@@ -46,8 +46,7 @@ public class StackRepairService {
             return;
         }
         UnhealthyInstances unhealthyInstances = groupInstancesByHostGroups(stack, unhealthyInstanceIds);
-        StackRepairFlowSubmitter stackRepairFlowSubmitter =
-                new StackRepairFlowSubmitter(stack.getId(), unhealthyInstances);
+        StackRepairFlowSubmitter stackRepairFlowSubmitter = new StackRepairFlowSubmitter(stack.getId(), unhealthyInstances);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_ATTEMPTING, Status.UPDATE_IN_PROGRESS.name());
         executorService.submit(stackRepairFlowSubmitter);
     }
