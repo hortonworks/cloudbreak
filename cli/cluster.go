@@ -281,24 +281,47 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			HostCount:         int32(skeleton.Compute.InstanceCount),
 		}
 
+		var masterRecoveryMode string
+		if skeleton.Master.RecoveryMode != "" {
+			masterRecoveryMode = skeleton.Master.RecoveryMode
+		} else {
+			masterRecoveryMode = "MANUAL"
+		}
+		var workerRecoveryMode string
+		if skeleton.Worker.RecoveryMode != "" {
+			workerRecoveryMode = skeleton.Worker.RecoveryMode
+		} else {
+			workerRecoveryMode = "AUTO"
+		}
+		var computeRecoveryMode string
+		if skeleton.Compute.RecoveryMode != "" {
+			computeRecoveryMode = skeleton.Compute.RecoveryMode
+		} else {
+			if skeleton.Compute.SpotPrice != "" {
+				computeRecoveryMode = "MANUAL"
+			} else {
+				computeRecoveryMode = "AUTO"
+			}
+		}
+
 		hostGroups := []*models.HostGroupRequest{
 			{
 				Name:         MASTER,
 				Constraint:   &masterConstraint,
 				Recipes:      createRecipeRequests(skeleton.Master.Recipes),
-				RecoveryMode: &skeleton.Master.RecoveryMode,
+				RecoveryMode: &masterRecoveryMode,
 			},
 			{
 				Name:         WORKER,
 				Constraint:   &workerConstraint,
 				Recipes:      createRecipeRequests(skeleton.Worker.Recipes),
-				RecoveryMode: &skeleton.Worker.RecoveryMode,
+				RecoveryMode: &workerRecoveryMode,
 			},
 			{
 				Name:         COMPUTE,
 				Constraint:   &computeConstraint,
 				Recipes:      createRecipeRequests(skeleton.Compute.Recipes),
-				RecoveryMode: &skeleton.Compute.RecoveryMode,
+				RecoveryMode: &computeRecoveryMode,
 			},
 		}
 

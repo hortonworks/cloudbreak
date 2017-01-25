@@ -195,7 +195,7 @@ func isVersionSupported(version float64) bool {
 }
 
 func validateMasterRecoveryMode(hostGroup string, recoveryMode string) error {
-	if recoveryMode != "MANUAL" {
+	if recoveryMode != "" && recoveryMode != "MANUAL" {
 		return errors.New(fmt.Sprintf("Invalid recoveryMode [%s] on hostgroup [%s], supported revorery mode on master hostgroups is MANUAL only",
 			recoveryMode, hostGroup))
 	}
@@ -203,14 +203,14 @@ func validateMasterRecoveryMode(hostGroup string, recoveryMode string) error {
 }
 
 func validateRecoveryMode(hostGroup string, recoveryMode string) error {
-	if recoveryMode != "MANUAL" && recoveryMode != "AUTO" {
+	if recoveryMode != "" && recoveryMode != "MANUAL" && recoveryMode != "AUTO" {
 		return errors.New(fmt.Sprintf("Invalid recoveryMode [%s] on Hostgroup [%s], supported revorery modes are MANUAL or AUTO", recoveryMode, hostGroup))
 	}
 	return nil
 }
 
 func validateSpotRecoveryMode(hostGroup string, recoveryMode string, spotPrice string) error {
-	if spotPrice != "" && recoveryMode != "MANUAL" {
+	if spotPrice != "" && recoveryMode != "" && recoveryMode != "MANUAL" {
 		return errors.New(
 			fmt.Sprintf("Invalid recoveryMode [%s] on Hostgroup [%s] with spotprice [%s], supported revorery mode for nodes with spotprice is MANUAL only",
 				recoveryMode, hostGroup, spotPrice))
