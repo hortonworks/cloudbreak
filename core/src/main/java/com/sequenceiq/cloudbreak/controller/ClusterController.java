@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
-import com.sequenceiq.cloudbreak.api.model.HostGroupBase;
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -311,9 +311,10 @@ public class ClusterController implements ClusterEndpoint {
     private void recreateCluster(Long stackId, UpdateClusterJson updateJson) {
         CbUser user = authenticatedUserService.getCbUser();
         Set<HostGroup> hostGroups = new HashSet<>();
-        for (HostGroupBase json : updateJson.getHostgroups()) {
+        for (HostGroupRequest json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, user, json.getConstraint(), json.getRecipeIds(), false);
+            hostGroup = hostGroupDecorator.decorate(hostGroup, stackId, user, json.getConstraint(), json.getRecipeIds(), false, json.getRecipes(),
+                    false);
             hostGroups.add(hostGroup);
         }
         AmbariStackDetailsJson stackDetails = updateJson.getAmbariStackDetails();
