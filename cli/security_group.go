@@ -47,6 +47,7 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models.
 	if group == MASTER {
 		openPorts = append(openPorts, SECURITY_GROUP_GATEWAY_NGINX_PORT)
 		if skeleton.WebAccess {
+			secGroupName = fmt.Sprintf("hdc-sg-webaccess-%s-%s", strings.ToLower(group), strconv.FormatInt(time.Now().UnixNano(), 10))
 			openPorts = append(openPorts, SECURITY_GROUP_GATEWAY_KNOX_PORT)
 		}
 	}
