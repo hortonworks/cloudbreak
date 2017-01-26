@@ -9,6 +9,9 @@ import (
 	"github.com/hortonworks/hdc-cli/client/cluster"
 	"github.com/hortonworks/hdc-cli/client/stacks"
 	"github.com/hortonworks/hdc-cli/models"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 func TestCreateClusterImplFull(t *testing.T) {
@@ -180,6 +183,82 @@ func TestResizeClusterImplCluster(t *testing.T) {
 	}
 	if !*actualUpdate.HostGroupAdjustment.WithStackUpdate {
 		t.Error("with cluster event is false")
+	}
+}
+
+func TestResizeClusterInvalidWorkerCount(t *testing.T) {
+	expectedId := int64(1)
+	getStack := func(string) *models.StackResponse {
+		var instances = make([]*models.InstanceMetaData, 0)
+		for i := 0; i < 3; i++ {
+			instances = append(instances, &models.InstanceMetaData{})
+		}
+		ig := []*models.InstanceGroupResponse{{Group: WORKER, Metadata: instances}}
+		return &models.StackResponse{ID: &expectedId, InstanceGroups: ig}
+	}
+	putCluster := func(params *cluster.PutStacksIDClusterParams) error {
+		return nil
+	}
+	expectedAdjustment := int32(-1)
+
+	// Only run the failing part when a specific env variable is set
+	if os.Getenv("OS_EXIT") == "1" {
+		resizeClusterImpl("name", WORKER, expectedAdjustment, getStack, nil, putCluster)
+		return
+	}
+
+	// Start the actual test in a different subprocess
+	cmd := exec.Command(os.Args[0], "-test.v", "-test.run=TestResizeClusterInvalidWorkerCount")
+	cmd.Env = append(cmd.Env, "OS_EXIT=1")
+	cmd.Env = append(cmd.Env, "GOPATH="+os.Getenv("GOPATH"))
+	stdout, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Check that the log fatal message is what we expected
+	got := string(stdout)
+	expectedMessage := "You cannot scale down the worker host group below 3, because it can cause data loss"
+	if !strings.Contains(got, expectedMessage) {
+		t.Errorf("It should exit with validation error message: %s BUT got: %s", expectedMessage, got)
+	}
+}
+
+func TestResizeClusterInvalidComputeCount(t *testing.T) {
+	expectedId := int64(1)
+	getStack := func(string) *models.StackResponse {
+		var instances = make([]*models.InstanceMetaData, 0)
+		for i := 0; i < 1; i++ {
+			instances = append(instances, &models.InstanceMetaData{})
+		}
+		ig := []*models.InstanceGroupResponse{{Group: COMPUTE, Metadata: instances}}
+		return &models.StackResponse{ID: &expectedId, InstanceGroups: ig}
+	}
+	putCluster := func(params *cluster.PutStacksIDClusterParams) error {
+		return nil
+	}
+	expectedAdjustment := int32(-1)
+
+	// Only run the failing part when a specific env variable is set
+	if os.Getenv("OS_EXIT") == "1" {
+		resizeClusterImpl("name", COMPUTE, expectedAdjustment, getStack, nil, putCluster)
+		return
+	}
+
+	// Start the actual test in a different subprocess
+	cmd := exec.Command(os.Args[0], "-test.v", "-test.run=TestResizeClusterInvalidComputeCount")
+	cmd.Env = append(cmd.Env, "OS_EXIT=1")
+	cmd.Env = append(cmd.Env, "GOPATH="+os.Getenv("GOPATH"))
+	stdout, err := cmd.CombinedOutput()
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Check that the log fatal message is what we expected
+	got := string(stdout)
+	expectedMessage := "The compute host group must contain at least 1 host after the downscale"
+	if !strings.Contains(got, expectedMessage) {
+		t.Errorf("It should exit with validation error message: %s BUT got: %s", expectedMessage, got)
 	}
 }
 

@@ -403,14 +403,19 @@ func ResizeCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	stack := resizeClusterImpl(clusterName, nodeType, adjustment, oAuth2Client.GetClusterByName, oAuth2Client.Cloudbreak.Stacks.PutStacksID, oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster)
+	stack := resizeClusterImpl(clusterName, nodeType, adjustment,
+		oAuth2Client.GetClusterByName,
+		oAuth2Client.Cloudbreak.Stacks.PutStacksID,
+		oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster)
 
 	oAuth2Client.waitForClusterToFinish(*stack.ID, c)
 
 	return nil
 }
 
-func resizeClusterImpl(clusterName string, nodeType string, adjustment int32, getStack func(string) *models.StackResponse, putStack func(*stacks.PutStacksIDParams) error,
+func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
+	getStack func(string) *models.StackResponse,
+	putStack func(*stacks.PutStacksIDParams) error,
 	putCluster func(*cluster.PutStacksIDClusterParams) error) *models.StackResponse {
 
 	stack := getStack(clusterName)
@@ -423,12 +428,24 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32, ge
 				ScalingAdjustment: adjustment,
 				WithClusterEvent:  &withClusterScale,
 			},
-			Status: nil,
 		}
 		if err := putStack(&stacks.PutStacksIDParams{ID: *stack.ID, Body: update}); err != nil {
 			logErrorAndExit(ResizeCluster, err.Error())
 		}
 	} else {
+		for _, v := range stack.InstanceGroups {
+			if nodeType == v.Group {
+				if WORKER == nodeType {
+					if len(v.Metadata)+int(adjustment) < 3 {
+						logErrorAndExit(ResizeCluster, "You cannot scale down the worker host group below 3, because it can cause data loss")
+					}
+				} else if COMPUTE == nodeType {
+					if len(v.Metadata)+int(adjustment) < 1 {
+						logErrorAndExit(ResizeCluster, "The compute host group must contain at least 1 host after the downscale")
+					}
+				}
+			}
+		}
 		withStackScale := true
 		update := &models.UpdateCluster{
 			HostGroupAdjustment: &models.HostGroupAdjustment{
