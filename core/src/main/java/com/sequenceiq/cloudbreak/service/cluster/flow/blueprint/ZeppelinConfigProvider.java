@@ -14,8 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -27,8 +29,12 @@ public class ZeppelinConfigProvider {
 
     private static final String ZEPPELIN_MASTER = "ZEPPELIN_MASTER";
 
-    //This is needed since the API has hanged beetween AMbari 2.4 and 2.5
-    private static final String[] ZEPPELIN_MASTER_CONFIG_FILES = {"zeppelin-shiro-ini", "zeppelin-env"};
+    //This is needed since the API has hanged beetween Ambari 2.4 and 2.5, in case of Ambari 2.4 zeppelin-env needs to be set
+    private static final String AMBARI_2_4_VERSION = "2.4";
+
+    private static final String ZEPPELIN_MASTER_CONFIG_FILES_2_4 = "zeppelin-env";
+
+    private static final String ZEPPELIN_MASTER_CONFIG_FILES_2_5 = "zeppelin-shiro-ini";
 
     @Inject
     private Configuration freemarkerConfiguration;
@@ -36,24 +42,31 @@ public class ZeppelinConfigProvider {
     @Inject
     private BlueprintProcessor blueprintProcessor;
 
+    @Inject
+    private ComponentConfigProvider componentConfigProvider;
+
     public String addToBlueprint(Stack stack, String blueprintText) {
         if (blueprintProcessor.componentExistsInBlueprint(ZEPPELIN_MASTER, blueprintText)) {
             LOGGER.info("Zeppelin exists in Blueprint");
-            List<BlueprintConfigurationEntry> configs = getConfigs(stack.getCluster());
+            List<BlueprintConfigurationEntry> configs = getConfigs(stack.getId(), stack.getCluster());
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, false);
         }
         return blueprintText;
     }
 
-    private List<BlueprintConfigurationEntry> getConfigs(Cluster cluster) {
+    private List<BlueprintConfigurationEntry> getConfigs(Long stackId, Cluster cluster) {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         try {
             Map<String, Object> model = new HashMap<>();
             model.put("zeppelin_admin_password", cluster.getPassword());
             model.put("knoxGateway", cluster.getEnableKnoxGateway());
             String shiroIniContent = processTemplateIntoString(freemarkerConfiguration.getTemplate("hdp/zeppelin/shiro_ini_content.ftl", "UTF-8"), model);
-            for (String configFile : ZEPPELIN_MASTER_CONFIG_FILES) {
-                configs.add(new BlueprintConfigurationEntry(configFile, "shiro_ini_content", shiroIniContent));
+
+            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
+            if (ambariRepo.getPredefined() || (ambariRepo.getVersion() != null && !ambariRepo.getVersion().startsWith(AMBARI_2_4_VERSION))) {
+                configs.add(new BlueprintConfigurationEntry(ZEPPELIN_MASTER_CONFIG_FILES_2_5, "shiro_ini_content", shiroIniContent));
+            } else {
+                configs.add(new BlueprintConfigurationEntry(ZEPPELIN_MASTER_CONFIG_FILES_2_4, "shiro_ini_content", shiroIniContent));
             }
         } catch (TemplateException | IOException e) {
             LOGGER.error("Failed to read zeppelin config", e);
