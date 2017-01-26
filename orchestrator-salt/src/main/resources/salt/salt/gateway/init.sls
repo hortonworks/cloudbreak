@@ -5,7 +5,7 @@ knox:
 
 knox-master-secret:
   cmd.run:
-    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master {{ salt['pillar.get']('gateway:password') }}
+    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master '{{ salt['pillar.get']('gateway:password') }}'
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/master
 
