@@ -27,6 +27,7 @@ func init() {
 	BlueprintMap["hdp-etl-edw-tp"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
 	BlueprintMap["hdp26-etl-edw-spark2"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1"
 	BlueprintMap["hdp-druid-bi"] = "BI: Druid 0.9.2 (Technical Preview)"
+	BlueprintMap["hdp-data-science-spark2"] = "Data Science: Apache Spark 2.0, Apache Zeppelin 0.6.2"
 }
 
 func getDefaultClusterType() string {
