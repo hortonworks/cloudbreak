@@ -13,7 +13,7 @@ import (
 )
 
 var ClusterListHeader = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}
-var ClusterNodeHeader = []string{"Instance ID", "Hostname", "Public IP", "Private IP", "Type"}
+var ClusterNodeHeader = []string{"Instance ID", "Hostname", "Public IP", "Private IP", "Instance Status", "Host Status", "Type"}
 
 type ClusterListElement struct {
 	ClusterName string `json:"ClusterName" yaml:"ClusterName"`
@@ -27,15 +27,17 @@ func (c *ClusterListElement) DataAsStringArray() []string {
 }
 
 type ClusterNode struct {
-	InstanceId string `json:"InstanceId" yaml:"InstanceId"`
-	Hostname   string `json:"Hostname" yaml:"Hostname"`
-	PublicIP   string `json:"PublicIP,omitempty" yaml:"PublicIP,omitempty"`
-	PrivateIP  string `json:"PrivateIP" yaml:"PrivateIP"`
-	Type       string
+	InstanceId     string `json:"InstanceId" yaml:"InstanceId"`
+	Hostname       string `json:"Hostname" yaml:"Hostname"`
+	PublicIP       string `json:"PublicIP,omitempty" yaml:"PublicIP,omitempty"`
+	PrivateIP      string `json:"PrivateIP" yaml:"PrivateIP"`
+	InstanceStatus string `json:"InstanceStatus" yaml:"InstanceStatus"`
+	HostStatus     string `json:"HostStatus" yaml:"HostStatus"`
+	Type           string
 }
 
 func (c *ClusterNode) DataAsStringArray() []string {
-	return []string{c.InstanceId, c.Hostname, c.PublicIP, c.PrivateIP, c.Type}
+	return []string{c.InstanceId, c.Hostname, c.PublicIP, c.PrivateIP, c.InstanceStatus, c.HostStatus, c.Type}
 }
 
 func ListClusters(c *cli.Context) error {
@@ -119,16 +121,39 @@ func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetStacksUse
 			if nodeType == MASTER {
 				nodeType = "master - ambari server"
 			}
+			var hostStatus string = getHostStatus(respStack.Payload, metadata)
 			row := &ClusterNode{
-				InstanceId: SafeStringConvert(data.InstanceID),
-				Hostname:   SafeStringConvert(data.DiscoveryFQDN),
-				PublicIP:   SafeStringConvert(data.PublicIP),
-				PrivateIP:  SafeStringConvert(data.PrivateIP),
-				Type:       nodeType,
+				InstanceId:     SafeStringConvert(data.InstanceID),
+				Hostname:       SafeStringConvert(data.DiscoveryFQDN),
+				PublicIP:       SafeStringConvert(data.PublicIP),
+				PrivateIP:      SafeStringConvert(data.PrivateIP),
+				InstanceStatus: SafeStringConvert(data.InstanceStatus),
+				HostStatus:     hostStatus,
+				Type:           nodeType,
 			}
 			tableRows = append(tableRows, row)
 		}
 	}
 
 	writer(ClusterNodeHeader, tableRows)
+}
+
+func getHostStatus(stack *models.StackResponse, imd *models.InstanceMetaData) string {
+	var result string = ""
+	if stack.Cluster != nil {
+		for _, hg := range stack.Cluster.HostGroups {
+			if hg.Name == *imd.InstanceGroup {
+				for _, hmd := range hg.Metadata {
+					if hmd.Name == *imd.DiscoveryFQDN {
+						result = *hmd.State
+						break
+					}
+				}
+				if result != "" {
+					break
+				}
+			}
+		}
+	}
+	return result
 }
