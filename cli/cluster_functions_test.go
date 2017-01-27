@@ -217,6 +217,11 @@ func TestFillWithSshKey(t *testing.T) {
 func TestFillWithSecurityMap(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
+	cl := models.ClusterResponse{
+		ExposedKnoxServices: []string{"AMBARI"},
+	}
+	sr.Cluster = &cl
+
 	sm := make(map[string][]*models.SecurityRuleResponse)
 	rules := make([]*models.SecurityRuleResponse, 0)
 	rules = append(rules, &models.SecurityRuleResponse{Ports: "22,9443,8443"})

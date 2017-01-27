@@ -14,6 +14,10 @@ import (
 	"strconv"
 )
 
+var BASE_EXPOSED_SERVICES = []string{"AMBARI", "AMBARIUI", "ZEPPELINWS", "ZEPPELINUI"}
+var HIVE_EXPOSED_SERVICES = []string{"HIVE"}
+var CLUSTER_MANAGER_EXPOSED_SERVICES = []string{"HDFSUI", "YARNUI", "JOBHISTORYUI", "SPARKHISTORYUI"}
+
 func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 	defer timeTrack(time.Now(), "get cluster by name")
 
@@ -353,6 +357,20 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			inputs = append(inputs, &models.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
 		}
 
+		exposedServices := []string{}
+
+		if skeleton.WebAccess {
+			exposedServices = append(exposedServices, BASE_EXPOSED_SERVICES...)
+		}
+
+		if skeleton.WebAccessHive {
+			exposedServices = append(exposedServices, HIVE_EXPOSED_SERVICES...)
+		}
+
+		if skeleton.WebAccessClusterManagement {
+			exposedServices = append(exposedServices, CLUSTER_MANAGER_EXPOSED_SERVICES...)
+		}
+
 		enableKnoxGateway := true
 		clusterReq := models.ClusterRequest{
 			Name:                      skeleton.ClusterName,
@@ -365,6 +383,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			BlueprintInputs:           inputs,
 			BlueprintCustomProperties: skeleton.Configurations,
 			EnableKnoxGateway:         &enableKnoxGateway,
+			ExposedKnoxServices:       exposedServices,
 		}
 
 		resp, err := postCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
@@ -608,10 +627,12 @@ func getBaseSkeleton() *ClusterSkeleton {
 				},
 				SpotPrice: "0",
 			},
-			WebAccess:    true,
-			InstanceRole: "CREATE",
-			Network:      &Network{},
-			Tags:         make(map[string]string, 0),
+			WebAccess:                  true,
+			WebAccessHive:              true,
+			WebAccessClusterManagement: false,
+			InstanceRole:               "CREATE",
+			Network:                    &Network{},
+			Tags:                       make(map[string]string, 0),
 		},
 		HiveMetastore:  &HiveMetastore{},
 		Configurations: []models.Configurations{},

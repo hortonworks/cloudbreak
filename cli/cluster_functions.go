@@ -121,6 +121,9 @@ func (c *ClusterSkeletonResult) fill(
 		c.Master.RecoveryMode = recoveryModeMap[MASTER]
 		c.Worker.RecoveryMode = recoveryModeMap[WORKER]
 		c.Compute.RecoveryMode = recoveryModeMap[COMPUTE]
+
+		fillWebAccess(stack.Cluster, c)
+
 	}
 
 	c.HDPVersion = SafeStringConvert(stack.HdpVersion)
@@ -196,14 +199,8 @@ func (c *ClusterSkeletonResult) fill(
 	}
 
 	keys := make([]string, 0, len(securityMap))
-	for k, v := range securityMap {
+	for k, _ := range securityMap {
 		keys = append(keys, k)
-		for _, sr := range v {
-			log.Infof("SecurityRule: %s", sr.Ports)
-			if strings.Contains(sr.Ports, SECURITY_GROUP_GATEWAY_KNOX_PORT) {
-				c.WebAccess = true
-			}
-		}
 	}
 	c.RemoteAccess = strings.Join(keys, ",")
 
@@ -223,6 +220,30 @@ func (c *ClusterSkeletonResult) fill(
 	c.Tags = tags
 
 	return nil
+}
+
+func fillWebAccess(cluster *models.ClusterResponse, skeleton *ClusterSkeletonResult) {
+	serviceMap := make(map[string]int)
+	for index, service := range cluster.ExposedKnoxServices {
+		serviceMap[service] = index
+	}
+	for _, service := range BASE_EXPOSED_SERVICES {
+		if _, ok := serviceMap[service]; ok {
+			skeleton.WebAccess = true
+		}
+	}
+
+	for _, service := range HIVE_EXPOSED_SERVICES {
+		if _, ok := serviceMap[service]; ok {
+			skeleton.WebAccessHive = true
+		}
+	}
+
+	for _, service := range CLUSTER_MANAGER_EXPOSED_SERVICES {
+		if _, ok := serviceMap[service]; ok {
+			skeleton.WebAccessClusterManagement = true
+		}
+	}
 }
 
 func convertRecipes(recipes []*models.RecipeResponse) []Recipe {
