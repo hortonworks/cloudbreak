@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ClusterContainerRunner;
@@ -83,7 +84,7 @@ public class ClusterServiceRunner {
                 }
                 hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
             }
-            clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
+            clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
             hostRunner.runAmbariServices(stack);
             String gatewayIp = gatewayConfigService.getGatewayIp(stack);
@@ -97,7 +98,7 @@ public class ClusterServiceRunner {
                 }
                 hostsPerHostGroup.get(groupName).add(instanceMetaData.getDiscoveryFQDN());
             }
-            clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup);
+            clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup, HostMetadataState.SERVICES_RUNNING);
         } else {
             LOGGER.info(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));

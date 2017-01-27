@@ -256,11 +256,11 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup) {
+    public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup, HostMetadataState hostMetadataState) {
         for (Map.Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
             if (hostGroup != null) {
-                Set<String> existingHosts = hostMetadataRepository.findEmptyContainerHostsInHostGroup(hostGroup.getId()).stream()
+                Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.getId()).stream()
                         .map(HostMetadata::getHostName)
                         .collect(Collectors.toSet());
                 hostGroupEntry.getValue().stream()
@@ -269,7 +269,7 @@ public class AmbariClusterService implements ClusterService {
                             HostMetadata hostMetadataEntry = new HostMetadata();
                             hostMetadataEntry.setHostName(hostName);
                             hostMetadataEntry.setHostGroup(hostGroup);
-                            hostMetadataEntry.setHostMetadataState(HostMetadataState.CONTAINER_RUNNING);
+                            hostMetadataEntry.setHostMetadataState(hostMetadataState);
                             hostGroup.getHostMetadata().add(hostMetadataEntry);
                         });
                 hostGroupService.save(hostGroup);
