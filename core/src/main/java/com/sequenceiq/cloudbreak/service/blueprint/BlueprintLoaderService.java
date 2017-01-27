@@ -121,7 +121,7 @@ public class BlueprintLoaderService {
                     blueprintRepository.save(bp);
                     blueprints.add(bp);
                 } catch (Exception e) {
-                    LOGGER.error("Blueprint is not available for '{}' user.", e, user);
+                    LOGGER.error("Blueprint is not available for '" + user.getUsername() + "' user.", e);
                 }
             }
         }
