@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -25,6 +26,9 @@ public class InteractiveLoginHandler implements CloudPlatformEventHandler<Intera
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private CredentialNotifier credentialNotifier;
+
     @Override
     public Class<InteractiveLoginRequest> type() {
         return InteractiveLoginRequest.class;
@@ -38,7 +42,7 @@ public class InteractiveLoginHandler implements CloudPlatformEventHandler<Intera
         try {
             CloudConnector connector = cloudPlatformConnectors.getDefault(cloudContext.getPlatform());
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            Map<String, String> parameters = connector.credentials().interactiveLogin(auth, request.getExtendedCloudCredential());
+            Map<String, String> parameters = connector.credentials().interactiveLogin(auth, request.getExtendedCloudCredential(), credentialNotifier);
             InteractiveLoginResult interactiveLoginResult = new InteractiveLoginResult(request, parameters);
             request.getResult().onNext(interactiveLoginResult);
             LOGGER.info("Interactive login request successfully processed");

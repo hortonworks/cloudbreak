@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("credentialController-logger");
 
 angular.module('uluwatuControllers').controller('credentialController', [
-    '$scope', '$rootScope', '$filter', '$base64', '$interpolate', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'GlobalCredentialCertificate', 'AccountStack', 'UserStack', 'GlobalStack',
-    function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, GlobalCredentialCertificate, AccountStack, UserStack, GlobalStack) {
+    '$scope', '$rootScope', '$filter', '$base64', '$interpolate', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'InteractiveLogin', 'GlobalCredentialCertificate', 'AccountStack', 'UserStack', 'GlobalStack',
+    function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, InteractiveLogin ,GlobalCredentialCertificate, AccountStack, UserStack, GlobalStack) {
         $rootScope.credentials = AccountCredential.query();
         $rootScope.importedStacks = AccountStack.query();
         $scope.credentialInCreation = false;
@@ -14,9 +14,14 @@ angular.module('uluwatuControllers').controller('credentialController', [
             }
         };
         $scope.credentialAzure = {};
-        $scope.credentialAzureRm = {};
+        $scope.credentialAzureRm = {
+            parameters: {
+                selector: 'app-based'
+            }
+        };
         $scope.credentialGcp = {};
         $scope.credentialOpenstack = {};
+        $scope.interactiveLoginResult = null;
         $scope.mesosStack = {};
         $scope.mesosStac = false;
         $scope.awsCredentialForm = {};
@@ -340,6 +345,38 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 key: key
             })]
         }
+
+        $scope.azureInteractiveLogin = function() {
+            $scope.credentialAzureRm.cloudPlatform = "AZURE_RM";
+
+            InteractiveLogin.save($scope.credentialAzureRm, function(success) {
+                $scope.interactiveLoginResult = success;
+            }, function (error) {
+                $scope.showError(error);
+            });
+        };
+
+        $rootScope.$on('interactiveCredentialCreationInProgress', function(event) {
+            $scope.credentialInCreation = true;
+        });
+
+        $rootScope.$on('credentialCreated', function(event, credentials) {
+            $scope.interactiveLoginResult = null;
+            $scope.credentialInCreation = false;
+            var createdCredential = credentials.filter(function (credential) {
+                return credential.name == $scope.credentialAzureRm.name;
+            })[0];
+            $rootScope.credentials.push($scope.credentialAzureRm);
+            $scope.credentialAzureRm = {
+                parameters: {
+                    selector: 'app-based'
+                }
+            };
+            $scope.showSuccess($filter("format")($rootScope.msg.azure_credential_success, createdCredential.id));
+            $scope.azureRmCredentialForm.$setPristine();
+            collapseCreateCredentialFormPanel();
+            $scope.unShowErrorMessageAlert();
+        });
 
         function collapseCreateCredentialFormPanel() {
             angular.element(document.querySelector('#panel-create-credentials-collapse-btn')).click();

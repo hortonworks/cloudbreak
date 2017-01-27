@@ -24,12 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.arm.ArmInteractiveLogin;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ArmInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.view.ArmCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 /**
@@ -91,21 +88,25 @@ public class ArmInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
             try {
                 String accessToken = new JSONObject(tokenResponseString).getString("access_token");
 
-                CloudCredential cloudCredential = getAuthenticatedContext().getCloudCredential();
-                ArmCredentialView armCredentialView = new ArmCredentialView(cloudCredential);
-
-                String appId = applicationCreator.createApplication(accessToken, armCredentialView.getTenantId());
-                String principalObjectId = principalCreator.createServicePrincipal(accessToken, appId, armCredentialView.getTenantId());
-                azureRoleManager.assignRole(accessToken, armCredentialView.getSubscriptionId(), principalObjectId);
-
                 ExtendedCloudCredential extendedCloudCredential = armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential();
-                extendedCloudCredential.putParameter("accessKey", appId);
-                extendedCloudCredential.putParameter("secretKey", PASSWORD);
+                ArmCredentialView armCredentialView = new ArmCredentialView(extendedCloudCredential);
 
-                InteractiveCredentialCreationRequest credentialCreationRequest =
-                        new InteractiveCredentialCreationRequest(getAuthenticatedContext().getCloudContext(), cloudCredential, extendedCloudCredential);
-                LOGGER.info("Triggering event: {}", credentialCreationRequest);
-                eventBus.notify(credentialCreationRequest.selector(), Event.wrap(credentialCreationRequest));
+                try {
+                    String appId = applicationCreator.createApplication(accessToken, armCredentialView.getTenantId());
+                    sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
+                    String principalObjectId = principalCreator.createServicePrincipal(accessToken, appId, armCredentialView.getTenantId());
+                    sendStatusMessage(extendedCloudCredential, "Principal created for application");
+                    azureRoleManager.assignRole(accessToken, armCredentialView.getSubscriptionId(), principalObjectId);
+                    sendStatusMessage(extendedCloudCredential, "Role assigned for principal");
+
+                    extendedCloudCredential.putParameter("accessKey", appId);
+                    extendedCloudCredential.putParameter("secretKey", PASSWORD);
+
+                    armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
+                            extendedCloudCredential);
+                } catch (InteractiveLoginException e) {
+                    sendErrorStatusMessage(extendedCloudCredential, e.getMessage());
+                }
             } catch (JSONException e) {
                 throw new IllegalStateException(e);
             }
@@ -113,6 +114,16 @@ public class ArmInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
         } else {
             return false;
         }
+    }
+
+    private void sendStatusMessage(ExtendedCloudCredential extendedCloudCredential, String message) {
+        armInteractiveLoginStatusCheckerContext.getCredentialNotifier().sendStatusMessage(getAuthenticatedContext().getCloudContext(),
+                extendedCloudCredential, false, message);
+    }
+
+    private void sendErrorStatusMessage(ExtendedCloudCredential extendedCloudCredential, String message) {
+        armInteractiveLoginStatusCheckerContext.getCredentialNotifier().sendStatusMessage(getAuthenticatedContext().getCloudContext(),
+                extendedCloudCredential, true, message);
     }
 
     private Response createPollingRequest() {
@@ -131,10 +142,6 @@ public class ArmInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
         pollingForm.param("code", armInteractiveLoginStatusCheckerContext.getDeviceCode());
         return pollingForm;
     }
-
-
-
-
 
 
 }

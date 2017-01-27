@@ -17,6 +17,7 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.DiskList;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
@@ -64,7 +65,8 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext,  ExtendedCloudCredential extendedCloudCredential) {
+    public Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext,  ExtendedCloudCredential extendedCloudCredential,
+            CredentialNotifier credentialNotifier) {
         throw new UnsupportedOperationException("Interactive login not supported on GCP");
     }
 

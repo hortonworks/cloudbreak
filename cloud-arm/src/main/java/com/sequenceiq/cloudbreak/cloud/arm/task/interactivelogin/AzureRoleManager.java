@@ -32,13 +32,13 @@ public class AzureRoleManager {
 
     private static final String OWNER_ROLE = "Owner";
 
-    @Retryable(value = IllegalStateException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000))
-    public void assignRole(String accessToken, String subscriptionId, String principalObjectId) {
+    @Retryable(value = InteractiveLoginException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000))
+    public void assignRole(String accessToken, String subscriptionId, String principalObjectId) throws InteractiveLoginException {
         String ownerRoleNameRoleIdPair = getOwnerRoleDefinitionId(subscriptionId, accessToken);
         assignRole(accessToken, subscriptionId, ownerRoleNameRoleIdPair, principalObjectId);
     }
 
-    private String getOwnerRoleDefinitionId(String subscriptionId, String accessToken) {
+    private String getOwnerRoleDefinitionId(String subscriptionId, String accessToken) throws InteractiveLoginException {
         Response response = getOwnerRole(subscriptionId, accessToken);
 
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
@@ -52,8 +52,19 @@ public class AzureRoleManager {
                 throw new IllegalStateException(e);
             }
         } else {
-            throw new IllegalStateException("get 'Owner' role name and id request error - status code: " + response.getStatus()
-                    + " - error message: " + response.readEntity(String.class));
+            if (Response.Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
+                throw new InteractiveLoginException("You have no permission to access Active Directory roles, please contact with your administrator");
+            } else {
+                String errorResponse = response.readEntity(String.class);
+                LOGGER.error("get owner role definition id failed: " + errorResponse);
+                try {
+                    JSONObject errorJson = new JSONObject(errorResponse);
+                    throw new InteractiveLoginException("Get 'Owner' role name and definition id request error: " + errorJson.getJSONObject("error")
+                            .getString("message"));
+                } catch (JSONException e) {
+                    throw new IllegalStateException(e);
+                }
+            }
         }
 
     }
@@ -71,7 +82,7 @@ public class AzureRoleManager {
         return request.get();
     }
 
-    private void assignRole(String accessToken, String subscriptionId, String roleDefinitionId, String principalObjectId) {
+    private void assignRole(String accessToken, String subscriptionId, String roleDefinitionId, String principalObjectId) throws InteractiveLoginException {
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(AZURE_MANAGEMENT);
         Invocation.Builder request = resource.path("subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleAssignments/"
@@ -90,7 +101,7 @@ public class AzureRoleManager {
         Response response = request.put(Entity.entity(jsonObject.toString(), MediaType.APPLICATION_JSON));
 
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            throw new IllegalStateException("Assign role request error - status code: " + response.getStatus()
+            throw new InteractiveLoginException("Assign role request error - status code: " + response.getStatus()
                     + " - error message: " + response.readEntity(String.class));
         } else {
             LOGGER.info("Role assigned successfully");

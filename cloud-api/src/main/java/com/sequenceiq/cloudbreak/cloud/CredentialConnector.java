@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
@@ -34,7 +35,8 @@ public interface CredentialConnector {
      *
      * @return parameters for interactive login
      */
-    Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential);
+    Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential,
+            CredentialNotifier credentialNotifier);
 
     /**
      * Delete the credential (e.g public key) associated with a stack (cluster) from Cloud provider.

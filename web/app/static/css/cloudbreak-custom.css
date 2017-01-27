@@ -309,3 +309,19 @@ a.list-group-item, button.list-group-item {
     left: 5px;
     margin-right: 10px;
 }
+
+#interactive-login label, #interactive-login .high {
+    line-height: 40px
+}
+
+#interactive-login .high i {
+    margin-left: 5px;
+}
+
+#interactive-login #interactive-code {
+    border: 0;
+    font-size: 20px;
+    text-align: center;
+    font-weight: bold;
+}
+

@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.arm.context.ArmInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.arm.task.ArmPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -58,7 +59,8 @@ public class ArmInteractiveLogin {
         executor = Executors.newSingleThreadExecutor();
     }
 
-    public Map<String, String> login(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential) {
+    public Map<String, String> login(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential,
+            CredentialNotifier credentialNotifier) {
         Response deviceCodeResponse = getDeviceCode();
 
         if (deviceCodeResponse.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
@@ -72,7 +74,7 @@ public class ArmInteractiveLogin {
                 int expiresIn = jsonObject.getInt("expires_in");
                 String deviceCode = jsonObject.getString("device_code");
 
-                createCheckerContextAndCancelPrevious(extendedCloudCredential, deviceCode);
+                createCheckerContextAndCancelPrevious(extendedCloudCredential, deviceCode, credentialNotifier);
                 startAsyncPolling(authenticatedContext, pollInterval, expiresIn);
 
                 return extractParameters(jsonObject);
@@ -97,11 +99,12 @@ public class ArmInteractiveLogin {
         });
     }
 
-    private void createCheckerContextAndCancelPrevious(ExtendedCloudCredential extendedCloudCredential, String deviceCode) {
+    private void createCheckerContextAndCancelPrevious(ExtendedCloudCredential extendedCloudCredential, String deviceCode,
+            CredentialNotifier credentialNotifier) {
         if (armInteractiveLoginStatusCheckerContext != null) {
             armInteractiveLoginStatusCheckerContext.cancel();
         }
-        armInteractiveLoginStatusCheckerContext = new ArmInteractiveLoginStatusCheckerContext(deviceCode, extendedCloudCredential);
+        armInteractiveLoginStatusCheckerContext = new ArmInteractiveLoginStatusCheckerContext(deviceCode, extendedCloudCredential, credentialNotifier);
     }
 
     private Map<String, String> extractParameters(JSONObject jsonObject) throws JSONException {

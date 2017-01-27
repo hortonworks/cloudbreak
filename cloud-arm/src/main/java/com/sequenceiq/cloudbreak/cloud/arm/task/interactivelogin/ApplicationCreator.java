@@ -35,7 +35,7 @@ public class ApplicationCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationCreator.class);
 
-    public String createApplication(String accessToken, String tenantId) {
+    public String createApplication(String accessToken, String tenantId) throws InteractiveLoginException {
         Response response = createApplicationWithGraph(accessToken, tenantId);
 
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
@@ -49,8 +49,14 @@ public class ApplicationCreator {
                 throw new IllegalStateException(e);
             }
         } else {
-            throw new IllegalStateException("Application creation error - status code: " + response.getStatus()
-                    + " - error message: " + response.readEntity(String.class));
+            String errorResponse = response.readEntity(String.class);
+            try {
+                JSONObject errorJson = new JSONObject(errorResponse);
+                throw new InteractiveLoginException("AD Application creation error: "
+                        + errorJson.getJSONObject("odata.error").getJSONObject("message").getString("value"));
+            } catch (JSONException e) {
+                throw new IllegalStateException(e);
+            }
         }
 
     }

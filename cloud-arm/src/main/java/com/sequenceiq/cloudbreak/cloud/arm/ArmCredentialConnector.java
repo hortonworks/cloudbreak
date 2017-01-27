@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloud.azure.client.AzureRMClient;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -45,8 +46,9 @@ public class ArmCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential) {
-        return armInteractiveLogin.login(authenticatedContext, extendedCloudCredential);
+    public Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential,
+            CredentialNotifier credentialNotifier) {
+        return armInteractiveLogin.login(authenticatedContext, extendedCloudCredential, credentialNotifier);
     }
 
     @Override

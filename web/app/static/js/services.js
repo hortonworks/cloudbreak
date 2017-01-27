@@ -128,6 +128,16 @@ uluwatuServices.factory('GlobalCredential', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('InteractiveLogin', ['$resource',
+    function($resource) {
+        return $resource('credentials/accountinteractivelogin', {
+            'save': {
+                method: 'POST'
+            }
+        });
+    }
+]);
+
 uluwatuServices.factory('GlobalCredentialCertificate', ['$resource',
     function($resource) {
         return $resource('credentials/certificate/:id', {}, {

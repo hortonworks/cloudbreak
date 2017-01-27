@@ -64,6 +64,10 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             }
         }
 
+        $scope.showInteractiveCredentialMessage = function(message) {
+            $scope.defaultCredentialError = message;
+        }
+
         $scope.showErrorMessage = function(message, prefix) {
             $scope.modifyStatusMessage(message, prefix);
             $scope.modifyStatusClass("has-error");
