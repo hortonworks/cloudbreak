@@ -169,6 +169,14 @@ func main() {
 			Action: hdc.CreateRDSConfig,
 		},
 		{
+			Name:   "repair-cluster",
+			Usage:  "remove or replace the faulty nodes",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlRemoveOnly, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			After:  StopSpinner,
+			Action: hdc.RepairCluster,
+		},
+		{
 			Name:   "resize-cluster",
 			Usage:  "change the number of worker or compute nodes of an existing cluster",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},

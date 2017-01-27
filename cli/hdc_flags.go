@@ -95,6 +95,13 @@ var (
 			Usage: "wait for the operation to finish",
 		},
 	}
+	FlRemoveOnly = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "remove-only",
+			Usage: "set to true if you want the instances to be removed only, otherwise they will be replaced",
+		},
+	}
 	FlOutput = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -114,7 +121,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "node-type",
-			Usage: "type of the nodes to scale. One of [worker, compute]",
+			Usage: "type of the nodes. [worker, compute]",
 		},
 	}
 	FlCredentialName = StringFlag{

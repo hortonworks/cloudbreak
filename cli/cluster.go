@@ -383,6 +383,34 @@ func ValidateCreateClusterSkeleton(c *cli.Context) error {
 	return skeleton.Validate()
 }
 
+func RepairCluster(c *cli.Context) error {
+	defer timeTrack(time.Now(), "repair cluster")
+	checkRequiredFlags(c, RepairCluster)
+
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	clusterName := c.String(FlClusterName.Name)
+	nodeType := c.String(FlNodeType.Name)
+	removeOnly := c.Bool(FlRemoveOnly.Name)
+	if nodeType != WORKER && nodeType != COMPUTE {
+		logMissingParameterAndExit(c, RepairCluster, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
+	}
+
+	repairClusterImp(clusterName, nodeType, removeOnly, oAuth2Client.GetClusterByName, oAuth2Client.Cloudbreak.Cluster.RepairCluster)
+	return nil
+}
+
+func repairClusterImp(clusterName string, nodeType string, removeOnly bool,
+	getStack func(string) *models.StackResponse,
+	repairCluster func(params *cluster.RepairClusterParams) error) {
+
+	stack := getStack(clusterName)
+
+	repairBody := &models.ClusterRepairRequest{HostGroups: []string{nodeType}, RemoveOnly: &removeOnly}
+	if err := repairCluster(&cluster.RepairClusterParams{Body: repairBody, ID: *stack.ID}); err != nil {
+		logErrorAndExit(RepairCluster, err.Error())
+	}
+}
+
 func ResizeCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "resize cluster")
 
