@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,14 +15,19 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 
 @Component
 public class JsonToClusterConverter extends AbstractConversionServiceAwareConverter<ClusterRequest, Cluster> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonToClusterConverter.class);
+
     @Override
     public Cluster convert(ClusterRequest source) {
         Cluster cluster = new Cluster();
@@ -33,6 +40,17 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? false : enableSecurity);
         cluster.setEnableKnoxGateway(source.getEnableKnoxGateway());
+        try {
+            ExposedServices exposedServices = new ExposedServices();
+            if (source.getExposedKnoxServices() != null) {
+                exposedServices.setServices(source.getExposedKnoxServices());
+            }
+            cluster.setExposedKnoxServices(new Json(exposedServices));
+        } catch (JsonProcessingException e) {
+            LOGGER.error("Failed to store exposedServices", e);
+            throw new CloudbreakApiException("Failed to store exposedServices", e);
+        }
+
         KerberosRequest kerberos = source.getKerberos();
         KerberosConfig kerberosConfig = new KerberosConfig();
         if (source.getKerberos() != null) {

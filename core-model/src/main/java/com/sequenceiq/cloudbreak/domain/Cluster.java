@@ -158,6 +158,10 @@ public class Cluster implements ProvisionEntity {
     @Column(nullable = false)
     private Boolean enableKnoxGateway;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json exposedKnoxServices;
+
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
 
@@ -462,6 +466,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
         this.enableKnoxGateway = enableKnoxGateway;
+    }
+
+    public Json getExposedKnoxServices() {
+        return exposedKnoxServices;
+    }
+
+    public void setExposedKnoxServices(Json exposedKnoxServices) {
+        this.exposedKnoxServices = exposedKnoxServices;
     }
 
     public ConfigStrategy getConfigStrategy() {

@@ -13,6 +13,7 @@ import java.util.Set;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceCom
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -123,10 +126,24 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setRdsConfig(getConversionService().convert(source.getRdsConfig(), RDSConfigResponse.class));
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
         clusterResponse.setSssdConfig(getConversionService().convert(source.getSssdConfig(), SssdConfigResponse.class));
+        convertKnox(source, clusterResponse);
         if (source.getBlueprintCustomProperties() != null) {
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
         return clusterResponse;
+    }
+
+    private void convertKnox(Cluster source, ClusterResponse clusterResponse) {
+        clusterResponse.setEnableKnoxGateway(source.getEnableKnoxGateway());
+        Json exposedJson = source.getExposedKnoxServices();
+        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
+            try {
+                clusterResponse.setExposedKnoxServices(exposedJson.get(ExposedServices.class).getServices());
+            } catch (IOException e) {
+                LOGGER.error("Failed to add exposedServices to response", e);
+                throw new CloudbreakApiException("Failed to add exposedServices to response", e);
+            }
+        }
     }
 
     private String getAmbariIp(Cluster cluster) {

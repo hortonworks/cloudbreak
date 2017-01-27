@@ -74,6 +74,7 @@ public class ModelDescriptions {
         public static final String PASSWORD = "ambari password";
         public static final String ENABLE_SECURITY = "enable Kerberos security";
         public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
+        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
         public static final String KERBEROS_PASSWORD = "kerberos admin password";

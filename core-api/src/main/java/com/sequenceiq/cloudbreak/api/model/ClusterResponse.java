@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -95,6 +96,12 @@ public class ClusterResponse {
 
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
+
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_KNOX_GATEWAY)
+    private Boolean enableKnoxGateway;
+
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.EXPOSED_KNOX_SERVICES)
+    private List<String> exposedKnoxServices;
 
     public Boolean getEnableShipyard() {
         return enableShipyard;
@@ -320,5 +327,21 @@ public class ClusterResponse {
 
     public void setBlueprint(BlueprintResponse blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public Boolean getEnableKnoxGateway() {
+        return enableKnoxGateway;
+    }
+
+    public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
+        this.enableKnoxGateway = enableKnoxGateway;
+    }
+
+    public List<String> getExposedKnoxServices() {
+        return exposedKnoxServices;
+    }
+
+    public void setExposedKnoxServices(List<String> exposedKnoxServices) {
+        this.exposedKnoxServices = exposedKnoxServices;
     }
 }

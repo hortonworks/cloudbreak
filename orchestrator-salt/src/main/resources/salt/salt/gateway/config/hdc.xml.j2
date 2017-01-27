@@ -70,28 +70,36 @@
 
     </gateway>
 
+    {% if 'WEBHDFS' in salt['pillar.get']('gateway:exposed') -%}
     <!-- curl -iku {{ salt['pillar.get']('ambari:username') }}:{{ salt['pillar.get']('ambari:password') }} -X GET 'https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/webhdfs/v1/?op=LISTSTATUS' -->
-
     <service>
         <role>WEBHDFS</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:50070/webhdfs</url>
     </service>
+    {%- endif %}
 
+    {% if 'AMBARI' in salt['pillar.get']('gateway:exposed') -%}
     <service>
         <role>AMBARI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
     </service>
+    {%- endif %}
 
+    {% if 'ZEPPELINWS' in salt['pillar.get']('gateway:exposed') -%}
     <service>
         <role>ZEPPELINWS</role>
         <url>ws://{{ salt['grains.get']('fqdn') }}:9995/ws</url>
     </service>
+    {%- endif %}
 
+    {% if 'RANGER' in salt['pillar.get']('gateway:exposed') -%}
     <service>
         <role>RANGER</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:6080</url>
     </service>
+    {%- endif %}
 
+    {% if 'HIVE' in salt['pillar.get']('gateway:exposed') -%}
     <!-- beeline -u "jdbc:hive2://{{ salt['pillar.get']('gateway:address') }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['pillar.get']('gateway:address') }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
@@ -100,56 +108,69 @@
         <role>HIVE</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:10001/cliservice</url>
     </service>
+    {%- endif %}
 
     <!-- UI -->
-
+    {% if 'HDFSUI' in salt['pillar.get']('gateway:exposed') -%}
     <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/hdfs/ -->
-
     <service>
         <role>HDFSUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:50070</url>
     </service>
+    {%- endif %}
 
+    {% if 'AMBARIUI' in salt['pillar.get']('gateway:exposed') -%}
     <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/ambari/ -->
 
     <service>
         <role>AMBARIUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:8080</url>
     </service>
+    {%- endif %}
 
+    {% if 'YARNUI' in salt['pillar.get']('gateway:exposed') -%}
     <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/yarn/ -->
 
     <service>
         <role>YARNUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:8088</url>
     </service>
+    {%- endif %}
 
+    {% if 'JOBHISTORYUI' in salt['pillar.get']('gateway:exposed') -%}
     <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/jobhistory/ -->
 
     <service>
         <role>JOBHISTORYUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:19888</url>
     </service>
+    {%- endif %}
 
+    {% if 'SPARKHISTORYUI' in salt['pillar.get']('gateway:exposed') -%}
     <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/sparkhistory/ -->
 
     <service>
         <role>SPARKHISTORYUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:18080/</url>
     </service>
+    {%- endif %}
 
+    {% if 'ZEPPELINUI' in salt['pillar.get']('gateway:exposed') -%}
     <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/zeppelin/ -->
 
     <service>
         <role>ZEPPELINUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:9995</url>
     </service>
+    {%- endif %}
 
+    {% if 'RANGERUI' in salt['pillar.get']('gateway:exposed') -%}
     <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/ranger/ -->
 
     <service>
         <role>RANGERUI</role>
         <url>http://{{ salt['grains.get']('fqdn') }}:6080</url>
     </service>
+    {%- endif %}
 
 </topology>

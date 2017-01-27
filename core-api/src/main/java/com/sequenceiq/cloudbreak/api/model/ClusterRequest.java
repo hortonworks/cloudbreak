@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -51,6 +52,9 @@ public class ClusterRequest {
 
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_KNOX_GATEWAY)
     private Boolean enableKnoxGateway = Boolean.FALSE;
+
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.EXPOSED_KNOX_SERVICES)
+    private List<String> exposedKnoxServices;
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
@@ -173,6 +177,14 @@ public class ClusterRequest {
 
     public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
         this.enableKnoxGateway = enableKnoxGateway;
+    }
+
+    public List<String> getExposedKnoxServices() {
+        return exposedKnoxServices;
+    }
+
+    public void setExposedKnoxServices(List<String> exposedKnoxServices) {
+        this.exposedKnoxServices = exposedKnoxServices;
     }
 
     public Boolean getLdapRequired() {
