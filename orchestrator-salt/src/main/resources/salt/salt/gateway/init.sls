@@ -3,6 +3,15 @@
 knox:
   pkg.installed
 
+#/usr/hdp/current/knox-server/conf/topologies/admin.xml:
+#  file.absent
+
+#/usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
+#  file.absent
+
+#/usr/hdp/current/knox-server/conf/topologies/manager.xml:
+#  file.absent
+
 knox-master-secret:
   cmd.run:
     - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master '{{ salt['pillar.get']('gateway:password') }}'

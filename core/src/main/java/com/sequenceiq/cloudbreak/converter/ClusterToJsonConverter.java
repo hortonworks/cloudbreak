@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static com.sequenceiq.cloudbreak.service.network.ExposedService.SHIPYARD;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -205,6 +206,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         List<Port> ports = NetworkUtils.getPorts(Optional.absent());
         collectPortsOfAdditionalServices(result, ambariIp, shipyardEnabled);
         try {
+            List<String> exposedServices = new ArrayList<>();
+            if (cluster.getExposedKnoxServices() != null && cluster.getExposedKnoxServices().getValue() != null) {
+                exposedServices = cluster.getExposedKnoxServices().get(ExposedServices.class).getServices();
+            }
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
             Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);
             for (JsonNode hostGroupNode : hostGroupsNode) {
@@ -221,7 +226,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 for (JsonNode componentNode : componentsNode) {
                     String componentName = componentNode.get("name").asText();
                     StackServiceComponentDescriptor componentDescriptor = stackServiceComponentDescs.get(componentName);
-                    collectServicePorts(result, ports, serviceAddress, componentDescriptor, cluster.getEnableKnoxGateway());
+                    collectServicePorts(result, ports, serviceAddress, componentDescriptor, cluster.getEnableKnoxGateway(), exposedServices);
                 }
             }
         } catch (Exception ex) {
@@ -238,17 +243,20 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private void collectServicePorts(Map<String, String> result, List<Port> ports, String address, StackServiceComponentDescriptor componentDescriptor,
-            Boolean knoxGatewayEnabled) {
+            Boolean knoxGatewayEnabled, List<String> exposedServices) {
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
             for (Port port : ports) {
                 if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
                     String url;
                     if (knoxGatewayEnabled) {
-                        url = String.format("https://%s:8443/gateway/hdc%s", address, port.getKnoxUrl());
+                        url = String.format("https://%s:8443/gateway/hdc%s", address, port.getExposedService().getKnoxUrl());
+                        if (exposedServices.contains(port.getExposedService().getKnoxService())) {
+                            result.put(port.getExposedService().getPortName(), url);
+                        }
                     } else {
                         url = String.format("http://%s:%s%s", address, port.getPort(), port.getExposedService().getPostFix());
+                        result.put(port.getExposedService().getPortName(), url);
                     }
-                    result.put(port.getExposedService().getPortName(), url);
                 }
             }
         }
