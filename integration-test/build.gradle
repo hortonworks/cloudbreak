@@ -32,7 +32,7 @@ dependencies {
     exclude group: 'commons-logging'
   }
   compile group:  'com.microsoft.azure',          name: 'azure',                          version: '1.0.0-beta2'
-  compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev102-1.21.0'
+  compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev133-1.22.0'
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion
   compile group:  'org.springframework',          name: 'spring-web',                     version: springFrameworkVersion
