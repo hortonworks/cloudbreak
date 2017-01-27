@@ -29,8 +29,8 @@ public class PrincipalCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrincipalCreator.class);
 
-    @Retryable(value = IllegalStateException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000))
-    public String createServicePrincipal(String accessToken, String appId, String tenantId) {
+    @Retryable(value = InteractiveLoginException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000))
+    public String createServicePrincipal(String accessToken, String appId, String tenantId) throws InteractiveLoginException {
         Response response = createServicePrincipalWithGraph(accessToken, appId, tenantId);
 
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
@@ -45,8 +45,15 @@ public class PrincipalCreator {
                 throw new IllegalStateException(e);
             }
         } else {
-            throw new IllegalStateException("Service principal creation error - status code: " + response.getStatus()
-                    + " - error message: " + response.readEntity(String.class));
+            String errorResponse = response.readEntity(String.class);
+            LOGGER.error("create service principal failed: " + errorResponse);
+            try {
+                JSONObject errorJson = new JSONObject(errorResponse);
+                throw new InteractiveLoginException("Service principal creation error: "
+                        + errorJson.getJSONObject("odata.error").getJSONObject("message").getString("value"));
+            } catch (JSONException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 

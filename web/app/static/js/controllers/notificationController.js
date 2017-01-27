@@ -2,8 +2,8 @@
 
 var log = log4javascript.getLogger("notificationController-logger");
 
-angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster', 'GlobalStack', 'UluwatuCluster',
-    function($scope, $rootScope, $filter, Cluster, GlobalStack, UluwatuCluster) {
+angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster', 'GlobalStack', 'UluwatuCluster', 'AccountCredential',
+    function($scope, $rootScope, $filter, Cluster, GlobalStack, UluwatuCluster, AccountCredential) {
         var successEvents = ["REQUESTED",
             "CREATE_IN_PROGRESS",
             "START_REQUESTED",
@@ -103,10 +103,32 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                         handleUpdateInProgressNotification(notification);
                         handleStatusChange(notification, false);
                         break;
+                    case "CREDENTIAL_CREATED":
+                        // handleCredentialCreated(notification);
+                        var credentials = AccountCredential.query(function (credentials) {
+                            $rootScope.$broadcast('credentialCreated', credentials);
+                        });
+                        break;
+                    case "INTERACTIVE_CREDENTIAL_STATUS":
+                        handleInteractiveCredentialStatus(notification);
+                        break;
+                    case "INTERACTIVE_CREDENTIAL_ERROR":
+                        handleInteractiveCredentialError(notification);
+                        break;
                 }
             }
 
             $scope.$apply();
+        }
+
+        function handleInteractiveCredentialError(notification) {
+            $scope.showErrorMessage(notification.eventMessage);
+            $scope.showInteractiveCredentialMessage(notification.eventMessage)
+        }
+
+        function handleInteractiveCredentialStatus(notification) {
+            $rootScope.$broadcast('interactiveCredentialCreationInProgress');
+            $scope.showSuccess(notification.eventMessage);
         }
 
         function getActCluster(notification) {

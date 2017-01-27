@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.arm.context;
 
+import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 public class ArmInteractiveLoginStatusCheckerContext {
@@ -8,11 +9,14 @@ public class ArmInteractiveLoginStatusCheckerContext {
 
     private String deviceCode;
 
+    private final CredentialNotifier credentialNotifier;
+
     private ExtendedCloudCredential extendedCloudCredential;
 
-    public ArmInteractiveLoginStatusCheckerContext(String deviceCode, ExtendedCloudCredential extendedCloudCredential) {
+    public ArmInteractiveLoginStatusCheckerContext(String deviceCode, ExtendedCloudCredential extendedCloudCredential, CredentialNotifier credentialNotifier) {
         this.deviceCode = deviceCode;
         this.extendedCloudCredential = extendedCloudCredential;
+        this.credentialNotifier = credentialNotifier;
     }
 
     public String getDeviceCode() {
@@ -29,5 +33,9 @@ public class ArmInteractiveLoginStatusCheckerContext {
 
     public void cancel() {
         cancelled = true;
+    }
+
+    public CredentialNotifier getCredentialNotifier() {
+        return credentialNotifier;
     }
 }

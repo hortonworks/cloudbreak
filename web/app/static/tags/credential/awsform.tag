@@ -1,5 +1,5 @@
 <div class="form-group">
-    <label class="col-sm-3 control-label" for="awscredentialtype">{{msg.credential_aws_select}}</label>
+    <label class="col-sm-3 control-label" for="awscredentialtype">{{msg.credential_select}}</label>
     <div class="col-sm-3">
         <select class="form-control" id="awscredentialtype" name="awscredentialtype" ng-model="credentialAws.parameters.selector" ng-options="option.id as option.name for option in $root.config.AWS_SELECTOR" ng-init="credentialAws.parameters.selector == 'role-based'">
         </select>

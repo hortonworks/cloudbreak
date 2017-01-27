@@ -88,7 +88,9 @@ var config = {
     cloudbreakAddress: null,
     periscopeAddress: null,
     cloudbreakApiRootContext: '/cb/api/v1',
-    periscopeApiRootContext: '/as/api/v1'
+    periscopeApiRootContext: '/as/api/v1',
+    azureTenantId: process.env.AZURE_TENANT_ID,
+    azureSubscriptionId: process.env.AZURE_SUBSCRIPTION_ID
 }
 
 if (config.addressResolvingRetryCount <= 0) {
@@ -301,6 +303,22 @@ function continueInit() {
         });
     })
 
+    app.post('/credentials/accountinteractivelogin', function(req, res) {
+        console.log("interactive login");
+        var requestArgs = {
+            headers: {
+                "Authorization": "Bearer " + req.session.token
+            }
+        };
+        identityServerClient.get(config.identityServerAddress + "userinfo", requestArgs, function(data, response, error) {
+            if (!error && response.statusCode == 200) {
+                interactiveLogin(req, res);
+            } else {
+                res.status(500).send(null);
+            }
+        });
+    });
+
     function preventNoCachInResponse(res) {
         res.header("Cache-Control", "no-cache, no-store, must-revalidate");
         res.header("Pragma", "no-cache");
@@ -375,6 +393,21 @@ function continueInit() {
                 }
             }
         };
+    }
+
+    function interactiveLogin(req, res) {
+        console.log("interactive login: " + JSON.stringify(req.body));
+        console.log("tenant id: " + config.azureTenantId + ", subscription id: " + config.azureSubscriptionId);
+        if (config.azureSubscriptionId && config.azureTenantId) {
+            req.body.parameters = {
+                subscriptionId: config.azureSubscriptionId,
+                tenantId: config.azureTenantId
+            };
+            console.log("interactive login request: " + JSON.stringify(req.body));
+            return proxyCloudbreakRequest(req, res, proxyRestClient.post);
+        } else {
+            res.status(500).send("Please set AZURE_TENANT_ID and AZURE_SUBSCRIPTION_ID in Profile");
+        }
     }
 
     function proxyCloudbreakRequest(req, res, method) {
