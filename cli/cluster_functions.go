@@ -132,7 +132,7 @@ func (c *ClusterSkeletonResult) fill(
 		c.ClusterType = getFancyBlueprintName(blueprint)
 	}
 
-	if network != nil && network.Parameters["internetGatewayId"] == nil {
+	if network != nil && network.Parameters["vpcId"] != nil && network.Parameters["subnetId"] != nil {
 		net := Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
 		c.Network = &net
 	}
