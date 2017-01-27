@@ -58,9 +58,9 @@ public class DefaultSecurityGroupCreator {
         String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
         if (!defSecGroupMap.containsKey(securityGroupName)) {
             List<Port> strictSecurityGroupPorts = new ArrayList<>();
-            strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp", null));
-            strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp", null));
-            strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp", null));
+            strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
+            strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
+            strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
             String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
             addSecurityGroup(user, platform, securityGroups, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
         }
