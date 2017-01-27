@@ -43,7 +43,7 @@ public class HostGroupService {
     }
 
     public Set<HostMetadata> findEmptyHostMetadataInHostGroup(Long hostGroupId) {
-        return hostMetadataRepository.findEmptyContainerHostsInHostGroup(hostGroupId);
+        return hostMetadataRepository.findEmptyHostsInHostGroup(hostGroupId);
     }
 
     public HostGroup getByClusterIdAndInstanceGroupName(Long clusterId, String instanceGroupName) {

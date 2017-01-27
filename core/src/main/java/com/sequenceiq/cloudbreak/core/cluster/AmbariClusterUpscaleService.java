@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -77,6 +78,7 @@ public class AmbariClusterUpscaleService {
                 List<String> hostNames = containersEntry.getValue().stream().map(Container::getHost).collect(Collectors.toList());
                 hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
             }
+            clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
             Map<String, String> hosts = hostRunner.addAmbariServices(stackId, hostGroupName, scalingAdjustment);
             for (String hostName : hosts.keySet()) {
@@ -85,11 +87,11 @@ public class AmbariClusterUpscaleService {
                 }
                 hostsPerHostGroup.get(hostGroupName).add(hostName);
             }
+            clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup, HostMetadataState.SERVICES_RUNNING);
         } else {
             LOGGER.info(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
         }
-        clusterService.updateHostMetadata(stack.getCluster().getId(), hostsPerHostGroup);
         Set<String> allHosts = new HashSet<>();
         for (Map.Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
             allHosts.addAll(hostsPerHostGroupEntry.getValue());
