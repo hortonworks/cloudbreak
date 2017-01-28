@@ -10,6 +10,9 @@ const (
 	PRE       = "pre"
 	POST      = "post"
 	USER_TAGS = "userDefined"
+	UNKNOWN   = "UNKNOWN"
+	HEALTHY   = "HEALTHY"
+	UNHEALTHY = "UNHEALTHY"
 )
 
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5, 2.6}
@@ -45,6 +48,7 @@ type ClusterSkeletonResult struct {
 	ClusterSkeletonBase
 	HiveMetastore  *HiveMetastoreResult    `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
 	Configurations []models.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Nodes          string                  `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
 	Status         string                  `json:"Status,omitempty" yaml:"Status,omitempty"`
 	StatusReason   string                  `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 }

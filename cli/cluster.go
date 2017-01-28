@@ -102,6 +102,7 @@ func describeClusterImpl(clusterName string, format string,
 		clusterSkeleton.Worker.Recipes = []Recipe{}
 		clusterSkeleton.Compute.Recipes = []Recipe{}
 	}
+	clusterSkeleton.Nodes = ""
 	return clusterSkeleton
 }
 

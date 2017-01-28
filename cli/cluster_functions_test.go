@@ -278,6 +278,115 @@ func TestFillWithCluster(t *testing.T) {
 	}
 }
 
+func TestFillWithNoInstances(t *testing.T) {
+	skeleton, sr, _, _, _ := clusterSkeleton(nil, nil, nil)
+
+	skeleton.fill(sr, nil, nil, nil, nil, nil, nil, nil, nil)
+
+	if skeleton.Nodes != UNKNOWN {
+		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNKNOWN)
+	}
+}
+
+func TestFillWitMixedHostStatuses(t *testing.T) {
+	skeleton, _, _, _, _ := clusterSkeleton(nil, nil, nil)
+	host1 := "host1.example.com"
+	host2 := "host2.example.com"
+	metadata := []*models.InstanceMetaData{
+		{DiscoveryFQDN: &host1,
+			InstanceGroup: &(&stringWrapper{MASTER}).s},
+		{DiscoveryFQDN: &host2,
+			InstanceGroup: &(&stringWrapper{WORKER}).s},
+	}
+	ig := []*models.InstanceGroupResponse{{Metadata: metadata}}
+	hm := []*models.HostMetadata{
+		{Name: host1,
+			State: &(&stringWrapper{UNHEALTHY}).s},
+		{Name: host2,
+			State: &(&stringWrapper{HEALTHY}).s},
+	}
+	hg := []*models.HostGroupResponse{
+		{Name: MASTER,
+			Metadata: hm},
+	}
+	cr := models.ClusterResponse{
+		HostGroups: hg,
+	}
+	sr := models.StackResponse{
+		Name:           "stack-name",
+		InstanceGroups: ig,
+		Cluster:        &cr,
+	}
+
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+
+	if skeleton.Nodes != UNHEALTHY {
+		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNHEALTHY)
+	}
+}
+
+func TestFillWithHealthyHostStatuses(t *testing.T) {
+	skeleton, _, _, _, _ := clusterSkeleton(nil, nil, nil)
+	host1 := "host1.example.com"
+	host2 := "host2.example.com"
+	metadata := []*models.InstanceMetaData{
+		{DiscoveryFQDN: &host1,
+			InstanceGroup: &(&stringWrapper{MASTER}).s},
+		{DiscoveryFQDN: &host2,
+			InstanceGroup: &(&stringWrapper{WORKER}).s},
+	}
+	ig := []*models.InstanceGroupResponse{{Metadata: metadata}}
+	hm := []*models.HostMetadata{
+		{Name: host1,
+			State: &(&stringWrapper{HEALTHY}).s},
+		{Name: host2,
+			State: &(&stringWrapper{HEALTHY}).s},
+	}
+	hg := []*models.HostGroupResponse{
+		{Name: MASTER,
+			Metadata: hm},
+	}
+	cr := models.ClusterResponse{
+		HostGroups: hg,
+	}
+	sr := models.StackResponse{
+		Name:           "stack-name",
+		InstanceGroups: ig,
+		Cluster:        &cr,
+	}
+
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+
+	if skeleton.Nodes != HEALTHY {
+		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, HEALTHY)
+	}
+}
+
+func TestFillWithUnknownHostStatuses(t *testing.T) {
+	skeleton, _, _, _, _ := clusterSkeleton(nil, nil, nil)
+	host1 := "host1.example.com"
+	host2 := "host2.example.com"
+	metadata := []*models.InstanceMetaData{
+		{DiscoveryFQDN: &host1,
+			InstanceGroup: &(&stringWrapper{MASTER}).s},
+		{DiscoveryFQDN: &host2,
+			InstanceGroup: &(&stringWrapper{WORKER}).s},
+	}
+	ig := []*models.InstanceGroupResponse{{Metadata: metadata}}
+	cr := models.ClusterResponse{}
+	sr := models.StackResponse{
+		Name:           "stack-name",
+		InstanceGroups: ig,
+		Cluster:        &cr,
+	}
+
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+
+	if skeleton.Nodes != UNKNOWN {
+		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNKNOWN)
+	}
+}
+
 func TestFillWithClusterAvailable(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 

@@ -148,6 +148,28 @@ func (c *ClusterSkeletonResult) fill(
 	c.Worker.Recipes = convertRecipes(recipeMap[WORKER])
 	c.Compute.Recipes = convertRecipes(recipeMap[COMPUTE])
 
+	if stack.InstanceGroups != nil {
+		for _, v := range stack.InstanceGroups {
+			if c.Nodes == UNHEALTHY {
+				break
+			}
+			for _, metadata := range v.Metadata {
+				hostStatus := getHostStatus(stack, metadata)
+				if hostStatus == UNHEALTHY {
+					c.Nodes = UNHEALTHY
+					break
+				} else if len(hostStatus) > 0 {
+					c.Nodes = HEALTHY
+				}
+			}
+		}
+		if len(c.Nodes) == 0 {
+			c.Nodes = UNKNOWN
+		}
+	} else {
+		c.Nodes = UNKNOWN
+	}
+
 	if securityMap != nil {
 		if stack.InstanceGroups != nil {
 			for _, v := range stack.InstanceGroups {

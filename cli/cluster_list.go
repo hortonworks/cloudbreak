@@ -12,7 +12,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var ClusterListHeader = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type"}
+var ClusterListHeader = []string{"Cluster Name", "Status", "HDP Version", "Cluster Type", "Nodes status"}
 var ClusterNodeHeader = []string{"Instance ID", "Hostname", "Public IP", "Private IP", "Instance Status", "Host Status", "Type"}
 
 type ClusterListElement struct {
@@ -20,10 +20,11 @@ type ClusterListElement struct {
 	HDPVersion  string `json:"HDPVersion" yaml:"HDPVersion"`
 	ClusterType string `json:"ClusterType" yaml:"ClusterType"`
 	Status      string `json:"Status,omitempty" yaml:"Status,omitempty"`
+	Nodes       string `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
 }
 
 func (c *ClusterListElement) DataAsStringArray() []string {
-	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType}
+	return []string{c.ClusterName, c.Status, c.HDPVersion, c.ClusterType, c.Nodes}
 }
 
 type ClusterNode struct {
@@ -78,6 +79,7 @@ func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetSt
 			HDPVersion:  v.HDPVersion,
 			ClusterType: v.ClusterType,
 			Status:      v.Status,
+			Nodes:       v.Nodes,
 		}
 		tableRows[i] = clusterListElement
 	}
