@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint;
 
+import java.util.Map;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -38,6 +40,12 @@ public interface AccountPreferencesEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
     AccountPreferencesJson post(@Valid AccountPreferencesJson updateRequest);
+
+    @GET
+    @Path("/isplatformselectiondisabled")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.IS_PLATFORM_SELECTION_DISABLED, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
+    Map<String, Boolean> isPlatformSelectionDisabled();
 
     @GET
     @Path("validate")

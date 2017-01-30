@@ -123,7 +123,7 @@
                                 </table>
                             </div>
                         </div>
-                        <div class="">
+                        <div ng-init="fetchIsPlatformSelectionDisabled()" ng-hide="isPlatformSelectionDisabled" class="">
                             <label class="col-sm-3 control-label" for="scopes">{{msg.account_details_cloudplatforms}}</label>
                             <div class="col-sm-4">
                                 <table class="table table-bordered table-striped responsive-utilities">

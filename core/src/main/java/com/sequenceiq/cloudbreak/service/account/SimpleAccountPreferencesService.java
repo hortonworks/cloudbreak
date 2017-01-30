@@ -5,6 +5,8 @@ import java.util.concurrent.locks.Lock;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,9 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     private static final long ZERO = 0L;
 
     private static final int STRIPES = 10;
+
+    @Value("${cb.enabledplatforms:}")
+    private String enabledPlatforms;
 
     @Inject
     private AccountPreferencesRepository repository;
@@ -43,6 +48,10 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
         return repository.findOne(id);
     }
 
+    public Boolean isPlatformSelectionDisabled() {
+        return !StringUtils.isEmpty(enabledPlatforms);
+    }
+
     @Override
     public AccountPreferences getByAccount(String account) {
         Lock lock = locks.get(account);
@@ -51,6 +60,9 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
             AccountPreferences accountPreferences = repository.findByAccount(account);
             if (accountPreferences == null) {
                 accountPreferences = createDefaultAccountPreferences(account);
+            }
+            if (!StringUtils.isEmpty(enabledPlatforms)) {
+                accountPreferences.setPlatforms(enabledPlatforms);
             }
             return accountPreferences;
         } finally {
@@ -76,17 +88,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     @Override
     public AccountPreferences getOneByAccount(CbUser user) {
         String account = user.getAccount();
-        Lock lock = locks.get(account);
-        lock.lock();
-        try {
-            AccountPreferences accountPreferences = repository.findByAccount(account);
-            if (accountPreferences == null) {
-                accountPreferences = createDefaultAccountPreferences(account);
-            }
-            return accountPreferences;
-        } finally {
-            lock.unlock();
-        }
+        return getByAccount(account);
     }
 
     @Override
