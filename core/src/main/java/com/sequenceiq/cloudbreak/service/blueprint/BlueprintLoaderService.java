@@ -9,11 +9,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -120,6 +122,8 @@ public class BlueprintLoaderService {
                     bp.setStatus(ResourceStatus.DEFAULT);
                     blueprintRepository.save(bp);
                     blueprints.add(bp);
+                } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+                    LOGGER.info("Blueprint already added with name: '" + split[0] + "' for user: '" + user.getUsername() + "' user.");
                 } catch (Exception e) {
                     LOGGER.error("Blueprint is not available for '" + user.getUsername() + "' user.", e);
                 }

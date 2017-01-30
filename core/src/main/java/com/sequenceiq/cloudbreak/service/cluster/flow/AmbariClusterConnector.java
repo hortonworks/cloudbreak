@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.domain.TopologyRecord;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
@@ -138,6 +139,9 @@ public class AmbariClusterConnector {
 
     @Inject
     private AmbariOperationService ambariOperationService;
+
+    @Inject
+    private RdsConfigRepository rdsConfigRepository;
 
     @Inject
     private PollingService<AmbariHostsCheckerContext> hostsPollingService;
@@ -262,8 +266,9 @@ public class AmbariClusterConnector {
 
             String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint());
 
+            Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
             FileSystem fs = cluster.getFileSystem();
-            blueprintText = updateBlueprintConfiguration(stack, blueprintText, cluster.getRdsConfig(), fs);
+            blueprintText = updateBlueprintConfiguration(stack, blueprintText, rdsConfigs, fs);
 
             AmbariClient ambariClient = getAmbariClient(stack);
             setBaseRepoURL(stack, ambariClient);
@@ -320,7 +325,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private String updateBlueprintConfiguration(Stack stack, String blueprintText, RDSConfig rdsConfig, FileSystem fs)
+    private String updateBlueprintConfiguration(Stack stack, String blueprintText, Set<RDSConfig> rdsConfigs, FileSystem fs)
             throws IOException, CloudbreakImageNotFoundException {
         if (fs != null) {
             blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
@@ -333,8 +338,8 @@ public class AmbariClusterConnector {
                 blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, hdpRepo.getHdpVersion());
             }
         }
-        if (rdsConfig != null) {
-            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, rdsConfigProvider.getConfigs(rdsConfig), true);
+        if (rdsConfigs != null && !rdsConfigs.isEmpty()) {
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, rdsConfigProvider.getConfigs(rdsConfigs), true);
             blueprintText = blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER", blueprintText);
         }
         blueprintText = autoRecoveryConfigProvider.addToBlueprint(blueprintText);

@@ -108,7 +108,9 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
     private ClusterRequest setRDSConfiguration(IntegrationTestContext itContext, ClusterRequest clusterRequest) {
         Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID), "RDS configuration id is missing.");
         long rdsConfigId = Long.parseLong(itContext.getContextParam(CloudbreakITContextConstants.RDS_CONFIG_ID));
-        clusterRequest.setRdsConfigId(rdsConfigId);
+        Set<Long> rdsConfigIds = new HashSet<>();
+        rdsConfigIds.add(rdsConfigId);
+        clusterRequest.setRdsConfigIds(rdsConfigIds);
         return clusterRequest;
     }
 

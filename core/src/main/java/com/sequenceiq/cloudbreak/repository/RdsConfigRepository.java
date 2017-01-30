@@ -24,4 +24,6 @@ public interface RdsConfigRepository extends CrudRepository<RDSConfig, Long> {
     RDSConfig findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
     RDSConfig findById(@Param("id") Long id);
+
+    Set<RDSConfig> findByClusterId(@Param("user") String user, @Param("account") String account, @Param("clusterId") Long clusterId);
 }

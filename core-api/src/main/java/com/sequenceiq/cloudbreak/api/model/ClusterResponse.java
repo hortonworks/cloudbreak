@@ -65,13 +65,13 @@ public class ClusterResponse {
     @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG)
     private SssdConfigResponse sssdConfig;
 
-    private Set<HostGroupResponse> hostGroups;
+    private Set<HostGroupResponse> hostGroups = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_ID)
-    private Long rdsConfigId;
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
+    private Set<Long> rdsConfigIds = new HashSet<>();
 
-    @ApiModelProperty(ClusterModelDescription.RDSCONFIG)
-    private RDSConfigResponse rdsConfig;
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIGS)
+    private Set<RDSConfigResponse> rdsConfigs = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.SERVICE_ENDPOINT_MAP)
     private Map<String, String> serviceEndPoints = new HashMap<>();
@@ -89,7 +89,7 @@ public class ClusterResponse {
     private LdapConfigResponse ldapConfig;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
-    private Map<String, Object> attributes;
+    private Map<String, Object> attributes = new HashMap<>();
 
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
@@ -224,12 +224,12 @@ public class ClusterResponse {
         this.ambariServerIp = ambariServerIp;
     }
 
-    public Long getRdsConfigId() {
-        return rdsConfigId;
+    public Set<Long> getRdsConfigIds() {
+        return rdsConfigIds;
     }
 
-    public void setRdsConfigId(Long rdsConfigId) {
-        this.rdsConfigId = rdsConfigId;
+    public void setRdsConfigId(Set<Long> rdsConfigIds) {
+        this.rdsConfigIds = rdsConfigIds;
     }
 
     public String getUserName() {
@@ -305,12 +305,12 @@ public class ClusterResponse {
         this.sssdConfig = sssdConfig;
     }
 
-    public RDSConfigResponse getRdsConfig() {
-        return rdsConfig;
+    public Set<RDSConfigResponse> getRdsConfigs() {
+        return rdsConfigs;
     }
 
-    public void setRdsConfig(RDSConfigResponse rdsConfig) {
-        this.rdsConfig = rdsConfig;
+    public void setRdsConfigs(Set<RDSConfigResponse> rdsConfigs) {
+        this.rdsConfigs = rdsConfigs;
     }
 
     public LdapConfigResponse getLdapConfig() {

@@ -10,9 +10,9 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -58,6 +58,12 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                         + "LEFT JOIN FETCH r.clusters "
                         + "WHERE r.name= :name and r.account= :account "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
+        @NamedQuery(
+                name = "RDSConfig.findByClusterId",
+                query = "SELECT r FROM RDSConfig r "
+                        + "INNER JOIN r.clusters cluster "
+                        + "WHERE cluster.id= :clusterId AND "
+                        + "((r.account= :account AND r.publicInAccount= true) OR r.owner= :user)"),
         @NamedQuery(
                 name = "RDSConfig.findByIdInAccount",
                 query = "SELECT r FROM RDSConfig r "
@@ -118,7 +124,7 @@ public class RDSConfig {
     @Enumerated(EnumType.STRING)
     private ResourceStatus status;
 
-    @OneToMany(mappedBy = "rdsConfig")
+    @ManyToMany(mappedBy = "rdsConfigs")
     private Set<Cluster> clusters;
 
     @Enumerated(EnumType.STRING)

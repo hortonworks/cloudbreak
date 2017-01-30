@@ -88,9 +88,9 @@ public class ClusterDecorator implements Decorator<Cluster> {
         Set<HostGroupRequest> hostGroupsJsons = (Set<HostGroupRequest>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
         BlueprintRequest requestBlueprint = (BlueprintRequest) data[DecorationData.BLUEPRINT.ordinal()];
         SssdConfigRequest requestSssd = (SssdConfigRequest) data[DecorationData.SSSDCONFIG.ordinal()];
-        RDSConfigJson requestRds = (RDSConfigJson) data[DecorationData.RDSCONFIG.ordinal()];
+        Set<RDSConfigJson> requestRdsConfigs = (Set<RDSConfigJson>) data[DecorationData.RDSCONFIG.ordinal()];
         LdapConfigRequest ldapConfigRequest = (LdapConfigRequest) data[DecorationData.LDAP_CONFIG.ordinal()];
-        Long rdsConfigId = (Long) data[DecorationData.RDSCONFIG_ID.ordinal()];
+        Set<Long> rdsConfigIds = (Set<Long>) data[DecorationData.RDSCONFIG_ID.ordinal()];
         Long sssdConfigId = (Long) data[DecorationData.SSSDCONFIG_ID.ordinal()];
 
         Stack stack = stackService.getById(stackId);
@@ -118,7 +118,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         }
         subject.setTopologyValidation(validate);
         prepareSssd(subject, user, sssdConfigId, requestSssd, stack);
-        prepareRds(subject, user, rdsConfigId, requestRds, stack);
+        prepareRds(subject, user, rdsConfigIds, requestRdsConfigs, stack);
         prepareLdap(subject, user, ldapConfigId, ldapConfigRequest, stack);
         return subject;
     }
@@ -148,15 +148,20 @@ public class ClusterDecorator implements Decorator<Cluster> {
         }
     }
 
-    private void prepareRds(Cluster subject, CbUser user, Long rdsConfigId, RDSConfigJson requestRds, Stack stack) {
-        if (rdsConfigId != null) {
-            RDSConfig rdsConfig = rdsConfigService.get(rdsConfigId);
-            subject.setRdsConfig(rdsConfig);
-        } else if (requestRds != null) {
-            RDSConfig rdsConfig = conversionService.convert(requestRds, RDSConfig.class);
-            rdsConfig.setPublicInAccount(stack.isPublicInAccount());
-            rdsConfig = rdsConfigService.create(user, rdsConfig);
-            subject.setRdsConfig(rdsConfig);
+    private void prepareRds(Cluster subject, CbUser user, Set<Long> rdsConfigIds, Set<RDSConfigJson> requestRdsConfigs, Stack stack) {
+        subject.setRdsConfigs(new HashSet<>());
+        if (rdsConfigIds != null && !rdsConfigIds.isEmpty()) {
+            for (Long rdsConfigId : rdsConfigIds) {
+                RDSConfig rdsConfig = rdsConfigService.get(rdsConfigId);
+                subject.getRdsConfigs().add(rdsConfig);
+            }
+        } else if (requestRdsConfigs != null && !requestRdsConfigs.isEmpty()) {
+            for (RDSConfigJson requestRdsConfig : requestRdsConfigs) {
+                RDSConfig rdsConfig = conversionService.convert(requestRdsConfig, RDSConfig.class);
+                rdsConfig.setPublicInAccount(stack.isPublicInAccount());
+                rdsConfig = rdsConfigService.create(user, rdsConfig);
+                subject.getRdsConfigs().add(rdsConfig);
+            }
         }
     }
 
