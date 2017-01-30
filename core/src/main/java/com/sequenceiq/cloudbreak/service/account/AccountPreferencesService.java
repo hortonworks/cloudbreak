@@ -12,6 +12,8 @@ public interface AccountPreferencesService {
 
     AccountPreferences get(Long id);
 
+    Boolean isPlatformSelectionDisabled();
+
     AccountPreferences getByAccount(String account);
 
     AccountPreferences getOneById(Long id, CbUser user);

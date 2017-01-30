@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Map;
+
 import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
@@ -52,6 +55,11 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return convert(service.saveOne(user, convert(updateRequest)));
+    }
+
+    @Override
+    public Map<String, Boolean> isPlatformSelectionDisabled() {
+        return ImmutableMap.of("disabled", service.isPlatformSelectionDisabled());
     }
 
     @Override

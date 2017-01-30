@@ -609,6 +609,12 @@ uluwatuServices.factory('AccountPreferences', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('PlatformSelectionDisabled', ['$resource',
+    function($resource) {
+        return $resource('accountpreferences/isplatformselectiondisabled');
+    }
+]);
+
 uluwatuServices.factory('PlatformParameters', ['$resource',
     function($resource) {
         return $resource('connectors');

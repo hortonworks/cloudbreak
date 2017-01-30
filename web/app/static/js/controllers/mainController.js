@@ -4,13 +4,14 @@ var log = log4javascript.getLogger("mainController-logger");
 var $jq = jQuery.noConflict();
 
 angular.module('uluwatuControllers')
-    .controller('mainController', ['$scope', '$rootScope', '$filter', '$interval', 'PlatformParameters',
-        function($scope, $rootScope, $filter, $interval, PlatformParameters) {
+    .controller('mainController', ['$scope', '$rootScope', '$filter', '$interval', 'PlatformParameters', 'PlatformSelectionDisabled',
+        function($scope, $rootScope, $filter, $interval, PlatformParameters, PlatformSelectionDisabled) {
 
             $rootScope.fileReadAvailable = window.File && window.FileReader && window.FileList && window.Blob ? true : false;
 
             $scope.showManagement = true;
             $scope.showAccountPanel = false;
+            $scope.isPlatformSelectionDisabled = true;
 
             $scope.activateManagement = function() {
                 $scope.showManagement = true;
@@ -20,6 +21,12 @@ angular.module('uluwatuControllers')
             $scope.activateAccountPanel = function() {
                 $scope.showManagement = false;
                 $scope.showAccountPanel = true;
+            }
+
+            $scope.fetchIsPlatformSelectionDisabled = function () {
+                PlatformSelectionDisabled.get().$promise.then(function(map) {
+                    $scope.isPlatformSelectionDisabled = map.disabled;
+                })
             }
 
             $rootScope.config = {
