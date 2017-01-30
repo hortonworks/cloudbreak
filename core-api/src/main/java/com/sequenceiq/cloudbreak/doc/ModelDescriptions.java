@@ -128,8 +128,8 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
-        public static final String RDSCONFIG_ID = "RDS configuration id for the cluster";
-        public static final String RDSCONFIG = "RDS configuration for the cluster";
+        public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
+        public static final String RDSCONFIGS = "RDS configurations for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
         public static final String LDAP_CONFIG = "LDAP config for the cluster";
         public static final String HOSTGROUP_ADJUSTMENT = "host group adjustment";
@@ -141,7 +141,7 @@ public class ModelDescriptions {
         public static final String AMBARI_REPO_DETAILS = "details of the Ambari package repository";
         public static final String AMBARI_DATABASE_DETAILS = "details of the external Ambari database";
         public static final String AMBARI_DATABASE_ERROR = "result of Ambari database test";
-        public static final String RDS_CONFIG = "details of the external database for Hadoop components";
+        public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
         public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
     }
 

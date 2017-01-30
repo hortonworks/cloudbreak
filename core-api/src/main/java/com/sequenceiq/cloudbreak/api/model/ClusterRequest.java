@@ -96,16 +96,16 @@ public class ClusterRequest {
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
 
-    @ApiModelProperty(value = ClusterModelDescription.RDSCONFIG_ID)
-    private Long rdsConfigId;
+    @ApiModelProperty(value = ClusterModelDescription.RDSCONFIG_IDS)
+    private Set<Long> rdsConfigIds = new HashSet<>();
 
     @Valid
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_DETAILS)
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.RDS_CONFIG)
-    private RDSConfigJson rdsConfigJson;
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.RDS_CONFIGS)
+    private Set<RDSConfigJson> rdsConfigJsons = new HashSet<>();
 
     @Valid
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.FILE_SYSTEM)
@@ -235,20 +235,20 @@ public class ClusterRequest {
         this.ambariDatabaseDetails = ambariDatabaseDetails;
     }
 
-    public Long getRdsConfigId() {
-        return rdsConfigId;
+    public Set<Long> getRdsConfigIds() {
+        return rdsConfigIds;
     }
 
-    public void setRdsConfigId(Long rdsConfigId) {
-        this.rdsConfigId = rdsConfigId;
+    public void setRdsConfigIds(Set<Long> rdsConfigIds) {
+        this.rdsConfigIds = rdsConfigIds;
     }
 
-    public RDSConfigJson getRdsConfigJson() {
-        return rdsConfigJson;
+    public Set<RDSConfigJson> getRdsConfigJsons() {
+        return rdsConfigJsons;
     }
 
-    public void setRdsConfigJson(RDSConfigJson rdsConfigJson) {
-        this.rdsConfigJson = rdsConfigJson;
+    public void setRdsConfigJsons(Set<RDSConfigJson> rdsConfigJson) {
+        this.rdsConfigJsons = rdsConfigJsons;
     }
 
     public String getUserName() {

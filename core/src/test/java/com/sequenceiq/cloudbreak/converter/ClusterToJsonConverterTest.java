@@ -5,6 +5,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
@@ -104,7 +106,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         // THEN
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
-                "blueprint", "sssdConfig", "rdsConfig", "ldapConfig", "exposedKnoxServices"));
+                "blueprint", "sssdConfig", "rdsConfigs", "ldapConfig", "exposedKnoxServices"));
     }
 
     @Test
@@ -162,11 +164,10 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         given(jsonNode.iterator()).willReturn(mockIterator);
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);
         given(mockIterator.next()).willReturn(jsonNode);
-        given(conversionService.convert(getSource().getRdsConfig(), RDSConfigJson.class)).willReturn(new RDSConfigJson());
+        given(conversionService.convert(any(RDSConfig.class), eq(RDSConfigJson.class))).willReturn(new RDSConfigJson());
         given(blueprintValidator.getHostGroupName(jsonNode)).willReturn("slave_1");
         given(blueprintValidator.createHostGroupMap(any(Set.class))).willReturn(hostGroupMap);
         given(hostGroupMap.get("slave_1")).willReturn(hostGroup);
-//        given(hostGroup.getInstanceGroup()).willReturn(instanceGroup);
         given(instanceGroup.getInstanceMetaData()).willReturn(Sets.newHashSet(instanceMetaData));
         given(blueprintValidator.getComponentsNode(jsonNode)).willReturn(nameJsonNode);
         given(nameJsonNode.iterator()).willReturn(mockComponentIterator);

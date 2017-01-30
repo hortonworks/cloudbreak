@@ -26,6 +26,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -53,8 +54,8 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                         + "WHERE c.blueprint.id= :id"),
         @NamedQuery(
                 name = "Cluster.findAllClustersByRDSConfig",
-                query = "SELECT c FROM Cluster c "
-                        + "WHERE c.rdsConfig.id= :id"),
+                query = "SELECT c FROM Cluster c inner join c.rdsConfigs rc "
+                        + "WHERE rc.id= :id"),
         @NamedQuery(
                 name = "Cluster.findAllClustersBySssdConfig",
                 query = "SELECT c FROM Cluster c "
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                 query = "SELECT c FROM Cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
                         + "LEFT JOIN FETCH c.containers "
+                        + "LEFT JOIN FETCH c.rdsConfigs "
                         + "WHERE c.id= :id"),
         @NamedQuery(
                 name = "Cluster.findByStatuses",
@@ -168,8 +170,8 @@ public class Cluster implements ProvisionEntity {
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Container> containers = new HashSet<>();
 
-    @ManyToOne
-    private RDSConfig rdsConfig;
+    @ManyToMany
+    private Set<RDSConfig> rdsConfigs;
 
     @ManyToOne
     private FileSystem fileSystem;
@@ -340,12 +342,12 @@ public class Cluster implements ProvisionEntity {
         this.sssdConfig = sssdConfig;
     }
 
-    public RDSConfig getRdsConfig() {
-        return rdsConfig;
+    public Set<RDSConfig> getRdsConfigs() {
+        return rdsConfigs;
     }
 
-    public void setRdsConfig(RDSConfig rdsConfig) {
-        this.rdsConfig = rdsConfig;
+    public void setRdsConfigs(Set<RDSConfig> rdsConfigs) {
+        this.rdsConfigs = rdsConfigs;
     }
 
     public FileSystem getFileSystem() {

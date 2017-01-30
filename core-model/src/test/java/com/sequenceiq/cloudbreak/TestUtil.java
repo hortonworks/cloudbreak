@@ -365,7 +365,9 @@ public class TestUtil {
         cluster.setEnableShipyard(true);
         cluster.setEnableKnoxGateway(false);
         RDSConfig rdsConfig = new RDSConfig();
-        cluster.setRdsConfig(rdsConfig);
+        Set<RDSConfig> rdsConfigs = new HashSet<>();
+        rdsConfigs.add(rdsConfig);
+        cluster.setRdsConfigs(rdsConfigs);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
         Map<String, String> map = new HashMap<>();

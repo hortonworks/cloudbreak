@@ -2,6 +2,10 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
+## [v1.14.0]
+
+- ability to specify more rdsconfig on one cluster
+
 ## [v1.6.2]
 
 ### Fixed

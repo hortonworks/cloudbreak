@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.util.JsonUtil.writeValueAsString;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class ClusterTerminationService {
         cluster.setBlueprint(null);
         cluster.setStack(null);
         cluster.setSssdConfig(null);
-        cluster.setRdsConfig(null);
+        cluster.setRdsConfigs(new HashSet<>());
         cluster.setStatus(DELETE_COMPLETED);
         deleteClusterHostGroupsWithItsMetadata(cluster);
         componentConfigProvider.deleteComponentsForStack(stackId);

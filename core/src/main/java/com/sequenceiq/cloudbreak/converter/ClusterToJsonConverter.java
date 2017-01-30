@@ -101,10 +101,8 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getSssdConfig() != null) {
             clusterResponse.setSssdConfigId(source.getSssdConfig().getId());
         }
-        RDSConfig rdsConfig = source.getRdsConfig();
-        if (rdsConfig != null) {
-            clusterResponse.setRdsConfigId(rdsConfig.getId());
-        }
+        Set<RDSConfig> rdsConfigs = source.getRdsConfigs();
+        convertRdsIds(clusterResponse, rdsConfigs);
         if (source.getLdapConfig() != null) {
             clusterResponse.setLdapConfigId(source.getLdapConfig().getId());
         }
@@ -124,7 +122,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
-        clusterResponse.setRdsConfig(getConversionService().convert(source.getRdsConfig(), RDSConfigResponse.class));
+        convertRdsConfigs(source, clusterResponse);
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
         clusterResponse.setSssdConfig(getConversionService().convert(source.getSssdConfig(), SssdConfigResponse.class));
         convertKnox(source, clusterResponse);
@@ -132,6 +130,20 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
         return clusterResponse;
+    }
+
+    private void convertRdsIds(ClusterResponse clusterResponse, Set<RDSConfig> rdsConfigs) {
+        if (rdsConfigs != null && !rdsConfigs.isEmpty()) {
+            for (RDSConfig rdsConfig : rdsConfigs) {
+                clusterResponse.getRdsConfigIds().add(rdsConfig.getId());
+            }
+        }
+    }
+
+    private void convertRdsConfigs(Cluster source, ClusterResponse clusterResponse) {
+        for (RDSConfig rdsConfig : source.getRdsConfigs()) {
+            clusterResponse.getRdsConfigs().add(getConversionService().convert(rdsConfig, RDSConfigResponse.class));
+        }
     }
 
     private void convertKnox(Cluster source, ClusterResponse clusterResponse) {

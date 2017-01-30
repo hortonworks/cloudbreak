@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -125,16 +126,20 @@ public class ClusterController implements ClusterEndpoint {
 
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
         validateRdsConfigParams(request);
-        if (request.getRdsConfigJson() != null) {
-            validateRdsConnection(request);
-            RDSConfig rdsConfig = rdsConfigService.create(user, conversionService.convert(request.getRdsConfigJson(), RDSConfig.class));
-            request.setRdsConfigId(rdsConfig.getId());
+        if (request.getRdsConfigJsons() != null && !request.getRdsConfigJsons().isEmpty()) {
+            for (RDSConfigJson rdsConfigJson : request.getRdsConfigJsons()) {
+                validateRdsConnection(rdsConfigJson);
+                RDSConfig rdsConfig = rdsConfigService.create(user, conversionService.convert(rdsConfigJson, RDSConfig.class));
+                request.getRdsConfigIds().add(rdsConfig.getId());
+            }
+
+
         }
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, user,
                 request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
-                request.getSssdConfigId(), request.getRdsConfigId(), request.getLdapConfigId(),
-                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJson(), request.getLdapConfig());
+                request.getSssdConfigId(), request.getRdsConfigIds(), request.getLdapConfigId(),
+                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJsons(), request.getLdapConfig());
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
         }
@@ -146,9 +151,9 @@ public class ClusterController implements ClusterEndpoint {
         return conversionService.convert(resp, ClusterResponse.class);
     }
 
-    private void validateRdsConnection(ClusterRequest request) {
-        if (request.getRdsConfigJson().isValidated()) {
-            rdsConnectionValidator.validateRdsConnection(request.getRdsConfigJson());
+    private void validateRdsConnection(RDSConfigJson request) {
+        if (request.isValidated()) {
+            rdsConnectionValidator.validateRdsConnection(request);
         }
     }
 
@@ -342,8 +347,9 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     private void validateRdsConfigParams(ClusterRequest request) {
-        if (request.getRdsConfigJson() != null && request.getRdsConfigId() != null) {
-            throw new BadRequestException("Both rdsConfig and rdsConfigId cannot be set in the same request.");
+        if (request.getRdsConfigJsons() != null && !request.getRdsConfigJsons().isEmpty()
+                && request.getRdsConfigIds() != null && !request.getRdsConfigIds().isEmpty()) {
+            throw new BadRequestException("Both rdsConfigs and rdsConfigIds cannot be set in the same request.");
         }
     }
 }

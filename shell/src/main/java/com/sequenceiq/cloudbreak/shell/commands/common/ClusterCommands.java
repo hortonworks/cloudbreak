@@ -195,7 +195,9 @@ public class ClusterCommands implements BaseCommands {
                     return "--connectionURL, --databaseType, --connectionUserName, --connectionPassword switches "
                             + "cannot be used if an RDS config is already selected with 'rdsconfig select'";
                 }
-                clusterRequest.setRdsConfigId(Long.valueOf(shellContext.getRdsConfigId()));
+                Set<Long> rdsConfigs = new HashSet<>();
+                rdsConfigs.add(Long.valueOf(shellContext.getRdsConfigId()));
+                clusterRequest.setRdsConfigIds(rdsConfigs);
             }
             String ldapConfigId = shellContext.getLdapConfigId();
             if (ldapConfigId != null) {
@@ -243,7 +245,9 @@ public class ClusterCommands implements BaseCommands {
                 rdsConfigJson.setConnectionPassword(connectionPassword);
                 rdsConfigJson.setHdpVersion(hdpVersion);
                 rdsConfigJson.setValidated(validated);
-                clusterRequest.setRdsConfigJson(rdsConfigJson);
+                Set<RDSConfigJson> rdsConfigJsons = new HashSet<>();
+                rdsConfigJsons.add(rdsConfigJson);
+                clusterRequest.setRdsConfigJsons(rdsConfigJsons);
             } else if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
                 return "connectionURL, databaseType, connectionUserName, connectionPassword and hdpVersion must be all set.";
             }
