@@ -3,10 +3,13 @@ package com.sequenceiq.cloudbreak.service.stack;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Resource;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
@@ -30,14 +33,23 @@ public class StackParameterService {
     @Inject
     private CredentialService credentialService;
 
+    @Resource
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
+
     @Inject
     private EventBus eventBus;
 
     public List<StackParamValidation> getStackParams(StackRequest stackRequest) {
         LOGGER.debug("Get stack params");
         Long credentialId = stackRequest.getCredentialId();
-        if (credentialId != null) {
-            Credential credential = credentialService.get(credentialId);
+        if (credentialId != null || stackRequest.getCredential() != null) {
+            Credential credential = null;
+            if (credentialId != null) {
+                credential = credentialService.get(credentialId);
+            } else {
+                credential = conversionService.convert(stackRequest.getCredential(), Credential.class);
+            }
             CloudContext cloudContext = new CloudContext(credential.getId(), stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
