@@ -421,6 +421,7 @@ cloudbreak:
         - "CB_PUBLICIP=$DEFAULT_INBOUND_ACCESS_IP"
         - CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP
         - CB_AWS_VPC
+        - CB_ENABLEDPLATFORMS
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
