@@ -1,7 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
@@ -13,6 +15,8 @@ import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -137,6 +141,48 @@ public class CloudbreakUtil {
         if (stackStatus.contains("FAILED") || (!"DELETE_COMPLETED".equals(desiredStatus) && "DELETE_COMPLETED".equals(stackStatus))) {
             waitResult = WaitResult.FAILED;
         }
+        if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+        }
+        return waitResult;
+    }
+
+    public static WaitResult waitForHostStatusStack(StackEndpoint stackEndpoint, String stackId, String hostGroup, String desiredStatus,
+            Integer desiredHostcount, Boolean checkNotContains) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        Boolean unhealthy = Boolean.FALSE;
+        List<String> hostStatuses = new ArrayList<>();
+
+        int retryCount = 0;
+        do {
+            LOGGER.info("Waiting for desired host status ...");
+            sleep();
+            StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+            Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
+            for (HostGroupResponse hr : hostGroupResponse) {
+                if (hr.getName().equals(hostGroup)) {
+                    Set<HostMetadataResponse> hostMetadataResponses = hr.getMetadata();
+                    for (HostMetadataResponse hmr : hostMetadataResponses) {
+                        // Check for a host is in the desired state if CheckNotContains is disabled
+                        if ((hmr.getState().equals(desiredStatus)) && !checkNotContains) {
+                            unhealthy = Boolean.TRUE;
+                        }
+                        if (checkNotContains) {
+                            hostStatuses.add(hmr.getState());
+                        }
+                    }
+                }
+            }
+            // Check for desired value is not in the host status list if checkNotContains enabled
+            if (checkNotContains && (hostStatuses.size() == desiredHostcount) && (Boolean.FALSE == hostStatuses.contains(desiredStatus))) {
+                unhealthy = Boolean.TRUE;
+            }
+            hostStatuses.clear();
+            retryCount++;
+            LOGGER.info(String.valueOf(retryCount));
+            LOGGER.info(unhealthy.toString());
+        } while (!unhealthy && (retryCount < MAX_RETRY));
+
         if (retryCount == MAX_RETRY) {
             waitResult = WaitResult.TIMEOUT;
         }
