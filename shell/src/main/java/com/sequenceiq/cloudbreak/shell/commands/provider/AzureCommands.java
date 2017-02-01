@@ -68,32 +68,32 @@ public class AzureCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "stack create --AZURE")
     public boolean createStackAvailable() {
-        return stackCommands.createStackAvailable(PLATFORM);
+        return stackCommands.createStackAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "template create --AZURE")
     public boolean createTemplateAvailable() {
-        return baseTemplateCommands.createTemplateAvailable(PLATFORM);
+        return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "platform create --AZURE")
     public boolean createPlatformAvailable() {
-        return basePlatformCommands.createPlatformAvailable(PLATFORM);
+        return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = { "network create --AZURE --NEW", "network create --AZURE --EXISTING_SUBNET" })
     public boolean createNetworkAvailable() {
-        return baseNetworkCommands.createNetworkAvailable(PLATFORM);
+        return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"securitygroup create --AZURE --NEW"})
     public boolean createSecurityGroupAvailable() {
-        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM);
+        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "credential create --AZURE")
     public boolean createCredentialAvailable() {
-        return baseCredentialCommands.createCredentialAvailable(PLATFORM);
+        return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliCommand(value = "credential create --AZURE", help = "Create a new Azure credential")

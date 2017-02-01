@@ -66,32 +66,32 @@ public class AwsCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "stack create --AWS")
     public boolean createStackAvailable() {
-        return stackCommands.createStackAvailable(PLATFORM);
+        return stackCommands.createStackAvailable(PLATFORM)  && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "template create --AWS")
     public boolean createTemplateAvailable() {
-        return baseTemplateCommands.createTemplateAvailable(PLATFORM);
+        return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "platform create --AWS")
     public boolean createPlatformAvailable() {
-        return basePlatformCommands.createPlatformAvailable(PLATFORM);
+        return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"network create --AWS --NEW_SUBNET", "network create --AWS --NEW", "network create --AWS --EXISTING_SUBNET"})
     public boolean createNetworkAvailable() {
-        return baseNetworkCommands.createNetworkAvailable(PLATFORM);
+        return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"securitygroup create --AWS --NEW", "securitygroup create --AWS --EXISTING"})
     public boolean createSecurityGroupAvailable() {
-        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM);
+        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"credential create --AWS", "template create --EC2"})
     public boolean createCredentialAvailable() {
-        return baseCredentialCommands.createCredentialAvailable(PLATFORM);
+        return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliCommand(value = "credential create --AWS", help = "Create a new AWS credential")

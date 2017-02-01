@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.shell;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -131,6 +133,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         //cloudbreak.health();
         initResourceAccessibility();
         initPlatformVariants();
+        initEnabledPlatformms();
         if (!context.isCredentialAccessible()) {
             context.setHint(Hints.CREATE_CREDENTIAL);
         } else {
@@ -258,4 +261,8 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         }
     }
 
+    private void initEnabledPlatformms() {
+        String[] values = cloudbreakClient.accountPreferencesEndpoint().get().getPlatforms().split(",");
+        context.setEnabledPlatforms(new HashSet<String>(Arrays.asList(values)));
+    }
 }

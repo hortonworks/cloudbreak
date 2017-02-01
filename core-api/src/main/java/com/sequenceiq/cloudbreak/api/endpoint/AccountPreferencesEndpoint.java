@@ -44,7 +44,8 @@ public interface AccountPreferencesEndpoint {
     @GET
     @Path("/isplatformselectiondisabled")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.IS_PLATFORM_SELECTION_DISABLED, produces = ContentType.JSON, notes = Notes.ACCOUNT_PREFERENCES_NOTES)
+    @ApiOperation(value = OperationDescriptions.AccountPreferencesDescription.IS_PLATFORM_SELECTION_DISABLED, produces = ContentType.JSON,
+            notes = Notes.ACCOUNT_PREFERENCES_NOTES)
     Map<String, Boolean> isPlatformSelectionDisabled();
 
     @GET
