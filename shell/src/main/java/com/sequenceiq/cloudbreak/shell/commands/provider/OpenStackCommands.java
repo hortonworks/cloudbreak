@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.util.TagParser;
 
 public class OpenStackCommands implements CommandMarker {
 
@@ -283,10 +284,11 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") OpenStackOrchestratorType orchestratorType,
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
+            @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
         Map<String, String> params = new HashMap<>();
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
-                ambariVersion, hdpVersion, imageCatalog, params);
+                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags));
     }
 }
