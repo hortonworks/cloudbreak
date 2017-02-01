@@ -130,9 +130,6 @@ upload-release: prepare-release
 		anigeo/awscli s3 cp release/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
 
 upload-tagged: prepare-release
-ifeq ($(GIT_TAG),)
-	@echo "not a tag, no upload needed"
-else
 	@echo upload artifacts to $(S3_TARGET) ...
 	@docker run \
 		-v $(PWD):/data \
@@ -140,8 +137,6 @@ else
 		-e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) \
 		-e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) \
 		anigeo/awscli s3 cp release/ $(S3_TARGET) --recursive --include "$(NAME)_$(VERSION)_*.tgz"
-endif
-
 
 release: upload-release
 	gh-release checksums sha256
