@@ -64,32 +64,33 @@ public class OpenStackCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "stack create --OPENSTACK")
     public boolean createStackAvailable() {
-        return stackCommands.createStackAvailable(PLATFORM);
+        return stackCommands.createStackAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "template create --OPENSTACK")
     public boolean createTemplateAvailable() {
-        return baseTemplateCommands.createTemplateAvailable(PLATFORM);
+        return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "platform create --OPENSTACK")
     public boolean createPlatformAvailable() {
-        return basePlatformCommands.createPlatformAvailable(PLATFORM);
+        return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"network create --OPENSTACK --NEW", "network create --OPENSTACK --EXISTING", "network create --OPENSTACK --NEW_SUBNET"})
+    @CliAvailabilityIndicator(value = {"network create --OPENSTACK --NEW", "network create --OPENSTACK --EXISTING_SUBNET",
+            "network create --OPENSTACK --NEW_SUBNET"})
     public boolean createNetworkAvailable() {
-        return baseNetworkCommands.createNetworkAvailable(PLATFORM);
+        return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"securitygroup create --OPENSTACK --NEW"})
     public boolean createSecurityGroupAvailable() {
-        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM);
+        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "credential create --OPENSTACK")
     public boolean createCredentialAvailable() {
-        return baseCredentialCommands.createCredentialAvailable(PLATFORM);
+        return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliCommand(value = "credential create --OPENSTACK", help = "Create a new OpenStack credential")

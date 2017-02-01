@@ -71,33 +71,33 @@ public class GcpCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "stack create --GCP")
     public boolean createStackAvailable() {
-        return stackCommands.createStackAvailable(PLATFORM);
+        return stackCommands.createStackAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "template create --GCP")
     public boolean createTemplateAvailable() {
-        return baseTemplateCommands.createTemplateAvailable(PLATFORM);
+        return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "platform create --GCP")
     public boolean createPlatformAvailable() {
-        return basePlatformCommands.createPlatformAvailable(PLATFORM);
+        return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"network create --GCP --NEW", "network create --GCP --NEW_SUBNET",
             "network create --GCP --EXISTING_SUBNET", "network create --GCP --LEGACY"})
     public boolean createNetworkAvailable() {
-        return baseNetworkCommands.createNetworkAvailable(PLATFORM);
+        return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = {"securitygroup create --GCP --NEW"})
     public boolean createSecurityGroupAvailable() {
-        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM);
+        return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliAvailabilityIndicator(value = "credential create --GCP")
     public boolean createCredentialAvailable() {
-        return baseCredentialCommands.createCredentialAvailable(PLATFORM);
+        return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliCommand(value = "credential create --GCP", help = "Create a new GCP credential")
@@ -291,5 +291,4 @@ public class GcpCommands implements CommandMarker {
                 false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion,
                 hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags));
     }
-
 }

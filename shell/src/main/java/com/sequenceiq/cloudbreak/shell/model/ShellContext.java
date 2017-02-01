@@ -88,6 +88,8 @@ public class ShellContext {
 
     private Set<String> constraintTemplates = new HashSet<>();
 
+    private Set<String> enabledPlatforms = new HashSet<>();
+
     private Map<String, MarathonHostgroupEntry> marathonHostgroups = new HashMap<>();
 
     private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
@@ -269,6 +271,22 @@ public class ShellContext {
         for (ConstraintTemplateResponse constraintTemplateResponse : constraintTemplateResponses) {
             constraintTemplates.add(constraintTemplateResponse.getName());
         }
+    }
+
+    public Boolean isPlatformSelectionDisabled() {
+        return cloudbreakClient.accountPreferencesEndpoint().isPlatformSelectionDisabled().get("disabled");
+    }
+
+    public Set<String> getEnabledPlatforms() {
+        return enabledPlatforms;
+    }
+
+    public boolean isPlatformAvailable(String platform) {
+        return getEnabledPlatforms().contains(platform);
+    }
+
+    public void setEnabledPlatforms(Set<String> enabledPlatforms) {
+        this.enabledPlatforms = enabledPlatforms;
     }
 
     public Map<String, MarathonHostgroupEntry> putMarathonHostGroup(String name, MarathonHostgroupEntry hostgroupEntry) {
