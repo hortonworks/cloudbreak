@@ -12,10 +12,10 @@ create_certificates() {
 }
 
 start_nginx() {
-  sudo mv /tmp/nginx.conf /etc/nginx/nginx.conf
+  sudo mkdir -p /etc/nginx/sites-enabled/
+  sudo mv /tmp/ssl.conf /etc/nginx/sites-enabled/ssl.conf
   sudo mkdir -p /usr/share/nginx/json/
-  sudo mv /tmp/50x.json /usr/share/nginx/json/50x.json
-  sudo service nginx start
+  sudo service nginx restart
   sudo chkconfig nginx on
 }
 

@@ -4,7 +4,6 @@ base:
     - unbound
     - java
     - metadata
-    - nginx
 
   'roles:kerberos_server':
     - match: grain
@@ -29,7 +28,6 @@ base:
     - match: grain
     - prometheus.server
     - ambari.server
-    - service-registration
     - grafana
 
   'roles:ambari_agent':
