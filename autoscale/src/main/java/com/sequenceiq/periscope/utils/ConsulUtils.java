@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.utils;
 
+import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -8,8 +9,10 @@ import java.util.Map;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.ReflectionUtils;
 
 import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.ConsulRawClient;
 import com.ecwid.consul.v1.OperationException;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.agent.model.Member;
@@ -18,11 +21,9 @@ import com.ecwid.consul.v1.event.model.Event;
 import com.ecwid.consul.v1.event.model.EventParams;
 import com.ecwid.consul.v1.kv.model.GetValue;
 import com.ecwid.consul.v1.kv.model.PutParams;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.periscope.model.TlsConfiguration;
 
 public final class ConsulUtils {
-
-    public static final String CONSUL_DOMAIN = ".node.dc1.consul";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulUtils.class);
 
@@ -155,24 +156,20 @@ public final class ConsulUtils {
         }
     }
 
-    public static ConsulClient createClient(HttpClientConfig httpClientConfig, boolean https) {
-        return createClient(httpClientConfig, DEFAULT_TIMEOUT_MS, https);
+    public static ConsulClient createClient(String apiAddress, String apiPort, TlsConfiguration tlsConfiguration) {
+        return createClient(apiAddress, Integer.valueOf(apiPort), tlsConfiguration, DEFAULT_TIMEOUT_MS);
     }
 
-    public static ConsulClient createClient(HttpClientConfig httpClientConfig, int timeout, boolean https) {
-        String protocol = "https";
-        ConsulClient consulClient = null;
-        if (https) {
-        consulClient = new ConsulClient(protocol + "://" + httpClientConfig.getApiAddress(), httpClientConfig.getApiPort(),
-                httpClientConfig.getClientCert(),
-                httpClientConfig.getClientKey(),
-                httpClientConfig.getServerCert(),
+    public static ConsulClient createClient(String apiAddress, int apiPort, TlsConfiguration tlsConfiguration, int timeout) {
+        ConsulRawClient rawClient = new ConsulRawClient("https://" + apiAddress, apiPort,
+                tlsConfiguration.getClientCertPath(),
+                tlsConfiguration.getClientKeyPath(),
+                tlsConfiguration.getServerCertPath(),
                 timeout);
-        } else {
-            protocol = "http";
-            consulClient = new ConsulClient(protocol + "://" + httpClientConfig.getApiAddress(), httpClientConfig.getApiPort(), timeout);
-        }
-        return consulClient;
+        Field agentAddress = ReflectionUtils.findField(ConsulRawClient.class, "agentAddress");
+        ReflectionUtils.makeAccessible(agentAddress);
+        ReflectionUtils.setField(agentAddress, rawClient, "https://" + apiAddress + ":" + apiPort + "/consul");
+        return new ConsulClient(rawClient);
     }
 
     public static void agentForceLeave(List<ConsulClient> clients, String nodeName) {

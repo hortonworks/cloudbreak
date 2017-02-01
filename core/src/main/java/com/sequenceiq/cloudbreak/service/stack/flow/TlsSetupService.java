@@ -174,15 +174,10 @@ public class TlsSetupService {
         LOGGER.info("tls-setup.sh uploaded to /tmp/tls-setup.sh. Content: {}", tls);
 
         if (type.hostOrchestrator()) {
-            String nginxConf = FileReaderUtils.readFileFromClasspath("init/host/nginx.conf");
-            InMemorySourceFile nginxConfFile = uploadParameterFile(nginxConf, "nginx.conf");
-            ssh.newSCPFileTransfer().upload(nginxConfFile, "/tmp/nginx.conf");
-            LOGGER.info("nginx conf uploaded to /tmp/nginx.conf. Content: {}", nginxConf);
-
-            String notAv = FileReaderUtils.readFileFromClasspath("init/host/50x.json");
-            InMemorySourceFile notAvFile = uploadParameterFile(notAv, "50x.json");
-            ssh.newSCPFileTransfer().upload(notAvFile, "/tmp/50x.json");
-            LOGGER.info("ngingx error page uploaded to /tmp/50x.json. Content: {}", notAv);
+            String nginxConf = FileReaderUtils.readFileFromClasspath("init/host/ssl.conf");
+            InMemorySourceFile nginxConfFile = uploadParameterFile(nginxConf, "ssl.conf");
+            ssh.newSCPFileTransfer().upload(nginxConfFile, "/tmp/ssl.conf");
+            LOGGER.info("nginx conf uploaded to /tmp/ssl.conf. Content: {}", nginxConf);
         }
     }
 

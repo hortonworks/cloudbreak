@@ -1,30 +1,34 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
+
+import javax.inject.Inject;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponents;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.util.JaxRSUtil;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.PrometheusResponse;
+import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.security.TlsSecurityService;
 
 @Component("PrometheusEvaluator")
 @Scope("prototype")
@@ -38,6 +42,9 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     @Autowired
     private PrometheusAlertRepository alertRepository;
 
+    @Inject
+    private TlsSecurityService tlsSecurityService;
+
     private long clusterId;
 
     @Override
@@ -47,22 +54,28 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
 
     @Override
     public void run() {
-        Cluster cluster = clusterService.find(clusterId);
-        //TODO needs to be updated after the Prometheus will be available through NGINX
-        String prometheusAddress = "http://" + cluster.getAmbari().getHost() + ":9090";
-        MDCBuilder.buildMdcContext(cluster);
-        RestTemplate restTemplate = new RestTemplate();
         try {
+            Cluster cluster = clusterService.find(clusterId);
+            MDCBuilder.buildMdcContext(cluster);
+
+            TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
+            Client client = RestClientUtil.createClient(tlsConfig.getServerCertPath(),
+                    tlsConfig.getClientCertPath(), tlsConfig.getClientKeyPath(), true, PrometheusEvaluator.class);
+            String prometheusAddress = String.format("https://%s:%s/prometheus", cluster.getAmbari().getHost(), cluster.getPort());
+            WebTarget target = client.target(prometheusAddress);
+
             for (PrometheusAlert alert : alertRepository.findAllByCluster(clusterId)) {
                 String alertName = alert.getName();
                 LOGGER.info("Checking Prometheus based alert: '{}'", alertName);
-                UriComponents uriComponents = UriComponentsBuilder.fromHttpUrl(prometheusAddress + "/api/v1/query")
-                        .queryParam("query", String.format("ALERTS{alertname=\"%s\"}[%dm]", alert.getName(), alert.getPeriod())).build();
-                HttpHeaders headers = new HttpHeaders();
-                headers.set("Accept", MediaType.APPLICATION_JSON_VALUE);
-                HttpEntity<?> entity = new HttpEntity<>(headers);
-                HttpEntity<PrometheusResponse> resp = restTemplate.exchange(uriComponents.encode().toUri(), HttpMethod.GET, entity, PrometheusResponse.class);
-                PrometheusResponse prometheusResponse = resp.getBody();
+                String query = URLEncoder.encode(String.format("ALERTS{alertname=\"%s\"}[%dm]", alert.getName(), alert.getPeriod()), "UTF-8");
+                Response response = target
+                        .path("/api/v1/query")
+                        .queryParam("query", query)
+                        .request()
+                        .header("Accept", MediaType.APPLICATION_JSON_VALUE)
+                        .get();
+
+                PrometheusResponse prometheusResponse = JaxRSUtil.response(response, PrometheusResponse.class);
 
                 boolean triggerScale = false;
                 switch (alert.getAlertState()) {
