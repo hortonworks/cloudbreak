@@ -25,7 +25,8 @@ public interface StackCommands {
             String ambariVersion,
             String hdpVersion,
             String imageCatalog,
-            Map<String, String> params);
+            Map<String, String> params,
+            Map<String, String> userDefinedTags);
 
     boolean createStackAvailable(String platform);
 }

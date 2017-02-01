@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.util.TagParser;
 
 public class AwsCommands implements CommandMarker {
 
@@ -277,6 +278,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
             @CliOption(key = "dedicatedInstances", help = "request dedicated instances on AWS") Boolean dedicatedInstances,
+            @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "instanceProfileStrategy", help = "seamless access to Amazon API", specifiedDefaultValue = "false")
                     InstanceProfileStrategy instanceProfileStrategy,
             @CliOption(key = "instanceProfile", help = "instance profile which will attached to the instance", specifiedDefaultValue = "false")
@@ -298,6 +300,7 @@ public class AwsCommands implements CommandMarker {
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
-                ambariVersion, hdpVersion, imageCatalog, params);
+                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags));
     }
+
 }
