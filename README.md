@@ -122,7 +122,7 @@ To create a cluster fill the empty values or change the existing ones, e.g:
     "VolumeType": "ephemeral",
     "VolumeSize": 40,
     "VolumeCount": 2,
-    "InstanceCount": 2
+    "InstanceCount": 3
   },
   "Compute": {
     "InstanceType": "m3.xlarge",
@@ -170,7 +170,7 @@ hdc describe-cluster --cluster-name my-cluster
     "VolumeType": "ephemeral",
     "VolumeSize": 40,
     "VolumeCount": 2,
-    "InstanceCount": 2
+    "InstanceCount": 3
   },
   "Compute": {
     "InstanceType": "m3.xlarge",
