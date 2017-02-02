@@ -21,23 +21,23 @@ var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cl
 	"SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
 
 type ClusterSkeletonBase struct {
-	ClusterName                string             `json:"ClusterName" yaml:"ClusterName"`
-	HDPVersion                 string             `json:"HDPVersion" yaml:"HDPVersion"`
-	ClusterType                string             `json:"ClusterType" yaml:"ClusterType"`
-	Master                     InstanceConfig     `json:"Master" yaml:"Master"`
-	Worker                     InstanceConfig     `json:"Worker" yaml:"Worker"`
-	Compute                    SpotInstanceConfig `json:"Compute" yaml:"Compute"`
-	SSHKeyName                 string             `json:"SSHKeyName" yaml:"SSHKeyName"`
-	RemoteAccess               string             `json:"RemoteAccess" yaml:"RemoteAccess"`
-	WebAccess                  bool               `json:"WebAccess" yaml:"WebAccess"`
-	WebAccessHive              bool               `json:"WebAccessHive" yaml:"WebAccessHive"`
-	WebAccessClusterManagement bool               `json:"WebAccessClusterManagement" yaml:"WebAccessClusterManagement"`
-	ClusterAndAmbariUser       string             `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
-	ClusterAndAmbariPassword   string             `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
-	InstanceRole               string             `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
-	Network                    *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
-	ClusterInputs              map[string]string  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
-	Tags                       map[string]string  `json:"Tags" yaml:"Tags"`
+	ClusterName              string             `json:"ClusterName" yaml:"ClusterName"`
+	HDPVersion               string             `json:"HDPVersion" yaml:"HDPVersion"`
+	ClusterType              string             `json:"ClusterType" yaml:"ClusterType"`
+	Master                   InstanceConfig     `json:"Master" yaml:"Master"`
+	Worker                   InstanceConfig     `json:"Worker" yaml:"Worker"`
+	Compute                  SpotInstanceConfig `json:"Compute" yaml:"Compute"`
+	SSHKeyName               string             `json:"SSHKeyName" yaml:"SSHKeyName"`
+	RemoteAccess             string             `json:"RemoteAccess" yaml:"RemoteAccess"`
+	WebAccess                bool               `json:"WebAccess" yaml:"WebAccess"`
+	HiveJDBCAccess           bool               `json:"HiveJDBCAccess" yaml:"HiveJDBCAccess"`
+	ClusterComponentAccess   bool               `json:"ClusterComponentAccess" yaml:"ClusterComponentAccess"`
+	ClusterAndAmbariUser     string             `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
+	ClusterAndAmbariPassword string             `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
+	InstanceRole             string             `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
+	Network                  *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
+	ClusterInputs            map[string]string  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
+	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
 }
 
 type ClusterSkeleton struct {

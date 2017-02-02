@@ -363,11 +363,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			exposedServices = append(exposedServices, BASE_EXPOSED_SERVICES...)
 		}
 
-		if skeleton.WebAccessHive {
+		if skeleton.HiveJDBCAccess {
 			exposedServices = append(exposedServices, HIVE_EXPOSED_SERVICES...)
 		}
 
-		if skeleton.WebAccessClusterManagement {
+		if skeleton.ClusterComponentAccess {
 			exposedServices = append(exposedServices, CLUSTER_MANAGER_EXPOSED_SERVICES...)
 		}
 
@@ -628,12 +628,12 @@ func getBaseSkeleton() *ClusterSkeleton {
 				},
 				SpotPrice: "0",
 			},
-			WebAccess:                  true,
-			WebAccessHive:              true,
-			WebAccessClusterManagement: false,
-			InstanceRole:               "CREATE",
-			Network:                    &Network{},
-			Tags:                       make(map[string]string, 0),
+			WebAccess:              true,
+			HiveJDBCAccess:         true,
+			ClusterComponentAccess: false,
+			InstanceRole:           "CREATE",
+			Network:                &Network{},
+			Tags:                   make(map[string]string, 0),
 		},
 		HiveMetastore:  &HiveMetastore{},
 		Configurations: []models.Configurations{},
