@@ -6,11 +6,11 @@ knox:
 #/usr/hdp/current/knox-server/conf/topologies/admin.xml:
 #  file.absent
 
-#/usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
-#  file.absent
+/usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
+  file.absent
 
-#/usr/hdp/current/knox-server/conf/topologies/manager.xml:
-#  file.absent
+/usr/hdp/current/knox-server/conf/topologies/manager.xml:
+  file.absent
 
 knox-master-secret:
   cmd.run:
@@ -114,11 +114,3 @@ start-knox-gateway:
     - name: knox-gateway
 
 {% endif %}
-
-
-
-#salt -G 'roles:ambari_server' state.apply gateway
-
-#curl -iku guest:guest-password -X GET 'https://localhost:8443/gateway/hdc/webhdfs/v1/?op=LISTSTATUS'
-
-#rm -rfv /srv/salt/gateway; cp -rv /home/cloudbreak/gateway /srv/salt/; rm -rfv /home/cloudbreak/gateway
