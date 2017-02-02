@@ -25,6 +25,11 @@ func (s *ClusterSkeleton) Validate() error {
 	if err := validate.RequiredString("ClusterType", "body", string(s.ClusterType)); err != nil {
 		res = append(res, err)
 	}
+	if err := validate.RequiredNumber("InstanceCount", "master", float64(s.Master.InstanceCount)); err != nil {
+		res = append(res, err)
+	} else if s.Master.InstanceCount != 1 {
+		res = append(res, swagerrors.New(1, "The instance count must be 1 for the 'master' group"))
+	}
 	if err := validate.RequiredNumber("InstanceCount", "worker", float64(s.Worker.InstanceCount)); err != nil {
 		res = append(res, err)
 	} else if s.Worker.InstanceCount < 1 {
