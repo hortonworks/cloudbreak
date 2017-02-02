@@ -18,6 +18,7 @@ func TestListRDSConfigsImpl(t *testing.T) {
 			Name:          "rds-name" + n,
 			ConnectionURL: "jdbc:postgresql://lh:5432/p" + n,
 			DatabaseType:  POSTGRES + n,
+			Type:          &(&stringWrapper{HIVE_RDS}).s,
 		})
 	}
 	getConfigs := func(params *rdsconfigs.GetRdsconfigsAccountParams) (*rdsconfigs.GetRdsconfigsAccountOK, error) {
@@ -35,7 +36,7 @@ func TestListRDSConfigsImpl(t *testing.T) {
 
 	for i, r := range rows {
 		n := strconv.Itoa(i)
-		expected := []string{"rds-name" + n, rawRdsUrl("jdbc:postgresql://lh:5432/p" + n), POSTGRES + n, "hdp-version" + n}
+		expected := []string{"rds-name" + n, rawRdsUrl("jdbc:postgresql://lh:5432/p" + n), POSTGRES + n, "hdp-version" + n, HIVE_RDS}
 		if strings.Join(r.DataAsStringArray(), "") != strings.Join(expected, "") {
 			t.Errorf("row data not match %s == %s", expected, r.DataAsStringArray())
 		}

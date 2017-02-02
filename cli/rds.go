@@ -10,15 +10,16 @@ import (
 	"github.com/urfave/cli"
 )
 
-var RdsHeader []string = []string{"Name", "Username", "URL", "DatabaseType", "HDP Version"}
+var RdsHeader []string = []string{"Name", "Username", "URL", "DatabaseType", "HDP Version", "Type"}
 
 type RdsConfig struct {
 	MetaStore
+	Type       string `json:"Type" yaml:"Type"`
 	HDPVersion string `json:"HDPVersion" yaml:"HDPVersion"`
 }
 
 func (r *RdsConfig) DataAsStringArray() []string {
-	return []string{r.Name, r.Username, r.URL, r.DatabaseType, r.HDPVersion}
+	return []string{r.Name, r.Username, r.URL, r.DatabaseType, r.HDPVersion, r.Type}
 }
 
 func (c *Cloudbreak) GetRDSConfigByName(name string) models.RDSConfigResponse {
@@ -71,6 +72,7 @@ func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetRdsconfigsAccountParams) 
 	for _, rds := range resp.Payload {
 		row := &RdsConfig{
 			HDPVersion: rds.HdpVersion,
+			Type:       *rds.Type,
 			MetaStore: MetaStore{
 				Name:         rds.Name,
 				Username:     rds.ConnectionUserName,
@@ -94,6 +96,11 @@ func CreateRDSConfig(c *cli.Context) error {
 		logErrorAndExit(CreateRDSConfig, "Invalid DB type. Accepted value: "+POSTGRES)
 	}
 
+	rdsType := strings.ToUpper(c.String(FlRdsType.Name))
+	if len(rdsType) == 0 || (rdsType != HIVE_RDS && rdsType != DRUID_RDS) {
+		logErrorAndExit(CreateRDSConfig, "Invalid RDS type, accepted values: HIVE,DRUID")
+	}
+
 	if err := validateHDPVersion(c.String(FlHdpVersion.Name)); err != nil {
 		logErrorAndExit(CreateRDSConfig, err.Error())
 	}
@@ -101,7 +108,7 @@ func CreateRDSConfig(c *cli.Context) error {
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	return createRDSConfigImpl(HIVE_RDS, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
+	return createRDSConfigImpl(rdsType, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
 }
 
 func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {

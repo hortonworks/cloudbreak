@@ -207,6 +207,13 @@ var (
 			Usage: "URL of the RDS, <Endpoint>/<DB Name>",
 		},
 	}
+	FlRdsType = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "rds-type",
+			Usage: "type of the RDS (HIVE/DRUID)",
+		},
+	}
 	FlRdsDbType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

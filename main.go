@@ -162,7 +162,7 @@ func main() {
 		{
 			Name:  "register-metastore",
 			Usage: "register a new Hive metastore",
-			Flags: []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsDbType, hdc.FlHdpVersion,
+			Flags: []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType, hdc.FlHdpVersion,
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			After:  StopSpinner,
