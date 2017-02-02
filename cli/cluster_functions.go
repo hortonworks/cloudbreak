@@ -235,13 +235,13 @@ func fillWebAccess(cluster *models.ClusterResponse, skeleton *ClusterSkeletonRes
 
 	for _, service := range HIVE_EXPOSED_SERVICES {
 		if _, ok := serviceMap[service]; ok {
-			skeleton.WebAccessHive = true
+			skeleton.HiveJDBCAccess = true
 		}
 	}
 
 	for _, service := range CLUSTER_MANAGER_EXPOSED_SERVICES {
 		if _, ok := serviceMap[service]; ok {
-			skeleton.WebAccessClusterManagement = true
+			skeleton.ClusterComponentAccess = true
 		}
 	}
 }
