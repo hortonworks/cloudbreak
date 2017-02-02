@@ -96,35 +96,36 @@ function main {
 function appStart {
    createLogFiles
 
-#   getPID
-#   if [ $? -eq 0 ]; then
-#     printf "$APP_LABEL is already running with PID $APP_PID.\n"
-#     exit 0
-#   fi
-#
-#   printf "Starting $APP_LABEL "
-#
-#   rm -f $APP_PID_FILE
+   if [ "$LDAP_SERVER_RUN_IN_FOREGROUND" == true ]; then
+     $JAVA $APP_MEM_OPTS $APP_DBG_OPTS $APP_LOG_OPTS -jar $APP_JAR $APP_CONF_DIR >>$APP_OUT_FILE 2>>$APP_ERR_FILE
+   else
+     getPID
+     if [ $? -eq 0 ]; then
+       printf "$APP_LABEL is already running with PID $APP_PID.\n"
+       exit 0
+     fi
 
-   echo $JAVA $APP_MEM_OPTS $APP_DBG_OPTS $APP_LOG_OPTS -jar $APP_JAR $APP_CONF_DIR >>$APP_OUT_FILE
-   $JAVA $APP_MEM_OPTS $APP_DBG_OPTS $APP_LOG_OPTS -jar $APP_JAR $APP_CONF_DIR >>$APP_OUT_FILE 2>>$APP_ERR_FILE
-#
-#   nohup $JAVA $APP_MEM_OPTS $APP_DBG_OPTS $APP_LOG_OPTS -jar $APP_JAR $APP_CONF_DIR >>$APP_OUT_FILE 2>>$APP_ERR_FILE & printf $!>$APP_PID_FILE || exit 1
-#
-#   getPID
-#   for ((i=0; i<APP_START_WAIT_TIME*10; i++)); do
-#      appIsRunning $APP_PID
-#      if [ $? -eq 0 ]; then break; fi
-#      sleep 0.1
-#   done
-#   appIsRunning $APP_PID
-#   if [ $? -ne 1 ]; then
-#      printf "failed.\n"
-#      rm -f $APP_PID_FILE
-#      exit 1
-#   fi
-#   printf "succeeded with PID $APP_PID.\n"
-#   return 0
+     printf "Starting $APP_LABEL "
+
+     rm -f $APP_PID_FILE
+
+     nohup $JAVA $APP_MEM_OPTS $APP_DBG_OPTS $APP_LOG_OPTS -jar $APP_JAR $APP_CONF_DIR >>$APP_OUT_FILE 2>>$APP_ERR_FILE & printf $!>$APP_PID_FILE || exit 1
+
+     getPID
+     for ((i=0; i<APP_START_WAIT_TIME*10; i++)); do
+        appIsRunning $APP_PID
+        if [ $? -eq 0 ]; then break; fi
+        sleep 0.1
+     done
+     appIsRunning $APP_PID
+     if [ $? -ne 1 ]; then
+       printf "failed.\n"
+       rm -f $APP_PID_FILE
+       exit 1
+     fi
+     printf "succeeded with PID $APP_PID.\n"
+     return 0
+   fi
 }
 
 function appStop {

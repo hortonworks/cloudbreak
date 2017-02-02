@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.util.TagParser;
 
 public class AzureCommands implements CommandMarker {
 
@@ -277,6 +278,7 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "diskPerStorage", help = "disk per Storage Account on Azure") Integer diskPerStorage,
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "relocateDocker", help = "relocate docker in startup time") Boolean relocateDocker,
+            @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") ArmOrchestratorType orchestratorType,
             @CliOption(key = "attachedStorageType", help = "type of the storage creation") ArmAttachedStorageOption attachedStorageOption,
             @CliOption(key = "persistentStorage", help = "name of the persistent storage")
@@ -309,6 +311,7 @@ public class AzureCommands implements CommandMarker {
                 params.put("persistentStorage", "cbstore");
             }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params);
+                relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params,
+                TagParser.parseTagsIntoMap(tags));
     }
 }

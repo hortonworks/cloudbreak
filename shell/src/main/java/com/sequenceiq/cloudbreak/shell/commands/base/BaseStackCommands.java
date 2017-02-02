@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.shell.commands.base;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -239,7 +240,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @Override
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, boolean publicInAccount, OnFailureAction onFailureAction,
             AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, boolean wait, PlatformVariant platformVariant, String orchestrator,
-            String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params) {
+            String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params, Map<String, String> userDefinedTags) {
         try {
             validateNetwork();
             validateRegion(region);
@@ -263,6 +264,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setPlatformVariant(platformVariant == null ? "" : platformVariant.getName());
             stackRequest.setCloudPlatform(platform);
             stackRequest.setParameters(params);
+            stackRequest.setTags(Collections.singletonMap("userDefined", userDefinedTags));
             stackRequest.setAmbariVersion(ambariVersion);
             stackRequest.setHdpVersion(hdpVersion);
             stackRequest.setImageCatalog(imageCatalog);
