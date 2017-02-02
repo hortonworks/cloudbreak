@@ -14,6 +14,7 @@ const (
 	HEALTHY   = "HEALTHY"
 	UNHEALTHY = "UNHEALTHY"
 	HIVE_RDS  = "HIVE"
+	DRUID_RDS = "DRUID"
 )
 
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5, 2.6}
@@ -44,12 +45,14 @@ type ClusterSkeletonBase struct {
 type ClusterSkeleton struct {
 	ClusterSkeletonBase
 	HiveMetastore  *HiveMetastore          `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore *DruidMetastore         `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
 	Configurations []models.Configurations `json:"Configurations" yaml:"Configurations"`
 }
 
 type ClusterSkeletonResult struct {
 	ClusterSkeletonBase
 	HiveMetastore  *HiveMetastoreResult    `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore *DruidMetastoreResult   `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
 	Configurations []models.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
 	Nodes          string                  `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
 	Status         string                  `json:"Status,omitempty" yaml:"Status,omitempty"`
@@ -94,5 +97,13 @@ type HiveMetastore struct {
 }
 
 type HiveMetastoreResult struct {
+	Name string `json:"Name" yaml:"Name"`
+}
+
+type DruidMetastore struct {
+	MetaStore
+}
+
+type DruidMetastoreResult struct {
 	Name string `json:"Name" yaml:"Name"`
 }

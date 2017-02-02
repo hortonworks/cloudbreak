@@ -126,16 +126,19 @@ func TestFillWithExistingNetwork(t *testing.T) {
 func TestFillWithRDSConfig(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	rcr := &models.RDSConfigResponse{
-		Name: "rds-name",
+	rdsName := "rds-name"
+	rcr := []*models.RDSConfigResponse{{
+		Name: rdsName,
+		Type: &(&stringWrapper{HIVE_RDS}).s,
+	},
 	}
 
 	skeleton.fill(sr, cr, br, nil, nil, nj, rcr, nil, nil)
 
 	if skeleton.HiveMetastore == nil {
 		t.Error("meta store is empty")
-	} else if skeleton.HiveMetastore.Name != rcr.Name {
-		t.Errorf("meta store name not match %s == %s", rcr.Name, skeleton.HiveMetastore.Name)
+	} else if skeleton.HiveMetastore.Name != rdsName {
+		t.Errorf("meta store name not match %s == %s", rdsName, skeleton.HiveMetastore.Name)
 	}
 }
 

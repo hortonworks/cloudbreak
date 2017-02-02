@@ -66,17 +66,8 @@ func fetchClusterImpl(stack *models.StackResponse) (*ClusterSkeletonResult, erro
 	var credential *models.CredentialResponse = stack.Credential
 	var network *models.NetworkResponse = stack.Network
 
-	var rdsConfig *models.RDSConfigResponse = nil
-	if stack.Cluster != nil {
-		for _, rds := range stack.Cluster.RdsConfigs {
-			if rds.Type != nil && *rds.Type == HIVE_RDS {
-				rdsConfig = rds
-			}
-		}
-	}
-
 	clusterSkeleton := &ClusterSkeletonResult{}
-	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, rdsConfig, recipeMap, recoveryModeMap)
+	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, stack.Cluster.RdsConfigs, recipeMap, recoveryModeMap)
 
 	return clusterSkeleton, nil
 }
@@ -154,6 +145,7 @@ func CreateCluster(c *cli.Context) error {
 		createNetworkRequest,
 		createRecipeRequests,
 		createBlueprintRequest,
+		createRDSRequest,
 		oAuth2Client.GetBlueprintByName,
 		oAuth2Client.GetCredential,
 		oAuth2Client.GetNetwork,
@@ -174,6 +166,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	createNetworkRequest func(skeleton ClusterSkeleton, getNetwork func(string) models.NetworkResponse) *models.NetworkRequest,
 	createRecipeRequests func(recipes []Recipe) []*models.RecipeRequest,
 	createBlueprintRequest func(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse) *models.BlueprintRequest,
+	createRDSRequest func(metastore MetaStore, rdsType string, hdpVersion string) *models.RDSConfig,
 	getBlueprint func(string) *models.BlueprintResponse,
 	getCredential func(string) models.CredentialResponse,
 	getNetwork func(name string) models.NetworkResponse,
@@ -336,24 +329,24 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		rdsConfigs := make([]*models.RDSConfig, 0)
 		rdsConfigIds := make([]int64, 0)
-		ms := skeleton.HiveMetastore
-		if skeleton.HiveMetastore != nil {
-			if len(skeleton.HiveMetastore.URL) > 0 {
-				validate := false
-				rdsType := HIVE_RDS
-				rdsConfig := &models.RDSConfig{
-					Name:               ms.Name,
-					ConnectionUserName: ms.Username,
-					ConnectionPassword: ms.Password,
-					ConnectionURL:      extendRdsUrl(ms.URL),
-					DatabaseType:       ms.DatabaseType,
-					HdpVersion:         skeleton.HDPVersion,
-					Validated:          &validate,
-					Type:               &rdsType,
-				}
-				rdsConfigs = append(rdsConfigs, rdsConfig)
-			} else if len(ms.Name) > 0 {
-				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(ms.Name).ID)
+		// hive metastore
+		hiveMetastore := skeleton.HiveMetastore
+		if hiveMetastore != nil {
+			if len(hiveMetastore.URL) > 0 {
+				hiveRds := createRDSRequest(hiveMetastore.MetaStore, HIVE_RDS, skeleton.HDPVersion)
+				rdsConfigs = append(rdsConfigs, hiveRds)
+			} else if len(hiveMetastore.Name) > 0 {
+				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(hiveMetastore.Name).ID)
+			}
+		}
+		// druid metastore
+		druidMetastore := skeleton.DruidMetastore
+		if druidMetastore != nil {
+			if len(druidMetastore.URL) > 0 {
+				druidRds := createRDSRequest(druidMetastore.MetaStore, DRUID_RDS, skeleton.HDPVersion)
+				rdsConfigs = append(rdsConfigs, druidRds)
+			} else if len(druidMetastore.Name) > 0 {
+				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(druidMetastore.Name).ID)
 			}
 		}
 
@@ -582,8 +575,12 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 
 		if stack.Cluster != nil && len(stack.Cluster.RdsConfigs) > 0 {
 			for _, rds := range stack.Cluster.RdsConfigs {
-				if rds.Type != nil && *rds.Type == HIVE_RDS {
-					skeleton.HiveMetastore.Name = rds.Name
+				if rds.Type != nil {
+					if *rds.Type == HIVE_RDS {
+						skeleton.HiveMetastore.Name = rds.Name
+					} else if *rds.Type == DRUID_RDS {
+						skeleton.DruidMetastore.Name = rds.Name
+					}
 				}
 			}
 		}
@@ -635,6 +632,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 			Tags:                   make(map[string]string, 0),
 		},
 		HiveMetastore:  &HiveMetastore{},
+		DruidMetastore: &DruidMetastore{},
 		Configurations: []models.Configurations{},
 	}
 }

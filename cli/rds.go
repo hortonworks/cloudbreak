@@ -127,6 +127,20 @@ func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig 
 	return nil
 }
 
+func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string) *models.RDSConfig {
+	validate := false
+	return &models.RDSConfig{
+		Name:               metastore.Name,
+		ConnectionUserName: metastore.Username,
+		ConnectionPassword: metastore.Password,
+		ConnectionURL:      extendRdsUrl(metastore.URL),
+		DatabaseType:       metastore.DatabaseType,
+		HdpVersion:         hdpVersion,
+		Validated:          &validate,
+		Type:               &rdsType,
+	}
+}
+
 func extendRdsUrl(url string) string {
 	if strings.Contains(url, "jdbc:") {
 		return url

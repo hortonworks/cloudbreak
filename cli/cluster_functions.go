@@ -80,7 +80,7 @@ func (c *ClusterSkeletonResult) fill(
 	templateMap map[string]*models.TemplateResponse,
 	securityMap map[string][]*models.SecurityRuleResponse,
 	network *models.NetworkResponse,
-	rdsConfig *models.RDSConfigResponse,
+	rdsConfigs []*models.RDSConfigResponse,
 	recipeMap map[string][]*models.RecipeResponse,
 	recoveryModeMap map[string]string) error {
 
@@ -140,11 +140,20 @@ func (c *ClusterSkeletonResult) fill(
 		c.Network = &net
 	}
 
-	if rdsConfig != nil {
-		rdsConfig := HiveMetastoreResult{
-			Name: rdsConfig.Name,
+	for _, rds := range rdsConfigs {
+		if rds.Type != nil {
+			if *rds.Type == HIVE_RDS {
+				rdsConfig := HiveMetastoreResult{
+					Name: rds.Name,
+				}
+				c.HiveMetastore = &rdsConfig
+			} else if *rds.Type == DRUID_RDS {
+				rdsConfig := DruidMetastoreResult{
+					Name: rds.Name,
+				}
+				c.DruidMetastore = &rdsConfig
+			}
 		}
-		c.HiveMetastore = &rdsConfig
 	}
 
 	c.Master.Recipes = convertRecipes(recipeMap[MASTER])

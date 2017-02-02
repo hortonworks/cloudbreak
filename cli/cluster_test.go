@@ -110,7 +110,7 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	}
 
 	actualId = createClusterImpl(*skeleton, createFuncs[0], createFuncs[1], createFuncs[2],
-		createSecurityGroupRequest, createCredentialRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest,
+		createSecurityGroupRequest, createCredentialRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest, createRDSRequest,
 		getBlueprint, getCredential, getNetwork, postStack, getRdsConfig, postCluster)
 
 	return
@@ -341,7 +341,6 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 		}
 	}
 	getCluster := func(string) *models.StackResponse {
-		rdsType := HIVE_RDS
 		np := make(map[string]interface{})
 		np["vpcId"] = "vpcId"
 		np["subnetId"] = "subnetId"
@@ -350,7 +349,7 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 			ID:      &(&int64Wrapper{int64(1)}).i,
 			Status:  &(&stringWrapper{"AVAILABLE"}).s,
 			Network: network,
-			Cluster: &models.ClusterResponse{RdsConfigs: []*models.RDSConfigResponse{{Name: "rds-name", Type: &rdsType}}},
+			Cluster: &models.ClusterResponse{RdsConfigs: []*models.RDSConfigResponse{{Name: "rds-name", Type: &(&stringWrapper{HIVE_RDS}).s}}},
 		}
 	}
 	getClusterConfig := func(id int64, params []*models.BlueprintParameter) []*models.BlueprintInput {
