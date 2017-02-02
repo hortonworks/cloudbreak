@@ -122,7 +122,7 @@ Fill the missing fields (for the HiveMetastore only the name is required):
     "VolumeType": "ephemeral",
     "VolumeSize": 40,
     "VolumeCount": 2,
-    "InstanceCount": 2
+    "InstanceCount": 3
   },
   "SSHKeyName": "seq-master",
   "RemoteAccess": "0.0.0.0/0",

@@ -33,7 +33,7 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeType": "ephemeral",                                             // Volume type of worker instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 40,                                                      // Volume size of worker instance group
     "VolumeCount": 2,                                                      // Volume count of worker instance group
-    "InstanceCount": 1                                                     // Instance count of worker instance group, accepted value: >0
+    "InstanceCount": 3                                                     // Instance count of worker instance group, accepted value: >0
     "Recipes:" [                                                           // (Optional) List of recipes
       {
         "URI": "http://some-site.com/test.sh",                             // URI of the script
