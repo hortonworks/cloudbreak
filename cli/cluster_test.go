@@ -282,7 +282,7 @@ func TestGenerateCreateSharedClusterSkeletonImplNotAvailable(t *testing.T) {
 			Cluster:   &models.ClusterResponse{Status: &(&stringWrapper{"CREATED"}).s}}
 	}
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, nil, nil, nil)
+	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, nil)
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplNotAvailable.json")
 	if skeleton.Json() != string(expected) {
@@ -304,22 +304,21 @@ func TestGenerateCreateSharedClusterSkeletonImplMinimalConfig(t *testing.T) {
 		}
 	}
 	getCluster := func(string) *models.StackResponse {
+		np := make(map[string]interface{})
+		np["internetGatewayId"] = "igw"
+		networResp := &models.NetworkResponse{Parameters: np}
 		return &models.StackResponse{
 			ID:        &(&int64Wrapper{int64(1)}).i,
 			NetworkID: &(&int64Wrapper{int64(1)}).i,
 			Status:    &(&stringWrapper{"AVAILABLE"}).s,
+			Network:   networResp,
 		}
 	}
 	getClusterConfig := func(id int64, params []*models.BlueprintParameter) []*models.BlueprintInput {
 		return nil
 	}
-	getNetwork := func(id int64) *models.NetworkResponse {
-		np := make(map[string]interface{})
-		np["internetGatewayId"] = "igw"
-		return &models.NetworkResponse{Parameters: np}
-	}
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, getClusterConfig, getNetwork, nil)
+	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, getClusterConfig)
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplMinimalConfig.json")
 	if skeleton.Json() != string(expected) {
@@ -342,27 +341,23 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 		}
 	}
 	getCluster := func(string) *models.StackResponse {
+		rdsType := HIVE_RDS
+		np := make(map[string]interface{})
+		np["vpcId"] = "vpcId"
+		np["subnetId"] = "subnetId"
+		network := &models.NetworkResponse{Parameters: np}
 		return &models.StackResponse{
-			ID:        &(&int64Wrapper{int64(1)}).i,
-			Status:    &(&stringWrapper{"AVAILABLE"}).s,
-			NetworkID: &(&int64Wrapper{int64(1)}).i,
-			Cluster:   &models.ClusterResponse{RdsConfigID: &(&int64Wrapper{int64(2)}).i},
+			ID:      &(&int64Wrapper{int64(1)}).i,
+			Status:  &(&stringWrapper{"AVAILABLE"}).s,
+			Network: network,
+			Cluster: &models.ClusterResponse{RdsConfigs: []*models.RDSConfigResponse{{Name: "rds-name", Type: &rdsType}}},
 		}
 	}
 	getClusterConfig := func(id int64, params []*models.BlueprintParameter) []*models.BlueprintInput {
 		return []*models.BlueprintInput{{Name: &(&stringWrapper{"key"}).s, PropertyValue: &(&stringWrapper{"value"}).s}}
 	}
-	getNetwork := func(id int64) *models.NetworkResponse {
-		np := make(map[string]interface{})
-		np["vpcId"] = "vpcId"
-		np["subnetId"] = "subnetId"
-		return &models.NetworkResponse{Parameters: np}
-	}
-	getRdsConfig := func(id int64) *models.RDSConfigResponse {
-		return &models.RDSConfigResponse{Name: "rds-name"}
-	}
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, getClusterConfig, getNetwork, getRdsConfig)
+	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, getClusterConfig)
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplFullConfig.json")
 	if skeleton.Json() != string(expected) {

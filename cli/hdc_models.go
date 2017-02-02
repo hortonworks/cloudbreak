@@ -13,6 +13,7 @@ const (
 	UNKNOWN   = "UNKNOWN"
 	HEALTHY   = "HEALTHY"
 	UNHEALTHY = "UNHEALTHY"
+	HIVE_RDS  = "HIVE"
 )
 
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5, 2.6}

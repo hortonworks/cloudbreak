@@ -101,10 +101,10 @@ func CreateRDSConfig(c *cli.Context) error {
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	return createRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
+	return createRDSConfigImpl(HIVE_RDS, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
 }
 
-func createRDSConfigImpl(finder func(string) string, postConfig func(*rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {
+func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {
 	validate := false
 	rdsConfig := models.RDSConfig{
 		Name:               finder(FlRdsName.Name),
@@ -114,6 +114,7 @@ func createRDSConfigImpl(finder func(string) string, postConfig func(*rdsconfigs
 		DatabaseType:       finder(FlRdsDbType.Name),
 		Validated:          &validate,
 		HdpVersion:         finder(FlHdpVersion.Name),
+		Type:               &rdsType,
 	}
 
 	resp, err := postConfig(&rdsconfigs.PostRdsconfigsAccountParams{Body: &rdsConfig})

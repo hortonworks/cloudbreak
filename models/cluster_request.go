@@ -129,13 +129,17 @@ type ClusterRequest struct {
 	*/
 	Password string `json:"password"`
 
-	/* RDS configuration id for the cluster
-	 */
-	RdsConfigID *int64 `json:"rdsConfigId,omitempty"`
+	/* RDS configuration ids for the cluster
+
+	Unique: true
+	*/
+	RdsConfigIds []int64 `json:"rdsConfigIds,omitempty"`
 
 	/* details of the external database for Hadoop components
-	 */
-	RdsConfigJSON *RDSConfig `json:"rdsConfigJson,omitempty"`
+
+	Unique: true
+	*/
+	RdsConfigJsons []*RDSConfig `json:"rdsConfigJsons,omitempty"`
 
 	/* SSSD config for the cluster
 	 */
@@ -194,6 +198,16 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validatePassword(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRdsConfigIds(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRdsConfigJsons(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -355,6 +369,51 @@ func (m *ClusterRequest) validatePassword(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("password", "body", string(m.Password), 100); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *ClusterRequest) validateRdsConfigIds(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RdsConfigIds) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("rdsConfigIds", "body", m.RdsConfigIds); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.RdsConfigIds); i++ {
+
+		if err := validate.Required("rdsConfigIds"+"."+strconv.Itoa(i), "body", int64(m.RdsConfigIds[i])); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ClusterRequest) validateRdsConfigJsons(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RdsConfigJsons) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("rdsConfigJsons", "body", m.RdsConfigJsons); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.RdsConfigJsons); i++ {
+
+		if m.RdsConfigJsons[i] != nil {
+
+			if err := m.RdsConfigJsons[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

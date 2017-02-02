@@ -68,7 +68,11 @@ func fetchClusterImpl(stack *models.StackResponse) (*ClusterSkeletonResult, erro
 
 	var rdsConfig *models.RDSConfigResponse = nil
 	if stack.Cluster != nil {
-		rdsConfig = stack.Cluster.RdsConfig
+		for _, rds := range stack.Cluster.RdsConfigs {
+			if rds.Type != nil && *rds.Type == HIVE_RDS {
+				rdsConfig = rds
+			}
+		}
 	}
 
 	clusterSkeleton := &ClusterSkeletonResult{}
@@ -330,13 +334,14 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			},
 		}
 
-		var rdsConfig *models.RDSConfig = nil
-		var rdsId *int64 = nil
+		rdsConfigs := make([]*models.RDSConfig, 0)
+		rdsConfigIds := make([]int64, 0)
 		ms := skeleton.HiveMetastore
-		validate := false
 		if skeleton.HiveMetastore != nil {
 			if len(skeleton.HiveMetastore.URL) > 0 {
-				rdsConfig = &models.RDSConfig{
+				validate := false
+				rdsType := HIVE_RDS
+				rdsConfig := &models.RDSConfig{
 					Name:               ms.Name,
 					ConnectionUserName: ms.Username,
 					ConnectionPassword: ms.Password,
@@ -344,9 +349,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 					DatabaseType:       ms.DatabaseType,
 					HdpVersion:         skeleton.HDPVersion,
 					Validated:          &validate,
+					Type:               &rdsType,
 				}
+				rdsConfigs = append(rdsConfigs, rdsConfig)
 			} else if len(ms.Name) > 0 {
-				rdsId = getRdsConfig(ms.Name).ID
+				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(ms.Name).ID)
 			}
 		}
 
@@ -378,8 +385,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			HostGroups:                hostGroups,
 			UserName:                  skeleton.ClusterAndAmbariUser,
 			Password:                  skeleton.ClusterAndAmbariPassword,
-			RdsConfigJSON:             rdsConfig,
-			RdsConfigID:               rdsId,
+			RdsConfigJsons:            rdsConfigs,
+			RdsConfigIds:              rdsConfigIds,
 			BlueprintInputs:           inputs,
 			BlueprintCustomProperties: skeleton.Configurations,
 			EnableKnoxGateway:         &enableKnoxGateway,
@@ -528,9 +535,7 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 	generateCreateSharedClusterSkeletonImpl(skeleton, clusterName, clusterType,
 		oAuth2Client.GetBlueprintByName,
 		oAuth2Client.GetClusterByName,
-		oAuth2Client.GetClusterConfig,
-		oAuth2Client.GetNetworkById,
-		oAuth2Client.GetRDSConfigById)
+		oAuth2Client.GetClusterConfig)
 
 	Println(skeleton.JsonPretty())
 	return nil
@@ -539,9 +544,7 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterName string, clusterType string,
 	getBlueprint func(string) *models.BlueprintResponse,
 	getCluster func(string) *models.StackResponse,
-	getClusterConfig func(int64, []*models.BlueprintParameter) []*models.BlueprintInput,
-	getNetwork func(int64) *models.NetworkResponse,
-	getRdsConfig func(int64) *models.RDSConfigResponse) {
+	getClusterConfig func(int64, []*models.BlueprintParameter) []*models.BlueprintInput) {
 
 	ambariBp := getBlueprint(clusterType)
 
@@ -572,23 +575,19 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 			}
 		}()
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			network := getNetwork(*stack.NetworkID)
-			if network.Parameters["internetGatewayId"] == nil {
-				skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
-			}
-		}()
-
-		if stack.Cluster != nil && stack.Cluster.RdsConfigID != nil {
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				rdsConfig := getRdsConfig(*stack.Cluster.RdsConfigID)
-				skeleton.HiveMetastore.Name = rdsConfig.Name
-			}()
+		network := stack.Network
+		if network != nil && network.Parameters["internetGatewayId"] == nil {
+			skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
 		}
+
+		if stack.Cluster != nil && len(stack.Cluster.RdsConfigs) > 0 {
+			for _, rds := range stack.Cluster.RdsConfigs {
+				if rds.Type != nil && *rds.Type == HIVE_RDS {
+					skeleton.HiveMetastore.Name = rds.Name
+				}
+			}
+		}
+
 		wg.Wait()
 	}
 }

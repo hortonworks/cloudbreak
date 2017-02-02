@@ -109,13 +109,17 @@ type ClusterResponse struct {
 	 */
 	Password *string `json:"password,omitempty"`
 
-	/* RDS configuration for the cluster
-	 */
-	RdsConfig *RDSConfigResponse `json:"rdsConfig,omitempty"`
+	/* RDS configuration ids for the cluster
 
-	/* RDS configuration id for the cluster
-	 */
-	RdsConfigID *int64 `json:"rdsConfigId,omitempty"`
+	Unique: true
+	*/
+	RdsConfigIds []int64 `json:"rdsConfigIds,omitempty"`
+
+	/* RDS configurations for the cluster
+
+	Unique: true
+	*/
+	RdsConfigs []*RDSConfigResponse `json:"rdsConfigs,omitempty"`
 
 	/* secure
 	 */
@@ -166,6 +170,16 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateHostGroups(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRdsConfigIds(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRdsConfigs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -268,6 +282,51 @@ func (m *ClusterResponse) validateHostGroups(formats strfmt.Registry) error {
 		if m.HostGroups[i] != nil {
 
 			if err := m.HostGroups[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateRdsConfigIds(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RdsConfigIds) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("rdsConfigIds", "body", m.RdsConfigIds); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.RdsConfigIds); i++ {
+
+		if err := validate.Required("rdsConfigIds"+"."+strconv.Itoa(i), "body", int64(m.RdsConfigIds[i])); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+func (m *ClusterResponse) validateRdsConfigs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RdsConfigs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("rdsConfigs", "body", m.RdsConfigs); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.RdsConfigs); i++ {
+
+		if m.RdsConfigs[i] != nil {
+
+			if err := m.RdsConfigs[i].Validate(formats); err != nil {
 				return err
 			}
 		}

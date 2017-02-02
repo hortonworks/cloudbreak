@@ -68,7 +68,7 @@ func TestCreateRDSConfigImpl(t *testing.T) {
 		return &rdsconfigs.PostRdsconfigsAccountOK{Payload: &models.RDSConfigResponse{ID: &expectedId}}, nil
 	}
 
-	createRDSConfigImpl(finder, postConfig)
+	createRDSConfigImpl(HIVE_RDS, finder, postConfig)
 
 	if actual.Name != finder(FlRdsName.Name) {
 		t.Errorf("name not match %s == %s", finder(FlRdsName.Name), actual.Name)

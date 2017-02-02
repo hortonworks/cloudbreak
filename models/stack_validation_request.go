@@ -24,11 +24,13 @@ type StackValidationRequest struct {
 	 */
 	BlueprintID *int64 `json:"blueprintId,omitempty"`
 
-	/* credential resource id for the stack
+	/* stack related credential
+	 */
+	Credential *CredentialRequest `json:"credential,omitempty"`
 
-	Required: true
-	*/
-	CredentialID int64 `json:"credentialId"`
+	/* credential resource id for the stack
+	 */
+	CredentialID *int64 `json:"credentialId,omitempty"`
 
 	/* file system
 	 */
@@ -67,11 +69,6 @@ type StackValidationRequest struct {
 func (m *StackValidationRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateCredentialID(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateHostGroups(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -90,15 +87,6 @@ func (m *StackValidationRequest) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *StackValidationRequest) validateCredentialID(formats strfmt.Registry) error {
-
-	if err := validate.Required("credentialId", "body", int64(m.CredentialID)); err != nil {
-		return err
-	}
-
 	return nil
 }
 
