@@ -247,7 +247,7 @@ public class ClusterRequest {
         return rdsConfigJsons;
     }
 
-    public void setRdsConfigJsons(Set<RDSConfigJson> rdsConfigJson) {
+    public void setRdsConfigJsons(Set<RDSConfigJson> rdsConfigJsons) {
         this.rdsConfigJsons = rdsConfigJsons;
     }
 
