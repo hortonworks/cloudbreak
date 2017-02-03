@@ -3,10 +3,9 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StartInstancesResult;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 
 public enum StackStartEvent implements FlowEvent {
-    START_EVENT(FlowTriggers.STACK_START_TRIGGER_EVENT),
+    STACK_START_EVENT("STACK_START_TRIGGER_EVENT"),
     START_FINISHED_EVENT(StartInstancesResult.selector(StartInstancesResult.class)),
     START_FAILURE_EVENT(StartInstancesResult.failureSelector(StartInstancesResult.class)),
     COLLECT_METADATA_FINISHED_EVENT(CollectMetadataResult.selector(CollectMetadataResult.class)),
@@ -14,15 +13,15 @@ public enum StackStartEvent implements FlowEvent {
     START_FINALIZED_EVENT("STARTSTACKFINALIZED"),
     START_FAIL_HANDLED_EVENT("STARTFAILHANDLED");
 
-    private String stringRepresentation;
+    private String event;
 
-    StackStartEvent(String stringRepresentation) {
-        this.stringRepresentation = stringRepresentation;
+    StackStartEvent(String event) {
+        this.event = event;
     }
 
     @Override
-    public String stringRepresentation() {
-        return stringRepresentation;
+    public String event() {
+        return event;
     }
 
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import static com.sequenceiq.cloudbreak.core.flow2.FlowTriggers.STACK_FORCE_TERMINATE_TRIGGER_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.FlowTriggers.STACK_TERMINATE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.FORCE_TERMINATION_EVENT;
 
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTrigge
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
@@ -64,7 +64,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Arrays.asList(
-            STACK_FORCE_TERMINATE_TRIGGER_EVENT, STACK_TERMINATE_TRIGGER_EVENT
+            FORCE_TERMINATION_EVENT.event(), StackTerminationEvent.TERMINATION_EVENT.event()
     );
 
     private static final List<Class<? extends FlowConfiguration>> RESTARTABLE_FLOWS = Arrays.asList(

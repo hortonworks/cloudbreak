@@ -26,7 +26,7 @@ public class HelloWorldActions {
 
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context.getFlowId(), HELLO_WORLD_FINISHED_EVENT.stringRepresentation(), payload);
+                sendEvent(context.getFlowId(), HELLO_WORLD_FINISHED_EVENT.event(), payload);
             }
         };
     }
@@ -45,7 +45,7 @@ public class HelloWorldActions {
 
                     @Override
                     public String selector() {
-                        return FINALIZE_HELLO_WORLD_EVENT.stringRepresentation();
+                        return FINALIZE_HELLO_WORLD_EVENT.event();
                     }
 
                     @Override
@@ -63,7 +63,7 @@ public class HelloWorldActions {
 
             @Override
             protected void doExecute(CommonContext context, Payload payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context.getFlowId(), HELLO_WORLD_FAIL_HANDLED_EVENT.stringRepresentation(), payload);
+                sendEvent(context.getFlowId(), HELLO_WORLD_FAIL_HANDLED_EVENT.event(), payload);
             }
         };
     }

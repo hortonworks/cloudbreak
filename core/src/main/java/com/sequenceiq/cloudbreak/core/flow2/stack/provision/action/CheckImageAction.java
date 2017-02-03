@@ -70,7 +70,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
 
     @Override
     protected Selectable createRequest(StackContext context) {
-        return new StackEvent(StackCreationEvent.IMAGE_COPY_FINISHED_EVENT.stringRepresentation(), context.getStack().getId());
+        return new StackEvent(StackCreationEvent.IMAGE_COPY_FINISHED_EVENT.event(), context.getStack().getId());
     }
 
     @Override
@@ -79,7 +79,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     private void repeat(final StackContext context) {
-        timer.submit(aLong -> sendEvent(context.getFlowId(), new StackEvent(StackCreationEvent.IMAGE_COPY_CHECK_EVENT.stringRepresentation(),
+        timer.submit(aLong -> sendEvent(context.getFlowId(), new StackEvent(StackCreationEvent.IMAGE_COPY_CHECK_EVENT.event(),
                 context.getStack().getId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
     }
 

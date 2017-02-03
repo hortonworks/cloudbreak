@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
@@ -15,8 +14,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServ
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
 
 public enum ClusterCreationEvent implements FlowEvent {
-    CLUSTER_CREATION_EVENT(FlowTriggers.CLUSTER_PROVISION_TRIGGER_EVENT),
-    CLUSTER_INSTALL_EVENT(FlowTriggers.CLUSTER_INSTALL_TRIGGER_EVENT),
+    CLUSTER_CREATION_EVENT("CLUSTER_PROVISION_TRIGGER_EVENT"),
+    CLUSTER_INSTALL_EVENT("CLUSTER_INSTALL_TRIGGER_EVENT"),
     BOOTSTRAP_MACHINES_FINISHED_EVENT(EventSelectorUtil.selector(BootstrapMachinesSuccess.class)),
     BOOTSTRAP_MACHINES_FAILED_EVENT(EventSelectorUtil.selector(BootstrapMachinesFailed.class)),
     HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),
@@ -31,14 +30,14 @@ public enum ClusterCreationEvent implements FlowEvent {
     CLUSTER_CREATION_FINISHED_EVENT("CLUSTER_CREATION_FINISHED"),
     CLUSTER_CREATION_FAILURE_HANDLED_EVENT("CLUSTER_CREATION_FAILHANDLED");
 
-    private String stringRepresentation;
+    private String event;
 
-    ClusterCreationEvent(String stringRepresentation) {
-        this.stringRepresentation = stringRepresentation;
+    ClusterCreationEvent(String event) {
+        this.event = event;
     }
 
     @Override
-    public String stringRepresentation() {
-        return stringRepresentation;
+    public String event() {
+        return event;
     }
 }

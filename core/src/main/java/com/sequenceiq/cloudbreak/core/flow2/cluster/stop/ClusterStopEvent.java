@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
 
 public enum ClusterStopEvent implements FlowEvent {
-    CLUSTER_STOP_EVENT(FlowTriggers.CLUSTER_STOP_TRIGGER_EVENT),
+    CLUSTER_STOP_EVENT("CLUSTER_STOP_TRIGGER_EVENT"),
     CLUSTER_STOP_FINISHED_EVENT(EventSelectorUtil.selector(ClusterStopResult.class)),
     CLUSTER_STOP_FINISHED_FAILURE_EVENT(EventSelectorUtil.failureSelector(ClusterStopResult.class)),
 
@@ -14,14 +13,14 @@ public enum ClusterStopEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERSTOPFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERSTOPFAILHANDLEDEVENT");
 
-    private String stringRepresentation;
+    private String event;
 
-    ClusterStopEvent(String stringRepresentation) {
-        this.stringRepresentation = stringRepresentation;
+    ClusterStopEvent(String event) {
+        this.event = event;
     }
 
     @Override
-    public String stringRepresentation() {
-        return stringRepresentation;
+    public String event() {
+        return event;
     }
 }

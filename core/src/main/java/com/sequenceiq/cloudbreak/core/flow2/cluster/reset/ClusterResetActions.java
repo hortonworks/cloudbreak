@@ -85,7 +85,7 @@ public class ClusterResetActions {
 
             @Override
             protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterResetEvent.FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterResetEvent.FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -101,7 +101,7 @@ public class ClusterResetActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterResetEvent.FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterResetEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

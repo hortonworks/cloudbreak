@@ -32,6 +32,6 @@ public class StackTerminationFinishedAction extends AbstractStackTerminationActi
 
     @Override
     protected Selectable createRequest(StackTerminationContext context) {
-        return new StackEvent(StackTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+        return new StackEvent(StackTerminationEvent.TERMINATION_FINALIZED_EVENT.event(), context.getStack().getId());
     }
 }

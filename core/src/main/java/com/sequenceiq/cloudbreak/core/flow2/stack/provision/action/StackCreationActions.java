@@ -206,7 +206,7 @@ public class StackCreationActions {
             protected void doExecute(StackContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.setupTls(context, payload);
                 StackWithFingerprintsEvent fingerprintsEvent = new StackWithFingerprintsEvent(payload.getStackId(), payload.getSshFingerprints());
-                sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.stringRepresentation(), fingerprintsEvent);
+                sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), fingerprintsEvent);
             }
         };
     }
@@ -223,7 +223,7 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                return new StackEvent(StackCreationEvent.STACK_CREATION_FINISHED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackCreationEvent.STACK_CREATION_FINISHED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -239,7 +239,7 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

@@ -27,6 +27,6 @@ public class InstanceTerminationFinishedAction extends AbstractInstanceTerminati
 
     @Override
     protected Selectable createRequest(InstanceTerminationContext context) {
-        return new StackEvent(InstanceTerminationEvent.TERMINATION_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+        return new StackEvent(InstanceTerminationEvent.TERMINATION_FINALIZED_EVENT.event(), context.getStack().getId());
     }
 }

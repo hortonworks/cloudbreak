@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.DECOMMISSION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
+
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -10,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
@@ -41,10 +43,10 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         ClusterScaleTriggerEvent cste;
         if (event.getHostNames() == null) {
-            cste = new ClusterDownscaleTriggerEvent(FlowTriggers.CLUSTER_DOWNSCALE_TRIGGER_EVENT, event.getStackId(), event.getHostGroupName(),
+            cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), event.getHostGroupName(),
                     event.getAdjustment(), event.accepted());
         } else {
-            cste = new ClusterDownscaleTriggerEvent(FlowTriggers.CLUSTER_DOWNSCALE_TRIGGER_EVENT, event.getStackId(), event.getHostGroupName(),
+            cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getStackId(), event.getHostGroupName(),
                     event.getHostNames(), event.accepted());
         }
         flowEventChain.add(cste);
@@ -55,9 +57,9 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
             String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);
             StackScaleTriggerEvent sste;
             if (event.getHostNames() == null) {
-                sste = new StackDownscaleTriggerEvent(FlowTriggers.STACK_DOWNSCALE_TRIGGER_EVENT, event.getStackId(), instanceGroupName, event.getAdjustment());
+                sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getStackId(), instanceGroupName, event.getAdjustment());
             } else {
-                sste = new StackDownscaleTriggerEvent(FlowTriggers.STACK_DOWNSCALE_TRIGGER_EVENT, event.getStackId(), instanceGroupName, event.getHostNames());
+                sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getStackId(), instanceGroupName, event.getHostNames());
             }
             flowEventChain.add(sste);
         }

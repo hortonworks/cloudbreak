@@ -1,5 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscaleEvent.CLUSTER_UPSCALE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.userpasswd.ClusterCredentialChangeEvent.CLUSTER_CREDENTIALCHANGE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.FORCE_TERMINATION_EVENT;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +27,8 @@ import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
@@ -26,9 +37,11 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerE
 import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
@@ -62,7 +75,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerStackStop(Long stackId) {
-        String selector = FlowTriggers.STACK_STOP_TRIGGER_EVENT;
+        String selector = STACK_STOP_EVENT.event();
         notify(selector, new StackEvent(selector, stackId));
     }
 
@@ -75,39 +88,39 @@ public class ReactorFlowManager {
     }
 
     public void triggerStackDownscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
-        String selector = FlowTriggers.STACK_DOWNSCALE_TRIGGER_EVENT;
+        String selector = STACK_DOWNSCALE_EVENT.event();
         StackScaleTriggerEvent stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
                 instanceGroupAdjustment.getScalingAdjustment());
         notify(selector, stackScaleTriggerEvent);
     }
 
     public void triggerStackSync(Long stackId) {
-        String selector = FlowTriggers.STACK_SYNC_TRIGGER_EVENT;
+        String selector = STACK_SYNC_EVENT.event();
         notify(selector, new StackSyncTriggerEvent(selector, stackId, true));
     }
 
     public void triggerStackRemoveInstance(Long stackId, String instanceId) {
-        String selector = FlowTriggers.REMOVE_INSTANCE_TRIGGER_EVENT;
+        String selector = InstanceTerminationEvent.TERMINATION_EVENT.event();
         InstanceTerminationTriggerEvent event = new InstanceTerminationTriggerEvent(selector, stackId, Collections.singleton(instanceId));
         notify(selector, event);
     }
 
     public void triggerTermination(Long stackId, Boolean deleteDependencies) {
-        String selector = FlowTriggers.STACK_TERMINATE_TRIGGER_EVENT;
+        String selector = StackTerminationEvent.TERMINATION_EVENT.event();
         TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
         notify(selector, event);
         cancelRunningFlows(stackId);
     }
 
     public void triggerForcedTermination(Long stackId, Boolean deleteDependencies) {
-        String selector = FlowTriggers.STACK_FORCE_TERMINATE_TRIGGER_EVENT;
+        String selector = FORCE_TERMINATION_EVENT.event();
         TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
         notify(selector, event);
         cancelRunningFlows(stackId);
     }
 
     public void triggerClusterInstall(Long stackId) {
-        String selector = FlowTriggers.CLUSTER_PROVISION_TRIGGER_EVENT;
+        String selector = CLUSTER_CREATION_EVENT.event();
         notify(selector, new StackEvent(selector, stackId));
     }
 
@@ -122,19 +135,19 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterCredentialReplace(Long stackId, String userName, String password) {
-        String selector = FlowTriggers.CLUSTER_CREDENTIALCHANGE_TRIGGER_EVENT;
+        String selector = CLUSTER_CREDENTIALCHANGE_EVENT.event();
         ClusterCredentialChangeTriggerEvent event = ClusterCredentialChangeTriggerEvent.replaceUserEvent(selector, stackId, userName, password);
         notify(selector, event);
     }
 
     public void triggerClusterCredentialUpdate(Long stackId, String password) {
-        String selector = FlowTriggers.CLUSTER_CREDENTIALCHANGE_TRIGGER_EVENT;
+        String selector = CLUSTER_CREDENTIALCHANGE_EVENT.event();
         ClusterCredentialChangeTriggerEvent event = ClusterCredentialChangeTriggerEvent.changePasswordEvent(selector, stackId, password);
         notify(selector, event);
     }
 
     public void triggerClusterUpscale(Long stackId, HostGroupAdjustmentJson hostGroupAdjustment) {
-        String selector = FlowTriggers.CLUSTER_UPSCALE_TRIGGER_EVENT;
+        String selector = CLUSTER_UPSCALE_TRIGGER_EVENT.event();
         ClusterScaleTriggerEvent event = new ClusterScaleTriggerEvent(selector, stackId,
                 hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
         notify(selector, event);
@@ -149,7 +162,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterStart(Long stackId) {
-        String selector = FlowTriggers.CLUSTER_START_TRIGGER_EVENT;
+        String selector = CLUSTER_START_EVENT.event();
         notify(selector, new StackEvent(selector, stackId));
     }
 
@@ -159,7 +172,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterSync(Long stackId) {
-        String selector = FlowTriggers.CLUSTER_SYNC_TRIGGER_EVENT;
+        String selector = CLUSTER_SYNC_EVENT.event();
         notify(selector, new StackEvent(selector, stackId));
     }
 
@@ -169,12 +182,12 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterTermination(Long stackId) {
-        String selector = FlowTriggers.CLUSTER_TERMINATION_TRIGGER_EVENT;
+        String selector = ClusterTerminationEvent.TERMINATION_EVENT.event();
         notify(selector, new StackEvent(selector, stackId));
     }
 
     public void triggerManualRepairFlow(Long stackId) {
-        String selector = FlowTriggers.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
+        String selector = MANUAL_STACK_REPAIR_TRIGGER_EVENT.event();
         notify(selector, new StackEvent(selector, stackId));
     }
 

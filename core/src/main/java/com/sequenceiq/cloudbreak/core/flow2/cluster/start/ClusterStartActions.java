@@ -70,7 +70,7 @@ public class ClusterStartActions {
 
             @Override
             protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterStartEvent.FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterStartEvent.FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -86,7 +86,7 @@ public class ClusterStartActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

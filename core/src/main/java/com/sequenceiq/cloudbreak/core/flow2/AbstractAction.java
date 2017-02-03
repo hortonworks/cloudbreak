@@ -81,7 +81,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         } catch (Exception ex) {
             LOGGER.error("Error during execution of " + getClass().getName(), ex);
             if (failureEvent != null) {
-                sendEvent(flowId, failureEvent.stringRepresentation(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex));
+                sendEvent(flowId, failureEvent.event(), getFailurePayload(payload, Optional.ofNullable(flowContext), ex));
             } else {
                 LOGGER.error("Missing error handling for " + getClass().getName());
             }

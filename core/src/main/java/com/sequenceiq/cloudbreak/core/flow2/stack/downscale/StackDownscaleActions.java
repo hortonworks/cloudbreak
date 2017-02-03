@@ -97,7 +97,7 @@ public class StackDownscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -113,7 +113,7 @@ public class StackDownscaleActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

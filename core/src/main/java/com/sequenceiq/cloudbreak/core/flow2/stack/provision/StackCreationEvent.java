@@ -8,10 +8,9 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 
 public enum StackCreationEvent implements FlowEvent {
-    START_CREATION_EVENT(FlowTriggers.STACK_PROVISION_TRIGGER_EVENT),
+    START_CREATION_EVENT("STACK_PROVISION_TRIGGER_EVENT"),
     SETUP_FINISHED_EVENT(SetupResult.selector(SetupResult.class)),
     SETUP_FAILED_EVENT(SetupResult.failureSelector(SetupResult.class)),
     IMAGE_PREPARATION_FINISHED_EVENT(PrepareImageResult.selector(PrepareImageResult.class)),
@@ -34,14 +33,14 @@ public enum StackCreationEvent implements FlowEvent {
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),
     STACKCREATION_FAILURE_HANDLED_EVENT("STACK_CREATION_FAILHANDLED");
 
-    private String stringRepresentation;
+    private String event;
 
-    StackCreationEvent(String stringRepresentation) {
-        this.stringRepresentation = stringRepresentation;
+    StackCreationEvent(String event) {
+        this.event = event;
     }
 
     @Override
-    public String stringRepresentation() {
-        return stringRepresentation;
+    public String event() {
+        return event;
     }
 }

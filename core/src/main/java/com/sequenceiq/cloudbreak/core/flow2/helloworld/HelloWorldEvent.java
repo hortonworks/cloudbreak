@@ -11,7 +11,7 @@ public enum HelloWorldEvent implements FlowEvent {
     HELLO_WORLD_FAIL_HANDLED_EVENT;
 
     @Override
-    public String stringRepresentation() {
+    public String event() {
         return name();
     }
 }

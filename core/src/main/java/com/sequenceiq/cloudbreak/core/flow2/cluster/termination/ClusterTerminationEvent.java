@@ -1,12 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.termination;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.FlowTriggers;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 
 public enum ClusterTerminationEvent implements FlowEvent {
-    TERMINATION_EVENT(FlowTriggers.CLUSTER_TERMINATION_TRIGGER_EVENT),
+    TERMINATION_EVENT("CLUSTER_TERMINATION_TRIGGER_EVENT"),
     TERMINATION_FINISHED_EVENT(EventSelectorUtil.selector(ClusterTerminationResult.class)),
     TERMINATION_FAILED_EVENT(EventSelectorUtil.failureSelector(ClusterTerminationResult.class)),
 
@@ -14,14 +13,14 @@ public enum ClusterTerminationEvent implements FlowEvent {
     FAILURE_EVENT("TERMINATECLUSTERFAILUREEVENT"),
     FAIL_HANDLED_EVENT("TERMINATECLUSTERFAILHANDLED");
 
-    private String stringRepresentation;
+    private String event;
 
-    ClusterTerminationEvent(String stringRepresentation) {
-        this.stringRepresentation = stringRepresentation;
+    ClusterTerminationEvent(String event) {
+        this.event = event;
     }
 
     @Override
-    public String stringRepresentation() {
-        return stringRepresentation;
+    public String event() {
+        return event;
     }
 }
