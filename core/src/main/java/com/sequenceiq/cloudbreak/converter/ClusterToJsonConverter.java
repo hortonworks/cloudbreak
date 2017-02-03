@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
 import com.sequenceiq.cloudbreak.service.network.Port;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterToJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterResponse> {
@@ -113,7 +114,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setAttributes(source.getAttributes().getMap());
         }
 
-        String ambariIp = getAmbariIp(source);
+        String ambariIp = StackUtil.extractAmbariIp(source.getStack());
         clusterResponse.setAmbariServerIp(ambariIp);
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setPassword(source.getPassword());
@@ -145,15 +146,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
             }
         }
-    }
-
-    private String getAmbariIp(Cluster cluster) {
-        Set<InstanceMetaData> gateway = cluster.getStack().getGatewayInstanceGroup().getInstanceMetaData();
-        String ambariIp = null;
-        if (cluster.getAmbariIp() != null && gateway != null && !gateway.isEmpty()) {
-            ambariIp = gateway.iterator().next().getPublicIpWrapper();
-        }
-        return ambariIp;
     }
 
     private Cluster provideViewDefinitions(Cluster source) {

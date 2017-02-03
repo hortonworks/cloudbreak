@@ -24,4 +24,13 @@ public class StackUtil {
         }
         return agents;
     }
+
+    public static String extractAmbariIp(Stack stack) {
+        Set<InstanceMetaData> gateway =  stack.getGatewayInstanceGroup().getInstanceMetaData();
+        String ambariIp = null;
+        if (stack.getCluster().getAmbariIp() != null && gateway != null && !gateway.isEmpty()) {
+            ambariIp = gateway.iterator().next().getPublicIpWrapper();
+        }
+        return ambariIp;
+    }
 }
