@@ -273,7 +273,9 @@ func checkRequiredFlags(c *cli.Context) {
 			missingFlags = append(missingFlags, f.GetName())
 		}
 	}
-	logMissingParameterAndExit(c, missingFlags)
+	if len(missingFlags) > 0 {
+		logMissingParameterAndExit(c, missingFlags)
+	}
 }
 
 func isRequiredVisible(flag cli.Flag) bool {

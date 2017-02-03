@@ -408,6 +408,9 @@ func RepairCluster(c *cli.Context) error {
 	if nodeType != WORKER && nodeType != COMPUTE {
 		logMissingParameterMessageAndExit(c, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
 	}
+	if nodeType == COMPUTE && !removeOnly {
+		logMissingParameterMessageAndExit(c, fmt.Sprintf("compute nodes cannot be replaced, please use the `--%s true` option", FlRemoveOnly.Name))
+	}
 
 	repairClusterImp(clusterName, nodeType, removeOnly, oAuth2Client.GetClusterByName, oAuth2Client.Cloudbreak.Cluster.RepairCluster)
 	return nil
