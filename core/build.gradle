@@ -81,7 +81,7 @@ dependencies {
     compile project(':core-model')
     compile project(':orchestrator-api')
     compile project(':cloud-reactor-api')
-    compile project(':cloud-arm')
+    compile project(':cloud-reactor')
 
     runtime project(':orchestrator-swarm')
     runtime project(':orchestrator-marathon')
@@ -93,6 +93,7 @@ dependencies {
     runtime project(':cloud-aws')
     runtime project(':cloud-byos')
     runtime project(':cloud-mock')
+    runtime project(':cloud-azure')
 
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'

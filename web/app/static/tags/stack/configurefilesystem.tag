@@ -1,18 +1,18 @@
-<div class="form-group" ng-show="activeCredential.cloudPlatform == 'AZURE_RM' || activeCredential.cloudPlatform == 'GCP'">
+<div class="form-group" ng-show="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'GCP'">
     <label class="col-sm-3 control-label" for="selectFileSystem">{{msg.filesystem_label}}</label>
     <div class="col-sm-8">
         <select class="form-control" id="selectFileSystem" ng-model="cluster.fileSystem.type">
             <option value="LOCAL">{{msg.filesystem_local_label}}</option>
-            <option value="WASB" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_wasb_label}}</option>
+            <option value="WASB" ng-if="activeCredential.cloudPlatform == 'AZURE'">{{msg.filesystem_wasb_label}}</option>
             <option value="GCS" ng-if="activeCredential.cloudPlatform == 'GCP'">{{msg.filesystem_gcs_label}}</option>
-            <option value="ADLS" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_adls_label}}</option>
+            <option value="ADLS" ng-if="activeCredential.cloudPlatform == 'AZURE'">{{msg.filesystem_adls_label}}</option>
         </select>
 
-        <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') &&  cluster.fileSystem.type == 'LOCAL'"><i class="fa fa-warning"></i> {{msg.filesystem_local_label_azure_warning}}</div>
-        <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') &&  cluster.fileSystem.type == 'WASB'"><i class="fa fa-warning"></i> {{msg.filesystem_wasb_label_azure_warning}}</div>
+        <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE') &&  cluster.fileSystem.type == 'LOCAL'"><i class="fa fa-warning"></i> {{msg.filesystem_local_label_azure_warning}}</div>
+        <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE') &&  cluster.fileSystem.type == 'WASB'"><i class="fa fa-warning"></i> {{msg.filesystem_wasb_label_azure_warning}}</div>
     </div>
 </div>
-<div class="form-group" ng-class="{ 'has-error': clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'WASB'">
+<div class="form-group" ng-class="{ 'has-error': clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'WASB'">
     <label class="col-sm-3 control-label" for="wasbaccountname">{{msg.filesystem_wasb_account_name_label}}
         <i class="fa fa-question-circle" popover-placement="top" popover={{msg.filesystem_azure_account_name_label_wasb_popover}} popover-trigger="mouseenter"></i>
     </label>
@@ -23,7 +23,7 @@
         </div>
     </div>
 </div>
-<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'WASB'" ng-class="{ 'has-error': clusterCreationForm.wasbaccountkey.$dirty && clusterCreationForm.wasbaccountkey.$invalid }">
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'WASB'" ng-class="{ 'has-error': clusterCreationForm.wasbaccountkey.$dirty && clusterCreationForm.wasbaccountkey.$invalid }">
     <label class="col-sm-3 control-label" for="wasbaccountkey">{{msg.filesystem_wasb_account_key_label}}</label>
     <div class="col-sm-8">
         <input class="form-control" type="text" name="wasbaccountkey" id="wasbaccountkey" ng-model="cluster.fileSystem.properties.accountKey" ng-pattern="/^([A-Za-z0-9+/]{4}){21}([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/" ng-required="cluster.fileSystem.type == 'WASB'">
@@ -31,7 +31,7 @@
         </div>
     </div>
 </div>
-  <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'ADLS'">
+  <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'ADLS'">
     <label class="col-sm-3 control-label" for="adlsaccountname">{{msg.filesystem_adls_account_name_label}}
         <i class="fa fa-question-circle" popover-placement="top" popover={{msg.filesystem_adls_account_name_label_popover}} popover-trigger="mouseenter"></i>
     </label>
@@ -72,19 +72,19 @@
     </div>
 </div>
 
-<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type != 'LOCAL' && cluster.fileSystem.type != 'ADLS'">
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type != 'LOCAL' && cluster.fileSystem.type != 'ADLS'">
     <label class="col-sm-3 control-label" for="asdefaultfs">{{msg.filesystem_default_fs}}</label>
     <div class="col-sm-8">
         <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM' && cluster.orchestrator.type !== 'SALT'">
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE' && cluster.orchestrator.type !== 'SALT'">
     <label class="col-sm-3 control-label" for="relocateDocker">{{msg.relocate_docker_label}}</label>
     <div class="col-sm-8">
         <input type="checkbox" id="relocateDocker" ng-model="cluster.relocateDocker" name="relocateDocker">
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'">
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
     <label class="col-sm-3 control-label" for="attachedstoragetype">{{msg.attached_storage_type}}</label>
     <div class="col-sm-8">
         <select class="form-control" id="attachedstoragetype" ng-model="cluster.parameters.attachedStorageOption">
@@ -93,10 +93,10 @@
         </select>
     </div>
 </div>
-<div class="form-group" ng-if="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE_RM'" ng-class="{ 'has-error': clusterCreationForm.persistentstoragename.$dirty && clusterCreationForm.persistentstoragename.$invalid }">
+<div class="form-group" ng-if="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'" ng-class="{ 'has-error': clusterCreationForm.persistentstoragename.$dirty && clusterCreationForm.persistentstoragename.$invalid }">
     <label class="col-sm-3 control-label" for="persistentstoragename">{{msg.persistent_storage_name}}</label>
     <div class="col-sm-8">
-        <input class="form-control" type="text" id="persistentstoragename" name="persistentstoragename" ng-model="cluster.parameters.persistentStorage" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="4" ng-maxlength="20" ng-required="($root.activeCredential.cloudPlatform=='AZURE_RM' && cluster.parameters.persistentStorage != '' && cluster.parameters.persistentStorage)">
+        <input class="form-control" type="text" id="persistentstoragename" name="persistentstoragename" ng-model="cluster.parameters.persistentStorage" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="4" ng-maxlength="20" ng-required="($root.activeCredential.cloudPlatform=='AZURE' && cluster.parameters.persistentStorage != '' && cluster.parameters.persistentStorage)">
         <div class="help-block" ng-show="clusterCreationForm.persistentstoragename.$dirty && clusterCreationForm.persistentstoragename.$invalid"><i class="fa fa-warning"></i> {{msg.persistent_storage_name_invalid}}</div>
     </div>
 </div>

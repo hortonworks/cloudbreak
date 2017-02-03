@@ -24,7 +24,7 @@ public class AzureInstanceTypeConverter extends AbstractConverter<AzureInstanceT
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
-            return getAllPossibleValues(completions, context.getInstanceTypeNamesByPlatform("AZURE_RM"));
+            return getAllPossibleValues(completions, context.getInstanceTypeNamesByPlatform("AZURE"));
         } catch (Exception e) {
             return false;
         }

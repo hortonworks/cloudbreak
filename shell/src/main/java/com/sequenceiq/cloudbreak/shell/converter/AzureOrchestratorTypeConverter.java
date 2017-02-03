@@ -25,7 +25,7 @@ public class AzureOrchestratorTypeConverter extends AbstractConverter<ArmOrchest
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
-            return getAllPossibleValues(completions, context.getOrchestratorNamesByPlatform("AZURE_RM"));
+            return getAllPossibleValues(completions, context.getOrchestratorNamesByPlatform("AZURE"));
         } catch (Exception e) {
             return false;
         }

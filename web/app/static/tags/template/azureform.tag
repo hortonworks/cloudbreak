@@ -26,7 +26,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="azure_tvmType">{{msg.template_form_instance_type_label}}</label>
     <div class="col-sm-9">
-        <select class="form-control" id="azure_tvmType" ng-options="vmType.value as vmType.value for vmType in $root.params.vmTypes.AZURE_RM" ng-model="azureTemp.instanceType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE_RM', azureTemp)" required>
+        <select class="form-control" id="azure_tvmType" ng-options="vmType.value as vmType.value for vmType in $root.params.vmTypes.AZURE" ng-model="azureTemp.instanceType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE', azureTemp)" required>
         </select>
         <div class="help-block ng-binding" ng-show="azureTemp.CPUs && azureTemp.RAMs">{{msg.template_form_vm_info | format: azureTemp.CPUs:azureTemp.RAMs}}</p>
         </div>
@@ -37,7 +37,7 @@
         <label class="col-sm-3 control-label" for="azure_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
         <div class="col-sm-9">
-            <select class="form-control" id="azure_tvolumetype" name="azure_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AZURE_RM', volumeType) for volumeType in $root.params.diskTypes.AZURE_RM | filter:filterByVolumetype" ng-model="azureTemp.volumeType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE_RM', azureTemp)" required>
+            <select class="form-control" id="azure_tvolumetype" name="azure_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AZURE', volumeType) for volumeType in $root.params.diskTypes.AZURE | filter:filterByVolumetype" ng-model="azureTemp.volumeType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE', azureTemp)" required>
             </select>
         </div>
         <!-- .col-sm-9 -->

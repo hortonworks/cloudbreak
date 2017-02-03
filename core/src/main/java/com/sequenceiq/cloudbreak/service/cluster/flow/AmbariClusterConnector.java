@@ -534,7 +534,7 @@ public class AmbariClusterConnector {
 
     private void decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
         fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
-        if (CloudConstants.AZURE_RM.equals(stack.getPlatformVariant())) {
+        if (CloudConstants.AZURE.equals(stack.getPlatformVariant())) {
             String resourceGroupName = stack.getResourceByType(ResourceType.ARM_TEMPLATE).getResourceName();
             fsConfiguration.addProperty(FileSystemConfiguration.RESOURCE_GROUP_NAME, resourceGroupName);
         }

@@ -30,7 +30,7 @@ tests:
       azureVolumeSize: 50
       templateAdditions: "azure,1"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
       - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
 
   - name: aws_template_test
@@ -75,5 +75,5 @@ tests:
     parameters:
       credentialName: itazurermcredentialrestest
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureRmCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.azure.AzureCredentialCreationTest
       - com.sequenceiq.it.cloudbreak.CredentialDeleteByNameTest

@@ -30,8 +30,7 @@ import com.sequenceiq.cloudbreak.service.network.Port;
 @Service
 public class DefaultSecurityGroupCreator {
 
-    private static final String[] PLATFORMS_WITH_SEC_GROUP_SUPPORT = {CloudConstants.AWS, CloudConstants.AZURE_RM,
-            CloudConstants.GCP, CloudConstants.OPENSTACK};
+    private static final String[] PLATFORMS_WITH_SEC_GROUP_SUPPORT = {CloudConstants.AWS, CloudConstants.AZURE, CloudConstants.GCP, CloudConstants.OPENSTACK};
 
     private static final String TCP_PROTOCOL = "tcp";
 
