@@ -122,7 +122,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) throws Exception {
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
-                sendEvent(context.getFlowId(), FINALIZED_EVENT.stringRepresentation(), payload);
+                sendEvent(context.getFlowId(), FINALIZED_EVENT.event(), payload);
             }
 
             @Override
@@ -139,7 +139,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStack(), payload.getException());
-                sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.stringRepresentation(), payload);
+                sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.event(), payload);
             }
         };
     }

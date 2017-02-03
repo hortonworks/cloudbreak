@@ -64,7 +64,7 @@ public class ManualStackRepairTriggerActions {
 
             @Override
             protected Selectable createRequest(StackRepairTriggerContext context) {
-                return new StackEvent(ManualStackRepairTriggerEvent.REPAIR_SERVICE_NOTIFIED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ManualStackRepairTriggerEvent.REPAIR_SERVICE_NOTIFIED_EVENT.event(), context.getStack().getId());
             }
         };
     }

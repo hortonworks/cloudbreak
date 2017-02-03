@@ -164,7 +164,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     @Override
     public RestartAction getRestartAction(final String event) {
-        Optional<Transition<S, E>> transaction = getTransitions().stream().filter(t -> t.event.stringRepresentation().equals(event)).findFirst();
+        Optional<Transition<S, E>> transaction = getTransitions().stream().filter(t -> t.event.event().equals(event)).findFirst();
         if (transaction.isPresent() && transaction.get().target.restartAction() != null) {
             Class<? extends RestartAction> restartAction = transaction.get().target.restartAction();
             return applicationContext.getBean(restartAction.getSimpleName(), restartAction);

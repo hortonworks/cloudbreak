@@ -105,7 +105,7 @@ public class AbstractActionTest {
     enum Event implements FlowEvent {
         DOIT, FAILURE;
 
-        public String stringRepresentation() {
+        public String event() {
             return name();
         }
     }

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.stop;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STOP_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STOP_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STOP_FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STOP_FINISHED_EVENT;
@@ -22,7 +22,7 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
 
     private static final List<Transition<StackStopState, StackStopEvent>> TRANSITIONS = new Transition.Builder<StackStopState, StackStopEvent>()
             .defaultFailureEvent(StackStopEvent.STOP_FAILURE_EVENT)
-            .from(INIT_STATE).to(STOP_STATE).event(STOP_EVENT).noFailureEvent()
+            .from(INIT_STATE).to(STOP_STATE).event(STACK_STOP_EVENT).noFailureEvent()
             .from(STOP_STATE).to(STOP_FINISHED_STATE).event(STOP_FINISHED_EVENT).defaultFailureEvent()
             .from(STOP_FINISHED_STATE).to(FINAL_STATE).event(STOP_FINALIZED_EVENT).defaultFailureEvent()
             .build();
@@ -47,7 +47,7 @@ public class StackStopFlowConfig extends AbstractFlowConfiguration<StackStopStat
     @Override
     public StackStopEvent[] getInitEvents() {
         return new StackStopEvent[]{
-                StackStopEvent.STOP_EVENT
+                StackStopEvent.STACK_STOP_EVENT
         };
     }
 

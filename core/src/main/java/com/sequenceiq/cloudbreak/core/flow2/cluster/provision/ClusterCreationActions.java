@@ -124,7 +124,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FINISHED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FINISHED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -140,7 +140,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

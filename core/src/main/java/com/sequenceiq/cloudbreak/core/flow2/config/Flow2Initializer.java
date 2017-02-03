@@ -31,7 +31,7 @@ public class Flow2Initializer {
     @PostConstruct
     public void init() {
         String eventSelector = Stream.concat(Stream.of(Flow2Handler.FLOW_FINAL, Flow2Handler.FLOW_CANCEL),
-                                            flowConfigs.stream().flatMap(c -> Arrays.stream(c.getEvents())).map(FlowEvent::stringRepresentation)
+                                            flowConfigs.stream().flatMap(c -> Arrays.stream(c.getEvents())).map(FlowEvent::event)
                                     ).distinct().collect(Collectors.joining("|"));
         reactor.on(Selectors.regex(eventSelector), flow2Handler);
     }

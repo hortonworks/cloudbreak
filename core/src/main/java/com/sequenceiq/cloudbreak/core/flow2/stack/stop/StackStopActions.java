@@ -85,7 +85,7 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                return new StackEvent(StackStopEvent.STOP_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackStopEvent.STOP_FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -101,7 +101,7 @@ public class StackStopActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

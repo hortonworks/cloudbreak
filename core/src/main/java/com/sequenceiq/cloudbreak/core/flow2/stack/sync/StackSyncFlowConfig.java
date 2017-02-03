@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.SYNC_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.SYNC_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.SYNC_FINALIZED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.SYNC_FINISHED_EVENT;
@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncState, StackSyncEvent> {
     private static final List<Transition<StackSyncState, StackSyncEvent>> TRANSITIONS = new Transition.Builder<StackSyncState, StackSyncEvent>()
             .defaultFailureEvent(StackSyncEvent.SYNC_FAILURE_EVENT)
-            .from(INIT_STATE).to(SYNC_STATE).event(SYNC_EVENT).noFailureEvent()
+            .from(INIT_STATE).to(SYNC_STATE).event(STACK_SYNC_EVENT).noFailureEvent()
             .from(SYNC_STATE).to(SYNC_FINISHED_STATE).event(SYNC_FINISHED_EVENT).defaultFailureEvent()
             .from(SYNC_FINISHED_STATE).to(FINAL_STATE).event(SYNC_FINALIZED_EVENT).defaultFailureEvent()
             .build();
@@ -40,7 +40,7 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     @Override
     public StackSyncEvent[] getInitEvents() {
         return new StackSyncEvent[] {
-                StackSyncEvent.SYNC_EVENT
+                StackSyncEvent.STACK_SYNC_EVENT
         };
     }
 

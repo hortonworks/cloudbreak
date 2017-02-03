@@ -10,7 +10,7 @@ public class EventConverterAdapter<E extends FlowEvent> implements EventConverte
     @Override
     public E convert(String key) {
         for (E event : type.getEnumConstants()) {
-            if (key.equalsIgnoreCase(event.stringRepresentation())) {
+            if (key.equalsIgnoreCase(event.event())) {
                 return event;
             }
         }

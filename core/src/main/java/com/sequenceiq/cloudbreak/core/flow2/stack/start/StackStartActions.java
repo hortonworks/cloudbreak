@@ -109,7 +109,7 @@ public class StackStartActions {
 
             @Override
             protected Selectable createRequest(StackStartStopContext context) {
-                return new StackEvent(StackStartEvent.START_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackStartEvent.START_FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -125,7 +125,7 @@ public class StackStartActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackStartEvent.START_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackStartEvent.START_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

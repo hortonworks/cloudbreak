@@ -94,7 +94,7 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                return new StackEvent(StackUpscaleEvent.EXTEND_METADATA_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackUpscaleEvent.EXTEND_METADATA_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -124,7 +124,7 @@ public class StackUpscaleActions {
             protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getInstanceGroupName(), payload);
                 BootstrapNewNodesEvent bootstrapPayload = new BootstrapNewNodesEvent(context.getStack().getId(), upscaleCandidateAddresses);
-                sendEvent(context.getFlowId(), StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.stringRepresentation(), bootstrapPayload);
+                sendEvent(context.getFlowId(), StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
             }
         };
     }
@@ -165,7 +165,7 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                return new StackEvent(StackUpscaleEvent.UPSCALE_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackUpscaleEvent.UPSCALE_FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -181,7 +181,7 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

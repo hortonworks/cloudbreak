@@ -128,7 +128,7 @@ public class AbstractFlowConfigurationTest {
     enum Event implements FlowEvent {
         START, CONTINUE, FINISHED, FAILURE, FAILURE2, FINALIZED, FAIL_HANDLED;
 
-        public String stringRepresentation() {
+        public String event() {
             return name();
         }
     }

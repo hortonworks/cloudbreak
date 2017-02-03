@@ -89,7 +89,7 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackSyncContext context) {
-                return new StackEvent(StackSyncEvent.SYNC_FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackSyncEvent.SYNC_FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -106,7 +106,7 @@ public class StackSyncActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(StackSyncEvent.SYNC_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

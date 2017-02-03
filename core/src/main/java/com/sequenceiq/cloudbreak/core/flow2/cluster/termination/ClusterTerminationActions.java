@@ -55,7 +55,7 @@ public class ClusterTerminationActions {
 
             @Override
             protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterTerminationEvent.FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterTerminationEvent.FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -71,7 +71,7 @@ public class ClusterTerminationActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterTerminationEvent.FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterTerminationEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

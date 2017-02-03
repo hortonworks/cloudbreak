@@ -79,7 +79,7 @@ public class ClusterCredentialChangeActions {
 
             @Override
             protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterCredentialChangeEvent.FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterCredentialChangeEvent.FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -96,7 +96,7 @@ public class ClusterCredentialChangeActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }

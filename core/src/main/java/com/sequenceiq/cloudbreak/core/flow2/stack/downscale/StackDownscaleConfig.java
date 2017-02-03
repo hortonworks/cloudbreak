@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.DOWNSCALE_FINALIZED_EVENT;
@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownscaleState, StackDownscaleEvent> {
     private static final List<Transition<StackDownscaleState, StackDownscaleEvent>> TRANSITIONS =
             new Transition.Builder<StackDownscaleState, StackDownscaleEvent>()
-                .from(INIT_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE).event(DOWNSCALE_EVENT).noFailureEvent()
+                .from(INIT_STATE).to(DOWNSCALE_COLLECT_RESOURCES_STATE).event(STACK_DOWNSCALE_EVENT).noFailureEvent()
                 .from(DOWNSCALE_COLLECT_RESOURCES_STATE).to(DOWNSCALE_STATE).event(DOWNSCALE_RESOURCES_COLLECTED_EVENT)
                     .failureEvent(DOWNSCALE_RESOURCES_FAILURE_EVENT)
                 .from(DOWNSCALE_STATE).to(DOWNSCALE_FINISHED_STATE).event(DOWNSCALE_FINISHED_EVENT)
@@ -47,7 +47,7 @@ public class StackDownscaleConfig extends AbstractFlowConfiguration<StackDownsca
     @Override
     public StackDownscaleEvent[] getInitEvents() {
         return new StackDownscaleEvent[] {
-                StackDownscaleEvent.DOWNSCALE_EVENT
+                StackDownscaleEvent.STACK_DOWNSCALE_EVENT
         };
     }
 

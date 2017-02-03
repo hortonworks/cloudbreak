@@ -25,6 +25,6 @@ public class InstanceTerminationFailureAction extends AbstractStackFailureAction
 
     @Override
     protected Selectable createRequest(StackFailureContext context) {
-        return new StackEvent(InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+        return new StackEvent(InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
     }
 }

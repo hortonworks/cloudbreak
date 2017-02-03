@@ -59,7 +59,7 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
             LOGGER.info("Could not trigger stack event on null", terminateRequest);
             String statusReason = "Stack or credential not found.";
             TerminateStackResult terminateStackResult = new TerminateStackResult(statusReason, new IllegalArgumentException(statusReason), terminateRequest);
-            sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FAILED_EVENT.stringRepresentation(), terminateStackResult);
+            sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), terminateStackResult);
         } else {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
             cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),

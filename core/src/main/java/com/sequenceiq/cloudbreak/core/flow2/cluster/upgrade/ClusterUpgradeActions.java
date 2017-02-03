@@ -67,7 +67,7 @@ public class ClusterUpgradeActions {
 
             @Override
             protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterUpgradeEvent.FINALIZED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterUpgradeEvent.FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
     }
@@ -83,7 +83,7 @@ public class ClusterUpgradeActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterUpgradeEvent.FAIL_HANDLED_EVENT.stringRepresentation(), context.getStack().getId());
+                return new StackEvent(ClusterUpgradeEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
             }
         };
     }
