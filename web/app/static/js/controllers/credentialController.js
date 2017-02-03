@@ -25,16 +25,16 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.gcp.p12 = "";
         $scope.showAlert = false;
         $scope.alertMessage = "";
-        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "BYOS", "GCP", "OPENSTACK"]);
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE", "BYOS", "GCP", "OPENSTACK"]);
         if (firstVisiblePlatform != -1) {
-            $scope[["awsCredential", "azureRmCredential", "mesosCredential", "gcpCredential", "openstackCredential", "yarnCredential"][firstVisiblePlatform]] = true;
+            $scope[["awsCredential", "azureCredential", "mesosCredential", "gcpCredential", "openstackCredential", "yarnCredential"][firstVisiblePlatform]] = true;
         }
 
-        $scope.createAzureRmCredentialRequest = function() {
+        $scope.createAzureCredentialRequest = function() {
             $scope.awsCredential = false;
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
-            $scope.azureRmCredential = true;
+            $scope.azureCredential = true;
             $scope.mesosCredential = false;
             $scope.yarnCredential = false;
         }
@@ -43,7 +43,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.awsCredential = true;
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
-            $scope.azureRmCredential = false;
+            $scope.azureCredential = false;
             $scope.mesosCredential = false;
             $scope.yarnCredential = false;
         }
@@ -52,7 +52,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.awsCredential = false;
             $scope.gcpCredential = true;
             $scope.openstackCredential = false;
-            $scope.azureRmCredential = false;
+            $scope.azureCredential = false;
             $scope.mesosCredential = false;
             $scope.yarnCredential = false;
         }
@@ -61,7 +61,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.awsCredential = false;
             $scope.gcpCredential = false;
             $scope.openstackCredential = true;
-            $scope.azureRmCredential = false;
+            $scope.azureCredential = false;
             $scope.mesosCredential = false;
             $scope.yarnCredential = false;
         }
@@ -70,7 +70,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.awsCredential = false;
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
-            $scope.azureRmCredential = false;
+            $scope.azureCredential = false;
             $scope.mesosCredential = true;
             $scope.yarnCredential = false;
         }
@@ -95,7 +95,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.filterByCloudPlatform = function(topology) {
             return (topology.cloudPlatform === 'AWS' && $scope.awsCredential) ||
                 (topology.cloudPlatform === 'GCP' && $scope.gcpCredential) ||
-                (topology.cloudPlatform === 'AZURE_RM' && $scope.azureRmCredential) ||
+                (topology.cloudPlatform === 'AZURE' && $scope.azureCredential) ||
                 (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackCredential)
         }
 

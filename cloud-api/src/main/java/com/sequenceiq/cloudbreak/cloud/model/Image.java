@@ -36,4 +36,11 @@ public class Image {
     public Map<InstanceGroupType, String> getUserdata() {
         return userdata;
     }
+
+    @Override
+    public String toString() {
+        return "Image{"
+                + "imageName='" + imageName + '\''
+                + ", userdata=" + userdata + '}';
+    }
 }

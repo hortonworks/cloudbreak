@@ -18,8 +18,9 @@ out/
 curl_config_admin_user
 *.suml
 startit.sh
-integrationtest/build/
-integrationtest/test-output/
+integration-test/integcb/*.log
+integration-test/build/
+integration-test/test-output/
 owners_log/
 stacks_log/
 suites_log/

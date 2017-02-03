@@ -16,7 +16,7 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
         $scope.tmpMapping = {}
         $scope.modify = false
         $scope.modifyTopology = {}
-        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE", "GCP", "OPENSTACK"]);
         if (firstVisiblePlatform != -1) {
             $scope[["awsTopology", "azureTopology", "gcpTopology", "openstackTopology"][firstVisiblePlatform]] = true;
         }
@@ -31,7 +31,7 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
             if (type === 'GCP') {
                 $scope.createGcpTopologyRequest()
             }
-            if (type === 'AZURE_RM') {
+            if (type === 'AZURE') {
                 $scope.createAzureTopologyRequest()
             }
         }
@@ -99,7 +99,7 @@ angular.module('uluwatuControllers').controller('topologyController', ['$scope',
             if (type === 'GCP') {
                 return $filter("format")($scope.modify ? $rootScope.msg.gcp_topology_modify_success : $rootScope.msg.gcp_topology_success, String(id))
             }
-            if (type === 'AZURE_RM') {
+            if (type === 'AZURE') {
                 return $filter("format")($scope.modify ? $rootScope.msg.azure_topology_modify_success : $rootScope.msg.azure_topology_success, String(id))
             }
         }

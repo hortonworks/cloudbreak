@@ -27,21 +27,28 @@
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <!-- .form-group -->
     <div class="form-group">
-        <label class="col-sm-3 control-label" for="jksFile">{{msg.credential_azure_list_cert_label}}</label>
+        <label class="col-sm-3 control-label" for="accesKey">{{msg.credential_azure_form_access_key_id_label}}</label>
 
-        <div class="col-sm-9" id="jksFile">
-            <div class="col-sm-11">
-                <a ng-href="credentials/certificate/{{credential.id}}" class="btn btn-success btn-block" role="button"><i
-                     class="fa fa-file fa-fw"></i>
-                 {{msg.credential_azure_list_cert_download_label}}</a>
-            </div>
-            <div class="col-sm-1">
-                <a ng-click=refreshCertificateFile(credential.id) class="btn btn-info btn-block" role="button">
-                    <i class="fa fa-refresh fa-2"></i></a>
-            </div>
+        <div class="col-sm-9">
+            <p id="accesKey" class="form-control-static">{{credential.parameters.accessKey}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="tenantId">{{msg.credential_azure_form_tenant_id_label}}</label>
+
+        <div class="col-sm-9">
+            <p id="tenantId" class="form-control-static">{{credential.parameters.tenantId}}</p>
+        </div>
+    </div>
+    <div class="form-group" ng-show="credential.topologyId">
+        <label class="col-sm-3 control-label" for="credential-topology">{{msg.credential_form_topology_label}}</label>
+
+        <div class="col-sm-9">
+            <p id="credential-topology" class="form-control-static">{{getTopologyNameById(credential.topologyId)}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+
 </form>

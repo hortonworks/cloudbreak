@@ -36,7 +36,7 @@ function AzureCredentialController($rootScope, $filter, InteractiveLogin, Accoun
     };
 
     ctrl.showThird = function () {
-        ctrl.credentialAzure.cloudPlatform = "AZURE_RM";
+        ctrl.credentialAzure.cloudPlatform = "AZURE";
         if (ctrl.credentialAzure.parameters.selector == 'interactive') {
             azureInteractiveLogin(ctrl.credentialAzure);
         } else {

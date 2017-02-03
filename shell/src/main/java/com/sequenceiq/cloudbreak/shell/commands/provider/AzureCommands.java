@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.shell.util.TagParser;
 
 public class AzureCommands implements CommandMarker {
 
-    public static final String PLATFORM = "AZURE_RM";
+    public static final String PLATFORM = "AZURE";
 
     public static final String SALT = "SALT";
 
