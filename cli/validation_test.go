@@ -36,7 +36,7 @@ func TestClusterSkeletonValidateAllGood(t *testing.T) {
 			ClusterName:              "name",
 			HDPVersion:               "2.5",
 			ClusterType:              "type",
-			Master:                   InstanceConfig{RecoveryMode: "MANUAL", InstanceCount: 1},
+			Master:                   InstanceConfig{InstanceCount: 1},
 			Worker:                   InstanceConfig{InstanceCount: 1, RecoveryMode: "AUTO"},
 			Compute:                  SpotInstanceConfig{InstanceConfig: InstanceConfig{InstanceCount: 1, RecoveryMode: "MANUAL"}},
 			SSHKeyName:               "ssh",

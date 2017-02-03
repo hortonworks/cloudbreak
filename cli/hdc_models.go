@@ -62,7 +62,7 @@ type InstanceConfig struct {
 	VolumeCount   *int32   `json:"VolumeCount" yaml:"VolumeCount"`
 	InstanceCount int32    `json:"InstanceCount" yaml:"InstanceCount"`
 	Recipes       []Recipe `json:"Recipes" yaml:"Recipes"`
-	RecoveryMode  string   `json:"RecoveryMode" yaml:"RecoveryMode"`
+	RecoveryMode  string   `json:"RecoveryMode,omitempty" yaml:"RecoveryMode,omitempty"`
 }
 
 type SpotInstanceConfig struct {

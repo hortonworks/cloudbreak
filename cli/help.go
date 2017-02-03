@@ -2,12 +2,13 @@ package cli
 
 import (
 	"fmt"
-	"github.com/urfave/cli"
 	"io"
 	"os"
 	"strings"
 	"text/tabwriter"
 	"text/template"
+
+	"github.com/urfave/cli"
 )
 
 var AWSCreateClusterSkeletonHelp = `
@@ -25,8 +26,7 @@ var AWSCreateClusterSkeletonHelp = `
         "URI": "http://some-site.com/test.sh",                             // URI of the script
         "Phase: "pre"                                                      // Which phase to run the script on, accepted values: pre, post
       }
-    ],
-    "RecoveryMode": "MANUAL"                                               // Recovery mode: for master hostgroups only MANUAL is supported
+    ]
   },
   "Worker": {                                                              // Worker instance group
     "InstanceType": "m3.xlarge",                                           // Instance type of worker instance group
