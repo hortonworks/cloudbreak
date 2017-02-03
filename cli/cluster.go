@@ -284,12 +284,6 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			HostCount:         int32(skeleton.Compute.InstanceCount),
 		}
 
-		var masterRecoveryMode string
-		if skeleton.Master.RecoveryMode != "" {
-			masterRecoveryMode = skeleton.Master.RecoveryMode
-		} else {
-			masterRecoveryMode = "MANUAL"
-		}
 		var workerRecoveryMode string
 		if skeleton.Worker.RecoveryMode != "" {
 			workerRecoveryMode = skeleton.Worker.RecoveryMode
@@ -309,10 +303,9 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		hostGroups := []*models.HostGroupRequest{
 			{
-				Name:         MASTER,
-				Constraint:   &masterConstraint,
-				Recipes:      createRecipeRequests(skeleton.Master.Recipes),
-				RecoveryMode: &masterRecoveryMode,
+				Name:       MASTER,
+				Constraint: &masterConstraint,
+				Recipes:    createRecipeRequests(skeleton.Master.Recipes),
 			},
 			{
 				Name:         WORKER,
@@ -602,7 +595,6 @@ func getBaseSkeleton() *ClusterSkeleton {
 				VolumeSize:    &(&int32Wrapper{32}).i,
 				InstanceCount: 1,
 				Recipes:       []Recipe{},
-				RecoveryMode:  "MANUAL",
 			},
 			Worker: InstanceConfig{
 				InstanceType:  "m3.xlarge",

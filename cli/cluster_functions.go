@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"fmt"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/stacks"
 	"github.com/hortonworks/hdc-cli/models"
@@ -118,7 +119,6 @@ func (c *ClusterSkeletonResult) fill(
 			}
 			c.ClusterInputs = inputs
 		}
-		c.Master.RecoveryMode = recoveryModeMap[MASTER]
 		c.Worker.RecoveryMode = recoveryModeMap[WORKER]
 		c.Compute.RecoveryMode = recoveryModeMap[COMPUTE]
 
