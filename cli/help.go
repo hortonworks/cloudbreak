@@ -79,8 +79,15 @@ var AWSCreateClusterSkeletonHelp = `
    "Password": "hive-metastore-password",                                  // Password of the Hive metastore
    "URL": "hive.eu-west-1.rds.amazonaws.com:5432/hive",                    // Connection URL of the Hive metastore
    "DatabaseType": "POSTGRES",                                             // Database type of the Hive metastore, accepted value: POSTGRES
-   "Configurations: [{"core-site":{"fs.trash.interval":"5000"}}]           // Custom configurations, format: [{"configuration-type": {"property-name": "property-value"}}, {"configuration-type2": {"property-name": "property-value"}}]
   }
+  "DruidMetastore": {                                                      // (Optional) You can specify an existing Druid metastore or register a new one
+   "Name": "my-druid-metastore",                                           // Name of the Druid metastore, if it's an existing one only provide the name, otherwise one will be created with this name
+   "Username": "druid-metastore-username",                                 // Username of the Druid metastore
+   "Password": "druid-metastore-password",                                 // Password of the Druid metastore
+   "URL": "druid.eu-west-1.rds.amazonaws.com:5432/druid",                  // Connection URL of the Druid metastore
+   "DatabaseType": "POSTGRES",                                             // Database type of the Druid metastore, accepted value: POSTGRES
+  }
+  "Configurations: [{"core-site":{"fs.trash.interval":"5000"}}]            // Custom configurations, format: [{"configuration-type": {"property-name": "property-value"}}, {"configuration-type2": {"property-name": "property-value"}}]
 }`
 
 var SharedDescription = `You can either start a new shared cluster or connect to an existing one. To start a new cluster provide only the input
