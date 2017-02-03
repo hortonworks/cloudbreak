@@ -66,7 +66,7 @@
                             <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.provider" ng-change="selectRegionsByProvider()">
                                 <option>{{msg.usage_events_form_all_label}}</option>
                                 <option value="AWS">{{msg.usage_events_form_provider_amazon_label}}</option>
-                                <option value="AZURE_RM">{{msg.usage_events_form_provider_microsoft_label}}</option>
+                                <option value="AZURE">{{msg.usage_events_form_provider_microsoft_label}}</option>
                                 <option value="GCP">{{msg.usage_events_form_provider_google_label}}</option>
                                 <option value="OPENSTACK">{{msg.usage_events_form_provider_openstack_label}}</option>
                             </select>
@@ -209,7 +209,7 @@
                                             <tr ng-repeat="group in usage.instanceGroups | orderBy:'name'">
                                                 <td>{{group.name}}</td>
                                                 <td>
-                                                    <p ng-repeat="item in $root.params.vmTypes.AZURE_RM | filter:{value: group.instanceType}">{{item.value}}</p>
+                                                    <p ng-repeat="item in $root.params.vmTypes.AZURE | filter:{value: group.instanceType}">{{item.value}}</p>
                                                 </td>
                                                 <td>{{group.hours}}</td>
                                             </tr>

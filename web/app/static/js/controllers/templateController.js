@@ -15,7 +15,7 @@ angular.module('uluwatuControllers').controller('templateController', [
         $scope.awsInstanceType = {};
         $scope.showAlert = false;
         $scope.alertMessage = "";
-        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "BYOS", "GCP", "OPENSTACK"]);
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE", "BYOS", "GCP", "OPENSTACK"]);
         if (firstVisiblePlatform != -1) {
             $scope[["awsTemplate", "azureTemplate", "mesosTemplate", "gcpTemplate", "openstackTemplate"][firstVisiblePlatform]] = true;
         }
@@ -157,7 +157,7 @@ angular.module('uluwatuControllers').controller('templateController', [
         }
 
         $scope.createAzureTemplate = function() {
-            $scope.azureTemp.cloudPlatform = "AZURE_RM";
+            $scope.azureTemp.cloudPlatform = "AZURE";
             if ($scope.azureTemp.public) {
                 AccountTemplate.save($scope.azureTemp, function(result) {
                     handleAzureTemplateSuccess(result)
@@ -342,11 +342,11 @@ angular.module('uluwatuControllers').controller('templateController', [
             $scope.azureTemp = {
                 volumeCount: 1,
                 volumeSize: 100,
-                volumeType: $rootScope.params.defaultDisks.AZURE_RM,
-                instanceType: $rootScope.params.defaultVmTypes.AZURE_RM,
+                volumeType: $rootScope.params.defaultDisks.AZURE,
+                instanceType: $rootScope.params.defaultVmTypes.AZURE,
                 parameters: {}
             }
-            $scope.changeInstanceType($scope.azureTemp.instanceType, $scope.azureTemp.volumeType, "AZURE_RM", $scope.azureTemp);
+            $scope.changeInstanceType($scope.azureTemp.instanceType, $scope.azureTemp.volumeType, "AZURE", $scope.azureTemp);
         }
 
         function initializeMesosTemp() {
@@ -380,7 +380,7 @@ angular.module('uluwatuControllers').controller('templateController', [
         $scope.filterByCloudPlatform = function(topology) {
             return (topology.cloudPlatform === 'AWS' && $scope.awsTemplate) ||
                 (topology.cloudPlatform === 'GCP' && $scope.gcpTemplate) ||
-                (topology.cloudPlatform === 'AZURE_RM' && $scope.azureTemplate) ||
+                (topology.cloudPlatform === 'AZURE' && $scope.azureTemplate) ||
                 (topology.cloudPlatform === 'OPENSTACK' && $scope.openstackTemplate)
         }
 

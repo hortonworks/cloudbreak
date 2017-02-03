@@ -49,7 +49,7 @@ cb:
     host.name.prefix.length: 3
 
   blueprint.defaults: hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp-etl-edw;hdp25-data-science;hdp25-edw-analytics;hdp25-etl-edw;hdp25-etl-edw-spark2
-  template.defaults: minviable-gcp,minviable-azure,minviable-aws
+  template.defaults: minviable-gcp,minviable-azure-new,minviable-azure-rm,minviable-aws
   custom.user.data: |
     touch /tmp/custom-user-data
     date >> /tmp/custom-user-data

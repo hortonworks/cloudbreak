@@ -28,7 +28,7 @@
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsSecurityGroupChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'AWS'), 'btn-default':(selectedProvider != 'AWS')}" role="button" ng-click="createSecurityGroupRequest('AWS')">{{msg.aws_label}}</a>
-                                        <a id="azureSecurityGroupChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'AZURE_RM'), 'btn-default':!azureSecurityGroup}" role="button" ng-click="createSecurityGroupRequest('AZURE_RM')">{{msg.azure_label}}</a>
+                                        <a id="azureSecurityGroupChange" ng-if="isVisible('AZURE')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'AZURE'), 'btn-default':!azureSecurityGroup}" role="button" ng-click="createSecurityGroupRequest('AZURE')">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpSecurityGroupChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':(selectedProvider == 'GCP'), 'btn-default':(selectedProvider != 'GCP')}" role="button" ng-click="createSecurityGroupRequest('GCP')">{{msg.gcp_label}}</a>

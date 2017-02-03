@@ -68,8 +68,8 @@
         <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'OPENSTACK'">
             <option ng-repeat="region in $root.params.regions.OPENSTACK" value="{{region}}">{{region}}</option>
         </select>
-        <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'AZURE_RM'">
-            <option ng-repeat="region in $root.params.regions.AZURE_RM" value="{{region}}">{{region}}</option>
+        <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'AZURE'">
+            <option ng-repeat="region in $root.params.regions.AZURE" value="{{region}}">{{region}}</option>
         </select>
     </div>
 </div>
@@ -108,8 +108,8 @@
         <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'OPENSTACK'">
             <option ng-repeat="orchestrator in $root.params.orchestrators.OPENSTACK" value="{{orchestrator}}">{{$root.displayNames.getPropertyName('orchestrators', orchestrator)}}</option>
         </select>
-        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'AZURE_RM'">
-            <option ng-repeat="orchestrator in $root.params.orchestrators.AZURE_RM" value="{{orchestrator}}">{{$root.displayNames.getOrchestrator('orchestrators', orchestrator)}}</option>
+        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'AZURE'">
+            <option ng-repeat="orchestrator in $root.params.orchestrators.AZURE" value="{{orchestrator}}">{{$root.displayNames.getOrchestrator('orchestrators', orchestrator)}}</option>
         </select>
     </div>
 </div>

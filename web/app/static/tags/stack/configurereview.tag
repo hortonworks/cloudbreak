@@ -27,7 +27,7 @@
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'GCP' ">
             <p id="sl_region" class="form-control-static">{{$root.displayNames.getRegion(activeCredential.cloudPlatform, cluster.region)}}</p>
         </div>
-        <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'AZURE_RM' ">
+        <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'AZURE' ">
             <p id="sl_region" class="form-control-static">{{cluster.region}}</p>
         </div>
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'OPENSTACK' ">

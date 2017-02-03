@@ -11,6 +11,8 @@ public class CloudConstants {
 
     public static final String BYOS = "BYOS";
 
+    public static final String AZURE = "AZURE";
+
     private CloudConstants() {
     }
 }

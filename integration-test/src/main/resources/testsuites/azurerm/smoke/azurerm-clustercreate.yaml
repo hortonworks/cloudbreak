@@ -20,7 +20,7 @@ tests:
       templateAdditions: "cbgateway,1,GATEWAY"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.AzureRmTemplateCreationTestst
 
   - name: create master template
     parameters: {
@@ -31,7 +31,7 @@ tests:
       templateAdditions: "master,1"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.AzureRmTemplateCreationTestst
 
   - name: create slave template
     parameters: {
@@ -42,7 +42,7 @@ tests:
       templateAdditions: "slave_1,3"
     }
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.AzureRmTemplateCreationTestst
 
   - name: create cluster
     parameters: {

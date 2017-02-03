@@ -8,9 +8,9 @@ angular.module('uluwatuControllers').controller('securityGroupController', ['$sc
         $scope.alertMessage = "";
         $scope.securitygroup = {};
 
-        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE_RM", "GCP", "OPENSTACK"]);
+        var firstVisiblePlatform = $scope.firstVisible(["AWS", "AZURE", "GCP", "OPENSTACK"]);
         if (firstVisiblePlatform != -1) {
-            $scope.selectedProvider = ["AWS", "AZURE_RM", "GCP", "OPENSTACK"][firstVisiblePlatform];
+            $scope.selectedProvider = ["AWS", "AZURE", "GCP", "OPENSTACK"][firstVisiblePlatform];
         }
         initializeFormsAndScopeSecurityGroup();
 

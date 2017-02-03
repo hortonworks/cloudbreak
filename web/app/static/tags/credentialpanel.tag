@@ -30,7 +30,8 @@
                                 <div class="btn-segmented-control" id="providerSelector1">
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsCredential, 'btn-default':!awsCredential}" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureRmChange" ng-if="isVisible('AZURE_RM')" type="button" ng-class="{'btn':true, 'btn-info':azureRmCredential, 'btn-default':!azureRmCredential}" ng-click="createAzureRmCredentialRequest()">{{msg.azure_rm_label}}</a>
+                                        <a id="azureChange" ng-if="isVisible('AZURE')" type="button" ng-class="{'btn':true,
+    'btn-info':azureCredential, 'btn-default':!azureCredential}" ng-click="createAzureCredentialRequest()">{{msg.azure_label}}</a>
                                         <a id="mesosChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':mesosCredential, 'btn-default':!mesosCredential}" ng-click="importMesosStackRequest()">{{msg.mesos_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
@@ -45,8 +46,10 @@
                             <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential  && !credentialInCreation && isVisible('AWS')" name="awsCredentialForm">
                                 <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
-                            <form class="form-horizontal" role="form" name="azureRmCredentialForm" ng-show="azureRmCredential && !credentialInCreation && isVisible('AZURE_RM')">
-                                <div ng-include src="'tags/credential/azurermform.tag'"></div>
+                            <form class="form-horizontal" role="form" name="azureCredentialForm"
+    ng-show="azureCredential
+    && !credentialInCreation && isVisible('AZURE')">
+                                <div ng-include src="'tags/credential/azureform.tag'"></div>
                             </form>
 
                             <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && !credentialInCreation && isVisible('GCP')">
@@ -88,8 +91,8 @@
                                 </a>
                             </p>
 
-                            <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE_RM' ">
-                                <div ng-include src="'tags/credential/azurermlist.tag'"></div>
+                            <div class="panel-body" ng-if="credential.cloudPlatform == 'AZURE' ">
+                                <div ng-include src="'tags/credential/azurelist.tag'"></div>
                             </div>
 
                             <div class="panel-body" ng-if="credential.cloudPlatform == 'GCP' ">
