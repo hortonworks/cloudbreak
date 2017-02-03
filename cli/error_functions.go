@@ -19,28 +19,36 @@ type RESTError struct {
 }
 
 func (e *RESTError) Error() string {
-	return fmt.Sprintf("(status %d): %+v ", e.Code, e.Response)
+	return fmt.Sprintf("status code: %d, message: %+v ", e.Code, e.Response)
 }
 
-func logMissingParameterAndExit(c *cli.Context, caller interface{}, message ...string) {
+func logMissingParameterMessageAndExit(c *cli.Context, message string) {
+	logMissingParameterAndExit(c, nil, message)
+}
+
+func logMissingParameterAndExit(c *cli.Context, missingFlags []string, message ...string) {
 	StopSpinner()
 	if len(message) == 0 {
-		logErrorMessage(caller, "there are missing parameters\n")
+		if missingFlags != nil && len(missingFlags) > 0 {
+			logErrorMessage(fmt.Sprintf("the following parameters are missing: %v\n", strings.Join(missingFlags, ", ")))
+		} else {
+			logErrorMessage("there are missing parameters\n")
+		}
 	} else {
-		logErrorMessage(caller, message[0])
+		logErrorMessage(message[0])
 	}
 	cli.ShowSubcommandHelp(c)
 	exit(1)
 }
 
-func logErrorAndExit(caller interface{}, message string) {
+func logErrorAndExit(err error) {
 	StopSpinner()
-	logErrorMessage(caller, message)
+	logErrorMessage(err.Error())
 	exit(1)
 }
 
-func logErrorMessage(caller interface{}, message string) {
-	log.Errorf("[%s] %s", getFunctionName(caller), message)
+func logErrorMessage(message string) {
+	log.Errorf(message)
 }
 
 func getFunctionName(caller interface{}) string {

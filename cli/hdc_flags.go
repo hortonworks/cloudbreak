@@ -266,12 +266,14 @@ func OptionalFlags(flags []cli.Flag) []cli.Flag {
 	return required
 }
 
-func checkRequiredFlags(c *cli.Context, caller interface{}) {
+func checkRequiredFlags(c *cli.Context) {
+	missingFlags := make([]string, 0)
 	for _, f := range c.Command.Flags {
 		if isRequired(f) && len(c.String(f.GetName())) == 0 {
-			logMissingParameterAndExit(c, caller)
+			missingFlags = append(missingFlags, f.GetName())
 		}
 	}
+	logMissingParameterAndExit(c, missingFlags)
 }
 
 func isRequiredVisible(flag cli.Flag) bool {

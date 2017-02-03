@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"errors"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client/rdsconfigs"
 	"github.com/hortonworks/hdc-cli/models"
@@ -29,7 +30,7 @@ func (c *Cloudbreak) GetRDSConfigByName(name string) models.RDSConfigResponse {
 	resp, err := c.Cloudbreak.Rdsconfigs.GetRdsconfigsAccountName(&rdsconfigs.GetRdsconfigsAccountNameParams{Name: name})
 
 	if err != nil {
-		logErrorAndExit(c.GetRDSConfigByName, err.Error())
+		logErrorAndExit(err)
 	}
 
 	rdsConfig := *resp.Payload
@@ -44,7 +45,7 @@ func (c *Cloudbreak) GetRDSConfigById(id int64) *models.RDSConfigResponse {
 	resp, err := c.Cloudbreak.Rdsconfigs.GetRdsconfigsID(&rdsconfigs.GetRdsconfigsIDParams{ID: id})
 
 	if err != nil {
-		logErrorAndExit(c.GetRDSConfigById, err.Error())
+		logErrorAndExit(err)
 	}
 
 	rdsConfig := resp.Payload
@@ -65,7 +66,7 @@ func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetRdsconfigsAccountParams) 
 	resp, err := getConfigs(&rdsconfigs.GetRdsconfigsAccountParams{})
 
 	if err != nil {
-		logErrorAndExit(ListRDSConfigs, err.Error())
+		logErrorAndExit(err)
 	}
 
 	var tableRows []Row
@@ -89,20 +90,20 @@ func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetRdsconfigsAccountParams) 
 }
 
 func CreateRDSConfig(c *cli.Context) error {
-	checkRequiredFlags(c, CreateRDSConfig)
+	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "create rds config")
 
 	if c.String(FlRdsDbType.Name) != POSTGRES {
-		logErrorAndExit(CreateRDSConfig, "Invalid DB type. Accepted value: "+POSTGRES)
+		logErrorAndExit(errors.New("Invalid DB type. Accepted value: " + POSTGRES))
 	}
 
 	rdsType := strings.ToUpper(c.String(FlRdsType.Name))
 	if len(rdsType) == 0 || (rdsType != HIVE_RDS && rdsType != DRUID_RDS) {
-		logErrorAndExit(CreateRDSConfig, "Invalid RDS type, accepted values: HIVE,DRUID")
+		logErrorAndExit(errors.New("Invalid RDS type, accepted values: HIVE,DRUID"))
 	}
 
 	if err := validateHDPVersion(c.String(FlHdpVersion.Name)); err != nil {
-		logErrorAndExit(CreateRDSConfig, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
@@ -127,7 +128,7 @@ func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig 
 	resp, err := postConfig(&rdsconfigs.PostRdsconfigsAccountParams{Body: &rdsConfig})
 
 	if err != nil {
-		logErrorAndExit(CreateRDSConfig, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateRDSConfig] RDS config created, id: %d", resp.Payload.ID)
@@ -135,7 +136,7 @@ func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig 
 }
 
 func DeleteRDSConfig(c *cli.Context) error {
-	checkRequiredFlags(c, DeleteRDSConfig)
+	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "delete rds config")
 
 	log.Infof("[DeleteRDSConfig] delete RDS config by name: %s", c.String(FlRdsName.Name))
@@ -149,7 +150,7 @@ func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params
 	rdsName := finder(FlRdsName.Name)
 
 	if err := deleteRDSConfig(&rdsconfigs.DeleteRdsconfigsAccountNameParams{Name: rdsName}); err != nil {
-		logErrorAndExit(DeleteRDSConfig, err.Error())
+		logErrorAndExit(err)
 	}
 	log.Infof("[DeleteRDSConfig] RDS config deleted: %s", rdsName)
 }

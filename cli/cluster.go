@@ -11,6 +11,7 @@ import (
 	"github.com/hortonworks/hdc-cli/models"
 	"github.com/urfave/cli"
 
+	"errors"
 	"strconv"
 )
 
@@ -23,7 +24,7 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 
 	stack, err := c.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: name})
 	if err != nil {
-		logErrorAndExit(c.GetClusterByName, err.Error())
+		logErrorAndExit(err)
 	}
 	return stack.Payload
 }
@@ -77,7 +78,7 @@ func DescribeCluster(c *cli.Context) error {
 
 	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
-		logMissingParameterAndExit(c, DescribeCluster)
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -109,7 +110,7 @@ func TerminateCluster(c *cli.Context) error {
 	clusterName := c.String(FlClusterName.Name)
 
 	if len(clusterName) == 0 {
-		logMissingParameterAndExit(c, TerminateCluster)
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s", clusterName)
@@ -119,7 +120,7 @@ func TerminateCluster(c *cli.Context) error {
 	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName, DeleteDependencies: &deleteDependencies})
 
 	if err != nil {
-		logErrorAndExit(TerminateCluster, err.Error())
+		logErrorAndExit(err)
 	}
 
 	oAuth2Client.waitForClusterToTerminate(clusterName, c)
@@ -131,7 +132,7 @@ func CreateCluster(c *cli.Context) error {
 	skeleton := assembleClusterSkeleton(c)
 
 	if err := skeleton.Validate(); err != nil {
-		logErrorAndExit(CreateCluster, err.Error())
+		logErrorAndExit(err)
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -258,7 +259,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		resp, err := postStack(&stacks.PostStacksUserParams{Body: &stackReq})
 
 		if err != nil {
-			logErrorAndExit(CreateCluster, err.Error())
+			logErrorAndExit(err)
 		}
 
 		log.Infof("[CreateStack] stack created, id: %d", resp.Payload.ID)
@@ -389,7 +390,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		resp, err := postCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
 
 		if err != nil {
-			logErrorAndExit(CreateCluster, err.Error())
+			logErrorAndExit(err)
 		}
 
 		log.Infof("[CreateCluster] cluster created, id: %d", resp.Payload.ID)
@@ -405,14 +406,14 @@ func ValidateCreateClusterSkeleton(c *cli.Context) error {
 
 func RepairCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "repair cluster")
-	checkRequiredFlags(c, RepairCluster)
+	checkRequiredFlags(c)
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	clusterName := c.String(FlClusterName.Name)
 	nodeType := c.String(FlNodeType.Name)
 	removeOnly := c.Bool(FlRemoveOnly.Name)
 	if nodeType != WORKER && nodeType != COMPUTE {
-		logMissingParameterAndExit(c, RepairCluster, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
+		logMissingParameterMessageAndExit(c, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
 	}
 
 	repairClusterImp(clusterName, nodeType, removeOnly, oAuth2Client.GetClusterByName, oAuth2Client.Cloudbreak.Cluster.RepairCluster)
@@ -427,7 +428,7 @@ func repairClusterImp(clusterName string, nodeType string, removeOnly bool,
 
 	repairBody := &models.ClusterRepairRequest{HostGroups: []string{nodeType}, RemoveOnly: &removeOnly}
 	if err := repairCluster(&cluster.RepairClusterParams{Body: repairBody, ID: *stack.ID}); err != nil {
-		logErrorAndExit(RepairCluster, err.Error())
+		logErrorAndExit(err)
 	}
 }
 
@@ -436,17 +437,17 @@ func ResizeCluster(c *cli.Context) error {
 
 	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
-		logMissingParameterAndExit(c, ResizeCluster)
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
 	adjustment := int32(c.Int(FlScalingAdjustment.Name))
 	if adjustment == 0 {
-		logMissingParameterAndExit(c, ResizeCluster, fmt.Sprintf("the %s cannot be 0\n", FlScalingAdjustment.Name))
+		logMissingParameterMessageAndExit(c, fmt.Sprintf("the %s cannot be 0\n", FlScalingAdjustment.Name))
 	}
 
 	nodeType := c.String(FlNodeType.Name)
 	if len(nodeType) == 0 || (nodeType != WORKER && nodeType != COMPUTE) {
-		logMissingParameterAndExit(c, ResizeCluster, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
+		logMissingParameterMessageAndExit(c, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -478,18 +479,18 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 			},
 		}
 		if err := putStack(&stacks.PutStacksIDParams{ID: *stack.ID, Body: update}); err != nil {
-			logErrorAndExit(ResizeCluster, err.Error())
+			logErrorAndExit(err)
 		}
 	} else {
 		for _, v := range stack.InstanceGroups {
 			if nodeType == v.Group {
 				if WORKER == nodeType {
 					if len(v.Metadata)+int(adjustment) < 3 {
-						logErrorAndExit(ResizeCluster, "You cannot scale down the worker host group below 3, because it can cause data loss")
+						logErrorAndExit(errors.New("You cannot scale down the worker host group below 3, because it can cause data loss"))
 					}
 				} else if COMPUTE == nodeType {
 					if len(v.Metadata)+int(adjustment) < 1 {
-						logErrorAndExit(ResizeCluster, "The compute host group must contain at least 1 host after the downscale")
+						logErrorAndExit(errors.New("The compute host group must contain at least 1 host after the downscale"))
 					}
 				}
 			}
@@ -503,7 +504,7 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 			},
 		}
 		if err := putCluster(&cluster.PutStacksIDClusterParams{ID: *stack.ID, Body: update}); err != nil {
-			logErrorAndExit(ResizeCluster, err.Error())
+			logErrorAndExit(err)
 		}
 	}
 
@@ -517,7 +518,7 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 
 func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 	defer timeTrack(time.Now(), "generate shared cluster skeleton")
-	checkRequiredFlags(c, GenerateCreateSharedClusterSkeleton)
+	checkRequiredFlags(c)
 
 	skeleton := getBaseSkeleton()
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -553,7 +554,7 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 	if len(clusterName) > 0 {
 		stack := getCluster(clusterName)
 		if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
-			logErrorAndExit(GenerateCreateSharedClusterSkeleton, "the cluster is not 'AVAILABLE' yet, please try again later")
+			logErrorAndExit(errors.New("the cluster is not 'AVAILABLE' yet, please try again later"))
 			return
 		}
 

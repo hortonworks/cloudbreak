@@ -76,7 +76,7 @@ func (c *Cloudbreak) GetPublicBlueprints() []*models.BlueprintResponse {
 	defer timeTrack(time.Now(), "get public blueprints")
 	resp, err := c.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPublicBlueprints, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }
@@ -93,7 +93,7 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 
 	resp, err := c.Cloudbreak.Blueprints.GetPublic(&blueprints.GetPublicParams{Name: getRealBlueprintName(name)})
 	if err != nil {
-		logErrorAndExit(c.GetBlueprintByName, err.Error())
+		logErrorAndExit(err)
 	}
 
 	id64 := *resp.Payload.ID
@@ -120,7 +120,7 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintRe
 	resp, err := postPublicBlueprint(&blueprints.PostPublicParams{Body: bpRequest})
 
 	if err != nil {
-		logErrorAndExit(createBlueprintImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateBlueprint] blueprint created, id: %d", resp.Payload.ID)

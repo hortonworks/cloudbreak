@@ -49,24 +49,24 @@ func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroupResponse, templ
 func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 	path := c.String(FlInputJson.Name)
 	if len(path) == 0 {
-		logMissingParameterAndExit(c, assembleClusterSkeleton)
+		logMissingParameterAndExit(c, []string{FlInputJson.Name})
 	}
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		logErrorAndExit(assembleClusterSkeleton, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[AssembleClusterSkeleton] read cluster create json from file: %s", path)
 	content, err := ioutil.ReadFile(path)
 	if err != nil {
-		logErrorAndExit(assembleClusterSkeleton, err.Error())
+		logErrorAndExit(err)
 	}
 
 	var skeleton ClusterSkeleton
 	err = json.Unmarshal(content, &skeleton)
 	if err != nil {
 		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
-		logErrorAndExit(assembleClusterSkeleton, msg)
+		logErrorAndExit(errors.New(msg))
 	}
 
 	log.Infof("[AssembleClusterSkeleton] assemble cluster based on skeleton: %s", skeleton.Json())
@@ -277,7 +277,7 @@ func waitForClusterToFinishImpl(stackId int64, getStack func(params *stacks.GetS
 		resp, err := getStack(&stacks.GetStacksIDParams{ID: stackId})
 
 		if err != nil {
-			logErrorAndExit(waitForClusterToFinishImpl, err.Error())
+			logErrorAndExit(err)
 		}
 
 		desiredStatus := "AVAILABLE"
@@ -290,7 +290,7 @@ func waitForClusterToFinishImpl(stackId int64, getStack func(params *stacks.GetS
 			break
 		}
 		if strings.Contains(stackStatus, "FAILED") || strings.Contains(clusterStatus, "FAILED") {
-			logErrorAndExit(waitForClusterToFinishImpl, "cluster operation failed")
+			logErrorAndExit(errors.New("cluster operation failed"))
 		}
 
 		log.Infof("[WaitForClusterToFinish] cluster is in progress, wait for 20 seconds")
@@ -318,14 +318,14 @@ func waitForClusterToTerminateImpl(clusterName string, getStack func(*stacks.Get
 				log.Infof("[waitForClusterToTerminate] cluster is terminated")
 				break
 			}
-			logErrorAndExit(waitForClusterToTerminateImpl, errorMessage)
+			logErrorAndExit(errors.New(errorMessage))
 		}
 
 		stackStatus := *resp.Payload.Status
 		log.Infof("[waitForClusterToTerminate] stack status: %s", stackStatus)
 
 		if strings.Contains(stackStatus, "FAILED") {
-			logErrorAndExit(waitForClusterToTerminateImpl, "cluster termination failed")
+			logErrorAndExit(errors.New("cluster termination failed"))
 		}
 		if strings.Contains(stackStatus, "DELETE_COMPLETED") {
 			log.Infof("[waitForClusterToTerminate] cluster is terminated")

@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
+	"errors"
 	log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
@@ -34,11 +35,11 @@ func (c Config) Yaml() string {
 }
 
 func Configure(c *cli.Context) error {
-	checkRequiredFlags(c, Configure)
+	checkRequiredFlags(c)
 
 	err := WriteConfigToFile(GetHomeDirectory(), c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
 	if err != nil {
-		logErrorAndExit(Configure, err.Error())
+		logErrorAndExit(err)
 	}
 	return nil
 }
@@ -46,7 +47,7 @@ func Configure(c *cli.Context) error {
 func GetHomeDirectory() string {
 	homeDir, err := homedir.Dir()
 	if err != nil || len(homeDir) == 0 {
-		logErrorAndExit(GetHomeDirectory, "failed to determine the home directory")
+		logErrorAndExit(errors.New("failed to determine the home directory"))
 	}
 	return homeDir
 }

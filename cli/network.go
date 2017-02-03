@@ -39,7 +39,7 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
 	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: network})
 
 	if err != nil {
-		logErrorAndExit(createNetworkImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
@@ -70,7 +70,7 @@ func createNetworkRequest(skeleton ClusterSkeleton, getNetwork func(string) mode
 }
 
 func CreateNetworkCommand(c *cli.Context) error {
-	checkRequiredFlags(c, CreateNetworkCommand)
+	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "create network")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -97,7 +97,7 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: &network})
 
 	if err != nil {
-		logErrorAndExit(CreateNetworkCommand, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateNetworkCommand] network created, id: %d", resp.Payload.ID)
@@ -109,7 +109,7 @@ func (c *Cloudbreak) GetNetwork(name string) models.NetworkResponse {
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccountName(&networks.GetNetworksAccountNameParams{Name: name})
 
 	if err != nil {
-		logErrorAndExit(c.GetNetwork, err.Error())
+		logErrorAndExit(err)
 	}
 
 	defaultNetwork := *resp.Payload
@@ -122,7 +122,7 @@ func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkResponse {
 	resp, err := c.Cloudbreak.Networks.GetNetworksID(&networks.GetNetworksIDParams{ID: id})
 
 	if err != nil {
-		logErrorAndExit(c.GetNetwork, err.Error())
+		logErrorAndExit(err)
 	}
 
 	network := resp.Payload
@@ -131,10 +131,10 @@ func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkResponse {
 }
 
 func DeleteNetwork(c *cli.Context) error {
-	checkRequiredFlags(c, DeleteCredential)
+	checkRequiredFlags(c)
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	if err := oAuth2Client.DeleteNetwork(c.String(FlNetworkName.Name)); err != nil {
-		logErrorAndExit(DeleteNetwork, err.Error())
+		logErrorAndExit(err)
 	}
 	return nil
 }
@@ -143,7 +143,7 @@ func (c *Cloudbreak) GetPublicNetworks() []*models.NetworkResponse {
 	defer timeTrack(time.Now(), "get public networks")
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccount(&networks.GetNetworksAccountParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPublicNetworks, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }
@@ -155,7 +155,7 @@ func (c *Cloudbreak) DeleteNetwork(name string) error {
 }
 
 func ListPrivateNetworks(c *cli.Context) error {
-	checkRequiredFlags(c, ListPrivateNetworks)
+	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "list the private networks")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -181,7 +181,7 @@ func (c *Cloudbreak) GetPrivateNetworks() []*models.NetworkResponse {
 	defer timeTrack(time.Now(), "get private networks")
 	resp, err := c.Cloudbreak.Networks.GetNetworksUser(&networks.GetNetworksUserParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPrivateNetworks, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }

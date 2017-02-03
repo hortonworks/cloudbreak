@@ -94,7 +94,7 @@ func ListClusterNodes(c *cli.Context) error {
 
 	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
-		logMissingParameterAndExit(c, ListClusterNodes)
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -108,7 +108,7 @@ func ListClusterNodes(c *cli.Context) error {
 func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error), writer func([]string, []Row)) {
 	respStack, err := getStack(&stacks.GetStacksUserNameParams{Name: clusterName})
 	if err != nil {
-		logErrorAndExit(listClusterNodesImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	var tableRows []Row

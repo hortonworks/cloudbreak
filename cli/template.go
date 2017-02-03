@@ -26,7 +26,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	resp, err := postTemplate(&templates.PostTemplatesAccountParams{Body: masterTemplateReqBody})
 
 	if err != nil {
-		logErrorAndExit(createTemplateImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateTemplate] master template created, id: %d", resp.Payload.ID)
@@ -36,7 +36,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	resp, err = postTemplate(&templates.PostTemplatesAccountParams{Body: workerTemplateReqBody})
 
 	if err != nil {
-		logErrorAndExit(createTemplateImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateTemplate] worker template created, id: %d", resp.Payload.ID)
@@ -46,7 +46,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	resp, err = postTemplate(&templates.PostTemplatesAccountParams{Body: computeTemplateReqBody})
 
 	if err != nil {
-		logErrorAndExit(createTemplateImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateTemplate] compute template created, id: %d", resp.Payload.ID)
@@ -111,7 +111,7 @@ func (c *Cloudbreak) GetPublicTemplates() []*models.TemplateResponse {
 	defer timeTrack(time.Now(), "get public templates")
 	resp, err := c.Cloudbreak.Templates.GetTemplatesAccount(&templates.GetTemplatesAccountParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPublicTemplates, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }

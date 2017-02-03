@@ -32,7 +32,7 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, group string, channel cha
 	resp, err := postSecGroup(&securitygroups.PostSecuritygroupsAccountParams{Body: secGroup})
 
 	if err != nil {
-		logErrorAndExit(createSecurityGroupImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)
@@ -95,7 +95,7 @@ func (c *Cloudbreak) GetPublicSecurityGroups() []*models.SecurityGroupResponse {
 	defer timeTrack(time.Now(), "get public security groups")
 	resp, err := c.Cloudbreak.Securitygroups.GetSecuritygroupsAccount(&securitygroups.GetSecuritygroupsAccountParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPublicSecurityGroups, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }

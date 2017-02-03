@@ -55,7 +55,7 @@ func NewOAuth2HTTPClient(address string, username string, password string) *Clou
 
 	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	if err != nil {
-		logErrorAndExit(NewOAuth2HTTPClient, err.Error())
+		logErrorAndExit(err)
 	}
 
 	cbTransport := &cbTransport{httptransport.New(address, "/cb/api/v1", []string{"https"})}

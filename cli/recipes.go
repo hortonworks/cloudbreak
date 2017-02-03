@@ -59,7 +59,7 @@ func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostRecip
 	resp, err := postPublicRecipe(&recipes.PostRecipesAccountParams{Body: recipeRequest})
 
 	if err != nil {
-		logErrorAndExit(createRecipeImpl, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[createRecipe] recipe created, name: %s, uri: %s, id: %d", resp.Payload.Name, recipe.URI, *resp.Payload.ID)
@@ -89,7 +89,7 @@ func (c *Cloudbreak) GetPublicRecipes() []*models.RecipeResponse {
 	defer timeTrack(time.Now(), "get public recipes")
 	resp, err := c.Cloudbreak.Recipes.GetRecipesAccount(&recipes.GetRecipesAccountParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPublicRecipes, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }

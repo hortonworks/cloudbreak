@@ -25,7 +25,7 @@ func (c *Credential) DataAsStringArray() []string {
 }
 
 func CreateCredential(c *cli.Context) error {
-	checkRequiredFlags(c, CreateCredential)
+	checkRequiredFlags(c)
 
 	go StartSpinner()
 
@@ -41,7 +41,7 @@ func createCredential(finder func(string) string, getResponse func(string) (*htt
 
 	resp, err := getResponse(sshKeyURL)
 	if err != nil {
-		logErrorAndExit(createCredential, err.Error())
+		logErrorAndExit(err)
 	}
 	sshKey, _ := ioutil.ReadAll(resp.Body)
 	log.Infof("[CreateCredential] SSH key recieved: %s", sshKey)
@@ -57,10 +57,10 @@ func createCredential(finder func(string) string, getResponse func(string) (*htt
 }
 
 func DeleteCredential(c *cli.Context) error {
-	checkRequiredFlags(c, DeleteCredential)
+	checkRequiredFlags(c)
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	if err := oAuth2Client.DeleteCredential(c.String(FlCredentialName.Name)); err != nil {
-		logErrorAndExit(DeleteCredential, err.Error())
+		logErrorAndExit(err)
 	}
 	return nil
 }
@@ -94,13 +94,13 @@ func createCredentialImpl(name string, defaultCredential models.CredentialRespon
 	if public {
 		resp, err := postAccountCredential(&credentials.PostCredentialsAccountParams{Body: credReq})
 		if err != nil {
-			logErrorAndExit(createCredentialImpl, err.Error())
+			logErrorAndExit(err)
 		}
 		id = *resp.Payload.ID
 	} else {
 		resp, err := postUserCredential(&credentials.PostCredentialsUserParams{Body: credReq})
 		if err != nil {
-			logErrorAndExit(createCredentialImpl, err.Error())
+			logErrorAndExit(err)
 		}
 		id = *resp.Payload.ID
 	}
@@ -141,7 +141,7 @@ func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsUserName(&credentials.GetCredentialsUserNameParams{Name: name})
 
 	if err != nil {
-		logErrorAndExit(c.GetCredential, err.Error())
+		logErrorAndExit(err)
 	}
 
 	awsAccess := *resp.Payload
@@ -153,7 +153,7 @@ func (c *Cloudbreak) GetPublicCredentials() []*models.CredentialResponse {
 	defer timeTrack(time.Now(), "get public credentials")
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsAccount(&credentials.GetCredentialsAccountParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPublicCredentials, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }
@@ -165,7 +165,7 @@ func (c *Cloudbreak) DeleteCredential(name string) error {
 }
 
 func ListPrivateCredentials(c *cli.Context) error {
-	checkRequiredFlags(c, ListPrivateCredentials)
+	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "list the private credentials")
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -191,7 +191,7 @@ func (c *Cloudbreak) GetPrivateCredentials() []*models.CredentialResponse {
 	defer timeTrack(time.Now(), "get private credentials")
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
 	if err != nil {
-		logErrorAndExit(c.GetPrivateCredentials, err.Error())
+		logErrorAndExit(err)
 	}
 	return resp.Payload
 }

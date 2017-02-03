@@ -14,7 +14,7 @@ func (c *Cloudbreak) GetClusterConfig(id int64, inputs []*models.BlueprintParame
 	resp, err := c.Cloudbreak.Cluster.GetConfigs(&cluster.GetConfigsParams{ID: id, Body: &models.ConfigsRequest{Requests: inputs}})
 
 	if err != nil {
-		logErrorAndExit(c.GetClusterConfig, err.Error())
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[GetClusterConfig] found configs for stack id: %d", id)
