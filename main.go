@@ -161,12 +161,20 @@ func main() {
 		},
 		{
 			Name:  "register-metastore",
-			Usage: "register a new Hive metastore",
+			Usage: "register a new Hive or Druid metastore",
 			Flags: []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType, hdc.FlHdpVersion,
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.CreateRDSConfig,
+		},
+		{
+			Name:   "remove-metastore",
+			Usage:  "remove a metastore",
+			Flags:  []cli.Flag{hdc.FlRdsName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			After:  StopSpinner,
+			Action: hdc.DeleteRDSConfig,
 		},
 		{
 			Name:   "repair-cluster",

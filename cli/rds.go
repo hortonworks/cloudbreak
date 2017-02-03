@@ -134,6 +134,26 @@ func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig 
 	return nil
 }
 
+func DeleteRDSConfig(c *cli.Context) error {
+	checkRequiredFlags(c, DeleteRDSConfig)
+	defer timeTrack(time.Now(), "delete rds config")
+
+	log.Infof("[DeleteRDSConfig] delete RDS config by name: %s", c.String(FlRdsName.Name))
+	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	deleteRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.DeleteRdsconfigsAccountName)
+	return nil
+}
+
+func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params *rdsconfigs.DeleteRdsconfigsAccountNameParams) error) {
+	rdsName := finder(FlRdsName.Name)
+
+	if err := deleteRDSConfig(&rdsconfigs.DeleteRdsconfigsAccountNameParams{Name: rdsName}); err != nil {
+		logErrorAndExit(DeleteRDSConfig, err.Error())
+	}
+	log.Infof("[DeleteRDSConfig] RDS config deleted: %s", rdsName)
+}
+
 func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string) *models.RDSConfig {
 	validate := false
 	return &models.RDSConfig{
