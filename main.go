@@ -54,6 +54,10 @@ func StopSpinner(c *cli.Context) error {
 	return nil
 }
 
+func printFlagCompletion(f cli.Flag) {
+	fmt.Printf("--%s\n", f.GetName())
+}
+
 func main() {
 
 	app := cli.NewApp()
@@ -61,6 +65,7 @@ func main() {
 	app.HelpName = "Hortonworks Data Cloud command line tool"
 	app.Version = hdc.Version + "-" + hdc.BuildTime
 	app.Author = "Hortonworks"
+	app.EnableBashCompletion = true
 
 	app.Flags = []cli.Flag{
 		hdc.FlDebug,
@@ -91,6 +96,11 @@ func main() {
 			Usage:  "configure the server address and credentials used to communicate with this server",
 			Flags:  []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPasswordRequired, hdc.FlOutput},
 			Action: hdc.Configure,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPasswordRequired, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "create-cluster",
@@ -99,6 +109,14 @@ func main() {
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.CreateCluster,
+			BashComplete: func(c *cli.Context) {
+				fmt.Println("generate-cli-skeleton")
+				fmt.Println("generate-cli-shared-skeleton")
+				fmt.Println("validate-cli-skeleton")
+				for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 			Subcommands: []cli.Command{
 				{
 					Name:      "generate-cli-skeleton",
@@ -113,12 +131,22 @@ func main() {
 					Before:      ConfigRead,
 					Flags:       []cli.Flag{hdc.FlClusterType, hdc.FlClusterNameOptional, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 					Usage:       "generate the cluster creation template for a specified shared cluster",
+					BashComplete: func(c *cli.Context) {
+						for _, f := range []cli.Flag{hdc.FlClusterType, hdc.FlClusterNameOptional, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+							printFlagCompletion(f)
+						}
+					},
 				},
 				{
 					Name:   "validate-cli-skeleton",
 					Flags:  []cli.Flag{hdc.FlInputJson},
 					Action: hdc.ValidateCreateClusterSkeleton,
 					Usage:  "validate the input json",
+					BashComplete: func(c *cli.Context) {
+						for _, f := range []cli.Flag{hdc.FlInputJson} {
+							printFlagCompletion(f)
+						}
+					},
 				},
 			},
 		},
@@ -128,6 +156,12 @@ func main() {
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.DescribeCluster,
+			BashComplete: func(c *cli.Context) {
+				fmt.Println("instances")
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 			Subcommands: []cli.Command{
 				{
 					Name:   "instances",
@@ -135,6 +169,11 @@ func main() {
 					Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 					Before: ConfigRead,
 					Action: hdc.ListClusterNodes,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+							printFlagCompletion(f)
+						}
+					},
 				},
 			},
 		},
@@ -144,6 +183,11 @@ func main() {
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListBlueprints,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "list-clusters",
@@ -151,6 +195,11 @@ func main() {
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListClusters,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "list-metastores",
@@ -158,6 +207,11 @@ func main() {
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListRDSConfigs,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:  "register-metastore",
@@ -167,6 +221,12 @@ func main() {
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.CreateRDSConfig,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType, hdc.FlHdpVersion,
+					hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "remove-metastore",
@@ -175,6 +235,11 @@ func main() {
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.DeleteRDSConfig,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "repair-cluster",
@@ -183,6 +248,11 @@ func main() {
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.RepairCluster,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlRemoveOnly, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "resize-cluster",
@@ -191,6 +261,11 @@ func main() {
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.ResizeCluster,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "terminate-cluster",
@@ -199,6 +274,11 @@ func main() {
 			Before: ConfigRead,
 			After:  StopSpinner,
 			Action: hdc.TerminateCluster,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 	}
 

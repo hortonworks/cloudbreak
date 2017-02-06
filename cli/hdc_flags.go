@@ -259,8 +259,10 @@ func RequiredFlags(flags []cli.Flag) []cli.Flag {
 func OptionalFlags(flags []cli.Flag) []cli.Flag {
 	required := []cli.Flag{}
 	for _, flag := range flags {
-		if !isRequiredVisible(flag) {
-			required = append(required, flag)
+		if flag.GetName() != "generate-bash-completion" {
+			if !isRequiredVisible(flag) {
+				required = append(required, flag)
+			}
 		}
 	}
 	return required
@@ -279,7 +281,7 @@ func checkRequiredFlags(c *cli.Context) {
 }
 
 func isRequiredVisible(flag cli.Flag) bool {
-	if flag.GetName() == "help, h" {
+	if flag.GetName() == "help, h" || flag.GetName() == "generate-bash-completion" {
 		return false
 	}
 	hidden := flagValue(flag).FieldByName("Hidden").Bool()
@@ -287,7 +289,12 @@ func isRequiredVisible(flag cli.Flag) bool {
 	return !hidden && required
 }
 
-func isRequired(flag cli.Flag) bool {
+func isRequired(flag cli.Flag) (required bool) {
+	defer func() {
+		if r := recover(); r != nil {
+			required = false
+		}
+	}()
 	if flag.GetName() == "help, h" {
 		return false
 	}

@@ -1,0 +1,20 @@
+#! /bin/bash
+: ${PROG:=hdc}
+
+_cli_bash_autocomplete() {
+     local cur opts base
+     COMPREPLY=()
+     cur="${COMP_WORDS[COMP_CWORD]}"
+     base=${COMP_WORDS[@]:0:$COMP_CWORD}
+     wrd_num=$(echo $base | wc -w | awk '{print $1}')
+     word=$(echo $base | awk "{print \$$wrd_num}")
+     if [[ ! "$word" == --* ]]; then
+       opts=$( ${base} --generate-bash-completion )
+       COMPREPLY=( $(compgen -W "${opts}" -- ${cur}) )
+     else
+       COMPREPLY=()
+     fi
+     return 0
+ }
+
+complete -o default -F _cli_bash_autocomplete $PROG
