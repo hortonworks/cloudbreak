@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,6 +18,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -104,6 +106,11 @@ public class UserDataBuilderTest {
             @Override
             public VmTypes vmTypes(Boolean extended) {
                 return new VmTypes(new ArrayList<>(), VmType.vmType(""));
+            }
+
+            @Override
+            public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
+                return Collections.emptyMap();
             }
         };
     }

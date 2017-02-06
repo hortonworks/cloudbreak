@@ -191,6 +191,17 @@ public class ArmPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
+        Map<AvailabilityZone, VmTypes> result = new HashMap<>();
+        for (Map.Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
+            for (AvailabilityZone zone : zones.getValue()) {
+                result.put(zone, new VmTypes(vmTypes, defaultVmType));
+            }
+        }
+        return result;
+    }
+
+    @Override
     public PlatformOrchestrator orchestratorParams() {
         return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
     }

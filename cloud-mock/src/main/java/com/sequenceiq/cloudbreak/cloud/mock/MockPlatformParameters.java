@@ -166,6 +166,18 @@ public class MockPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
+        VmTypes vmTypes = vmTypes(extended);
+        Map<AvailabilityZone, VmTypes> result = new HashMap<>();
+        for (Map.Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
+            for (AvailabilityZone zone : zones.getValue()) {
+                result.put(zone, vmTypes);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public AvailabilityZones availabilityZones() {
         return new AvailabilityZones(regions);
     }

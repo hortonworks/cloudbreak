@@ -10,13 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 
 import reactor.bus.Event;
 
@@ -39,14 +42,27 @@ public class GetVirtualMachineTypesHandler implements CloudPlatformEventHandler<
         try {
             Map<Platform, Collection<VmType>> platformVms = Maps.newHashMap();
             Map<Platform, VmType> platformDefaultVm = Maps.newHashMap();
+            Map<Platform, Map<AvailabilityZone, Collection<VmType>>> platformVmPerZones = Maps.newHashMap();
+            Map<Platform, Map<AvailabilityZone, VmType>> platformDefaultVmPerZones = Maps.newHashMap();
             for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
-                VmType defaultVm = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes(request.getExtended()).defaultType();
-                Collection<VmType> vmTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().vmTypes(request.getExtended()).types();
+                Platform platform = connector.getKey();
+                PlatformParameters platformParams = cloudPlatformConnectors.getDefault(platform).parameters();
+                VmTypes vmTypes =  platformParams.vmTypes(request.getExtended());
+                Map<AvailabilityZone, VmTypes> zoneVmTypes = platformParams.vmTypesPerAvailabilityZones(request.getExtended());
 
-                platformDefaultVm.put(connector.getKey(), defaultVm);
-                platformVms.put(connector.getKey(), vmTypes);
+                platformDefaultVm.put(platform, vmTypes.defaultType());
+                platformVms.put(platform, vmTypes.types());
+
+                Map<AvailabilityZone, Collection<VmType>> vmPerZones = Maps.newHashMap();
+                Map<AvailabilityZone, VmType> defaultVmPerZones = Maps.newHashMap();
+                for (Map.Entry<AvailabilityZone, VmTypes> types: zoneVmTypes.entrySet()) {
+                    vmPerZones.put(types.getKey(), types.getValue().types());
+                    defaultVmPerZones.put(types.getKey(), types.getValue().defaultType());
+                }
+                platformVmPerZones.put(platform, vmPerZones);
+                platformDefaultVmPerZones.put(platform, defaultVmPerZones);
             }
-            PlatformVirtualMachines pv = new PlatformVirtualMachines(platformVms, platformDefaultVm);
+            PlatformVirtualMachines pv = new PlatformVirtualMachines(platformVms, platformDefaultVm, platformVmPerZones, platformDefaultVmPerZones);
             GetVirtualMachineTypesResult getVirtualMachineTypesResult = new GetVirtualMachineTypesResult(request, pv);
             request.getResult().onNext(getVirtualMachineTypesResult);
             LOGGER.info("Query platform machine types types finished.");

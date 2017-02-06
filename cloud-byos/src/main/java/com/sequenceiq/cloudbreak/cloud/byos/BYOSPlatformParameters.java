@@ -10,6 +10,7 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
@@ -47,6 +48,11 @@ public class BYOSPlatformParameters implements PlatformParameters {
     @Override
     public VmTypes vmTypes(Boolean extended) {
         return new VmTypes(Collections.emptyList(), VmType.vmType(""));
+    }
+
+    @Override
+    public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
+        return Collections.emptyMap();
     }
 
     @Override

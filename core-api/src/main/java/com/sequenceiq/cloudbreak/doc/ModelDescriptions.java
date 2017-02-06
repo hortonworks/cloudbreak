@@ -161,6 +161,8 @@ public class ModelDescriptions {
         public static final String DEFAULT_ORCHESTRATORS = "default orchestrators";
         public static final String VIRTUAL_MACHNES = "virtual machines";
         public static final String DEFAULT_VIRTUAL_MACHINES = "default virtual machines";
+        public static final String DEFAULT_VIRTUAL_MACHINES_PER_ZONES = "default virtual machines per zones";
+        public static final String VIRTUAL_MACHINES_PER_ZONES = "virtual machines per zones";
         public static final String REGIONS = "regions";
         public static final String AVAILABILITY_ZONES = "availability zones";
         public static final String DEFAULT_REGIOS = "default regions";
