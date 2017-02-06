@@ -295,6 +295,12 @@
           {
             "name" : "DRUID_OVERLORD",
             "provision_action": "INSTALL_ONLY"
+          },
+          {
+            "name": "DRUID_COORDINATOR"
+          },
+          {
+            "name": "DRUID_ROUTER"
           }
         ],
         "cardinality":"1"
@@ -310,6 +316,9 @@
           },
           {
             "name":"TEZ_CLIENT"
+          },
+          {
+            "name": "DRUID_BROKER"
           },
           {
             "name":"SPARK_CLIENT"
@@ -334,6 +343,9 @@
           },
           {
             "name":"ATLAS_CLIENT"
+          },
+          {
+            "name": "DRUID_HISTORICAL"
           },
           {
             "name" : "DRUID_MIDDLEMANAGER",
