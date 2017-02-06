@@ -26,7 +26,7 @@
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsNetworkChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsNetwork, 'btn-default':!awsNetwork}" role="button" ng-click="createAwsNetworkRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureNetworkChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureNetwork, 'btn-default':!azureNetwork}" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
+                                        <a id="azureNetworkChange" ng-if="isVisible('AZURE')" ng-class="{'btn':true, 'btn-info':azureNetwork, 'btn-default':!azureNetwork}" role="button" ng-click="createAzureNetworkRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpNetworkChange" ng-if="isVisible('GCP')" ng-class="{'btn':true, 'btn-info':gcpNetwork, 'btn-default':!gcpNetwork}" role="button" ng-click="createGcpNetworkRequest()">{{msg.gcp_label}}</a>
@@ -37,7 +37,7 @@
 
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <form class="form-horizontal" role="form" name="azureNetworkForm" ng-show="azureNetwork && isVisible('AZURE_RM')">
+                            <form class="form-horizontal" role="form" name="azureNetworkForm" ng-show="azureNetwork && isVisible('AZURE')">
                                 <div ng-include src="'tags/network/azurenetworkform.tag'"></div>
                             </form>
 
@@ -79,7 +79,7 @@
                                 </a>
                             </p>
 
-                            <div class="panel-body" ng-if="network.cloudPlatform == 'AZURE_RM'">
+                            <div class="panel-body" ng-if="network.cloudPlatform == 'AZURE'">
                                 <div ng-include src="'tags/network/azurenetworklist.tag'"></div>
                             </div>
 

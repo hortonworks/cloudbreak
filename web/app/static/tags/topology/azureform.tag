@@ -25,7 +25,7 @@
 
 <div class="row btn-row">
     <div class="col-sm-9 col-sm-offset-3">
-        <a id="createAzureTopology" ng-disabled="azureTopologyForm.azure_tclusterName.$invalid" class="btn btn-success btn-block" ng-click="createTopology('AZURE_RM')" role="button"><i class="fa fa-plus fa-fw"></i>
+        <a id="createAzureTopology" ng-disabled="azureTopologyForm.azure_tclusterName.$invalid" class="btn btn-success btn-block" ng-click="createTopology('AZURE')" role="button"><i class="fa fa-plus fa-fw"></i>
                 {{modify ? msg.topology_form_modify : msg.topology_form_create}}</a>
     </div>
 </div>

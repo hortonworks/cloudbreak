@@ -26,7 +26,7 @@
                                 <div class="btn-segmented-control" id="providerSelector2">
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsTemplateChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsTemplate, 'btn-default':!awsTemplate}" role="button" ng-click="createAwsTemplateRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureTemplateChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureTemplate, 'btn-default':!azureTemplate}" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
+                                        <a id="azureTemplateChange" ng-if="isVisible('AZURE')" ng-class="{'btn':true, 'btn-info':azureTemplate, 'btn-default':!azureTemplate}" role="button" ng-click="createAzureTemplateRequest()">{{msg.azure_label}}</a>
                                         <a id="mesosTemplateChange" ng-if="isVisible('BYOS')" ng-class="{'btn':true, 'btn-info':mesosTemplate, 'btn-default':!mesosTemplate}" role="button" ng-click="createMesosTemplateRequest()">{{msg.mesos_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
@@ -38,7 +38,7 @@
 
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate && isVisible('AZURE_RM')">
+                            <form class="form-horizontal" role="form" name="azureTemplateForm" ng-show="azureTemplate && isVisible('AZURE')">
                                 <div ng-include src="'tags/template/azureform.tag'"></div>
                             </form>
 
@@ -83,7 +83,7 @@
                                 </a>
                             </p>
 
-                            <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE_RM' ">
+                            <div class="panel-body" ng-if="template.cloudPlatform == 'AZURE' ">
                                 <div ng-include src="'tags/template/azurelist.tag'"></div>
                             </div>
 

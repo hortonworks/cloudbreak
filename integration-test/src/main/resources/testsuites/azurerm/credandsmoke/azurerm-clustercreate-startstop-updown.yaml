@@ -31,7 +31,7 @@ tests:
       azureVolumeSize: 50
       templateAdditions: "host_group_master_1,1,GATEWAY"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.AzureRmTemplateCreationTestst
 
   - name: create master template
     parameters:
@@ -41,7 +41,7 @@ tests:
       azureVolumeSize: 100
       templateAdditions: "host_group_master_2,1;host_group_master_3,1"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.AzureRmTemplateCreationTestst
 
   - name: create slave template
     parameters:
@@ -51,7 +51,7 @@ tests:
       azureVolumeSize: 200
       templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.AzureRmTemplateCreationTestst
 
   - name: create cluster
     parameters:

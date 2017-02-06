@@ -870,7 +870,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         function setFileSystem() {
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform != undefined) {
-                if ($rootScope.activeCredential.cloudPlatform == 'AZURE_RM') {
+                if ($rootScope.activeCredential.cloudPlatform == 'AZURE') {
                     $scope.cluster.fileSystem = {};
                     $scope.cluster.fileSystem.type = "ADLS";
                     $scope.cluster.fileSystem.defaultFs = false;
@@ -1297,7 +1297,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.isExistingVpc = function() {
-            if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform == 'AZURE_RM' && $scope.cluster.networkId) {
+            if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform == 'AZURE' && $scope.cluster.networkId) {
                 var network = $filter('filter')($rootScope.networks, {
                     id: $scope.cluster.networkId
                 })[0];

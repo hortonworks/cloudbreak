@@ -2,7 +2,10 @@ package com.sequenceiq.cloudbreak.service.template;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -47,16 +50,16 @@ public class DefaultTemplateLoaderService {
 
     public Set<Template> loadTemplates(CbUser user) {
         Set<Template> templates = new HashSet<>();
-        if (templateRepository.findAllDefaultInAccount(user.getAccount()).isEmpty()) {
-            templates.addAll(createDefaultTemplates(user));
-        }
+        Set<Template> defaultTemplates = templateRepository.findAllDefaultInAccount(user.getAccount());
+        Map<String, Template> defaultNetworksMap = defaultTemplates.stream().collect(Collectors.toMap(Template::getName, Function.identity()));
+        templates.addAll(createDefaultTemplates(user, defaultNetworksMap));
         return templates;
     }
 
-    private Set<Template> createDefaultTemplates(CbUser user) {
+    private Set<Template> createDefaultTemplates(CbUser user, Map<String, Template> defaultNetworksMap) {
         Set<Template> templates = new HashSet<>();
         for (String templateName : templateArray) {
-            if (!templateName.isEmpty() && templateRepository.findOneByName(templateName, user.getAccount()) == null) {
+            if (!templateName.isEmpty() && !defaultNetworksMap.containsKey(templateName)) {
                 try {
                     JsonNode jsonNode = jsonHelper.createJsonFromString(
                             FileReaderUtils.readFileFromClasspath(String.format("defaults/templates/%s.tmpl", templateName)));

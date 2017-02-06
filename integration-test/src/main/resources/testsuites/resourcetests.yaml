@@ -30,7 +30,7 @@ tests:
       azureVolumeSize: 50
       templateAdditions: "azure,1"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.AzureRmTemplateCreationTestst
       - com.sequenceiq.it.cloudbreak.TemplateDeleteByNameTest
 
   - name: aws_template_test

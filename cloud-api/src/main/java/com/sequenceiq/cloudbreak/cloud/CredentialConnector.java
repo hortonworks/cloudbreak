@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.credential.CredentialNotifier;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
@@ -35,7 +36,7 @@ public interface CredentialConnector {
      *
      * @return parameters for interactive login
      */
-    Map<String, String> interactiveLogin(AuthenticatedContext authenticatedContext, ExtendedCloudCredential extendedCloudCredential,
+    Map<String, String> interactiveLogin(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential,
             CredentialNotifier credentialNotifier);
 
     /**

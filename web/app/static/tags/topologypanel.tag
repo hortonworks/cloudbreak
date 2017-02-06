@@ -27,7 +27,7 @@
 
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsTopologyChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsTopology, 'btn-default':!awsTopology}" role="button" ng-click="createAwsTopologyRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureTopologyChange" ng-if="isVisible('AZURE_RM')" ng-class="{'btn':true, 'btn-info':azureTopology, 'btn-default':!azureTopology}" role="button" ng-click="createAzureTopologyRequest()">{{msg.azure_label}}</a>
+                                        <a id="azureTopologyChange" ng-if="isVisible('AZURE')" ng-class="{'btn':true, 'btn-info':azureTopology, 'btn-default':!azureTopology}" role="button" ng-click="createAzureTopologyRequest()">{{msg.azure_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpTopologyChange" ng-if="isVisible('GCP')" class="btn btn-default" ng-class="{'btn':true, 'btn-info':gcpTopology, 'btn-default':!gcpTopology}" role="button" ng-click="createGcpTopologyRequest()">{{msg.gcp_label}}</a>
@@ -39,7 +39,7 @@
 
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <form class="form-horizontal" role="form" name="azureTopologyForm" ng-show="azureTopology && isVisible('AZURE_RM')">
+                            <form class="form-horizontal" role="form" name="azureTopologyForm" ng-show="azureTopology && isVisible('AZURE')">
                                 <div ng-include src="'tags/topology/azureform.tag'"></div>
                             </form>
 
@@ -95,7 +95,7 @@
                             <div class="panel-body" ng-if="topology.cloudPlatform === 'GCP' ">
                                 <div ng-include src="'tags/topology/gcplist.tag'"></div>
                             </div>
-                            <div class="panel-body" ng-if="topology.cloudPlatform === 'AZURE_RM' ">
+                            <div class="panel-body" ng-if="topology.cloudPlatform === 'AZURE' ">
                                 <div ng-include src="'tags/topology/azurelist.tag'"></div>
                             </div>
 
