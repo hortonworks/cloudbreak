@@ -13,7 +13,6 @@ import (
 )
 
 var SECURITY_GROUP_DEFAULT_PORTS = []string{"22"}
-var SECURITY_GROUP_GATEWAY_NGINX_PORT = "9443"
 var SECURITY_GROUP_GATEWAY_KNOX_PORT = "8443"
 
 func (c *Cloudbreak) CreateSecurityGroup(skeleton ClusterSkeleton, group string, channel chan int64, wg *sync.WaitGroup) {
@@ -45,7 +44,6 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models.
 	openPorts := SECURITY_GROUP_DEFAULT_PORTS
 
 	if group == MASTER {
-		openPorts = append(openPorts, SECURITY_GROUP_GATEWAY_NGINX_PORT)
 		if skeleton.WebAccess || skeleton.HiveJDBCAccess || skeleton.ClusterComponentAccess {
 			secGroupName = fmt.Sprintf("hdc-sg-webaccess-%s-%s", strings.ToLower(group), strconv.FormatInt(time.Now().UnixNano(), 10))
 			openPorts = append(openPorts, SECURITY_GROUP_GATEWAY_KNOX_PORT)
