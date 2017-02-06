@@ -162,6 +162,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Value("${cb.aws.cf.template.new.path:}")
     private String awsCloudformationTemplatePath;
 
+    @Value("${cb.default.gateway.cidr:}")
+    private String defaultGatewayCidr;
+
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
@@ -208,7 +211,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withDefaultSubnet(subnet)
                     .withCloudbreakPublicIp(cloudbreakPublicIp)
                     .withDefaultInboundSecurityGroup(inboundSecurityGroup)
-                    .withGatewayPort(gatewayPort);
+                    .withGatewayPort(gatewayPort)
+                    .withDefaultGatewayCidr(defaultGatewayCidr);
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
