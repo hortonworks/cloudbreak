@@ -64,6 +64,9 @@ public class CloudFormationTemplateBuilder {
         if (isNoneEmpty(context.cloudbreakPublicIp)) {
             model.put("cloudbreakPublicIp", context.cloudbreakPublicIp);
         }
+        if (isNoneEmpty(context.defaultGatewayCidr)) {
+            model.put("defaultGatewayCidr", context.defaultGatewayCidr);
+        }
         if (isNoneEmpty(context.defaultInboundSecurityGroup)) {
             model.put("defaultInboundSecurityGroup", context.defaultInboundSecurityGroup);
         }
@@ -127,6 +130,8 @@ public class CloudFormationTemplateBuilder {
         private String cloudbreakPublicIp;
 
         private int gatewayPort;
+
+        private String defaultGatewayCidr;
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
@@ -195,6 +200,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withGatewayPort(int gatewayPort) {
             this.gatewayPort = gatewayPort;
+            return this;
+        }
+
+        public ModelContext withDefaultGatewayCidr(String defaultGatewayCidr) {
+            this.defaultGatewayCidr = defaultGatewayCidr;
             return this;
         }
 
