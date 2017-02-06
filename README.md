@@ -190,6 +190,13 @@ hdc describe-cluster --cluster-name my-cluster
 
 ```
 
+## Bash/Zsh autocompletion
+To enable autocompletion on bash or zsh source the appropriate file under the `autocomplete` folder:
+```
+source autocomplete/bash_autocomplete
+```
+On linux copy the file into `/etc/bash_completion.d/hdc`. Don't forget to source the file to make it active in the current shell.
+
 ## Debug
 To enable the debug logging use the `--debug` global switch
 ```
