@@ -18,6 +18,12 @@ public class PlatformVirtualMachinesJson implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_VIRTUAL_MACHINES)
     private Map<String, String> defaultVirtualMachines = new HashMap<>();
 
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.VIRTUAL_MACHINES_PER_ZONES)
+    private Map<String, Map<String, Collection<VmTypeJson>>> vmTypesPerZones = new HashMap<>();
+
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_VIRTUAL_MACHINES_PER_ZONES)
+    private Map<String, Map<String, String>> defaultVmTypePerZones = new HashMap<>();
+
     public Map<String, Collection<VmTypeJson>> getVirtualMachines() {
         return virtualMachines;
     }
@@ -34,5 +40,19 @@ public class PlatformVirtualMachinesJson implements JsonEntity {
         this.defaultVirtualMachines = defaultVirtualMachines;
     }
 
+    public Map<String, Map<String, Collection<VmTypeJson>>> getVmTypesPerZones() {
+        return vmTypesPerZones;
+    }
 
+    public void setVmTypesPerZones(Map<String, Map<String, Collection<VmTypeJson>>> vmTypesPerZones) {
+        this.vmTypesPerZones = vmTypesPerZones;
+    }
+
+    public Map<String, Map<String, String>> getDefaultVmTypePerZones() {
+        return defaultVmTypePerZones;
+    }
+
+    public void setDefaultVmTypePerZones(Map<String, Map<String, String>> defaultVmTypePerZones) {
+        this.defaultVmTypePerZones = defaultVmTypePerZones;
+    }
 }

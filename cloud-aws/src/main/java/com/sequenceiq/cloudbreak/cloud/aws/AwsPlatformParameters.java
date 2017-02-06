@@ -7,15 +7,20 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -34,7 +39,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
-import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -42,6 +46,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -49,7 +55,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class AwsPlatformParameters implements PlatformParameters {
-
     public static final String DEDICATED_INSTANCES = "dedicatedInstances";
 
     public static final String INSTANCE_PROFILE_STRATEGY = "instanceProfileStrategy";
@@ -60,9 +65,9 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("xvd", START_LABEL);
 
-    private static final int DEFAULT_REGION_TYPE_POSITION = 4;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformParameters.class);
 
-    private static final int DEFAULT_VM_TYPE_POSITION = 21;
+    private static final int DEFAULT_REGION_TYPE_POSITION = 4;
 
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
@@ -76,6 +81,8 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<AvailabilityZone, List<VmType>> sortListOfVmTypes = new HashMap<>();
 
+    private Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
+
     private Region defaultRegion;
 
     private VmType defaultVmType;
@@ -83,41 +90,43 @@ public class AwsPlatformParameters implements PlatformParameters {
     @PostConstruct
     public void init() {
         this.regions = readRegions(resourceDefinition("zone"));
-        this.vmTypes = readVmTypes();
+        readVmTypes();
         this.sortListOfVmTypes = refineList();
         this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
-        this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
+        this.defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
     }
 
-    private Map<AvailabilityZone, List<VmType>> readVmTypes() {
-        Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
-        List<VmType> tmpVmTypes = new ArrayList<>();
+    private void readVmTypes() {
+        Map<String, VmType> vmTypeMap = new TreeMap<>();
         String vm = getDefinition(awsVmParameterDefinitionPath, "vm");
+        String zoneVms = getDefinition(awsVmParameterDefinitionPath, "zone-vm");
         try {
             VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
             for (VmSpecification vmSpecification : oVms.getItems()) {
-
                 VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
                         .withCpuAndMemory(vmSpecification.getMetaSpecification().getProperties().getCpu(),
                                 vmSpecification.getMetaSpecification().getProperties().getMemory())
                         .withPrice(vmSpecification.getMetaSpecification().getProperties().getPrice());
-
                 for (ConfigSpecification configSpecification : vmSpecification.getMetaSpecification().getConfigSpecification()) {
                     addConfig(builder, configSpecification);
                 }
                 VmTypeMeta vmTypeMeta = builder.create();
-                tmpVmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta, vmSpecification.getExtended()));
+                vmTypeMap.put(vmSpecification.getValue(), VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta, vmSpecification.getExtended()));
             }
-            Collections.sort(tmpVmTypes, new StringTypesCompare());
-            for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
-                for (AvailabilityZone availabilityZone : regionListEntry.getValue()) {
-                    vmTypes.put(availabilityZone, tmpVmTypes);
+            ZoneVmSpecifications zoneVmSpecifications = JsonUtil.readValue(zoneVms, ZoneVmSpecifications.class);
+            Map<String, List<AvailabilityZone>> azmap = regions.entrySet().stream().collect(Collectors.toMap(av -> av.getKey().value(), av -> av.getValue()));
+            for (ZoneVmSpecification zvs : zoneVmSpecifications.getItems()) {
+                List<VmType> regionVmTypes = zvs.getVmTypes().stream().filter(vmTypeName -> vmTypeMap.containsKey(vmTypeName))
+                        .map(vmTypeName -> vmTypeMap.get(vmTypeName)).collect(Collectors.toList());
+                List<AvailabilityZone> azs = azmap.get(zvs.getZone());
+                if (azs != null) {
+                    azs.forEach(zone -> vmTypes.put(zone, regionVmTypes));
+                    azs.forEach(zone -> defaultVmTypes.put(zone, vmTypeMap.get(zvs.getDefaultVmType())));
                 }
             }
         } catch (IOException e) {
-            return vmTypes;
+            LOGGER.error("Cannot initialize platform parameters for aws", e);
         }
-        return sortMap(vmTypes);
     }
 
     private Map<AvailabilityZone, List<VmType>> refineList() {
@@ -223,7 +232,12 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Override
     public VmTypes vmTypes(Boolean extended) {
-        Set<VmType> lists = new LinkedHashSet<>();
+        Set<VmType> lists = new TreeSet<>(new Comparator<VmType>() {
+            @Override
+            public int compare(VmType o1, VmType o2) {
+                return o1.value().compareTo(o2.value());
+            }
+        });
         if (extended) {
             for (List<VmType> vmTypeList : vmTypes.values()) {
                 lists.addAll(vmTypeList);
@@ -234,6 +248,13 @@ public class AwsPlatformParameters implements PlatformParameters {
             }
         }
         return new VmTypes(lists, defaultVmType);
+    }
+
+    @Override
+    public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
+        Map<AvailabilityZone, List<VmType>> map = extended ? vmTypes : sortListOfVmTypes;
+        return map.entrySet().stream().collect(
+                Collectors.toMap(vmt -> vmt.getKey(), vmt -> new VmTypes(vmt.getValue(), defaultVmTypes.get(vmt.getKey()))));
     }
 
     @Override
@@ -257,5 +278,4 @@ public class AwsPlatformParameters implements PlatformParameters {
             return value;
         }
     }
-
 }

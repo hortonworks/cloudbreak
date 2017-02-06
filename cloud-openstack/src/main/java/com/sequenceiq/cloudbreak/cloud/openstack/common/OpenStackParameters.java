@@ -122,6 +122,17 @@ public class OpenStackParameters implements PlatformParameters {
         return new VmTypes(virtualMachines(extended), defaultVirtualMachine());
     }
 
+    @Override
+    public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
+        Map<AvailabilityZone, VmTypes> result = new HashMap<>();
+        for (Map.Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
+            for (AvailabilityZone zone : zones.getValue()) {
+                result.put(zone, new VmTypes(virtualMachines(extended), defaultVirtualMachine()));
+            }
+        }
+        return result;
+    }
+
     private Collection<VmType> virtualMachines(Boolean extended) {
         return new ArrayList<>();
     }

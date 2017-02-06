@@ -59,6 +59,13 @@ public interface PlatformParameters {
     VmTypes vmTypes(Boolean extended);
 
     /**
+     * Virtual machine types of a platform in availability zones.
+     *
+     * @return the {@link AvailabilityZone}, {@link VmTypes} map of a platform
+     */
+    Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended);
+
+    /**
      * Return the availability zones of a platform
      *
      * @return the {@link AvailabilityZones} of a platform

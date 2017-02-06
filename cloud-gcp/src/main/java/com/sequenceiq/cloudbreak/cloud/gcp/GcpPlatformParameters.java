@@ -76,6 +76,8 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private VmType defaultVmType;
 
+    private Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
+
     @PostConstruct
     public void init() {
         this.regions = readRegionsGcp();
@@ -83,6 +85,13 @@ public class GcpPlatformParameters implements PlatformParameters {
 
         this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
         this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
+        initDefaultVmTypes();
+    }
+
+    private void initDefaultVmTypes() {
+        for (Map.Entry<AvailabilityZone, List<VmType>> vmType: vmTypes.entrySet()) {
+            defaultVmTypes.put(vmType.getKey(), nthElement(vmType.getValue(), DEFAULT_VM_TYPE_POSITION));
+        }
     }
 
     private Map<AvailabilityZone, List<VmType>> readVmTypes() {
@@ -221,6 +230,16 @@ public class GcpPlatformParameters implements PlatformParameters {
         Set<VmType> lists = new LinkedHashSet<>();
         vmTypes.values().forEach(lists::addAll);
         return new VmTypes(lists, defaultVirtualMachine());
+    }
+
+    @Override
+    public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
+        Map<AvailabilityZone, VmTypes> result = new HashMap<>();
+        for (Map.Entry<AvailabilityZone, List<VmType>> zoneTypes : vmTypes.entrySet()) {
+            AvailabilityZone zone = zoneTypes.getKey();
+            result.put(zone, new VmTypes(zoneTypes.getValue(), defaultVmTypes.get(zone)));
+        }
+        return result;
     }
 
     private VmType defaultVirtualMachine() {
