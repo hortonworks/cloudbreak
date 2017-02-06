@@ -46,7 +46,7 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 	if rule.Protocol != "tcp" {
 		t.Errorf("rule protocol not match tcp == %s", rule.Protocol)
 	}
-	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "9443")
+	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS)
 	if rule.Ports != strings.Join(expectedPorts, ",") {
 		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), rule.Ports)
 	}
@@ -74,7 +74,7 @@ func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
 		t.Fatal("missing security group rule")
 	}
 	rule := actualGroup.SecurityRules[0]
-	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "9443", "8443")
+	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "8443")
 	if rule.Ports != strings.Join(expectedPorts, ",") {
 		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), rule.Ports)
 	}
