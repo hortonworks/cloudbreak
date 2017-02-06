@@ -9,8 +9,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 
 @Component
 public class ClusterHostServiceRunner {
@@ -74,6 +77,9 @@ public class ClusterHostServiceRunner {
     private ComponentConfigProvider componentConfigProvider;
 
     @Inject
+    private BlueprintProcessor blueprintProcessor;
+
+    @Inject
     private BlueprintUtils blueprintUtils;
 
     public void runAmbariServices(Stack stack) throws CloudbreakException {
@@ -96,19 +102,7 @@ public class ClusterHostServiceRunner {
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
-
-            Map<String, Object> gateway = new HashMap<>();
-            gateway.put("address", gatewayConfig.getPublicAddress());
-            gateway.put("username", cluster.getUserName());
-            gateway.put("password", cluster.getPassword());
-            Json exposedJson = cluster.getExposedKnoxServices();
-            if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
-                gateway.put("exposed", exposedJson.get(ExposedServices.class).getServices());
-            } else {
-                gateway.put("exposed", new ArrayList<>());
-            }
-            servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
-
+            saveGatewayPillar(gatewayConfig, cluster, servicePillar);
             AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stack.getId());
             if (ambariRepo != null) {
                 servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
@@ -126,6 +120,25 @@ public class ClusterHostServiceRunner {
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakException(e);
         }
+    }
+
+    public void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {
+        Map<String, Object> gateway = new HashMap<>();
+        gateway.put("address", gatewayConfig.getPublicAddress());
+        gateway.put("username", cluster.getUserName());
+        gateway.put("password", cluster.getPassword());
+
+        Json exposedJson = cluster.getExposedKnoxServices();
+        if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
+            List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
+            if (blueprintProcessor.componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE", cluster.getBlueprint().getBlueprintText())) {
+                exposedServices = exposedServices.stream().map(x -> x.equals("HIVE") ? "HIVE_INTERACTIVE" : x).collect(Collectors.toList());
+            }
+            gateway.put("exposed", exposedServices);
+        } else {
+            gateway.put("exposed", new ArrayList<>());
+        }
+        servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
     public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {

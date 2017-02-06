@@ -148,7 +148,9 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         Stack stack = TestUtil.stack();
         Blueprint blueprint = TestUtil.blueprint();
         SssdConfig config = TestUtil.sssdConfigs(1).iterator().next();
-        return TestUtil.cluster(blueprint, config, stack, 1L);
+        Cluster cluster = TestUtil.cluster(blueprint, config, stack, 1L);
+        stack.setCluster(cluster);
+        return cluster;
     }
 
     private void mockAll() throws IOException {
