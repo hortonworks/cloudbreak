@@ -1,34 +1,6 @@
 {
   "inputs":[
     {
-      "name":"RANGER_DB_ROOT_USER",
-      "referenceConfiguration":"db_root_user"
-    },
-    {
-      "name":"RANGER_DB_ROOT_PASSWORD",
-      "referenceConfiguration":"db_root_password"
-    },
-    {
-      "name":"RANGER_DB_USER",
-      "referenceConfiguration":"db_user"
-    },
-    {
-      "name":"RANGER_DB_PASSWORD",
-      "referenceConfiguration":"db_password"
-    },
-    {
-      "name":"RANGER_DB_NAME",
-      "referenceConfiguration":"db_name"
-    },
-    {
-      "name":"RANGER_DB_HOST",
-      "referenceConfiguration":"db_host"
-    },
-    {
-      "name":"RANGER_ADMIN_PASSWORD",
-      "referenceConfiguration":"ranger_admin_password"
-    },
-    {
       "name":"LDAP_URL",
       "referenceConfiguration":"hive.server2.authentication.ldap.url"
     },
@@ -37,7 +9,7 @@
       "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
     },
     {
-      "name":"POLICYMGR_EXTERNAL_URL",
+      "name":"RANGER_REST_ADDRESS",
       "referenceConfiguration":"policymgr_external_url"
     },
     {
@@ -61,8 +33,32 @@
       "referenceConfiguration":"atlas.rest.address"
     },
     {
+      "name":"LDAP_BIND_DN",
+      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
+    },
+    {
+      "name":"LDAP_BIND_PASSWORD",
+      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
+    },
+    {
       "name":"LDAP_GROUP_SEARCH_BASE",
       "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
+    },
+    {
+      "name":"ADMIN_USERNAME",
+      "referenceConfiguration":"admin_username"
+    },
+    {
+      "name":"ADMIN_PASSWORD",
+      "referenceConfiguration":"admin_password"
+    },
+    {
+      "name":"RANGER_ADMIN_USERNAME",
+      "referenceConfiguration":"ranger_admin_username"
+    },
+    {
+      "name":"RANGER_ADMIN_PASSWORD",
+      "referenceConfiguration":"ranger_admin_password"
     }
   ],
   "blueprint":{
@@ -94,6 +90,23 @@
         }
       },
       {
+        "hive-env": {
+          "properties": {
+            "hive_security_authorization": "Ranger"
+          }
+        }
+      },
+      {
+        "ranger-hive-plugin-properties": {
+          "properties": {
+            "external_admin_username": "{{ ADMIN_USERNAME }}",
+            "external_admin_password": "{{ ADMIN_PASSWORD}}",
+            "external_ranger_admin_username": "{{ RANGER_ADMIN_USERNAME }}",
+            "external_ranger_admin_password": "{{ RANGER_ADMIN_PASSWORD }}"
+          }
+        }
+      },
+      {
         "hive-site":{
           "hive.exec.compress.output":"true",
           "hive.merge.mapfiles":"true",
@@ -117,37 +130,8 @@
         }
       },
       {
-        "admin-properties":{
-          "db_root_user":"{{ RANGER_DB_ROOT_USER }}",
-          "db_root_password":"{{ RANGER_DB_ROOT_PASSWORD }}",
-          "db_user":"{{ RANGER_DB_USER }}",
-          "db_password":"{{ RANGER_DB_PASSWORD }}",
-          "db_name":"{{ RANGER_DB_NAME }}",
-          "db_host":"{{ RANGER_DB_HOST }}",
-          "policymgr_external_url":"{{ POLICYMGR_EXTERNAL_URL }}",
-          "DB_FLAVOR":"POSTGRES"
-        }
-      },
-      {
-        "ranger-env":{
-          "ranger_admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
-          "ranger-hdfs-plugin-enabled":"No",
-          "ranger-hive-plugin-enabled":"Yes",
-          "ranger-yarn-plugin-enabled":"No",
-          "xasecure.audit.destination.solr":"false",
-          "xasecure.audit.destination.hdfs":"false",
-          "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}",
-          "create_db_dbuser":"false"
-        }
-      },
-      {
-        "ranger-admin-site":{
-          "ranger.jpa.jdbc.driver":"org.postgresql.Driver",
-          "ranger.jpa.jdbc.url":"jdbc:postgresql://{{ RANGER_DB_HOST }}/{{ RANGER_DB_NAME }}"
-        }
-      },
-      {
         "ranger-hive-security":{
+          "ranger.plugin.hive.policy.rest.url": "{{ RANGER_REST_ADDRESS }}",
           "ranger.plugin.hive.service.name":"{{ REMOTE_CLUSTER_NAME }}_hive"
         }
       },
@@ -157,11 +141,6 @@
           "xasecure.audit.destination.hdfs":"false",
           "xasecure.audit.destination.solr":"true",
           "xasecure.audit.destination.solr.zookeepers":"{{ SOLR_ZOOKEPERS_URL }}"
-        }
-      },
-      {
-        "ranger-ugsync-site":{
-          "ranger.usersync.enabled":"false"
         }
       },
       {
@@ -291,15 +270,6 @@
           },
           {
             "name":"ZOOKEEPER_SERVER"
-          },
-          {
-            "name":"RANGER_ADMIN"
-          },
-          {
-            "name":"RANGER_USERSYNC"
-          },
-          {
-            "name":"RANGER_TAGSYNC"
           },
           {
             "name":"HBASE_MASTER"
