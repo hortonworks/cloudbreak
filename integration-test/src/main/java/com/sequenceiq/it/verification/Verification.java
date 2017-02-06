@@ -3,6 +3,7 @@ package com.sequenceiq.it.verification;
 import static org.testng.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -32,7 +33,7 @@ public class Verification {
 
     private List<Pattern> patternList = new ArrayList<>();
 
-    private List<String> bodyContainsList = new ArrayList<>();
+    private Map<String, Integer> bodyContainsList = new HashMap<>();
 
     public Verification(String path, String httpMethod, Map<Call, Response> requestResponseMap, boolean regex) {
         this.path = path;
@@ -52,7 +53,12 @@ public class Verification {
     }
 
     public Verification bodyContains(String text) {
-        bodyContainsList.add(text);
+        bodyContainsList.put(text, -1);
+        return this;
+    }
+
+    public Verification bodyContains(String text, int times) {
+        bodyContainsList.put(text, times);
         return this;
     }
 
@@ -100,13 +106,14 @@ public class Verification {
             boolean pathMatched = isPathMatched(call);
             if (call.getMethod().equals(httpMethod) && pathMatched) {
                 int bodyContainsNumber = 0;
-                int patternNumber = 0;
-                for (String bodyContains : bodyContainsList) {
-                    boolean contains = call.getPostBody().contains(bodyContains);
-                    if (contains) {
+                for (String bodyContains : bodyContainsList.keySet()) {
+                    int count = StringUtils.countMatches(call.getPostBody(), bodyContains);
+                    int required = bodyContainsList.get(bodyContains);
+                    if ((required < 0 && count > 0) || (count == required)) {
                         bodyContainsNumber++;
                     }
                 }
+                int patternNumber = 0;
                 for (Pattern pattern : patternList) {
                     boolean patternMatch = pattern.matcher(call.getPostBody()).matches();
                     if (patternMatch) {
