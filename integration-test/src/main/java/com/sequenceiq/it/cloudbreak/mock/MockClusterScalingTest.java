@@ -138,6 +138,32 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(),
                 "8080", stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), false);
+
+        verifyCalls("ambari_cluster", scalingAdjustment);
+    }
+
+    private void verifyCalls(String clusterName, int scalingAdjustment) {
+        if (scalingAdjustment < 0) {
+
+        } else {
+            verify(MOCK_ROOT + "/cloud_instance_statuses", "POST").exactTimes(1).verify();
+            verify(MOCK_ROOT + "/cloud_metadata_statuses", "POST").bodyContains("CREATE_REQUESTED", scalingAdjustment).exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").atLeast(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.interface").exactTimes(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(3).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
+                    .exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/server/pillar", "POST").bodyContains("/ambari/server.sls").exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/server/pillar", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
+            verify(AMBARI_API_ROOT + "/hosts", "GET").atLeast(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").exactTimes(1).verify();
+        }
     }
 
     private void addMockEndpoints(Map<String, CloudVmMetaDataStatus> instanceMap) {
@@ -188,9 +214,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         post(MOCK_ROOT + "/cloud_instance_statuses", new CloudVmInstanceStatuses(instanceMap), gson()::toJson);
         post(MOCK_ROOT + "/terminate_instances", (request, response) -> {
             List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() { }.getType());
-            cloudInstances.forEach(cloudInstance -> {
-                mockInstanceUtil.terminateInstance(instanceMap, cloudInstance.getInstanceId());
-            });
+            cloudInstances.forEach(cloudInstance -> mockInstanceUtil.terminateInstance(instanceMap, cloudInstance.getInstanceId()));
             return null;
         }, gson()::toJson);
     }
