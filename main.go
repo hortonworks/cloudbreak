@@ -222,8 +222,8 @@ func main() {
 			After:  StopSpinner,
 			Action: hdc.CreateRDSConfig,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType, hdc.FlHdpVersion,
-					hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType,
+					hdc.FlHdpVersion, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}
 			},
@@ -262,7 +262,8 @@ func main() {
 			After:  StopSpinner,
 			Action: hdc.ResizeCluster,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait,
+					hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
 					printFlagCompletion(f)
 				}
 			},
@@ -275,7 +276,7 @@ func main() {
 			After:  StopSpinner,
 			Action: hdc.TerminateCluster,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}
 			},
