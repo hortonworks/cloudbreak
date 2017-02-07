@@ -67,6 +67,8 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
 
     private MockInstanceUtil mockInstanceUtil;
 
+    private String clusterName = "ambari_cluster";
+
     @BeforeMethod
     public void setContextParameters() {
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
@@ -91,7 +93,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
 
         addSPIEndpoints(instanceMap);
         addMockEndpoints(instanceMap);
-        addAmbariMappings(instanceMap, mockPort);
+        addAmbariMappings(instanceMap, mockPort, clusterName);
 
         // WHEN
         if (scalingAdjustment < 0) {
@@ -139,16 +141,31 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
                 "8080", stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), false);
 
-        verifyCalls("ambari_cluster", scalingAdjustment);
+        verifyCalls(clusterName, scalingAdjustment);
     }
 
     private void verifyCalls(String clusterName, int scalingAdjustment) {
         if (scalingAdjustment < 0) {
-
+            int adjustment = Math.abs(scalingAdjustment);
+            verifyRegexpPath(AMBARI_API_ROOT + "/blueprints/.*", "GET").atLeast(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", "GET").atLeast(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").atLeast(1).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*", "GET").atLeast(adjustment * 2).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts", "GET").exactTimes(1).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/.*/host_components/.*", "DELETE").exactTimes(adjustment * 2).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/((?!/).)*$", "DELETE").exactTimes(adjustment).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/hosts/.*/host_components/.*", "GET").atLeast(adjustment * 2).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/services/.*", "PUT").atLeast(1).verify();
+            verify(AMBARI_API_ROOT + "/clusters/" + clusterName + "/requests", "POST").bodyContains("DECOMMISSION").exactTimes(2).verify();
+            verifyRegexpPath(AMBARI_API_ROOT + "/clusters/" + clusterName + "/host_components", "PUT").bodyContains("INSTALLED")
+                    .exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").bodyContains("\"action\":\"stop\"").exactTimes(1).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=key.delete").exactTimes(1).verify();
+            verify(MOCK_ROOT + "/terminate_instances", "POST").exactTimes(1).verify();
         } else {
             verify(MOCK_ROOT + "/cloud_instance_statuses", "POST").exactTimes(1).verify();
             verify(MOCK_ROOT + "/cloud_metadata_statuses", "POST").bodyContains("CREATE_REQUESTED", scalingAdjustment).exactTimes(1).verify();
-            verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/health", "GET").atLeast(1).verify();
             verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").atLeast(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=network.interface").exactTimes(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(1).verify();
@@ -236,7 +253,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         throw new IllegalStateException("There is no instance group with this name");
     }
 
-    private void addAmbariMappings(Map<String, CloudVmMetaDataStatus> instanceMap, int port) {
+    private void addAmbariMappings(Map<String, CloudVmMetaDataStatus> instanceMap, int port, String clusterName) {
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse(instanceMap));
@@ -248,7 +265,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         put(AMBARI_API_ROOT + "/clusters/:cluster/services/*", new AmbariClusterRequestsResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClusterRequestsResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname/host_components/*", new AmbariComponentStatusOnHostResponse());
-        get(AMBARI_API_ROOT + "/clusters/ambari_cluster/configurations/service_config_versions", new AmbariServiceConfigResponse(mockServerAddress, port),
+        get(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", new AmbariServiceConfigResponse(mockServerAddress, port),
                 gson()::toJson);
         get(AMBARI_API_ROOT + "/blueprints/*", (request, response) -> {
             response.type("text/plain");
@@ -257,7 +274,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         get(AMBARI_API_ROOT + "/clusters/:clusterName/hosts/:internalhostname", (request, response) -> {
             response.type("text/plain");
             ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
-            rootNode.putObject("Hosts").put("public_host_name", request.params("internalhostname"));
+            rootNode.putObject("Hosts").put("public_host_name", request.params("internalhostname")).put("host_status", "HEALTHY");
             return rootNode;
         });
         get(AMBARI_API_ROOT + "/clusters/:clusterName/services/HDFS/components/NAMENODE", (request, response) -> {

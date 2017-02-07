@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
@@ -67,9 +66,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.ConfigParam;
 import com.sequenceiq.cloudbreak.service.cluster.filter.HostFilterService;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.util.AmbariClientExceptionUtil;
 
 import groovyx.net.http.HttpResponseException;
@@ -90,9 +87,6 @@ public class AmbariDecommissioner {
     private static final Map<String, String> COMPONENTS_NEED_TO_DECOMMISSION = new HashMap<>();
 
     @Inject
-    private StackRepository stackRepository;
-
-    @Inject
     private HostGroupService hostGroupService;
 
     @Inject
@@ -100,12 +94,6 @@ public class AmbariDecommissioner {
 
     @Inject
     private AmbariClientProvider ambariClientProvider;
-
-    @Inject
-    private CloudbreakMessagesService cloudbreakMessagesService;
-
-    @Inject
-    private CloudbreakEventService eventService;
 
     @Inject
     private PollingService<AmbariHostsWithNames> rsPollerService;
@@ -196,26 +184,32 @@ public class AmbariDecommissioner {
             }
         }
         Set<String> deletedHosts = new HashSet<>();
+        Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
         for (Map.Entry<String, HostMetadata> host : unhealthyHosts.entrySet()) {
-            deleteHostFromAmbari(stack, host.getValue());
+            deleteHostFromAmbari(host.getValue(), runningComponents, ambariClient);
             hostMetadataRepository.delete(host.getValue().getId());
             deletedHosts.add(host.getKey());
         }
         if (!healthyHosts.isEmpty()) {
-            deletedHosts.addAll(decommissionAmbariNodes(stack, healthyHosts));
+            deletedHosts.addAll(decommissionAmbariNodes(stack, healthyHosts, runningComponents, ambariClient));
         }
         return deletedHosts;
     }
 
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
-        boolean hostDeleted = false;
         HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster());
+        Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
+        return deleteHostFromAmbari(data, runningComponents, ambariClient);
+    }
+
+    private boolean deleteHostFromAmbari(HostMetadata data, Map<String, Map<String, String>> runningComponents, AmbariClient ambariClient)
+            throws CloudbreakSecuritySetupException {
+        boolean hostDeleted = false;
         if (ambariClient.getClusterHosts().contains(data.getHostName())) {
             String hostState = ambariClient.getHostState(data.getHostName());
             if ("UNKNOWN".equals(hostState)) {
-                Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
-                deleteHosts(stack, singletonList(data.getHostName()), runningComponents);
+                deleteHosts(singletonList(data.getHostName()), runningComponents, ambariClient);
                 hostDeleted = true;
             }
         } else {
@@ -225,12 +219,9 @@ public class AmbariDecommissioner {
         return hostDeleted;
     }
 
-    private Set<String> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove) throws CloudbreakException {
-        Cluster cluster = stack.getCluster();
+    private Set<String> decommissionAmbariNodes(Stack stack, Map<String, HostMetadata> hostsToRemove, Map<String, Map<String, String>> runningComponents,
+            AmbariClient ambariClient) throws CloudbreakException {
         Set<String> result = new HashSet<>();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
-        Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
         PollingResult pollingResult = startServicesIfNeeded(stack, ambariClient, runningComponents);
         if (isSuccess(pollingResult)) {
             List<String> hostList = new ArrayList<>(hostsToRemove.keySet());
@@ -255,10 +246,8 @@ public class AmbariDecommissioner {
         return result;
     }
 
-    private void deleteHosts(Stack stack, List<String> hosts, Map<String, Map<String, String>> runningComponents) throws CloudbreakSecuritySetupException {
-        Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
-        AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
+    private void deleteHosts(List<String> hosts, Map<String, Map<String, String>> runningComponents, AmbariClient ambariClient)
+            throws CloudbreakSecuritySetupException {
         for (String hostName : hosts) {
             ambariClient.deleteHostComponents(hostName, new ArrayList<>(runningComponents.get(hostName).keySet()));
             ambariClient.deleteHost(hostName);
@@ -275,7 +264,7 @@ public class AmbariDecommissioner {
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
         String blueprintName = cluster.getBlueprint().getBlueprintName();
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
-        if (doesHostGroupContainDataNode(ambariClient, blueprintName, hostGroupName)) {
+        if (ambariClient.getBlueprintMap(blueprintName).get(hostGroupName).contains(DATANODE)) {
             int replication = getReplicationFactor(ambariClient, hostGroupName);
             verifyNodeCount(replication, scalingAdjustment, filteredHostList, reservedInstances);
             downScaleCandidates = checkAndSortByAvailableSpace(stack, ambariClient, replication, scalingAdjustment, filteredHostList);
@@ -307,10 +296,6 @@ public class AmbariDecommissioner {
             throw new BadRequestException("There is not enough node to downscale. "
                     + "Check the replication factor and the ApplicationMaster occupation.");
         }
-    }
-
-    private boolean doesHostGroupContainDataNode(AmbariClient client, String blueprint, String hostGroup) {
-        return client.getBlueprintMap(blueprint).get(hostGroup).contains(DATANODE);
     }
 
     private List<HostMetadata> checkAndSortByAvailableSpace(Stack stack, AmbariClient client, int replication, int adjustment,
@@ -439,7 +424,7 @@ public class AmbariDecommissioner {
                     LOGGER.warn("Ambari agent stop timed out, delete the hosts anyway, hosts: {}", hostNames);
                 }
                 if (!isExited(pollingResult)) {
-                    deleteHosts(stack, hostNames, runningComponents);
+                    deleteHosts(hostNames, runningComponents, ambariClient);
                 }
             } else if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -449,7 +434,7 @@ public class AmbariDecommissioner {
                         .filter(instanceMetaData -> hostNames.stream().anyMatch(hn -> hn.contains(instanceMetaData.getDiscoveryFQDN().split("\\.")[0])))
                         .forEach(instanceMetaData -> privateIpsByFQDN.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp()));
                 hostOrchestrator.tearDown(gatewayConfig, privateIpsByFQDN);
-                deleteHosts(stack, hostNames, runningComponents);
+                deleteHosts(hostNames, runningComponents, ambariClient);
             }
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed to delete containers while decommissioning: ", e);
