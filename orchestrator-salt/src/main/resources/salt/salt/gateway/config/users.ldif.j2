@@ -31,13 +31,13 @@ objectclass:organizationalUnit
 ou: people
 
 # entry for sample user admin
-dn: uid=admin,ou=people,dc=hadoop,dc=apache,dc=org
+dn: uid={{ salt['pillar.get']('gateway:username') }},ou=people,dc=hadoop,dc=apache,dc=org
 objectclass:top
 objectclass:person
 objectclass:organizationalPerson
 objectclass:inetOrgPerson
-cn: Admin
-sn: Admin
+cn: {{ salt['pillar.get']('gateway:username') }}
+sn: {{ salt['pillar.get']('gateway:username') }}
 uid: {{ salt['pillar.get']('gateway:username') }}
 userPassword: {{ salt['pillar.get']('gateway:password') }}
 
