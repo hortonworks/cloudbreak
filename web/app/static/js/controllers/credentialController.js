@@ -413,7 +413,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             var createdCredential = credentials.filter(function (credential) {
                 return credential.name == $scope.credentialAzureRm.name;
             })[0];
-            $rootScope.credentials.push($scope.credentialAzureRm);
+            $rootScope.credentials.push(createdCredential);
             $scope.credentialAzureRm = {
                 parameters: {
                     selector: 'app-based'
