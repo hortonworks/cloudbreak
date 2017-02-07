@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
 import java.util.HashSet;
+import java.util.Map;
 
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -31,6 +32,13 @@ public class InstanceGroupCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "instancegroup configure")
     public boolean createAvailable() {
+        return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())
+                && !shellContext.isMarathonMode()
+                && !shellContext.isYarnMode();
+    }
+
+    @CliAvailabilityIndicator(value = "instancegroup delete")
+    public boolean deleteAvailable() {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())
                 && !shellContext.isMarathonMode()
                 && !shellContext.isYarnMode();
@@ -86,7 +94,9 @@ public class InstanceGroupCommands implements CommandMarker {
                     boolean ambariSpecified = shellContext.getInstanceGroups().values()
                             .stream().filter(e -> e.getType().equals("GATEWAY")).findAny().isPresent();
                     if (ambariSpecified) {
-                        return "Ambari server is already specified";
+                        for (Map.Entry<String, InstanceGroupEntry> stringInstanceGroupEntryEntry : shellContext.getInstanceGroups().entrySet()) {
+                            shellContext.getInstanceGroups().get(stringInstanceGroupEntryEntry.getKey()).setType("CORE");
+                        }
                     }
                     if (nodeCount != 1) {
                         return "Allowed node count for Ambari server: 1";
@@ -121,4 +131,15 @@ public class InstanceGroupCommands implements CommandMarker {
             return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");
         }
     }
+
+    @CliCommand(value = "instancegroup delete", help = "Delete a currently available instance group")
+    public String delete(@CliOption(key = "name", help = "name of the instanceGroup", mandatory = true) String name) throws Exception {
+        if (shellContext.getInstanceGroups().isEmpty()) {
+            return "List of instance groups is empty currently.";
+        } else {
+            shellContext.getInstanceGroups().remove(name);
+            return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");
+        }
+    }
+
 }

@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class BlueprintCommands implements BaseCommands {
@@ -120,6 +121,8 @@ public class BlueprintCommands implements BaseCommands {
                         shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
                     } else if (shellContext.isYarnMode()) {
                         shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
+                    } else if (shellContext.getStackId() != null) {
+                        shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);
                     } else {
                         shellContext.setHint(Hints.CONFIGURE_INSTANCEGROUP);
                     }
@@ -135,6 +138,8 @@ public class BlueprintCommands implements BaseCommands {
                         shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
                     } else if (shellContext.isYarnMode()) {
                         shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
+                    } else if (shellContext.getStackId() != null) {
+                        shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);
                     } else {
                         shellContext.setHint(Hints.CONFIGURE_INSTANCEGROUP);
                     }
@@ -166,8 +171,9 @@ public class BlueprintCommands implements BaseCommands {
     }
 
     @Override
-    public String show(Long id, String name) {
+    public String show(Long id, String name, OutPutType outPutType) {
         try {
+            outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             BlueprintResponse blueprintResponse;
             if (id != null) {
                 blueprintResponse = shellContext.cloudbreakClient().blueprintEndpoint().get(id);
@@ -176,10 +182,11 @@ public class BlueprintCommands implements BaseCommands {
             } else {
                 return "No blueprints specified.";
             }
-            return shellContext.outputTransformer().render(
+            return shellContext.outputTransformer().render(outPutType,
                     shellContext.responseTransformer().transformObjectToStringMap(blueprintResponse, "ambariBlueprint"), "FIELD", "INFO")
                     + "\n\n"
-                    + shellContext.outputTransformer().render(getComponentMap(blueprintResponse.getAmbariBlueprint()), "HOSTGROUP", "COMPONENT");
+                    + shellContext.outputTransformer().render(outPutType,
+                    getComponentMap(blueprintResponse.getAmbariBlueprint()), "HOSTGROUP", "COMPONENT");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -187,14 +194,18 @@ public class BlueprintCommands implements BaseCommands {
 
     @CliCommand(value = "blueprint show --id", help = "Show the blueprint by its id")
     @Override
-    public String showById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return show(id, null);
+    public String showById(
+            @CliOption(key = "", mandatory = true) Long id,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(id, null, outPutType);
     }
 
     @CliCommand(value = "blueprint show --name", help = "Show the blueprint by its name")
     @Override
-    public String showByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return show(null, name);
+    public String showByName(
+            @CliOption(key = "", mandatory = true) String name,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(null, name, outPutType);
     }
 
     @Override
@@ -204,7 +215,7 @@ public class BlueprintCommands implements BaseCommands {
     }
 
     @Override
-    public String delete(Long id, String name) throws Exception {
+    public String delete(Long id, String name, Long timeout) throws Exception {
         try {
             if (id != null) {
                 shellContext.cloudbreakClient().blueprintEndpoint().delete(id);
@@ -222,14 +233,14 @@ public class BlueprintCommands implements BaseCommands {
 
     @CliCommand(value = "blueprint delete --id", help = "Delete the blueprint by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return delete(id, null);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
+        return delete(id, null, timeout);
     }
 
     @CliCommand(value = "blueprint delete --name", help = "Delete the blueprint by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return delete(null, name);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
+        return delete(null, name, timeout);
     }
 
     @CliAvailabilityIndicator(value = "blueprint defaults")

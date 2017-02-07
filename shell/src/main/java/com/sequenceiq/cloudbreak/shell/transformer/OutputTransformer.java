@@ -24,6 +24,7 @@ public class OutputTransformer {
     private JsonRenderer jsonRenderer;
 
     public <O> String render(OutPutType outPutType, O object, String... headers) throws JsonProcessingException {
+        outPutType = outPutType == null ? OutPutType.RAW : outPutType;
         if (OutPutType.JSON.equals(outPutType)) {
             return jsonRenderer.render(object);
         } else if (OutPutType.RAW.equals(outPutType)) {

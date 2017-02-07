@@ -62,6 +62,7 @@ public class BaseNetworkCommandsTest {
         given(cloudbreakClient.networkEndpoint()).willReturn(networkEndpoint);
         given(shellContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(any(OutPutType.class), anyObject(), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
     }
@@ -105,7 +106,7 @@ public class BaseNetworkCommandsTest {
         given(networkEndpoint.get(anyLong())).willReturn(networkJson());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
-        String show = underTest.show(50L, null);
+        String show = underTest.show(50L, null, null);
 
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
@@ -117,7 +118,7 @@ public class BaseNetworkCommandsTest {
     public void showNetworkByIdWhichIsNotExist() throws Exception {
         when(networkEndpoint.get(anyLong())).thenThrow(new NotFoundException("not found"));
 
-        underTest.show(51L, null);
+        underTest.show(51L, null, null);
     }
 
     @Test
@@ -125,7 +126,7 @@ public class BaseNetworkCommandsTest {
         given(networkEndpoint.getPublic(anyString())).willReturn(networkJson());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
-        String show = underTest.show(null, "test1");
+        String show = underTest.show(null, "test1", null);
 
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
@@ -137,7 +138,7 @@ public class BaseNetworkCommandsTest {
     public void showNetworkByNameWhichIsNotExistThenThowNotFoundException() throws Exception {
         given(networkEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
 
-        underTest.show(null, "test1");
+        underTest.show(null, "test1", null);
     }
 
     private NetworkResponse networkJson() {

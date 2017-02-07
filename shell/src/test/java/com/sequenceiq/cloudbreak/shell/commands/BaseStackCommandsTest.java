@@ -69,6 +69,7 @@ public class BaseStackCommandsTest {
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
         given(shellContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(any(OutPutType.class), anyObject(), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
     }
 
@@ -111,7 +112,7 @@ public class BaseStackCommandsTest {
         given(stackEndpoint.get(anyLong())).willReturn(stackResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
-        String show = underTest.show(50L, null);
+        String show = underTest.show(50L, null, null);
 
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
@@ -123,7 +124,7 @@ public class BaseStackCommandsTest {
     public void showStackByIdWhichIsNotExist() {
         given(stackEndpoint.get(anyLong())).willThrow(new NotFoundException("not found"));
 
-        underTest.show(51L, null);
+        underTest.show(51L, null, null);
     }
 
     @Test
@@ -131,7 +132,7 @@ public class BaseStackCommandsTest {
         given(stackEndpoint.getPublic(anyString())).willReturn(stackResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
-        String show = underTest.show(null, "test1");
+        String show = underTest.show(null, "test1", null);
 
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
@@ -143,13 +144,15 @@ public class BaseStackCommandsTest {
     public void showStackByNameWhichIsNotExistThenThowNotFoundException() {
         given(stackEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
 
-        underTest.show(null, "test1");
+        underTest.show(null, "test1", null);
     }
 
     private StackResponse stackResponse() {
         StackResponse stackResponse = new StackResponse();
         stackResponse.setName("test1");
         stackResponse.setId(50L);
+        stackResponse.setCredentialId(1L);
+        stackResponse.setNetworkId(1L);
         return stackResponse;
     }
 }

@@ -283,7 +283,8 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "attachedStorageType", help = "type of the storage creation") ArmAttachedStorageOption attachedStorageOption,
             @CliOption(key = "persistentStorage", help = "name of the persistent storage")
             String persistentStorage,
-            @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
 
             orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
             if (SALT.equals(orchestratorType.getName())) {
@@ -312,6 +313,6 @@ public class AzureCommands implements CommandMarker {
             }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params,
-                TagParser.parseTagsIntoMap(tags));
+                TagParser.parseTagsIntoMap(tags), timeout);
     }
 }

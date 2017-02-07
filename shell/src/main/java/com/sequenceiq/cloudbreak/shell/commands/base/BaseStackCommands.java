@@ -75,22 +75,28 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliCommand(value = "stack show --id", help = "Show the stack by its id")
     @Override
-    public String showById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return show(id, null);
+    public String showById(
+            @CliOption(key = "", mandatory = true) Long id,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(id, null, outPutType);
     }
 
     @CliCommand(value = "stack show --name", help = "Show the stack by its name")
     @Override
-    public String showByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return show(null, name);
+    public String showByName(
+            @CliOption(key = "", mandatory = true) String name,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(null, name, outPutType);
     }
 
     @Override
-    public String show(Long id, String name) {
+    public String show(Long id, String name, OutPutType outPutType) {
         try {
+            outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             StackResponse stackResponse = getStackResponse(name, id);
             if (stackResponse != null) {
-                return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(stackResponse), "FIELD", "VALUE");
+                return shellContext.outputTransformer().render(outPutType, shellContext.responseTransformer()
+                        .transformObjectToStringMap(stackResponse, "stackTemplate"), "FIELD", "VALUE");
             }
             return "No stack specified (select a stack by --id or --name).";
         } catch (Exception ex) {
@@ -105,42 +111,44 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @Override
-    public String deleteById(Long id) throws Exception {
-        return delete(id, null);
+    public String deleteById(Long id, Long timeout) throws Exception {
+        return delete(id, null, timeout);
     }
 
     @Override
-    public String deleteByName(String name) throws Exception {
-        return delete(null, name);
+    public String deleteByName(String name, Long timeout) throws Exception {
+        return delete(null, name, timeout);
     }
 
     @CliCommand(value = "stack delete --id", help = "Delete the stack by its id")
     public String deleteByName(
             @CliOption(key = "", mandatory = true) Long id,
-            @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
-        return delete(id, null, wait);
+            @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+        return delete(id, null, wait, timeout);
     }
 
     @CliCommand(value = "stack delete --name", help = "Delete the stack by its name")
     public String deleteById(
             @CliOption(key = "", mandatory = true) String name,
-            @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
-        return delete(null, name, wait);
+            @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+        return delete(null, name, wait, timeout);
     }
 
     @Override
-    public String delete(Long id, String name) throws Exception {
-        return delete(id, name, false);
+    public String delete(Long id, String name, Long timeout) throws Exception {
+        return delete(id, name, false, timeout);
     }
 
-    public String delete(Long id, String name, boolean wait) {
+    public String delete(Long id, String name, boolean wait, Long timeout) {
         try {
             if (id != null) {
                 shellContext.cloudbreakClient().stackEndpoint().delete(id, false, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
-                shellContext.removeStack(id.toString());
+                shellContext.removeStack();
                 if (wait) {
-                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.DELETE_COMPLETED.name());
+                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.DELETE_COMPLETED.name(), timeout);
                     if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                         throw shellContext.exceptionTransformer().transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
                     } else {
@@ -155,7 +163,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 shellContext.setHint(Hints.CREATE_CLUSTER);
 
                 if (wait) {
-                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(response.getId(), Status.DELETE_COMPLETED.name());
+                    CloudbreakShellUtil.WaitResult waitResult =
+                            cloudbreakShellUtil.waitAndCheckStackStatus(response.getId(), Status.DELETE_COMPLETED.name(), timeout);
                     if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                         throw shellContext.exceptionTransformer()
                                 .transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
@@ -185,13 +194,15 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id);
                 if (stack != null) {
                     shellContext.addStack(id.toString(), stack.getName());
-                    if (shellContext.isCredentialAvailable()) {
-                        shellContext.setHint(Hints.CREATE_CLUSTER);
-                    } else {
-                        shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);
-                    }
+                    shellContext.setCredential(stack.getCredentialId().toString());
+                    shellContext.setActiveNetworkId(stack.getNetworkId());
                     prepareCluster(id.toString());
                     shellContext.prepareInstanceGroups(stack);
+                    if (shellContext.getBlueprintId() == null) {
+                        shellContext.setHint(Hints.SELECT_BLUEPRINT);
+                    } else {
+                        shellContext.setHint(Hints.SELECT_CREDENTIAL);
+                    }
                     return "Stack selected, id: " + id;
                 }
 
@@ -200,13 +211,15 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 if (stack != null) {
                     Long stackId = stack.getId();
                     shellContext.addStack(stackId.toString(), name);
-                    if (shellContext.isCredentialAvailable()) {
-                        shellContext.setHint(Hints.CREATE_CLUSTER);
-                    } else {
-                        shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);
-                    }
+                    shellContext.setCredential(stack.getCredentialId().toString());
+                    shellContext.setActiveNetworkId(stack.getNetworkId());
                     prepareCluster(stackId.toString());
                     shellContext.prepareInstanceGroups(stack);
+                    if (shellContext.getBlueprintId() == null) {
+                        shellContext.setHint(Hints.SELECT_BLUEPRINT);
+                    } else {
+                        shellContext.setHint(Hints.SELECT_CREDENTIAL);
+                    }
                     return "Stack selected, name: " + name;
                 }
             }
@@ -240,7 +253,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @Override
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, boolean publicInAccount, OnFailureAction onFailureAction,
             AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, boolean wait, PlatformVariant platformVariant, String orchestrator,
-            String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params, Map<String, String> userDefinedTags) {
+            String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params, Map<String, String> userDefinedTags,
+            Long timeout) {
         try {
             validateNetwork();
             validateRegion(region);
@@ -296,7 +310,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             shellContext.setHint(Hints.CREATE_CLUSTER);
 
             if (wait) {
-                waitUntilStackAvailable(id, "Stack creation failed:");
+                waitUntilStackAvailable(id, "Stack creation failed:", timeout);
                 return "Stack creation finished with name: " + name;
             }
             return String.format("Stack creation started with id: '%s' and name: '%s'", id, name);
@@ -396,7 +410,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             @CliOption(key = "withClusterUpScale", help = "Do the upscale with the cluster together",
                 unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withClusterUpScale,
             @CliOption(key = "wait", help = "Wait until the operation completes",
-                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
+                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment < 1) {
                 return "The adjustment value in case of node addition should be at least 1.";
@@ -414,12 +429,12 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 return "Stack upscale started with id: " + stackIdStr;
             }
 
-            waitUntilStackAvailable(stackId, "Stack upscale failed: ");
+            waitUntilStackAvailable(stackId, "Stack upscale failed: ", timeout);
             if (!withClusterUpScale) {
                 return "Stack upscale finished with id: " + stackIdStr;
             }
 
-            waitUntilClusterAvailable(stackId, "Cluster upscale failed: ");
+            waitUntilClusterAvailable(stackId, "Cluster upscale failed: ", timeout);
             return "Stack and cluster upscale finished with id " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -431,7 +446,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be removed from the stack") Integer adjustment,
             @CliOption(key = "wait", help = "Wait until the operation completes",
-                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment > -1) {
                 return "The adjustment value in case of node removal should be negative.";
@@ -448,7 +464,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             if (!wait) {
                 return "Stack downscale started with id: " + stackIdStr;
             }
-            waitUntilStackAvailable(stackId, "Stack downscale failed: ");
+            waitUntilStackAvailable(stackId, "Stack downscale failed: ", timeout);
             return "Stack downscale finished with id: " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -571,6 +587,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             if (cluster != null) {
                 String blueprintId = cluster.getBlueprintId().toString();
                 shellContext.addBlueprint(blueprintId);
+            } else {
+                shellContext.removeBlueprintId();
             }
         } catch (Exception e) {
             // ignore
@@ -581,8 +599,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
      * Waits until stack becomes available after some operation.
      * @throws RuntimeException if the operation fails
      */
-    public void waitUntilStackAvailable(Long stackId, String errorMessagePrefix) {
-        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(stackId, Status.AVAILABLE.name());
+    public void waitUntilStackAvailable(Long stackId, String errorMessagePrefix, Long timeout) {
+        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(stackId, Status.AVAILABLE.name(), timeout);
         throwIfWaitFailed(errorMessagePrefix, waitResult);
     }
 
@@ -590,8 +608,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
      * Waits until cluster becomes available after some operation.
      * @throws RuntimeException if the operation fails
      */
-    public void waitUntilClusterAvailable(Long stackId, String errorMessagePrefix) {
-        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckClusterStatus(stackId, Status.AVAILABLE.name());
+    public void waitUntilClusterAvailable(Long stackId, String errorMessagePrefix, Long timeout) {
+        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckClusterStatus(stackId, Status.AVAILABLE.name(), timeout);
         throwIfWaitFailed(errorMessagePrefix, waitResult);
     }
 

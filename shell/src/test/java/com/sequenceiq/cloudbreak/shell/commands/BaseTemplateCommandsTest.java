@@ -62,6 +62,7 @@ public class BaseTemplateCommandsTest {
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
         given(shellContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
+        given(outputTransformer.render(any(OutPutType.class), anyObject(), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
     }
 
@@ -75,7 +76,7 @@ public class BaseTemplateCommandsTest {
         given(templateEndpoint.get(anyLong())).willReturn(templateResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
-        String show = underTest.show(50L, null);
+        String show = underTest.show(50L, null, null);
 
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
@@ -87,7 +88,7 @@ public class BaseTemplateCommandsTest {
     public void showTemplateByIdWhichIsNotExist() throws Exception {
         given(templateEndpoint.get(anyLong())).willThrow(new NotFoundException("not found"));
 
-        underTest.show(51L, null);
+        underTest.show(51L, null, null);
     }
 
     @Test
@@ -95,7 +96,7 @@ public class BaseTemplateCommandsTest {
         given(templateEndpoint.getPublic(anyString())).willReturn(templateResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
-        String show = underTest.show(null, "test1");
+        String show = underTest.show(null, "test1", null);
 
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
@@ -107,7 +108,7 @@ public class BaseTemplateCommandsTest {
     public void showTemplateByNameWhichIsNotExistThenThowNotFoundException() throws Exception {
         given(templateEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
 
-        underTest.show(null, "test1");
+        underTest.show(null, "test1", null);
     }
 
     private TemplateResponse templateResponse() {

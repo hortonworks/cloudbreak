@@ -61,7 +61,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedYarnStackId()).willReturn(null);
 
         HostGroup hostGroup = new HostGroup("master");
-        String addNodeResult = underTest.addNode(hostGroup, +1, false);
+        String addNodeResult = underTest.addNode(hostGroup, +1, false, null);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackIdStr));
@@ -75,7 +75,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedMarathonStackId()).willReturn(stackId);
 
         HostGroup hostGroup = new HostGroup("master");
-        String addNodeResult = underTest.addNode(hostGroup, +1, false);
+        String addNodeResult = underTest.addNode(hostGroup, +1, false, null);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackId));
@@ -89,7 +89,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedYarnStackId()).willReturn(stackId);
 
         HostGroup hostGroup = new HostGroup("master");
-        String addNodeResult = underTest.addNode(hostGroup, +1, false);
+        String addNodeResult = underTest.addNode(hostGroup, +1, false, null);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackId));
@@ -106,7 +106,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedYarnStackId()).willReturn(null);
 
         HostGroup hostGroup = new HostGroup("master");
-        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false);
+        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false, null);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackIdStr));
@@ -120,7 +120,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedMarathonStackId()).willReturn(stackId);
 
         HostGroup hostGroup = new HostGroup("master");
-        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false);
+        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false, null);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackId));
@@ -134,7 +134,7 @@ public class ClusterCommandsTest {
         given(shellContext.getSelectedYarnStackId()).willReturn(stackId);
 
         HostGroup hostGroup = new HostGroup("master");
-        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false);
+        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false, null);
 
         verify(clusterEndpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackId));

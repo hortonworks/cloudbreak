@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.shell.util;
 
+import java.util.Date;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -22,6 +23,8 @@ public class CloudbreakShellUtil {
 
     private static final int MAX_ATTEMPT = 3;
 
+    private static final int MILISECOND = 1000;
+
     @Inject
     private CloudbreakClient cloudbreakClient;
 
@@ -34,17 +37,17 @@ public class CloudbreakShellUtil {
         }
     }
 
-    public WaitResult waitAndCheckStackStatus(Long stackId, String desiredStatus) {
-        return waitAndCheckStatus(stackId, desiredStatus, "status");
+    public WaitResult waitAndCheckStackStatus(Long stackId, String desiredStatus, Long timeout) {
+        return waitAndCheckStatus(stackId, desiredStatus, "status", timeout);
     }
 
-    public WaitResult waitAndCheckClusterStatus(Long stackId, String desiredStatus) {
-        return waitAndCheckStatus(stackId, desiredStatus, "clusterStatus");
+    public WaitResult waitAndCheckClusterStatus(Long stackId, String desiredStatus, Long timeout) {
+        return waitAndCheckStatus(stackId, desiredStatus, "clusterStatus", timeout);
     }
 
-    private WaitResult waitAndCheckStatus(Long stackId, String desiredStatus, String statusPath) {
+    private WaitResult waitAndCheckStatus(Long stackId, String desiredStatus, String statusPath, Long timeout) {
         for (int i = 0; i < MAX_ATTEMPT; i++) {
-            WaitResult waitResult = waitForStatus(stackId, desiredStatus, statusPath);
+            WaitResult waitResult = waitForStatus(stackId, desiredStatus, statusPath, timeout);
             if (waitResult.getWaitResultStatus().equals(WaitResultStatus.FAILED)) {
                 return waitResult;
             }
@@ -52,12 +55,14 @@ public class CloudbreakShellUtil {
         return new WaitResult(WaitResultStatus.SUCCESSFUL, "");
     }
 
-    private WaitResult waitForStatus(Long stackId, String desiredStatus, String statusPath) {
+    private WaitResult waitForStatus(Long stackId, String desiredStatus, String statusPath, Long timeout) {
         WaitResult waitResult = new WaitResult(WaitResultStatus.SUCCESSFUL, "");
         String status = null;
         String statusReason;
         int retryCount = 0;
+        long fullTime = 0;
         do {
+            Date start = new Date();
             LOGGER.info("Waiting for status {}, stack id: {}, current status {} ...", desiredStatus, stackId, status);
             sleep();
             Map<String, Object> statusResult = cloudbreakClient.stackEndpoint().status(stackId);
@@ -67,15 +72,26 @@ public class CloudbreakShellUtil {
             status = (String) statusResult.get(statusPath);
             statusReason = (String) statusResult.get(statusPath + "Reason");
             retryCount++;
+            Date end = new Date();
+            fullTime += (end.getTime() - start.getTime()) / MILISECOND;
         } while (!desiredStatus.equals(status) && !status.contains("FAILED") && !Status.DELETE_COMPLETED.name().equals(status)
-                && retryCount < MAX_RETRY);
+                && shouldNotExitFromPolling(retryCount, timeout, fullTime));
         LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, status);
         if (status.contains("FAILED") || (!Status.DELETE_COMPLETED.name().equals(desiredStatus) && Status.DELETE_COMPLETED.name().equals(status))) {
             waitResult = new WaitResult(WaitResultStatus.FAILED, statusReason);
         } else if (retryCount == MAX_RETRY) {
             waitResult = new WaitResult(WaitResultStatus.FAILED, "Timeout while trying to fetch status.");
+        } else if (timeout != null && fullTime >= timeout) {
+            waitResult = new WaitResult(WaitResultStatus.FAILED, "Timeout while trying to fetch status.");
         }
         return waitResult;
+    }
+
+    private boolean shouldNotExitFromPolling(int retryCount, Long timeout, Long fullTime) {
+        if (timeout == null) {
+            return retryCount < MAX_RETRY;
+        }
+        return fullTime < timeout;
     }
 
     private static void sleep() {

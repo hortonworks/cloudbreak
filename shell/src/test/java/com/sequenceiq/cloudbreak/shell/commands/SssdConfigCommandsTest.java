@@ -158,21 +158,21 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testShowSssdConfigById() throws Exception {
-        underTest.show(CONFIG_ID, null);
+        underTest.show(CONFIG_ID, null, null);
         verify(sssdConfigEndpoint, times(1)).get(anyLong());
         verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
     }
 
     @Test
     public void testShowSssdConfigByName() throws Exception {
-        underTest.show(null, CONFIG_NAME);
+        underTest.show(null, CONFIG_NAME, null);
         verify(sssdConfigEndpoint, times(0)).get(anyLong());
         verify(sssdConfigEndpoint, times(1)).getPublic(anyString());
     }
 
     @Test
     public void testShowSssdConfigWithoutIdAndName() throws Exception {
-        underTest.show(null, null);
+        underTest.show(null, null, null);
         verify(sssdConfigEndpoint, times(0)).get(anyLong());
         verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
     }
@@ -180,28 +180,28 @@ public class SssdConfigCommandsTest {
     @Test
     public void testDeleteSssdConfigById() throws Exception {
         doNothing().when(sssdConfigEndpoint).delete(CONFIG_ID);
-        underTest.delete(CONFIG_ID, null);
+        underTest.delete(CONFIG_ID, null, null);
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteSssdConfigByName() throws Exception {
         doNothing().when(sssdConfigEndpoint).deletePublic(CONFIG_NAME);
-        underTest.delete(null, CONFIG_NAME);
+        underTest.delete(null, CONFIG_NAME, null);
         verify(sssdConfigEndpoint, times(1)).deletePublic(anyString());
     }
 
     @Test
     public void testDeleteSssdConfigByIdAndName() throws Exception {
         doNothing().when(sssdConfigEndpoint).delete(CONFIG_ID);
-        underTest.delete(CONFIG_ID, CONFIG_NAME);
+        underTest.delete(CONFIG_ID, CONFIG_NAME, null);
         verify(sssdConfigEndpoint, times(0)).deletePublic(anyString());
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteSssdConfigWithoutIdAndName() throws Exception {
-        underTest.delete(null, null);
+        underTest.delete(null, null, null);
         verify(sssdConfigEndpoint, times(0)).deletePublic(anyString());
         verify(sssdConfigEndpoint, times(0)).delete(anyLong());
     }

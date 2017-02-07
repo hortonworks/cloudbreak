@@ -94,7 +94,7 @@ public class BaseCredentialCommandsTest {
     @Test
     public void testShowCredentialById() throws Exception {
         given(credentialEndpoint.get(DUMMY_ID)).willReturn(dummyResult);
-        underTest.show(DUMMY_ID, null);
+        underTest.show(DUMMY_ID, null, null);
         verify(credentialEndpoint, times(1)).get(anyLong());
     }
 
@@ -102,7 +102,7 @@ public class BaseCredentialCommandsTest {
     public void testShowCredentialByName() throws Exception {
         given(credentialEndpoint.get(DUMMY_ID)).willReturn(dummyResult);
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(dummyResult);
-        underTest.show(null, DUMMY_NAME);
+        underTest.show(null, DUMMY_NAME, null);
         verify(credentialEndpoint, times(0)).get(anyLong());
         verify(credentialEndpoint, times(1)).getPublic(anyString());
     }
@@ -110,31 +110,31 @@ public class BaseCredentialCommandsTest {
     @Test
     public void testShowCredentialByNameNotFound() throws Exception {
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(null);
-        underTest.show(null, DUMMY_NAME);
+        underTest.show(null, DUMMY_NAME, null);
         verify(credentialEndpoint, times(1)).getPublic(anyString());
     }
 
     @Test
     public void testShowCredentialWithoutIdAndName() throws Exception {
-        underTest.show(null, null);
+        underTest.show(null, null, null);
         verify(credentialEndpoint, times(0)).get(anyLong());
     }
 
     @Test
     public void testDeleteCredentialById() throws Exception {
-        underTest.delete(DUMMY_ID, null);
+        underTest.delete(DUMMY_ID, null, null);
         verify(credentialEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteCredentialByName() throws Exception {
-        underTest.delete(null, DUMMY_NAME);
+        underTest.delete(null, DUMMY_NAME, null);
         verify(credentialEndpoint, times(1)).deletePublic(anyString());
     }
 
     @Test
     public void testDeleteCredentialWithoutIdAndName() throws Exception {
-        underTest.delete(null, null);
+        underTest.delete(null, null, null);
         verify(credentialEndpoint, times(0)).delete(anyLong());
         verify(credentialEndpoint, times(0)).deletePublic(anyString());
     }
