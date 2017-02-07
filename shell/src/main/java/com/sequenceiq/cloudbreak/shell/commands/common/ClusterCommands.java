@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.MarathonHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.NodeCountEntry;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.model.YarnHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
@@ -110,8 +111,8 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
             @CliOption(key = "enableShipyard", help = "Run shipyard in cluster",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableShipyard,
-            @CliOption(key = "wait", help = "Wait for stack creation",
-                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             Set<HostGroupRequest> hostGroupList = new HashSet<>();
             Set<? extends Map.Entry<String, ? extends NodeCountEntry>> entries;
@@ -289,7 +290,7 @@ public class ClusterCommands implements BaseCommands {
             shellContext.resetAmbariDatabaseDetailsJson();
             if (wait) {
                 CloudbreakShellUtil.WaitResult waitResult =
-                        cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(stackId), Status.AVAILABLE.name());
+                        cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(stackId), Status.AVAILABLE.name(), timeout);
                 if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                     throw shellContext.exceptionTransformer().transformToRuntimeException(
                             String.format("Cluster creation failed on stack with id: '%s': '%s'", stackId, waitResult.getReason()));
@@ -352,7 +353,7 @@ public class ClusterCommands implements BaseCommands {
     }
 
     @Override
-    public String delete(Long id, String name) throws Exception {
+    public String delete(Long id, String name, Long timeout) throws Exception {
         throw new MethodNotSupportedException("Cluster delete command not available");
     }
 
@@ -381,13 +382,13 @@ public class ClusterCommands implements BaseCommands {
     }
 
     @Override
-    public String deleteById(Long id) throws Exception {
-        return delete(id, null);
+    public String deleteById(Long id, Long timeout) throws Exception {
+        return delete(id, null, timeout);
     }
 
     @Override
-    public String deleteByName(String name) throws Exception {
-        return delete(null, name);
+    public String deleteByName(String name, Long timeout) throws Exception {
+        return delete(null, name, timeout);
     }
 
     @Override
@@ -428,8 +429,9 @@ public class ClusterCommands implements BaseCommands {
     }
 
     @CliCommand(value = "cluster show", help = "Shows the cluster by stack id")
-    public String show() {
+    public String show(@CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) {
         try {
+            outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             String stackId;
             if (shellContext.isMarathonMode()) {
                 stackId = shellContext.getSelectedMarathonStackId().toString();
@@ -439,7 +441,8 @@ public class ClusterCommands implements BaseCommands {
                 stackId = shellContext.getStackId();
             }
             ClusterResponse clusterResponse = shellContext.cloudbreakClient().clusterEndpoint().get(Long.valueOf(stackId));
-            return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
+            return shellContext.outputTransformer().render(outPutType,
+                    shellContext.responseTransformer().transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException("There was no cluster for this account.");
         } catch (Exception ex) {
@@ -448,18 +451,18 @@ public class ClusterCommands implements BaseCommands {
     }
 
     @Override
-    public String show(Long id, String name) throws Exception {
+    public String show(Long id, String name, OutPutType outPutType) throws Exception {
         throw new MethodNotSupportedException("Cluster show command not available");
     }
 
     @Override
-    public String showById(Long id) throws Exception {
-        return show(id, null);
+    public String showById(Long id, OutPutType outPutType) throws Exception {
+        return show(id, null, outPutType);
     }
 
     @Override
-    public String showByName(String name) throws Exception {
-        return show(null, name);
+    public String showByName(String name, OutPutType outPutType) throws Exception {
+        return show(null, name, outPutType);
     }
 
     @CliAvailabilityIndicator(value = {"cluster node --ADD", "cluster node --REMOVE"})
@@ -478,7 +481,8 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "hostgroup", mandatory = true, help = "Name of the hostgroup") HostGroup hostGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the cluster") Integer adjustment,
             @CliOption(key = "wait", help = "Wait until the operation completes",
-                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment < 1) {
                 return "The adjustment value in case of node addition should be at least 1.";
@@ -502,7 +506,7 @@ public class ClusterCommands implements BaseCommands {
             if (!wait) {
                 return "Cluster upscale started with stack id: " + stackIdStr;
             }
-            stackCommands.waitUntilClusterAvailable(stackId, "Cluster upscale failed: ");
+            stackCommands.waitUntilClusterAvailable(stackId, "Cluster upscale failed: ", timeout);
             return "Cluster upscale finished with stack id " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -516,7 +520,8 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "withStackDownScale", help = "Do the downscale with the stack together",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withStackDownScale,
             @CliOption(key = "wait", help = "Wait until the operation completes",
-                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment > -1) {
                 return "The adjustment value in case of node removal should be negative.";
@@ -542,12 +547,12 @@ public class ClusterCommands implements BaseCommands {
                 return "Cluster downscale started with stack id: " + stackIdStr;
             }
 
-            stackCommands.waitUntilClusterAvailable(stackId, "Cluster downscale failed: ");
+            stackCommands.waitUntilClusterAvailable(stackId, "Cluster downscale failed: ", timeout);
             if (!withStackDownScale) {
                 return "Cluster downscale finished with stack id: " + stackIdStr;
             }
 
-            stackCommands.waitUntilStackAvailable(stackId, "Stack downscale failed: ");
+            stackCommands.waitUntilStackAvailable(stackId, "Stack downscale failed: ", timeout);
             return "Cluster and stack downscale finished with stack id " + stackIdStr;
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);

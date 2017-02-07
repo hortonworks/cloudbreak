@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class BaseCredentialCommands implements BaseCommands, CredentialCommands {
@@ -45,18 +46,18 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
 
     @CliCommand(value = "credential delete --id", help = "Delete the credential by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return delete(id, null);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
+        return delete(id, null, timeout);
     }
 
     @CliCommand(value = "credential delete --name", help = "Delete the credential by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return delete(null, name);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
+        return delete(null, name, timeout);
     }
 
     @Override
-    public String delete(Long id, String name) {
+    public String delete(Long id, String name, Long timeout) {
         try {
             if (id != null) {
                 shellContext.cloudbreakClient().credentialEndpoint().delete(id);
@@ -137,27 +138,33 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
 
     @CliCommand(value = "credential show --id", help = "Show the credential by its id")
     @Override
-    public String showById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return show(id, null);
+    public String showById(
+            @CliOption(key = "", mandatory = true) Long id,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(id, null, outPutType);
     }
 
     @CliCommand(value = "credential show --name", help = "Show the credential by its name")
     @Override
-    public String showByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return show(null, name);
+    public String showByName(
+            @CliOption(key = "", mandatory = true) String name,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(null, name, outPutType);
     }
 
     @Override
-    public String show(Long id, String name) {
+    public String show(Long id, String name, OutPutType outPutType) {
         try {
+            outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             if (id != null) {
                 CredentialResponse credentialResponse = shellContext.cloudbreakClient().credentialEndpoint().get(id);
                 Map<String, String> map = shellContext.responseTransformer().transformObjectToStringMap(credentialResponse);
-                return shellContext.outputTransformer().render(map, "FIELD", "VALUE");
+                return shellContext.outputTransformer().render(outPutType, map, "FIELD", "VALUE");
             } else if (name != null) {
                 CredentialResponse aPublic = shellContext.cloudbreakClient().credentialEndpoint().getPublic(name);
                 if (aPublic != null) {
-                    return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
+                    return shellContext.outputTransformer().render(outPutType,
+                            shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
                 }
             }
             return "No credential specified (select a credential by --id or --name)";

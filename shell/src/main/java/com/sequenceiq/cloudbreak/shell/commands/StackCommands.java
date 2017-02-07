@@ -26,7 +26,8 @@ public interface StackCommands {
             String hdpVersion,
             String imageCatalog,
             Map<String, String> params,
-            Map<String, String> userDefinedTags);
+            Map<String, String> userDefinedTags,
+            Long timeout);
 
     boolean createStackAvailable(String platform);
 }

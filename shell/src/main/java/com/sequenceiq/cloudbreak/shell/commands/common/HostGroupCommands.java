@@ -13,6 +13,7 @@ import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
+import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
@@ -52,6 +53,11 @@ public class HostGroupCommands implements CommandMarker {
             }
             shellContext.putHostGroup(hostgroup.getName(),
                     new HostgroupEntry(shellContext.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet, recoverMode));
+            if (shellContext.getHostGroups().entrySet().size() == shellContext.getInstanceGroups().entrySet().size()) {
+                shellContext.setHint(Hints.CREATE_CLUSTER);
+            } else {
+                shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);
+            }
             return shellContext.outputTransformer().render(shellContext.getHostGroups(), "hostgroup");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);

@@ -11,6 +11,7 @@ import org.springframework.shell.core.annotation.CliOption;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class LdapConfigCommands implements BaseCommands {
@@ -119,8 +120,9 @@ public class LdapConfigCommands implements BaseCommands {
     }
 
     @Override
-    public String show(Long id, String name) throws Exception {
+    public String show(Long id, String name, OutPutType outPutType) throws Exception {
         try {
+            outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             LdapConfigResponse response;
             if (id != null) {
                 response = shellContext.cloudbreakClient().ldapConfigEndpoint().get(id);
@@ -142,9 +144,7 @@ public class LdapConfigCommands implements BaseCommands {
             map.put("userSearchFilter", response.getUserSearchFilter());
             map.put("groupSearchBase", response.getGroupSearchBase());
             map.put("groupSearchFilter", response.getGroupSearchFilter());
-            //map.put("principalRegex", response.getPrincipalRegex());
-            //return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(response), "FIELD", "VALUE");
-            return shellContext.outputTransformer().render(map, "FIELD", "INFO");
+            return shellContext.outputTransformer().render(outPutType, map, "FIELD", "INFO");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -152,14 +152,18 @@ public class LdapConfigCommands implements BaseCommands {
 
     @CliCommand(value = "ldapconfig show --id", help = "Show the Ldap config by its id")
     @Override
-    public String showById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return show(id, null);
+    public String showById(
+            @CliOption(key = "", mandatory = true) Long id,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(id, null, outPutType);
     }
 
     @CliCommand(value = "ldapconfig show --name", help = "Show the Ldap config by its name")
     @Override
-    public String showByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return show(null, name);
+    public String showByName(
+            @CliOption(key = "", mandatory = true) String name,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(null, name, outPutType);
     }
 
     @CliAvailabilityIndicator(value = { "ldapconfig delete --id", "ldapconfig delete --name" })
@@ -169,7 +173,7 @@ public class LdapConfigCommands implements BaseCommands {
     }
 
     @Override
-    public String delete(Long id, String name) throws Exception {
+    public String delete(Long id, String name, Long timeout) throws Exception {
         try {
             if (id != null) {
                 shellContext.cloudbreakClient().ldapConfigEndpoint().delete(id);
@@ -186,14 +190,14 @@ public class LdapConfigCommands implements BaseCommands {
 
     @CliCommand(value = "ldapconfig delete --id", help = "Deletes the Ldap config by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return delete(id, null);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
+        return delete(id, null, timeout);
     }
 
     @CliCommand(value = "ldapconfig delete --name", help = "Deletes the Ldap config by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return delete(null, name);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
+        return delete(null, name, timeout);
     }
 
     @CliAvailabilityIndicator(value = "ldapconfig list")

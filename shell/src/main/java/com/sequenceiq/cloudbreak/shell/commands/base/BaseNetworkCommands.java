@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
@@ -33,18 +34,18 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
 
     @CliCommand(value = "network delete --id", help = "Delete the network by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return delete(id, null);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
+        return delete(id, null, timeout);
     }
 
     @CliCommand(value = "network delete --name", help = "Delete the network by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return delete(null, name);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
+        return delete(null, name, timeout);
     }
 
     @Override
-    public String delete(Long id, String name) throws Exception {
+    public String delete(Long id, String name, Long timeout) throws Exception {
         try {
             Long networkId = id == null ? null : id;
             String networkName = name == null ? null : name;
@@ -127,25 +128,34 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
 
     @CliCommand(value = "network show --id", help = "Show the network by its id")
     @Override
-    public String showById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
-        return show(id, null);
+    public String showById(
+            @CliOption(key = "", mandatory = true) Long id,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(id, null, outPutType);
     }
 
     @CliCommand(value = "network show --name", help = "Show the network by its name")
     @Override
-    public String showByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
-        return show(null, name);
+    public String showByName(
+            @CliOption(key = "", mandatory = true) String name,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(null, name, outPutType);
     }
 
     @Override
-    public String show(Long id, String name) throws Exception {
+    public String show(Long id, String name, OutPutType outPutType) throws Exception {
         try {
+            outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             if (id != null) {
                 NetworkResponse networkResponse = shellContext.cloudbreakClient().networkEndpoint().get(id);
-                return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(networkResponse), "FIELD", "VALUE");
+                return shellContext.outputTransformer()
+                        .render(outPutType,
+                                shellContext.responseTransformer().transformObjectToStringMap(networkResponse), "FIELD", "VALUE");
             } else if (name != null) {
                 NetworkResponse aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(name);
-                return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
+                return shellContext.outputTransformer()
+                        .render(outPutType,
+                                shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
             }
             return "Network could not be found!";
         } catch (Exception ex) {

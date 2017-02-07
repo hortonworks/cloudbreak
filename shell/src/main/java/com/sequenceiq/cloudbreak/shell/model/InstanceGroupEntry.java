@@ -32,4 +32,8 @@ public class InstanceGroupEntry {
     public Long getSecurityGroupId() {
         return securityGroupId;
     }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 }

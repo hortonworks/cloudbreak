@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.shell.commands;
 
 import org.springframework.shell.core.CommandMarker;
 
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public interface BaseCommands extends CommandMarker {
@@ -16,19 +17,19 @@ public interface BaseCommands extends CommandMarker {
 
     boolean showAvailable();
 
-    String show(Long id, String name) throws Exception;
+    String show(Long id, String name, OutPutType outPutType) throws Exception;
 
-    String showById(Long id) throws Exception;
+    String showById(Long id, OutPutType outPutType) throws Exception;
 
-    String showByName(String name) throws Exception;
+    String showByName(String name, OutPutType outPutType) throws Exception;
 
     boolean deleteAvailable();
 
-    String delete(Long id, String name) throws Exception;
+    String delete(Long id, String name, Long timeout) throws Exception;
 
-    String deleteById(Long id) throws Exception;
+    String deleteById(Long id, Long timeout) throws Exception;
 
-    String deleteByName(String name) throws Exception;
+    String deleteByName(String name, Long timeout) throws Exception;
 
     boolean listAvailable();
 

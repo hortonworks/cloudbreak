@@ -283,7 +283,8 @@ public class AwsCommands implements CommandMarker {
                     InstanceProfileStrategy instanceProfileStrategy,
             @CliOption(key = "instanceProfile", help = "instance profile which will attached to the instance", specifiedDefaultValue = "false")
                     String instanceProfile,
-            @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait) {
+            @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
 
         Map<String, String> params = new HashMap<>();
         if (dedicatedInstances != null) {
@@ -300,7 +301,7 @@ public class AwsCommands implements CommandMarker {
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
-                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags));
+                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), timeout);
     }
 
 }

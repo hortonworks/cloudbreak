@@ -171,8 +171,8 @@ public class ShellContext {
         return AzureCommands.PLATFORM.equals(getActiveCloudPlatform());
     }
 
-    public void removeStack(String id) {
-        removeProperty(PropertyKey.STACK_ID, id);
+    public void removeStack() {
+        removeProperty(PropertyKey.STACK_ID);
     }
 
     public Map<String, InstanceGroupEntry> getInstanceGroups() {
@@ -206,15 +206,19 @@ public class ShellContext {
     }
 
     public void addBlueprint(String id) throws Exception {
-        this.instanceGroups = new HashMap<>();
+        if (getStackId() == null) {
+            this.instanceGroups = new HashMap<>();
+            this.activeInstanceGroups = new HashSet<>();
+        }
         this.hostGroups = new HashMap<>();
-        this.activeInstanceGroups = new HashSet<>();
         this.activeHostGroups = new HashSet<>();
         String blueprintText = getBlueprintText(id);
         JsonNode hostGroups = objectMapper.readTree(blueprintText.getBytes()).get("host_groups");
         for (JsonNode hostGroup : hostGroups) {
             activeHostGroups.add(hostGroup.get("name").asText());
-            activeInstanceGroups.add(hostGroup.get("name").asText());
+            if (getStackId() == null) {
+                activeInstanceGroups.add(hostGroup.get("name").asText());
+            }
         }
         addProperty(PropertyKey.BLUEPRINT_ID, id);
         setBlueprintAccessible();
@@ -497,6 +501,10 @@ public class ShellContext {
         return getLastPropertyValue(PropertyKey.BLUEPRINT_ID);
     }
 
+    public void removeBlueprintId() {
+        removeProperty(PropertyKey.BLUEPRINT_ID);
+    }
+
     public String getRecipeId() {
         return getLastPropertyValue(PropertyKey.RECIPE_ID);
     }
@@ -673,7 +681,7 @@ public class ShellContext {
         properties.put(key, value);
     }
 
-    private void removeProperty(PropertyKey key, String value) {
+    private void removeProperty(PropertyKey key) {
         properties.remove(key);
     }
 

@@ -101,7 +101,7 @@ public class BlueprintCommandsTest {
     @Test(expected = RuntimeException.class)
     public void testShowBlueprintById() throws Exception {
         given(blueprintEndpoint.get(BLUEPRINT_ID)).willReturn(dummyResult);
-        underTest.show(BLUEPRINT_ID, null);
+        underTest.show(BLUEPRINT_ID, null, null);
         verify(blueprintEndpoint, times(0)).getPublic(anyString());
         verify(blueprintEndpoint, times(1)).get(anyLong());
     }
@@ -110,7 +110,7 @@ public class BlueprintCommandsTest {
     public void testShowBlueprintByName() throws Exception {
         given(blueprintEndpoint.get(BLUEPRINT_ID)).willReturn(dummyResult);
         given(blueprintEndpoint.getPublic(BLUEPRINT_NAME)).willReturn(dummyResult);
-        underTest.show(null, BLUEPRINT_NAME);
+        underTest.show(null, BLUEPRINT_NAME, null);
         verify(blueprintEndpoint, times(0)).get(anyLong());
         verify(blueprintEndpoint, times(1)).getPublic(anyString());
     }
@@ -118,7 +118,7 @@ public class BlueprintCommandsTest {
     @Test(expected = RuntimeException.class)
     public void testShowBlueprintByIdAndName() throws Exception {
         given(blueprintEndpoint.get(BLUEPRINT_ID)).willReturn(dummyResult);
-        underTest.show(BLUEPRINT_ID, BLUEPRINT_NAME);
+        underTest.show(BLUEPRINT_ID, BLUEPRINT_NAME, null);
         verify(blueprintEndpoint, times(0)).getPublic(anyString());
         verify(blueprintEndpoint, times(1)).get(anyLong());
     }
@@ -126,14 +126,14 @@ public class BlueprintCommandsTest {
     @Test
     public void testDeleteBlueprintById() throws Exception {
         doNothing().when(blueprintEndpoint).deletePublic(BLUEPRINT_ID.toString());
-        underTest.delete(BLUEPRINT_ID, null);
+        underTest.delete(BLUEPRINT_ID, null, null);
         verify(blueprintEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteBlueprintByName() throws Exception {
         doNothing().when(blueprintEndpoint).deletePublic(BLUEPRINT_NAME);
-        underTest.delete(null, BLUEPRINT_NAME);
+        underTest.delete(null, BLUEPRINT_NAME, null);
         verify(blueprintEndpoint, times(1)).deletePublic(anyString());
     }
 
