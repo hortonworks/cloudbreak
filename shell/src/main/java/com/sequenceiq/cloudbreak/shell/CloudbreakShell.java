@@ -26,6 +26,7 @@ import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.event.ShellStatus;
 import org.springframework.shell.event.ShellStatusListener;
 
+import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
@@ -262,7 +263,12 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     }
 
     private void initEnabledPlatformms() {
-        String[] values = cloudbreakClient.accountPreferencesEndpoint().get().getPlatforms().split(",");
-        context.setEnabledPlatforms(new HashSet<String>(Arrays.asList(values)));
+        AccountPreferencesJson accountPreferencesJson = cloudbreakClient.accountPreferencesEndpoint().get();
+        if (accountPreferencesJson.getPlatforms() != null) {
+            String[] values = accountPreferencesJson.getPlatforms().split(",");
+            context.setEnabledPlatforms(new HashSet<>(Arrays.asList(values)));
+        } else {
+            context.setEnabledPlatforms(null);
+        }
     }
 }
