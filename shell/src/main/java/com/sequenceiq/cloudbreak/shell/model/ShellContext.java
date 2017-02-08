@@ -321,7 +321,7 @@ public class ShellContext {
     }
 
     public boolean isPlatformAvailable(String platform) {
-        return getEnabledPlatforms().contains(platform);
+        return getEnabledPlatforms() == null || getEnabledPlatforms().contains(platform);
     }
 
     public void setEnabledPlatforms(Set<String> enabledPlatforms) {
