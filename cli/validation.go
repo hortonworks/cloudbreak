@@ -230,7 +230,7 @@ func validateSpotRecoveryMode(hostGroup string, recoveryMode string, spotPrice s
 func validateTags(tags map[string]string) []error {
 	var res []error = make([]error, 0)
 
-	pattern := `^[a-zA-Z0-9+ \-=._:/]*$`
+	pattern := `^[a-zA-Z0-9+ \-=.@_:/]*$`
 
 	if len(tags) > 10 {
 		res = append(res, errors.New("Maximum number of tags allowed: 10"))
