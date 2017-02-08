@@ -59,14 +59,6 @@ var (
 			EnvVar: "CB_PASSWORD",
 		},
 	}
-	FlPasswordRequired = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:   "password",
-			Usage:  "password",
-			EnvVar: "CB_PASSWORD",
-		},
-	}
 	FlInputJson = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

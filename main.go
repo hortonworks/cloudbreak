@@ -94,10 +94,10 @@ func main() {
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPasswordRequired, hdc.FlOutput},
+			Flags:  []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword, hdc.FlOutput},
 			Action: hdc.Configure,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPasswordRequired, hdc.FlOutput} {
+				for _, f := range []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword, hdc.FlOutput} {
 					printFlagCompletion(f)
 				}
 			},

@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"errors"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
@@ -19,7 +20,7 @@ const (
 
 type Config struct {
 	Username string `json:"username" yaml:"username"`
-	Password string `json:"password" yaml:"password"`
+	Password string `json:"password,omitempty" yaml:"password,omitempty"`
 	Server   string `json:"server" yaml:"server"`
 	Output   string `json:"output,omitempty" yaml:"output,omitempty"`
 }

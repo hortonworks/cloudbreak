@@ -91,7 +91,7 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 		if err != nil {
 			return "", err
 		}
-		return "", errors.New(fmt.Sprintf("Error while connnecting to %s as user: %s, please check your username and password. (%s)", identityUrl, username, resp.Status))
+		return "", errors.New(fmt.Sprintf("Error while connnecting to %s as user: %s, please check your username and password in %s or use flags for each command. (%s)", identityUrl, username, Hdc_dir+"/"+Config_file, resp.Status))
 	}
 
 	location := resp.Header.Get("Location")
