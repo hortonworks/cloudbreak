@@ -254,7 +254,7 @@
                                                     <tbody>
                                                         <tr ng-repeat="(key, value) in $root.activeCluster.cluster.serviceEndPoints">
                                                             <td data-title="'servicename'" class="col-md-4">{{key}}</td>
-                                                            <td data-title="'address'" class="col-md-3"><a target="_blank" href="{{isVisibleServiceValue(value) ? 'http://'+value : '#' }}">{{isVisibleServiceValue(value) ? value : msg.active_cluster_pending}}</a></td>
+                                                            <td data-title="'address'" class="col-md-3"><a target="_blank" href="{{isVisibleServiceValue(value) ?  value : '#' }}">{{isVisibleServiceValue(value) ? value : msg.active_cluster_pending}}</a></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
