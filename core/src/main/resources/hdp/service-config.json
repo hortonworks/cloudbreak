@@ -28,6 +28,22 @@
       ]
     },
     {
+      "name": "S3",
+      "configurations": [
+        {
+          "type": "core-site",
+          "global": [],
+          "host": [
+            {
+              "name": "fs.s3a.buffer.dir",
+              "prefix": "",
+              "directory": "temp"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "HDFS",
       "configurations": [
         {
