@@ -2,6 +2,7 @@ base:
   '*':
     - ambari.repo
     - ambari.server
+    - hdp.repo
     - nodes.hosts
     - discovery.init
     - recipes.init

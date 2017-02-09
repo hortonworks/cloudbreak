@@ -8,5 +8,7 @@
   "enableSecurity": false,
   "ldapRequired" : false,
   "emailTo": "admin@example.com",
-  "validateBlueprint" : true
+  "validateBlueprint" : true,
+  "enableKnoxGateway" : true,
+  "knoxTopologyName" : "cb"
 }

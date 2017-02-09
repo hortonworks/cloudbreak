@@ -74,6 +74,7 @@ public class ModelDescriptions {
         public static final String PASSWORD = "ambari password";
         public static final String ENABLE_SECURITY = "enable Kerberos security";
         public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
+        public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
         public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
@@ -85,6 +86,7 @@ public class ModelDescriptions {
         public static final String STATUS_REASON = "status message of the stack";
         public static final String STATUS_REQUEST = "status of the scale request";
         public static final String AMBARI_IP = "public ambari ip of the stack";
+        public static final String AMBARI_URL = "public ambari url";
         public static final String NETWORK_ID = "network resource id for the stack";
         public static final String CERTIFICATE = "certificate used by the gateway";
         public static final String CLUSTER_STATUS = "status of the cluster";

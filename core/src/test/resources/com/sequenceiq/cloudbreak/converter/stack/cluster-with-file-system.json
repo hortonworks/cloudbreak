@@ -1,5 +1,7 @@
 {
   "name" : "mycluster",
+  "enableKnoxGateway" : true,
+  "knoxTopologyName" : "cb",
   "emailNeeded" : true,
   "blueprintId": 50,
   "description" : "my cluster description",

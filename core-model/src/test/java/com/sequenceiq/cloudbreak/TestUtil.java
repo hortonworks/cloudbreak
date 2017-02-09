@@ -370,6 +370,8 @@ public class TestUtil {
         cluster.setRdsConfigs(rdsConfigs);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
+        cluster.setEnableKnoxGateway(true);
+        cluster.setKnoxTopologyName("cb");
         Map<String, String> map = new HashMap<>();
         try {
             cluster.setAttributes(new Json(map));

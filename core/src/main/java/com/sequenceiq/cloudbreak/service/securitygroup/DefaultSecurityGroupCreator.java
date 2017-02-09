@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.securitygroup;
 
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.GATEWAY;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.HTTPS;
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.SSH;
+import static com.sequenceiq.cloudbreak.api.model.ExposedService.GATEWAY;
+import static com.sequenceiq.cloudbreak.api.model.ExposedService.HTTPS;
+import static com.sequenceiq.cloudbreak.api.model.ExposedService.SSH;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.service.network.Port;
+import com.sequenceiq.cloudbreak.api.model.Port;
 
 @Service
 public class DefaultSecurityGroupCreator {

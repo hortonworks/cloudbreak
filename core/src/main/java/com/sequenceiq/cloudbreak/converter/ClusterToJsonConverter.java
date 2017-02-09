@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.service.network.ExposedService.SHIPYARD;
+import static com.sequenceiq.cloudbreak.api.model.ExposedService.SHIPYARD;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
+import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
+import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -49,7 +52,6 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
-import com.sequenceiq.cloudbreak.service.network.Port;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -125,6 +127,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
+        clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source));
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source, ambariIp));
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
@@ -156,6 +159,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     private void convertKnox(Cluster source, ClusterResponse clusterResponse) {
         clusterResponse.setEnableKnoxGateway(source.getEnableKnoxGateway());
+        clusterResponse.setKnoxTopologyName(source.getKnoxTopologyName());
         Json exposedJson = source.getExposedKnoxServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
             try {
@@ -217,10 +221,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         List<Port> ports = NetworkUtils.getPorts(Optional.absent());
         collectPortsOfAdditionalServices(result, ambariIp, shipyardEnabled);
         try {
-            List<String> exposedServices = new ArrayList<>();
-            if (cluster.getExposedKnoxServices() != null && cluster.getExposedKnoxServices().getValue() != null) {
-                exposedServices = cluster.getExposedKnoxServices().get(ExposedServices.class).getServices();
-            }
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
             Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);
             for (JsonNode hostGroupNode : hostGroupsNode) {
@@ -237,7 +237,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 for (JsonNode componentNode : componentsNode) {
                     String componentName = componentNode.get("name").asText();
                     StackServiceComponentDescriptor componentDescriptor = stackServiceComponentDescs.get(componentName);
-                    collectServicePorts(result, ports, serviceAddress, componentDescriptor, cluster.getEnableKnoxGateway(), exposedServices);
+                    collectServicePorts(result, ports, serviceAddress, componentDescriptor, cluster);
                 }
             }
         } catch (Exception ex) {
@@ -253,24 +253,49 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
     }
 
-    private void collectServicePorts(Map<String, String> result, List<Port> ports, String address, StackServiceComponentDescriptor componentDescriptor,
-            Boolean knoxGatewayEnabled, List<String> exposedServices) {
+    private void collectServicePorts(Map<String, String> result, List<Port> ports, String serviceAddress,
+            StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
+            List<String> exposedServices = new ArrayList<>();
+            if (cluster.getExposedKnoxServices() != null && cluster.getExposedKnoxServices().getValue() != null) {
+                exposedServices = cluster.getExposedKnoxServices().get(ExposedServices.class).getServices();
+            }
+
             for (Port port : ports) {
                 if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
                     String url;
-                    if (knoxGatewayEnabled) {
-                        url = String.format("https://%s:8443/gateway/hdc%s", address, port.getExposedService().getKnoxUrl());
+                    if (cluster.getEnableKnoxGateway()) {
+                        url = String.format("https://%s:8443/gateway/%s%s", cluster.getAmbariIp(), cluster.getKnoxTopologyName(),
+                                port.getExposedService().getKnoxUrl());
                         if (exposedServices.contains(port.getExposedService().getKnoxService())) {
                             result.put(port.getExposedService().getPortName(), url);
                         }
                     } else {
-                        url = String.format("http://%s:%s%s", address, port.getPort(), port.getExposedService().getPostFix());
+                        url = String.format("http://%s:%s%s", serviceAddress, port.getPort(), port.getExposedService().getPostFix());
                         result.put(port.getExposedService().getPortName(), url);
                     }
                 }
             }
         }
+    }
+
+    private String getAmbariServerUrl(Cluster cluster) {
+        String url;
+        String orchestrator = cluster.getStack().getOrchestrator().getType();
+        if (cluster.getAmbariIp() != null) {
+            if (YARN.equals(orchestrator) || MARATHON.equals(orchestrator)) {
+                url = String.format("http://%s:8080", cluster.getAmbariIp());
+            } else {
+                if (cluster.getEnableKnoxGateway() != null && cluster.getEnableKnoxGateway()) {
+                    url = String.format("https://%s:8443/gateway/%s/ambari/", cluster.getAmbariIp(), cluster.getKnoxTopologyName());
+                } else {
+                    url = String.format("https://%s/ambari/", cluster.getAmbariIp());
+                }
+            }
+        } else {
+            url = null;
+        }
+        return url;
     }
 
 }

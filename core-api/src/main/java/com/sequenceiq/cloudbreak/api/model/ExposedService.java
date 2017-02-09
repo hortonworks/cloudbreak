@@ -1,11 +1,22 @@
-package com.sequenceiq.cloudbreak.service.network;
+package com.sequenceiq.cloudbreak.api.model;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 
 public enum ExposedService {
+
+    ALL("ALL", "ALL", "", "", ""),
     SSH("SSH", "SSH", "", "", ""),
     HTTPS("HTTPS", "HTTPS", "", "", ""),
     GATEWAY("Gateway", "Gateway", "", "", ""),
-    AMBARI("Ambari", "Ambari", "", "AMBARIUI", "/ambari/"),
+    AMBARI("Ambari", "AMBARI_SERVER", "", "AMBARI", "/ambari/"),
+    AMBARIUI("Ambari", "AMBARI_SERVER", "", "AMBARIUI", "/ambari/"),
     CONSUL("Consul", "Consul", "", "", ""),
+    WEBHDFS("WebHDFS", "NAMENODE", "", "WEBHDFS", "/webhdfs/"),
     NAMENODE("Name Node", "NAMENODE", "", "HDFSUI", "/hdfs/"),
     RESOURCEMANAGER_WEB("Resource Manager", "RESOURCEMANAGER", "", "YARNUI", "/yarn/"),
     RESOURCEMANAGER_SCHEDULER("RM Scheduler", "RM Scheduler", "", "", ""),
@@ -16,7 +27,8 @@ public enum ExposedService {
     HBASE_REGION("HBase Region Server", "HBase Region Server", "", "", ""),
     HBASE_REGION_INFO("HBase Region Server Info", "HBase Region Server Info", "", "", ""),
     HIVE_METASTORE("Hive Metastore", "Hive Metastore", "", "", ""),
-    HIVE_SERVER("Hive Server", "ive Server", "", "", ""),
+    HIVE_SERVER("Hive Server", "HIVE_SERVER", "", "", ""),
+    HIVE_SERVER_INTERACTIVE("Hive Server Interactive", "HIVE_SERVER_INTERACTIVE", "", "", ""),
     HIVE_SERVER_HTTP("Hive Server Http", "Hive Server Http", "", "", ""),
     FALCON("Falcon", "FALCON_SERVER", "", "", ""),
     STORM("Storm", "STORM", "", "", ""),
@@ -27,7 +39,7 @@ public enum ExposedService {
     KNOX_GW("Knox GW", "Knox GW", "", "", ""),
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "", "SPARKHISTORYUI", "/sparkhistory/"),
     CONTAINER_LOGS("Container logs", "Container logs", "", "", ""),
-    ZEPPELIN_WEB_SOCKET("Zeppelin web socket", "Zeppelin web socket", "", "", ""),
+    ZEPPELIN_WEB_SOCKET("Zeppelin Web Socket", "ZEPPELIN_MASTER", "", "ZEPPELINWS", "/ws/"),
     ZEPPELIN_UI("Zeppelin UI", "ZEPPELIN_MASTER", "", "ZEPPELINUI", "/zeppelin/"),
     RANGER("Ranger Admin UI", "RANGER_ADMIN", "", "RANGERUI", "/ranger/"),
     KIBANA("Kibana", "KIBANA", "", "", ""),
@@ -47,6 +59,21 @@ public enum ExposedService {
         this.postfix = postFix;
         this.knoxService = knoxService;
         this.knoxUrl = knoxUrl;
+    }
+
+    public static List<ExposedService> filterSupportedKnoxServices() {
+        return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.getKnoxService())).collect(Collectors.toList());
+    }
+
+    public static List<String> getAllKnoxExposed() {
+        List<String> allKnoxExposed = filterSupportedKnoxServices().stream().map(ExposedService::getKnoxService).collect(Collectors.toList());
+        return ImmutableList.copyOf(allKnoxExposed);
+    }
+
+    public static List<String> getAllServiceName() {
+        List<String> allServiceName = Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.getServiceName()))
+                .map(ExposedService::getServiceName).collect(Collectors.toList());
+        return ImmutableList.copyOf(allServiceName);
     }
 
     public String getServiceName() {

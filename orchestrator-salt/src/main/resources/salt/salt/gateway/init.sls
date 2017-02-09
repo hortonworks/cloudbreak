@@ -1,5 +1,8 @@
 {%- from 'gateway/settings.sls' import gateway with context %}
 
+include:
+  - gateway.repo
+
 knox:
   pkg.installed
 
@@ -34,9 +37,9 @@ knox-create-cert:
     - source: salt://gateway/config/gateway-site.xml.j2
     - template: jinja
 
-/usr/hdp/current/knox-server/conf/topologies/hdc.xml:
+/usr/hdp/current/knox-server/conf/topologies/{{ salt['pillar.get']('gateway:topology') }}.xml:
   file.managed:
-    - source: salt://gateway/config/hdc.xml.j2
+    - source: salt://gateway/config/topology.xml.j2
     - template: jinja
     - user: knox
     - group: knox

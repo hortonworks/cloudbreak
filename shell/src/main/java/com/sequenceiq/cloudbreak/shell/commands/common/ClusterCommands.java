@@ -11,12 +11,14 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
 import com.google.common.base.Strings;
+import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
@@ -111,6 +113,8 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
             @CliOption(key = "enableShipyard", help = "Run shipyard in cluster",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableShipyard,
+            @CliOption(key = "enableKnoxGateway", help = "Enable Knox Gateway",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableKnoxGateway,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
@@ -161,6 +165,8 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setEnableSecurity(enableSecurity);
             clusterRequest.setHostGroups(hostGroupList);
             clusterRequest.setBlueprintInputs(new HashSet<>());
+            clusterRequest.setEnableKnoxGateway(enableKnoxGateway);
+            clusterRequest.setExposedKnoxServices(ImmutableList.of(ExposedService.ALL.name()));
 
             if (strategy != null) {
                 clusterRequest.setConfigStrategy(strategy);
@@ -173,7 +179,7 @@ public class ClusterCommands implements BaseCommands {
                 fileSystemRequest.setType(shellContext.getFileSystemType());
 
                 Map<String, String> fileSystemParameters = new HashMap<>();
-                for (String key: shellContext.getFileSystemParameters().keySet()) {
+                for (String key : shellContext.getFileSystemParameters().keySet()) {
                     fileSystemParameters.put(key, (String) shellContext.getFileSystemParameters().get(key));
                 }
                 fileSystemRequest.setProperties(fileSystemParameters);

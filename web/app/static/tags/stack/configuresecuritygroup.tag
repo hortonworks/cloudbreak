@@ -5,6 +5,12 @@
         </select>
     </div>
 </div>
+<div class="form-group" name="cluster_perimeter_security1">
+    <label class="col-sm-3 control-label" for="cluster_perimeter_security">{{msg.cluster_form_enable_perimeter_security}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="cluster_perimeter_security" id="cluster_perimeter_security" ng-model="cluster.enableKnoxGateway">
+    </div>
+</div>
 <div class="form-group" name="cluster_security1">
     <label class="col-sm-3 control-label" for="cluster_security">{{msg.cluster_form_enable_security}}</label>
     <div class="col-sm-8">
