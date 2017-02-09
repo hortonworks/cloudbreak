@@ -43,7 +43,7 @@ public class ScheduledAccountPreferencesValidator {
         for (Stack stack : allAlive) {
             AccountPreferences preferences = getAccountPreferences(stack.getAccount(), accountPreferences);
             try {
-                preferencesValidator.validateClusterTimeToLive(stack.getCreated(), preferences);
+                preferencesValidator.validateClusterTimeToLive(stack.getCreated(), preferences.getClusterTimeToLive());
                 preferencesValidator.validateUserTimeToLive(stack.getOwner(), preferences);
             } catch (AccountPreferencesValidationFailed e) {
                 terminateStack(stack);

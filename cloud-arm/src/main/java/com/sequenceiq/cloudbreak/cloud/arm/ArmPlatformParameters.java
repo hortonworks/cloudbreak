@@ -22,6 +22,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
@@ -178,6 +179,7 @@ public class ArmPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
+        additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL, false, String.class, Optional.absent()));
         additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.absent()));
         additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,

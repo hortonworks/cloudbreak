@@ -103,8 +103,7 @@ public class AccountPreferencesValidator {
         }
     }
 
-    public void validateClusterTimeToLive(Long created, AccountPreferences preferences) throws AccountPreferencesValidationFailed {
-        Long clusterTimeToLive = preferences.getClusterTimeToLive();
+    public void validateClusterTimeToLive(Long created, Long clusterTimeToLive) throws AccountPreferencesValidationFailed {
         if (needToValidateField(clusterTimeToLive)) {
             long now = Calendar.getInstance().getTimeInMillis();
             long clusterRunningTime = now - created;
