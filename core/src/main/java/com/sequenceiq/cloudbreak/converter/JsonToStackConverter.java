@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -91,6 +92,9 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
             containerOrchestrator = orchestratorTypeResolver.resolveType(source.getOrchestrator().getType()).containerOrchestrator();
         } catch (CloudbreakException e) {
             throw new BadRequestException("Orchestrator not supported.");
+        }
+        if (OrchestratorConstants.YARN.equals(source.getOrchestrator().getType())) {
+            return OrchestratorConstants.YARN;
         }
         if (isEmpty(source.getRegion()) && !containerOrchestrator) {
             Map<Platform, Region> regions = Maps.newHashMap();

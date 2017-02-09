@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
-import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
@@ -82,6 +81,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Override
     public ClusterResponse convert(Cluster source) {
         ClusterResponse clusterResponse = new ClusterResponse();
@@ -117,7 +119,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setAttributes(source.getAttributes().getMap());
         }
 
-        String ambariIp = getAmbariIp(source);
+        String ambariIp = stackUtil.extractAmbariIp(source.getStack());
         clusterResponse.setAmbariServerIp(ambariIp);
         clusterResponse.setUserName(source.getUserName());
         clusterResponse.setPassword(source.getPassword());
@@ -163,20 +165,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
             }
         }
-    }
-
-    private String getAmbariIp(Cluster cluster) {
-        String ambariIp = null;
-        try {
-            if (!orchestratorTypeResolver.resolveType(cluster.getStack().getOrchestrator()).containerOrchestrator()) {
-                return StackUtil.extractAmbariIp(cluster.getStack());
-            } else {
-                ambariIp = cluster.getAmbariIp();
-            }
-        } catch (CloudbreakException e) {
-            ambariIp = cluster.getAmbariIp();
-        }
-        return ambariIp;
     }
 
     private Cluster provideViewDefinitions(Cluster source) {

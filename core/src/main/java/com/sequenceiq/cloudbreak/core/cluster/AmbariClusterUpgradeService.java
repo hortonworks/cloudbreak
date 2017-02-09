@@ -55,6 +55,9 @@ public class AmbariClusterUpgradeService {
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void upgradeCluster(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = stack.getCluster();
@@ -77,7 +80,7 @@ public class AmbariClusterUpgradeService {
                     servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
                 }
                 SaltPillarConfig pillar = new SaltPillarConfig(servicePillar);
-                hostOrchestrator.upgradeAmbari(gatewayConfig, gatewayFQDN, StackUtil.collectNodes(stack), pillar, exitCriteriaModel);
+                hostOrchestrator.upgradeAmbari(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), pillar, exitCriteriaModel);
             } else {
                 throw new UnsupportedOperationException("Ambari upgrade works only with host orchestrator");
             }

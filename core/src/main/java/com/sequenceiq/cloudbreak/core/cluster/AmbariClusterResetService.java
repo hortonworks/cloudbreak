@@ -40,6 +40,9 @@ public class AmbariClusterResetService {
     @Inject
     private StackRepository stackRepository;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void resetCluster(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         try {
@@ -51,7 +54,7 @@ public class AmbariClusterResetService {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
                 ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId());
-                hostOrchestrator.resetAmbari(gatewayConfig, gatewayFQDN, StackUtil.collectNodes(stack), exitCriteriaModel);
+                hostOrchestrator.resetAmbari(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), exitCriteriaModel);
             } else {
                 throw new UnsupportedOperationException("ambari reset cluster works only with host orchestrator");
             }

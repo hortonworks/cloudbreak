@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Cluster> {
 
@@ -93,6 +94,9 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     @Mock
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
+    @Mock
+    private StackUtil stackUtil;
+
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
     @Before
@@ -109,6 +113,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         mockAll();
         getSource().setConfigStrategy(ConfigStrategy.NEVER_APPLY);
         given(stackServiceComponentDescs.get(anyString())).willReturn(stackServiceComponentDescriptor);
+        given(stackUtil.extractAmbariIp(any(Stack.class))).willReturn("10.0.0.1");
         // WHEN
         ClusterResponse result = underTest.convert(getSource());
         // THEN
