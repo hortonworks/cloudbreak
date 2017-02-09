@@ -48,6 +48,9 @@ public class ClusterCreationService {
     @Inject
     private ClusterTerminationService clusterTerminationService;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void bootstrappingMachines(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_MACHINES);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_BOOTSTRAP, UPDATE_IN_PROGRESS.name());
@@ -80,13 +83,13 @@ public class ClusterCreationService {
     public void installingCluster(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
                 String.format("Building the Ambari cluster. Ambari ip:%s", stack.getAmbariIp()));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILDING, UPDATE_IN_PROGRESS.name(), StackUtil.extractAmbariIp(stack));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILDING, UPDATE_IN_PROGRESS.name(), stackUtil.extractAmbariIp(stack));
     }
 
     public void clusterInstallationFinished(Stack stack, Cluster cluster) {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), StackUtil.extractAmbariIp(stack));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILT, AVAILABLE.name(), stackUtil.extractAmbariIp(stack));
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendProvisioningSuccessEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), stack.getAmbariIp(), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());

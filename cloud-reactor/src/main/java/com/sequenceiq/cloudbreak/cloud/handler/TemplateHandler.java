@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateRequest
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformTemplateResult;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 import reactor.bus.Event;
 
@@ -30,16 +31,18 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
     public void accept(Event<GetPlatformTemplateRequest> platformTemplateRequestEvent) {
         LOGGER.info("Received event: {}", platformTemplateRequestEvent);
         GetPlatformTemplateRequest request = platformTemplateRequestEvent.getData();
-        String template;
-        try {
-            CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
-            if (connector != null) {
-                template = connector.resources().getStackTemplate();
-            } else {
-                throw new TemplatingDoesNotSupportedException();
+        String template = null;
+        if (!request.getCloudContext().getPlatformVariant().getVariant().value().equals(CloudConstants.BYOS)) {
+            try {
+                CloudConnector connector = cloudPlatformConnectors.get(request.getCloudContext().getPlatformVariant());
+                if (connector != null) {
+                    template = connector.resources().getStackTemplate();
+                } else {
+                    throw new TemplatingDoesNotSupportedException();
+                }
+            } catch (TemplatingDoesNotSupportedException e) {
+                template = null;
             }
-        } catch (TemplatingDoesNotSupportedException e) {
-            template = null;
         }
         GetPlatformTemplateResult getPlatformTemplateResult = new GetPlatformTemplateResult(request, template);
         request.getResult().onNext(getPlatformTemplateResult);
