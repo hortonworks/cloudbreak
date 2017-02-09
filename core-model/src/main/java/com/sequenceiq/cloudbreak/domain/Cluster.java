@@ -160,6 +160,8 @@ public class Cluster implements ProvisionEntity {
     @Column(nullable = false)
     private Boolean enableKnoxGateway;
 
+    private String knoxTopologyName;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json exposedKnoxServices;
@@ -468,6 +470,14 @@ public class Cluster implements ProvisionEntity {
 
     public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
         this.enableKnoxGateway = enableKnoxGateway;
+    }
+
+    public String getKnoxTopologyName() {
+        return knoxTopologyName;
+    }
+
+    public void setKnoxTopologyName(String knoxTopologyName) {
+        this.knoxTopologyName = knoxTopologyName;
     }
 
     public Json getExposedKnoxServices() {

@@ -48,6 +48,9 @@ public class ClusterResponse {
     @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_IP)
     private String ambariServerIp;
 
+    @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_URL)
+    private String ambariServerUrl;
+
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME)
     private String userName;
 
@@ -99,6 +102,9 @@ public class ClusterResponse {
 
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_KNOX_GATEWAY)
     private Boolean enableKnoxGateway;
+
+    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KNOX_TOPOLOGY_NAME)
+    private String knoxTopologyName;
 
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.EXPOSED_KNOX_SERVICES)
     private List<String> exposedKnoxServices;
@@ -224,6 +230,14 @@ public class ClusterResponse {
         this.ambariServerIp = ambariServerIp;
     }
 
+    public String getAmbariServerUrl() {
+        return ambariServerUrl;
+    }
+
+    public void setAmbariServerUrl(String ambariServerUrl) {
+        this.ambariServerUrl = ambariServerUrl;
+    }
+
     public Set<Long> getRdsConfigIds() {
         return rdsConfigIds;
     }
@@ -335,6 +349,14 @@ public class ClusterResponse {
 
     public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
         this.enableKnoxGateway = enableKnoxGateway;
+    }
+
+    public String getKnoxTopologyName() {
+        return knoxTopologyName;
+    }
+
+    public void setKnoxTopologyName(String knoxTopologyName) {
+        this.knoxTopologyName = knoxTopologyName;
     }
 
     public List<String> getExposedKnoxServices() {

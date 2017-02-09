@@ -492,6 +492,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     password: $scope.cluster.password,
                     userName: $scope.cluster.userName,
                     enableSecurity: $scope.cluster.enableSecurity || false,
+                    enableKnoxGateway: $scope.cluster.enableKnoxGateway || false,
+                    exposedKnoxServices: ['ALL'],
                     validateBlueprint: $scope.cluster.validateBlueprint,
                     imageId:  $scope.cluster.imageId || null,
                     fileSystem: $scope.cluster.fileSystem || null,
@@ -836,6 +838,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.orchestrator = {};
                 $scope.cluster.availabilityZone = null;
                 $scope.cluster.region = null;
+                $scope.cluster.enableKnoxGateway = false;
+                $scope.cluster.exposedKnoxServices = ['ALL'];
                 delete $scope.cluster.hostGroups;
                 delete $scope.cluster.instanceGroups;
                 delete $scope.cluster.blueprintId;
@@ -1194,6 +1198,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 onFailureAction: "DO_NOTHING",
                 bestEffort: "BEST_EFFORT",
                 validateBlueprint: true,
+                enableKnoxGateway: false,
+                exposedKnoxServices: ['ALL'],
                 parameters: {},
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
@@ -1338,10 +1344,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             });
             return result
-        }
-
-        $scope.noProxyBeforeAmbari = function() {
-            return $rootScope.activeCluster.orchestrator.type === 'MARATHON' || $rootScope.activeCluster.orchestrator.type === 'YARN' || $rootScope.activeCluster.cloudbreakDetails === null || !$rootScope.activeCluster.cloudbreakDetails
         }
 
         $scope.getUserDefinedTags = function() {

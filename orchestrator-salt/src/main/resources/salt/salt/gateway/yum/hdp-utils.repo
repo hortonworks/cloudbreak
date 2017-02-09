@@ -1,0 +1,8 @@
+[{{ salt['pillar.get']('hdp:util:repoid') }}]
+name={{ salt['pillar.get']('hdp:util:repoid') }}
+{% set active_util = 'hdp:util:redhat' + grains['osmajorrelease'] -%}
+baseurl={{ salt['pillar.get'](active_util) }}
+
+path=/
+enabled=1
+gpgcheck=0

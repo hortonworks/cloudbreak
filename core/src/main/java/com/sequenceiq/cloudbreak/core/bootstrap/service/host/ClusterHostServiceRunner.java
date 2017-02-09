@@ -15,13 +15,16 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -46,6 +49,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
+import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 
@@ -80,14 +84,17 @@ public class ClusterHostServiceRunner {
     private BlueprintProcessor blueprintProcessor;
 
     @Inject
+    private ComponentLocatorService componentLocator;
+
+    @Inject
     private BlueprintUtils blueprintUtils;
 
-    public void runAmbariServices(Stack stack) throws CloudbreakException {
+    @Transactional
+    public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
             Set<Node> nodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack);
-            Cluster cluster = stack.getCluster();
             Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
             if (cluster.isSecure()) {
                 Map<String, Object> krb = new HashMap<>();
@@ -113,6 +120,7 @@ public class ClusterHostServiceRunner {
             if (ldapConfig != null && blueprintUtils.containsComponent(cluster.getBlueprint(), "KNOX_GATEWAY")) {
                 servicePillar.put("ldap", new SaltPillarProperties("/ldap/init.sls", singletonMap("ldap", ldapConfig)));
             }
+            saveHDPPillar(stack.getId(), servicePillar);
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
             hostOrchestrator.runService(gatewayConfig, nodes, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -122,11 +130,12 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {
+    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
+        gateway.put("topology", cluster.getKnoxTopologyName());
 
         Json exposedJson = cluster.getExposedKnoxServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
@@ -138,7 +147,14 @@ public class ClusterHostServiceRunner {
         } else {
             gateway.put("exposed", new ArrayList<>());
         }
+        Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
+        gateway.put("location", serviceLocation);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private void saveHDPPillar(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
+        HDPRepo hdprepo = componentConfigProvider.getHDPRepo(stackId);
+        servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
 
     public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
