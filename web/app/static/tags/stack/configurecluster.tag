@@ -125,6 +125,19 @@
         <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
     </div>
 </div>
+<div class="form-group" ng-show="showAdvancedOptionForm">
+    <label class="col-sm-3 control-label" for="cluster_enableLifetime">{{msg.cluster_form_enable_lifetime_label}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="cluster_enableLifetime" id="cluster_enableLifetime" ng-model="enableLifetime" ng-change="delTimetolive(enableLifetime)">
+    </div>
+</div>
+<div class="form-group" ng-show="showAdvancedOptionForm && enableLifetime" ng-class="{ 'has-error': clusterCreationForm.cl_timetolive.$dirty && clusterCreationForm.cl_timetolive.$invalid }">
+    <label class="col-sm-3 control-label" for="cl_timetolive">{{msg.cluster_form_lifetime_label}}</label>
+    <div class="col-sm-8">
+        <input type="number" name="cl_timetolive" class="form-control" id="cl_timetolive" placeholder="" ng-model="cluster.parameters.timetolive" min="1">
+        </div>
+    </div>
+</div>
 
 
 

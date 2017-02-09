@@ -561,6 +561,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 if (cluster.parameters[item] === "" || cluster.parameters[item] === undefined) {
                     delete cluster.parameters[item];
                 }
+                if (item === "timetolive") {
+                    cluster.parameters[item] = cluster.parameters[item] * 60 * 1000;
+                }
+            }
+        }
+
+        $scope.delTimetolive = function(enabled) {
+            if (!enabled) {
+                delete $scope.cluster.parameters.timetolive
             }
         }
 
