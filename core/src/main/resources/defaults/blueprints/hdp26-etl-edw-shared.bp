@@ -21,18 +21,6 @@
       "referenceConfiguration":"xasecure.audit.destination.solr.zookeepers"
     },
     {
-      "name":"KAFKA_SERVERS",
-      "referenceConfiguration":"atlas.kafka.bootstrap.servers"
-    },
-    {
-      "name":"SOLR_ZOOKEPERS_SERVERS",
-      "referenceConfiguration":"atlas.kafka.zookeeper.connect"
-    },
-    {
-      "name":"ATLAS_REST_ADDRESS",
-      "referenceConfiguration":"atlas.rest.address"
-    },
-    {
       "name":"LDAP_BIND_DN",
       "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
     },
@@ -47,10 +35,6 @@
     {
       "name":"ADMIN_USERNAME",
       "referenceConfiguration":"admin_username"
-    },
-    {
-      "name":"ADMIN_PASSWORD",
-      "referenceConfiguration":"admin_password"
     },
     {
       "name":"RANGER_ADMIN_USERNAME",
@@ -99,10 +83,10 @@
       {
         "ranger-hive-plugin-properties": {
           "properties": {
-            "external_admin_username": "{{ ADMIN_USERNAME }}",
-            "external_admin_password": "{{ ADMIN_PASSWORD}}",
-            "external_ranger_admin_username": "{{ RANGER_ADMIN_USERNAME }}",
-            "external_ranger_admin_password": "{{ RANGER_ADMIN_PASSWORD }}"
+            "external_admin_username":"{{ ADMIN_USERNAME }}",
+            "external_admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
+            "external_ranger_admin_username":"{{ RANGER_ADMIN_USERNAME }}",
+            "external_ranger_admin_password":"{{ RANGER_ADMIN_PASSWORD }}"
           }
         }
       },
@@ -141,17 +125,6 @@
           "xasecure.audit.destination.hdfs":"false",
           "xasecure.audit.destination.solr":"true",
           "xasecure.audit.destination.solr.zookeepers":"{{ SOLR_ZOOKEPERS_URL }}"
-        }
-      },
-      {
-        "application-properties":{
-          "atlas.cluster.name":"{{ REMOTE_CLUSTER_NAME }}",
-          "atlas.kafka.bootstrap.servers":"{{ KAFKA_SERVERS }}",
-          "atlas.kafka.zookeeper.connect":"{{ SOLR_ZOOKEPERS_SERVERS }}",
-          "atlas.kafka.zookeeper.connection.timeout.ms":"20000",
-          "atlas.kafka.zookeeper.session.timeout.ms":"40000",
-          "atlas.rest.address":"{{ ATLAS_REST_ADDRESS }}",
-          "atlas.notification.embedded": "true"
         }
       },
       {
@@ -272,25 +245,10 @@
             "name":"ZOOKEEPER_SERVER"
           },
           {
-            "name":"HBASE_MASTER"
-          },
-          {
             "name":"INFRA_SOLR_CLIENT"
           },
           {
             "name":"INFRA_SOLR"
-          },
-          {
-            "name":"KAFKA_BROKER"
-          },
-          {
-            "name":"ATLAS_SERVER"
-          },
-          {
-            "name":"HBASE_CLIENT"
-          },
-          {
-            "name":"ATLAS_CLIENT"
           },
           {
             "name" : "DRUID_OVERLORD",
@@ -334,15 +292,6 @@
           },
           {
             "name":"INFRA_SOLR_CLIENT"
-          },
-          {
-            "name":"HBASE_REGIONSERVER"
-          },
-          {
-            "name":"HBASE_CLIENT"
-          },
-          {
-            "name":"ATLAS_CLIENT"
           },
           {
             "name": "DRUID_HISTORICAL"

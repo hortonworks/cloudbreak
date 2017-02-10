@@ -111,7 +111,6 @@
             "db_password":"{{ RANGER_DB_PASSWORD }}",
             "db_name":"{{ RANGER_DB_NAME }}",
             "db_host":"{{ RANGER_DB_HOST }}",
-            "policymgr_external_url":"http://%HOSTGROUP::master%:6080",
             "DB_FLAVOR":"POSTGRES"
           }
         }
@@ -119,6 +118,7 @@
       {
         "ranger-env":{
           "properties":{
+            "admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
             "ranger_admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
             "is_solrCloud_enabled":"true",
             "ranger-hdfs-plugin-enabled":"No",
@@ -126,7 +126,7 @@
             "ranger-yarn-plugin-enabled":"No",
             "xasecure.audit.destination.hdfs.dir":"hdfs://%HOSTGROUP::master%:8020/ranger/audit",
             "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}",
-            "ranger-atlas-plugin-enabled":"Yes"
+            "ranger-atlas-plugin-enabled":"No"
           }
         }
       },
@@ -151,23 +151,6 @@
             "ranger.ldap.ad.domain":"{{ LDAP_DOMAIN }}",
             "ranger.ldap.ad.base.dn":"{{ LDAP_SYNC_SEARCH_BASE }}"
           }
-        }
-      },
-      {
-        "application-properties":{
-          "atlas.authentication.method.ldap.ad.bind.dn":"{{ LDAP_BIND_DN }}",
-          "atlas.authentication.method.ldap.type":"ad",
-          "atlas.authentication.method.ldap":"true",
-          "atlas.authentication.method.ldap.ad.url":"{{ LDAP_URL }}",
-          "atlas.authentication.method.ldap.ad.base.dn":"{{ LDAP_SYNC_SEARCH_BASE }}",
-          "atlas.authentication.method.ldap.ad.domain":"{{ LDAP_DOMAIN }}",
-          "atlas.authentication.method.ldap.ugi-groups":"false",
-          "atlas.authorizer.impl":"ranger"
-        }
-      },
-      {
-        "ranger-atlas-plugin-properties":{
-          "ranger-atlas-plugin-enabled":"Yes"
         }
       }
     ],
@@ -227,12 +210,6 @@
             "name":"SECONDARY_NAMENODE"
           },
           {
-            "name":"SPARK_CLIENT"
-          },
-          {
-            "name":"SPARK_JOBHISTORYSERVER"
-          },
-          {
             "name":"SQOOP"
           },
           {
@@ -264,21 +241,6 @@
           },
           {
             "name":"INFRA_SOLR"
-          },
-          {
-            "name":"HBASE_MASTER"
-          },
-          {
-            "name":"KAFKA_BROKER"
-          },
-          {
-            "name":"ATLAS_SERVER"
-          },
-          {
-            "name":"HBASE_CLIENT"
-          },
-          {
-            "name":"ATLAS_CLIENT"
           }
         ],
         "cardinality":"1"
@@ -306,15 +268,6 @@
           },
           {
             "name":"INFRA_SOLR_CLIENT"
-          },
-          {
-            "name":"HBASE_REGIONSERVER"
-          },
-          {
-            "name":"HBASE_CLIENT"
-          },
-          {
-            "name":"ATLAS_CLIENT"
           }
         ],
         "cardinality":"1+"
@@ -328,9 +281,6 @@
           },
           {
             "name": "TEZ_CLIENT"
-          },
-          {
-            "name": "SPARK_CLIENT"
           },
           {
             "name": "METRICS_MONITOR"
