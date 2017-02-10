@@ -1,10 +1,12 @@
 ##Creating the aws-zone-vm.json files
 
-1. Download https://pricing.us-east-1.amazonaws.com/offers/v1.0/aws/index.json
-2. cat [downloaded index file]  | jq '.products | .[] |  | select(.productFamily!=null and .productFamily=="Compute Instance") | .attributes | {location, instanceType} | select(.location!=null and .instanceType !=null)' | jq --slurp '. | group_by(.location) | .[] | {(.[0].location): [map(.instanceType)|sort|unique]} '
-3. Change region names to region ids
-4. put "zone": before the zones
-5. define default vm types
+from the cloud-aws directory run the following make command:
+
+```
+make generate-zone-vms
+```
+
+##Currently supported regions: X means not supported:
 
 - ap-south-1 - Asia Pacific (Mumbai) X
 - ap-northeast-2 - Asia Pacific (Seoul)
