@@ -273,13 +273,13 @@ util-cloudbreak-shell-remote(){
 
     cloudbreak-config
 
-    echo "If you want to run CloudbreakShell on your local machine then please copy and paste the next command:"
+    echo "If you want to run CloudbreakShell on your local machine then please copy and paste the next command and fill your password:"
     echo docker run -it \
         --rm --name cloudbreak-shell \
         -e CLOUDBREAK_ADDRESS=\'https://$PUBLIC_IP\' \
         -e IDENTITY_ADDRESS=\'https://$PUBLIC_IP/identity\' \
         -e SEQUENCEIQ_USER=\'$UAA_DEFAULT_USER_EMAIL\' \
-        -e SEQUENCEIQ_PASSWORD=\'$(escape-string-env $UAA_DEFAULT_USER_PW \')\' \
+        -e SEQUENCEIQ_PASSWORD=\'****\' \
         -w /data \
         -v $PWD:/data \
         $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL --cert.validation=false
@@ -295,6 +295,12 @@ _cloudbreak-shell() {
 
     cloudbreak-config
 
+    local passwd="$UAA_DEFAULT_USER_PW"
+    if ! [[ "$passwd" ]]; then
+        read -s -t 10 -p "password:" passwd
+        echo
+    fi
+
     docker run "$@" \
         --name cloudbreak-shell \
         --label cbreak.sidekick=true \
@@ -302,7 +308,7 @@ _cloudbreak-shell() {
         -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
         -e IDENTITY_ADDRESS=http://identity.service.consul:$UAA_PORT \
         -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
-        -e SEQUENCEIQ_PASSWORD="$UAA_DEFAULT_USER_PW" \
+        -e SEQUENCEIQ_PASSWORD="$passwd" \
         -w /data \
         -v $PWD:/data \
         $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL
@@ -475,10 +481,17 @@ util-token() {
     declare desc="Generates an OAuth token with CloudbreakShell scopes"
 
     cloudbreak-config
+
+    local passwd="$UAA_DEFAULT_USER_PW"
+    if ! [[ "$passwd" ]]; then
+        read -s -t 10 -p "password:" passwd
+        echo
+    fi
+
     local TOKEN=$(curl -sX POST \
         -w '%{redirect_url}' \
         -H "accept: application/x-www-form-urlencoded" \
-        --data-urlencode credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${UAA_DEFAULT_USER_PW}'"}' \
+        --data-urlencode credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${passwd}'"}' \
         "${PUBLIC_IP}:${UAA_PORT}/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | cut -d'&' -f 2)
     echo ${TOKEN#*=}
