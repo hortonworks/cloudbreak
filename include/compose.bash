@@ -306,7 +306,7 @@ mail:
     environment:
         - SERVICE_NAME=smtp
         - maildomain=example.com
-        - 'smtp_user=admin:$(escape-string-compose-yaml $UAA_DEFAULT_USER_PW \')'
+        - 'smtp_user=admin:$(escape-string-compose-yaml $LOCAL_SMTP_PASSWORD \')'
     image: catatnight/postfix:$DOCKER_TAG_POSTFIX
 
 uaadb:

@@ -99,8 +99,13 @@ cloudbreak-conf-images() {
 }
 
 cloudbreak-conf-smtp() {
+    env-import LOCAL_SMTP_PASSWORD "$UAA_DEFAULT_USER_PW"
+    if ! [[ "$LOCAL_SMTP_PASSWORD" ]]; then
+        LOCAL_SMTP_PASSWORD="cloudbreak"
+    fi
+
     env-import CLOUDBREAK_SMTP_SENDER_USERNAME "admin"
-    env-import CLOUDBREAK_SMTP_SENDER_PASSWORD "$UAA_DEFAULT_USER_PW"
+    env-import CLOUDBREAK_SMTP_SENDER_PASSWORD "$LOCAL_SMTP_PASSWORD"
     env-import CLOUDBREAK_SMTP_SENDER_HOST "smtp.service.consul"
     env-import CLOUDBREAK_SMTP_SENDER_PORT 25
     env-import CLOUDBREAK_SMTP_SENDER_FROM "noreply@hortonworks.com"
