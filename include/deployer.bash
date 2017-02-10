@@ -357,9 +357,11 @@ deployer-login() {
     mkdir -p $HOME/.hdc
     cat > $HOME/.hdc/config <<EOF
 username: $UAA_DEFAULT_USER_EMAIL
-password: "$(escape-string-yaml $UAA_DEFAULT_USER_PW \")"
 server: $ULU_HOST_ADDRESS
 EOF
+    if [[ "$UAA_DEFAULT_USER_PW" ]]; then
+        echo "password: \"$(escape-string-yaml $UAA_DEFAULT_USER_PW \")\"" >> $HOME/.hdc/config
+    fi
 
 }
 
