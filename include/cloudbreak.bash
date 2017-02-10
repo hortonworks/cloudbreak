@@ -190,6 +190,8 @@ cloudbreak-conf-uaa() {
     env-import UAA_DEFAULT_USER_FIRSTNAME Joe
     env-import UAA_DEFAULT_USER_LASTNAME Admin
     env-import UAA_ZONE_DOMAIN example.com
+
+    env-import UAA_DEFAULT_USER_GROUPS "openid,cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read"
 }
 
 cloudbreak-conf-defaults() {
@@ -407,7 +409,6 @@ generate_uaa_config() {
     fi
 }
 
-
 generate_uaa_config_force() {
     declare uaaFile=${1:? required: uaa config file path}
 
@@ -471,11 +472,75 @@ oauth:
 
 scim:
   username_pattern: '[a-z0-9+\-_.@]+'
-  users:
-    - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|openid,cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.seq1234567.SequenceIQ,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
-
+  groups:
 EOF
+    for group in ${UAA_DEFAULT_USER_GROUPS//,/ }; do
+        echo "    $group: Default group" >> ${uaaFile}
+    done
+    if [[ "$UAA_DEFAULT_USER_PW" ]]; then
+        cat >> ${uaaFile} << EOF
+  users:
+    - ${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_PW}|${UAA_DEFAULT_USER_EMAIL}|${UAA_DEFAULT_USER_FIRSTNAME}|${UAA_DEFAULT_USER_LASTNAME}|${UAA_DEFAULT_USER_GROUPS}
+EOF
+    fi
 }
+
+escape-string-json() {
+    declare desc="Escape json string"
+    : ${1:=required}
+    local in=$1
+
+    out=`echo $in | sed -e 's/\\\\/\\\\\\\/g' -e 's/"/\\\"/g'`
+
+    echo $out
+}
+
+util-add-default-user() {
+    declare desc="Add default admin Cloudbreak user"
+    
+    cloudbreak-config
+
+    if ! [[ "$UAA_DEFAULT_USER_PW" ]];then
+        echo "[ERROR] Password is missing, please set UAA_DEFAULT_USER_PW variable" | red 1>&2
+        _exit 1
+    fi
+
+    local address="http://$PUBLIC_IP:$UAA_PORT"
+    local bearer=$(curl -s "$address/oauth/token?grant_type=client_credentials&token_format=opaque" -u "${UAA_SULTANS_ID}:${UAA_CLOUDBREAK_SECRET}" | jq -r .access_token 2>/dev/null)
+    local user=$(curl -s $address/Users -X POST -H 'Accept: application/json' -H "Authorization: Bearer $bearer" -H 'Content-Type: application/json' -d @- < <(cat <<EOF
+{
+  "userName" : "${UAA_DEFAULT_USER_EMAIL}",
+  "name" : {
+    "formatted" : "${UAA_DEFAULT_USER_FIRSTNAME} ${UAA_DEFAULT_USER_LASTNAME}",
+    "familyName" : "${UAA_DEFAULT_USER_LASTNAME}",
+    "givenName" : "${UAA_DEFAULT_USER_FIRSTNAME}"
+  },
+  "emails" : [ {
+    "value" : "${UAA_DEFAULT_USER_EMAIL}",
+    "primary" : true
+  } ],
+  "active" : true,
+  "verified" : true,
+  "password" : "$(escape-string-json $UAA_DEFAULT_USER_PW)",
+  "schemas" : [ "urn:scim:schemas:core:1.0" ]
+}
+EOF
+))
+
+    local user_id=$(echo $user | jq -r .id 2> /dev/null)
+    if [[ "$user_id" != "null" ]]; then
+        local groups=$(curl -s "$address/Groups" -H "Authorization: Bearer $bearer" | jq ".resources[] | {id, displayName}")
+        for group in ${UAA_DEFAULT_USER_GROUPS//,/ }; do
+            debug "Adding user to group $group"
+            group_id=$(echo $groups | jq . | grep -B2 -A1 "\"$group\"" | jq -r .id)
+            curl -s "$address/Groups/$group_id/members" -X POST -H "Authorization: Bearer $bearer" -H 'Content-Type: application/json' -d "{\"origin\":\"uaa\",\"type\":\"USER\",\"value\":\"$user_id\"}" &>/dev/null
+        done
+    else
+        echo "[ERROR] ${user}" | red 1>&2
+        _exit 1
+    fi
+}
+
 
 util-token() {
     declare desc="Generates an OAuth token with CloudbreakShell scopes"
