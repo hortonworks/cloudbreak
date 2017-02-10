@@ -6,4 +6,4 @@ UPDATE cluster SET attributes = NULL;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-
+UPDATE cluster SET attributes = NULL;
