@@ -80,11 +80,11 @@ var (
 			Usage: "name of a cluster",
 		},
 	}
-	FlWait = StringFlag{
+	FlWait = BoolFlag{
 		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
+		BoolFlag: cli.BoolFlag{
 			Name:  "wait",
-			Usage: "wait for the operation to finish",
+			Usage: "wait for the operation to finish, no argument required",
 		},
 	}
 	FlRemoveOnly = StringFlag{
