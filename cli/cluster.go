@@ -430,11 +430,7 @@ func repairClusterImp(clusterName string, nodeType string, removeOnly bool,
 
 func ResizeCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "resize cluster")
-
-	clusterName := c.String(FlClusterName.Name)
-	if len(clusterName) == 0 {
-		logMissingParameterAndExit(c, []string{FlClusterName.Name})
-	}
+	checkRequiredFlags(c)
 
 	adjustment := int32(c.Int(FlScalingAdjustment.Name))
 	if adjustment == 0 {
@@ -448,6 +444,7 @@ func ResizeCluster(c *cli.Context) error {
 
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
+	clusterName := c.String(FlClusterName.Name)
 	stack := resizeClusterImpl(clusterName, nodeType, adjustment,
 		oAuth2Client.GetClusterByName,
 		oAuth2Client.Cloudbreak.Stacks.PutStacksID,
