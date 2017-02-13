@@ -22,8 +22,10 @@ public class HostGroupAdjustmentJson {
     @ApiModelProperty(HostGroupAdjustmentModelDescription.WITH_STACK_UPDATE)
     private Boolean withStackUpdate = Boolean.FALSE;
 
-    public HostGroupAdjustmentJson() {
+    @ApiModelProperty(HostGroupAdjustmentModelDescription.VALIDATE_NODE_COUNT)
+    private Boolean validateNodeCount = Boolean.TRUE;
 
+    public HostGroupAdjustmentJson() {
     }
 
     public String getHostGroup() {
@@ -50,4 +52,11 @@ public class HostGroupAdjustmentJson {
         this.withStackUpdate = withStackUpdate;
     }
 
+    public Boolean getValidateNodeCount() {
+        return validateNodeCount;
+    }
+
+    public void setValidateNodeCount(Boolean validateNodeCount) {
+        this.validateNodeCount = validateNodeCount;
+    }
 }

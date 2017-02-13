@@ -784,14 +784,17 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private void validateRegisteredHosts(Stack stack, HostGroupAdjustmentJson hostGroupAdjustment) {
-        Set<HostMetadata> hostMetadata = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupAdjustment.getHostGroup())
-                .getHostMetadata();
-        if (hostMetadata.size() <= -1 * hostGroupAdjustment.getScalingAdjustment()) {
-            String errorMessage = String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]",
-                    hostGroupAdjustment.getHostGroup(), hostMetadata.size(), -1 * hostGroupAdjustment.getScalingAdjustment());
-            throw new BadRequestException(String.format(
-                    "The host group must contain at least 1 host after the decommission: %s",
-                    errorMessage));
+        String hostGroup = hostGroupAdjustment.getHostGroup();
+        int hostsCount = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroup).getHostMetadata().size();
+        int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
+        Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
+        if (validateNodeCount == null || validateNodeCount) {
+            if (hostsCount <= adjustment) {
+                String errorMessage = String.format("[hostGroup: '%s', current hosts: %s, decommissions requested: %s]", hostGroup, hostsCount, adjustment);
+                throw new BadRequestException(String.format("The host group must contain at least 1 host after the decommission: %s", errorMessage));
+            }
+        } else if (hostsCount - adjustment < 0) {
+            throw new BadRequestException(String.format("There are not enough hosts in host group: %s to remove", hostGroup));
         }
     }
 
