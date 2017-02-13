@@ -273,6 +273,7 @@ public class ModelDescriptions {
     public static class HostGroupAdjustmentModelDescription {
         public static final String SCALING_ADJUSTMENT = "scaling adjustment of the host groups";
         public static final String WITH_STACK_UPDATE = "on cluster update, update stack too";
+        public static final String VALIDATE_NODE_COUNT = "validate node count during downscale";
     }
 
     public static class InstanceMetaDataModelDescription {
