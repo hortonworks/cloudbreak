@@ -49,11 +49,6 @@ func PrintConfig(cfg hdc.Config) {
 	log.Infof("[ConfigRead] Config read from file, setting as global variable:\n%s", cfg.Yaml())
 }
 
-func StopSpinner(c *cli.Context) error {
-	hdc.StopSpinner()
-	return nil
-}
-
 func printFlagCompletion(f cli.Flag) {
 	fmt.Printf("--%s\n", f.GetName())
 }
@@ -78,7 +73,6 @@ func main() {
 		log.SetFormatter(formatter)
 		if c.Bool(hdc.FlDebug.Name) {
 			log.SetLevel(log.DebugLevel)
-			hdc.Spinner = nil
 		}
 		return nil
 	}
@@ -107,7 +101,6 @@ func main() {
 			Usage:  "creates a new cluster",
 			Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
-			After:  StopSpinner,
 			Action: hdc.CreateCluster,
 			BashComplete: func(c *cli.Context) {
 				fmt.Println("generate-cli-skeleton")
@@ -219,7 +212,6 @@ func main() {
 			Flags: []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType, hdc.FlHdpVersion,
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
-			After:  StopSpinner,
 			Action: hdc.CreateRDSConfig,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType,
@@ -233,7 +225,6 @@ func main() {
 			Usage:  "remove a metastore",
 			Flags:  []cli.Flag{hdc.FlRdsName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
-			After:  StopSpinner,
 			Action: hdc.DeleteRDSConfig,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
@@ -246,7 +237,6 @@ func main() {
 			Usage:  "remove or replace the faulty nodes",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlRemoveOnly, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
-			After:  StopSpinner,
 			Action: hdc.RepairCluster,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlRemoveOnly, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
@@ -259,7 +249,6 @@ func main() {
 			Usage:  "change the number of worker or compute nodes of an existing cluster",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
-			After:  StopSpinner,
 			Action: hdc.ResizeCluster,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlNodeType, hdc.FlScalingAdjustment, hdc.FlWait,
@@ -273,7 +262,6 @@ func main() {
 			Usage:  "terminates a cluster",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
-			After:  StopSpinner,
 			Action: hdc.TerminateCluster,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
@@ -295,7 +283,6 @@ func main() {
 			Name:   "cleanup",
 			Usage:  "remove the unused resources",
 			Before: ConfigRead,
-			After:  StopSpinner,
 			Hidden: true,
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Action: hdc.CleanupResources,
@@ -307,7 +294,6 @@ func main() {
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			Hidden: true,
-			After:  StopSpinner,
 			Action: hdc.CreateCredential,
 		},
 		{
@@ -317,7 +303,6 @@ func main() {
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			Hidden: true,
-			After:  StopSpinner,
 			Action: hdc.CreateNetworkCommand,
 		},
 		{
@@ -326,7 +311,6 @@ func main() {
 			Flags:  []cli.Flag{hdc.FlCredentialName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			Hidden: true,
-			After:  StopSpinner,
 			Action: hdc.DeleteCredential,
 		},
 		{
@@ -335,7 +319,6 @@ func main() {
 			Flags:  []cli.Flag{hdc.FlNetworkName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			Hidden: true,
-			After:  StopSpinner,
 			Action: hdc.DeleteNetwork,
 		},
 		{

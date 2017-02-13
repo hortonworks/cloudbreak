@@ -27,7 +27,6 @@ func logMissingParameterMessageAndExit(c *cli.Context, message string) {
 }
 
 func logMissingParameterAndExit(c *cli.Context, missingFlags []string, message ...string) {
-	StopSpinner()
 	if len(message) == 0 {
 		if missingFlags != nil && len(missingFlags) > 0 {
 			logErrorMessage(fmt.Sprintf("the following parameters are missing: %v\n", strings.Join(missingFlags, ", ")))
@@ -42,7 +41,6 @@ func logMissingParameterAndExit(c *cli.Context, missingFlags []string, message .
 }
 
 func logErrorAndExit(err error) {
-	StopSpinner()
 	logErrorMessage(err.Error())
 	exit(1)
 }

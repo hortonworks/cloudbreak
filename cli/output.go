@@ -13,12 +13,10 @@ type Output struct {
 }
 
 func Println(a ...interface{}) (n int, err error) {
-	StopSpinner()
 	return fmt.Println(a...)
 }
 
 func (o *Output) Write(header []string, row Row) {
-	StopSpinner()
 	if o.Format == "table" {
 		writeTable(header, []Row{row})
 	} else if o.Format == "yaml" {
@@ -31,7 +29,6 @@ func (o *Output) Write(header []string, row Row) {
 }
 
 func (o *Output) WriteList(header []string, tableRows []Row) {
-	StopSpinner()
 	if o.Format == "table" {
 		writeTable(header, tableRows)
 	} else if o.Format == "yaml" {

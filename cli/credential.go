@@ -27,8 +27,6 @@ func (c *Credential) DataAsStringArray() []string {
 func CreateCredential(c *cli.Context) error {
 	checkRequiredFlags(c)
 
-	go StartSpinner()
-
 	client := &http.Client{Transport: TransportConfig}
 	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	createCredential(c.String, client.Get, oAuth2Client.CreateCredential)
