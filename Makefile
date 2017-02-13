@@ -30,3 +30,7 @@ build:
 
 build-release:
 	 ./scripts/build-release.sh
+
+git-secrets:
+	brew install git-secrets
+	git secrets --install
