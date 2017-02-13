@@ -50,6 +50,33 @@ func (a *Client) Get(params *GetParams) (*GetOK, error) {
 }
 
 /*
+IsPlatformSelectionDisabled is platform selection disabled
+
+Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
+*/
+func (a *Client) IsPlatformSelectionDisabled(params *IsPlatformSelectionDisabledParams) (*IsPlatformSelectionDisabledOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewIsPlatformSelectionDisabledParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "isPlatformSelectionDisabled",
+		Method:             "GET",
+		PathPattern:        "/accountpreferences/isplatformselectiondisabled",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &IsPlatformSelectionDisabledReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*IsPlatformSelectionDisabledOK), nil
+}
+
+/*
 Post posts account preferences of admin user
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.

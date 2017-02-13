@@ -21,9 +21,17 @@ type PlatformVirtualMachinesJSON struct {
 	 */
 	DefaultVirtualMachines map[string]string `json:"defaultVirtualMachines,omitempty"`
 
+	/* default virtual machines per zones
+	 */
+	DefaultVMTypePerZones map[string]map[string]string `json:"defaultVmTypePerZones,omitempty"`
+
 	/* virtual machines
 	 */
 	VirtualMachines map[string][]*VMTypeJSON `json:"virtualMachines,omitempty"`
+
+	/* virtual machines per zones
+	 */
+	VMTypesPerZones map[string]map[string][]*VMTypeJSON `json:"vmTypesPerZones,omitempty"`
 }
 
 // Validate validates this platform virtual machines json
@@ -35,7 +43,17 @@ func (m *PlatformVirtualMachinesJSON) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateDefaultVMTypePerZones(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateVirtualMachines(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateVMTypesPerZones(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -59,6 +77,19 @@ func (m *PlatformVirtualMachinesJSON) validateDefaultVirtualMachines(formats str
 	return nil
 }
 
+func (m *PlatformVirtualMachinesJSON) validateDefaultVMTypePerZones(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DefaultVMTypePerZones) { // not required
+		return nil
+	}
+
+	if swag.IsZero(m.DefaultVMTypePerZones) { // not required
+		return nil
+	}
+
+	return nil
+}
+
 func (m *PlatformVirtualMachinesJSON) validateVirtualMachines(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.VirtualMachines) { // not required
@@ -67,6 +98,19 @@ func (m *PlatformVirtualMachinesJSON) validateVirtualMachines(formats strfmt.Reg
 
 	if err := validate.Required("virtualMachines", "body", m.VirtualMachines); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (m *PlatformVirtualMachinesJSON) validateVMTypesPerZones(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.VMTypesPerZones) { // not required
+		return nil
+	}
+
+	if swag.IsZero(m.VMTypesPerZones) { // not required
+		return nil
 	}
 
 	return nil
