@@ -28,6 +28,10 @@ type HostGroupAdjustment struct {
 	*/
 	ScalingAdjustment int32 `json:"scalingAdjustment"`
 
+	/* validate node count during downscale
+	 */
+	ValidateNodeCount *bool `json:"validateNodeCount,omitempty"`
+
 	/* on cluster update, update stack too
 	 */
 	WithStackUpdate *bool `json:"withStackUpdate,omitempty"`

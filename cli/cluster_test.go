@@ -237,7 +237,7 @@ func TestResizeClusterInvalidComputeCount(t *testing.T) {
 	putCluster := func(params *cluster.PutStacksIDClusterParams) error {
 		return nil
 	}
-	expectedAdjustment := int32(-1)
+	expectedAdjustment := int32(-2)
 
 	// Only run the failing part when a specific env variable is set
 	if os.Getenv("OS_EXIT") == "1" {
@@ -256,7 +256,7 @@ func TestResizeClusterInvalidComputeCount(t *testing.T) {
 
 	// Check that the log fatal message is what we expected
 	got := string(stdout)
-	expectedMessage := "The compute host group must contain at least 1 host after the downscale"
+	expectedMessage := "You cannot scale the compute nodes below 0"
 	if !strings.Contains(got, expectedMessage) {
 		t.Errorf("It should exit with validation error message: %s BUT got: %s", expectedMessage, got)
 	}

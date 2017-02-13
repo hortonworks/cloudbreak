@@ -475,6 +475,7 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 			logErrorAndExit(err)
 		}
 	} else {
+		validateNodeCount := true
 		for _, v := range stack.InstanceGroups {
 			if nodeType == v.Group {
 				if WORKER == nodeType {
@@ -482,8 +483,9 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 						logErrorAndExit(errors.New("You cannot scale down the worker host group below 3, because it can cause data loss"))
 					}
 				} else if COMPUTE == nodeType {
-					if len(v.Metadata)+int(adjustment) < 1 {
-						logErrorAndExit(errors.New("The compute host group must contain at least 1 host after the downscale"))
+					validateNodeCount = false
+					if len(v.Metadata)+int(adjustment) < 0 {
+						logErrorAndExit(errors.New("You cannot scale the compute nodes below 0"))
 					}
 				}
 			}
@@ -494,6 +496,7 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 				ScalingAdjustment: adjustment,
 				HostGroup:         nodeType,
 				WithStackUpdate:   &withStackScale,
+				ValidateNodeCount: &validateNodeCount,
 			},
 		}
 		if err := putCluster(&cluster.PutStacksIDClusterParams{ID: *stack.ID, Body: update}); err != nil {
