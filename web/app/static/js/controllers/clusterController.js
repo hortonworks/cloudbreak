@@ -502,6 +502,16 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     ambariStackDetails: $scope.cluster.ambariStackDetails === 'undefined' ? null : $scope.cluster.ambariStackDetails,
                     ambariDatabaseDetails: $scope.cluster.ambariDatabaseDetails === 'undefined' ? null : $scope.cluster.ambariDatabaseDetails
                 }
+                if ($scope.cluster.customContainer == true) {
+                    cbCluster.customContainer = {
+                        definitions: {
+                            "AMBARI_SERVER": $scope.cluster.ambariServerId,
+                            "AMBARI_AGENT": $scope.cluster.ambariAgentId,
+                            "AMBARI_DB": $scope.cluster.ambariDbId
+                        }
+                    }
+                }
+
                 Cluster.save({
                     id: $scope.activeStack.id
                 }, cbCluster, function(result) {
@@ -852,6 +862,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 setOrchestrator();
                 setInstanceProfile();
                 setAmbariStackDetails($rootScope.activeCredential, $scope.cluster);
+                $scope.cluster.customContainer = false;
+                $scope.cluster.customImage = false;
             }
         });
 
@@ -1211,6 +1223,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 ldapRequired: false,
                 sssdConfigId: null,
                 enableShipyard: false,
+                customImage: false,
+                customContainer: false,
                 userDefinedTags: []
             };
             $scope.selectSssd = {

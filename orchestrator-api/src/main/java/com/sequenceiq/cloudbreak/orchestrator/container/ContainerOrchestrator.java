@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.container;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -29,10 +30,10 @@ public interface ContainerOrchestrator extends ContainerOrchestrationBootstrap {
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    String ambariServerContainer();
+    String ambariServerContainer(Optional<String> name);
 
-    String ambariClientContainer();
+    String ambariClientContainer(Optional<String> name);
 
-    String ambariDbContainer();
+    String ambariDbContainer(Optional<String> name);
 
 }

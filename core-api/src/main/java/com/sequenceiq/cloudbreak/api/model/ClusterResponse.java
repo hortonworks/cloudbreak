@@ -109,6 +109,9 @@ public class ClusterResponse {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.EXPOSED_KNOX_SERVICES)
     private List<String> exposedKnoxServices;
 
+    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
+    private CustomContainerResponse customContainers;
+
     public Boolean getEnableShipyard() {
         return enableShipyard;
     }
@@ -365,5 +368,13 @@ public class ClusterResponse {
 
     public void setExposedKnoxServices(List<String> exposedKnoxServices) {
         this.exposedKnoxServices = exposedKnoxServices;
+    }
+
+    public CustomContainerResponse getCustomContainers() {
+        return customContainers;
+    }
+
+    public void setCustomContainers(CustomContainerResponse customContainers) {
+        this.customContainers = customContainers;
     }
 }

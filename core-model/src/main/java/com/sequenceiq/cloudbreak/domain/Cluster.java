@@ -196,6 +196,10 @@ public class Cluster implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private String blueprintCustomProperties;
 
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json customContainerDefinition;
+
     public Stack getStack() {
         return stack;
     }
@@ -534,7 +538,6 @@ public class Cluster implements ProvisionEntity {
 
     public void setBlueprintCustomProperties(String blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties;
-
     }
 
     public KerberosConfig getKerberosConfig() {
@@ -551,5 +554,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setTopologyValidation(Boolean topologyValidation) {
         this.topologyValidation = topologyValidation;
+    }
+
+    public Json getCustomContainerDefinition() {
+        return customContainerDefinition;
+    }
+
+    public void setCustomContainerDefinition(Json customContainerDefinition) {
+        this.customContainerDefinition = customContainerDefinition;
     }
 }

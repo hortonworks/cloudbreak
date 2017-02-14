@@ -150,7 +150,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     private boolean acceptFlow(String key, Payload payload) {
-        if (payload instanceof Acceptable) {
+        if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
             Acceptable acceptable = (Acceptable) payload;
             if (!ALLOWED_PARALLEL_FLOWS.contains(key) && isOtherFlowRunning(payload.getStackId())) {
                 acceptable.accepted().accept(Boolean.FALSE);

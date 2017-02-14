@@ -28,6 +28,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
@@ -140,6 +141,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getBlueprintCustomProperties() != null) {
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
+        convertContainerConfig(source, clusterResponse);
         return clusterResponse;
     }
 
@@ -167,6 +169,25 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             } catch (IOException e) {
                 LOGGER.error("Failed to add exposedServices to response", e);
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
+            }
+        }
+    }
+
+    private void convertContainerConfig(Cluster source, ClusterResponse clusterResponse) {
+        Json customContainerDefinition = source.getCustomContainerDefinition();
+        if (customContainerDefinition != null && StringUtils.isNoneEmpty(customContainerDefinition.getValue())) {
+            try {
+                Map<String, String> map = customContainerDefinition.get(Map.class);
+                Map<String, String> result = new HashMap<>();
+
+                for (Map.Entry<String, String> stringStringEntry : map.entrySet()) {
+                    result.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+                }
+                clusterResponse.setCustomContainers(new CustomContainerResponse(result));
+
+            } catch (IOException e) {
+                LOGGER.error("Failed to add customContainerDefinition to response", e);
+                throw new CloudbreakApiException("Failed to add customContainerDefinition to response", e);
             }
         }
     }

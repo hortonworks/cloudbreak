@@ -115,14 +115,14 @@
 </div>
 
 
-<div class="form-group" ng-show="showAdvancedOptionForm && $root.params.specialParameters.enableCustomImage == true">
+<div class="form-group" ng-show="showAdvancedOptionForm && $root.params.specialParameters.enableCustomImage == true && activeStack === undefined">
     <label class="col-sm-3 control-label" for="custom_image">{{msg.cluster_form_custom_image}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.use_custom_image_popup}} popover-trigger="mouseenter"></i></label>
     <div class="col-sm-8">
         <input type="checkbox" name="custom_image" id="custom_image" ng-model="cluster.customImage">
     </div>
 </div>
 
-<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customImage && $root.params.specialParameters.enableCustomImage == true" ng-class="{ 'has-error': clusterCreationForm.image_id.$dirty && clusterCreationForm.image_id.$invalid }">
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customImage && $root.params.specialParameters.enableCustomImage == true && activeStack === undefined" ng-class="{ 'has-error': clusterCreationForm.image_id.$dirty && clusterCreationForm.image_id.$invalid }">
     <label class="col-sm-3 control-label" for="image_id">{{msg.cluster_form_custom_image_id}}</label>
     <div class="col-sm-8">
         <input type="text" name="image_id" class="form-control" id="image_id" ng-model="cluster.imageId" ng-required="cluster.customImage" ng-pattern="actualRegex" placeholder="{{$root.params.images[activeCredential.cloudPlatform][cluster.region]}}" >
@@ -131,6 +131,44 @@
         </div>
     </div>
 </div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && activeStack !== undefined">
+    <label class="col-sm-3 control-label" for="custom_container">{{msg.cluster_form_custom_container}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.use_custom_container_popup}} popover-trigger="mouseenter"></i></label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="custom_container" id="custom_container" ng-model="cluster.customContainer">
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customContainer && activeStack !== undefined" ng-class="{ 'has-error': clusterCreationForm.ambari_server_container_id.$dirty && clusterCreationForm.ambari_server_container_id.$invalid }">
+    <label class="col-sm-3 control-label" for="ambari_server_container_id">{{msg.cluster_form_custom_ambariserver_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="ambari_server_container_id" class="form-control" id="ambari_server_container_id" ng-model="cluster.ambariServerId" ng-required="cluster.customContainer" placeholder="" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_server_container_id.$dirty && $parent.clusterCreationForm.ambari_server_container_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_container_error}}
+        </div>
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customContainer && activeStack !== undefined" ng-class="{ 'has-error': clusterCreationForm.ambari_agent_container_id.$dirty && clusterCreationForm.ambari_agent_container_id.$invalid }">
+    <label class="col-sm-3 control-label" for="ambari_agent_container_id">{{msg.cluster_form_custom_ambariagent_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="ambari_agent_container_id" class="form-control" id="ambari_agent_container_id" ng-model="cluster.ambariAgentId" ng-required="cluster.customContainer" placeholder="" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_agent_container_id.$dirty && $parent.clusterCreationForm.ambari_agent_container_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_container_error}}
+        </div>
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customContainer && activeStack !== undefined" ng-class="{ 'has-error': clusterCreationForm.ambari_db_container_id.$dirty && clusterCreationForm.ambari_db_container_id.$invalid }">
+    <label class="col-sm-3 control-label" for="ambari_db_container_id">{{msg.cluster_form_custom_ambaridb_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="ambari_db_container_id" class="form-control" id="ambari_db_container_id" ng-model="cluster.ambariDbId" ng-required="cluster.customContainer" placeholder="" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_db_container_id.$dirty && $parent.clusterCreationForm.ambari_db_container_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_container_error}}
+        </div>
+    </div>
+</div>
+
 <div class="form-group">
     <label class="col-sm-3 control-label" for="emailneeded">{{msg.cluster_form_email_label}}</label>
     <div class="col-sm-8">

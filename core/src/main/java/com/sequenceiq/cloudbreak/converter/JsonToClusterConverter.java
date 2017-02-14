@@ -15,6 +15,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
+import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
@@ -77,6 +78,12 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         } catch (JsonProcessingException e) {
             cluster.setBlueprintInputs(null);
         }
+        try {
+            Json json = new Json(convertContainerConfigs(source.getCustomContainer()));
+            cluster.setCustomContainerDefinition(json);
+        } catch (JsonProcessingException e) {
+            cluster.setCustomContainerDefinition(null);
+        }
         return cluster;
     }
 
@@ -109,5 +116,15 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             blueprintInputs.put(input.getName(), input.getPropertyValue());
         }
         return blueprintInputs;
+    }
+
+    private Map<String, String> convertContainerConfigs(CustomContainerRequest customContainerRequest) {
+        Map<String, String> configs = new HashMap<>();
+        if (customContainerRequest != null) {
+            for (Map.Entry<String, String> stringStringEntry : customContainerRequest.getDefinitions().entrySet()) {
+                configs.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+            }
+        }
+        return configs;
     }
 }

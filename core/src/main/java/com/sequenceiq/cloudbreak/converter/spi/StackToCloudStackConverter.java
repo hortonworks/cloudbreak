@@ -75,7 +75,11 @@ public class StackToCloudStackConverter {
         }
         Network network = buildNetwork(stack);
         StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stack.getId());
-        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), stackTemplate.getTemplate());
+        String template = null;
+        if (stackTemplate != null) {
+            template = stackTemplate.getTemplate();
+        }
+        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), template);
     }
 
     public Map<String, String> getUserDefinedTags(Stack stack) {

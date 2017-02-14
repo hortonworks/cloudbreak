@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -89,15 +93,17 @@ public class ContainerConfigService {
         try {
             ContainerConfig config;
             ContainerOrchestrator orchestrator = containerOrchestratorResolver.get(stack.getOrchestrator().getType());
+            Map<String, String> customContainerConfig = getCustomContainerConfig(stack);
+            Optional<String> customContainerName = Optional.ofNullable(customContainerConfig.get(dc.name()));
             switch (dc) {
                 case AMBARI_SERVER:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariServerContainer()).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariServerContainer(customContainerName)).build();
                     break;
                 case AMBARI_AGENT:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariClientContainer()).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariClientContainer(customContainerName)).build();
                     break;
                 case AMBARI_DB:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariDbContainer()).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariDbContainer(customContainerName)).build();
                     break;
                 case KERBEROS:
                     config = new ContainerConfigBuilder.Builder(kerberosDockerImageName).build();
@@ -136,6 +142,19 @@ public class ContainerConfigService {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s",
                     stack.getId(), dc.getName()));
         }
+    }
+
+    private Map<String, String> getCustomContainerConfig(Stack stack) {
+        Json customContainerDefinition = stack.getCluster().getCustomContainerDefinition();
+        if (customContainerDefinition != null && StringUtils.isNoneEmpty(customContainerDefinition.getValue())) {
+            try {
+                return customContainerDefinition.get(Map.class);
+            } catch (IOException e) {
+                LOGGER.error("Failed to add customContainerDefinition to response", e);
+                return new HashMap<>();
+            }
+        }
+        return new HashMap<>();
     }
 
 }
