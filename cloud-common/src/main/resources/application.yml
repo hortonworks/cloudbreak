@@ -57,6 +57,8 @@ cb:
     touch /tmp/custom-user-data
     date >> /tmp/custom-user-data
 
+  enable.custom.image: false
+
   mail:
     smtp:
       auth: true

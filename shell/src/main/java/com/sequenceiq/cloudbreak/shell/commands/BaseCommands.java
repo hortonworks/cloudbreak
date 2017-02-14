@@ -25,11 +25,11 @@ public interface BaseCommands extends CommandMarker {
 
     boolean deleteAvailable();
 
-    String delete(Long id, String name, Long timeout) throws Exception;
+    String delete(Long id, String name) throws Exception;
 
-    String deleteById(Long id, Long timeout) throws Exception;
+    String deleteById(Long id) throws Exception;
 
-    String deleteByName(String name, Long timeout) throws Exception;
+    String deleteByName(String name) throws Exception;
 
     boolean listAvailable();
 

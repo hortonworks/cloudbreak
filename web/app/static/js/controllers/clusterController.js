@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', 'GlobalStackInstance', '$interval', 'UserEvents', 'PeriscopeCluster', 'PlatformVariant',
-    function($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, GlobalStackInstance, $interval, UserEvents, PeriscopeCluster, PlatformVariant) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', 'GlobalStackInstance', '$interval', 'UserEvents', 'PeriscopeCluster', 'PlatformVariant', '$sce',
+    function($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, GlobalStackInstance, $interval, UserEvents, PeriscopeCluster, PlatformVariant, $sce) {
 
         $rootScope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -493,7 +493,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     userName: $scope.cluster.userName,
                     enableSecurity: $scope.cluster.enableSecurity || false,
                     validateBlueprint: $scope.cluster.validateBlueprint,
-                    imageId:  $scope.cluster.imageId,
+                    imageId:  $scope.cluster.imageId || null,
                     fileSystem: $scope.cluster.fileSystem || null,
                     configStrategy: $scope.cluster.configStrategy || null,
                     ambariRepoDetailsJson: $scope.cluster.ambariRepoDetailsJson === 'undefined' ? null : $scope.cluster.ambariRepoDetailsJson,
@@ -843,6 +843,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 delete $scope.cluster.hostGroups;
                 delete $scope.cluster.instanceGroups;
                 delete $scope.cluster.blueprintId;
+                $scope.escapeRegex();
                 setFileSystem();
                 setNetwork();
                 setRegion();
@@ -1213,6 +1214,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.selectSssd = {
                 show: false
             };
+            $scope.actualRegex = "";
             setSecurity();
             setFileSystem();
             initWizard();
@@ -1348,6 +1350,18 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.getUserDefinedTags = function() {
             return ($rootScope.activeCluster.tags && $rootScope.activeCluster.tags.userDefined) ? $rootScope.activeCluster.tags.userDefined : [];
+        }
+
+        $scope.escapeRegex = function() {
+            if ($rootScope.activeCredential != null) {
+                var tmpRegex = $rootScope.params.imagesRegex[$rootScope.activeCredential.cloudPlatform];
+                if (typeof tmpRegex != 'undefined' && tmpRegex != null) {
+                    $scope.actualRegex = new RegExp(tmpRegex);
+                } else {
+                    $scope.actualRegex = new RegExp("");
+                }
+            }
+
         }
     }
 ]);

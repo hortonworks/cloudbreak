@@ -215,7 +215,7 @@ public class BlueprintCommands implements BaseCommands {
     }
 
     @Override
-    public String delete(Long id, String name, Long timeout) throws Exception {
+    public String delete(Long id, String name) throws Exception {
         try {
             if (id != null) {
                 shellContext.cloudbreakClient().blueprintEndpoint().delete(id);
@@ -233,14 +233,14 @@ public class BlueprintCommands implements BaseCommands {
 
     @CliCommand(value = "blueprint delete --id", help = "Delete the blueprint by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
-        return delete(id, null, timeout);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return delete(id, null);
     }
 
     @CliCommand(value = "blueprint delete --name", help = "Delete the blueprint by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
-        return delete(null, name, timeout);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return delete(null, name);
     }
 
     @CliAvailabilityIndicator(value = "blueprint defaults")

@@ -60,6 +60,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
 
         // GIVEN
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        ReflectionTestUtils.setField(underTest, "enableCustomImage", true);
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))

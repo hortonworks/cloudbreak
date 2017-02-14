@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
+import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
@@ -19,6 +20,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
@@ -26,8 +28,10 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
+import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -53,6 +57,9 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Inject
+    private Environment environment;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
@@ -120,6 +127,21 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public PlatformOrchestrator orchestratorParams() {
         return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+    }
+
+    @Override
+    public PlatformImage images() {
+        List<CustomImage> customImages = new ArrayList<>();
+        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
+            String property = environment.getProperty("openstack." + "default");
+            customImages.add(customImage(regionListEntry.getKey().value(), property));
+        }
+        return new PlatformImage(customImages, imageRegex());
+    }
+
+    @Override
+    public String imageRegex() {
+        return "";
     }
 
     @Override

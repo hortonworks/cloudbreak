@@ -34,18 +34,18 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
 
     @CliCommand(value = "network delete --id", help = "Delete the network by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
-        return delete(id, null, timeout);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return delete(id, null);
     }
 
     @CliCommand(value = "network delete --name", help = "Delete the network by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
-        return delete(null, name, timeout);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return delete(null, name);
     }
 
     @Override
-    public String delete(Long id, String name, Long timeout) throws Exception {
+    public String delete(Long id, String name) throws Exception {
         try {
             Long networkId = id == null ? null : id;
             String networkName = name == null ? null : name;

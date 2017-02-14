@@ -232,6 +232,9 @@ public class OperationDescriptions {
         public static final String GET_REGIONS = "retrive available regions";
         public static final String GET_REGION_R_BY_TYPE = "retrive regions by type";
         public static final String GET_REGION_AV_BY_TYPE = "retrive availability zones by type";
+        public static final String GET_IMAGES = "retrive available images";
+        public static final String GET_SPECIALS = "retrive special properties";
+        public static final String GET_IMAGE_R_BY_TYPE = "retrive images by type";
     }
 
     public static class SettingsOpDescription {

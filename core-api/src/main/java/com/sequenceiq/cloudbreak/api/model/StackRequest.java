@@ -34,6 +34,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(value = StackModelDescription.IMAGE_CATALOG)
     private String imageCatalog;
 
+    @ApiModelProperty(value = StackModelDescription.CUSTOM_IMAGE)
+    private String customImage;
+
     public FailurePolicyRequest getFailurePolicy() {
         return failurePolicy;
     }
@@ -80,5 +83,13 @@ public class StackRequest extends StackBase {
 
     public void setNetwork(NetworkRequest network) {
         this.network = network;
+    }
+
+    public String getCustomImage() {
+        return customImage;
+    }
+
+    public void setCustomImage(String customImage) {
+        this.customImage = customImage;
     }
 }

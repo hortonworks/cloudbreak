@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
+import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
@@ -18,6 +19,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
@@ -30,8 +32,10 @@ import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionView;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionWrapper;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
+import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -69,6 +73,9 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Inject
+    private Environment environment;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
@@ -244,6 +251,21 @@ public class GcpPlatformParameters implements PlatformParameters {
             result.put(zone, new VmTypes(zoneTypes.getValue(), defaultVmTypes.get(zone)));
         }
         return result;
+    }
+
+    @Override
+    public PlatformImage images() {
+        List<CustomImage> customImages = new ArrayList<>();
+        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
+            String property = environment.getProperty("gcp." + "default");
+            customImages.add(customImage(regionListEntry.getKey().value(), property));
+        }
+        return new PlatformImage(customImages, imageRegex());
+    }
+
+    @Override
+    public String imageRegex() {
+        return "(.*)\\/(.*).tar.gz$";
     }
 
     private VmType defaultVirtualMachine() {

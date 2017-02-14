@@ -50,6 +50,9 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
+    @Value("${cb.enable.custom.image:false}")
+    private Boolean enableCustomImage;
+
     @Override
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();
@@ -72,7 +75,14 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         if (source.getNetwork() != null) {
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
         }
+        validateCustomImage(source);
         return stack;
+    }
+
+    private void validateCustomImage(StackRequest source) {
+        if ((source.getCustomImage() != null && !source.getCustomImage().isEmpty()) && !enableCustomImage) {
+            throw new BadRequestException("Custom image feature was not enabled. Please enable it with -Dcb.enable.custom.image=true.");
+        }
     }
 
     private Json getTags(Map<String, Object> tags) {

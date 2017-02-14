@@ -1,14 +1,21 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
@@ -18,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
@@ -30,6 +38,9 @@ import reactor.bus.EventBus;
 @Service
 public class CloudParameterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudParameterService.class);
+
+    @Value("${cb.enable.custom.image:false}")
+    private Boolean enableCustomImage;
 
     @Inject
     private EventBus eventBus;
@@ -125,5 +136,30 @@ public class CloudParameterService {
             LOGGER.error("Error while getting the platform orchestrators", e);
             throw new OperationException(e);
         }
+    }
+
+    public PlatformImages getImages() {
+        LOGGER.debug("Get platform orchestrators");
+        GetPlatformImagesRequest getPlatformImagesRequest = new GetPlatformImagesRequest();
+        eventBus.notify(getPlatformImagesRequest.selector(), Event.wrap(getPlatformImagesRequest));
+        try {
+            GetPlatformImagesResult res = getPlatformImagesRequest.await();
+            LOGGER.info("Platform images result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform images", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getPlatformImages();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform images", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public SpecialParameters getSpecialParameters() {
+        LOGGER.debug("Get special platform parameters");
+        Map<String, Boolean> specialParameters = new HashMap<>();
+        specialParameters.put("enableCustomImage", enableCustomImage);
+        return new SpecialParameters(specialParameters);
     }
 }

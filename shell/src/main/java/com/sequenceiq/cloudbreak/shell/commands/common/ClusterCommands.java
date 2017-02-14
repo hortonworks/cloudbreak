@@ -353,7 +353,7 @@ public class ClusterCommands implements BaseCommands {
     }
 
     @Override
-    public String delete(Long id, String name, Long timeout) throws Exception {
+    public String delete(Long id, String name) throws Exception {
         throw new MethodNotSupportedException("Cluster delete command not available");
     }
 
@@ -382,13 +382,13 @@ public class ClusterCommands implements BaseCommands {
     }
 
     @Override
-    public String deleteById(Long id, Long timeout) throws Exception {
-        return delete(id, null, timeout);
+    public String deleteById(Long id) throws Exception {
+        return delete(id, null);
     }
 
     @Override
-    public String deleteByName(String name, Long timeout) throws Exception {
-        return delete(null, name, timeout);
+    public String deleteByName(String name) throws Exception {
+        return delete(null, name);
     }
 
     @Override

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -57,12 +58,12 @@ public class ImageService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion, String imageCatalog)
+    public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> customImage)
             throws CloudbreakImageNotFoundException {
         try {
             Platform platform = platform(stack.cloudPlatform());
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
-            String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion);
+            String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion, customImage);
             String cbPrivKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPrivateKey()));
             String cbSshKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPublicKey()));
             byte[] cbSshKeyDer = RsaKeyUtil.getPublicKeyDer(cbPrivKey);
@@ -72,7 +73,7 @@ public class ImageService {
                     stack.getRelocateDocker() == null ? false : stack.getRelocateDocker(), stack.getSecurityConfig().getSaltBootPassword());
             HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(platformString, ambariVersion, hdpVersion, imageCatalog);
             if (hdpInfo != null) {
-                String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion());
+                String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion(), customImage);
                 if (specificImage == null) {
                     LOGGER.warn("Cannot find image in the catalog, fallback to default image, ambari: {}, hdp: {}", ambariVersion, hdpVersion);
                     hdpInfo = null;

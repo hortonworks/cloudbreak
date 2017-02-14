@@ -207,7 +207,7 @@ public class SssdConfigCommands implements BaseCommands {
     }
 
     @Override
-    public String delete(Long id, String name, Long timeout) {
+    public String delete(Long id, String name) {
         try {
             if (id != null) {
                 shellContext.cloudbreakClient().sssdConfigEndpoint().delete(id);
@@ -224,14 +224,14 @@ public class SssdConfigCommands implements BaseCommands {
 
     @CliCommand(value = "sssdconfig delete --id", help = "Delete the config by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
-        return delete(id, null, timeout);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return delete(id, null);
     }
 
     @CliCommand(value = "sssdconfig delete --name", help = "Delete the config by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
-        return delete(null, name, timeout);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return delete(null, name);
     }
 
     @Override

@@ -42,6 +42,8 @@ import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 
 public class BaseStackCommands implements BaseCommands, StackCommands {
 
+    public static final long TIMEOUT = 5000L;
+
     private ShellContext shellContext;
 
     private CloudbreakShellUtil cloudbreakShellUtil;
@@ -111,13 +113,13 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @Override
-    public String deleteById(Long id, Long timeout) throws Exception {
-        return delete(id, null, timeout);
+    public String deleteById(Long id) throws Exception {
+        return delete(id, null);
     }
 
     @Override
-    public String deleteByName(String name, Long timeout) throws Exception {
-        return delete(null, name, timeout);
+    public String deleteByName(String name) throws Exception {
+        return delete(null, name);
     }
 
     @CliCommand(value = "stack delete --id", help = "Delete the stack by its id")
@@ -137,8 +139,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @Override
-    public String delete(Long id, String name, Long timeout) throws Exception {
-        return delete(id, name, false, timeout);
+    public String delete(Long id, String name) throws Exception {
+        return delete(id, name, false, TIMEOUT);
     }
 
     public String delete(Long id, String name, boolean wait, Long timeout) {
@@ -254,7 +256,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, boolean publicInAccount, OnFailureAction onFailureAction,
             AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, boolean wait, PlatformVariant platformVariant, String orchestrator,
             String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params, Map<String, String> userDefinedTags,
-            Long timeout) {
+            String customImage, Long timeout) {
         try {
             validateNetwork();
             validateRegion(region);
@@ -282,6 +284,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setAmbariVersion(ambariVersion);
             stackRequest.setHdpVersion(hdpVersion);
             stackRequest.setImageCatalog(imageCatalog);
+            stackRequest.setCustomImage(customImage);
             OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
             orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);

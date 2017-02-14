@@ -126,14 +126,14 @@ public class BlueprintCommandsTest {
     @Test
     public void testDeleteBlueprintById() throws Exception {
         doNothing().when(blueprintEndpoint).deletePublic(BLUEPRINT_ID.toString());
-        underTest.delete(BLUEPRINT_ID, null, null);
+        underTest.delete(BLUEPRINT_ID, null);
         verify(blueprintEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteBlueprintByName() throws Exception {
         doNothing().when(blueprintEndpoint).deletePublic(BLUEPRINT_NAME);
-        underTest.delete(null, BLUEPRINT_NAME, null);
+        underTest.delete(null, BLUEPRINT_NAME);
         verify(blueprintEndpoint, times(1)).deletePublic(anyString());
     }
 

@@ -13,12 +13,16 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
+import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
@@ -42,6 +46,8 @@ public class PlatformParameterController implements ConnectorEndpoint {
         PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(extended);
         PlatformRegions regions = cloudParameterService.getRegions();
         PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
+        PlatformImages images = cloudParameterService.getImages();
+        SpecialParameters specialParameters = cloudParameterService.getSpecialParameters();
 
         Map<String, JsonEntity> map = new HashMap<>();
 
@@ -50,6 +56,8 @@ public class PlatformParameterController implements ConnectorEndpoint {
         map.put("virtualMachines", conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class));
         map.put("regions", conversionService.convert(regions, PlatformRegionsJson.class));
         map.put("orchestrators", conversionService.convert(orchestrators, PlatformOrchestratorsJson.class));
+        map.put("images", conversionService.convert(images, PlatformImagesJson.class));
+        map.put("specialParameters", conversionService.convert(specialParameters, SpecialParametersJson.class));
 
         return map;
     }
@@ -129,6 +137,25 @@ public class PlatformParameterController implements ConnectorEndpoint {
         Map<String, Collection<String>> azs = conversionService.convert(pv, PlatformRegionsJson.class)
                 .getAvailabilityZones().get(type.toUpperCase());
         return azs == null ? new HashMap<>() : azs;
+    }
+
+    @Override
+    public Map<String, String> getImagesByType(String type) {
+        PlatformImages pv = cloudParameterService.getImages();
+        Map<String, String> images = conversionService.convert(pv, PlatformImagesJson.class)
+                .getImages().get(type.toUpperCase());
+        return images == null ? new HashMap<>() : images;
+    }
+
+    @Override
+    public PlatformImagesJson getImages() {
+        PlatformImages pv = cloudParameterService.getImages();
+        return conversionService.convert(pv, PlatformImagesJson.class);
+    }
+
+    @Override
+    public Map<String, Boolean> getSpecialProperties() {
+        return cloudParameterService.getSpecialParameters().getSpecialParameters();
     }
 
 }

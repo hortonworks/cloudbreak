@@ -388,7 +388,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                             "userDefined": userDefined(cluster.userDefinedTags)
                         },
                         platformVariant: cluster.platformVariant,
-                        imageId: cluster.customImage == true ? cluster.imageId :null
+                        customImage: cluster.customImage == true ? cluster.imageId :null
                     }
                     if (cluster.public) {
                         AccountStack.save(stack, function(result) {
