@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class ClusterStopService {
@@ -27,6 +28,9 @@ public class ClusterStopService {
 
     @Inject
     private EmailSenderService emailSenderService;
+
+    @Inject
+    private StackUtil stackUtil;
 
     public void stoppingCluster(Stack stack) {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
@@ -45,7 +49,7 @@ public class ClusterStopService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.AVAILABLE.name(), errorReason);
         if (cluster.getEmailNeeded()) {
             emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stack.getAmbariIp(), cluster.getName());
+                    stackUtil.extractAmbariIp(stack), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.STOP_FAILED.name());
         }
     }

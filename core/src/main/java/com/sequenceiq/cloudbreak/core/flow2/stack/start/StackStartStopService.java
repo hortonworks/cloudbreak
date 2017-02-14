@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.WrongMetadataException;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class StackStartStopService {
@@ -48,6 +49,9 @@ public class StackStartStopService {
 
     @Inject
     private UsageService usageService;
+
+    @Inject
+    private StackUtil stackUtil;
 
     public void startStackStart(StackStartStopContext context) {
         Stack stack = context.getStack();
@@ -93,7 +97,7 @@ public class StackStartStopService {
 
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stack.getAmbariIp(), stack.getCluster().getName());
+                    stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, Status.STOPPED.name());
         }
     }
@@ -120,7 +124,7 @@ public class StackStartStopService {
             clusterService.updateClusterStatusByStackId(stack.getId(), STOPPED);
             if (stack.getCluster().getEmailNeeded()) {
                 emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        stack.getAmbariIp(), stack.getCluster().getName());
+                        stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, stackStatus.name());
             }
         }
