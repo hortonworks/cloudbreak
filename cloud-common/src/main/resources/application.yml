@@ -17,26 +17,26 @@ cb:
   container.threadpool:
     core.size: 40
     capacity.size: 4000
-  
+
   cert:
     dir: /certs/
 
   tls:
     private.key.file: client-key.pem
     cert.file: client.pem
-  
+
   smtp.sender:
     host:
     port: 25
     username:
     password:
     from: no-reply@sequenceiq.com
-  
+
   db.env:
     user: postgres
     pass:
     db: postgres
-  
+
   aws:
     spotinstances.enabled: true
     hostkey.verify: false
@@ -104,7 +104,7 @@ cb:
   openstack:
     heat.template.path: templates/openstack-heat.ftl
     api.debug: false
-  
+
   max:
     azure.resource.name.length: 120
     gcp.resource.name.length: 63
@@ -115,7 +115,7 @@ cb:
     salt.recipe.execution.retry: 90
 
   address.resolving.timeout: 60000
-  
+
   eventbus.threadpool.core.size: 100
   cloud.api.executorservice.pool.size: 40
 
@@ -132,9 +132,9 @@ cb:
 
   ambari:
     repo:
-      version: 2.4.0.1-1
-      baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.0.1
-      gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      version: 2.4.2.2-1
+      baseurl: http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1
+      gpgkey: http://private-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
       host: localhost
@@ -144,13 +144,13 @@ cb:
       password: bigdata
 
   hdp:
-    version: 2.5.0.0
+    version: 2.5.0.1-210
     repoid: HDP-2.5
     repo:
       stack:
         repoid: HDP-2.5
-        redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.0
-        redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.0.0
+        redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
+        redhat7: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
       util:
         repoid: HDP-UTILS-1.1.0.21
         redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
