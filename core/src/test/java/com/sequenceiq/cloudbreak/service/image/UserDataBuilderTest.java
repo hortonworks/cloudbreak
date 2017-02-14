@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -101,6 +102,16 @@ public class UserDataBuilderTest {
             public PlatformOrchestrator orchestratorParams() {
                 return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT), orchestrator(OrchestratorConstants.SWARM)),
                         orchestrator(OrchestratorConstants.SALT));
+            }
+
+            @Override
+            public PlatformImage images() {
+                return new PlatformImage(new ArrayList<>(), imageRegex());
+            }
+
+            @Override
+            public String imageRegex() {
+                return "";
             }
 
             @Override

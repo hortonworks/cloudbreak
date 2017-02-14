@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -21,9 +22,11 @@ public class ImageNameUtil {
     @Inject
     private Environment environment;
 
-    public String determineImageName(String platform, String region, String ambariVersion, String hdpVersion) {
+    public String determineImageName(String platform, String region, String ambariVersion, String hdpVersion, Optional<String> customImage) {
         String image = getDefaultImage(platform, region);
-        if (ambariVersion != null) {
+        if (customImage.isPresent()) {
+            image = customImage.get();
+        } else if (ambariVersion != null) {
             String specificImage = getSpecificImage(platform, region, ambariVersion, hdpVersion);
             if (specificImage != null) {
                 image = specificImage;
@@ -35,9 +38,11 @@ public class ImageNameUtil {
         return image;
     }
 
-    public String determineImageName(HDPInfo hdpInfo, String platform, String region) {
+    public String determineImageName(HDPInfo hdpInfo, String platform, String region, Optional<String> customImage) {
         Map<String, String> regions = hdpInfo.getImages().get(platform);
-        if (regions != null) {
+        if (customImage.isPresent()) {
+            return customImage.get();
+        } else if (regions != null) {
             String image = regions.get(region);
             return image == null ? regions.get(DEFAULT) : image;
         }

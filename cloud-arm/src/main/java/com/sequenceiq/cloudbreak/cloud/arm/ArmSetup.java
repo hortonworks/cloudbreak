@@ -75,14 +75,14 @@ public class ArmSetup implements Setup {
     @Override
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
         LOGGER.info("prepare image: {}", image);
-        ArmCredentialView acv = new ArmCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
-                armStorage.getArmAttachedStorageOption(stack.getParameters()));
-        String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
-        String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
-        AzureRMClient client = armClient.getClient(ac.getCloudCredential());
-        String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
+            ArmCredentialView acv = new ArmCredentialView(ac.getCloudCredential());
+            String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
+                    armStorage.getArmAttachedStorageOption(stack.getParameters()));
+            String resourceGroupName = armUtils.getResourceGroupName(ac.getCloudContext());
+            String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
+            AzureRMClient client = armClient.getClient(ac.getCloudCredential());
+            String region = ac.getCloudContext().getLocation().getRegion().value();
             if (!resourceGroupExist(client, resourceGroupName)) {
                 client.createResourceGroup(resourceGroupName, region);
             }
@@ -97,7 +97,8 @@ public class ArmSetup implements Setup {
         } catch (HttpResponseException ex) {
             throw new CloudConnectorException(ex.getResponse().getData().toString(), ex);
         } catch (Exception ex) {
-            throw new CloudConnectorException(ex);
+            LOGGER.error("Could not create image with the specified parameters: {}", ex);
+            throw new CloudConnectorException("Image creation failed because " + image.getImageName() + "does not exist or Cloudbreak could not reach.");
         }
         LOGGER.debug("prepare image has been executed");
     }

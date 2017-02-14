@@ -113,6 +113,24 @@
         </select>
     </div>
 </div>
+
+
+<div class="form-group" ng-show="showAdvancedOptionForm && $root.params.specialParameters.enableCustomImage == true">
+    <label class="col-sm-3 control-label" for="custom_image">{{msg.cluster_form_custom_image}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.use_custom_image_popup}} popover-trigger="mouseenter"></i></label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="custom_image" id="custom_image" ng-model="cluster.customImage">
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customImage && $root.params.specialParameters.enableCustomImage == true" ng-class="{ 'has-error': clusterCreationForm.image_id.$dirty && clusterCreationForm.image_id.$invalid }">
+    <label class="col-sm-3 control-label" for="image_id">{{msg.cluster_form_custom_image_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="image_id" class="form-control" id="image_id" ng-model="cluster.imageId" ng-required="cluster.customImage" ng-pattern="actualRegex" placeholder="{{$root.params.images[activeCredential.cloudPlatform][cluster.region]}}" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.image_id.$dirty && $parent.clusterCreationForm.image_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_image_error}}
+        </div>
+    </div>
+</div>
 <div class="form-group">
     <label class="col-sm-3 control-label" for="emailneeded">{{msg.cluster_form_email_label}}</label>
     <div class="col-sm-8">

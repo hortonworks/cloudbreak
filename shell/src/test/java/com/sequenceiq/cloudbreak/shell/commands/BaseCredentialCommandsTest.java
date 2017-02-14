@@ -122,19 +122,19 @@ public class BaseCredentialCommandsTest {
 
     @Test
     public void testDeleteCredentialById() throws Exception {
-        underTest.delete(DUMMY_ID, null, null);
+        underTest.delete(DUMMY_ID, null);
         verify(credentialEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteCredentialByName() throws Exception {
-        underTest.delete(null, DUMMY_NAME, null);
+        underTest.delete(null, DUMMY_NAME);
         verify(credentialEndpoint, times(1)).deletePublic(anyString());
     }
 
     @Test
     public void testDeleteCredentialWithoutIdAndName() throws Exception {
-        underTest.delete(null, null, null);
+        underTest.delete(null, null);
         verify(credentialEndpoint, times(0)).delete(anyLong());
         verify(credentialEndpoint, times(0)).deletePublic(anyString());
     }

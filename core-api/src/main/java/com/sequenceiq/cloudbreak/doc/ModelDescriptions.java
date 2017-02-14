@@ -101,6 +101,7 @@ public class ModelDescriptions {
         public static final String S3_ACCESS_ROLE_ARN = "S3 access role arn";
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
+        public static final String CUSTOM_IMAGE = "custom image for the cluster";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String TAGS = "stack related tags";
         public static final String CREDENTIAL = "stack related credential";
@@ -157,6 +158,9 @@ public class ModelDescriptions {
         public static final String DISK_TYPES = "disk types";
         public static final String DEFAULT_DISKS = "default disks";
         public static final String DISK_MAPPINGS = "disk mappings";
+        public static final String IMAGES = "default images";
+        public static final String IMAGES_REGEX = "images regex";
+        public static final String SPECIAL_PARAMETERS = "custom parameters";
         public static final String ORCHESTRATORS = "orchestrators";
         public static final String DEFAULT_ORCHESTRATORS = "default orchestrators";
         public static final String VIRTUAL_MACHNES = "virtual machines";

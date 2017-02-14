@@ -101,28 +101,28 @@ public class RecipeCommandsTest {
     @Test
     public void testDeleteRecipeById() throws Exception {
         doNothing().when(recipeEndpoint).delete(RECIPE_ID);
-        underTest.delete(RECIPE_ID, null, null);
+        underTest.delete(RECIPE_ID, null);
         verify(recipeEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteRecipeByName() throws Exception {
         doNothing().when(recipeEndpoint).deletePublic(RECIPE_NAME);
-        underTest.delete(null, RECIPE_NAME, null);
+        underTest.delete(null, RECIPE_NAME);
         verify(recipeEndpoint, times(1)).deletePublic(anyString());
     }
 
     @Test
     public void testDeleteRecipeByIdAndName() throws Exception {
         doNothing().when(recipeEndpoint).delete(RECIPE_ID);
-        underTest.delete(RECIPE_ID, RECIPE_NAME, null);
+        underTest.delete(RECIPE_ID, RECIPE_NAME);
         verify(recipeEndpoint, times(0)).deletePublic(anyString());
         verify(recipeEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteRecipeWithoutIdAndName() throws Exception {
-        underTest.delete(null, null, null);
+        underTest.delete(null, null);
         verify(recipeEndpoint, times(0)).deletePublic(anyString());
         verify(recipeEndpoint, times(0)).delete(anyLong());
     }

@@ -46,18 +46,18 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
 
     @CliCommand(value = "credential delete --id", help = "Delete the credential by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
-        return delete(id, null, timeout);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return delete(id, null);
     }
 
     @CliCommand(value = "credential delete --name", help = "Delete the credential by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
-        return delete(null, name, timeout);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return delete(null, name);
     }
 
     @Override
-    public String delete(Long id, String name, Long timeout) {
+    public String delete(Long id, String name) {
         try {
             if (id != null) {
                 shellContext.cloudbreakClient().credentialEndpoint().delete(id);

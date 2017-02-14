@@ -27,6 +27,7 @@ public interface StackCommands {
             String imageCatalog,
             Map<String, String> params,
             Map<String, String> userDefinedTags,
+            String customImage,
             Long timeout);
 
     boolean createStackAvailable(String platform);

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
@@ -235,7 +236,8 @@ public class StackController implements StackEndpoint {
         if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
             stackService.validateOrchestrator(stack.getOrchestrator());
         }
-        stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(), stackRequest.getImageCatalog());
+        stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
+                stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getCustomImage()));
         return conversionService.convert(stack, StackResponse.class);
     }
 

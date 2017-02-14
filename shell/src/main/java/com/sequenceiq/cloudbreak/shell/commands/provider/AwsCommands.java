@@ -277,6 +277,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") AwsOrchestratorType orchestratorType,
+            @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "dedicatedInstances", help = "request dedicated instances on AWS") Boolean dedicatedInstances,
             @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "instanceProfileStrategy", help = "seamless access to Amazon API", specifiedDefaultValue = "false")
@@ -301,7 +302,7 @@ public class AwsCommands implements CommandMarker {
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
-                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), timeout);
+                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.arm;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
@@ -15,6 +16,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Optional;
@@ -26,8 +28,10 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -65,6 +69,9 @@ public class ArmPlatformParameters implements PlatformParameters {
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Inject
+    private Environment environment;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
@@ -206,5 +213,20 @@ public class ArmPlatformParameters implements PlatformParameters {
     @Override
     public PlatformOrchestrator orchestratorParams() {
         return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
+    }
+
+    @Override
+    public PlatformImage images() {
+        List<CustomImage> customImages = new ArrayList<>();
+        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
+            String property = environment.getProperty("azure_rm." + regionListEntry.getKey().value());
+            customImages.add(customImage(regionListEntry.getKey().value(), property));
+        }
+        return new PlatformImage(customImages, imageRegex());
+    }
+
+    @Override
+    public String imageRegex() {
+        return "^https://.*[.]vhd$";
     }
 }

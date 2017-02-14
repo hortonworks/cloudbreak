@@ -12,19 +12,6 @@
         </select>
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm">
-    <label class="col-sm-3 control-label" for="custom_image">{{msg.cluster_form_custom_image}}</label>
-	<div class="col-sm-8">
-        <input type="checkbox" name="custom_image" id="custom_image" ng-model="cluster.customImage">
-    </div>
-</div>
-
-<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customImage" ng-class="{ 'has-error': clusterCreationForm.image_id.$dirty && clusterCreationForm.image_id.$invalid }">
-    <label class="col-sm-3 control-label" for="image_id">{{msg.cluster_form_custom_image_id}}</label>
-    <div class="col-sm-8">
-        <input type="text" name="image_id" class="form-control" id="image_id" ng-model="cluster.imageId"  placeholder="{{msg.custom_image_id_placeholder}}" ng-pattern="/^ami-[a-zA-Z0-9]{8}$/" >
-    </div>
-</div>
 
 <div class="form-group" ng-show="showAdvancedOptionForm">
     <label class="col-sm-3 control-label" for="cluster_validateBlueprint">{{msg.cluster_form_blueprint_validate_label}}</label>

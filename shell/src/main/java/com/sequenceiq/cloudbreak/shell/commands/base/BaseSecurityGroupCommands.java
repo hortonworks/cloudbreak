@@ -95,7 +95,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
     }
 
     @Override
-    public String delete(Long securityGroupId, String securityGroupName, Long timeout) {
+    public String delete(Long securityGroupId, String securityGroupName) {
         try {
             Long id = securityGroupId == null ? null : securityGroupId;
             String name = securityGroupName == null ? null : securityGroupName;
@@ -116,14 +116,14 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
 
     @CliCommand(value = "securitygroup delete --id", help = "Delete the securitygroup by its id")
     @Override
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id, Long timeout) throws Exception {
-        return delete(id, null, timeout);
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+        return delete(id, null);
     }
 
     @CliCommand(value = "securitygroup delete --name", help = "Delete the securitygroup by its name")
     @Override
-    public String deleteByName(@CliOption(key = "", mandatory = true) String name, Long timeout) throws Exception {
-        return delete(null, name, timeout);
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+        return delete(null, name);
     }
 
     @Override

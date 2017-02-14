@@ -13,6 +13,7 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
@@ -101,4 +102,22 @@ public interface ConnectorEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_REGION_AV_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
     Map<String, Collection<String>> getRegionAvByType(@PathParam(value = "type") String type);
+
+    @GET
+    @Path(value = "images/{type}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_IMAGE_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    Map<String, String> getImagesByType(@PathParam(value = "type") String type);
+
+    @GET
+    @Path(value = "images")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_IMAGES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    PlatformImagesJson getImages();
+
+    @GET
+    @Path(value = "custom")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_SPECIALS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    Map<String, Boolean> getSpecialProperties();
 }

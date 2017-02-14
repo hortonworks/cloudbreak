@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -196,6 +197,16 @@ public class MockPlatformParameters implements PlatformParameters {
     public PlatformOrchestrator orchestratorParams() {
         return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT), orchestrator(OrchestratorConstants.SWARM)),
                 orchestrator(OrchestratorConstants.SWARM));
+    }
+
+    @Override
+    public PlatformImage images() {
+        return new PlatformImage(new ArrayList<>(), imageRegex());
+    }
+
+    @Override
+    public String imageRegex() {
+        return "";
     }
 
     private enum MockDiskType {

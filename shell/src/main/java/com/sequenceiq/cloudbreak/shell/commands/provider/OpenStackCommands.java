@@ -285,12 +285,13 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") OpenStackOrchestratorType orchestratorType,
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
+            @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         Map<String, String> params = new HashMap<>();
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
-                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), timeout);
+                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout);
     }
 }

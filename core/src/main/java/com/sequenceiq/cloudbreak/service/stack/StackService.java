@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -284,7 +285,7 @@ public class StackService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Stack create(CbUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog) {
+    public Stack create(CbUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> customImage) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -310,7 +311,7 @@ public class StackService {
                 securityConfigRepository.save(securityConfig);
                 stack.setSecurityConfig(securityConfig);
 
-                imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog);
+                imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog, customImage);
                 flowManager.triggerProvisioning(savedStack.getId());
             } else {
                 savedStack.setStackStatus(new StackStatus(savedStack, Status.AVAILABLE, "", DetailedStackStatus.PROVISIONED));

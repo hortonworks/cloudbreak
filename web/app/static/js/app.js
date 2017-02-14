@@ -246,6 +246,8 @@ cloudbreakApp.run(function($rootScope, $http) {
         function($rootScope, initconf) {
             if (initconf !== null) {
                 $rootScope.params = {};
+                $rootScope.params.images = initconf.images.images;
+                $rootScope.params.imagesRegex = initconf.images.imagesRegex;
                 $rootScope.params.regions = initconf.regions.regions;
                 $rootScope.params.defaultRegions = initconf.regions.defaultRegions;
                 $rootScope.params.zones = initconf.regions.availabilityZones;
@@ -258,8 +260,11 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultVariants = initconf.variants.defaultVariants;
                 $rootScope.params.orchestrators = initconf.orchestrators.orchestrators;
                 $rootScope.params.defaultOrchestrators = initconf.orchestrators.defaults;
+                $rootScope.params.specialParameters = initconf.specialParameters.specialParameters;
             } else {
                 $rootScope.params = {};
+                $rootScope.params.images = {};
+                $rootScope.params.imagesRegex = {};
                 $rootScope.params.regions = {};
                 $rootScope.params.defaultRegions = {};
                 $rootScope.params.zones = {};
@@ -272,6 +277,7 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultVariants = {};
                 $rootScope.params.orchestrators = {};
                 $rootScope.params.defaultOrchestrators = {};
+                $rootScope.params.specialParameters = {};
             }
         }
     ])

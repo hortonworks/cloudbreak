@@ -180,28 +180,28 @@ public class SssdConfigCommandsTest {
     @Test
     public void testDeleteSssdConfigById() throws Exception {
         doNothing().when(sssdConfigEndpoint).delete(CONFIG_ID);
-        underTest.delete(CONFIG_ID, null, null);
+        underTest.delete(CONFIG_ID, null);
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteSssdConfigByName() throws Exception {
         doNothing().when(sssdConfigEndpoint).deletePublic(CONFIG_NAME);
-        underTest.delete(null, CONFIG_NAME, null);
+        underTest.delete(null, CONFIG_NAME);
         verify(sssdConfigEndpoint, times(1)).deletePublic(anyString());
     }
 
     @Test
     public void testDeleteSssdConfigByIdAndName() throws Exception {
         doNothing().when(sssdConfigEndpoint).delete(CONFIG_ID);
-        underTest.delete(CONFIG_ID, CONFIG_NAME, null);
+        underTest.delete(CONFIG_ID, CONFIG_NAME);
         verify(sssdConfigEndpoint, times(0)).deletePublic(anyString());
         verify(sssdConfigEndpoint, times(1)).delete(anyLong());
     }
 
     @Test
     public void testDeleteSssdConfigWithoutIdAndName() throws Exception {
-        underTest.delete(null, null, null);
+        underTest.delete(null, null);
         verify(sssdConfigEndpoint, times(0)).deletePublic(anyString());
         verify(sssdConfigEndpoint, times(0)).delete(anyLong());
     }
