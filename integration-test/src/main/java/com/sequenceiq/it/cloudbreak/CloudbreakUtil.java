@@ -1,7 +1,9 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.core.Response;
 
@@ -13,6 +15,8 @@ import org.testng.Assert;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.HostMetadataResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -55,6 +59,22 @@ public class CloudbreakUtil {
 
     public static WaitResult waitForClusterStatus(CloudbreakClient cloudbreakClient, String stackId, String desiredStatus) {
         return waitForStatus(cloudbreakClient, stackId, desiredStatus, "clusterStatus");
+    }
+
+    public static void waitAndCheckStatuses(CloudbreakClient cloudbreakClient, String stackId, List<String> desiredStatus) {
+        List<String> path = new ArrayList<>();
+        path.add("status");
+        path.add("clusterStatus");
+
+        for (int i = 0; i < 3; i++) {
+            WaitResult waitResult = waitForStackAndClusterStatuses(cloudbreakClient, stackId, path, desiredStatus);
+            if (waitResult == WaitResult.FAILED) {
+                Assert.fail("The stack has failed");
+            }
+            if (waitResult == WaitResult.TIMEOUT) {
+                Assert.fail("Timeout happened");
+            }
+        }
     }
 
     public static void checkClusterFailed(StackEndpoint stackEndpoint, String stackId, String failMessage) {
@@ -137,6 +157,77 @@ public class CloudbreakUtil {
         if (stackStatus.contains("FAILED") || (!"DELETE_COMPLETED".equals(desiredStatus) && "DELETE_COMPLETED".equals(stackStatus))) {
             waitResult = WaitResult.FAILED;
         }
+        if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+        }
+        return waitResult;
+    }
+
+    private static WaitResult waitForStackAndClusterStatuses(CloudbreakClient cloudbreakClient, String stackId,
+            List<String> statusPath, List<String> desiredStatus) {
+
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        String stackStatus = null;
+        String clusterStatus = null;
+
+        int retryCount = 0;
+        do {
+            LOGGER.info("Waiting for stack status {}, stack id: {}, current status {} ...", desiredStatus.get(0), stackId, stackStatus);
+            LOGGER.info("Waiting for cluster status {}, stack id: {}, current status {} ...", desiredStatus.get(1), stackId, clusterStatus);
+
+            sleep();
+            StackEndpoint stackEndpoint = cloudbreakClient.stackEndpoint();
+            try {
+                Map<String, Object> statusResult = stackEndpoint.status(Long.valueOf(stackId));
+                stackStatus = (String) statusResult.get(statusPath.get(0));
+                clusterStatus = (String) statusResult.get(statusPath.get(1));
+            } catch (Exception exception) {
+                if (exception instanceof HttpResponseException && ((HttpResponseException) exception).getStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                    stackStatus = "DELETE_COMPLETED";
+                } else {
+                    continue;
+                }
+            }
+
+            retryCount++;
+        } while (!(desiredStatus.get(0).equals(stackStatus) && desiredStatus.get(1).equals(clusterStatus))  && !stackStatus.contains("FAILED")
+                && !clusterStatus.contains("FAILED") && !"DELETE_COMPLETED".equals(stackStatus) && retryCount < MAX_RETRY);
+
+        LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, stackStatus);
+        if (stackStatus.contains("FAILED") || (!"DELETE_COMPLETED".equals(desiredStatus) && "DELETE_COMPLETED".equals(stackStatus))) {
+            waitResult = WaitResult.FAILED;
+        }
+        if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+        }
+        return waitResult;
+    }
+
+    public static WaitResult waitForHostStatusStack(StackEndpoint stackEndpoint, String stackId, String hostGroup, String desiredStatus) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        Boolean unhealthy = Boolean.FALSE;
+
+        int retryCount = 0;
+        do {
+            LOGGER.info("Waiting for desired host status ...");
+            sleep();
+            StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+            Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
+            for (HostGroupResponse hr : hostGroupResponse) {
+                if (hr.getName().equals(hostGroup)) {
+                    Set<HostMetadataResponse> hostMetadataResponses = hr.getMetadata();
+                    for (HostMetadataResponse hmr : hostMetadataResponses) {
+                        if (hmr.getState().equals(desiredStatus)) {
+                            unhealthy = Boolean.TRUE;
+                        }
+                    }
+                }
+            }
+
+            retryCount++;
+
+        } while (!unhealthy && (retryCount < MAX_RETRY));
+
         if (retryCount == MAX_RETRY) {
             waitResult = WaitResult.TIMEOUT;
         }
