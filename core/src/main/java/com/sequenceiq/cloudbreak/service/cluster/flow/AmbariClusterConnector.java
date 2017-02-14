@@ -21,11 +21,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -311,8 +309,6 @@ public class AmbariClusterConnector {
 
             recipeEngine.executePostInstall(stack);
 
-            // executeSmokeTest(stack, ambariClient);
-            startStoppedServices(stack, ambariClient, stack.getCluster().getBlueprint().getBlueprintName());
             triggerSmartSenseCapture(ambariClient, blueprintText);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);
             cluster = handleClusterCreationSuccess(stack, cluster);
@@ -699,25 +695,6 @@ public class AmbariClusterConnector {
             }
         }
         return stopped;
-    }
-
-    private void startStoppedServices(Stack stack, AmbariClient ambariClient, String blueprint) throws CloudbreakException {
-        Set<String> components = new HashSet<>();
-        Map<String, Map<String, String>> hostComponentsStates = ambariClient.getHostComponentsStates();
-        Collection<Map<String, String>> values = hostComponentsStates.values();
-        Map<String, String> componentsCategory = ambariClient.getComponentsCategory(blueprint);
-        for (Map<String, String> value : values) {
-            for (Entry<String, String> entry : value.entrySet()) {
-                String category = componentsCategory.get(entry.getKey());
-                if ("INSTALLED".equals(entry.getValue()) && !"CLIENT".equals(category)) {
-                    components.add(entry.getKey());
-                }
-            }
-        }
-
-        if (!components.isEmpty()) {
-            startAllServicesAndWait(stack, ambariClient);
-        }
     }
 
     private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException, CloudbreakImageNotFoundException, CloudbreakException {
