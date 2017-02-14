@@ -4,15 +4,22 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
+import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.SimpleContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -22,12 +29,14 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnHttpClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationDetailHandler;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationSubmissionHandler;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationWaitHandler;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.DeleteApplicationRequest;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.util.ApplicationUtils;
 
 @Component
 public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
@@ -43,6 +52,12 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
     @Value("${cb.docker.container.yarn.ambari.db:}")
     private String postgresDockerImageName;
 
+    @Value("${cb.max.yarn.orchestrator.retry:300}")
+    private int maxRetry;
+
+    @Value("${cb.max.yarn.orchestrator.sleep:3000}")
+    private int sleepTime;
+
     @Inject
     private ApplicationDetailHandler detailHandler;
 
@@ -51,6 +66,9 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Inject
     private ApplicationWaitHandler waitHandler;
+
+    @Inject
+    private ApplicationUtils applicationUtils;
 
     @Override
     public void validateApiEndpoint(OrchestrationCredential cred) throws CloudbreakOrchestratorException {
@@ -69,12 +87,19 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
         // Create an application per component
         List<ContainerInfo> containerInfos = new ArrayList<>();
         for (int componentNumber = 1; componentNumber <= constraint.getInstances(); componentNumber++) {
-
             try {
                 submitHandler.submitApplication(config, cred, constraint, componentNumber);
-                waitHandler.waitForApplicationStart(cred, constraint, componentNumber);
+                //waitHandler.waitForApplicationStart(cred, constraint, componentNumber);
+
+                String applicationName = applicationUtils.getApplicationName(constraint, componentNumber);
+
+                YarnAppBootstrap bootstrap = new YarnAppBootstrap(cred.getApiEndpoint(), applicationName);
+
+                Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel);
+                Future<Boolean> appFuture = getParallelOrchestratorComponentRunner().submit(runner);
+                appFuture.get();
                 containerInfos.add(detailHandler.getContainerInfo(config, cred, constraint, componentNumber));
-            } catch (CloudbreakOrchestratorException e) {
+            } catch (CloudbreakOrchestratorException | InterruptedException | ExecutionException e) {
                 throw new CloudbreakOrchestratorFailedException(e);
             }
         }
@@ -121,6 +146,10 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
         assert false;
     }
 
+    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel) {
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, sleepTime);
+    }
+
     @Override
     public int getMaxBootstrapNodes() {
         return 0;
@@ -147,17 +176,17 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public String ambariServerContainer() {
-        return ambariServer;
+    public String ambariServerContainer(Optional<String> name) {
+        return name.isPresent() ? name.get() : ambariServer;
     }
 
     @Override
-    public String ambariClientContainer() {
-        return ambariAgent;
+    public String ambariClientContainer(Optional<String> name) {
+        return name.isPresent() ? name.get() : ambariServer;
     }
 
     @Override
-    public String ambariDbContainer() {
-        return postgresDockerImageName;
+    public String ambariDbContainer(Optional<String> name) {
+        return name.isPresent() ? name.get() : ambariServer;
     }
 }

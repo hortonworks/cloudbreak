@@ -130,6 +130,7 @@ public class ModelDescriptions {
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
         public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
+        public static final String CUSTOM_CONTAINERS = "custom containers";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
         public static final String RDSCONFIGS = "RDS configurations for the cluster";

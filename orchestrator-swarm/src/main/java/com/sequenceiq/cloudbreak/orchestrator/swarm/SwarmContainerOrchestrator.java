@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -453,17 +454,17 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public String ambariServerContainer() {
-        return ambariServer;
+    public String ambariServerContainer(Optional<String> name) {
+        return name.isPresent() ? name.get() : ambariServer;
     }
 
     @Override
-    public String ambariClientContainer() {
-        return ambariAgent;
+    public String ambariClientContainer(Optional<String> name) {
+        return name.isPresent() ? name.get() : ambariServer;
     }
 
     @Override
-    public String ambariDbContainer() {
-        return postgresDockerImageName;
+    public String ambariDbContainer(Optional<String> name) {
+        return name.isPresent() ? name.get() : ambariServer;
     }
 }

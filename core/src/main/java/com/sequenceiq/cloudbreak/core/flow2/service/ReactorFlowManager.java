@@ -39,10 +39,12 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
 import reactor.bus.Event;
@@ -62,6 +64,9 @@ public class ReactorFlowManager {
 
     @Inject
     private ErrorHandlerAwareFlowEventFactory eventFactory;
+
+    @Inject
+    private StackService stackService;
 
     public void triggerProvisioning(Long stackId) {
         String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
@@ -121,7 +126,12 @@ public class ReactorFlowManager {
 
     public void triggerClusterInstall(Long stackId) {
         String selector = CLUSTER_CREATION_EVENT.event();
-        notify(selector, new StackEvent(selector, stackId));
+        Stack stack = stackService.get(stackId);
+        if (stack.getCredential() != null && !stack.getCredential().cloudPlatform().equals("BYOS")) {
+            notify(selector, new StackEvent(selector, stackId));
+        } else {
+            notify(selector, new StackEvent(selector, stackId, null));
+        }
     }
 
     public void triggerClusterReInstall(Long stackId) {
@@ -183,7 +193,12 @@ public class ReactorFlowManager {
 
     public void triggerClusterTermination(Long stackId) {
         String selector = ClusterTerminationEvent.TERMINATION_EVENT.event();
-        notify(selector, new StackEvent(selector, stackId));
+        Stack stack = stackService.get(stackId);
+        if (stack.getCredential() != null && !stack.getCredential().cloudPlatform().equals("BYOS")) {
+            notify(selector, new StackEvent(selector, stackId));
+        } else {
+            notify(selector, new StackEvent(selector, stackId, null));
+        }
     }
 
     public void triggerManualRepairFlow(Long stackId) {
@@ -210,7 +225,10 @@ public class ReactorFlowManager {
         reactor.notify(selector, event);
 
         try {
-            Boolean accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
+            Boolean accepted = true;
+            if (event.getData().accepted() != null) {
+                accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
+            }
             if (accepted == null || !accepted) {
                 throw new FlowsAlreadyRunningException(String.format("Stack %d has flows under operation, request not allowed.", event.getData().getStackId()));
             }
