@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class StackDownscaleService {
@@ -42,6 +43,9 @@ public class StackDownscaleService {
     @Inject
     private UsageService usageService;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack ", context.getStack().getId());
         MDCBuilder.buildMdcContext(context.getStack());
@@ -61,7 +65,7 @@ public class StackDownscaleService {
 
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendDownScaleSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stack.getAmbariIp(), stack.getCluster().getName());
+                    stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_NOTIFICATION_EMAIL, AVAILABLE.name());
         }
         usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterUpscaleFlowService {
@@ -55,6 +56,9 @@ public class ClusterUpscaleFlowService {
     @Inject
     private HostMetadataRepository hostMetadataRepository;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void upscalingAmbari(Stack stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS, "Upscaling the cluster.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
@@ -69,7 +73,7 @@ public class ClusterUpscaleFlowService {
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
             if (stack.getCluster().getEmailNeeded()) {
                 emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        stack.getAmbariIp(), stack.getCluster().getName());
+                        stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } else {

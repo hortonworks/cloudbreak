@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class StackTerminationService {
@@ -50,6 +51,9 @@ public class StackTerminationService {
     @Inject
     private DependecyDeletionService dependecyDeletionService;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload, Boolean deleteDependencies) {
         LOGGER.info("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
@@ -59,7 +63,7 @@ public class StackTerminationService {
         clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stack.getAmbariIp(), stack.getCluster().getName());
+                    stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
         }
         usageService.closeUsagesForStack(stack);
@@ -91,12 +95,13 @@ public class StackTerminationService {
         }
         flowMessageService.fireEventAndLog(stack.getId(), eventMessage, status.name(), stackUpdateMessage);
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
+            String ambariIp = stackUtil.extractAmbariIp(stack);
             if (forced) {
                 emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        stack.getAmbariIp(), stack.getCluster().getName());
+                        ambariIp, stack.getCluster().getName());
             } else {
                 emailSenderService.sendTerminationFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        stack.getAmbariIp(), stack.getCluster().getName());
+                        ambariIp, stack.getCluster().getName());
             }
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, status.name());
         }

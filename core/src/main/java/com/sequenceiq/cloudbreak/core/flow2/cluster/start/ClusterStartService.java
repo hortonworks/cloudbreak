@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class ClusterStartService {
@@ -34,22 +35,26 @@ public class ClusterStartService {
     @Inject
     private EmailSenderService emailSenderService;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void startingCluster(Stack stack, Cluster cluster) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the Ambari cluster. Ambari ip:%s",
-                stack.getAmbariIp()));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stack.getAmbariIp());
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the Ambari cluster. Ambari ip: %s",
+                stackUtil.extractAmbariIp(stack)));
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stackUtil.extractAmbariIp(stack));
     }
 
     public void clusterStartFinished(Stack stack) {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        String ambariIp = stackUtil.extractAmbariIp(stack);
         cluster.setUpSince(new Date().getTime());
         clusterService.updateCluster(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Ambari cluster started.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTED, Status.AVAILABLE.name(), stack.getAmbariIp());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTED, Status.AVAILABLE.name(), ambariIp);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStartSuccessEmail(cluster.getOwner(),  cluster.getEmailTo(), stack.getAmbariIp(), cluster.getName());
+            emailSenderService.sendStartSuccessEmail(cluster.getOwner(),  cluster.getEmailTo(), ambariIp, cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.AVAILABLE.name());
         }
     }
@@ -60,7 +65,7 @@ public class ClusterStartService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), cluster.getEmailTo(), stack.getAmbariIp(), cluster.getName());
+            emailSenderService.sendStartFailureEmail(stack.getCluster().getOwner(), cluster.getEmailTo(), stackUtil.extractAmbariIp(stack), cluster.getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.START_FAILED.name());
         }
     }
