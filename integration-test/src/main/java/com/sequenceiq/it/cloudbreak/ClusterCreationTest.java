@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.it.IntegrationTestContext;
 
 public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
@@ -33,19 +34,19 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({"clusterName", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
-            "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "withRDSConfig"})
+            "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "withRDSConfig", "autoRecoveryMode"})
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("false") boolean emailNeeded,
             @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey,
             @Optional String kerberosAdmin, @Optional String kerberosPassword,
             @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari,
-            @Optional ("false") boolean withRDSConfig) throws Exception {
+            @Optional ("false") boolean withRDSConfig, @Optional ("false") boolean autoRecoveryMode) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         Integer stackId = Integer.valueOf(stackIdStr);
         Integer blueprintId = Integer.valueOf(itContext.getContextParam(CloudbreakITContextConstants.BLUEPRINT_ID));
         List<HostGroup> hostgroups = itContext.getContextParam(CloudbreakITContextConstants.HOSTGROUP_ID, List.class);
-        Set<HostGroupRequest> hostGroupJsons1 = convertHostGroups(hostgroups, runRecipesOnHosts);
+        Set<HostGroupRequest> hostGroupJsons1 = convertHostGroups(hostgroups, runRecipesOnHosts, autoRecoveryMode);
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
@@ -81,7 +82,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         }
     }
 
-    private Set<HostGroupRequest> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts) {
+    private Set<HostGroupRequest> convertHostGroups(List<HostGroup> hostGroups, String runRecipesOnHosts, Boolean autoRecoveryMode) {
         Set<Long> recipeIds = Collections.emptySet();
         List<String> hostGroupsWithRecipe = Collections.emptyList();
         if (!runRecipesOnHosts.isEmpty()) {
@@ -93,6 +94,9 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         for (HostGroup hostgroup : hostGroups) {
             HostGroupRequest hostGroupBase = new HostGroupRequest();
             hostGroupBase.setName(hostgroup.getName());
+            if (Boolean.TRUE == autoRecoveryMode) {
+                hostGroupBase.setRecoveryMode(RecoveryMode.AUTO);
+            }
             ConstraintJson constraintJson = new ConstraintJson();
             constraintJson.setInstanceGroupName(hostgroup.getInstanceGroupName());
             constraintJson.setHostCount(hostgroup.getHostCount());
