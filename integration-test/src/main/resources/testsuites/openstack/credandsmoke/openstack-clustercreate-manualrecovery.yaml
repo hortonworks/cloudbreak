@@ -1,0 +1,77 @@
+name: OpenStack_simple_smoketest_cred_manualrecovery
+parameters:
+  cloudProvider: OPENSTACK
+  blueprintName: hdp-small-default
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+
+  # integratontest.openstackcredential params must be set in application.yml
+  - name: openstack_credential_test
+    parameters:
+      credentialName: its-openstack-credandsmoke-cred-mr
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackCredentialCreationTest
+
+  - name: create openstack network
+    parameters:
+      networkName: it-openstack-credandsmoke-network-mr
+      subnetCIDR: 10.0.36.0/24
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
+
+  - name: create gateway template
+    parameters:
+      templateName: it-openstack-credandsmoke-gateway-mr
+      instanceType: m1.large
+      volumeCount: 1
+      volumeSize: 10
+      templateAdditions: "host_group_master_1,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create master template
+    parameters:
+      templateName: it-openstack-credandsmoke-master-mr
+      instanceType: m1.large
+      volumeCount: 2
+      volumeSize: 10
+      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create slave template
+    parameters:
+      templateName: it-openstack-credandsmoke-slave-mr
+      instanceType: m1.large
+      volumeCount: 3
+      volumeSize: 10
+      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+    classes:
+      - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-openstack-cred-mr
+      region: local
+      clusterName: it-openstack-rec-mr
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: manual recovery with repair
+    parameters:
+      hostGroup: host_group_slave_1
+    classes:
+      - com.sequenceiq.it.cloudbreak.recovery.OpenstackManualRecoveryTest
+
+  - name: manual recovery with remove only
+    parameters:
+      hostGroup: host_group_slave_1
+      removeOnly: True
+      removedInstanceCount: 1
+    classes:
+      - com.sequenceiq.it.cloudbreak.recovery.OpenstackManualRecoveryTest
