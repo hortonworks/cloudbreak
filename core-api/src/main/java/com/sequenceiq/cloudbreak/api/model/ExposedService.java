@@ -45,7 +45,8 @@ public enum ExposedService {
     KIBANA("Kibana", "KIBANA", "", "", ""),
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
     SWARM("Swarm", "SWARM", "", "", ""),
-    SHIPYARD("Shipyard", "SHIPYARD", "", "", "");
+    SHIPYARD("Shipyard", "SHIPYARD", "", "", ""),
+    DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", "");
 
     private final String serviceName;
     private final String portName;

@@ -75,37 +75,45 @@
         }
       },
       {
-      "druid-historical" : {
-        "properties_attributes" : { },
-        "properties" : {
-          "druid.server.http.numThreads" : "50",
-          "druid.processing.numThreads" : "10",
-          "druid.service" : "druid/historical",
-          "druid.port" : "8083",
-          "druid.server.maxSize" : "300000000000"
+        "druid-historical": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.server.http.numThreads": "50",
+            "druid.processing.numThreads": "10",
+            "druid.service": "druid/historical",
+            "druid.port": "8083",
+            "druid.server.maxSize": "300000000000"
+          }
         }
-      }
-    },
+      },
       {
-      "druid-broker" : {
-        "properties_attributes" : { },
-        "properties" : {
-          "druid.cache.type" : "local",
-          "druid.server.http.numThreads" : "50",
-          "druid.broker.http.numConnections" : "5",
-          "druid.processing.numThreads" : "2",
-          "druid.service" : "druid/broker",
-          "druid.port" : "8082"
+        "druid-broker": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.cache.type": "local",
+            "druid.server.http.numThreads": "50",
+            "druid.broker.http.numConnections": "5",
+            "druid.processing.numThreads": "2",
+            "druid.service": "druid/broker",
+            "druid.port": "8082"
+          }
         }
-      }
-    },
+      },
       {
-      "druid-router" : {
-        "properties_attributes" : { },
-        "properties" : {
+        "druid-router": {
+          "properties_attributes": {},
+          "properties": {
+          }
+        }
+      },
+      {
+        "druid-superset": {
+          "properties_attributes": {},
+          "properties": {
+            "SECRET_KEY" : "123admin123"
+          }
         }
       }
-    }
     ],
     "host_groups": [
       {
@@ -155,7 +163,13 @@
             "name": "DRUID_ROUTER"
           },
           {
-          "name" : "HDFS_CLIENT"
+            "name": "DRUID_BROKER"
+          },
+          {
+            "name": "DRUID_SUPERSET"
+          },
+          {
+            "name": "HDFS_CLIENT"
           }
         ],
         "cardinality": "1"
@@ -172,9 +186,6 @@
           },
           {
             "name": "NODEMANAGER"
-          },
-          {
-            "name": "DRUID_BROKER"
           },
           {
             "name": "DRUID_HISTORICAL"

@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -200,6 +201,9 @@ public class AmbariClusterConnector {
     private ZeppelinConfigProvider zeppelinConfigProvider;
 
     @Inject
+    private DruidSupersetConfigProvider druidSupersetConfigProvider;
+
+    @Inject
     private RDSConfigProvider rdsConfigProvider;
 
     @Inject
@@ -332,6 +336,7 @@ public class AmbariClusterConnector {
         }
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
+        blueprintText = druidSupersetConfigProvider.addToBlueprint(stack, blueprintText);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
             if (hdpRepo != null && hdpRepo.getHdpVersion() != null) {
