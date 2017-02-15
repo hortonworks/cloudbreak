@@ -99,14 +99,14 @@ func main() {
 		{
 			Name:   "create-cluster",
 			Usage:  "creates a new cluster",
-			Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlAmbariPasswordOptional},
 			Before: ConfigRead,
 			Action: hdc.CreateCluster,
 			BashComplete: func(c *cli.Context) {
 				fmt.Println("generate-cli-skeleton")
 				fmt.Println("generate-cli-shared-skeleton")
 				fmt.Println("validate-cli-skeleton")
-				for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+				for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlAmbariPasswordOptional} {
 					printFlagCompletion(f)
 				}
 			},
@@ -132,11 +132,11 @@ func main() {
 				},
 				{
 					Name:   "validate-cli-skeleton",
-					Flags:  []cli.Flag{hdc.FlInputJson},
+					Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlAmbariPasswordOptional},
 					Action: hdc.ValidateCreateClusterSkeleton,
 					Usage:  "validate the input json",
 					BashComplete: func(c *cli.Context) {
-						for _, f := range []cli.Flag{hdc.FlInputJson} {
+						for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlAmbariPasswordOptional} {
 							printFlagCompletion(f)
 						}
 					},
