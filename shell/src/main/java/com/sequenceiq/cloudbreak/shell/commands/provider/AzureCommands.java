@@ -186,20 +186,6 @@ public class AzureCommands implements CommandMarker {
                 parameters, platformId, PLATFORM);
     }
 
-    @CliCommand(value = "cluster fileSystem --DASH", help = "Set Windows Azure Blob Storage filesystem with DASH on cluster")
-    public String setAzureRmFileSystem(
-            @CliOption(key = "defaultFileSystem", mandatory = true, help = "Use as default filesystem") Boolean defaultFileSystem,
-            @CliOption(key = "accountName", mandatory = true, help = "accountName of the DASH service") String accountName,
-            @CliOption(key = "accountKey", mandatory = true, help = "access key of the DASH service") String accountKey) {
-        shellContext.setDefaultFileSystem(defaultFileSystem);
-        shellContext.setFileSystemType(FileSystemType.DASH);
-        Map<String, Object> props = new HashMap<>();
-        props.put("accountName", accountName);
-        props.put("accountKey", accountKey);
-        shellContext.setFileSystemParameters(props);
-        return "Windows Azure Blob Storage with DASH configured as the filesystem";
-    }
-
     @CliCommand(value = "cluster fileSystem --WASB", help = "Set Windows Azure Blob Storage filesystem on cluster")
     public String setWasbFileSystem(
             @CliOption(key = "defaultFileSystem", mandatory = true, help = "Use as default filesystem") Boolean defaultFileSystem,

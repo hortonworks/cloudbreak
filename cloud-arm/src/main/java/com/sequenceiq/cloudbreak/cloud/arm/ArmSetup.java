@@ -57,8 +57,6 @@ public class ArmSetup implements Setup {
 
     private static final String TEST_CONTAINER = "cb-test-container";
 
-    private static final String DASH = "DASH";
-
     @Inject
     private ArmClient armClient;
 
@@ -175,11 +173,8 @@ public class ArmSetup implements Setup {
         try {
             containerReference.createIfNotExists();
             containerReference.delete();
-            if (DASH.equals(fileSystemType)) {
-                throw new CloudConnectorException("The provided account belongs to a single storage account, but the selected file system is WASB with DASH");
-            }
         } catch (StorageException e) {
-            if (!DASH.equals(fileSystemType) && e.getCause() instanceof UnknownHostException) {
+            if (e.getCause() instanceof UnknownHostException) {
                 throw new CloudConnectorException("The provided account does not belong to a valid storage account");
             }
         }

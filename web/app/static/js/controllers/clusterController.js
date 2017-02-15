@@ -535,11 +535,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         $scope.errorInFileSystemConfig = function() {
-            if ($scope.cluster.fileSystem.type == 'DASH') {
-                if (!$scope.isUndefined($scope.cluster.fileSystem.properties.accountName) && !$scope.isUndefined($scope.cluster.fileSystem.properties.accountKey)) {
-                    return false;
-                }
-            } else if ($scope.cluster.fileSystem.type == 'WASB') {
+            if ($scope.cluster.fileSystem.type == 'WASB') {
                 if (!$scope.isUndefined($scope.cluster.fileSystem.properties.accountName) && !$scope.isUndefined($scope.cluster.fileSystem.properties.accountKey)) {
                     return false;
                 }
