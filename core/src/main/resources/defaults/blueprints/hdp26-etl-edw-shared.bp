@@ -154,7 +154,25 @@
           "druid.port" : "8091"
         }
       }
-    }
+    },
+      {
+        "druid-superset": {
+          "properties_attributes": {},
+          "properties": {
+            "SECRET_KEY" : "123admin123"
+          }
+        }
+      },
+      {
+        "druid-superset-env": {
+          "properties": {
+            "superset_admin_password": "admin",
+            "superset_admin_firstname": "admin",
+            "superset_admin_lastname": "admin",
+            "superset_admin_email": "admin@devnull.com"
+          }
+        }
+      }
     ],
     "host_groups":[
       {
@@ -253,6 +271,9 @@
           },
           {
             "name": "DRUID_ROUTER"
+          },
+          {
+            "name": "DRUID_SUPERSET"
           }
         ],
         "cardinality":"1"
