@@ -16,7 +16,7 @@
   "emailTo": "admin@example.com",
   "fileSystem" : {
     "name": "teszt",
-    "type": "DASH",
+    "type": "WASB",
     "defaultFs": true,
     "properties": {}
   }

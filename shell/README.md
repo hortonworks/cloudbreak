@@ -420,9 +420,6 @@ You are almost done - one more command and this will create your Hadoop cluster 
 
 *Optional:* If you need a specific filesystem other that the local HDFS it can be configured with the shell:
 
-- DASH filesystem
-```
-cluster fileSystem --DASH --defaultFileSystem true --accountName "accountName" --accountKey "accountKey"
 ```
 - WASB filesystem
 ```
@@ -496,7 +493,7 @@ For the full list of available commands please check below. Please note that all
     * blueprint select - Select the blueprint by its id or name
     * blueprint show - Shows the blueprint by its id or name
     * cluster create - Create a new cluster based on a blueprint and optionally a recipe
-    * cluster fileSystem --DASH - Set Windows Azure Blob Storage filesystem with DASH on cluster
+    * cluster fileSystem --ADLS - Set Windows Azure Data Lake Storage filesystem on cluster
     * cluster fileSystem --GCS - Set GCS fileSystem on cluster
     * cluster fileSystem --WASB - Set Windows Azure Blob Storage filesystem on cluster
     * cluster node --ADD - Add new nodes to the cluster

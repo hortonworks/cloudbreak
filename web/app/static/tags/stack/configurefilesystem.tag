@@ -3,7 +3,6 @@
     <div class="col-sm-8">
         <select class="form-control" id="selectFileSystem" ng-model="cluster.fileSystem.type">
             <option value="LOCAL">{{msg.filesystem_local_label}}</option>
-            <option value="DASH" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_dash_label}}</option>
             <option value="WASB" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_wasb_label}}</option>
             <option value="GCS" ng-if="activeCredential.cloudPlatform == 'GCP'">{{msg.filesystem_gcs_label}}</option>
             <option value="ADLS" ng-if="activeCredential.cloudPlatform == 'AZURE_RM'">{{msg.filesystem_adls_label}}</option>
@@ -11,25 +10,6 @@
 
         <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') &&  cluster.fileSystem.type == 'LOCAL'"><i class="fa fa-warning"></i> {{msg.filesystem_local_label_azure_warning}}</div>
         <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') &&  cluster.fileSystem.type == 'WASB'"><i class="fa fa-warning"></i> {{msg.filesystem_wasb_label_azure_warning}}</div>
-    </div>
-</div>
-<div class="form-group" ng-class="{ 'has-error': clusterCreationForm.armaccountname.$dirty && clusterCreationForm.armaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'DASH'">
-    <label class="col-sm-3 control-label" for="armaccountname">{{msg.filesystem_azure_account_name_label}}
-        <i class="fa fa-question-circle" popover-placement="top" popover={{msg.filesystem_azure_account_name_label_popover}} popover-trigger="mouseenter"></i>
-    </label>
-
-    <div class="col-sm-8">
-        <input class="form-control" type="text" name="armaccountname" id="armaccountname" ng-model="cluster.fileSystem.properties.accountName" ng-pattern="/^[a-z0-9]{3,24}$/" ng-minlength="3" ng-maxlength="24" ng-required="cluster.fileSystem.type == 'DASH'">
-        <div class="help-block" ng-show="clusterCreationForm.armaccountname.$dirty && clusterCreationForm.armaccountname.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_azure_account_name_warning}}
-        </div>
-    </div>
-</div>
-<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'DASH'" ng-class="{ 'has-error': clusterCreationForm.armaccountkey.$dirty && clusterCreationForm.armaccountkey.$invalid }">
-    <label class="col-sm-3 control-label" for="armaccountkey">{{msg.filesystem_azure_account_key_label}}</label>
-    <div class="col-sm-8">
-        <input class="form-control" type="text" name="armaccountkey" id="armaccountkey" ng-model="cluster.fileSystem.properties.accountKey" ng-pattern="/^([A-Za-z0-9+/]{4}){21}([A-Za-z0-9+/]{4}|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)$/" ng-required="cluster.fileSystem.type == 'DASH'">
-        <div class="help-block" ng-show="clusterCreationForm.armaccountkey.$dirty && clusterCreationForm.armaccountkey.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_azure_account_key_warning}}
-        </div>
     </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE_RM') && cluster.fileSystem.type == 'WASB'">
