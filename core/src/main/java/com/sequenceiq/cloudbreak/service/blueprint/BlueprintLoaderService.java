@@ -103,8 +103,7 @@ public class BlueprintLoaderService {
         Set<String> blueprintNames = getDefaultBlueprintNames(user);
         for (String blueprintStrings : blueprintArray) {
             String[] split = blueprintStrings.split("=");
-            if (!blueprintStrings.isEmpty() && (split.length == 2 || split.length == 1) && !blueprintNames.contains(blueprintStrings)
-                    && !split[0].isEmpty()) {
+            if (isBlueprintNamePreConfigured(blueprintStrings, split) && !blueprintNames.contains(blueprintStrings)) {
                 LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintStrings, user.getUsername());
                 try {
                     BlueprintRequest blueprintJson = new BlueprintRequest();
@@ -133,12 +132,9 @@ public class BlueprintLoaderService {
     }
 
     private Set<String> getDefaultBlueprintNames(CbUser user) {
-        Set<String> defaultBpNames = new HashSet<>();
-        Set<Blueprint> defaultBlueprints = blueprintRepository.findAllDefaultInAccount(user.getAccount());
-        for (Blueprint defaultBlueprint : defaultBlueprints) {
-            defaultBpNames.add(defaultBlueprint.getName());
-        }
-        return defaultBpNames;
+        return blueprintRepository.findAllDefaultInAccount(user.getAccount()).stream()
+                .map(bp -> bp.getStatus() == ResourceStatus.DEFAULT_DELETED ? bp.getName().replaceAll("_([0-9]+)$", "") : bp.getName())
+                .collect(Collectors.toSet());
     }
 
 }

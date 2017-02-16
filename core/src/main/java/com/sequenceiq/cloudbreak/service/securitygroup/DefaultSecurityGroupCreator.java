@@ -47,31 +47,27 @@ public class DefaultSecurityGroupCreator {
     public void createDefaultSecurityGroups(CbUser user) {
         Set<SecurityGroup> defaultSecurityGroups = groupRepository.findAllDefaultInAccount(user.getAccount());
         Map<String, SecurityGroup> defSecGroupMap = defaultSecurityGroups.stream().collect(Collectors.toMap(SecurityGroup::getName, Function.identity()));
-        Set<SecurityGroup> securityGroups = new HashSet<>();
         for (String platform : PLATFORMS_WITH_SEC_GROUP_SUPPORT) {
-            //create default strict security group
-            createDefaultStrictSecurityGroup(user, platform, securityGroups, defSecGroupMap);
+            String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
+            if (!defSecGroupMap.containsKey(securityGroupName)) {
+                createDefaultStrictSecurityGroup(user, platform, securityGroupName);
+            }
         }
     }
 
-    private void createDefaultStrictSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups, Map<String, SecurityGroup> defSecGroupMap) {
-        String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
-        if (!defSecGroupMap.containsKey(securityGroupName)) {
-            List<Port> strictSecurityGroupPorts = new ArrayList<>();
-            strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
-            strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
-            strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
-            String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
-            addSecurityGroup(user, platform, securityGroups, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
-        }
+    private void createDefaultStrictSecurityGroup(CbUser user, String platform, String securityGroupName) {
+        List<Port> strictSecurityGroupPorts = new ArrayList<>();
+        strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
+        strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
+        strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
+        String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
+        addSecurityGroup(user, platform, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
     }
 
-    private void addSecurityGroup(CbUser user, String platform, Set<SecurityGroup> securityGroups, String name,
-            List<Port> securityGroupPorts, String securityGroupDesc) {
+    private void addSecurityGroup(CbUser user, String platform, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Collections.singletonList(sshAndSslRule)));
-        securityGroups.add(securityGroupService.create(user, onlySshAndSsl));
     }
 
     private String getPortsOpenDesc(List<Port> portsWithoutAclRules) {

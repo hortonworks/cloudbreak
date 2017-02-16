@@ -40,20 +40,15 @@ public class DefaultTemplateLoaderService {
     private TemplateRepository templateRepository;
 
     @Inject
-    private TemplateService templateService;
-
-    @Inject
     private JsonHelper jsonHelper;
 
-    public Set<Template> loadTemplates(CbUser user) {
-        Set<Template> templates = new HashSet<>();
+    public void createDefaultTemplates(CbUser user) {
         if (templateRepository.findAllDefaultInAccount(user.getAccount()).isEmpty()) {
-            templates.addAll(createDefaultTemplates(user));
+            createDefaultTemplateInstances(user);
         }
-        return templates;
     }
 
-    private Set<Template> createDefaultTemplates(CbUser user) {
+    private Set<Template> createDefaultTemplateInstances(CbUser user) {
         Set<Template> templates = new HashSet<>();
         for (String templateName : templateArray) {
             if (!templateName.isEmpty() && templateRepository.findOneByName(templateName, user.getAccount()) == null) {
