@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 @Transactional
@@ -144,6 +145,7 @@ public class BlueprintService {
             if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
                 blueprintRepository.delete(blueprint);
             } else {
+                blueprint.setName(NameUtil.postfixWithTimestamp(blueprint.getName()));
                 blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
                 blueprintRepository.save(blueprint);
             }

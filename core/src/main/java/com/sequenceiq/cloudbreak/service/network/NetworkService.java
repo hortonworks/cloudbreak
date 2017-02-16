@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 @Transactional
@@ -119,6 +120,7 @@ public class NetworkService {
                 if (ResourceStatus.USER_MANAGED.equals(network.getStatus())) {
                     networkRepository.delete(network);
                 } else {
+                    network.setName(NameUtil.postfixWithTimestamp(network.getName()));
                     network.setStatus(ResourceStatus.DEFAULT_DELETED);
                     networkRepository.save(network);
                 }

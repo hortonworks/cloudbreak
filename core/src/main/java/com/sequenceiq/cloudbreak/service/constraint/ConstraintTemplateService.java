@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.constraint;
 
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 @Transactional
@@ -32,8 +32,6 @@ public class ConstraintTemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConstraintTemplateService.class);
 
     private static final String CONSTRAINT_NOT_FOUND_MSG = "Constraint template '%s' not found.";
-
-    private static final String DELIMITER = "_";
 
     @Inject
     private ConstraintTemplateRepository constraintTemplateRepository;
@@ -119,6 +117,7 @@ public class ConstraintTemplateService {
             if (ResourceStatus.USER_MANAGED.equals(constraintTemplate.getStatus())) {
                 constraintTemplateRepository.delete(constraintTemplate);
             } else {
+                constraintTemplate.setName(NameUtil.postfixWithTimestamp(constraintTemplate.getName()));
                 constraintTemplate.setStatus(ResourceStatus.DEFAULT_DELETED);
                 constraintTemplateRepository.save(constraintTemplate);
             }
@@ -127,9 +126,7 @@ public class ConstraintTemplateService {
                 throw new BadRequestException(String.format(
                         "There are stacks associated with template '%s'. Please remove these before deleting the template.", constraintTemplate.getName()));
             } else {
-                Date now = new Date();
-                String terminatedName = constraintTemplate.getName() + DELIMITER + now.getTime();
-                constraintTemplate.setName(terminatedName);
+                constraintTemplate.setName(NameUtil.postfixWithTimestamp(constraintTemplate.getName()));
                 constraintTemplate.setDeleted(true);
                 if (ResourceStatus.DEFAULT.equals(constraintTemplate.getStatus())) {
                     constraintTemplate.setStatus(ResourceStatus.DEFAULT_DELETED);

@@ -59,7 +59,7 @@ public class TemplateController implements TemplateEndpoint {
     public Set<TemplateResponse> getPrivates() {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        defaultTemplateLoaderService.loadTemplates(user);
+        defaultTemplateLoaderService.createDefaultTemplates(user);
         Set<Template> templates = templateService.retrievePrivateTemplates(user);
         return convert(templates);
     }
@@ -68,7 +68,7 @@ public class TemplateController implements TemplateEndpoint {
     public Set<TemplateResponse> getPublics() {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        defaultTemplateLoaderService.loadTemplates(user);
+        defaultTemplateLoaderService.createDefaultTemplates(user);
         Set<Template> templates = templateService.retrieveAccountTemplates(user);
         return convert(templates);
     }
