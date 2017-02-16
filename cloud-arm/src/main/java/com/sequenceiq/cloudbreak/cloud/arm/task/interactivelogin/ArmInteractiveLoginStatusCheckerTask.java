@@ -87,6 +87,7 @@ public class ArmInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
             String tokenResponseString = response.readEntity(String.class);
             try {
                 String accessToken = new JSONObject(tokenResponseString).getString("access_token");
+                LOGGER.info("Access token received");
 
                 ExtendedCloudCredential extendedCloudCredential = armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential();
                 ArmCredentialView armCredentialView = new ArmCredentialView(extendedCloudCredential);
@@ -105,6 +106,7 @@ public class ArmInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
                 } catch (InteractiveLoginException e) {
+                    LOGGER.error("Interactive login failed: ", e.getMessage());
                     sendErrorStatusMessage(extendedCloudCredential, e.getMessage());
                 }
             } catch (JSONException e) {
@@ -112,6 +114,7 @@ public class ArmInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
             }
             return true;
         } else {
+            LOGGER.info("Polling request failed this time, status code {}, response: {}", response.getStatus(), response.readEntity(String.class));
             return false;
         }
     }

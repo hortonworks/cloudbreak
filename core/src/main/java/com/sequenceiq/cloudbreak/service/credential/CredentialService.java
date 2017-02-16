@@ -101,6 +101,17 @@ public class CredentialService {
         return create(userId, account, credential);
     }
 
+    public void sendErrorNotification(String owner, String account, String cloudPlatform, String errorMessage) {
+        Notification notification = new Notification();
+        notification.setEventType("CREDENTIAL_CREATE_FAILED");
+        notification.setEventTimestamp(new Date());
+        notification.setEventMessage(errorMessage);
+        notification.setOwner(owner);
+        notification.setAccount(account);
+        notification.setCloud(cloudPlatform);
+        notificationSender.send(notification);
+    }
+
     private void sendNotification(Credential credential) {
         Notification notification = new Notification();
         notification.setEventType("CREDENTIAL_CREATED");

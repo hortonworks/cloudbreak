@@ -6,8 +6,11 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 import reactor.bus.Event;
@@ -35,6 +38,14 @@ public class InteractiveCredentialCreationHandler implements ClusterEventHandler
 
         ExtendedCloudCredential extendedCloudCredential = interactiveCredentialCreationRequest.getExtendedCloudCredential();
         Credential credential = extendedCloudCredentialToCredentialConverter.convert(extendedCloudCredential);
-        credentialService.createWithRetry(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(), credential);
+        try {
+            credentialService.createWithRetry(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(), credential);
+        } catch (DuplicateKeyValueException e) {
+            credentialService.sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
+                    extendedCloudCredential.getCloudPlatform(), DuplicatedKeyValueExceptionMapper.errorMessage(e));
+        } catch (BadRequestException e) {
+            credentialService.sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
+                    extendedCloudCredential.getCloudPlatform(), e.getMessage());
+        }
     }
 }

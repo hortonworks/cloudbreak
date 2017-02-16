@@ -24,8 +24,8 @@ uluwatuControllers.filter("format", function() {
     };
 });
 
-uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'UserPermission', 'ErrorHandler', 'notify',
-    function($scope, $http, User, $rootScope, $filter, UserPermission, ErrorHandler, notify) {
+uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '$rootScope', '$filter', 'AccountCredential', 'UserPermission', 'ErrorHandler', 'notify',
+    function($scope, $http, User, $rootScope, $filter, AccountCredential, UserPermission, ErrorHandler, notify) {
         var orderBy = $filter('orderBy');
         $scope.user = User.get();
 
@@ -55,6 +55,10 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             $scope.statusclass = status;
         }
 
+        $rootScope.$on('showError', function (event, object) {
+            $scope.showError(object.error, object.prefix);
+        });
+
         $scope.showError = function(error, prefix) {
             var errorMsg = ErrorHandler.handleError(error);
             if (prefix) {
@@ -64,9 +68,9 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             }
         }
 
-        $scope.showInteractiveCredentialMessage = function(message) {
-            $scope.defaultCredentialError = message;
-        }
+        $rootScope.$on('showErrorMessage', function (event, message) {
+            $scope.showErrorMessage(message);
+        });
 
         $scope.showErrorMessage = function(message, prefix) {
             $scope.modifyStatusMessage(message, prefix);
@@ -74,11 +78,19 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
             $scope.popupError($scope.statusMessage);
         }
 
+        $rootScope.$on('showWarningMessage', function (event, message) {
+            $scope.showWarningMessage(message);
+        });
+
         $scope.showWarningMessage = function(message) {
             $scope.modifyStatusMessage(message);
             $scope.modifyStatusClass("has-warning");
             $scope.popupWarning($scope.statusMessage);
         }
+
+        $rootScope.$on('showSuccessMessage', function (event, message) {
+            $scope.showSuccess(message);
+        });
 
         $scope.showSuccess = function(message, prefix) {
             $scope.modifyStatusMessage(message);
@@ -119,6 +131,16 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
 
         $scope.addPanelJQueryEventListeners = function(panel) {
             addPanelJQueryEventListeners(panel);
+        }
+
+        $scope.addCredentialPanelQueryEventListener = function () {
+            addPanelJQueryEventListeners('crendetial');
+            var credentials = AccountCredential.query(function () {
+                if (credentials != null && credentials.length == 0 && $rootScope.params.platforms.length == 1) {
+                    $jq('#panel-credentials' + ' .panel-heading > a').click();
+                    $jq('#panel-create-credentials-collapse-btn').click();
+                }
+            });
         }
 
         $scope.addClusterFormJQEventListeners = function() {

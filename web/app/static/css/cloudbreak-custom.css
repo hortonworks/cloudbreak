@@ -350,3 +350,49 @@ a.list-group-item, button.list-group-item {
 #bg img.faded-bg {
     opacity: .1
 }
+
+.navbar-brand {
+    float:left;
+    padding:25px 15px;
+    font-size:19px;
+    line-height:21px;
+    height:71px
+}
+#bg {
+    position: fixed;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    z-index: -1
+}
+
+#bg img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    margin: auto;
+    min-width: 50%;
+    min-height: 50%;
+    opacity: 1;
+    transition: opacity 3s ease
+}
+
+#bg img.faded-bg {
+    opacity: .1
+}
+
+#azure-credential .btn-group a[disabled] {
+    opacity: 1;
+}
+
+#createCredentialButton {
+    position: relative;
+    top: 52px;
+}
+
+.azure-cred-padding-top {
+    padding-top: 40px;
+}
