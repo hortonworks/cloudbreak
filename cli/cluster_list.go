@@ -142,7 +142,7 @@ func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetStacksUse
 
 func getHostStatus(stack *models.StackResponse, imd *models.InstanceMetaData) string {
 	var result string = ""
-	if stack.Cluster != nil {
+	if stack.Cluster != nil && imd.DiscoveryFQDN != nil {
 		for _, hg := range stack.Cluster.HostGroups {
 			if hg.Name == *imd.InstanceGroup {
 				for _, hmd := range hg.Metadata {
