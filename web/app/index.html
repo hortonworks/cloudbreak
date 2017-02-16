@@ -68,11 +68,16 @@
     <script src="js/controllers/securityGroupController.js"></script>
     <script src="js/controllers/topologyController.js"></script>
     <script src="js/services.js"></script>
+
+    <script src="js/components/azurecredential/azurecredential.js"></script>
+    <script src="js/components/azurecredential/azurecredentialfirst.js"></script>
+    <script src="js/components/azurecredential/azurecredentialsecond.js"></script>
+    <script src="js/components/azurecredential/azurecredentialthird.js"></script>
 </head>
 
 <body>
     <div id="bg">
-        <img src="/img/HORT15001_Homepage_heroes-cdp.jpg" alt="" class="faded-bg">
+        <img src="/img/HORT15001_Homepage_heroes-cdp.jpg" alt="" data-no-retina class="faded-bg">
     </div>
     <div class="view-container" ng-init="authorizeUrl='<%= authorizeUrl %>'" block-ui="main">
         <div ng-view class="view-frame" onload="addCrudControls()"></div>

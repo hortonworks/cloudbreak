@@ -42,25 +42,23 @@
                             </div>
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <div class="alert alert-info" role="alert" ng-show="credentialInCreation"><b>{{msg.credential_creation_wait_prefix}}</b> {{msg.credential_creation_wait_suffix}}</div>
-                            <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential  && !credentialInCreation && isVisible('AWS')" name="awsCredentialForm">
+                            <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential && isVisible('AWS')" name="awsCredentialForm">
                                 <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
-                            <form class="form-horizontal" role="form" name="azureRmCredentialForm" ng-show="azureRmCredential && !credentialInCreation && isVisible('AZURE_RM')">
-                                <div ng-include src="'tags/credential/azurermform.tag'"></div>
-                            </form>
 
-                            <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && !credentialInCreation && isVisible('GCP')">
+                            <azure-credential ng-show="azureRmCredential && isVisible('AZURE_RM')"></azure-credential>
+
+                            <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && isVisible('GCP')">
                                 <div ng-include src="'tags/credential/gcpform.tag'"></div>
                             </form>
 
-                            <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && !credentialInCreation && isVisible('OPENSTACK')">
+                            <form class="form-horizontal" role="form" name="openstackCredentialForm" ng-show="openstackCredential && isVisible('OPENSTACK')">
                                 <div ng-include src="'tags/credential/openstackform.tag'"></div>
                             </form>
-                            <form class="form-horizontal" role="form" name="mesosImportStackForm" ng-show="mesosCredential && !credentialInCreation && isVisible('BYOS')">
+                            <form class="form-horizontal" role="form" name="mesosImportStackForm" ng-show="mesosCredential && isVisible('BYOS')">
                                 <div ng-include src="'tags/credential/mesosform.tag'"></div>
                             </form>
-                            <form class="form-horizontal" role="form" name="yarnImportStackForm" ng-show="yarnCredential && !credentialInCreation && isVisible('BYOS')">
+                            <form class="form-horizontal" role="form" name="yarnImportStackForm" ng-show="yarnCredential && isVisible('BYOS')">
                                 <div ng-include src="'tags/credential/yarnform.tag'"></div>
                             </form>
                         </div>

@@ -37,13 +37,6 @@ angular.module('uluwatuControllers')
                     name: 'Role Based',
                     id: 'role-based'
                 }],
-                'AZURE_SELECTOR': [{
-                    name: 'App based',
-                    id: 'app-based'
-                }, {
-                    name: 'Interactive',
-                    id: 'interactive'
-                }],
                 'RECIPE_EXECUTION_TYPE': {
                     execution_types: [{
                         key: 'PRE',

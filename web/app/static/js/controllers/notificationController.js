@@ -104,16 +104,15 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                         handleStatusChange(notification, false);
                         break;
                     case "CREDENTIAL_CREATED":
-                        // handleCredentialCreated(notification);
-                        var credentials = AccountCredential.query(function (credentials) {
+                        AccountCredential.query(function (credentials) {
                             $rootScope.$broadcast('credentialCreated', credentials);
                         });
                         break;
+                    case "CREDENTIAL_CREATE_FAILED":
+                        handleCredentialCreateFailed(notification);
+                        break;
                     case "INTERACTIVE_CREDENTIAL_STATUS":
                         handleInteractiveCredentialStatus(notification);
-                        break;
-                    case "INTERACTIVE_CREDENTIAL_ERROR":
-                        handleInteractiveCredentialError(notification);
                         break;
                 }
             }
@@ -121,14 +120,13 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             $scope.$apply();
         }
 
-        function handleInteractiveCredentialError(notification) {
-            $scope.showErrorMessage(notification.eventMessage);
-            $scope.showInteractiveCredentialMessage(notification.eventMessage)
+        function handleInteractiveCredentialStatus(notification) {
+            $rootScope.$broadcast('interactiveCredentialCreationInProgress', notification.eventMessage);
+            $scope.showSuccess(notification.eventMessage);
         }
 
-        function handleInteractiveCredentialStatus(notification) {
-            $rootScope.$broadcast('interactiveCredentialCreationInProgress');
-            $scope.showSuccess(notification.eventMessage);
+        function handleCredentialCreateFailed(notification) {
+            $rootScope.$broadcast('credentialCreateFailed', notification.eventMessage);
         }
 
         function getActCluster(notification) {

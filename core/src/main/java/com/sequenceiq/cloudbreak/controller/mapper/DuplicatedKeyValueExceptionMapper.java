@@ -21,9 +21,13 @@ public class DuplicatedKeyValueExceptionMapper implements ExceptionMapper<Duplic
         MDCBuilder.buildMdcContext();
         LOGGER.error(exception.getMessage(), exception);
         return Response.status(Response.Status.CONFLICT).entity(new ExceptionResult(
-                String.format("The %s name '%s' is already taken, please choose a different one",
-                        exception.getResourceType().toString().toLowerCase(),
-                        exception.getValue())))
+                errorMessage(exception)))
                 .build();
+    }
+
+    public static String errorMessage(DuplicateKeyValueException exception) {
+        return String.format("The %s name '%s' is already taken, please choose a different one",
+                exception.getResourceType().toString().toLowerCase(),
+                exception.getValue());
     }
 }

@@ -36,7 +36,7 @@ public class InteractiveCredentialCreationStatusHandler implements ClusterEventH
         String message = interactiveCredentialCreationStatus.getMessage();
         Notification notification = new Notification();
         if (interactiveCredentialCreationStatus.isError()) {
-            notification.setEventType("INTERACTIVE_CREDENTIAL_ERROR");
+            notification.setEventType("CREDENTIAL_CREATE_FAILED");
         } else {
             notification.setEventType("INTERACTIVE_CREDENTIAL_STATUS");
         }
