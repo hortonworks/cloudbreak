@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 @Transactional
@@ -108,6 +109,7 @@ public class SecurityGroupService {
                 if (ResourceStatus.USER_MANAGED.equals(securityGroup.getStatus())) {
                     groupRepository.delete(securityGroup);
                 } else {
+                    securityGroup.setName(NameUtil.postfixWithTimestamp(securityGroup.getName()));
                     securityGroup.setStatus(ResourceStatus.DEFAULT_DELETED);
                     groupRepository.save(securityGroup);
                 }

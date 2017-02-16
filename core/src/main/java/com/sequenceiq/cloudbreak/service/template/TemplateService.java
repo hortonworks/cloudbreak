@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.template;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -23,13 +22,12 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 @Transactional
 public class TemplateService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateService.class);
-
-    private static final String DELIMITER = "_";
 
     private static final String TEMPLATE_NOT_FOUND_MSG = "Template '%s' not found.";
 
@@ -121,6 +119,7 @@ public class TemplateService {
             if (ResourceStatus.USER_MANAGED.equals(template.getStatus())) {
                 templateRepository.delete(template);
             } else {
+                template.setName(NameUtil.postfixWithTimestamp(template.getName()));
                 template.setStatus(ResourceStatus.DEFAULT_DELETED);
                 templateRepository.save(template);
             }
@@ -129,9 +128,7 @@ public class TemplateService {
                 throw new BadRequestException(String.format(
                         "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));
             } else {
-                Date now = new Date();
-                String terminatedName = template.getName() + DELIMITER + now.getTime();
-                template.setName(terminatedName);
+                template.setName(NameUtil.postfixWithTimestamp(template.getName()));
                 template.setTopology(null);
                 template.setDeleted(true);
                 if (ResourceStatus.DEFAULT.equals(template.getStatus())) {

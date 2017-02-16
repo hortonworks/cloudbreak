@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 @Transactional
@@ -99,6 +100,7 @@ public class RdsConfigService {
             if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
                 rdsConfigRepository.delete(rdsConfig);
             } else {
+                rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
                 rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
                 rdsConfigRepository.save(rdsConfig);
             }
