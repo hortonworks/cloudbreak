@@ -2,9 +2,12 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Supplier;
@@ -19,6 +22,8 @@ import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 @Component
 public class TemplateDecorator implements Decorator<Template> {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TemplateDecorator.class);
+
     @Inject
     private CloudParameterService cloudParameterService;
 
@@ -31,19 +36,26 @@ public class TemplateDecorator implements Decorator<Template> {
     @Override
     public Template decorate(final Template subject, Object... data) {
         Supplier<VolumeParameterConfig> config = Suppliers.memoize(() -> {
-            Platform platform = Platform.platform(subject.cloudPlatform());
-            VmType vmType = virtualMachines.get().get(platform).stream().filter(curr -> curr.value().equals(subject.getInstanceType())).findFirst().get();
-            Map<String, VolumeParameterType> map = diskMappings.get().get(platform);
-            VolumeParameterType volumeParameterType = map.get(subject.getVolumeType());
+            try {
+                Platform platform = Platform.platform(subject.cloudPlatform());
+                VmType vmType = virtualMachines.get().get(platform).stream().filter(curr -> curr.value().equals(subject.getInstanceType())).findFirst().get();
+                Map<String, VolumeParameterType> map = diskMappings.get().get(platform);
+                VolumeParameterType volumeParameterType = map.get(subject.getVolumeType());
 
-            return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
+                return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
+            } catch (NoSuchElementException e) {
+                LOGGER.info("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
+                return VolumeParameterConfig.EMPTY;
+            }
         });
 
-        if (subject.getVolumeCount() == null) {
-            subject.setVolumeCount(config.get().maximumNumber());
-        }
-        if (subject.getVolumeSize() == null) {
-            subject.setVolumeSize(config.get().maximumSize());
+        if (config.get().volumeParameterType() != null) {
+            if (subject.getVolumeCount() == null) {
+                subject.setVolumeCount(config.get().maximumNumber());
+            }
+            if (subject.getVolumeSize() == null) {
+                subject.setVolumeSize(config.get().maximumSize());
+            }
         }
 
         return subject;

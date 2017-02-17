@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class VolumeParameterConfig {
 
+    public static final VolumeParameterConfig EMPTY = new VolumeParameterConfig();
+
     private VolumeParameterType volumeParameterType;
 
     private Integer minimumSize;
@@ -11,6 +13,10 @@ public class VolumeParameterConfig {
     private Integer minimumNumber;
 
     private Integer maximumNumber;
+
+    private VolumeParameterConfig() {
+
+    }
 
     public VolumeParameterConfig(VolumeParameterType volumeParameterType,
             Integer minimumSize,
