@@ -155,14 +155,14 @@ init-profile() {
 
 public-ip-resolver-command() {
     declare desc="Generates command to resolve public IP"
-    
+
     if is_linux; then
         # on gce
         if curl -m 1 -f -s -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
             echo "curl -m 1 -f -s -H \"Metadata-Flavor: Google\" 169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip"
             return
         fi
-        
+
         # on amazon
         if curl -m 1 -f -s 169.254.169.254/latest/dynamic &>/dev/null ; then
             if curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-hostname &>/dev/null ; then
@@ -177,7 +177,7 @@ public-ip-resolver-command() {
             fi
             return
         fi
-        
+
         # on openstack
         if curl -m 1 -f -s 169.254.169.254/latest &>/dev/null ; then
             if [[ -n "$(curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-ipv4)" ]]; then
@@ -241,7 +241,7 @@ doctor() {
 }
 
 network-doctor() {
-    
+
     if [[ "$SKIP_NETWORK_DOCTOR" ]] || [[ "$CB_HTTP_PROXY" ]] || [[ "$CB_HTTPS_PROXY" ]] || [[ "$http_proxy" ]] || [[ "$https_proxy" ]]; then
         info "network checks are skippen in case you are using porxy"
         return
@@ -253,21 +253,21 @@ network-doctor() {
     else
         error
     fi
-    
+
     echo-n "ping github.com on host: "
     if ping -c 1 -W 1 github.com &> /dev/null; then
         info "OK"
     else
         error
     fi
-    
+
     echo-n "ping 8.8.8.8 in container: "
     if docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 8.8.8.8' &> /dev/null; then
         info "OK"
     else
         error
     fi
-    
+
     echo-n "ping github.com in container: "
     if docker run --label cbreak.sidekick=true alpine sh -c 'ping -c 1 -W 1 github.com' &> /dev/null; then
         info "OK"
@@ -374,7 +374,7 @@ start-cmd() {
 
 restart-cmd() {
     declare desc="shortcut for kill + regenerate + start"
-    
+
     compose-kill
     deployer-regenerate
     start-requested-services
@@ -421,7 +421,7 @@ hdc-cli-downloadable() {
 
 wait-for-cloudbreak() {
     info "Waiting for Cloudbreak UI (timeout: $CB_UI_MAX_WAIT)"
-    
+
     local count=0
     while ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/cb/info &&  [ $((count++)) -lt $CB_UI_MAX_WAIT ] ; do
         echo -n . 1>&2
@@ -481,13 +481,12 @@ main() {
     cmd-export aws-certs-restore-s3
 
     cmd-export-ns azure "Azure namespace"
-    cmd-export azure-deploy-dash
     cmd-export azure-configure-arm
 
     cmd-export-ns machine "Docker-machine"
     cmd-export machine-create
     cmd-export machine-check
-    
+
     if [[ "$PROFILE_LOADED" ]] ; then
         cmd-export cbd-update update
         cmd-export deployer-generate generate
@@ -506,7 +505,7 @@ main() {
 
         cmd-export migrate-startdb-cmd startdb
         cmd-export migrate-cmd migrate
-        
+
         cmd-export-ns util "Util namespace"
         cmd-export util-cloudbreak-shell
         cmd-export util-cloudbreak-shell-quiet
