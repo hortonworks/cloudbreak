@@ -310,7 +310,7 @@ _cloudbreak-shell() {
         -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
         -e IDENTITY_ADDRESS=http://identity.service.consul:$UAA_PORT \
         -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
-        -e SEQUENCEIQ_PASSWORD="$passwd" \
+        -e SEQUENCEIQ_PASSWORD="$(escape-string-env $passwd \")" \
         -w /data \
         -v $PWD:/data \
         $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL
@@ -556,7 +556,7 @@ util-token() {
     local TOKEN=$(curl -sX POST \
         -w '%{redirect_url}' \
         -H "accept: application/x-www-form-urlencoded" \
-        --data-urlencode credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'${passwd}'"}' \
+        --data-urlencode credentials='{"username":"'${UAA_DEFAULT_USER_EMAIL}'","password":"'$(escape-string-json $passwd)'"}' \
         "${PUBLIC_IP}:${UAA_PORT}/oauth/authorize?response_type=token&client_id=cloudbreak_shell&scope.0=openid&source=login&redirect_uri=http://cloudbreak.shell" \
            | cut -d'&' -f 2)
     echo ${TOKEN#*=}
