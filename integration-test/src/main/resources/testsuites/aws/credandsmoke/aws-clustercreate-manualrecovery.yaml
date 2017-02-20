@@ -68,7 +68,7 @@ tests:
 
   - name: manual recovery with remove only
     parameters:
-      region: EU_WEST_1
+      region: eu-west-1
       hostGroup: host_group_slave_1
       removedInstanceCount: 1
       removeOnly: True
