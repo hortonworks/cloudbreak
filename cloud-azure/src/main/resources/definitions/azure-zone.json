@@ -2,63 +2,63 @@
   "items": [
     {
       "name": "Central US",
-      "zones": []
+      "zones": [ "Central US" ]
     },
     {
       "name": "North Europe",
-      "zones": []
+      "zones": [ "North Europe" ]
     },
     {
       "name": "East Asia",
-      "zones": []
+      "zones": [ "East Asia" ]
     },
     {
       "name": "West Europe",
-      "zones": []
+      "zones": [ "West Europe" ]
     },
     {
       "name": "North Central US",
-      "zones": []
+      "zones": [ "North Central US" ]
     },
     {
       "name": "West US",
-      "zones": []
+      "zones": [ "West US" ]
     },
     {
       "name": "East US 2",
-      "zones": []
+      "zones": [ "East US 2" ]
     },
     {
       "name": "Brazil South",
-      "zones": []
+      "zones": [ "Brazil South" ]
     },
     {
       "name": "South Central US",
-      "zones": []
+      "zones": [ "South Central US" ]
     },
     {
       "name": "Japan East",
-      "zones": []
+      "zones": [ "Japan East" ]
     },
     {
       "name": "East US",
-      "zones": []
+      "zones": [ "East US" ]
     },
     {
       "name": "Southeast Asia",
-      "zones": []
+      "zones": [ "Southeast Asia" ]
     },
     {
       "name": "Japan West",
-      "zones": []
+      "zones": [ "Japan West" ]
     },
     {
       "name": "Canada East",
-      "zones": []
+      "zones": [ "Canada East" ]
     },
     {
       "name": "Canada Central",
-      "zones": []
+      "zones": [ "Canada Central" ]
     }
   ]
 }

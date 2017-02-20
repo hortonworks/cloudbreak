@@ -11,10 +11,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -47,19 +50,20 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
-public class AzurePlatformParameters implements PlatformParameters {
+public class ArmPlatformParameters implements PlatformParameters {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ArmPlatformParameters.class);
 
     private static final int START_LABEL = 98;
 
     private static final int DEFAULT_REGION_TYPE_POSITION = 4;
-
-    private static final int DEFAULT_VM_TYPE_POSITION = 1;
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
@@ -79,21 +83,26 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private List<VmType> vmTypes = new ArrayList<>();
 
+    private Map<AvailabilityZone, List<VmType>> vmTypesForZones = new HashMap<>();
+
+    private Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
+
     private Region defaultRegion;
 
     private VmType defaultVmType;
 
     @PostConstruct
     public void init() {
-        this.regions = readRegions();
-        this.vmTypes = readVmTypes();
+        this.regions = readRegions(resourceDefinition("zone"));
+        readVmTypes();
         this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
-        this.defaultVmType = nthElement(this.vmTypes, DEFAULT_VM_TYPE_POSITION);
+        this.defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
     }
 
-    private List<VmType> readVmTypes() {
-        List<VmType> vmTypes = new ArrayList<>();
+    private void readVmTypes() {
+        Map<String, VmType> vmTypeMap = new HashMap<>();
         String vm = getDefinition(armVmParameterDefinitionPath, "vm");
+        String zoneVms = getDefinition(armVmParameterDefinitionPath, "zone-vm");
         try {
             VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
             for (VmSpecification vmSpecification : oVms.getItems()) {
@@ -114,13 +123,25 @@ public class AzurePlatformParameters implements PlatformParameters {
                     }
                 }
                 VmTypeMeta vmTypeMeta = builder.create();
-                vmTypes.add(VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta, true));
+                VmType vmType = VmType.vmTypeWithMeta(vmSpecification.getValue(), vmTypeMeta, true);
+                vmTypes.add(vmType);
+                vmTypeMap.put(vmType.value(), vmType);
+            }
+            ZoneVmSpecifications zoneVmSpecifications = JsonUtil.readValue(zoneVms, ZoneVmSpecifications.class);
+            Map<String, List<AvailabilityZone>> azmap = regions.entrySet().stream().collect(Collectors.toMap(av -> av.getKey().value(), av -> av.getValue()));
+            for (ZoneVmSpecification zvs : zoneVmSpecifications.getItems()) {
+                List<VmType> regionVmTypes = zvs.getVmTypes().stream().filter(vmTypeName -> vmTypeMap.containsKey(vmTypeName))
+                        .map(vmTypeName -> vmTypeMap.get(vmTypeName)).collect(Collectors.toList());
+                List<AvailabilityZone> azs = azmap.get(zvs.getZone());
+                if (azs != null) {
+                    azs.forEach(zone -> vmTypesForZones.put(zone, regionVmTypes));
+                    azs.forEach(zone -> defaultVmTypes.put(zone, vmTypeMap.get(zvs.getDefaultVmType())));
+                }
             }
         } catch (IOException e) {
-            return vmTypes;
+            LOGGER.error("Cannot initialize platform parameters for arm", e);
         }
         Collections.sort(vmTypes, new StringTypesCompare());
-        return vmTypes;
     }
 
     private VolumeParameterConfig volumeParameterConfig(ConfigSpecification configSpecification) {
@@ -225,7 +246,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         Map<AvailabilityZone, VmTypes> result = new HashMap<>();
         for (Map.Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
             for (AvailabilityZone zone : zones.getValue()) {
-                result.put(zone, new VmTypes(vmTypes, defaultVmType));
+                result.put(zone, new VmTypes(vmTypesForZones.get(zone), defaultVmTypes.get(zone)));
             }
         }
         return result;
