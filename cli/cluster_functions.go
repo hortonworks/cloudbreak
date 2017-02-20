@@ -70,8 +70,6 @@ func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 		logErrorAndExit(errors.New(msg))
 	}
 
-	log.Infof("[AssembleClusterSkeleton] assemble cluster based on skeleton: %s", skeleton.Json())
-
 	ambariPassword := c.String(FlAmbariPasswordOptional.Name)
 	if len(ambariPassword) != 0 {
 		skeleton.ClusterAndAmbariPassword = ambariPassword
