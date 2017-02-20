@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.recovery;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.openstack4j.api.OSClient;
@@ -21,10 +22,9 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 
 
 public class RecoveryUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(com.sequenceiq.it.cloudbreak.recovery.RecoveryUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RecoveryUtil.class);
 
-    protected RecoveryUtil() {
-
+    private RecoveryUtil() {
     }
 
     public static String getInstanceId(StackResponse stackResponse, String hostGroup) {
@@ -43,6 +43,21 @@ public class RecoveryUtil {
         }
         Assert.assertNotNull(instanceId);
     return instanceId;
+    }
+
+    public static void deleteInstance(Map<String, String> cloudProviderParams, String instanceId) {
+        switch (cloudProviderParams.get("cloudProvider")) {
+            case "AWS":
+                deleteAWSInstance(Regions.fromName(cloudProviderParams.get("region")), instanceId);
+                break;
+            case "OPENSTACK":
+                deleteOpenstackInstance(cloudProviderParams.get("endpoint"), cloudProviderParams.get("userName"), cloudProviderParams.get("password"),
+                        cloudProviderParams.get("tenantName"), instanceId);
+                break;
+            default:
+                LOGGER.info("CloudProvider {} is not supported!", cloudProviderParams.get("cloudProvider"));
+                break;
+        }
     }
 
     public static void deleteAWSInstance(Regions region, String instanceId) {

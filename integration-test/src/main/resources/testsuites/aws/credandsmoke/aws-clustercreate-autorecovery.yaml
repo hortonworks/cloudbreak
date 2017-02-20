@@ -62,7 +62,7 @@ tests:
 
   - name: auto recovery
     parameters:
-      region: EU_WEST_1
+      region: eu-west-1
       hostGroup: host_group_slave_1
     classes:
       - com.sequenceiq.it.cloudbreak.recovery.AwsAutoRecoveryTest
