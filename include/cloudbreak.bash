@@ -506,7 +506,7 @@ util-add-default-user() {
     fi
 
     local address="http://$PUBLIC_IP:$UAA_PORT"
-    local bearer=$(curl -s "$address/oauth/token?grant_type=client_credentials&token_format=opaque" -u "${UAA_SULTANS_ID}:${UAA_CLOUDBREAK_SECRET}" | jq -r .access_token 2>/dev/null)
+    local bearer=$(curl -s "$address/oauth/token?grant_type=client_credentials&token_format=opaque" -u "${UAA_SULTANS_ID}:${UAA_SULTANS_SECRET}" | jq -r .access_token 2>/dev/null)
     local user=$(curl -s $address/Users -X POST -H 'Accept: application/json' -H "Authorization: Bearer $bearer" -H 'Content-Type: application/json' -d @- < <(cat <<EOF
 {
   "userName" : "${UAA_DEFAULT_USER_EMAIL}",
