@@ -2,6 +2,13 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
+## [v1.6.3]
+
+### Changed
+
+- Updated traefik to v1.1.2
+- Updated Google Cloud SDK to 1.22.0
+
 ## [v1.6.2]
 
 ### Fixed
