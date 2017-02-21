@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.validation.Valid;
+
 import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -111,6 +113,16 @@ public class ClusterResponse {
 
     @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerResponse customContainers;
+
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
+    private AmbariStackDetailsJson ambariStackDetails;
+
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_REPO_DETAILS)
+    private AmbariRepoDetailsJson ambariRepoDetailsJson;
+
+    @Valid
+    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_DETAILS)
+    private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
     public Boolean getEnableShipyard() {
         return enableShipyard;
@@ -376,5 +388,29 @@ public class ClusterResponse {
 
     public void setCustomContainers(CustomContainerResponse customContainers) {
         this.customContainers = customContainers;
+    }
+
+    public AmbariStackDetailsJson getAmbariStackDetails() {
+        return ambariStackDetails;
+    }
+
+    public void setAmbariStackDetails(AmbariStackDetailsJson ambariStackDetails) {
+        this.ambariStackDetails = ambariStackDetails;
+    }
+
+    public AmbariRepoDetailsJson getAmbariRepoDetailsJson() {
+        return ambariRepoDetailsJson;
+    }
+
+    public void setAmbariRepoDetailsJson(AmbariRepoDetailsJson ambariRepoDetailsJson) {
+        this.ambariRepoDetailsJson = ambariRepoDetailsJson;
+    }
+
+    public AmbariDatabaseDetailsJson getAmbariDatabaseDetails() {
+        return ambariDatabaseDetails;
+    }
+
+    public void setAmbariDatabaseDetails(AmbariDatabaseDetailsJson ambariDatabaseDetails) {
+        this.ambariDatabaseDetails = ambariDatabaseDetails;
     }
 }

@@ -100,24 +100,28 @@ public class ClusterCreationService {
     }
 
     public void handleClusterCreationFailure(Stack stack, Exception exception) {
-        Cluster cluster = clusterService.getById(stack.getCluster().getId());
-        String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
-                ? exception.getCause().getMessage() : exception.getMessage();
-        clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, errorMessage);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
-        try {
-            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
-            if (cluster != null && orchestratorType.containerOrchestrator()) {
-                clusterTerminationService.deleteClusterContainers(cluster);
+        if (stack.getCluster() != null) {
+            Cluster cluster = clusterService.getById(stack.getCluster().getId());
+            String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
+                    ? exception.getCause().getMessage() : exception.getMessage();
+            clusterService.updateClusterStatusByStackId(stack.getId(), CREATE_FAILED, errorMessage);
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, CREATE_FAILED.name(), errorMessage);
+            try {
+                OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+                if (cluster != null && orchestratorType.containerOrchestrator()) {
+                    clusterTerminationService.deleteClusterContainers(cluster);
+                }
+            } catch (CloudbreakException | TerminationFailedException ex) {
+                LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
             }
-        } catch (CloudbreakException | TerminationFailedException ex) {
-            LOGGER.error("Cluster containers could not be deleted, preparation for reinstall failed: ", ex);
-        }
 
-        if (cluster != null && cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), cluster.getName());
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+            if (cluster != null && cluster.getEmailNeeded()) {
+                emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), cluster.getName());
+                flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+            }
+        } else {
+            LOGGER.error("Cluster was null. Flow action was not required.");
         }
     }
 }

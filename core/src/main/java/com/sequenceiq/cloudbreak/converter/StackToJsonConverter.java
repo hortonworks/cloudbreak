@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
@@ -46,6 +47,9 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Override
     public StackResponse convert(Stack source) {
@@ -106,7 +110,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             String s3AccessRoleArn = accessRoleArnOptional.get().getResourceName();
             stackJson.setS3AccessRoleArn(s3AccessRoleArn);
         }
-        convertComponentConfig(stackJson, source.getId());
+        convertComponentConfig(stackJson, source);
         convertTags(stackJson, source.getTags());
         return stackJson;
     }
@@ -128,23 +132,25 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
     }
 
-    private StackResponse convertComponentConfig(StackResponse stackJson, Long stackId) {
+    private StackResponse convertComponentConfig(StackResponse stackJson, Stack source) {
         try {
-            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
-            if (ambariRepo != null) {
-                stackJson.setAmbariVersion(ambariRepo.getVersion());
-            }
-            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stackId);
-            if (hdpRepo != null) {
-                stackJson.setHdpVersion(hdpRepo.getHdpVersion());
-            }
+            if (source.getCluster() != null) {
+                HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(source.getId());
+                if (hdpRepo != null) {
+                    stackJson.setHdpVersion(hdpRepo.getHdpVersion());
+                }
 
-            CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(stackId);
+                AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(source.getId());
+                if (hdpRepo != null) {
+                    stackJson.setAmbariVersion(ambariRepo.getVersion());
+                }
+            }
+            CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(source.getId());
             if (cloudbreakDetails != null) {
                 stackJson.setCloudbreakDetails(getConversionService().convert(cloudbreakDetails, CloudbreakDetailsJson.class));
             }
 
-            StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stackId);
+            StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(source.getId());
             if (stackTemplate != null) {
                 stackJson.setStackTemplate(stackTemplate.getTemplate());
             }

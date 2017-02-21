@@ -34,8 +34,8 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnHttpClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationDetailHandler;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationSubmissionHandler;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.handler.ApplicationWaitHandler;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.DeleteApplicationRequest;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.poller.YarnAppBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.util.ApplicationUtils;
 
 @Component
@@ -65,9 +65,6 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
     private ApplicationSubmissionHandler submitHandler;
 
     @Inject
-    private ApplicationWaitHandler waitHandler;
-
-    @Inject
     private ApplicationUtils applicationUtils;
 
     @Override
@@ -89,11 +86,10 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
         for (int componentNumber = 1; componentNumber <= constraint.getInstances(); componentNumber++) {
             try {
                 submitHandler.submitApplication(config, cred, constraint, componentNumber);
-                //waitHandler.waitForApplicationStart(cred, constraint, componentNumber);
 
                 String applicationName = applicationUtils.getApplicationName(constraint, componentNumber);
 
-                YarnAppBootstrap bootstrap = new YarnAppBootstrap(cred.getApiEndpoint(), applicationName);
+                YarnAppBootstrap bootstrap = new YarnAppBootstrap(applicationName, cred.getApiEndpoint());
 
                 Callable<Boolean> runner = runner(bootstrap, getExitCriteria(), exitCriteriaModel);
                 Future<Boolean> appFuture = getParallelOrchestratorComponentRunner().submit(runner);
