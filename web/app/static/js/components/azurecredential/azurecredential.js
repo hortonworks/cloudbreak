@@ -44,12 +44,18 @@ function AzureCredentialController($rootScope, $filter, InteractiveLogin, Accoun
         }
     };
 
+    function showError(error, prefix) {
+        $rootScope.$broadcast('showError', {error: error, prefix: prefix});
+        ctrl.errorMessage = (error.data.message ? error.data.message : error.data);
+        ctrl.activePanel = 3;
+    }
+
     azureInteractiveLogin = function (azureCredential) {
         InteractiveLogin.save(azureCredential, function (success) {
             ctrl.interactiveLoginResult = success;
             ctrl.activePanel = 3;
         }, function (error) {
-            ctrl.showError(error);
+            showError(error, null)
         });
     };
 
@@ -58,17 +64,13 @@ function AzureCredentialController($rootScope, $filter, InteractiveLogin, Accoun
             AccountCredential.save(azureCredential, function (result) {
                 ctrl.activePanel = 3;
             }, function (error) {
-                $rootScope.$broadcast('showError', { error: error, prefix: $filter("format")($rootScope.msg.azure_credential_failed) });
-                ctrl.errorMessage = error.data.message;
-                ctrl.activePanel = 3;
+                showError(error, $filter("format")($rootScope.msg.azure_credential_failed))
             });
         } else {
             UserCredential.save(azureCredential, function (result) {
                 ctrl.activePanel = 3;
             }, function (error) {
-                $rootScope.$broadcast('showError', { error: error, prefix: $filter("format")($rootScope.msg.azure_credential_failed) });
-                ctrl.errorMessage = error.data.message;
-                ctrl.activePanel = 3;
+                showError(error, $filter("format")($rootScope.msg.azure_credential_failed));
             });
         }
     };
