@@ -2,6 +2,12 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
+## [v1.11.1]
+
+### Changed
+
+- Updated traefik to v1.1.2 
+ 
 ## [v1.6.1]
 
 ### Fixed
