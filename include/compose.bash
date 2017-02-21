@@ -325,7 +325,7 @@ uaadb:
 identity:
     labels:
       - traefik.port=8080
-      - traefik.frontend.rule=PathPrefixStrip:/identity
+      - traefik.frontend.rule=PathPrefix:/identity/oauth;PathPrefixStrip:/identity
       - traefik.backend=identity-backend
       - traefik.frontend.priority=10
     ports:
