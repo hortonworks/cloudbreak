@@ -19,12 +19,14 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -35,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -49,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
@@ -70,6 +74,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     @Inject
+    private ConversionService conversionService;
+
+    @Inject
     private TlsSecurityService tlsSecurityService;
 
     @Inject
@@ -83,6 +90,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
+    @Inject
+    private ClusterComponentConfigProvider componentConfigProvider;
 
     @Inject
     private StackUtil stackUtil;
@@ -143,6 +153,20 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
         convertContainerConfig(source, clusterResponse);
         return clusterResponse;
+    }
+
+    private ClusterResponse convertComponentConfig(ClusterResponse response, Long clusterId) {
+        try {
+            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(clusterId);
+            if (hdpRepo != null) {
+                AmbariStackDetailsJson hdpRepoJson = conversionService.convert(hdpRepo, AmbariStackDetailsJson.class);
+                response.setAmbariStackDetails(hdpRepoJson);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to convert dynamic component.", e);
+        }
+
+        return response;
     }
 
     private void convertRdsIds(ClusterResponse clusterResponse, Set<RDSConfig> rdsConfigs) {

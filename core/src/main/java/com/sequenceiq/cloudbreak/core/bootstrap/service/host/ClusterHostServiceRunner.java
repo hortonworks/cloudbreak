@@ -46,7 +46,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
@@ -79,7 +79,7 @@ public class ClusterHostServiceRunner {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private BlueprintProcessor blueprintProcessor;
@@ -114,11 +114,11 @@ public class ClusterHostServiceRunner {
             }
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
             saveGatewayPillar(gatewayConfig, cluster, servicePillar);
-            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stack.getId());
+            AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(stack.getId());
             if (ambariRepo != null) {
                 servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
             }
-            AmbariDatabase ambariDb = componentConfigProvider.getAmbariDatabase(stack.getId());
+            AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(stack.getId());
             servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
             LdapConfig ldapConfig = cluster.getLdapConfig();
             if (ldapConfig != null && blueprintUtils.containsComponent(cluster.getBlueprint(), "KNOX_GATEWAY")) {

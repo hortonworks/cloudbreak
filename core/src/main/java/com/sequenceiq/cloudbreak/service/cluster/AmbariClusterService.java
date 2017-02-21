@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
+import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
@@ -63,7 +65,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Component;
+import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -78,8 +80,9 @@ import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
+import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -166,16 +169,22 @@ public class AmbariClusterService implements ClusterService {
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ClusterComponentConfigProvider componentConfigProvider;
+
+    @Inject
+    private StackUpdater stackUpdater;
 
     @Override
     @Transactional(Transactional.TxType.NEVER)
-    public Cluster create(CbUser user, Long stackId, Cluster cluster, List<Component> components) {
+    public Cluster create(CbUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
         Stack stack = stackService.getById(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
-        if (stack.getCluster() != null) {
+        if (stack.getCluster() != null && !stack.cloudPlatform().equals(BYOS)) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
                     .getName()));
+        }
+        if (stack.cloudPlatform().equals(BYOS)) {
+            stack = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED);
         }
         if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
@@ -197,8 +206,8 @@ public class AmbariClusterService implements ClusterService {
         cluster.setAccount(user.getAccount());
         stack.setCluster(cluster);
         try {
-            componentConfigProvider.store(components);
             cluster = clusterRepository.save(cluster);
+            componentConfigProvider.store(components, cluster);
             InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(cluster.getStatus()));
             if (InMemoryStateStore.getStack(stackId) == null) {
                 InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
@@ -672,13 +681,13 @@ public class AmbariClusterService implements ClusterService {
             AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
             if (ambariRepo == null) {
                 try {
-                    componentConfigProvider.store(new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
-                            new Json(ambariRepoUpgrade), stack));
+                    componentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
+                            new Json(ambariRepoUpgrade), stack.getCluster()));
                 } catch (JsonProcessingException e) {
                     throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
                 }
             } else {
-                Component component = componentConfigProvider
+                ClusterComponent component = componentConfigProvider
                         .getComponent(stackId, ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
                 ambariRepo.setBaseUrl(ambariRepoUpgrade.getBaseUrl());
                 ambariRepo.setGpgKeyUrl(ambariRepoUpgrade.getGpgKeyUrl());
@@ -704,13 +713,13 @@ public class AmbariClusterService implements ClusterService {
             HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stack.getId());
             if (hdpRepo == null) {
                 try {
-                    componentConfigProvider.store(new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
-                            new Json(hdpRepoUpdate), stack));
+                    componentConfigProvider.store(new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
+                            new Json(hdpRepoUpdate), stack.getCluster()));
                 } catch (JsonProcessingException e) {
                     throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", hdpRepoUpdate));
                 }
             } else {
-                Component component = componentConfigProvider
+                ClusterComponent component = componentConfigProvider
                         .getComponent(stack.getId(), ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
                 hdpRepo.setHdpVersion(hdpRepoUpdate.getHdpVersion());
                 hdpRepo.setVerify(hdpRepoUpdate.isVerify());
