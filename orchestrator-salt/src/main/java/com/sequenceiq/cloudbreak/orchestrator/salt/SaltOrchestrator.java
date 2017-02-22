@@ -220,7 +220,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, true);
 
             // remove 'ambari_upgrade' role from all nodes
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
@@ -316,12 +316,12 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws ExecutionException,
             InterruptedException {
-        runNewService(sc, baseSaltJobRunner, exitCriteriaModel, maxRetry);
+        runNewService(sc, baseSaltJobRunner, exitCriteriaModel, maxRetry, true);
     }
 
-    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int maxRetry)
+    private void runNewService(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel, int maxRetry, boolean retryOnFail)
             throws ExecutionException, InterruptedException {
-        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner);
+        SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, retryOnFail);
         Callable<Boolean> saltJobRunBootstrapRunner = runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxRetry);
         Future<Boolean> saltJobRunBootstrapFuture = getParallelOrchestratorComponentRunner().submit(saltJobRunBootstrapRunner);
         saltJobRunBootstrapFuture.get();
@@ -344,7 +344,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel, maxRetryRecipe, false);
 
             // remove 'recipe' grain from all nodes
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
