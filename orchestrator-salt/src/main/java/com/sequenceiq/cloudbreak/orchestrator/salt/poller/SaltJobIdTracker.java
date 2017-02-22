@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTerminateException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
@@ -24,9 +25,16 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
 
     private SaltJobRunner saltJobRunner;
 
+    private final boolean retryOnFail;
+
     public SaltJobIdTracker(SaltConnector saltConnector, SaltJobRunner saltJobRunner) {
+        this(saltConnector, saltJobRunner, true);
+    }
+
+    public SaltJobIdTracker(SaltConnector saltConnector, SaltJobRunner saltJobRunner, boolean retryOnFail) {
         this.saltConnector = saltConnector;
         this.saltJobRunner = saltJobRunner;
+        this.retryOnFail = retryOnFail;
     }
 
     @Override
@@ -41,6 +49,10 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} is running currently checking the current state.", jobId);
             checkIsFinished(jobId);
+        } else if (!retryOnFail && JobState.FAILED == saltJobRunner.getJobState()) {
+            String jobId = saltJobRunner.getJid().getJobId();
+            LOGGER.info("Job: {} failed. Terminate execution on these targets: {}", jobId, saltJobRunner.getTarget());
+            throw new CloudbreakOrchestratorTerminateException(buildErrorMessage());
         } else if (JobState.FAILED == saltJobRunner.getJobState() || JobState.AMBIGUOUS == saltJobRunner.getJobState()) {
             String jobId = saltJobRunner.getJid().getJobId();
             LOGGER.info("Job: {} failed in the previous time. Trigger again with these targets: {}", jobId, saltJobRunner.getTarget());

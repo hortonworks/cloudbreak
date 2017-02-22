@@ -189,7 +189,7 @@ public class SaltOrchestratorTest {
         // verify run new service
         verifyNew(HighStateRunner.class, atLeastOnce()).withArguments(eq(allNodes),
                 eq(targets));
-        verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateRunner));
+        verifyNew(SaltJobIdTracker.class, atLeastOnce()).withArguments(eq(saltConnector), eq(highStateRunner), eq(true));
     }
 
     @Test
