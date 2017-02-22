@@ -43,12 +43,14 @@ function AzureCredentialThirdController($rootScope, $filter) {
         var createdCredential = credentials.filter(function (credential) {
             return credential.name == ctrl.credentialAzure.name;
         })[0];
-        if (credentials.length == 1) {
-            $rootScope.activeCredential = createdCredential;
+        if (createdCredential) {
+            if (credentials.length == 1) {
+                $rootScope.activeCredential = createdCredential;
+            }
+            $rootScope.credentials.push(createdCredential);
+            ctrl.credentialAzure.id = createdCredential.id;
+            $rootScope.$broadcast('showSuccessMessage', $filter("format")($rootScope.msg.azure_credential_success, createdCredential.id));
         }
-        $rootScope.credentials.push(createdCredential);
-        ctrl.credentialAzure.id = createdCredential.id;
-        $rootScope.$broadcast('showSuccessMessage', $filter("format")($rootScope.msg.azure_credential_success, createdCredential.id));
     });
 
 }
