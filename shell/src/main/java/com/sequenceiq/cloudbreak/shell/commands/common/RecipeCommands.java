@@ -167,7 +167,6 @@ public class RecipeCommands implements BaseCommands {
         return !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "recipe delete", help = "Delete the recipe by its id or name")
     @Override
     public String delete(Long id, String name) {
         try {
