@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/hortonworks/hdc-cli",
-	"GoVersion": "go1.7",
+	"GoVersion": "go1.8",
 	"GodepVersion": "v74",
 	"Deps": [
 		{

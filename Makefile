@@ -33,7 +33,7 @@ coverage-html:
 build: format vet test build-darwin build-linux build-windows
 
 build-docker:
-	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} golang:1.7.1 make build
+	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} golang:1.8 make build
 
 build-darwin:
 	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
@@ -56,7 +56,7 @@ release: build
 	glu release
 
 release-docker:
-	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} golang:1.7.1 bash -c "make deps && make release"
+	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} golang:1.8 bash -c "make deps && make release"
 
 upload_s3:
 	ls -1 release | xargs -I@ aws s3 cp release/@ s3:///hdc-cli/@ --acl public-read
