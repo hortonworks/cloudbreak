@@ -513,17 +513,17 @@ util-add-default-user() {
     fi
 
     local address="http://localhost:8080"
-    local bearer=$(docker exec $container curl -s "$address/oauth/token?grant_type=client_credentials&token_format=opaque" -u "${UAA_SULTANS_ID}:${UAA_SULTANS_SECRET}" | jq -r .access_token 2>/dev/null)
+    local bearer=$(docker exec -it $container curl -s "$address/oauth/token?grant_type=client_credentials&token_format=opaque" -u "${UAA_SULTANS_ID}:${UAA_SULTANS_SECRET}" | jq -r .access_token 2>/dev/null)
     local json='{"userName":"'${UAA_DEFAULT_USER_EMAIL}'","name":{"familyName":"'${UAA_DEFAULT_USER_LASTNAME}'","givenName":"'${UAA_DEFAULT_USER_FIRSTNAME}'"},"emails":[{"value":"'${UAA_DEFAULT_USER_EMAIL}'","primary":true}],"password":"'$(escape-string-json $UAA_DEFAULT_USER_PW)'","active":true,"verified":true,"schemas":["urn:scim:schemas:core:1.0"]}'
     local user=$(docker exec -it $container  curl -s $address/Users -X POST -H 'Accept: application/json' -H "Authorization: Bearer $bearer" -H 'Content-Type: application/json' -d ''$json'')
 
     local user_id=$(echo $user | jq -r .id 2> /dev/null)
     if [[ "$user_id" != "null" ]]; then
-        local groups=$(docker exec $container  curl -s "$address/Groups" -H "Authorization: Bearer $bearer" | jq ".resources[] | {id, displayName}")
+        local groups=$(docker exec -it $container  curl -s "$address/Groups" -H "Authorization: Bearer $bearer" | jq ".resources[] | {id, displayName}")
         for group in ${UAA_DEFAULT_USER_GROUPS//,/ }; do
             debug "Adding user to group $group"
             group_id=$(echo $groups | jq . | grep -B2 -A1 '"'$group'"' | jq -r .id)
-            docker exec $container curl -s "$address/Groups/$group_id/members" -X POST -H "Authorization: Bearer $bearer" -H 'Content-Type: application/json' -d '{"origin":"uaa","type":"USER","value":"'$user_id'"}' &>/dev/null
+            docker exec -it $container curl -s "$address/Groups/$group_id/members" -X POST -H "Authorization: Bearer $bearer" -H 'Content-Type: application/json' -d '{"origin":"uaa","type":"USER","value":"'$user_id'"}' &>/dev/null
         done
     else
         echo "[ERROR] ${user}" | red 1>&2
