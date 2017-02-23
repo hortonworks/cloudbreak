@@ -124,7 +124,6 @@ public class RecipeCommands implements BaseCommands {
         return !shellContext.isMarathonMode();
     }
 
-    @CliCommand(value = "recipe show", help = "Shows the properties of the specified recipe")
     @Override
     public String show(Long id, String name) {
         try {
