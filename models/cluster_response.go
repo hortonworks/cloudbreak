@@ -24,6 +24,10 @@ type ClusterResponse struct {
 	 */
 	AmbariServerIP *string `json:"ambariServerIp,omitempty"`
 
+	/* public ambari url
+	 */
+	AmbariServerURL *string `json:"ambariServerUrl,omitempty"`
+
 	/* Additional information for ambari cluster
 	 */
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
@@ -84,6 +88,10 @@ type ClusterResponse struct {
 	/* id of the resource
 	 */
 	ID *int64 `json:"id,omitempty"`
+
+	/* Knox topology name
+	 */
+	KnoxTopologyName *string `json:"knoxTopologyName,omitempty"`
 
 	/* LDAP config for the cluster
 	 */

@@ -366,6 +366,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		enableKnoxGateway := true
+		knoxTopologyName := "hdc"
 		clusterReq := models.ClusterRequest{
 			Name:                      skeleton.ClusterName,
 			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
@@ -377,6 +378,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			BlueprintInputs:           inputs,
 			BlueprintCustomProperties: skeleton.Configurations,
 			EnableKnoxGateway:         &enableKnoxGateway,
+			KnoxTopologyName:          &knoxTopologyName,
 			ExposedKnoxServices:       exposedServices,
 		}
 

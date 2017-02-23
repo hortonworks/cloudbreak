@@ -100,6 +100,10 @@ type ClusterRequest struct {
 	 */
 	Kerberos *KerberosRequest `json:"kerberos,omitempty"`
 
+	/* Knox topology name
+	 */
+	KnoxTopologyName *string `json:"knoxTopologyName,omitempty"`
+
 	/* LDAP config for the cluster
 	 */
 	LdapConfig *LdapConfigRequest `json:"ldapConfig,omitempty"`
