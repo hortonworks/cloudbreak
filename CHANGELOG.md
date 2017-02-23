@@ -6,6 +6,13 @@ The Change Log summarizes the changes in Cloudbreak.
 
 - ability to specify more rdsconfig on one cluster
 
+## [v1.6.3]
+
+### Changed
+
+- Updated traefik to v1.1.2
+- Updated Google Cloud SDK to 1.22.0
+
 ## [v1.6.2]
 
 ### Fixed
