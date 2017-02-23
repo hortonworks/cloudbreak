@@ -39,6 +39,8 @@ public class ContainerConstraint {
 
     private Double disk;
 
+    private String identifier;
+
     private ContainerConstraint(ContainerConstraint.Builder builder) {
         this.cmd = builder.cmd;
         this.cpu = builder.cpus;
@@ -55,6 +57,7 @@ public class ContainerConstraint {
         this.links = builder.links;
         this.appName = builder.appName;
         this.disk = builder.disk;
+        this.identifier = builder.identifier;
     }
 
     public String[] getCmd() {
@@ -117,6 +120,10 @@ public class ContainerConstraint {
         return disk;
     }
 
+    public String getIdentifier() {
+        return identifier;
+    }
+
     public static class Builder {
 
         private String[] cmd;
@@ -149,6 +156,8 @@ public class ContainerConstraint {
 
         private Double disk;
 
+        private String identifier;
+
         public Builder containerConstraint(ContainerConstraint containerConstraint) {
             this.cmd = containerConstraint.getCmd();
             this.ports = containerConstraint.getPorts();
@@ -165,6 +174,7 @@ public class ContainerConstraint {
             this.links = containerConstraint.getLinks();
             this.appName = containerConstraint.getAppName();
             this.disk = containerConstraint.getDisk();
+            this.identifier = containerConstraint.getIdentifier();
             return this;
         }
 
@@ -245,6 +255,11 @@ public class ContainerConstraint {
 
         public Builder withAppName(String appName) {
             this.appName = appName;
+            return this;
+        }
+
+        public Builder withIdentifier(String identifier) {
+            this.identifier = identifier;
             return this;
         }
 

@@ -33,7 +33,7 @@
                                         <a id="azureChange" ng-if="isVisible('AZURE')" type="button" ng-class="{'btn':true,
     'btn-info':azureCredential, 'btn-default':!azureCredential}" ng-click="createAzureCredentialRequest()">{{msg.azure_label}}</a>
                                         <a id="mesosChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':mesosCredential, 'btn-default':!mesosCredential}" ng-click="importMesosStackRequest()">{{msg.mesos_label}}</a>
-                                        <a id="yarnChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':yarnCredential, 'btn-default':!yarnCredential}" ng-click="importYarnStackRequest()">{{msg.yarn_label}}</a>
+                                        <a id="yarnChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':yarnCredential, 'btn-default':!yarnCredential}" ng-click="importYarnCredentialRequest()">{{msg.yarn_label}}</a>
                                     </div>
                                     <div class="btn-group btn-group-justified" ng-if="isVisible('GCP') || isVisible('OPENSTACK')">
                                         <a id="gcpChange" ng-if="isVisible('GCP')" type="button" ng-class="{'btn':true, 'btn-info':gcpCredential, 'btn-default':!gcpCredential}" ng-click="createGcpCredentialRequest()">{{msg.gcp_label}}</a>
@@ -77,7 +77,7 @@
                         <div class="panel-heading">
                             <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
                                    data-target="#panel-credential-collapse{{credential.id}}"><i class="fa fa-tag fa-fw"></i>{{credential.name}}</a>
-                                <span class="label label-info pull-right" >{{credential.cloudPlatform == "GCP" ? "GCP" : credential.cloudPlatform}}</span>
+                                <span class="label label-info pull-right" >{{credential.cloudPlatform == "BYOS" ? credential.parameters.type : credential.cloudPlatform}}</span>
                                 <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="credential.public"></i>
 
                             </h5>
@@ -107,37 +107,18 @@
                                 <div ng-include src="'tags/credential/openstacklist.tag'"></div>
                             </div>
 
-                        </div>
-                    </div>
-                    <!-- .panel -->
-
-                    <div class="panel panel-default" ng-repeat="importedStack in $root.importedStacks  | filter:filterByImportedStack | orderBy:['name']">
-                        <div class="panel-heading">
-                            <h5><a href="" data-toggle="collapse" data-parent="#credential-list-accordion"
-                                   data-target="#panel-credential-collapse-imported{{importedStack.id}}"><i class="fa fa-tag fa-fw"></i>{{importedStack.name}}</a>
-                                <span class="label label-info pull-right" >{{importedStack.orchestrator.type}}</span>
-                                <i class="fa fa-users fa-lg public-account-info pull-right" style="padding-right: 5px" ng-show="importedStack.public"></i>
-
-                            </h5>
-                        </div>
-                        <div id="panel-credential-collapse-imported{{importedStack.id}}" class="panel-collapse collapse">
-
-                            <p class="btn-row-over-panel">
-                                <a href="" class="btn btn-danger" role="button" ng-click="deleteImportedStack(importedStack)">
-                                    <i class="fa fa-times fa-fw"></i>
-                                    <span> {{msg.credential_list_delete}}</span>
-                                </a>
-                            </p>
-
-                            <div class="panel-body" ng-if="importedStack.orchestrator.type == 'MARATHON'">
-                                <div ng-include src="'tags/credential/mesoslist.tag'"></div>
-                            </div>
-                            <div class="panel-body" ng-if="importedStack.orchestrator.type == 'YARN'">
+                            <div class="panel-body" ng-if="credential.cloudPlatform == 'BYOS' && credential.parameters.type == 'YARN'">
                                 <div ng-include src="'tags/credential/yarnlist.tag'"></div>
                             </div>
+
+                            <div class="panel-body" ng-if="credential.cloudPlatform == 'BYOS' && credential.parameters.type == 'MARATHON'">
+                                <div ng-include src="'tags/credential/marathonlist.tag'"></div>
+                            </div>
+
                         </div>
                     </div>
                     <!-- .panel -->
+
 
                 </div>
                 <!-- #credential-list-accordion -->

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
@@ -115,6 +116,12 @@ public class ClusterCommands implements BaseCommands {
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableShipyard,
             @CliOption(key = "enableKnoxGateway", help = "Enable Knox Gateway",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableKnoxGateway,
+            @CliOption(key = "ambariServerImage", help = "Name of the ambari server image in case of BYOS orchestrator.", mandatory = false)
+                    String ambariServerImage,
+            @CliOption(key = "ambariAgentImage", help = "Name of the ambari agent image in case of BYOS orchestrator.", mandatory = false)
+                    String ambariAgentImage,
+            @CliOption(key = "ambariDbImage", help = "Name of the ambari db image in case of BYOS orchestrator.", mandatory = false)
+                    String ambariDbImage,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
@@ -150,6 +157,23 @@ public class ClusterCommands implements BaseCommands {
 
             ClusterRequest clusterRequest = new ClusterRequest();
             clusterRequest.setEnableShipyard(enableShipyard);
+            if (shellContext.isMarathonMode() || shellContext.isYarnMode()) {
+                CustomContainerRequest customContainerRequest = new CustomContainerRequest();
+                Map<String, String> images = new HashMap<>();
+                if (!Strings.isNullOrEmpty(ambariServerImage)) {
+                    images.put("ambari-server", ambariServerImage);
+                }
+                if (!Strings.isNullOrEmpty(ambariAgentImage)) {
+                    images.put("ambari-agent", ambariAgentImage);
+                }
+                if (!Strings.isNullOrEmpty(ambariDbImage)) {
+                    images.put("ambari_db", ambariDbImage);
+                }
+                if (!images.isEmpty()) {
+                    customContainerRequest.setDefinitions(images);
+                    clusterRequest.setCustomContainer(customContainerRequest);
+                }
+            }
             if (shellContext.isMarathonMode()) {
                 clusterRequest.setName(shellContext.getSelectedMarathonStackName());
             } else if (shellContext.isYarnMode()) {

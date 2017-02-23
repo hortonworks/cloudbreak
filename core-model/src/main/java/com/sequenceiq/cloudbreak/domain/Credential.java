@@ -179,7 +179,7 @@ public class Credential {
     }
 
     public boolean passwordAuthenticationRequired() {
-        return publicKey.startsWith("Basic:");
+        return publicKey != null ? publicKey.startsWith("Basic:") : false;
     }
 
     public String getLoginPassword() {

@@ -50,10 +50,6 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                         + "AND r.account= :account "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
         @NamedQuery(
-                name = "Network.findByName",
-                query = "SELECT r FROM Network r "
-                        + "WHERE r.name= :name "),
-        @NamedQuery(
                 name = "Network.findForUser",
                 query = "SELECT r FROM Network r "
                         + "WHERE r.owner= :owner "

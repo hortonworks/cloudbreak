@@ -135,13 +135,13 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
     private StackResponse convertComponentConfig(StackResponse stackJson, Stack source) {
         try {
             if (source.getCluster() != null) {
-                HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(source.getId());
+                HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(source.getCluster().getId());
                 if (hdpRepo != null) {
                     stackJson.setHdpVersion(hdpRepo.getHdpVersion());
                 }
 
-                AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(source.getId());
-                if (hdpRepo != null) {
+                AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(source.getCluster().getId());
+                if (ambariRepo != null) {
                     stackJson.setAmbariVersion(ambariRepo.getVersion());
                 }
             }

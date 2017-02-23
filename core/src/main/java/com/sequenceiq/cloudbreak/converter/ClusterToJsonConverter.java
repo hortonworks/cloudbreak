@@ -26,7 +26,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -152,15 +152,16 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
         convertContainerConfig(source, clusterResponse);
+        convertComponentConfig(clusterResponse, source.getId());
         return clusterResponse;
     }
 
     private ClusterResponse convertComponentConfig(ClusterResponse response, Long clusterId) {
         try {
-            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(clusterId);
-            if (hdpRepo != null) {
-                AmbariStackDetailsJson hdpRepoJson = conversionService.convert(hdpRepo, AmbariStackDetailsJson.class);
-                response.setAmbariStackDetails(hdpRepoJson);
+            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(clusterId);
+            if (ambariRepo != null) {
+                AmbariRepoDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariRepo, AmbariRepoDetailsJson.class);
+                response.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to convert dynamic component.", e);

@@ -8,6 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+import javax.inject.Inject;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -24,9 +29,42 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 
 @Service
 public class BYOSPlatformParameters implements PlatformParameters {
+
+    @Value("${cb.byos.regions:}")
+    private String byosRegionDefinition;
+
+    @Inject
+    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+
+    private Region defaultRegion;
+
+    @PostConstruct
+    public void init() {
+        String zone;
+        if (StringUtils.isEmpty(byosRegionDefinition)) {
+            zone = resourceDefinition("zone");
+        } else {
+            zone = byosRegionDefinition;
+        }
+        this.regions = readRegions(zone);
+        this.defaultRegion = nthElement(this.regions.keySet(), 0);
+    }
+
+    @Override
+    public Regions regions() {
+        return new Regions(regions.keySet(), defaultRegion);
+    }
+
+    @Override
+    public AvailabilityZones availabilityZones() {
+        return new AvailabilityZones(regions);
+    }
 
     @Override
     public ScriptParams scriptParams() {
@@ -43,11 +81,6 @@ public class BYOSPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public Regions regions() {
-        return new Regions(Collections.emptyList(), Region.region(""));
-    }
-
-    @Override
     public VmTypes vmTypes(Boolean extended) {
         return new VmTypes(Collections.emptyList(), VmType.vmType(""));
     }
@@ -58,13 +91,8 @@ public class BYOSPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public AvailabilityZones availabilityZones() {
-        return new AvailabilityZones(Collections.emptyMap());
-    }
-
-    @Override
     public String resourceDefinition(String resource) {
-        return "";
+        return cloudbreakResourceReaderService.resourceDefinition("byos", resource);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -99,7 +101,10 @@ public class TlsSecurityService {
         Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
         if (stack != null && stack.getSecurityConfig() != null) {
             Long id = stack.getId();
-            readServerCert(id);
+            // In case of byos there is no server machine
+            if (!BYOS.equals(stack.getCredential().cloudPlatform())) {
+                readServerCert(id);
+            }
             readClientCert(id);
             readClientKey(id);
             readPrivateSshKey(id);
@@ -203,7 +208,7 @@ public class TlsSecurityService {
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
-        if (stack.isInstanceGroupsSpecified()) {
+        if (!BYOS.equals(stack.cloudPlatform())) {
             prepareCertDir(stackId);
             return new HttpClientConfig(apiAddress, stack.getGatewayPort(), prepareCertDir(stackId));
         } else {

@@ -2,7 +2,7 @@
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_cloudPlatform">{{msg.active_cluster_platform_label}}</label>
         <div class="col-sm-8">
-            <p id="sl_cloudPlatform" class="form-control-static">{{activeCredential ? activeCredential.cloudPlatform : activeStack.orchestrator.type}}</p>
+            <p id="sl_cloudPlatform" class="form-control-static">{{activeCredential.cloudPlatform !== 'BYOS' ? activeCredential.cloudPlatform : activeCredential.parameters.type}}</p>
         </div>
     </div>
     <div class="form-group">
@@ -33,6 +33,9 @@
         <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'OPENSTACK' ">
             <p id="sl_region" class="form-control-static">{{cluster.region}}</p>
         </div>
+        <div class="col-sm-8" ng-if="activeCredential.cloudPlatform == 'BYOS' ">
+            <p id="sl_region" class="form-control-static">{{cluster.region}}</p>
+        </div>
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="sl_credential_active">{{msg.active_cluster_credential_label}}</label>
@@ -43,7 +46,7 @@
             <a id="sl_credential_active" segment="#panel-credential-collapse-imported{{activeStack.id}}" class="credentialselect form-control-static review-a">{{activeStack.name}}</a>
         </div>
     </div>
-    <div class="form-group" ng-show="cluster.networkId">
+    <div class="form-group" ng-show="cluster.networkId && activeCredential.cloudPlatform !== 'BYOS'">
         <label class="col-sm-3 control-label" for="sl_network_active">{{msg.active_cluster_network_label}}</label>
         <div class="networkselect col-sm-8">
             <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: cluster.networkId }:true" segment="#panel-network-collapse{{cluster.networkId}}">{{network.name}}</a>
@@ -61,7 +64,7 @@
 
     <div class="row" style="margin-top: 20px;">
         <div id="panel-hostgroups-show" class="panel-btn-in-header-collapse collapse">
-            <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeCredential">
+            <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeCredential && activeCredential.cloudPlatform !== 'BYOS'">
                 <ul id="myTabs" class="nav nav-tabs" role="tablist">
                     <li role="presentation" ng-class="{true:'active', false:''}[group.group == cluster.activeGroup]" ng-repeat="group in cluster.instanceGroups| orderBy: 'group'"><a ng-click="changeActiveGroup(group.group)" href="" id="{{group.group}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.group}}" aria-expanded="true">{{group.group}}</a></li>
                 </ul>
@@ -96,7 +99,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeStack">
+            <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeStack || activeCredential.cloudPlatform === 'BYOS'">
                 <ul id="myTabs" class="nav nav-tabs" role="tablist">
                     <li role="presentation" ng-class="{true:'active', false:''}[group.name == cluster.activeGroup]" ng-repeat="group in cluster.hostGroups| orderBy: 'name'"><a ng-click="changeActiveGroup(group.name)" href="" id="{{group.name}}-tab" role="tab" data-toggle="tab" aria-controls="{{group.name}}" aria-expanded="true">{{group.name}}</a></li>
                 </ul>

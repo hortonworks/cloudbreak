@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
@@ -9,7 +10,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.FORCE_TERMINATION_EVENT;
 
 import java.util.Collections;
 import java.util.List;
@@ -111,27 +111,34 @@ public class ReactorFlowManager {
     }
 
     public void triggerTermination(Long stackId, Boolean deleteDependencies) {
-        String selector = StackTerminationEvent.TERMINATION_EVENT.event();
-        TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
-        notify(selector, event);
+        Stack stack = stackService.get(stackId);
+
+        if (BYOS.equals(stack.cloudPlatform())) {
+            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
+            notify(selector, new TerminationEvent(selector, stackId, null, deleteDependencies));
+        } else {
+            String selector = StackTerminationEvent.TERMINATION_EVENT.event();
+            notify(selector, new TerminationEvent(selector, stackId, deleteDependencies));
+        }
         cancelRunningFlows(stackId);
     }
 
     public void triggerForcedTermination(Long stackId, Boolean deleteDependencies) {
-        String selector = FORCE_TERMINATION_EVENT.event();
-        TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
-        notify(selector, event);
+        Stack stack = stackService.get(stackId);
+
+        if (BYOS.equals(stack.cloudPlatform())) {
+            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
+            notify(selector, new TerminationEvent(selector, stackId, null, deleteDependencies));
+        } else {
+            String selector = StackTerminationEvent.FORCE_TERMINATION_EVENT.event();
+            notify(selector, new TerminationEvent(selector, stackId, deleteDependencies));
+        }
         cancelRunningFlows(stackId);
     }
 
     public void triggerClusterInstall(Long stackId) {
         String selector = CLUSTER_CREATION_EVENT.event();
-        Stack stack = stackService.get(stackId);
-        if (stack.getCredential() != null && !stack.getCredential().cloudPlatform().equals("BYOS")) {
-            notify(selector, new StackEvent(selector, stackId));
-        } else {
-            notify(selector, new StackEvent(selector, stackId, null));
-        }
+        notify(selector, new StackEvent(selector, stackId));
     }
 
     public void triggerClusterReInstall(Long stackId) {
@@ -192,13 +199,15 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterTermination(Long stackId) {
-        String selector = ClusterTerminationEvent.TERMINATION_EVENT.event();
         Stack stack = stackService.get(stackId);
-        if (stack.getCredential() != null && !stack.getCredential().cloudPlatform().equals("BYOS")) {
-            notify(selector, new StackEvent(selector, stackId));
-        } else {
+        if (BYOS.equals(stack.cloudPlatform())) {
+            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
             notify(selector, new StackEvent(selector, stackId, null));
+        } else {
+            String selector = ClusterTerminationEvent.TERMINATION_EVENT.event();
+            notify(selector, new StackEvent(selector, stackId));
         }
+        cancelRunningFlows(stackId);
     }
 
     public void triggerManualRepairFlow(Long stackId) {
@@ -223,7 +232,6 @@ public class ReactorFlowManager {
     private void notify(String selector, Acceptable acceptable) {
         Event<Acceptable> event = eventFactory.createEvent(acceptable);
         reactor.notify(selector, event);
-
         try {
             Boolean accepted = true;
             if (event.getData().accepted() != null) {

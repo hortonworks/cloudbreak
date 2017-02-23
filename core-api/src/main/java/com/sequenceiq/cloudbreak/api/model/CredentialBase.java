@@ -35,8 +35,7 @@ public abstract class CredentialBase implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.CredentialModelDescription.LOGIN_USERNAME)
     private String loginUserName;
 
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PUBLIC_KEY, required = true)
+    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PUBLIC_KEY)
     private String publicKey;
 
     @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)

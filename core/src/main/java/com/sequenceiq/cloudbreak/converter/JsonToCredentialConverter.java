@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.util.Map;
 
@@ -9,6 +10,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -33,6 +35,9 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
         Credential credential = new Credential();
         credential.setName(source.getName());
         credential.setDescription(source.getDescription());
+        if (!BYOS.equals(source.getCloudPlatform()) && Strings.isNullOrEmpty(source.getPublicKey())) {
+            throw new BadRequestException("You should define the publickey!");
+        }
         credential.setPublicKey(source.getPublicKey());
         String cloudPlatform = source.getCloudPlatform();
         credential.setCloudPlatform(cloudPlatform);

@@ -10,7 +10,7 @@ public class CustomContainerResponse {
 
     private Map<String, String> definitions = new HashMap<>();
 
-    public CustomContainerResponse(){
+    public CustomContainerResponse() {
     }
 
     public CustomContainerResponse(Map<String, String> definitions) {
