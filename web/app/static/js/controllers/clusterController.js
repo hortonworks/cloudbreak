@@ -194,9 +194,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 var instanceGroups = [];
                 var hostGroups = [];
                 var sgroupsActiveId = null;
-                if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0) {
+                if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0 && $rootScope.activeCredential.cloudPlatform !== "BYOS") {
                     var sgroups = $filter('orderBy')($rootScope.securitygroups, 'name', false);
-                    sgroupsActiveId = sgroups[0].id;
+                    for (i = 0; i < sgroups.length; i++) {
+                         if (sgroups[i].cloudPlatform ===  $rootScope.activeCredential.cloudPlatform) {
+                            sgroupsActiveId = sgroups[i].id;
+                            break;
+                         }
+                    }
                 }
                 actualBp[0].ambariBlueprint.host_groups.forEach(function(k) {
                     instanceGroups.push({
@@ -206,16 +211,33 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         nodeCount: 1,
                         type: "CORE"
                     });
-                    hostGroups.push({
-                        name: k.name,
-                        constraint: {
-                            instanceGroupName: k.name,
-                            hostCount: 1
-                        },
-                        recipeIds: []
-                    })
+                    if ($rootScope.activeCredential.cloudPlatform === "BYOS") {
+                        var constraintTemplates = $rootScope.constraints;
+                        var tmpConstraint = $filter('orderBy')(constraintTemplates, 'name', false)[0];
+                        var tmpConstraintName;
+                        if (tmpConstraint != null) {
+                            tmpConstraintName = tmpConstraint.name;
+                        }
+                        hostGroups.push({
+                            name: k.name,
+                            constraint: {
+                                constraintTemplateName: tmpConstraintName,
+                                instanceGroupName: k.name,
+                                hostCount: 1
+                            },
+                            recipeIds: []
+                        });
+                    } else {
+                        hostGroups.push({
+                            name: k.name,
+                            constraint: {
+                                instanceGroupName: k.name,
+                                hostCount: 1
+                            },
+                            recipeIds: []
+                        });
+                    }
                 });
-
 
                 $scope.cluster.instanceGroups = instanceGroups;
                 $scope.cluster.hostGroups = hostGroups;
@@ -338,11 +360,23 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             }
 
-            if ($rootScope.activeCredential && ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK')) {
+            if ($rootScope.activeCredential && ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK' || $rootScope.activeCredential.cloudPlatform == 'BYOS')) {
                 delete $scope.cluster.fileSystem;
             }
             if ($scope.cluster.orchestrator.type === 'SALT') {
                 $scope.cluster.enableShipyard = false;
+            }
+            if ($scope.cluster.platformVariant === 'BYOS') {
+                $scope.cluster.networkId = null;
+                if ($scope.cluster.customContainer == true) {
+                    $scope.cluster.customContainerObj = {
+                        definitions: {
+                            "AMBARI_SERVER": $scope.cluster.ambariServerId,
+                            "AMBARI_AGENT": $scope.cluster.ambariAgentId,
+                            "AMBARI_DB": $scope.cluster.ambariDbId
+                        }
+                    }
+                }
             }
             if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform !== 'AWS') {
                 delete $scope.cluster.parameters.instanceProfile;
@@ -440,7 +474,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             } else {
                 $scope.cluster.ambariRepoDetailsJson = null;
             }
-
             if (typeof($scope.cluster.ambariDatabaseDetails) !== "undefined" && !$scope.cluster.ambariDatabaseDetails.vendor) {
                 delete $scope.cluster.ambariDatabaseDetails;
             }
@@ -454,18 +487,20 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         nodeCount += group.nodeCount;
                     });
                     result.nodeCount = nodeCount;
-                    result.cloudPlatform = $filter('filter')($rootScope.credentials, {
-                        id: $rootScope.activeCredential.id
-                    }, true)[0].cloudPlatform;
+                    result.cloudPlatform = $filter('filter')($rootScope.credentials, { id: $rootScope.activeCredential.id }, true)[0].cloudPlatform;
                     result.public = $scope.cluster.public;
                     angular.forEach(result.instanceGroups, function(item) {
                         item.templateId = parseFloat(item.templateId);
                     });
                     result.blueprintId = parseFloat(result.blueprintId);
 
-                    var existingCluster = $filter('filter')($rootScope.clusters, {
-                        id: result.id
-                    }, true)[0];
+                    var existingCluster = null;
+                    try {
+                        existingCluster = $filter('filter')($rootScope.clusters, { id: result.id }, true)[0];
+                    } catch(err) {
+                        existingCluster = null;
+                    }
+
                     if (result !== undefined && result.id !== undefined) {
                         GlobalStack.get({
                             id: result.id
@@ -503,7 +538,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     ambariDatabaseDetails: $scope.cluster.ambariDatabaseDetails === 'undefined' ? null : $scope.cluster.ambariDatabaseDetails
                 }
                 if ($scope.cluster.customContainer == true) {
-                    cbCluster.customContainer = {
+                    cbCluster.customContainerObj = {
                         definitions: {
                             "AMBARI_SERVER": $scope.cluster.ambariServerId,
                             "AMBARI_AGENT": $scope.cluster.ambariAgentId,
@@ -534,6 +569,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         function pushCluster(cluster) {
+            if ($rootScope.clusters == null || $rootScope.clusters == undefined) {
+                 $rootScope.clusters = [];
+            }
             $rootScope.clusters.push(cluster);
             $scope.$parent.orderClusters();
             $jq('.carousel').carousel(0);
@@ -929,7 +967,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         function setNetwork() {
-            if ($rootScope.activeCredential != undefined) {
+            if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform !== "BYOS") {
                 var nets = $filter('filter')($rootScope.networks, function(value, index, array) {
                     value.cloudPlatform === $rootScope.activeCredential.cloudPlatform
                 }, true);
@@ -957,8 +995,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         }
 
         function setOrchestrator() {
-            if ($rootScope.activeCredential !== undefined) {
+            if ($rootScope.activeCredential !== undefined && $rootScope.activeCredential.cloudPlatform !== "BYOS") {
                 $scope.cluster.orchestrator.type = $rootScope.params.defaultOrchestrators[$rootScope.activeCredential.cloudPlatform];
+            } else if ($rootScope.activeCredential !== undefined && $rootScope.activeCredential.cloudPlatform === "BYOS") {
+                $scope.cluster.orchestrator.type = $rootScope.activeCredential.parameters.type;
+                $scope.cluster.orchestrator.apiEndpoint = $rootScope.activeCredential.parameters.apiEndpoint;
             }
         }
 
@@ -1307,6 +1348,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 return false;
             }
         }
+
+        $scope.filterDeleteCompletedServices = function(element) {
+            try {
+                return (element.status == "DELETE_COMPLETED") ? false : true;
+            } catch (err) {
+                return false;
+            }
+        }
+
         $scope.selectCluster = function(cluster) {
             $scope.selectedCluster = cluster
         }
@@ -1349,7 +1399,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.ambariServerSelected = function() {
             var result = false
             var activeStack = $rootScope.activeStack;
-            if (activeStack && activeStack.orchestrator && (activeStack.orchestrator.type === "MARATHON" || activeStack.orchestrator.type === "YARN")) {
+            if ((activeStack && activeStack.orchestrator && (activeStack.orchestrator.type === "MARATHON" || activeStack.orchestrator.type === "YARN"))
+                || ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform === 'BYOS')) {
                 return true;
             }
             angular.forEach($scope.cluster.instanceGroups, function(ig) {

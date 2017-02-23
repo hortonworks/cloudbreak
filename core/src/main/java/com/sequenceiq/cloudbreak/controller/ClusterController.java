@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -118,7 +119,7 @@ public class ClusterController implements ClusterEndpoint {
         }
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getById(stackId);
-        if (!stack.isAvailable() && CloudConstants.BYOS.equals(stack.cloudPlatform())) {
+        if (!stack.isAvailable() && BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
         Credential credential = stack.getCredential();
@@ -253,7 +254,8 @@ public class ClusterController implements ClusterEndpoint {
         return Response.accepted().build();
     }
 
-    private List<ClusterComponent> addAmbariRepoConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster) throws JsonProcessingException {
+    private List<ClusterComponent> addAmbariRepoConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
+            throws JsonProcessingException {
         // If it is not predefined in image catalog
         if (componentConfigProvider.getAmbariRepo(cluster.getId()) == null) {
             AmbariRepoDetailsJson ambariRepoDetailsJson = request.getAmbariRepoDetailsJson();
@@ -285,7 +287,8 @@ public class ClusterController implements ClusterEndpoint {
         return components;
     }
 
-    private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster) throws JsonProcessingException {
+    private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
+            throws JsonProcessingException {
         AmbariDatabaseDetailsJson ambariRepoDetailsJson = request.getAmbariDatabaseDetails();
         if (ambariRepoDetailsJson == null) {
             ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();

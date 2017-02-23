@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,7 +35,6 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
-import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
@@ -179,12 +177,9 @@ public class AmbariClusterService implements ClusterService {
     public Cluster create(CbUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
         Stack stack = stackService.getById(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
-        if (stack.getCluster() != null && !stack.cloudPlatform().equals(BYOS)) {
+        if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
                     .getName()));
-        }
-        if (stack.cloudPlatform().equals(BYOS)) {
-            stack = stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED);
         }
         if (clusterRepository.findByNameInAccount(cluster.getName(), user.getAccount()) != null) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName());
@@ -228,7 +223,7 @@ public class AmbariClusterService implements ClusterService {
         if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
             throw new BadRequestException("Clusters can only be deleted by account admins or owners.");
         }
-        if (Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
+        if (stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("Clusters is already deleted.");
         }
         flowManager.triggerClusterTermination(stackId);
@@ -609,7 +604,7 @@ public class AmbariClusterService implements ClusterService {
         }
         Stack stack = stackService.getById(stackId);
         Cluster cluster = getCluster(stackId, stack);
-        AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(stackId);
+        AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(cluster.getId());
         if (ambariDatabase != null && !DatabaseVendor.EMBEDDED.value().equals(ambariDatabase.getVendor())) {
             throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
                     + "and then create it using DDL scripts from /var/lib/ambari-server/resources");
@@ -678,7 +673,7 @@ public class AmbariClusterService implements ClusterService {
                         "Cluster '%s' is currently in '%s' state. Upgrade requests to a cluster can only be made if the underlying stack is 'AVAILABLE'.",
                         stackId, stack.getStatus()));
             }
-            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
+            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(cluster.getId());
             if (ambariRepo == null) {
                 try {
                     componentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
@@ -688,7 +683,7 @@ public class AmbariClusterService implements ClusterService {
                 }
             } else {
                 ClusterComponent component = componentConfigProvider
-                        .getComponent(stackId, ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
+                        .getComponent(cluster.getId(), ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
                 ambariRepo.setBaseUrl(ambariRepoUpgrade.getBaseUrl());
                 ambariRepo.setGpgKeyUrl(ambariRepoUpgrade.getGpgKeyUrl());
                 ambariRepo.setPredefined(false);
@@ -710,7 +705,7 @@ public class AmbariClusterService implements ClusterService {
 
     private void createHDPRepoComponent(HDPRepo hdpRepoUpdate, Stack stack) {
         if (hdpRepoUpdate != null) {
-            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stack.getId());
+            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stack.getCluster().getId());
             if (hdpRepo == null) {
                 try {
                     componentConfigProvider.store(new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
@@ -720,7 +715,7 @@ public class AmbariClusterService implements ClusterService {
                 }
             } else {
                 ClusterComponent component = componentConfigProvider
-                        .getComponent(stack.getId(), ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
+                        .getComponent(stack.getCluster().getId(), ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
                 hdpRepo.setHdpVersion(hdpRepoUpdate.getHdpVersion());
                 hdpRepo.setVerify(hdpRepoUpdate.isVerify());
                 hdpRepo.setStack(hdpRepoUpdate.getStack());

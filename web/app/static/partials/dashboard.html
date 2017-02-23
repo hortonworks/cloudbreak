@@ -41,9 +41,6 @@
                             <li ng-repeat="credential in $root.credentials | filter:filterByVisiblePlatform | orderBy:'name'">
                                 <a href="" id="{{credential.id}}" value="{{credential.name}}" ng-click="$root.activeCredential = credential">{{credential.name}}</a>
                             </li>
-                            <li ng-repeat="importedStack in $root.importedStacks | filter:filterByImportedStack | orderBy:'name'">
-                                <a href="" id="{{importedStack.id}}" value="{{importedStack.name}}" ng-click="$root.activeStack = importedStack">{{importedStack.name}}</a>
-                            </li>
                             <li class="divider"></li>
                             <li>
                                 <a href="" class="not-option" data-toggle="collapse" data-target="#panel-credentials-collapse"><i class="fa fa-edit fa-fw"></i>

@@ -46,6 +46,7 @@ public class ApplicationSubmissionHandler {
     public void submitApplication(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint, int componentNumber)
             throws CloudbreakOrchestratorFailedException {
 
+
         // Set Ambari DB hostname, if available
         if (ComponentType.AMBARIDB.equals(applicationUtils.getComponentType(constraint))) {
             ambariDbHostname = applicationUtils.getComponentHostName(constraint, cred, componentNumber);

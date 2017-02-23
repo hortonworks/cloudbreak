@@ -80,9 +80,9 @@ public class ContainerConstraintFactory {
     @Inject
     private HostGroupRepository hostGroupRepository;
 
-    public ContainerConstraint getRegistratorConstraint(String gatewayHostname, String clusterName, String gatewayPrivateIp) {
+    public ContainerConstraint getRegistratorConstraint(String gatewayHostname, String clusterName, String gatewayPrivateIp, String identifier) {
         return new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(REGISTRATOR.getName(), clusterName))
+                .withName(createContainerInstanceName(REGISTRATOR.getName(), clusterName, identifier))
                 .networkMode(HOST_NETWORK_MODE)
                 .instances(1)
                 .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/tmp/docker.sock"))
@@ -94,9 +94,9 @@ public class ContainerConstraintFactory {
                 .build();
     }
 
-    public ContainerConstraint getAmbariServerDbConstraint(String gatewayHostname, String clusterName) {
+    public ContainerConstraint getAmbariServerDbConstraint(String gatewayHostname, String clusterName, String identifier) {
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(AMBARI_DB.getName(), clusterName))
+                .withName(createContainerInstanceName(AMBARI_DB.getName(), clusterName, identifier))
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/lib/ambari-server/pgsql/data", "/var/lib/postgresql/data"))
@@ -107,10 +107,11 @@ public class ContainerConstraintFactory {
         return builder.build();
     }
 
-    public ContainerConstraint getAmbariServerConstraint(String dbHostname, String gatewayHostname, String cloudPlatform, String clusterName) {
+    public ContainerConstraint getAmbariServerConstraint(String dbHostname, String gatewayHostname, String cloudPlatform,
+            String clusterName, String identifier) {
         String env = String.format("/usr/sbin/init systemd.setenv=POSTGRES_DB=%s systemd.setenv=CLOUD_PLATFORM=%s", dbHostname, cloudPlatform);
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(AMBARI_SERVER.getName(), clusterName))
+                .withName(createContainerInstanceName(AMBARI_SERVER.getName(), clusterName, identifier))
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
                 .tcpPortBinding(new TcpPortBinding(AMBARI_PORT, "0.0.0.0", AMBARI_PORT))
@@ -125,9 +126,9 @@ public class ContainerConstraintFactory {
         return builder.build();
     }
 
-    public ContainerConstraint getHavegedConstraint(String gatewayHostname, String clusterName) {
+    public ContainerConstraint getHavegedConstraint(String gatewayHostname, String clusterName, String identifier) {
         return new ContainerConstraint.Builder()
-                .withNamePrefix(createContainerInstanceName(HAVEGED.getName(), clusterName))
+                .withNamePrefix(createContainerInstanceName(HAVEGED.getName(), clusterName, identifier))
                 .instances(1)
                 .addHosts(ImmutableList.of(gatewayHostname))
                 .build();
@@ -156,7 +157,7 @@ public class ContainerConstraintFactory {
                 .build();
     }
 
-    public ContainerConstraint getKerberosServerConstraint(Cluster cluster, String gatewayHostname) {
+    public ContainerConstraint getKerberosServerConstraint(Cluster cluster, String gatewayHostname, String identifier) {
         KerberosConfig kerberosConfig = cluster.getKerberosConfig();
         KerberosConfiguration kerberosConf = new KerberosConfiguration(kerberosConfig.getKerberosMasterKey(), kerberosConfig.getKerberosAdmin(),
                 kerberosConfig.getKerberosPassword());
@@ -171,7 +172,7 @@ public class ContainerConstraintFactory {
         env.put("KERB_ADMIN_PASS", kerberosConf.getPassword());
 
         return new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(KERBEROS.getName(), cluster.getName()))
+                .withName(createContainerInstanceName(KERBEROS.getName(), cluster.getName(), identifier))
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
                 .addVolumeBindings(ImmutableMap.of("/var/log/kerberos-container", CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
@@ -204,12 +205,12 @@ public class ContainerConstraintFactory {
     }
 
     public ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform,
-            HostGroup hostGroup, Integer adjustment, List<String> hostBlackList) {
+            HostGroup hostGroup, Integer adjustment, List<String> hostBlackList, String identifier) {
         String containerInstanceName;
         if (YARN.equals(hostGroup.getCluster().getStack().getOrchestrator().getType())) {
-            containerInstanceName = createContainerInstanceNameForYarn(hostGroup, AMBARI_AGENT.getName());
+            containerInstanceName = createContainerInstanceNameForYarn(hostGroup, AMBARI_AGENT.getName(), identifier);
         } else {
-            containerInstanceName = createContainerInstanceName(hostGroup, AMBARI_AGENT.getName());
+            containerInstanceName = createContainerInstanceName(hostGroup, AMBARI_AGENT.getName(), identifier);
         }
         Constraint hgConstraint = hostGroup.getConstraint();
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
@@ -323,39 +324,43 @@ public class ContainerConstraintFactory {
         return hosts;
     }
 
-    private String createContainerInstanceName(HostGroup hostGroup, String containerName) {
+    private String createContainerInstanceName(HostGroup hostGroup, String containerName, String identifier) {
         String hostGroupName = hostGroup.getName();
         String clusterName = hostGroup.getCluster().getName();
-        return createContainerInstanceName(containerName, hostGroupName, clusterName);
+        return createContainerInstanceName(containerName, hostGroupName, clusterName, "");
     }
 
-    private String createContainerInstanceName(String containerName, String clusterName) {
-        return createContainerInstanceName(containerName, clusterName, "");
+    private String createContainerInstanceName(String containerName, String clusterName, String identifier) {
+        return createContainerInstanceName(containerName, clusterName, "", "");
     }
 
-    private String createContainerInstanceName(String containerName, String clusterName, String hostGroupName) {
+    private String createContainerInstanceName(String containerName, String clusterName, String hostGroupName, String identifier) {
         String separator = "-";
-        return createContainerInstanceNameWithSeparator(containerName, clusterName, hostGroupName, separator);
+        return createContainerInstanceNameWithSeparator(containerName, clusterName, hostGroupName, separator, "");
     }
 
-    private String createContainerInstanceNameForYarn(HostGroup hostGroup, String containerName) {
+    private String createContainerInstanceNameForYarn(HostGroup hostGroup, String containerName, String identifier) {
         String hostGroupName = hostGroup.getName();
         String clusterName = hostGroup.getCluster().getName();
-        return createContainerInstanceNameForYarn(containerName, hostGroupName, clusterName);
+        return createContainerInstanceNameForYarn(containerName, hostGroupName, clusterName, "");
     }
 
-    private String createContainerInstanceNameForYarn(String containerName, String clusterName, String hostGroupName) {
+    private String createContainerInstanceNameForYarn(String containerName, String clusterName, String hostGroupName, String identifier) {
         String separator = "%";
-        return createContainerInstanceNameWithSeparator(containerName, clusterName, hostGroupName, separator);
+        return createContainerInstanceNameWithSeparator(containerName, clusterName, hostGroupName, separator, "");
     }
 
-    private String createContainerInstanceNameWithSeparator(String containerName, String clusterName, String hostGroupName, String separator) {
+    private String createContainerInstanceNameWithSeparator(String containerName, String clusterName, String hostGroupName,
+            String separator, String identifier) {
         StringBuilder sb = new StringBuilder(containerName);
         if (!StringUtils.isEmpty(hostGroupName)) {
             sb.append(separator).append(hostGroupName);
         }
         if (!StringUtils.isEmpty(clusterName)) {
             sb.append(separator).append(clusterName);
+        }
+        if (!StringUtils.isEmpty(identifier)) {
+            sb.append(separator).append(identifier);
         }
         return sb.toString();
     }

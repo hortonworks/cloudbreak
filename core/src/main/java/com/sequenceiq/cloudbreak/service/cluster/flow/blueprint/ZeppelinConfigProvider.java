@@ -62,7 +62,7 @@ public class ZeppelinConfigProvider {
             model.put("knoxGateway", cluster.getEnableKnoxGateway());
             String shiroIniContent = processTemplateIntoString(freemarkerConfiguration.getTemplate("hdp/zeppelin/shiro_ini_content.ftl", "UTF-8"), model);
 
-            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stackId);
+            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(cluster.getId());
             if (hdpRepo != null && hdpRepo.getHdpVersion() != null && !hdpRepo.getHdpVersion().startsWith(HDP_2_5_VERSION)) {
                 configs.add(new BlueprintConfigurationEntry(ZEPPELIN_MASTER_CONFIG_FILES_2_6, "shiro_ini_content", shiroIniContent));
             } else {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.downscale;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.util.List;
 import java.util.Set;
@@ -17,7 +18,6 @@ import org.springframework.util.CollectionUtils;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -82,7 +82,7 @@ public class ClusterDownscaleService {
             hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
             hostGroupService.save(hostGroup);
         });
-        if (!CloudConstants.BYOS.equals(stack.cloudPlatform())) {
+        if (!BYOS.equals(stack.cloudPlatform())) {
             MDCBuilder.buildMdcContext(stack);
             LOGGER.info("Start updating metadata");
             for (String hostName : hostNames) {

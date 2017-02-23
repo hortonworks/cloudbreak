@@ -4,11 +4,11 @@
         <label class="col-sm-3 control-label" for="importedStackName">{{msg.name_label}}</label>
 
         <div class="col-sm-9">
-            <p id="importedStackName" class="form-control-static">{{importedStack.name}}</p>
+            <p id="importedStackName" class="form-control-static">{{credential.name}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>
-    <div class="form-group" ng-show="importedStack.description">
+    <div class="form-group" ng-show="credential.description">
         <label class="col-sm-3 control-label" for="importedStackDescription">{{msg.description_label}}</label>
 
         <div class="col-sm-9">
@@ -20,7 +20,7 @@
         <label class="col-sm-3 control-label" for="orchestratorEndpoint">{{msg.credential_mesos_form_marathon_endpoint}}</label>
 
         <div class="col-sm-9">
-            <p id="orchestratorEndpoint" class="form-control-static">{{importedStack.orchestrator.apiEndpoint}}</p>
+            <p id="orchestratorEndpoint" class="form-control-static">{{credential.parameters.apiEndpoint}}</p>
         </div>
         <!-- .col-sm-9 -->
     </div>

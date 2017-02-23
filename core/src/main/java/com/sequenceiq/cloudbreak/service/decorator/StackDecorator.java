@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -77,11 +79,13 @@ public class StackDecorator implements Decorator<Stack> {
         Object credentialId = data[DecorationData.CREDENTIAL_ID.ordinal()];
         if (credentialId != null || subject.getCredential() != null) {
             Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
-            if (subject.getInstanceGroups() == null || (networkId == null && subject.getNetwork() == null)) {
-                throw new BadRequestException("Instance groups and network must be specified!");
-            }
+
             prepareCredential(subject, credentialId);
             subject.setCloudPlatform(subject.getCredential().cloudPlatform());
+            if (subject.getInstanceGroups() == null || (networkId == null && subject.getNetwork() == null
+                    && !BYOS.equals(subject.getCredential().cloudPlatform()))) {
+                throw new BadRequestException("Instance groups and network must be specified!");
+            }
             prepareNetwork(subject, networkId);
             prepareOrchestratorIfNotExist(subject, subject.getCredential());
             if (subject.getFailurePolicy() != null) {
@@ -89,12 +93,6 @@ public class StackDecorator implements Decorator<Stack> {
             }
             prepareInstanceGroups(subject, data);
             validate(subject);
-        } else if (credentialId == null) {
-            subject.setCloudPlatform("BYOS");
-            if (subject.getOrchestrator() == null) {
-                throw new BadRequestException("If credential is not provided, orchestrator details cannot be empty.");
-            }
-            prepareInstanceGroups(subject, data);
         }
         return subject;
     }
@@ -109,7 +107,8 @@ public class StackDecorator implements Decorator<Stack> {
     private void prepareNetwork(Stack subject, Object networkId) {
         if (networkId != null) {
             subject.setNetwork(networkService.getById((Long) networkId));
-            if (subject.getOrchestrator() != null && (subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)) {
+            if (subject.getOrchestrator() != null && ((subject.getOrchestrator().getApiEndpoint() != null || subject.getOrchestrator().getType() == null)
+                    && !BYOS.equals(subject.cloudPlatform()))) {
                 throw new BadRequestException("Orchestrator cannot be configured for the stack!");
             }
         }
@@ -167,7 +166,7 @@ public class StackDecorator implements Decorator<Stack> {
     }
 
     private void validate(Stack stack) {
-        if (stack.getGatewayInstanceGroup() == null) {
+        if (stack.getGatewayInstanceGroup() == null && !BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Gateway instance group not configured");
         }
         int minNodeCount = ConsulUtils.ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();

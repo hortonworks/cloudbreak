@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -97,7 +99,7 @@ public class AmbariClusterUpscaleService {
             allHosts.addAll(hostsPerHostGroupEntry.getValue());
         }
         clusterService.updateHostCountWithAdjustment(stack.getCluster().getId(), hostGroupName, allHosts.size());
-        if (!"BYOS".equals(stack.cloudPlatform())) {
+        if (!BYOS.equals(stack.cloudPlatform())) {
             instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), InstanceStatus.UNREGISTERED, allHosts);
         }
         ambariClusterConnector.waitForAmbariHosts(stackService.getById(stackId));

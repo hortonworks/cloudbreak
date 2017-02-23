@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,48 +52,60 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         stackValidation.setInstanceGroups(instanceGroups);
         stackValidation.setHostGroups(convertHostGroupsFromJson(instanceGroups, stackValidationRequest.getHostGroups()));
         try {
-            if (stackValidationRequest.getBlueprintId() != null) {
-                Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
-                stackValidation.setBlueprint(blueprint);
-            } else if (stackValidationRequest.getBlueprint() != null) {
-                Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);
-                stackValidation.setBlueprint(blueprint);
-            } else {
-                throw new BadRequestException("Blueprint does not configured for the validation request!");
-            }
+            validateBlueprint(stackValidationRequest, stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to blueprint '%s' is denied or blueprint doesn't exist.", stackValidationRequest.getBlueprintId()), e);
         }
         try {
-            if (stackValidationRequest.getNetworkId() != null) {
-                Network network = networkService.get(stackValidationRequest.getNetworkId());
-                stackValidation.setNetwork(network);
-            } else if (stackValidationRequest.getNetwork() != null) {
-                Network network = conversionService.convert(stackValidationRequest.getNetwork(), Network.class);
-                stackValidation.setNetwork(network);
-            } else {
-                throw new BadRequestException("Network does not configured for the validation request!");
-            }
+            validateCredential(stackValidationRequest, stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to network '%s' is denied or network doesn't exist.", stackValidationRequest.getNetworkId()), e);
         }
         try {
-            if (stackValidationRequest.getCredentialId() != null) {
-                Credential credential = credentialService.get(stackValidationRequest.getCredentialId());
-                stackValidation.setCredential(credential);
-            } else if (stackValidationRequest.getCredential() != null) {
-                Credential credential = conversionService.convert(stackValidationRequest.getCredential(), Credential.class);
-                stackValidation.setCredential(credential);
-            } else {
-                throw new BadRequestException("Credential does not configured for the validation request!");
-            }
+            validateNetwork(stackValidationRequest, stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
                     String.format("Access to network '%s' is denied or network doesn't exist.", stackValidationRequest.getNetworkId()), e);
         }
         return stackValidation;
+    }
+
+    private void validateNetwork(StackValidationRequest stackValidationRequest, StackValidation stackValidation) {
+        if (stackValidationRequest.getNetworkId() != null) {
+            Network network = networkService.get(stackValidationRequest.getNetworkId());
+            stackValidation.setNetwork(network);
+        } else if (stackValidationRequest.getNetwork() != null) {
+            Network network = conversionService.convert(stackValidationRequest.getNetwork(), Network.class);
+            stackValidation.setNetwork(network);
+        } else if (!BYOS.equals(stackValidation.getCredential().cloudPlatform())) {
+            throw new BadRequestException("Network does not configured for the validation request!");
+        }
+    }
+
+    private void validateCredential(StackValidationRequest stackValidationRequest, StackValidation stackValidation) {
+        if (stackValidationRequest.getCredentialId() != null) {
+            Credential credential = credentialService.get(stackValidationRequest.getCredentialId());
+            stackValidation.setCredential(credential);
+        } else if (stackValidationRequest.getCredential() != null) {
+            Credential credential = conversionService.convert(stackValidationRequest.getCredential(), Credential.class);
+            stackValidation.setCredential(credential);
+        } else {
+            throw new BadRequestException("Credential does not configured for the validation request!");
+        }
+    }
+
+    private void validateBlueprint(StackValidationRequest stackValidationRequest, StackValidation stackValidation) {
+        if (stackValidationRequest.getBlueprintId() != null) {
+            Blueprint blueprint = blueprintService.get(stackValidationRequest.getBlueprintId());
+            stackValidation.setBlueprint(blueprint);
+        } else if (stackValidationRequest.getBlueprint() != null) {
+            Blueprint blueprint = conversionService.convert(stackValidationRequest.getBlueprint(), Blueprint.class);
+            stackValidation.setBlueprint(blueprint);
+        } else {
+            throw new BadRequestException("Blueprint does not configured for the validation request!");
+        }
     }
 
     private Set<HostGroup> convertHostGroupsFromJson(Set<InstanceGroup> instanceGroups, final Set<HostGroupRequest> hostGroupsJsons) {

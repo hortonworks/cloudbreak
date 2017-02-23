@@ -18,6 +18,8 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
@@ -47,6 +49,8 @@ import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 @Component
 @Transactional
 public class ClusterTerminationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterTerminationService.class);
 
     private static final String DELIMITER = "_";
 
@@ -80,8 +84,8 @@ public class ClusterTerminationService {
     public Boolean deleteClusterContainers(Long clusterId) {
         Cluster cluster = clusterRepository.findById(clusterId);
         if (cluster == null) {
-            String msg = String.format("Failed to delete containers of cluster (id:'%s'), because the cluster could not be found in the database.", clusterId);
-            throw new TerminationFailedException(msg);
+            LOGGER.warn("Failed to delete containers of cluster (id:'{}'), because the cluster could not be found in the database.", clusterId);
+            return Boolean.TRUE;
         }
         return deleteClusterContainers(cluster);
     }
