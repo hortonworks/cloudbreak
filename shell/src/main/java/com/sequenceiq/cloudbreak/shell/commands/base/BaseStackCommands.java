@@ -72,7 +72,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator({"stack show --id", "stack show --name"})
     @Override
     public boolean showAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return true;
     }
 
     @CliCommand(value = "stack show --id", help = "Show the stack by its id")
@@ -109,7 +109,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator(value = {"stack delete --id", "stack delete --name"})
     @Override
     public boolean deleteAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return true;
     }
 
     @Override
@@ -323,6 +323,31 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     }
 
+    @Override
+    public StackResponse create(StackRequest stackRequest, Boolean publicInAccount, Boolean wait, Long timeout) {
+        try {
+            Long id;
+            if (publicInAccount) {
+                id = shellContext.cloudbreakClient().stackEndpoint().postPublic(stackRequest).getId();
+            } else {
+                id = shellContext.cloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId();
+            }
+            StackResponse stackResponse = new StackResponse();
+            stackResponse.setName(stackRequest.getName());
+            stackResponse.setId(id);
+            shellContext.addStack(id.toString(), stackRequest.getName());
+            shellContext.setHint(Hints.CREATE_CLUSTER);
+
+            if (wait) {
+                waitUntilStackAvailable(id, "Stack creation failed:", timeout);
+                return stackResponse;
+            }
+            return stackResponse;
+        } catch (Exception ex) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
+        }
+    }
+
     @CliAvailabilityIndicator({"stack node --ADD", "stack node --REMOVE", "stack stop --id", "stack stop --name", "stack start --id", "stack start --name"})
     public boolean nodeAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -411,9 +436,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the stack") Integer adjustment,
             @CliOption(key = "withClusterUpScale", help = "Do the upscale with the cluster together",
-                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withClusterUpScale,
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withClusterUpScale,
             @CliOption(key = "wait", help = "Wait until the operation completes",
-                unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment < 1) {
@@ -600,6 +625,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     /**
      * Waits until stack becomes available after some operation.
+     *
      * @throws RuntimeException if the operation fails
      */
     public void waitUntilStackAvailable(Long stackId, String errorMessagePrefix, Long timeout) {
@@ -609,6 +635,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     /**
      * Waits until cluster becomes available after some operation.
+     *
      * @throws RuntimeException if the operation fails
      */
     public void waitUntilClusterAvailable(Long stackId, String errorMessagePrefix, Long timeout) {

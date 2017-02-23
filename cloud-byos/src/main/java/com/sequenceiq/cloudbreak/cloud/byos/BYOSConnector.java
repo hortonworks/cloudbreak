@@ -19,36 +19,57 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 public class BYOSConnector implements CloudConnector {
 
     @Inject
+    private BYOSResourceConnector byosResourceConnector;
+
+    @Inject
+    private BYOSInstanceConnector byosInstanceConnector;
+
+    @Inject
+    private BYOSMetadataCollector byosMetadataCollector;
+
+    @Inject
+    private BYOSCredentialConnector byosCredentialConnector;
+
+    @Inject
+    private BYOSPlatformParameters byosPlatformParameters;
+
+    @Inject
+    private BYOSSetup byosSetup;
+
+    @Inject
+    private BYOSAuthenticator byosAuthenticator;
+
+    @Inject
     private BYOSPlatformParameters platformParameters;
 
     @Override
     public Authenticator authentication() {
-        throw new UnsupportedOperationException("Authentication operation is not supported on BYOS stacks.");
+        return byosAuthenticator;
     }
 
     @Override
     public Setup setup() {
-        throw new UnsupportedOperationException("Setup operation is not supported on BYOS stacks.");
+        return byosSetup;
     }
 
     @Override
     public CredentialConnector credentials() {
-        throw new UnsupportedOperationException("Credentials operation is not supported on BYOS stacks.");
+        return byosCredentialConnector;
     }
 
     @Override
     public ResourceConnector resources() {
-        throw new UnsupportedOperationException("Resources operation is not supported on BYOS stacks.");
+        return byosResourceConnector;
     }
 
     @Override
     public InstanceConnector instances() {
-        throw new UnsupportedOperationException("Instances operation is not supported on BYOS stacks.");
+        return byosInstanceConnector;
     }
 
     @Override
     public MetadataCollector metadata() {
-        throw new UnsupportedOperationException("Metadata operation is not supported on BYOS stacks.");
+        return byosMetadataCollector;
     }
 
     @Override

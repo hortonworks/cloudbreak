@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.isGateway;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.StatusRequest.FULL_SYNC;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.util.Date;
 import java.util.List;
@@ -30,7 +32,6 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
@@ -57,7 +58,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -300,25 +300,25 @@ public class StackService {
             savedStack = stackRepository.save(stack);
             addTemplateForStack(stack, template);
             MDCBuilder.buildMdcContext(savedStack);
-            if (!"BYOS".equals(stack.cloudPlatform())) {
-                instanceGroupRepository.save(savedStack.getInstanceGroups());
-                tlsSecurityService.copyClientKeys(stack.getId());
+            instanceGroupRepository.save(savedStack.getInstanceGroups());
 
+            if (!BYOS.equals(savedStack.cloudPlatform())) {
+                tlsSecurityService.copyClientKeys(stack.getId());
                 SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys(stack.getId());
                 securityConfig.setSaltPassword(PasswordUtil.generatePassword());
                 securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
                 securityConfig.setStack(stack);
                 securityConfigRepository.save(securityConfig);
-                stack.setSecurityConfig(securityConfig);
-
+                savedStack.setSecurityConfig(securityConfig);
                 imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog, customImage);
                 flowManager.triggerProvisioning(savedStack.getId());
             } else {
-                savedStack.setStackStatus(new StackStatus(savedStack, Status.AVAILABLE, "", DetailedStackStatus.PROVISIONED));
+                savedStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED);
                 savedStack.setCreated(new Date().getTime());
-                stackRepository.save(savedStack);
+                save(savedStack);
+                savedStack = stackRepository.findById(savedStack.getId());
             }
-            addCloudbreakDetailsForStack(stack);
+            addCloudbreakDetailsForStack(savedStack);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
         } catch (CloudbreakSecuritySetupException e) {
@@ -370,7 +370,10 @@ public class StackService {
         if (stack.getCluster() != null) {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         }
-        if ("BYOS".equals(stack.cloudPlatform())) {
+        if (BYOS.equals(stack.cloudPlatform()) && status.equals(FULL_SYNC)) {
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED);
+            return;
+        } else if (BYOS.equals(stack.cloudPlatform())) {
             LOGGER.warn("The status of a 'Bring your own stack' type of infrastructure cannot be changed.");
             return;
         }
@@ -490,7 +493,9 @@ public class StackService {
     }
 
     public void validateStack(StackValidation stackValidation) {
-        networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
+        if (stackValidation.getNetwork() != null) {
+            networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
+        }
         blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
     }
 
@@ -576,11 +581,7 @@ public class StackService {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
-            if (!"BYOS".equals(stack.cloudPlatform())) {
-                flowManager.triggerTermination(stack.getId(), deleteDependencies);
-            } else {
-                terminationService.finalizeTermination(stack.getId(), false);
-            }
+            flowManager.triggerTermination(stack.getId(), deleteDependencies);
         } else {
             LOGGER.info("Stack is already deleted.");
         }

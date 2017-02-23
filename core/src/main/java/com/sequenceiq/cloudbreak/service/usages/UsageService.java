@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -46,7 +48,12 @@ public class UsageService {
         List<CloudbreakUsage> usages = Lists.newArrayList();
         for (InstanceGroup ig : stack.getInstanceGroups()) {
             Template template = ig.getTemplate();
-            String instanceType = template.getInstanceType();
+            String instanceType;
+            if (stack.getOrchestrator().getType().equals(BYOS)) {
+                instanceType = "byos-instance";
+            } else {
+                instanceType = template == null ? "undefined" : template.getInstanceType();
+            }
             String groupName = ig.getGroupName();
             Integer instanceNum = ig.getNodeCount();
             usages.add(usageGeneratorService.openNewUsage(stack, instanceType, instanceNum, groupName, ldt));

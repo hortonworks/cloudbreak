@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +26,6 @@ import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
@@ -170,17 +171,14 @@ public class StackController implements StackEndpoint {
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
-        if (CloudConstants.BYOS.equals(stack.cloudPlatform())) {
-            LOGGER.warn("A 'Bring your own stack' type of infrastructure cannot be modified.");
+        if (updateRequest.getStatus() != null) {
+            stackService.updateStatus(id, updateRequest.getStatus());
+        } else if (!BYOS.equals(stack.cloudPlatform())) {
+            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+            validateAccountPreferences(id, scalingAdjustment);
+            stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
+        } else if (BYOS.equals(stack.cloudPlatform())) {
             return Response.status(Response.Status.BAD_REQUEST).build();
-        } else {
-            if (updateRequest.getStatus() != null) {
-                stackService.updateStatus(id, updateRequest.getStatus());
-            } else {
-                Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-                validateAccountPreferences(id, scalingAdjustment);
-                stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
-            }
         }
         return Response.status(Response.Status.ACCEPTED).build();
     }

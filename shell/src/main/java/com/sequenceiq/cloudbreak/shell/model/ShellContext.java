@@ -50,6 +50,10 @@ public class ShellContext {
 
     private Hints hint;
 
+    private String byosOrchestrator;
+
+    private String byosEndpoint;
+
     private Map<PropertyKey, String> properties = new HashMap<>();
 
     private Map<String, InstanceGroupEntry> instanceGroups = new HashMap<>();
@@ -361,7 +365,18 @@ public class ShellContext {
         }
         fillTemplates(templateResponses);
         addProperty(PropertyKey.CREDENTIAL_ID, id);
+        if (credential.getCloudPlatform().equals("BYOS")) {
+            byosOrchestrator = credential.getParameters().get("type").toString();
+            byosEndpoint = credential.getParameters().get("apiEndpoint").toString();
+        } else {
+            byosOrchestrator = null;
+            byosEndpoint = null;
+        }
         setCredentialAccessible();
+    }
+
+    public String getApiEndpoint() {
+        return byosEndpoint;
     }
 
     public CredentialResponse getCredentialById(String id) {
@@ -669,11 +684,11 @@ public class ShellContext {
     }
 
     public boolean isMarathonMode() {
-        return getFocusType().equals(FocusType.MARATHON);
+        return "MESOS".equals(byosOrchestrator);
     }
 
     public boolean isYarnMode() {
-        return getFocusType().equals(FocusType.YARN);
+        return "YARN".equals(byosOrchestrator);
     }
 
     private void addProperty(PropertyKey key, String value) {

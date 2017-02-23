@@ -51,14 +51,16 @@ public class ClusterTerminationFlowService {
     public void finishClusterTerminationAllowed(ClusterContext context, ClusterTerminationResult payload) {
         LOGGER.info("Terminate cluster result: {}", payload);
         Cluster cluster = context.getCluster();
-        terminationService.finalizeClusterTermination(cluster.getId());
-        flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_COMPLETED, DELETE_COMPLETED.name(), cluster.getId());
-        clusterService.updateClusterStatusByStackId(cluster.getStack().getId(), DELETE_COMPLETED);
-        InMemoryStateStore.deleteCluster(cluster.getId());
-        stackUpdater.updateStackStatus(cluster.getStack().getId(), DetailedStackStatus.AVAILABLE);
-        if (cluster.getEmailNeeded()) {
-            emailSenderService.sendTerminationSuccessEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
-            flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_COMPLETED.name());
+        if (cluster != null) {
+            terminationService.finalizeClusterTermination(cluster.getId());
+            //flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_COMPLETED, DELETE_COMPLETED.name(), cluster.getId());
+            clusterService.updateClusterStatusByStackId(cluster.getStack().getId(), DELETE_COMPLETED);
+            InMemoryStateStore.deleteCluster(cluster.getId());
+            stackUpdater.updateStackStatus(cluster.getStack().getId(), DetailedStackStatus.AVAILABLE);
+            if (cluster.getEmailNeeded()) {
+                emailSenderService.sendTerminationSuccessEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
+                flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_COMPLETED.name());
+            }
         }
     }
 
@@ -77,11 +79,13 @@ public class ClusterTerminationFlowService {
         Exception errorDetails = payload.getException();
         LOGGER.error("Error during cluster termination flow: ", errorDetails);
         Cluster cluster = clusterService.retrieveClusterByStackId(payload.getStackId());
-        cluster.setStatus(DELETE_FAILED);
-        cluster.setStatusReason(errorDetails.getMessage());
-        clusterService.updateCluster(cluster);
+        if (cluster != null) {
+            cluster.setStatus(DELETE_FAILED);
+            cluster.setStatusReason(errorDetails.getMessage());
+            clusterService.updateCluster(cluster);
+        }
         flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
-        if (cluster.getEmailNeeded()) {
+        if (cluster != null && cluster.getEmailNeeded()) {
             sendDeleteFailedMail(cluster);
         }
     }

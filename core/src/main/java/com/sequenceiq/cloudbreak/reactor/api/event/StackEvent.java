@@ -44,4 +44,5 @@ public class StackEvent implements Selectable, Acceptable {
     public Promise<Boolean> accepted() {
         return accepted;
     }
+
 }

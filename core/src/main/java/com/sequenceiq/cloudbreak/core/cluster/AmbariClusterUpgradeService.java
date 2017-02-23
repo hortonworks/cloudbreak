@@ -70,7 +70,7 @@ public class AmbariClusterUpgradeService {
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getEnableKnoxGateway());
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
                 ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId());
-                AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
+                AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(cluster.getId());
                 Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
                 Map<String, Object> credentials = new HashMap<>();
                 credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(cluster));

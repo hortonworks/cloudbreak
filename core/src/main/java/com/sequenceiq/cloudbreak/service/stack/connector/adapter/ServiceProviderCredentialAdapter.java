@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
@@ -50,7 +51,7 @@ public class ServiceProviderCredentialAdapter {
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
     public Credential init(Credential credential) {
-        if (!credential.passwordAuthenticationRequired()) {
+        if (!credential.passwordAuthenticationRequired() && !Strings.isNullOrEmpty(credential.getPublicKey())) {
             rsaPublicKeyValidator.validate(credential.getPublicKey());
         }
         CloudContext cloudContext = new CloudContext(credential.getId(), credential.getName(), credential.cloudPlatform(), credential.getOwner());

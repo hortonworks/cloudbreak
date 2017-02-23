@@ -3,14 +3,14 @@
     <div class="row cluster-block collapse in">
         <div class="isotope-wrapper">
 
-            <div class="cluster" id="cluster-{{cluster.id}}" ng-repeat="cluster in $root.clusters">
+            <div class="cluster" id="cluster-{{cluster.id}}" ng-repeat="cluster in $root.clusters|filter: filterDeleteCompletedServices">
                 <h4>
                     <a href="" id="btn-cluster" class="btn btn-cluster btn-block" role="button" ng-click="selectActiveCluster(cluster.id)">{{cluster.name}}<i class="fa fa-angle-right fa-25x"></i></a>
                 </h4>
                 <dl class="row" style="padding-bottom: 4px;height: 25px;">
                     <div class="col-md-6">
                         <h6 style="margin: 0px;">
-                      <span class="label label-info">{{cluster.cloudPlatform}}</span>
+                      <span class="label label-info">{{cluster.cloudPlatform == 'BYOS' ? cluster.orchestrator.type : cluster.cloudPlatform}}</span>
                     </h6>
                     </div>
                     <div class="col-md-4" ng-show="cluster.public">

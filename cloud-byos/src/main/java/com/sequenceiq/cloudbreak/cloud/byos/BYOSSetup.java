@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.byos;
 
+import org.springframework.stereotype.Service;
+
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -9,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 
+@Service
 public class BYOSSetup implements Setup {
     @Override
     public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image) {

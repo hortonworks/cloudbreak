@@ -124,7 +124,7 @@ public class ClusterContainerRunnerTest {
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<>());
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
-                TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<>()))
+                TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<>(), ""))
                 .thenReturn(new ContainerConstraint.Builder().build());
         underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }

@@ -328,10 +328,10 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                 AccountStack.query(function(stacks) {
                     var clusters = [];
                     for (var i = 0; i < stacks.length; i++) {
-                        if (stacks[i].platformVariant !== 'BYOS' && stacks[i].status && stacks[i].status !== 'DELETE_COMPLETED') {
+                        if (stacks[i].status && stacks[i].status !== 'DELETE_COMPLETED') {
                             decorateCluster(stacks[i]);
                             clusters.push(stacks[i]);
-                        } else if (stacks[i].platformVariant === 'BYOS' && stacks[i].cluster.status && stacks[i].cluster.status !== 'DELETE_COMPLETED') {
+                        } else if (stacks[i].cluster.status && stacks[i].cluster.status !== 'DELETE_COMPLETED') {
                             decorateCluster(stacks[i]);
                             clusters.push(stacks[i]);
                         }
@@ -424,6 +424,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         sssdConfigId: cluster.sssdConfigId || null,
                         validateBlueprint: cluster.validateBlueprint,
                         fileSystem: cluster.fileSystem || null,
+                        customContainer: cluster.customContainerObj || null,
                         ambariRepoDetailsJson: cluster.ambariRepoDetailsJson === 'undefined' ? null : cluster.ambariRepoDetailsJson,
                         ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails,
                         ambariDatabaseDetails: cluster.ambariDatabaseDetails === 'undefined' ? null : cluster.ambariDatabaseDetails,
@@ -444,16 +445,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
             }
 
             this.delete = function(cluster, successHandler, failureHandler) {
-                var isByos = cluster.orchestrator.type === "MARATHON" || cluster.orchestrator.type === "YARN";
-                if (cluster.orchestrator != null && isByos) {
-                    Cluster.delete({
-                        id: cluster.id
-                    }, function(result) {
-                        successHandler(result);
-                    }, function(failure) {
-                        failureHandler(failure);
-                    });
-                } else {
+
                     GlobalStack.delete({
                         id: cluster.id
                     }, function(result) {
@@ -461,7 +453,6 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                     }, function(failure) {
                         failureHandler(failure);
                     });
-                }
             }
 
             this.forcedDelete = function(cluster, successHandler, failureHandler) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.filter;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +29,7 @@ public class ConsulServerFilter implements HostFilter {
     public List<HostMetadata> filter(long clusterId, Map<String, String> config, List<HostMetadata> hosts) throws HostFilterException {
         List<HostMetadata> copy = new ArrayList<>(hosts);
         Cluster cluster = clusterRepository.findById(clusterId);
-        if (!"BYOS".equals(cluster.getStack().cloudPlatform())) {
+        if (!BYOS.equals(cluster.getStack().cloudPlatform())) {
             for (HostMetadata host : hosts) {
                 InstanceMetaData instanceMetaData = instanceMetadataRepository.findHostInStack(cluster.getStack().getId(), host.getHostName());
                 if (instanceMetaData != null && instanceMetaData.getConsulServer()) {
