@@ -47,7 +47,7 @@
                                 <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
 
-                            <azure-credential ng-show="azureCredential && isVisible('AZURE_RM')"></azure-credential>
+                            <azure-credential ng-show="azureCredential && isVisible('AZURE')"></azure-credential>
 
                             <form class="form-horizontal" role="form" name="gcpCredentialForm" ng-show="gcpCredential && isVisible('GCP')">
                                 <div ng-include src="'tags/credential/gcpform.tag'"></div>
