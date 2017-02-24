@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
+import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
+
 import java.io.FileNotFoundException;
 import java.util.HashSet;
 import java.util.List;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Component
 public class BlueprintLoaderService {
@@ -133,7 +136,7 @@ public class BlueprintLoaderService {
 
     private Set<String> getDefaultBlueprintNames(CbUser user) {
         return blueprintRepository.findAllDefaultInAccount(user.getAccount()).stream()
-                .map(bp -> bp.getStatus() == ResourceStatus.DEFAULT_DELETED ? bp.getName().replaceAll("_([0-9]+)$", "") : bp.getName())
+                .map(bp -> bp.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(bp.getName()) : bp.getName())
                 .collect(Collectors.toSet());
     }
 
