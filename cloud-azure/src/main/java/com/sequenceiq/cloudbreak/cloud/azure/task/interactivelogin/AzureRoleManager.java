@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.AZURE_MANAGEMENT;
+
 import java.util.UUID;
 
 import javax.ws.rs.client.Client;
@@ -27,8 +29,6 @@ import com.google.gson.JsonObject;
 public class AzureRoleManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureRoleManager.class);
-
-    private static final String AZURE_MANAGEMENT = "https://management.azure.com";
 
     private static final String OWNER_ROLE = "Owner";
 
