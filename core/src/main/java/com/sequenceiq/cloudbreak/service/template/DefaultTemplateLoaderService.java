@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 @Transactional
@@ -47,7 +50,10 @@ public class DefaultTemplateLoaderService {
 
     public void createDefaultTemplates(CbUser user) {
         Set<Template> defaultTemplates = templateRepository.findAllDefaultInAccount(user.getAccount());
-        Map<String, Template> defaultNetworksMap = defaultTemplates.stream().collect(Collectors.toMap(Template::getName, Function.identity()));
+
+        Map<String, Template> defaultNetworksMap = defaultTemplates.stream()
+                .collect(Collectors.toMap(t -> t.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(t.getName()) : t.getName(),
+                        Function.identity()));
         createDefaultTemplateInstances(user, defaultNetworksMap);
     }
 

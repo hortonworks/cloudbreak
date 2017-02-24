@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.securitygroup;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.GATEWAY;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.HTTPS;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.SSH;
+import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
 import com.sequenceiq.cloudbreak.api.model.Port;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 public class DefaultSecurityGroupCreator {
@@ -45,7 +47,9 @@ public class DefaultSecurityGroupCreator {
 
     public void createDefaultSecurityGroups(CbUser user) {
         Set<SecurityGroup> defaultSecurityGroups = groupRepository.findAllDefaultInAccount(user.getAccount());
-        Map<String, SecurityGroup> defSecGroupMap = defaultSecurityGroups.stream().collect(Collectors.toMap(SecurityGroup::getName, Function.identity()));
+        Map<String, SecurityGroup> defSecGroupMap = defaultSecurityGroups.stream()
+                .collect(Collectors.toMap(g -> g.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(g.getName()) : g.getName(),
+                        Function.identity()));
         for (String platform : PLATFORMS_WITH_SEC_GROUP_SUPPORT) {
             String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
             if (!defSecGroupMap.containsKey(securityGroupName)) {

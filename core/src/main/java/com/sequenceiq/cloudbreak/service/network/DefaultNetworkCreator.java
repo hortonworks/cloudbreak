@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.network;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
+import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 public class DefaultNetworkCreator {
@@ -34,7 +36,9 @@ public class DefaultNetworkCreator {
 
     public void createDefaultNetworks(CbUser user) {
         Set<Network> defaultNetworks = networkRepository.findAllDefaultInAccount(user.getAccount());
-        Map<String, Network> defaultNetworksMap = defaultNetworks.stream().collect(Collectors.toMap(Network::getName, Function.identity()));
+        Map<String, Network> defaultNetworksMap = defaultNetworks.stream()
+                .collect(Collectors.toMap(n -> n.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(n.getName()) : n.getName(),
+                        Function.identity()));
         createDefaultNetworkInstances(user, defaultNetworksMap);
     }
 
