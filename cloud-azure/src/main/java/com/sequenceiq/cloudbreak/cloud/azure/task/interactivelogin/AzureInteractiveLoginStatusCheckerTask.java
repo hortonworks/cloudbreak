@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.XPLAT_CLI_CLIENT_ID;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -41,9 +40,13 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
 
     public static final String GRAPH_WINDOWS = "https://graph.windows.net/";
 
-    public static final String GRAPH_API_VERSION = "1.42-previewInternal";
+    public static final String GRAPH_API_VERSION = "1.6";
 
-    private static final String LOGIN_MICROSOFTONLINE_OAUTH2 = "https://login.microsoftonline.com/common/oauth2";
+    public static final String AZURE_MANAGEMENT = "https://management.azure.com/";
+
+    private static final String LOGIN_MICROSOFTONLINE = "https://login.microsoftonline.com/";
+
+    private static final String LOGIN_MICROSOFTONLINE_OAUTH2 = LOGIN_MICROSOFTONLINE + "common/oauth2";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureInteractiveLoginStatusCheckerTask.class);
 
@@ -76,29 +79,27 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         return armInteractiveLoginStatusCheckerContext.isCancelled();
     }
 
-    @PostConstruct
-    public void init() {
-        client = ClientBuilder.newClient();
-    }
-
     @Override
     public Boolean call() {
         Response response = createPollingRequest();
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             String tokenResponseString = response.readEntity(String.class);
             try {
-                String accessToken = new JSONObject(tokenResponseString).getString("access_token");
+                String refreshToken = new JSONObject(tokenResponseString).getString("refresh_token");
                 LOGGER.info("Access token received");
 
                 ExtendedCloudCredential extendedCloudCredential = armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential();
                 AzureCredentialView armCredentialView = new AzureCredentialView(extendedCloudCredential);
 
+                String graphApiAccessToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), GRAPH_WINDOWS);
+                String managementApiToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), AZURE_MANAGEMENT);
+
                 try {
-                    String appId = applicationCreator.createApplication(accessToken, armCredentialView.getTenantId());
+                    String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId());
                     sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
-                    String principalObjectId = principalCreator.createServicePrincipal(accessToken, appId, armCredentialView.getTenantId());
+                    String principalObjectId = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
                     sendStatusMessage(extendedCloudCredential, "Principal created for application");
-                    azureRoleManager.assignRole(accessToken, armCredentialView.getSubscriptionId(), principalObjectId);
+                    azureRoleManager.assignRole(managementApiToken, armCredentialView.getSubscriptionId(), principalObjectId);
                     sendStatusMessage(extendedCloudCredential, "Role assigned for principal");
 
                     extendedCloudCredential.putParameter("accessKey", appId);
@@ -132,10 +133,27 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
 
     private Response createPollingRequest() {
         Form pollingForm = createPollingForm();
-        WebTarget resource = client.target(LOGIN_MICROSOFTONLINE_OAUTH2);
+        WebTarget resource = ClientBuilder.newClient().target(LOGIN_MICROSOFTONLINE_OAUTH2);
         Invocation.Builder request = resource.path("token").queryParam("api-version", "1.0").request();
         request.accept(MediaType.APPLICATION_JSON);
         return request.post(Entity.entity(pollingForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+    }
+
+    private String createResourceToken(String refreshToken, String tenantId, String resource) {
+        Form graphApiTokenForm = createResourceTokenForm(refreshToken, resource);
+        WebTarget webTarget = ClientBuilder.newClient().target(LOGIN_MICROSOFTONLINE);
+        Invocation.Builder request = webTarget.path(tenantId + "/oauth2/token").queryParam("api-version", "1.0").request();
+        request.accept(MediaType.APPLICATION_JSON);
+        Response response = request.post(Entity.entity(graphApiTokenForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+            throw new IllegalStateException("Obtain graph api access token failed, status " + response.getStatus() + ", " + response.readEntity(String.class));
+        }
+        String responseString = response.readEntity(String.class);
+        try {
+            return new JSONObject(responseString).getString("access_token");
+        } catch (JSONException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     private Form createPollingForm() {
@@ -147,5 +165,13 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         return pollingForm;
     }
 
+    private Form createResourceTokenForm(String refreshToken, String resource) {
+        Form graphApiTokenForm = new Form();
+        graphApiTokenForm.param("grant_type", "refresh_token");
+        graphApiTokenForm.param("client_id", XPLAT_CLI_CLIENT_ID);
+        graphApiTokenForm.param("resource", resource);
+        graphApiTokenForm.param("refresh_token", refreshToken);
+        return graphApiTokenForm;
+    }
 
 }
