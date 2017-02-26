@@ -51,7 +51,8 @@ public class AbstractAutoRecoveryTest extends AbstractCloudbreakIntegrationTest 
         Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 - removedInstanceCount;
 
-        WaitResult waitResult = CloudbreakUtil.waitForHostStatusStack(stackEndpoint, stackId, hostGroup, "WAITING_FOR_REPAIR");
+        WaitResult waitResult = CloudbreakUtil.waitForEvent(getCloudbreakClient(), stackResponse.getName(), "RECOVERY", "autorecovery requested",
+                RecoveryUtil.getCurentTimeStamp());
 
         if (waitResult == WaitResult.TIMEOUT) {
             Assert.fail("Timeout happened when waiting for the desired host state");

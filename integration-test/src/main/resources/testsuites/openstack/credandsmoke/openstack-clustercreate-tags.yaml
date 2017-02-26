@@ -1,4 +1,4 @@
-name: OpenStack_simple_smoketest_cred_autorecovery
+name: OpenStack_simple_smoketest_cred
 parameters:
   cloudProvider: OPENSTACK
   blueprintName: hdp-small-default
@@ -12,20 +12,20 @@ tests:
   # integratontest.openstackcredential params must be set in application.yml
   - name: openstack_credential_test
     parameters:
-      credentialName: its-openstack-credandsmoke-cred-ar
+      credentialName: its-openstack-credandsmoke-cred-tags
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackCredentialCreationTest
 
   - name: create openstack network
     parameters:
-      networkName: it-openstack-credandsmoke-network-ar
+      networkName: it-openstack-credandsmoke-network-tags
       subnetCIDR: 10.0.36.0/24
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackNetworkCreationTest
 
   - name: create gateway template
     parameters:
-      templateName: it-openstack-credandsmoke-gateway-ar
+      templateName: it-openstack-credandsmoke-gateway-tags
       instanceType: m1.large
       volumeCount: 1
       volumeSize: 10
@@ -35,7 +35,7 @@ tests:
 
   - name: create master template
     parameters:
-      templateName: it-openstack-credandsmoke-master-ar
+      templateName: it-openstack-credandsmoke-master-tags
       instanceType: m1.large
       volumeCount: 2
       volumeSize: 10
@@ -45,7 +45,7 @@ tests:
 
   - name: create slave template
     parameters:
-      templateName: it-openstack-credandsmoke-slave-ar
+      templateName: it-openstack-credandsmoke-slave-tags
       instanceType: m1.large
       volumeCount: 3
       volumeSize: 10
@@ -55,16 +55,16 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-openstack-cred-ar
+      stackName: it-openstack-cred-tags
       region: local
-      clusterName: it-openstack-cred-ar
-      autoRecoveryMode: True
+      clusterName: it-openstack-cred-tags
+      userDefinedTags: ittest:itvalue;openstacktag:openstackvalue;result:success
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
-  - name: auto recovery
+  - name: check tags
     parameters:
-      hostGroup: host_group_slave_1
+      tags: ittest:itvalue;openstacktag:openstackvalue;result:success
     classes:
-      - com.sequenceiq.it.cloudbreak.recovery.OpenstackAutoRecoveryTest
+      - com.sequenceiq.it.cloudbreak.tags.OpenstackTagsTest

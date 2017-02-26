@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,10 +34,12 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "orchestrator" })
+    @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "orchestrator",
+    "userDefinedTags"})
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage,  @Optional("SALT") String orchestrator)
+            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage,  @Optional("SALT") String orchestrator,
+            @Optional ("") String userDefinedTags)
             throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
@@ -67,6 +70,11 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackRequest.setAvailabilityZone(availabilityZone);
         stackRequest.setInstanceGroups(igMap);
 
+        if (!userDefinedTags.isEmpty()) {
+            stackRequest.setTags(userDefinedTagsMap(userDefinedTags));
+
+        }
+
         OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
         orchestratorRequest.setType(orchestrator);
         stackRequest.setOrchestrator(orchestratorRequest);
@@ -85,5 +93,19 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
         ScalingUtil.putInstanceCountToContext(itContext, stackId);
+    }
+
+    public static Map<String, Object> userDefinedTagsMap(String userDefinedTag) {
+        Map<String, Object> tags = new HashMap<>();
+        Map<String, String> userDefinedTags = new HashMap<>();
+        List<String> tagsToCheckList = Arrays.asList(userDefinedTag.split(";"));
+
+        for (String elem : tagsToCheckList) {
+            String[] tmpList = elem.split(":");
+            Assert.assertTrue(tmpList.length > 1);
+            userDefinedTags.put(tmpList[0], tmpList[1]);
+        }
+        tags.put("userDefined", userDefinedTags);
+    return tags;
     }
 }
