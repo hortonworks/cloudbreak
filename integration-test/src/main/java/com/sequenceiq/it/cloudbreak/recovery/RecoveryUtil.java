@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.recovery;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -82,5 +83,9 @@ public class RecoveryUtil {
         ServerService servers =  os.compute().servers();
         servers.delete(instanceId);
         LOGGER.info("Instance was deleted with id: " + instanceId);
+    }
+
+    public static long getCurentTimeStamp() {
+        return Instant.now().getEpochSecond() * 1000;
     }
 }
