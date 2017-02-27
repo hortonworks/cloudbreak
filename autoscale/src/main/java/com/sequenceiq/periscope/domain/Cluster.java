@@ -19,11 +19,13 @@ import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.model.AmbariStack;
 
 @Entity
+@Table(name = "as_cluster")
 @NamedQueries({
         @NamedQuery(name = "Cluster.findAllByUser", query = "SELECT c FROM Cluster c WHERE c.user.id= :id"),
         @NamedQuery(name = "Cluster.find", query = "SELECT c FROM Cluster c WHERE c.id= :id"),
