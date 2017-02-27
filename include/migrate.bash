@@ -91,7 +91,7 @@ migrate-one-db() {
             local docker_image_name=${DOCKER_IMAGE_CLOUDBREAK_AUTH}:${DOCKER_TAG_SULTANS}
             ;;
         *)
-            migrateError "Invalid database service name: $service_name. Supported databases: cbdb, pcdb and uaadb"
+            migrateError "Invalid database service name: $service_name. Supported databases: cbdb, periscopedb and uaadb"
             return 1
             ;;
     esac
