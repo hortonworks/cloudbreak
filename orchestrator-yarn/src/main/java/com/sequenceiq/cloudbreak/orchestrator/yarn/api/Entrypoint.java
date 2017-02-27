@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.api;
 
 public enum Entrypoint {
-    AMBARIDB("/docker-entrypoint.sh"),
-    AMBARISERVER("/tmp/privileged-init"),
-    AMBARIAGENT("/tmp/privileged-init");
+    AMBARIDB("/docker-entrypoint"),
+    AMBARISERVER("/docker-entrypoint"),
+    AMBARIAGENT("/docker-entrypoint");
 
     private String entryPoint;
 

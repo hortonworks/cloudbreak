@@ -72,9 +72,9 @@ cb:
       ambari.server: hortonworks/ambari-server:2.4.0-v1
       ambari.agent: hortonworks/ambari-agent:2.4.0-v1
       ambari.db: postgres:9.4.1
-      yarn.ambari.server: registry.eng.hortonworks.com/cloudbreak/yarn-cloudbreak-ambari-server:0.1
-      yarn.ambari.agent: registry.eng.hortonworks.com/cloudbreak/yarn-cloudbreak-ambari-agent:0.1
-      yarn.ambari.db: registry.eng.hortonworks.com/cloudbreak/yarn-cloudbreak-postgres:0.1
+      yarn.ambari.server: hortonworks/yarn-cloudbreak-ambari-server:2.5.0-v1
+      yarn.ambari.agent: hortonworks/yarn-cloudbreak-ambari-agent:2.5.0-v1
+      yarn.ambari.db: hortonworks/yarn-cloudbreak-postgres:9.4.1
       registrator: gliderlabs/registrator:v6
       docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.6
       kerberos: sequenceiq/kerberos:1.1
