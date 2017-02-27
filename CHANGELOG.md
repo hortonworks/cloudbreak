@@ -2,6 +2,12 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
+## [v1.13.1]
+
+### Changed
+
+- Upgraded a dependent component in order to address a network configuration issue.
+
 ## [v1.6.2]
 
 ### Fixed
