@@ -317,8 +317,7 @@ func waitForClusterToTerminateImpl(clusterName string, getStack func(*stacks.Get
 
 		if err != nil {
 			errorMessage := err.Error()
-			// shouldn't happen, but handle anyway
-			if strings.Contains(errorMessage, "status 404") {
+			if strings.Contains(errorMessage, "status code: 404") {
 				log.Infof("[waitForClusterToTerminate] cluster is terminated")
 				break
 			}
