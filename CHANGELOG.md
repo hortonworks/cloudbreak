@@ -6,6 +6,7 @@ The Change Log summarizes the changes in Cloudbreak.
 
 ### Changed
 
+- Upgraded a dependent component in order to address a network configuration issue.
 - Updated traefik to v1.1.2
 - Updated Google Cloud SDK to 1.22.0
 
