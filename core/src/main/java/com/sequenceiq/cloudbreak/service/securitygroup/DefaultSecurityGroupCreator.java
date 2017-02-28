@@ -71,6 +71,7 @@ public class DefaultSecurityGroupCreator {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Collections.singletonList(sshAndSslRule)));
+        securityGroupService.create(user, onlySshAndSsl);
     }
 
     private String getPortsOpenDesc(List<Port> portsWithoutAclRules) {
