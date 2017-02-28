@@ -28,6 +28,8 @@ import org.springframework.shell.event.ShellStatusListener;
 
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
@@ -235,14 +237,17 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         Map<String, Map<String, Collection<String>>> availabilityZones = Collections.emptyMap();
         Map<String, List<Map<String, String>>> instanceTypes = new HashMap<>();
         Map<String, Collection<String>> orchestrators = new HashMap<>();
+        Map<String, Map<String, Collection<VmTypeJson>>> vmTypesPerZones = new HashMap<>();
+        Map<String, Map<String, String>> defaultVmTypePerZones = new HashMap<>();
         try {
             platformToVariants = cloudbreakClient.connectorEndpoint().getPlatformVariants().getPlatformToVariants();
-            regions = cloudbreakClient.connectorEndpoint().getRegions().getRegions();
-            availabilityZones = cloudbreakClient.connectorEndpoint().getRegions().getAvailabilityZones();
+            PlatformRegionsJson platformRegions = cloudbreakClient.connectorEndpoint().getRegions();
+            regions = platformRegions.getRegions();
+            availabilityZones = platformRegions.getAvailabilityZones();
             volumeTypes = cloudbreakClient.connectorEndpoint().getDisktypes().getDiskTypes();
             orchestrators = cloudbreakClient.connectorEndpoint().getOrchestratortypes().getOrchestrators();
-            Map<String, Collection<VmTypeJson>> virtualMachines = cloudbreakClient.connectorEndpoint().getVmTypes(true).getVirtualMachines();
-            for (Map.Entry<String, Collection<VmTypeJson>> vmCloud : virtualMachines.entrySet()) {
+            PlatformVirtualMachinesJson platformVirtualMachines = cloudbreakClient.connectorEndpoint().getVmTypes(true);
+            for (Map.Entry<String, Collection<VmTypeJson>> vmCloud : platformVirtualMachines.getVirtualMachines().entrySet()) {
                 List<Map<String, String>> tmp = new ArrayList<>();
                 for (VmTypeJson vmTypeJson : vmCloud.getValue()) {
                     Map<String, String> map = responseTransformer.transformObjectToStringMap(vmTypeJson);
@@ -250,12 +255,16 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                 }
                 instanceTypes.put(vmCloud.getKey(), tmp);
             }
+            vmTypesPerZones = platformVirtualMachines.getVmTypesPerZones();
+            defaultVmTypePerZones = platformVirtualMachines.getDefaultVmTypePerZones();
         } catch (Exception e) {
             System.out.println("Error during retrieving platform variants");
         } finally {
             context.setPlatformToVariantsMap(platformToVariants);
             context.setRegions(regions);
             context.setAvailabilityZones(availabilityZones);
+            context.setVmTypesPerZones(vmTypesPerZones);
+            context.setDefaultVmTypePerZones(defaultVmTypePerZones);
             context.setVolumeTypes(volumeTypes);
             context.setInstanceTypes(instanceTypes);
             context.setOrchestrators(orchestrators);

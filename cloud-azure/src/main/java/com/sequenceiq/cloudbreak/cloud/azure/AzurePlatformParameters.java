@@ -58,8 +58,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
-public class ArmPlatformParameters implements PlatformParameters {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ArmPlatformParameters.class);
+public class AzurePlatformParameters implements PlatformParameters {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzurePlatformParameters.class);
 
     private static final int START_LABEL = 98;
 

@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AzureCommands;
 import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
@@ -39,6 +40,10 @@ public class ShellContext {
     private Map<String, Collection<String>> regions;
 
     private Map<String, Map<String, Collection<String>>> availabilityZones;
+
+    private Map<String, Map<String, Collection<VmTypeJson>>> vmTypesPerZones = new HashMap<>();
+
+    private Map<String, Map<String, String>> defaultVmTypePerZones = new HashMap<>();
 
     private Map<String, Collection<String>> volumeTypes;
 
@@ -67,6 +72,8 @@ public class ShellContext {
     private Set<String> activeTemplates = new HashSet<>();
 
     private Set<String> activeTemplateNames = new HashSet<>();
+
+    private Map<Long, TemplateResponse> templateMap = new HashMap<>();
 
     private String activeCloudPlatform;
 
@@ -203,6 +210,10 @@ public class ShellContext {
 
     public Set<String> getActiveTemplateNames() {
         return activeTemplateNames;
+    }
+
+    public Map<Long, TemplateResponse> getTemplateMap() {
+        return templateMap;
     }
 
     public boolean isBlueprintAvailable() {
@@ -385,6 +396,7 @@ public class ShellContext {
 
     private void fillTemplates(List<TemplateResponse> templateList) {
         for (TemplateResponse t : templateList) {
+            templateMap.put(t.getId(), t);
             this.activeTemplateNames.add(t.getName());
             this.activeTemplates.add(t.getId().toString());
         }
@@ -445,6 +457,22 @@ public class ShellContext {
 
     public Collection<String> getAvailabilityZonesByRegion(String platform, String region) {
         return availabilityZones.get(platform).get(region);
+    }
+
+    public Map<String, Map<String, Collection<VmTypeJson>>> getVmTypesPerZones() {
+        return vmTypesPerZones;
+    }
+
+    public void setVmTypesPerZones(Map<String, Map<String, Collection<VmTypeJson>>> vmTypesPerZones) {
+        this.vmTypesPerZones = vmTypesPerZones;
+    }
+
+    public Map<String, Map<String, String>> getDefaultVmTypePerZones() {
+        return defaultVmTypePerZones;
+    }
+
+    public void setDefaultVmTypePerZones(Map<String, Map<String, String>> defaultVmTypePerZones) {
+        this.defaultVmTypePerZones = defaultVmTypePerZones;
     }
 
     public Collection<String> getInstanceTypeNamesByPlatform(String platform) {
