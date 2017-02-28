@@ -103,7 +103,7 @@ public class BlueprintLoaderService {
 
     public Set<Blueprint> loadBlueprints(CbUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
-        Set<String> blueprintNames = getDefaultBlueprintNames(user);
+        List<String> blueprintNames = getDefaultBlueprintNames(user);
         for (String blueprintStrings : blueprintArray) {
             String[] split = blueprintStrings.split("=");
             if (isBlueprintNamePreConfigured(blueprintStrings, split) && !blueprintNames.contains(blueprintStrings)) {
@@ -134,10 +134,10 @@ public class BlueprintLoaderService {
         return blueprints;
     }
 
-    private Set<String> getDefaultBlueprintNames(CbUser user) {
+    private List<String> getDefaultBlueprintNames(CbUser user) {
         return blueprintRepository.findAllDefaultInAccount(user.getAccount()).stream()
                 .map(bp -> bp.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(bp.getName()) : bp.getName())
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
     }
 
 }
