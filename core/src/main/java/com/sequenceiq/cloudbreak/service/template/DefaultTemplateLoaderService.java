@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.template;
 
 import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -57,8 +56,7 @@ public class DefaultTemplateLoaderService {
         createDefaultTemplateInstances(user, defaultNetworksMap);
     }
 
-    private Set<Template> createDefaultTemplateInstances(CbUser user, Map<String, Template> defaultNetworksMap) {
-        Set<Template> templates = new HashSet<>();
+    private void createDefaultTemplateInstances(CbUser user, Map<String, Template> defaultNetworksMap) {
         for (String templateName : templateArray) {
             if (!templateName.isEmpty() && !defaultNetworksMap.containsKey(templateName)) {
                 try {
@@ -71,13 +69,11 @@ public class DefaultTemplateLoaderService {
                     converted.setPublicInAccount(true);
                     converted.setStatus(ResourceStatus.DEFAULT);
                     templateRepository.save(converted);
-                    templates.add(converted);
                 } catch (Exception e) {
                     LOGGER.error("Template is not available for '{}' user.", e, user);
                 }
             }
         }
-        return templates;
     }
 
 }

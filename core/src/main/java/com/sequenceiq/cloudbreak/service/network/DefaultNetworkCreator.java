@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
 
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -42,29 +41,25 @@ public class DefaultNetworkCreator {
         createDefaultNetworkInstances(user, defaultNetworksMap);
     }
 
-    private Set<Network> createDefaultNetworkInstances(CbUser user, Map<String, Network> defaultNetworksMap) {
-        Set<Network> networks = new HashSet<>();
-
+    private void createDefaultNetworkInstances(CbUser user, Map<String, Network> defaultNetworksMap) {
         if (!defaultNetworksMap.containsKey(DEFAULT_AWS_NETWORK_NAME)) {
             Network awsNetwork = new Network();
             setNetworkCommonFields(awsNetwork, DEFAULT_AWS_NETWORK_NAME, "Default network settings for AWS clusters.",
                     NetworkConfig.SUBNET_16, user, AWS);
-            networks.add(networkRepository.save(awsNetwork));
+            networkRepository.save(awsNetwork);
         }
         if (!defaultNetworksMap.containsKey(DEFAULT_AZURE_NETWORK_NAME)) {
             Network azureNetwork = new Network();
             setNetworkCommonFields(azureNetwork, DEFAULT_AZURE_NETWORK_NAME, "Default network settings for Azure clusters.",
                     NetworkConfig.SUBNET_16, user, CloudConstants.AZURE);
-            networks.add(networkRepository.save(azureNetwork));
+            networkRepository.save(azureNetwork);
         }
         if (!defaultNetworksMap.containsKey(DEFAULT_GCP_NETWORK_NAME)) {
             Network gcpNetwork = new Network();
             setNetworkCommonFields(gcpNetwork, DEFAULT_GCP_NETWORK_NAME, "Default network settings for Gcp clusters.",
                     NetworkConfig.SUBNET_16, user, GCP);
-            networks.add(networkRepository.save(gcpNetwork));
+            networkRepository.save(gcpNetwork);
         }
-
-        return networks;
     }
 
     private void setNetworkCommonFields(Network network, String name, String description, String subnet, CbUser user, String platform) {
