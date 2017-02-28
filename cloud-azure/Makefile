@@ -5,3 +5,6 @@ deps:
 
 generate-yml:
 	sigil -f $(YAML_NAME).tmpl > ./src/main/resources/$(YAML_NAME).yml
+
+generate-zone-vms:
+	python scripts/zone.py

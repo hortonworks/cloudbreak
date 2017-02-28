@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -26,9 +27,12 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
+import com.sequenceiq.cloudbreak.shell.commands.provider.OpenStackCommands;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
@@ -260,7 +264,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         try {
             validateNetwork();
             validateRegion(region);
-            validateInstanceGroups();
+            validateInstanceGroups(platform, region.getName(), availabilityZone == null ? null : availabilityZone.getName());
             validateAvailabilityZone(region, availabilityZone);
             Long id;
             StackRequest stackRequest = new StackRequest();
@@ -602,11 +606,27 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    private void validateInstanceGroups() {
+    private void validateInstanceGroups(String platform, String region, String availabilityZone) {
         shellContext.getInstanceGroups().values()
                 .stream().filter(i -> "GATEWAY".equals(i.getType()))
                 .findAny()
                 .orElseThrow(() -> new ValidationException("You must specify where to install ambari server to with '--ambariServer true' on instancegroup"));
+        if (!platform.equals(OpenStackCommands.PLATFORM)) {
+            Map<String, Collection<VmTypeJson>> vmTypesPerZones = shellContext.getVmTypesPerZones().get(platform);
+            Map<Long, TemplateResponse> templateMap = shellContext.getTemplateMap();
+            String azone = availabilityZone == null ? shellContext.getAvailabilityZonesByRegion(platform, region).iterator().next() : availabilityZone;
+            Collection<VmTypeJson> vmTypes = vmTypesPerZones.get(azone);
+            for (Map.Entry<String, InstanceGroupEntry> ig : shellContext.getInstanceGroups().entrySet()) {
+                TemplateResponse template = templateMap.get(ig.getValue().getTemplateId());
+                String instanceType = template.getInstanceType();
+                if (!vmTypes.stream().anyMatch(vm -> vm.getValue().equals(instanceType))) {
+                    throw new ValidationException("The " + instanceType + " instencetype is not supported for the " + ig.getKey() + " instancegroup which using "
+                            + template.getName() + " template in [" + region + "] region and [" + availabilityZone + "] availabilty zone."
+                            + " Supported instancetypes in this region / availability zone: "
+                            + vmTypes.stream().map(vm -> vm.getValue()).collect(Collectors.toList()));
+                }
+            }
+        }
     }
 
     private void prepareCluster(String stackId) {

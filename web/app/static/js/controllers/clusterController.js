@@ -1228,6 +1228,35 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         });
 
+        $scope.filterByZoneInstanceType = function() {
+            if ($rootScope.activeCredential !== undefined && $scope.cluster.region !== null) {
+                $rootScope.templates.$promise.then(function(templates) {
+                    if ($rootScope.activeCredential.cloudPlatform === 'OPENSTACK') {
+                        $rootScope.filteredTemplates = templates;
+                    } else {
+                        var zoneid;
+                        if ($rootScope.activeCredential.cloudPlatform === 'AZURE') {
+                            zoneid = $scope.cluster.region;
+                        } else {
+                            zoneid = ($scope.cluster.availabilityZone !== undefined && $scope.cluster.availabilityZone !== null) ? $scope.cluster.availabilityZone : $rootScope.params.zones[$rootScope.activeCredential.cloudPlatform][$scope.cluster.region][0]
+                        }
+                        $rootScope.filteredTemplates = templates.filter(function(template) {
+                            var zoneVmTypes = $rootScope.params.vmTypesPerZone[$rootScope.activeCredential.cloudPlatform][zoneid];
+                            for (i = 0; i < zoneVmTypes.length; i++) {
+                                if (zoneVmTypes[i].value === template.instanceType) {
+                                    return true;
+                                }
+                            }
+                        })
+                    }
+                })
+            }
+        }
+
+        $rootScope.$watch('activeCredential', $scope.filterByZoneInstanceType);
+        $rootScope.$watch('templates', $scope.filterByZoneInstanceType, true);
+        $scope.$watch('cluster.region', $scope.filterByZoneInstanceType);
+        $scope.$watch('cluster.availabilityZone', $scope.filterByZoneInstanceType);
 
         $scope.requestStatusChange = function(cluster) {
             if (cluster.status == "STOPPED") {
