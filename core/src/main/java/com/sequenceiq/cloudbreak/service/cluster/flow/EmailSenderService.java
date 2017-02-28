@@ -18,7 +18,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -198,22 +197,6 @@ public class EmailSenderService {
         CbUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
         sendEmail(user, email, failedClusterMailTemplatePath, "Cluster termination failed", getEmailModel(user.getGivenName(),
                 ambariServer, State.TERMINATION_FAILURE, clusterName));
-    }
-
-    private String getClusterType(Stack stack, Cluster cluster) {
-        String hdpVersion = null;
-        try {
-            HDPRepo repo = componentConfigProvider.getHDPRepo(stack.getId());
-            if (repo != null) {
-                hdpVersion = repo.getHdpVersion();
-            }
-        } catch (CloudbreakServiceException e) {
-            LOGGER.info("cant find hdp version");
-        }
-        if (hdpVersion == null) {
-            hdpVersion = "HDP_VERSION_NOT_FOUND";
-        }
-        return hdpVersion + " : " + cluster.getBlueprint().getBlueprintName();
     }
 
     private String getInstanceTypes(Stack stack) {

@@ -36,7 +36,7 @@
     </div>
 </div>
 
-<div class="form-group" ng-show="activeCredential">
+<div class="form-group" ng-show="activeCredential && activeCredential.cloudPlatform !== 'BYOS'">
     <label class="col-sm-3 control-label" for="hostgroupconfig">{{msg.cluster_form_hostgroup_label}}</label>
     <div class="col-sm-7 col-sm-offset-1">
         <div ng-repeat="instanceGroup in cluster.instanceGroups" id="hostgroupconfig">
@@ -50,7 +50,7 @@
                             <div class="form-group" name="templateNodeform{{$index}}">
                                 <label class="col-sm-3 control-label" for="templateNodeCount{{$index}}">{{msg.cluster_form_hostgroup_group_size_label}}</label>
                                 <div class="col-sm-8">
-                                    <input type="number" name="templateNodeCount{{$index}}" ng-disabled="instanceGroup.type=='GATEWAY'" class="form-control" ng-model="instanceGroup.nodeCount" id="templateNodeCount{{$index}}" min="1" max="100000" placeholder="1 - 100000" ng-required="activeCredential">
+                                    <input type="number" name="templateNodeCount{{$index}}" ng-disabled="instanceGroup.type=='GATEWAY'" class="form-control" ng-model="instanceGroup.nodeCount" id="templateNodeCount{{$index}}" min="1" max="100000" placeholder="1 - 100000" ng-required="activeCredential && activeCredential.cloudPlatform !== 'BYOS'">
                                     <div class="help-block" ng-show="clusterCreationForm.templateNodeCount{{$index}}.$dirty && clusterCreationForm.templateNodeCount{{$index}}.$invalid"><i class="fa fa-warning"></i> {{msg.cluster_size_invalid}}
                                     </div>
                                 </div>
@@ -58,14 +58,14 @@
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="templateName{{$index}}">{{msg.cluster_form_hostgroup_template_label}}</label>
                                 <div class="col-sm-8">
-                                    <select class="form-control" id="template-name-{{$index}}" name="template-name-{{$index}}" ng-model="instanceGroup.templateId" ng-options="template.id as template.name for template in $root.templates | filter:filterByTopology | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" ng-required="activeCredential">
+                                    <select class="form-control" id="template-name-{{$index}}" name="template-name-{{$index}}" ng-model="instanceGroup.templateId" ng-options="template.id as template.name for template in $root.templates | filter:filterByTopology | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" ng-required="activeCredential && activeCredential.cloudPlatform !== 'BYOS'">
                                     </select>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="col-sm-3 control-label" for="securityGroupNameName{{$index}}">{{msg.cluster_form_securitygroup_label}}</label>
                                 <div class="col-sm-8">
-                                    <select class="form-control" id="securityGroupNameName{{$index}}" name="securityGroupNameName{{$index}}" ng-model="instanceGroup.securityGroupId" ng-options="securitygroup.id as securitygroup.name for securitygroup in $root.securitygroups | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" ng-required="activeCredential">
+                                    <select class="form-control" id="securityGroupNameName{{$index}}" name="securityGroupNameName{{$index}}" ng-model="instanceGroup.securityGroupId" ng-options="securitygroup.id as securitygroup.name for securitygroup in $root.securitygroups | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" ng-required="activeCredential && activeCredential.cloudPlatform !== 'BYOS'">
                                     </select>
                                 </div>
                             </div>
@@ -96,7 +96,7 @@
     </div>
 </div>
 
-<div class="form-group" ng-show="activeStack">
+<div class="form-group" ng-show="activeStack || activeCredential.cloudPlatform === 'BYOS'">
     <label class="col-sm-3 control-label" for="hostgroupconfig">{{msg.cluster_form_hostgroup_label}}</label>
     <div class="col-sm-7 col-sm-offset-1">
         <div ng-repeat="hostGroup in cluster.hostGroups" id="hostgroupconfig">
@@ -134,8 +134,8 @@
 
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-default" ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureCluster')">
-                    <i class="fa fa-angle-double-left"></i> {{activeStack === undefined ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_cluster_tag}}
+                <button type="button" class="btn btn-sm btn-default" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureCluster')">
+                    <i class="fa fa-angle-double-left"></i> {{(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_cluster_tag}}
                 </button>
             </div>
             <div class="btn-group" role="group" style="opacity: 0;">
@@ -145,12 +145,12 @@
                 <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || !cluster.blueprintId || !ambariServerSelected()">{{msg.cluster_form_ambari_filesystem_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
             <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'GCP'" ng-hide="!showAdvancedOptionForm">
-                <button type="button" class="btn btn-sm btn-default" ng-click="activeStack === undefined ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureAmbariRepository')" ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()">
-                    {{activeStack === undefined ? msg.cluster_form_ambari_failure_tag : msg.cluster_form_ambari_hdprepo_tag}} <i class="fa fa-angle-double-right"></i>
+                <button type="button" class="btn btn-sm btn-default" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureAmbariRepository')" ng-disabled="!cluster.name || !cluster.blueprintId || ((activeCredential !== undefined && activeCredential.cloudPlatform !== 'BYOS') && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()">
+                    {{(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? msg.cluster_form_ambari_failure_tag : msg.cluster_form_ambari_hdprepo_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>
             <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'GCP'" ng-hide="clusterCreationForm.$invalid || showAdvancedOptionForm">
-                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')" ng-disabled="!cluster.name || !cluster.blueprintId || (activeCredential !== undefined && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()">
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')" ng-disabled="!cluster.name || !cluster.blueprintId || ((activeCredential !== undefined && activeCredential.cloudPlatform !== 'BYOS') && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()">
                     {{msg.cluster_form_ambari_launch_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>

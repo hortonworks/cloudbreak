@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
@@ -82,6 +83,9 @@ public class ClusterHostServiceRunner {
     private ComponentConfigProvider componentConfigProvider;
 
     @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
     private BlueprintProcessor blueprintProcessor;
 
     @Inject
@@ -114,17 +118,17 @@ public class ClusterHostServiceRunner {
             }
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
             saveGatewayPillar(gatewayConfig, cluster, servicePillar);
-            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stack.getId());
+            AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
             if (ambariRepo != null) {
                 servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
             }
-            AmbariDatabase ambariDb = componentConfigProvider.getAmbariDatabase(stack.getId());
+            AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
             servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
             LdapConfig ldapConfig = cluster.getLdapConfig();
             if (ldapConfig != null && blueprintUtils.containsComponent(cluster.getBlueprint(), "KNOX_GATEWAY")) {
                 servicePillar.put("ldap", new SaltPillarProperties("/ldap/init.sls", singletonMap("ldap", ldapConfig)));
             }
-            saveHDPPillar(stack.getId(), servicePillar);
+            saveHDPPillar(cluster.getId(), servicePillar);
             Map<String, Object> credentials = new HashMap<>();
             credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
             credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
@@ -160,8 +164,8 @@ public class ClusterHostServiceRunner {
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
-    private void saveHDPPillar(Long stackId, Map<String, SaltPillarProperties> servicePillar) {
-        HDPRepo hdprepo = componentConfigProvider.getHDPRepo(stackId);
+    private void saveHDPPillar(Long clusterId, Map<String, SaltPillarProperties> servicePillar) {
+        HDPRepo hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
 

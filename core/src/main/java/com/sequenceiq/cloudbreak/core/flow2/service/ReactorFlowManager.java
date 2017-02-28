@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent.CLUSTER_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
@@ -9,7 +10,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent.FORCE_TERMINATION_EVENT;
 
 import java.util.Collections;
 import java.util.List;
@@ -39,10 +39,12 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
 import reactor.bus.Event;
@@ -62,6 +64,9 @@ public class ReactorFlowManager {
 
     @Inject
     private ErrorHandlerAwareFlowEventFactory eventFactory;
+
+    @Inject
+    private StackService stackService;
 
     public void triggerProvisioning(Long stackId) {
         String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
@@ -106,16 +111,28 @@ public class ReactorFlowManager {
     }
 
     public void triggerTermination(Long stackId, Boolean deleteDependencies) {
-        String selector = StackTerminationEvent.TERMINATION_EVENT.event();
-        TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
-        notify(selector, event);
+        Stack stack = stackService.get(stackId);
+
+        if (BYOS.equals(stack.cloudPlatform())) {
+            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
+            notify(selector, new TerminationEvent(selector, stackId, null, deleteDependencies));
+        } else {
+            String selector = StackTerminationEvent.TERMINATION_EVENT.event();
+            notify(selector, new TerminationEvent(selector, stackId, deleteDependencies));
+        }
         cancelRunningFlows(stackId);
     }
 
     public void triggerForcedTermination(Long stackId, Boolean deleteDependencies) {
-        String selector = FORCE_TERMINATION_EVENT.event();
-        TerminationEvent event = new TerminationEvent(selector, stackId, deleteDependencies);
-        notify(selector, event);
+        Stack stack = stackService.get(stackId);
+
+        if (BYOS.equals(stack.cloudPlatform())) {
+            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
+            notify(selector, new TerminationEvent(selector, stackId, null, deleteDependencies));
+        } else {
+            String selector = StackTerminationEvent.FORCE_TERMINATION_EVENT.event();
+            notify(selector, new TerminationEvent(selector, stackId, deleteDependencies));
+        }
         cancelRunningFlows(stackId);
     }
 
@@ -182,8 +199,15 @@ public class ReactorFlowManager {
     }
 
     public void triggerClusterTermination(Long stackId) {
-        String selector = ClusterTerminationEvent.TERMINATION_EVENT.event();
-        notify(selector, new StackEvent(selector, stackId));
+        Stack stack = stackService.get(stackId);
+        if (BYOS.equals(stack.cloudPlatform())) {
+            String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
+            notify(selector, new StackEvent(selector, stackId, null));
+        } else {
+            String selector = ClusterTerminationEvent.TERMINATION_EVENT.event();
+            notify(selector, new StackEvent(selector, stackId));
+        }
+        cancelRunningFlows(stackId);
     }
 
     public void triggerManualRepairFlow(Long stackId) {
@@ -208,9 +232,11 @@ public class ReactorFlowManager {
     private void notify(String selector, Acceptable acceptable) {
         Event<Acceptable> event = eventFactory.createEvent(acceptable);
         reactor.notify(selector, event);
-
         try {
-            Boolean accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
+            Boolean accepted = true;
+            if (event.getData().accepted() != null) {
+                accepted = event.getData().accepted().await(WAIT_FOR_ACCEPT, TimeUnit.SECONDS);
+            }
             if (accepted == null || !accepted) {
                 throw new FlowsAlreadyRunningException(String.format("Stack %d has flows under operation, request not allowed.", event.getData().getStackId()));
             }

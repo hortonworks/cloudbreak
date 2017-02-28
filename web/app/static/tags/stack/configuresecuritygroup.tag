@@ -1,7 +1,7 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="selectClusterNetwork">{{msg.cluster_form_network_label}}</label>
     <div class="col-sm-8">
-        <select class="form-control" id="selectClusterNetwork" name="selectClusterNetwork" ng-model="cluster.networkId" ng-required="activeCredential !== undefined" ng-options="network.id as network.name for network in $root.networks | filter:filterByTopology | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'">
+        <select class="form-control" id="selectClusterNetwork" name="selectClusterNetwork" ng-model="cluster.networkId" ng-required="activeCredential !== undefined && activeCredential.cloudPlatform !== 'BYOS'" ng-options="network.id as network.name for network in $root.networks | filter:filterByTopology | filter:{cloudPlatform: activeCredential.cloudPlatform} | orderBy:'name'">
         </select>
     </div>
 </div>

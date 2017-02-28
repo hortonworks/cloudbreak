@@ -17,7 +17,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
         $scope.credentialOpenstack = {};
         $scope.mesosStack = {};
         $scope.mesosStac = false;
-        $scope.yarnStack = {};
+        $scope.credentialYarn = {};
         $scope.awsCredentialForm = {};
         $scope.gcpCredentialForm = {};
         $scope.openstackCredentialForm = {};
@@ -75,7 +75,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.yarnCredential = false;
         }
 
-        $scope.importYarnStackRequest = function() {
+        $scope.importYarnCredentialRequest = function() {
             $scope.awsCredential = false;
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
@@ -255,20 +255,22 @@ angular.module('uluwatuControllers').controller('credentialController', [
             }
         }
 
-        $scope.importYarnStack = function() {
+        $scope.createYarnCredential = function() {
             $scope.credentialInCreation = true;
-            $scope.yarnStack.orchestrator.type = "YARN";
-            if ($scope.yarnStack.public) {
-                AccountStack.save($scope.yarnStack, function(result) {
-                    stackSuccessHandler(result)
+            $scope.credentialYarn.cloudPlatform = "BYOS";
+            $scope.credentialYarn.parameters.type = "YARN";
+
+            if ($scope.credentialYarn.public) {
+                AccountCredential.save($scope.credentialYarn, function(result) {
+                    yarnCredentialSuccessHandler(result)
                 }, function(error) {
                     $scope.showError(error, $rootScope.msg.yarn_credential_failed);
                     $scope.credentialInCreation = false;
                     $scope.showErrorMessageAlert();
                 });
             } else {
-                UserStack.save($scope.yarnStack, function(result) {
-                    stackSuccessHandler(result)
+                UserCredential.save($scope.credentialYarn, function(result) {
+                    yarnCredentialSuccessHandler(result)
                 }, function(error) {
                     $scope.showError(error, $rootScope.msg.yarn_credential_failed);
                     $scope.credentialInCreation = false;
@@ -276,10 +278,10 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 });
             }
 
-            function stackSuccessHandler(result) {
-                $scope.yarnStack.id = result.id;
-                $rootScope.importedStacks.push($scope.yarnStack);
-                $scope.yarnStack = {};
+            function yarnCredentialSuccessHandler(result) {
+                $scope.credentialYarn.id = result.id;
+                $rootScope.credentials.push($scope.credentialYarn);
+                $scope.credentialYarn = {};
                 $scope.showSuccess($filter("format")($rootScope.msg.yarn_credential_success, String(result.id)));
                 $scope.yarnImportStackForm.$setPristine();
                 collapseCreateCredentialFormPanel();

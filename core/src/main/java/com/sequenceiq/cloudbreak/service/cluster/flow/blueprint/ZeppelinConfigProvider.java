@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -43,7 +43,7 @@ public class ZeppelinConfigProvider {
     private BlueprintProcessor blueprintProcessor;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ClusterComponentConfigProvider componentConfigProvider;
 
     public String addToBlueprint(Stack stack, String blueprintText) {
         if (blueprintProcessor.componentExistsInBlueprint(ZEPPELIN_MASTER, blueprintText)) {
@@ -62,7 +62,7 @@ public class ZeppelinConfigProvider {
             model.put("knoxGateway", cluster.getEnableKnoxGateway());
             String shiroIniContent = processTemplateIntoString(freemarkerConfiguration.getTemplate("hdp/zeppelin/shiro_ini_content.ftl", "UTF-8"), model);
 
-            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stackId);
+            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(cluster.getId());
             if (hdpRepo != null && hdpRepo.getHdpVersion() != null && !hdpRepo.getHdpVersion().startsWith(HDP_2_5_VERSION)) {
                 configs.add(new BlueprintConfigurationEntry(ZEPPELIN_MASTER_CONFIG_FILES_2_6, "shiro_ini_content", shiroIniContent));
             } else {

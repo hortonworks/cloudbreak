@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -17,11 +18,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 
 import reactor.bus.Event;
@@ -37,6 +40,9 @@ public class ReactorFlowManagerTest {
 
     @Mock
     private ErrorHandlerAwareFlowEventFactory eventFactory;
+
+    @Mock
+    private StackService stackService;
 
     @InjectMocks
     private ReactorFlowManager flowManager;
@@ -61,6 +67,7 @@ public class ReactorFlowManagerTest {
                 return stackId;
             }
         };
+        when(stackService.get(anyLong())).thenReturn(TestUtil.stack());
         when(eventFactory.createEvent(anyObject())).thenReturn(new Event<>(acceptable));
     }
 
@@ -101,7 +108,7 @@ public class ReactorFlowManagerTest {
             }
         }
         // Termination triggers flow cancellation
-        count += 2;
+        count += 3;
         verify(reactor, times(count)).notify((Object) anyObject(), any(Event.class));
     }
 }

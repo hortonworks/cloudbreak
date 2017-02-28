@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
-import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -44,42 +41,6 @@ public class ComponentConfigProvider {
             return component.getAttributes().get(Image.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read image", e);
-        }
-    }
-
-    public HDPRepo getHDPRepo(Long stackId) {
-        try {
-            Component component = getComponent(stackId, ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(HDPRepo.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
-        }
-    }
-
-    public AmbariRepo getAmbariRepo(Long stackId) {
-        try {
-            Component component = getComponent(stackId, ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(AmbariRepo.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read Ambari repo", e);
-        }
-    }
-
-    public AmbariDatabase getAmbariDatabase(Long stackId) {
-        try {
-            Component component = getComponent(stackId, ComponentType.AMBARI_DATABASE_DETAILS, ComponentType.AMBARI_DATABASE_DETAILS.name());
-            if (component == null) {
-                return null;
-            }
-            return component.getAttributes().get(AmbariDatabase.class);
-        } catch (IOException e) {
-            throw new CloudbreakServiceException("Failed to read Ambari database", e);
         }
     }
 

@@ -23,6 +23,7 @@ import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -69,6 +70,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                 query = "SELECT c FROM Cluster c "
                         + "LEFT JOIN FETCH c.hostGroups "
                         + "LEFT JOIN FETCH c.containers "
+                        + "LEFT JOIN FETCH c.components "
                         + "LEFT JOIN FETCH c.rdsConfigs "
                         + "WHERE c.id= :id"),
         @NamedQuery(
@@ -169,6 +171,9 @@ public class Cluster implements ProvisionEntity {
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
 
+    @OneToMany(mappedBy = "cluster", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<ClusterComponent> components = new HashSet<>();
+
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Container> containers = new HashSet<>();
 
@@ -195,6 +200,10 @@ public class Cluster implements ProvisionEntity {
 
     @Column(columnDefinition = "TEXT")
     private String blueprintCustomProperties;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json customContainerDefinition;
 
     public Stack getStack() {
         return stack;
@@ -534,7 +543,6 @@ public class Cluster implements ProvisionEntity {
 
     public void setBlueprintCustomProperties(String blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties;
-
     }
 
     public KerberosConfig getKerberosConfig() {
@@ -551,5 +559,21 @@ public class Cluster implements ProvisionEntity {
 
     public void setTopologyValidation(Boolean topologyValidation) {
         this.topologyValidation = topologyValidation;
+    }
+
+    public Json getCustomContainerDefinition() {
+        return customContainerDefinition;
+    }
+
+    public void setCustomContainerDefinition(Json customContainerDefinition) {
+        this.customContainerDefinition = customContainerDefinition;
+    }
+
+    public Set<ClusterComponent> getComponents() {
+        return components;
+    }
+
+    public void setComponents(Set<ClusterComponent> components) {
+        this.components = components;
     }
 }

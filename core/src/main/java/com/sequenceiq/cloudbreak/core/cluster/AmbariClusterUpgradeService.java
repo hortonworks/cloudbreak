@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -50,7 +50,7 @@ public class AmbariClusterUpgradeService {
     private StackRepository stackRepository;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ClusterComponentConfigProvider componentConfigProvider;
 
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
@@ -70,7 +70,7 @@ public class AmbariClusterUpgradeService {
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getEnableKnoxGateway());
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
                 ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId());
-                AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
+                AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(cluster.getId());
                 Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
                 Map<String, Object> credentials = new HashMap<>();
                 credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(cluster));

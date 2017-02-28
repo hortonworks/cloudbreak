@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isFailure;
 import static com.sequenceiq.cloudbreak.service.PollingResult.isSuccess;
@@ -74,7 +75,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -208,7 +209,7 @@ public class AmbariClusterConnector {
     private ImageService imageService;
 
     @Inject
-    private ComponentConfigProvider componentConfigProvider;
+    private ClusterComponentConfigProvider componentConfigProvider;
 
     @Inject
     private AmbariViewProvider ambariViewProvider;
@@ -332,7 +333,7 @@ public class AmbariClusterConnector {
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stack.getId());
+            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stack.getCluster().getId());
             if (hdpRepo != null && hdpRepo.getHdpVersion() != null) {
                 blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, hdpRepo.getHdpVersion());
             }
@@ -493,7 +494,7 @@ public class AmbariClusterConnector {
     public int startCluster(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         waitForAmbariToStart(stack);
-        if (!"BYOS".equals(stack.cloudPlatform())) {
+        if (!BYOS.equals(stack.cloudPlatform())) {
             startAmbariAgents(stack);
         }
         return startAllServices(stack, ambariClient);

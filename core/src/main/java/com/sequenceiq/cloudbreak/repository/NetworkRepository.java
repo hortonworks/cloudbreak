@@ -21,8 +21,6 @@ public interface NetworkRepository extends CrudRepository<Network, Long> {
 
     Network findByNameInAccount(@Param("name") String name, @Param("account") String account);
 
-    Set<Network> findByName(@Param("name") String name);
-
     Set<Network> findForUser(@Param("owner") String user);
 
     Set<Network> findPublicInAccountForUser(@Param("owner") String user, @Param("account") String account);

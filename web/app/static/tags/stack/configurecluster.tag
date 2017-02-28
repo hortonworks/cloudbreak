@@ -59,7 +59,7 @@
 <div class="form-group" ng-show="activeCredential">
     <label class="col-sm-3 control-label" for="selectRegion">{{msg.cluster_form_region_label}}</label>
     <div class="col-sm-8">
-        <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-required="activeCredential !== undefined" ng-show="activeCredential.cloudPlatform == 'AWS'">
+        <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'AWS'">
             <option ng-repeat="region in $root.params.regions.AWS" value="{{region}}">{{$root.displayNames.getRegion(activeCredential.cloudPlatform, region)}}</option>
         </select>
         <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'GCP'">
@@ -70,6 +70,9 @@
         </select>
         <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'AZURE'">
             <option ng-repeat="region in $root.params.regions.AZURE" value="{{region}}">{{region}}</option>
+        </select>
+        <select class="form-control" id="selectRegion" ng-model="cluster.region" ng-show="activeCredential.cloudPlatform == 'BYOS'">
+            <option ng-repeat="region in $root.params.regions.BYOS" value="{{region}}">{{region}}</option>
         </select>
     </div>
 </div>
@@ -96,10 +99,10 @@
     </div>
 </div>
 
-<div class="form-group" ng-show="activeCredential && showAdvancedOptionForm">
+<div class="form-group" ng-show="activeCredential && showAdvancedOptionForm && activeCredential.cloudPlatform !== 'BYOS'">
     <label class="col-sm-3 control-label" for="provisionCluster">Provision cluster </label>
     <div class="col-sm-8">
-        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-required="activeCredential !== undefined" ng-show="activeCredential.cloudPlatform == 'AWS'">
+        <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'AWS'">
             <option ng-repeat="orchestrator in $root.params.orchestrators.AWS" value="{{orchestrator}}">{{$root.displayNames.getPropertyName('orchestrators', orchestrator)}}</option>
         </select>
         <select class="form-control" id="provisionCluster" ng-model="cluster.orchestrator.type" ng-show="activeCredential.cloudPlatform == 'GCP'">
@@ -114,15 +117,22 @@
     </div>
 </div>
 
+<div class="form-group" ng-show="activeCredential && showAdvancedOptionForm && activeCredential.cloudPlatform !== 'BYOS'">
+    <label class="col-sm-3 control-label" for="provisionCluster">Provision cluster </label>
+    <div class="col-sm-8">
+        <label class="control-label" for="provisionCluster">{{activeCredential.parameters.type}}</label>
+    </div>
+</div>
 
-<div class="form-group" ng-show="showAdvancedOptionForm && $root.params.specialParameters.enableCustomImage == true">
+
+<div class="form-group" ng-show="showAdvancedOptionForm && $root.params.specialParameters.enableCustomImage == true && activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS'">
     <label class="col-sm-3 control-label" for="custom_image">{{msg.cluster_form_custom_image}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.use_custom_image_popup}} popover-trigger="mouseenter"></i></label>
     <div class="col-sm-8">
         <input type="checkbox" name="custom_image" id="custom_image" ng-model="cluster.customImage">
     </div>
 </div>
 
-<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customImage && $root.params.specialParameters.enableCustomImage == true" ng-class="{ 'has-error': clusterCreationForm.image_id.$dirty && clusterCreationForm.image_id.$invalid }">
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customImage && $root.params.specialParameters.enableCustomImage == true && activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS'" ng-class="{ 'has-error': clusterCreationForm.image_id.$dirty && clusterCreationForm.image_id.$invalid }">
     <label class="col-sm-3 control-label" for="image_id">{{msg.cluster_form_custom_image_id}}</label>
     <div class="col-sm-8">
         <input type="text" name="image_id" class="form-control" id="image_id" ng-model="cluster.imageId" ng-required="cluster.customImage" ng-pattern="actualRegex" placeholder="{{$root.params.images[activeCredential.cloudPlatform][cluster.region]}}" >
@@ -131,6 +141,44 @@
         </div>
     </div>
 </div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && (activeStack !== undefined || activeCredential.cloudPlatform === 'BYOS')">
+    <label class="col-sm-3 control-label" for="custom_container">{{msg.cluster_form_custom_container}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.use_custom_container_popup}} popover-trigger="mouseenter"></i></label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="custom_container" id="custom_container" ng-model="cluster.customContainer">
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customContainer && (activeStack !== undefined || activeCredential.cloudPlatform === 'BYOS')" ng-class="{ 'has-error': clusterCreationForm.ambari_server_container_id.$dirty && clusterCreationForm.ambari_server_container_id.$invalid }">
+    <label class="col-sm-3 control-label" for="ambari_server_container_id">{{msg.cluster_form_custom_ambariserver_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="ambari_server_container_id" class="form-control" id="ambari_server_container_id" ng-model="cluster.ambariServerId" ng-required="cluster.customContainer" placeholder="" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_server_container_id.$dirty && $parent.clusterCreationForm.ambari_server_container_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_container_error}}
+        </div>
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customContainer && (activeStack !== undefined || activeCredential.cloudPlatform === 'BYOS')" ng-class="{ 'has-error': clusterCreationForm.ambari_agent_container_id.$dirty && clusterCreationForm.ambari_agent_container_id.$invalid }">
+    <label class="col-sm-3 control-label" for="ambari_agent_container_id">{{msg.cluster_form_custom_ambariagent_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="ambari_agent_container_id" class="form-control" id="ambari_agent_container_id" ng-model="cluster.ambariAgentId" ng-required="cluster.customContainer" placeholder="" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_agent_container_id.$dirty && $parent.clusterCreationForm.ambari_agent_container_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_container_error}}
+        </div>
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customContainer && (activeStack !== undefined || activeCredential.cloudPlatform === 'BYOS')" ng-class="{ 'has-error': clusterCreationForm.ambari_db_container_id.$dirty && clusterCreationForm.ambari_db_container_id.$invalid }">
+    <label class="col-sm-3 control-label" for="ambari_db_container_id">{{msg.cluster_form_custom_ambaridb_id}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="ambari_db_container_id" class="form-control" id="ambari_db_container_id" ng-model="cluster.ambariDbId" ng-required="cluster.customContainer" placeholder="" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_db_container_id.$dirty && $parent.clusterCreationForm.ambari_db_container_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_container_error}}
+        </div>
+    </div>
+</div>
+
 <div class="form-group">
     <label class="col-sm-3 control-label" for="emailneeded">{{msg.cluster_form_email_label}}</label>
     <div class="col-sm-8">
@@ -143,13 +191,13 @@
         <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm">
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform !== 'BYOS'">
     <label class="col-sm-3 control-label" for="cluster_enableLifetime">{{msg.cluster_form_enable_lifetime_label}}</label>
     <div class="col-sm-8">
         <input type="checkbox" name="cluster_enableLifetime" id="cluster_enableLifetime" ng-model="enableLifetime" ng-change="delTimetolive(enableLifetime)">
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm && enableLifetime" ng-class="{ 'has-error': clusterCreationForm.cl_timetolive.$dirty && clusterCreationForm.cl_timetolive.$invalid }">
+<div class="form-group" ng-show="showAdvancedOptionForm && enableLifetime && activeCredential.cloudPlatform !== 'BYOS'" ng-class="{ 'has-error': clusterCreationForm.cl_timetolive.$dirty && clusterCreationForm.cl_timetolive.$invalid }">
     <label class="col-sm-3 control-label" for="cl_timetolive">{{msg.cluster_form_lifetime_label}}</label>
     <div class="col-sm-8">
         <input type="number" name="cl_timetolive" class="form-control" id="cl_timetolive" placeholder="" ng-model="cluster.parameters.timetolive" min="1">
@@ -169,8 +217,8 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && !cluster.availabilityZone)" ng-click="activeStack === undefined ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
-                    {{activeStack === undefined ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i>
+                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && !cluster.availabilityZone)" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
+                    {{(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>
         </div>

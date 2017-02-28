@@ -75,7 +75,11 @@ public class StackToCloudStackConverter {
         }
         Network network = buildNetwork(stack);
         StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stack.getId());
-        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), stackTemplate.getTemplate());
+        String template = null;
+        if (stackTemplate != null) {
+            template = stackTemplate.getTemplate();
+        }
+        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), template);
     }
 
     public Map<String, String> getUserDefinedTags(Stack stack) {
@@ -100,27 +104,29 @@ public class StackToCloudStackConverter {
         List<Group> groups = new ArrayList<>();
         long privateId = getFirstValidPrivateId(instanceGroups);
         for (InstanceGroup instanceGroup : instanceGroups) {
-            CloudInstance skeleton = null;
-            List<CloudInstance> instances = new ArrayList<>();
-            Template template = instanceGroup.getTemplate();
-            int desiredNodeCount = instanceGroup.getNodeCount();
-            // existing instances
-            for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
-                InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(),
-                        metaData.getDiscoveryName(), status));
-            }
-            // new instances
-            int existingNodesSize = instances.size();
-            if (existingNodesSize < desiredNodeCount) {
-                for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                    instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, null, InstanceStatus.CREATE_REQUESTED));
+            if (instanceGroup.getTemplate() != null) {
+                CloudInstance skeleton = null;
+                List<CloudInstance> instances = new ArrayList<>();
+                Template template = instanceGroup.getTemplate();
+                int desiredNodeCount = instanceGroup.getNodeCount();
+                // existing instances
+                for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
+                    InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
+                    instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(),
+                            metaData.getDiscoveryName(), status));
                 }
+                // new instances
+                int existingNodesSize = instances.size();
+                if (existingNodesSize < desiredNodeCount) {
+                    for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
+                        instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, null, InstanceStatus.CREATE_REQUESTED));
+                    }
+                }
+                if (existingNodesSize == desiredNodeCount && desiredNodeCount == 0) {
+                    skeleton = buildInstance(null, template, instanceGroup.getGroupName(), 0L, null, InstanceStatus.CREATE_REQUESTED);
+                }
+                groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup), skeleton));
             }
-            if (existingNodesSize == desiredNodeCount && desiredNodeCount == 0) {
-                skeleton = buildInstance(null, template, instanceGroup.getGroupName(), 0L, null, InstanceStatus.CREATE_REQUESTED);
-            }
-            groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup), skeleton));
         }
         return groups;
     }

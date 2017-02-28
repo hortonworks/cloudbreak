@@ -28,7 +28,10 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
+import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -39,6 +42,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
@@ -54,6 +58,9 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
     private ImageService imageService;
 
     @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
     private ComponentConfigProvider componentConfigProvider;
 
     @Before
@@ -63,6 +70,9 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         when(imageService.getImage(anyLong())).thenReturn(new Image("testimage", new HashMap<>()));
         when(componentConfigProvider.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));
         when(componentConfigProvider.getStackTemplate(anyLong())).thenReturn(new StackTemplate("{}", "version"));
+        when(clusterComponentConfigProvider.getHDPRepo(anyLong())).thenReturn(new HDPRepo());
+        when(clusterComponentConfigProvider.getAmbariDatabase(anyLong())).thenReturn(new AmbariDatabase());
+        when(clusterComponentConfigProvider.getAmbariRepo(anyLong())).thenReturn(new AmbariRepo());
     }
 
     @Test
@@ -142,7 +152,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy", "platformVariant", "ambariVersion", "hdpVersion"));
+        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy", "platformVariant", "ambariVersion", "hdpVersion", "stackTemplate", "cloudbreakDetails"));
     }
 
     @Test

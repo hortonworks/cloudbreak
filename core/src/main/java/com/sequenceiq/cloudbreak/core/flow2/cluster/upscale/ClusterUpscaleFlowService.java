@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
 import java.util.HashSet;
 import java.util.List;
@@ -99,7 +100,7 @@ public class ClusterUpscaleFlowService {
         updateFailedHostMetaData(hostMetadata);
         int failedHosts = 0;
         for (HostMetadata hostMeta : hostMetadata) {
-            if (!"BYOS".equals(stack.cloudPlatform()) && hostGroup.getConstraint().getInstanceGroup() != null) {
+            if (!BYOS.equals(stack.cloudPlatform()) && hostGroup.getConstraint().getInstanceGroup() != null) {
                 stackService.updateMetaDataStatus(stack.getId(), hostMeta.getHostName(), InstanceStatus.REGISTERED);
             }
             hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);

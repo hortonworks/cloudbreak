@@ -19,21 +19,25 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -48,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
@@ -69,6 +74,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
     @Inject
+    private ConversionService conversionService;
+
+    @Inject
     private TlsSecurityService tlsSecurityService;
 
     @Inject
@@ -82,6 +90,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
+    @Inject
+    private ClusterComponentConfigProvider componentConfigProvider;
 
     @Inject
     private StackUtil stackUtil;
@@ -140,7 +151,23 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getBlueprintCustomProperties() != null) {
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
+        convertContainerConfig(source, clusterResponse);
+        convertComponentConfig(clusterResponse, source.getId());
         return clusterResponse;
+    }
+
+    private ClusterResponse convertComponentConfig(ClusterResponse response, Long clusterId) {
+        try {
+            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(clusterId);
+            if (ambariRepo != null) {
+                AmbariRepoDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariRepo, AmbariRepoDetailsJson.class);
+                response.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to convert dynamic component.", e);
+        }
+
+        return response;
     }
 
     private void convertRdsIds(ClusterResponse clusterResponse, Set<RDSConfig> rdsConfigs) {
@@ -167,6 +194,25 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             } catch (IOException e) {
                 LOGGER.error("Failed to add exposedServices to response", e);
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
+            }
+        }
+    }
+
+    private void convertContainerConfig(Cluster source, ClusterResponse clusterResponse) {
+        Json customContainerDefinition = source.getCustomContainerDefinition();
+        if (customContainerDefinition != null && StringUtils.isNoneEmpty(customContainerDefinition.getValue())) {
+            try {
+                Map<String, String> map = customContainerDefinition.get(Map.class);
+                Map<String, String> result = new HashMap<>();
+
+                for (Map.Entry<String, String> stringStringEntry : map.entrySet()) {
+                    result.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+                }
+                clusterResponse.setCustomContainers(new CustomContainerResponse(result));
+
+            } catch (IOException e) {
+                LOGGER.error("Failed to add customContainerDefinition to response", e);
+                throw new CloudbreakApiException("Failed to add customContainerDefinition to response", e);
             }
         }
     }

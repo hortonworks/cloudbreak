@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,7 +37,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -45,14 +46,14 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Component;
+import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -102,7 +103,7 @@ public class ClusterController implements ClusterEndpoint {
     private RdsConfigService rdsConfigService;
 
     @Autowired
-    private ComponentConfigProvider componentConfigProvider;
+    private ClusterComponentConfigProvider componentConfigProvider;
 
     @Inject
     private DefaultHDPInfo defaultHDPInfo;
@@ -118,7 +119,7 @@ public class ClusterController implements ClusterEndpoint {
         }
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getById(stackId);
-        if (!stack.isAvailable() && CloudConstants.BYOS.equals(stack.cloudPlatform())) {
+        if (!stack.isAvailable() && BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Stack is not in 'AVAILABLE' status, cannot create cluster now.");
         }
         Credential credential = stack.getCredential();
@@ -143,10 +144,10 @@ public class ClusterController implements ClusterEndpoint {
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
         }
-        List<Component> components = new ArrayList<>();
-        components = addAmbariRepoConfig(components, request, stack);
-        components = addHDPRepoConfig(components, request, stack);
-        components = addAmbariDatabaseConfig(components, request, stack);
+        List<ClusterComponent> components = new ArrayList<>();
+        components = addAmbariRepoConfig(components, request, cluster);
+        components = addHDPRepoConfig(components, request, cluster);
+        components = addAmbariDatabaseConfig(components, request, cluster);
         Cluster resp = clusterService.create(user, stackId, cluster, components);
         return conversionService.convert(resp, ClusterResponse.class);
     }
@@ -253,44 +254,48 @@ public class ClusterController implements ClusterEndpoint {
         return Response.accepted().build();
     }
 
-    private List<Component> addAmbariRepoConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {
+    private List<ClusterComponent> addAmbariRepoConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
+            throws JsonProcessingException {
         // If it is not predefined in image catalog
-        if (componentConfigProvider.getAmbariRepo(stack.getId()) == null) {
+        if (componentConfigProvider.getAmbariRepo(cluster.getId()) == null) {
             AmbariRepoDetailsJson ambariRepoDetailsJson = request.getAmbariRepoDetailsJson();
             if (ambariRepoDetailsJson == null) {
                 ambariRepoDetailsJson = new AmbariRepoDetailsJson();
             }
             AmbariRepo ambariRepo = conversionService.convert(ambariRepoDetailsJson, AmbariRepo.class);
-            Component component = new Component(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(), new Json(ambariRepo), stack);
+            ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(), new Json(ambariRepo),
+                    cluster);
             components.add(component);
         }
         return components;
     }
 
-    private List<Component> addHDPRepoConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {
-        if (componentConfigProvider.getHDPRepo(stack.getId()) == null) {
+    private List<ClusterComponent> addHDPRepoConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster) throws JsonProcessingException {
+        if (componentConfigProvider.getHDPRepo(cluster.getId()) == null) {
             AmbariStackDetailsJson ambariStackDetailsJson = request.getAmbariStackDetails();
             if (ambariStackDetailsJson != null) {
                 HDPRepo hdpRepo = conversionService.convert(ambariStackDetailsJson, HDPRepo.class);
-                Component component = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(hdpRepo), stack);
+                ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(hdpRepo),
+                        cluster);
                 components.add(component);
             } else {
-                Component hdpRepoComponent = new Component(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
-                        new Json(defaultHDPInfo.getRepo()), stack);
+                ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
+                        new Json(defaultHDPInfo.getRepo()), cluster);
                 components.add(hdpRepoComponent);
             }
         }
         return components;
     }
 
-    private List<Component> addAmbariDatabaseConfig(List<Component> components, ClusterRequest request, Stack stack) throws JsonProcessingException {
+    private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
+            throws JsonProcessingException {
         AmbariDatabaseDetailsJson ambariRepoDetailsJson = request.getAmbariDatabaseDetails();
         if (ambariRepoDetailsJson == null) {
             ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();
         }
         AmbariDatabase ambariDatabase = conversionService.convert(ambariRepoDetailsJson, AmbariDatabase.class);
-        Component component = new Component(ComponentType.AMBARI_DATABASE_DETAILS, ComponentType.AMBARI_DATABASE_DETAILS.name(), new Json(ambariDatabase),
-                stack);
+        ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_DATABASE_DETAILS, ComponentType.AMBARI_DATABASE_DETAILS.name(),
+                new Json(ambariDatabase), cluster);
         components.add(component);
         return components;
     }

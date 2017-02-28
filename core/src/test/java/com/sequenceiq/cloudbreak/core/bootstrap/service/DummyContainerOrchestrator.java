@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
@@ -51,17 +52,17 @@ public class DummyContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public String ambariServerContainer() {
+    public String ambariServerContainer(Optional<String> name) {
         return "server";
     }
 
     @Override
-    public String ambariClientContainer() {
+    public String ambariClientContainer(Optional<String> name) {
         return "client";
     }
 
     @Override
-    public String ambariDbContainer() {
+    public String ambariDbContainer(Optional<String> name) {
         return "db";
     }
 

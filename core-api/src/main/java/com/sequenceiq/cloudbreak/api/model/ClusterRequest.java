@@ -126,6 +126,9 @@ public class ClusterRequest {
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 
+    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
+    private CustomContainerRequest customContainer;
+
     public String getDescription() {
         return description;
     }
@@ -365,5 +368,13 @@ public class ClusterRequest {
 
     public void setBlueprint(BlueprintRequest blueprint) {
         this.blueprint = blueprint;
+    }
+
+    public CustomContainerRequest getCustomContainer() {
+        return customContainer;
+    }
+
+    public void setCustomContainer(CustomContainerRequest customContainer) {
+        this.customContainer = customContainer;
     }
 }
