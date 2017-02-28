@@ -91,10 +91,9 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                 ExtendedCloudCredential extendedCloudCredential = armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential();
                 AzureCredentialView armCredentialView = new AzureCredentialView(extendedCloudCredential);
 
-                String graphApiAccessToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), GRAPH_WINDOWS);
-                String managementApiToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), AZURE_MANAGEMENT);
-
                 try {
+                    String graphApiAccessToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), GRAPH_WINDOWS);
+                    String managementApiToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), AZURE_MANAGEMENT);
                     String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId());
                     sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
                     String principalObjectId = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
@@ -139,14 +138,16 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         return request.post(Entity.entity(pollingForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
     }
 
-    private String createResourceToken(String refreshToken, String tenantId, String resource) {
-        Form graphApiTokenForm = createResourceTokenForm(refreshToken, resource);
+    private String createResourceToken(String refreshToken, String tenantId, String resource) throws InteractiveLoginException {
+        Form resourceTokenForm = createResourceTokenForm(refreshToken, resource);
         WebTarget webTarget = ClientBuilder.newClient().target(LOGIN_MICROSOFTONLINE);
         Invocation.Builder request = webTarget.path(tenantId + "/oauth2/token").queryParam("api-version", "1.0").request();
         request.accept(MediaType.APPLICATION_JSON);
-        Response response = request.post(Entity.entity(graphApiTokenForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
+        Response response = request.post(Entity.entity(resourceTokenForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
         if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
-            throw new IllegalStateException("Obtain graph api access token failed, status " + response.getStatus() + ", " + response.readEntity(String.class));
+            throw new InteractiveLoginException("Obtain access token for " + resource + " failed "
+                    + "with tenant ID: " + tenantId + ", status code " + response.getStatus()
+                    + ", error message: " + response.readEntity(String.class));
         }
         String responseString = response.readEntity(String.class);
         try {
