@@ -10,9 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -20,13 +18,13 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -47,12 +45,12 @@ public class DefaultSecurityGroupCreator {
 
     public void createDefaultSecurityGroups(CbUser user) {
         Set<SecurityGroup> defaultSecurityGroups = groupRepository.findAllDefaultInAccount(user.getAccount());
-        Map<String, SecurityGroup> defSecGroupMap = defaultSecurityGroups.stream()
-                .collect(Collectors.toMap(g -> g.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(g.getName()) : g.getName(),
-                        Function.identity()));
+        List<String> defSecGroupNames = defaultSecurityGroups.stream()
+                .map(g -> g.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(g.getName()) : g.getName())
+                .collect(Collectors.toList());
         for (String platform : PLATFORMS_WITH_SEC_GROUP_SUPPORT) {
             String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
-            if (!defSecGroupMap.containsKey(securityGroupName)) {
+            if (!defSecGroupNames.contains(securityGroupName)) {
                 createDefaultStrictSecurityGroup(user, platform, securityGroupName);
             }
         }

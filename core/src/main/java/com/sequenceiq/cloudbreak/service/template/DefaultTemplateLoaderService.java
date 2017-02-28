@@ -3,9 +3,7 @@ package com.sequenceiq.cloudbreak.service.template;
 import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -50,15 +48,15 @@ public class DefaultTemplateLoaderService {
     public void createDefaultTemplates(CbUser user) {
         Set<Template> defaultTemplates = templateRepository.findAllDefaultInAccount(user.getAccount());
 
-        Map<String, Template> defaultNetworksMap = defaultTemplates.stream()
-                .collect(Collectors.toMap(t -> t.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(t.getName()) : t.getName(),
-                        Function.identity()));
-        createDefaultTemplateInstances(user, defaultNetworksMap);
+        List<String> defaultNetworkNames = defaultTemplates.stream()
+                .map(t -> t.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(t.getName()) : t.getName())
+                .collect(Collectors.toList());
+        createDefaultTemplateInstances(user, defaultNetworkNames);
     }
 
-    private void createDefaultTemplateInstances(CbUser user, Map<String, Template> defaultNetworksMap) {
+    private void createDefaultTemplateInstances(CbUser user, List<String> defaultNetworkNames) {
         for (String templateName : templateArray) {
-            if (!templateName.isEmpty() && !defaultNetworksMap.containsKey(templateName)) {
+            if (!templateName.isEmpty() && !defaultNetworkNames.contains(templateName)) {
                 try {
                     JsonNode jsonNode = jsonHelper.createJsonFromString(
                             FileReaderUtils.readFileFromClasspath(String.format("defaults/templates/%s.tmpl", templateName)));
