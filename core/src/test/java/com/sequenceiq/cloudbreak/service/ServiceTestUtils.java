@@ -3,13 +3,16 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -45,6 +48,13 @@ public final class ServiceTestUtils {
         blueprint.setOwner(owner);
         blueprint.setAccount(account);
         blueprint.setPublicInAccount(true);
+        return blueprint;
+    }
+
+    public static Blueprint createBlueprint(BlueprintRequest blueprintRequest) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setName(blueprintRequest.getName());
+        blueprint.setBlueprintText(blueprintRequest.getAmbariBlueprint());
         return blueprint;
     }
 
@@ -195,4 +205,7 @@ public final class ServiceTestUtils {
         return event;
     }
 
+    public static CbUser cbUser() {
+        return new CbUser("userId", "userName", "account", new ArrayList<>(), "givenName", "familyName", new Date());
+    }
 }

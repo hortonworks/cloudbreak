@@ -12,6 +12,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 @Table(name = "ldapconfig", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })
@@ -72,6 +74,7 @@ public class LdapConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String bindDn;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String bindPassword;
 

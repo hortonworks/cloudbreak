@@ -13,8 +13,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -95,7 +95,7 @@ public class Credential {
     @Column(nullable = false)
     private String cloudPlatform;
 
-    @Convert(converter = JsonToString.class)
+    @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 

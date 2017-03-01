@@ -41,6 +41,7 @@ import org.hibernate.annotations.Type;
 
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
@@ -127,9 +128,11 @@ public class Cluster implements ProvisionEntity {
 
     private String ambariIp;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String userName;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String password;
 
@@ -190,14 +193,15 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private LdapConfig ldapConfig;
 
-    @Convert(converter = JsonToString.class)
+    @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
 
-    @Convert(converter = JsonToString.class)
+    @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json blueprintInputs;
 
+    @Type(type = "encrypted_string")
     @Column(columnDefinition = "TEXT")
     private String blueprintCustomProperties;
 

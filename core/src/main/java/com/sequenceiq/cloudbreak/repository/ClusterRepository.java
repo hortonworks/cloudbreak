@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -20,7 +21,7 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findOneWithLists(@Param("id") Long id);
 
-    List<Cluster> findByStatuses(@Param("statuses") List<Status> statuses);
+    List<Cluster> findByStatuses(@Param("statuses") Collection<Status> statuses);
 
     Cluster findByNameInAccount(@Param("name") String name, @Param("account") String account);
 

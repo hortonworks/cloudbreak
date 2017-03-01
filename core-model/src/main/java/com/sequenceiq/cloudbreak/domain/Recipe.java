@@ -18,6 +18,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 import com.sequenceiq.cloudbreak.common.type.RecipeType;
 
 @Entity
@@ -70,6 +72,7 @@ public class Recipe implements ProvisionEntity {
     @Column(nullable = false)
     private String uri;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String content;
 

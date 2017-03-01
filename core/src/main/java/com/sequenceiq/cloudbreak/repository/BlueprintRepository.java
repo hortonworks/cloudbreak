@@ -27,5 +27,4 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
     Blueprint findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
     Set<Blueprint> findAllDefaultInAccount(@Param("account") String account);
-
 }
