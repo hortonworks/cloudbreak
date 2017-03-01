@@ -26,18 +26,22 @@ public class SecurityConfig implements ProvisionEntity {
     @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Type(type = "encrypted_string")
     @Column(columnDefinition = "TEXT")
     private String clientKey;
 
+    @Type(type = "encrypted_string")
     @Column(columnDefinition = "TEXT")
     private String clientCert;
 
+    @Type(type = "encrypted_string")
     @Column(columnDefinition = "TEXT")
     private String serverCert;
 
     @Column(columnDefinition = "TEXT")
     private String cloudbreakSshPublicKey;
 
+    @Type(type = "encrypted_string")
     @Column(columnDefinition = "TEXT")
     private String cloudbreakSshPrivateKey;
 

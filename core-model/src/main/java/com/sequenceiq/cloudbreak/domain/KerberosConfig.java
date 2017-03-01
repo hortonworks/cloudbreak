@@ -7,6 +7,8 @@ import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 @Table(name = "KerberosConfig")
 public class KerberosConfig {
@@ -16,18 +18,24 @@ public class KerberosConfig {
     @SequenceGenerator(name = "kerberosconfig_generator", sequenceName = "kerberosconfig_id_seq", allocationSize = 1)
     private Long id;
 
+    @Type(type = "encrypted_string")
     private String kerberosMasterKey;
 
+    @Type(type = "encrypted_string")
     private String kerberosAdmin;
 
+    @Type(type = "encrypted_string")
     private String kerberosPassword;
 
+    @Type(type = "encrypted_string")
     private String kerberosUrl;
 
+    @Type(type = "encrypted_string")
     private String kerberosRealm;
 
     private Boolean kerberosTcpAllowed;
 
+    @Type(type = "encrypted_string")
     private String kerberosPrincipal;
 
     private String kerberosLdapUrl;

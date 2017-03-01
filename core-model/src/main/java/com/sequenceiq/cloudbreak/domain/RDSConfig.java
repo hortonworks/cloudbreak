@@ -17,6 +17,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -100,9 +102,11 @@ public class RDSConfig {
     @Enumerated(EnumType.STRING)
     private RDSDatabase databaseType;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String connectionUserName;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String connectionPassword;
 

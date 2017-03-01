@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -10,6 +14,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -54,5 +59,20 @@ public class BlueprintUtils {
             }
         }
         return false;
+    }
+
+    public boolean isBlueprintNamePreConfigured(String blueprintStrings, String[] split) {
+        return !blueprintStrings.isEmpty() && (split.length == 2 || split.length == 1) && !split[0].isEmpty();
+    }
+
+    public List<BlueprintParameter> prepareInputs(JsonNode inputs) throws com.fasterxml.jackson.core.JsonProcessingException {
+        Set<BlueprintParameter> blueprintParameters = new HashSet<>();
+        if (inputs.isArray()) {
+            for (final JsonNode objNode : inputs) {
+                BlueprintParameter blueprintParameter = JsonUtil.treeToValue(objNode, BlueprintParameter.class);
+                blueprintParameters.add(blueprintParameter);
+            }
+        }
+        return blueprintParameters.stream().collect(Collectors.toList());
     }
 }

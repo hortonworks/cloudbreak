@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.websocket;
 
 import java.util.Date;
+import java.util.EnumSet;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -8,6 +9,7 @@ import javax.inject.Inject;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -30,7 +32,8 @@ public class UptimeNotifier {
 
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
-        List<Cluster> clusters = (List<Cluster>) clusterRepository.findAll();
+        EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
+        List<Cluster> clusters = clusterRepository.findByStatuses(statuses);
         long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
