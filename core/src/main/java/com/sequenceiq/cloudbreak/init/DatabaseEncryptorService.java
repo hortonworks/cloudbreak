@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.init;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -13,7 +16,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Joiner;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
+import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 
 @Component
 public class DatabaseEncryptorService {
@@ -28,23 +33,36 @@ public class DatabaseEncryptorService {
     @Inject
     private BlueprintRepository blueprintRepository;
 
+    @Inject
+    private ClusterRepository clusterRepository;
+
     @PostConstruct
     public void init() throws SQLException {
-        encryptBlueprintTexts();
+        doEncryption("blueprint", new String[]{ "blueprinttext" }, () -> blueprintRepository.findFirstByIdGreaterThan(0L));
+        String[] clusterFields = new String[]{ "username", "password", "blueprintcustomproperties" };
+        doEncryption("cluster", clusterFields, () -> clusterRepository.findFirstByIdGreaterThan(0L));
     }
 
-    private void encryptBlueprintTexts() throws SQLException {
+    private void doEncryption(String database, String[] fields, Supplier<?> check) throws SQLException {
         try {
-            blueprintRepository.findFirstByIdGreaterThan(0L);
+            check.get();
         } catch (EncryptionOperationNotPossibleException e) {
-            LOGGER.info("Encrypting blueprint texts");
+            LOGGER.info("Encrypting " + database);
             try (Statement select = dataSource.getConnection().createStatement(); Statement update = dataSource.getConnection().createStatement()) {
-                select.execute("SELECT id, blueprinttext FROM blueprint");
+                Joiner joiner = Joiner.on(",");
+                select.execute(String.format("SELECT id, %s FROM %s", joiner.join(fields), database));
                 try (ResultSet rs = select.getResultSet()) {
                     while (rs.next()) {
-                        Long id = rs.getLong("id");
-                        String text = rs.getString("blueprinttext");
-                        update.executeUpdate("UPDATE blueprint SET blueprinttext = '" + encryptor.encrypt(text) + "' WHERE id = " + id);
+                        StringBuilder sb = new StringBuilder(String.format("UPDATE %s SET ", database));
+                        sb.append(joiner.join(Arrays.stream(fields)
+                                .map(f -> {
+                                    try {
+                                        return String.format("%s = '%s' ", f, encryptor.encrypt(rs.getString(f)));
+                                    } catch (SQLException se) {
+                                        throw new RuntimeException(se);
+                                    }
+                                }).collect(Collectors.toList())));
+                        update.executeUpdate(sb.append("WHERE id = ").append(rs.getLong("id")).toString());
                     }
                 }
             }

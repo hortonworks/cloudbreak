@@ -127,9 +127,11 @@ public class Cluster implements ProvisionEntity {
 
     private String ambariIp;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String userName;
 
+    @Type(type = "encrypted_string")
     @Column(nullable = false)
     private String password;
 
@@ -198,6 +200,7 @@ public class Cluster implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json blueprintInputs;
 
+    @Type(type = "encrypted_string")
     @Column(columnDefinition = "TEXT")
     private String blueprintCustomProperties;
 
