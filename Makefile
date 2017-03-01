@@ -33,7 +33,8 @@ coverage-html:
 build: format vet test build-darwin build-linux build-windows
 
 build-docker:
-	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} golang:1.8 make build
+	@#USER_NS='-u $(shell id -u $(whoami)):$(shell id -g $(whoami))'
+	docker run --rm ${USER_NS} -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} golang:1.8 make build
 
 build-darwin:
 	GOOS=darwin CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Darwin/${BINARY} main.go
