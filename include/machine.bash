@@ -1,6 +1,5 @@
 
 machine-init() {
-
   env-import MACHINE_NAME cbd
   env-import MACHINE_STORAGE_PATH $HOME/.docker/machine
   env-import MACHINE_MEM 4096

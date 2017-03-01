@@ -459,7 +459,9 @@ main() {
     circle-init
     compose-init
     aws-init
-    machine-init
+    if is_macos; then
+        machine-init
+    fi
     db-init
 
     debug "Cloudbreak Deployer $(bin-version)"

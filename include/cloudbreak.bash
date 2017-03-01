@@ -117,6 +117,10 @@ is_linux() {
     [[ "$(uname)" == Linux ]]
 }
 
+is_macos() {
+    [[ "$(uname)" == Darwin ]]
+}
+
 cloudbreak-conf-db() {
     declare desc="Declares cloudbreak DB config"
 
