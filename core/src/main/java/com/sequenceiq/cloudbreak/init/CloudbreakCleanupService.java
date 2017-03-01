@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.init;
+package com.sequenceiq.cloudbreak.init;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -36,8 +37,8 @@ import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
-public class CloudbreakCleanupAction {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupAction.class);
+public class CloudbreakCleanupService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupService.class);
 
     @Inject
     private StackRepository stackRepository;
@@ -69,7 +70,8 @@ public class CloudbreakCleanupAction {
     @Inject
     private Flow2Handler flow2Handler;
 
-    public void resetStates() {
+    @PostConstruct
+    public void init() {
         List<Long> stackIdsUnderOperation = restartDistruptedFlows();
         usageService.fixUsages();
         List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
@@ -79,15 +81,15 @@ public class CloudbreakCleanupAction {
 
     private List<Stack> resetStackStatus(List<Long> excludeStackIds) {
         return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
-            .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
-            .map(s -> {
-                if (!WAIT_FOR_SYNC.equals(s.getStatus())) {
-                    loggingStatusChange("Stack", s.getId(), s.getStatus(), WAIT_FOR_SYNC);
-                    stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatusReason());
-                }
-                cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(s.getId()));
-                return s;
-            }).collect(Collectors.toList());
+                .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
+                .map(s -> {
+                    if (!WAIT_FOR_SYNC.equals(s.getStatus())) {
+                        loggingStatusChange("Stack", s.getId(), s.getStatus(), WAIT_FOR_SYNC);
+                        stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatusReason());
+                    }
+                    cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(s.getId()));
+                    return s;
+                }).collect(Collectors.toList());
     }
 
     private void cleanInstanceMetaData(Set<InstanceMetaData> metadataSet) {
@@ -101,13 +103,13 @@ public class CloudbreakCleanupAction {
 
     private List<Cluster> resetClusterStatus(List<Stack> stacksToSync, List<Long> excludeStackIds) {
         return clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
-            .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
-            .map(c -> {
-                loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);
-                c.setStatus(WAIT_FOR_SYNC);
-                clusterRepository.save(c);
-                return c;
-            }).filter(c -> !stackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
+                .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
+                .map(c -> {
+                    loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);
+                    c.setStatus(WAIT_FOR_SYNC);
+                    clusterRepository.save(c);
+                    return c;
+                }).filter(c -> !stackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
     }
 
     private boolean stackToSyncContainsCluster(List<Stack> stacksToSync, Cluster cluster) {
@@ -156,3 +158,4 @@ public class CloudbreakCleanupAction {
                 "Couldn't retrieve the cluster's status, starting to sync.");
     }
 }
+
