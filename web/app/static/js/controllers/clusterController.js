@@ -196,7 +196,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 var sgroupsActiveId = null;
                 if ($rootScope.securitygroups && $rootScope.securitygroups.length != 0 && $rootScope.activeCredential.cloudPlatform !== "BYOS") {
                     var sgroups = $filter('orderBy')($rootScope.securitygroups, 'name', false);
-                    for (i = 0; i < sgroups.length; i++) {
+                    for (var i = 0; i < sgroups.length; i++) {
                          if (sgroups[i].cloudPlatform ===  $rootScope.activeCredential.cloudPlatform) {
                             sgroupsActiveId = sgroups[i].id;
                             break;
@@ -1425,6 +1425,19 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             }
 
+        }
+
+        $scope.isUserDefinedTagsInvalid = function() {
+            var hasError = false;
+            angular.forEach($scope.cluster.userDefinedTags, function (userDefinedTag) {
+                if (!userDefinedTag["key"] || userDefinedTag["key"].length < 3) {
+                    hasError = true;
+                }
+                if (!userDefinedTag["value"] || userDefinedTag["value"].length < 3) {
+                    hasError = true;
+                }
+            });
+            return hasError;
         }
     }
 ]);
