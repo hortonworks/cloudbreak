@@ -394,6 +394,7 @@ cloudbreak:
         - CB_DB_ENV_USER
         - CB_DB_ENV_PASS
         - CB_DB_ENV_DB
+        - CB_DB_ENV_SCHEMA
         - "CB_DB_SERVICEID=cbdb.service.consul"
         - "CB_MAIL_SMTP_AUTH=$CLOUDBREAK_SMTP_AUTH"
         - "CB_MAIL_SMTP_STARTTLS_ENABLE=$CLOUDBREAK_SMTP_STARTTLS_ENABLE"
@@ -548,6 +549,12 @@ periscope:
         - http_proxy=$CB_HTTP_PROXY
         - https_proxy=$CB_HTTPS_PROXY
         - PERISCOPE_DB_HBM2DDL_STRATEGY
+        - PERISCOPE_DB_TCP_ADDR
+        - PERISCOPE_DB_TCP_PORT
+        - PERISCOPE_DB_USER
+        - PERISCOPE_DB_PASS
+        - PERISCOPE_DB_NAME
+        - PERISCOPE_DB_SCHEMA_NAME
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
         - CB_JAVA_OPTS
