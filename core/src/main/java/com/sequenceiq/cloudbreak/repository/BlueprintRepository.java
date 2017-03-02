@@ -28,4 +28,5 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     Set<Blueprint> findAllDefaultInAccount(@Param("account") String account);
 
+    Blueprint findFirstByIdGreaterThan(Long id);
 }

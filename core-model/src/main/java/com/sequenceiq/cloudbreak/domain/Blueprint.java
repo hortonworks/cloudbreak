@@ -14,6 +14,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.hibernate.annotations.Type;
+
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -75,6 +77,7 @@ public class Blueprint implements ProvisionEntity {
     @Column(nullable = false)
     private String name;
 
+    @Type(type = "encrypted_string")
     @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String blueprintText;
 
