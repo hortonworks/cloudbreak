@@ -5223,3 +5223,7 @@ footer p {
 footer a:hover {
     color: #9bd5e3
 }
+
+.logo {
+    height: 80px;
+}
