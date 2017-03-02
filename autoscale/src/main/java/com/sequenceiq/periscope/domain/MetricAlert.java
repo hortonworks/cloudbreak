@@ -8,12 +8,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 
 import com.sequenceiq.periscope.api.model.AlertState;
 
 @Entity
-@Table(name = "as_metricalert")
 @DiscriminatorValue("METRIC")
 @NamedQueries({
         @NamedQuery(name = "MetricAlert.findByCluster", query = "SELECT c FROM MetricAlert c WHERE c.cluster.id= :clusterId AND c.id= :alertId"),

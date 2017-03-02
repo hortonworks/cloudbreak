@@ -9,14 +9,12 @@ import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 
 import com.sequenceiq.periscope.api.model.AlertState;
 import com.sequenceiq.periscope.model.json.Json;
 import com.sequenceiq.periscope.model.json.JsonToString;
 
 @Entity
-@Table(name = "as_prometheusalert")
 @DiscriminatorValue("PROMETHEUS")
 @NamedQueries({
         @NamedQuery(name = "PrometheusAlert.findByCluster", query = "SELECT c FROM PrometheusAlert c WHERE c.cluster.id= :clusterId AND c.id= :alertId"),

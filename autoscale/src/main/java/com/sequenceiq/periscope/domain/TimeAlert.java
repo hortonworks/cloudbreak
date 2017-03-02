@@ -6,10 +6,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
-import javax.persistence.Table;
 
 @Entity
-@Table(name = "as_timealert")
 @DiscriminatorValue("TIME")
 @NamedQueries({
         @NamedQuery(name = "TimeAlert.findByCluster", query = "SELECT c FROM TimeAlert c WHERE c.cluster.id= :clusterId AND c.id= :alertId"),

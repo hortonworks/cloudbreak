@@ -16,14 +16,12 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
 
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 
 @Entity
-@Table(name = "as_history")
 @NamedQueries({
         @NamedQuery(name = "History.findAllByCluster", query = "SELECT c FROM History c WHERE c.clusterId= :id"),
         @NamedQuery(name = "History.findByCluster", query = "SELECT c FROM History c WHERE c.clusterId= :clusterId AND c.id= :historyId")
@@ -83,7 +81,7 @@ public class History {
 
     @ElementCollection(fetch = FetchType.EAGER)
     @MapKeyColumn(name = "key")
-    @Column(name = "value", columnDefinition = "TEXT", length = 100000, table = "as_history_properties")
+    @Column(name = "value", columnDefinition = "TEXT", length = 100000)
     private Map<String, String> properties = new HashMap<>();
 
     public History() {
