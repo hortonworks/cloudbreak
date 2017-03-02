@@ -52,8 +52,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
-import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.salt.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -84,7 +84,7 @@ public class SaltOrchestratorTest {
 
     @Before
     public void setUp() throws Exception {
-        gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "10-0-0-1", 9443, "/certdir", "servercert", "clientcert", "clientkey",
+        gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "/certdir", "servercert", "clientcert", "clientkey",
                 "saltpasswd", "saltbootpassword", "signkey", false);
         targets = new HashSet<>();
         targets.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com"));

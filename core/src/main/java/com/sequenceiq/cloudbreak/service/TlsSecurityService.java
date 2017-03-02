@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -197,11 +198,12 @@ public class TlsSecurityService {
         return privateKeyPath;
     }
 
-    public GatewayConfig buildGatewayConfig(Long stackId, String publicIp, Integer gatewayPort,
-            String privateIp, String hostname, SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
+    public GatewayConfig buildGatewayConfig(Long stackId, String connectionIp, InstanceMetaData gatewayInstance, Integer gatewayPort,
+            SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
         prepareCertDir(stackId);
-        HttpClientConfig conf = buildTLSClientConfig(stackId, publicIp);
-        return new GatewayConfig(publicIp, privateIp, hostname, gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(),
+        HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp);
+        return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
+                gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(),
                 conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
                 knoxGatewayEnabled);
     }

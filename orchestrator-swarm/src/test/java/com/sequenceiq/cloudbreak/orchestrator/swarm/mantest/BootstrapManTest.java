@@ -39,7 +39,8 @@ public class BootstrapManTest {
         SwarmContainerOrchestrator o = new SwarmContainerOrchestrator();
         o.init(new SingleContainerRunner(), new NoExit());
 
-        GatewayConfig gatewayConfig = new GatewayConfig("104.41.154.195", "10.0.0.8", 8443, "/Users/akanto/prj/cbd-test/certs/stack-4100", false);
+        GatewayConfig gatewayConfig = new GatewayConfig("104.41.154.195", "104.41.154.195", "10.0.0.8",
+                8443, "/Users/akanto/prj/cbd-test/certs/stack-4100", false);
 
         add("10.0.0.8", "104.41.154.195", "cbgateway-3-geza2-20150817160005");
         /*add("10.0.0.7", "23.96.84.101", "hostgroupclient1-2-geza2-20150817155818");

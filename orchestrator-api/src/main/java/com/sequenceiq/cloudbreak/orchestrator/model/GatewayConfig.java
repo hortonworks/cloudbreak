@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.orchestrator.model;
 
 public class GatewayConfig {
 
+    // Used by cloudbreak to connect the cluster
+    private final String connectionAddress;
+
     private final String publicAddress;
 
     private final String privateAddress;
@@ -26,13 +29,16 @@ public class GatewayConfig {
 
     private final Boolean knoxGatewayEnabled;
 
-    public GatewayConfig(String publicAddress, String privateAddress, Integer gatewayPort, String certificateDir, Boolean knoxGatewayEnabled) {
-        this(publicAddress, privateAddress, null, gatewayPort, certificateDir, null, null, null, null, null, null, knoxGatewayEnabled);
+    public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
+            Integer gatewayPort, String certificateDir, Boolean knoxGatewayEnabled) {
+        this(connectionAddress, publicAddress, privateAddress, null, gatewayPort, certificateDir,
+                null, null, null, null, null, null, knoxGatewayEnabled);
     }
 
-    public GatewayConfig(String publicAddress, String privateAddress, String hostname,
+    public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
             Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
             String signatureKey, Boolean knoxGatewayEnabled) {
+        this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
         this.hostname = hostname;
@@ -45,6 +51,10 @@ public class GatewayConfig {
         this.saltBootPassword = saltBootPassword;
         this.signatureKey = signatureKey;
         this.knoxGatewayEnabled = knoxGatewayEnabled;
+    }
+
+    public String getConnectionAddress() {
+        return connectionAddress;
     }
 
     public String getPublicAddress() {
@@ -68,7 +78,7 @@ public class GatewayConfig {
     }
 
     public String getGatewayUrl() {
-        return String.format("https://%s:%d", publicAddress, gatewayPort);
+        return String.format("https://%s:%d", connectionAddress, gatewayPort);
     }
 
     public String getServerCert() {
@@ -102,7 +112,8 @@ public class GatewayConfig {
     @Override
     public String toString() {
         return "GatewayConfig{"
-                + "publicAddress='" + publicAddress + '\''
+                + "connectionAddress='" + connectionAddress + '\''
+                + ", publicAddress='" + publicAddress + '\''
                 + ", privateAddress='" + privateAddress + '\''
                 + ", certificateDir='" + certificateDir + '\''
                 + ", knoxGatewayEnabled='" + knoxGatewayEnabled + '\''

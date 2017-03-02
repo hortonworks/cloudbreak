@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerConst
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Container;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
@@ -119,8 +120,8 @@ public class ClusterContainerRunnerTest {
         when(containerService.findContainersInCluster(anyLong())).thenReturn(containers);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString(), any(), any()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), any(InstanceMetaData.class), anyInt(), any(), any()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
         when(instanceMetaDataRepository.findAliveInstancesInInstanceGroup(anyLong())).thenReturn(new ArrayList<>());
         when(containerService.save(anyList())).thenReturn(new ArrayList<>());
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
@@ -139,8 +140,8 @@ public class ClusterContainerRunnerTest {
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new CancelledMockContainerOrchestrator());
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
-        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), anyInt(), anyString(), anyString(), any(), any()))
-                .thenReturn(new GatewayConfig("10.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
+        when(tlsSecurityService.buildGatewayConfig(anyLong(), anyString(), any(InstanceMetaData.class), anyInt(), any(), any()))
+                .thenReturn(new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
         when(hostGroupRepository.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(TestUtil.hostGroup());
 
