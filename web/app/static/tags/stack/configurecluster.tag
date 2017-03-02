@@ -20,7 +20,7 @@
                     </div>
                     <div class="col-md-offset-1 col-md-4 input-group">
                         <span class="input-group-addon">value</span>
-                        <input type="text" class="form-control" id="tagname{{$index}}" name="tagname{{$index}}" required ng-model="tag.value" ng-maxlength="255" ng-minlength="3" ng-required="true" placeholder="(OPTIONAL) Max 255 chars">
+                        <input type="text" class="form-control" id="tagname{{$index}}" name="tagname{{$index}}" required ng-model="tag.value" ng-maxlength="255" ng-minlength="3" ng-required="true" placeholder="(REQUIRED) Max 255 chars">
                     </div>
                     <div class="col-md-2 pull-right">
                         <a class="btn btn-info btn-block" role="button" ng-click="removeUserDefinedTag(tag)" style="margin-top: 0px;margin-bottom: 0px;"> - Remove</a>
@@ -34,7 +34,7 @@
             </div>
         </div>
         <div class="row col-md-4" style="padding-top: 0px;padding-bottom: 0px;">
-            <a class="btn btn-success btn-block" role="button" ng-click="addUserDefinedTag()"> + Add</a>
+            <button type="button" class="btn btn-success btn-block" role="button" ng-disabled="isUserDefinedTagsInvalid()" ng-click="addUserDefinedTag()"> + Add</button>
         </div>
     </div>
 
@@ -217,7 +217,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || (activeCredential !== undefined && !cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && !cluster.availabilityZone)" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
+                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || isUserDefinedTagsInvalid() || (activeCredential !== undefined && !cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && !cluster.availabilityZone)" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
                     {{(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>
