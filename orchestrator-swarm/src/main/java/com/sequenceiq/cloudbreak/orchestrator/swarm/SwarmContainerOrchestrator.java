@@ -87,9 +87,9 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
     public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try {
-            String privateGatewayIp = getPrivateGatewayIp(gatewayConfig.getPublicAddress(), nodes);
+            String privateGatewayIp = getPrivateGatewayIp(gatewayConfig.getConnectionAddress(), nodes);
             Set<String> privateAddresses = getPrivateAddresses(nodes);
-            Set<String> privateAddressesWithoutGateway = getPrivateAddresses(getNodesWithoutGateway(gatewayConfig.getPublicAddress(), nodes));
+            Set<String> privateAddressesWithoutGateway = getPrivateAddresses(getNodesWithoutGateway(gatewayConfig.getConnectionAddress(), nodes));
             Set<String> consulServers = selectConsulServers(privateGatewayIp, privateAddressesWithoutGateway, consulServerCount);
             Set<String> result = prepareDockerAddressInventory(privateAddresses);
 
