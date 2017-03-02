@@ -10,6 +10,15 @@ import (
 )
 
 func ConfigRead(c *cli.Context) error {
+	args := c.Args()
+	if args.Present() {
+		name := args.First()
+		if k := c.App.Command(name); k != nil {
+			// this is a sub-command invocation
+			return nil
+		}
+	}
+
 	server := c.String(hdc.FlServer.Name)
 	username := c.String(hdc.FlUsername.Name)
 	password := c.String(hdc.FlPassword.Name)
@@ -24,8 +33,8 @@ func ConfigRead(c *cli.Context) error {
 
 	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
 		if err != nil {
-			log.Error(fmt.Sprintf("[ConfigRead] %s", err.Error()))
-			log.Error(fmt.Sprintf("[ConfigRead] configuration is not set, see: %s configure --help", c.App.Name))
+			log.Error(fmt.Sprintf("configuration is not set, see: hdc configure --help or provide the following flags: %v",
+				[]string{"--" + hdc.FlServer.Name, "--" + hdc.FlUsername.Name, "--" + hdc.FlPassword.Name}))
 			os.Exit(1)
 		}
 
