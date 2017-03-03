@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.config;
 
+import java.sql.Connection;
+import java.sql.Statement;
 import java.util.Properties;
 
 import javax.persistence.EntityManager;
@@ -7,6 +9,8 @@ import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
 import org.postgresql.Driver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,10 +25,12 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.util.StringUtils;
 
 @Configuration
 @EnableTransactionManagement
 public class DatabaseConfig {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseConfig.class);
 
     @Value("${periscope.db.user:postgres}")
     private String dbUser;
@@ -35,6 +41,9 @@ public class DatabaseConfig {
     @Value("${periscope.db.name:postgres}")
     private String dbName;
 
+    @Value("${periscope.db.schema.name:}")
+    private String dbSchemaName;
+
     @Value("${periscope.db.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
 
@@ -44,9 +53,10 @@ public class DatabaseConfig {
 
     @Bean
     public DataSource dataSource() {
+        createSchemaIfNeeded();
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
-        dataSource.setUrl(String.format("jdbc:postgresql://%s/%s", databaseAddress, dbName));
+        dataSource.setUrl(createDbUrl());
         dataSource.setUsername(dbUser);
         dataSource.setPassword(dbPassword);
         return dataSource;
@@ -92,7 +102,33 @@ public class DatabaseConfig {
         properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddlStrategy);
         properties.setProperty("hibernate.show_sql", "false");
         properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+        properties.setProperty("hibernate.default_schema", StringUtils.isEmpty(dbSchemaName) ? "public" : dbSchemaName);
         return properties;
     }
 
+    private String createDbUrl() {
+        String url;
+        if (!StringUtils.isEmpty(dbSchemaName)) {
+            url = String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName);
+        } else {
+            url = String.format("jdbc:postgresql://%s/%s", databaseAddress, dbName);
+        }
+        return url;
+    }
+
+    private void createSchemaIfNeeded() {
+        if (!StringUtils.isEmpty(dbSchemaName)) {
+            try {
+                SimpleDriverDataSource ds = new SimpleDriverDataSource();
+                ds.setDriverClass(Driver.class);
+                ds.setUrl(String.format("jdbc:postgresql://%s/%s", databaseAddress, dbName));
+                Connection conn = ds.getConnection(dbUser, dbPassword);
+                Statement statement = conn.createStatement();
+                statement.execute("CREATE SCHEMA IF NOT EXISTS " + dbSchemaName);
+                conn.close();
+            } catch (Exception any) {
+                LOGGER.error(String.format("Cannot create the %s schema on %s in %s database", dbSchemaName, databaseAddress, dbName), any);
+            }
+        }
+    }
 }

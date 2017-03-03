@@ -37,7 +37,7 @@ dependencies {
     compile group: 'javax.mail',                    name: 'mail',                                   version: '1.5.0-b01'
     compile group: 'joda-time',                     name: 'joda-time',                              version: '2.5'
     compile group: 'net.sf.ehcache',                name: 'ehcache',                                version: '2.8.3'
-    compile group: 'org.postgresql',                name: 'postgresql',                             version: '9.3-1101-jdbc41'
+    compile group: 'org.postgresql',                name: 'postgresql',                             version: '9.4.1212'
     compile group: 'org.hibernate',                 name: 'hibernate-validator',                    version: hibernateValidatorVersion
     compile group: 'org.quartz-scheduler',          name: 'quartz',                                 version: '2.2.1'
     compile group: 'dnsjava',                       name: 'dnsjava',                                version: '2.1.7'
