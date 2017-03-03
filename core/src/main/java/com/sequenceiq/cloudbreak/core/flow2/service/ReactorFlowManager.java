@@ -111,7 +111,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerTermination(Long stackId, Boolean deleteDependencies) {
-        Stack stack = stackService.get(stackId);
+        Stack stack = stackService.getById(stackId);
 
         if (BYOS.equals(stack.cloudPlatform())) {
             String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;
