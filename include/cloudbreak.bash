@@ -501,9 +501,10 @@ util-add-default-user() {
     
     cloudbreak-config
 
-    if ! [[ "$UAA_DEFAULT_USER_PW" ]];then
-        echo "[ERROR] Password is missing, please set UAA_DEFAULT_USER_PW variable" | red 1>&2
-        _exit 1
+    local passwd="$UAA_DEFAULT_USER_PW"
+    if ! [[ "$passwd" ]]; then
+        read -s -t 10 -p "password:" passwd
+        echo
     fi
 
     local container=$(docker ps | grep cbreak_identity_ | cut -d" " -f 1)
@@ -514,7 +515,7 @@ util-add-default-user() {
 
     local address="http://localhost:8080"
     local bearer=$(docker exec -i $container curl -s "$address/oauth/token?grant_type=client_credentials&token_format=opaque" -u "${UAA_SULTANS_ID}:${UAA_SULTANS_SECRET}" | jq -r .access_token 2>/dev/null)
-    local json='{"userName":"'${UAA_DEFAULT_USER_EMAIL}'","name":{"familyName":"'${UAA_DEFAULT_USER_LASTNAME}'","givenName":"'${UAA_DEFAULT_USER_FIRSTNAME}'"},"emails":[{"value":"'${UAA_DEFAULT_USER_EMAIL}'","primary":true}],"password":"'$(escape-string-json $UAA_DEFAULT_USER_PW)'","active":true,"verified":true,"schemas":["urn:scim:schemas:core:1.0"]}'
+    local json='{"userName":"'${UAA_DEFAULT_USER_EMAIL}'","name":{"familyName":"'${UAA_DEFAULT_USER_LASTNAME}'","givenName":"'${UAA_DEFAULT_USER_FIRSTNAME}'"},"emails":[{"value":"'${UAA_DEFAULT_USER_EMAIL}'","primary":true}],"password":"'$(escape-string-json $passwd)'","active":true,"verified":true,"schemas":["urn:scim:schemas:core:1.0"]}'
     local user=$(docker exec -i $container  curl -s $address/Users -X POST -H 'Accept: application/json' -H "Authorization: Bearer $bearer" -H 'Content-Type: application/json' -d ''$json'' 2>/dev/null)
     local existing_id=$(echo $user | jq -r .user_id 2> /dev/null)
     if [[ "$existing_id" != "null" ]]; then
