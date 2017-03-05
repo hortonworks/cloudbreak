@@ -99,6 +99,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
+        itContext.putContextParam(CloudbreakITContextConstants.CLOUDPROVIDER, cloudProvider);
         String identity = itContext.getContextParam(IntegrationTestContext.IDENTITY_URL);
         String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);

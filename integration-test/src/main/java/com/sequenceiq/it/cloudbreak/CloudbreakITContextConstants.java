@@ -39,6 +39,10 @@ public class CloudbreakITContextConstants {
 
     public static final String INSTANCE_COUNT = "INSTANCE_COUNT";
 
+    public static final String CLOUDPROVIDER = "CLOUDPROVIDER";
+
+    public static final String CLOUDPROVIDER_PARAMETERS = "CLOUDPROVIDER_PARAMETERS";
+
     private CloudbreakITContextConstants() {
     }
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.scaling.ScalingUtil;
+import com.sequenceiq.it.cloudbreak.tags.TagsUtil;
 
 public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
 
@@ -72,7 +72,6 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
 
         if (!userDefinedTags.isEmpty()) {
             stackRequest.setTags(userDefinedTagsMap(userDefinedTags));
-
         }
 
         OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
@@ -95,17 +94,9 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         ScalingUtil.putInstanceCountToContext(itContext, stackId);
     }
 
-    public static Map<String, Object> userDefinedTagsMap(String userDefinedTag) {
+    private Map<String, Object> userDefinedTagsMap(String userDefinedTag) {
         Map<String, Object> tags = new HashMap<>();
-        Map<String, String> userDefinedTags = new HashMap<>();
-        List<String> tagsToCheckList = Arrays.asList(userDefinedTag.split(";"));
-
-        for (String elem : tagsToCheckList) {
-            String[] tmpList = elem.split(":");
-            Assert.assertTrue(tmpList.length > 1);
-            userDefinedTags.put(tmpList[0], tmpList[1]);
-        }
-        tags.put("userDefined", userDefinedTags);
-    return tags;
+        tags.put("userDefined", TagsUtil.getTagsToCheck(userDefinedTag));
+        return tags;
     }
 }

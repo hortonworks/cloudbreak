@@ -1,6 +1,7 @@
 name: Aws_simple_smokettest_cred-autorecovery
 parameters:
   cloudProvider: AWS
+  region: eu-west-1
   blueprintName: hdp-small-default
 
 tests:
@@ -8,6 +9,7 @@ tests:
     classes:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
 
   # integratontest.awscredential params must be set in application.yml
   - name: aws_credential_test
@@ -53,7 +55,6 @@ tests:
   - name: create cluster
     parameters:
       stackName: it-aws-cred-ar
-      region: eu-west-1
       clusterName: it-aws-cred-ar
       autoRecoveryMode: True
     classes:
@@ -62,9 +63,6 @@ tests:
 
   - name: auto recovery
     parameters:
-      region: eu-west-1
       hostGroup: host_group_slave_1
     classes:
-      - com.sequenceiq.it.cloudbreak.recovery.AwsAutoRecoveryTest
-
-
+      - com.sequenceiq.it.cloudbreak.recovery.AutoRecoveryTest

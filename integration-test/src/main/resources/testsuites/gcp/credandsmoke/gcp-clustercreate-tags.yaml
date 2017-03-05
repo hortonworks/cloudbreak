@@ -1,6 +1,7 @@
 name: Gcp_simple_smoketest_cred_tags
 parameters:
   cloudProvider: GCP
+  gcpAppName: its-gcp-credandsmoke-cred-tags
   blueprintName: hdp-small-default
 
 tests:
@@ -8,6 +9,7 @@ tests:
     classes:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
 
   # integratontest.gcpcredential params must be set in application.yml
   - name: gcp_credential_test
@@ -64,4 +66,4 @@ tests:
     parameters:
       tags: ittest:itvalue;gcptag:gcpvalue;result:success
     classes:
-      - com.sequenceiq.it.cloudbreak.tags.GcpTagsTest
+      - com.sequenceiq.it.cloudbreak.tags.TagsTest

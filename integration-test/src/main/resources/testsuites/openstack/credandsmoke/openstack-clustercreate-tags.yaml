@@ -8,6 +8,7 @@ tests:
     classes:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
 
   # integratontest.openstackcredential params must be set in application.yml
   - name: openstack_credential_test
@@ -67,4 +68,4 @@ tests:
     parameters:
       tags: ittest:itvalue;openstacktag:openstackvalue;result:success
     classes:
-      - com.sequenceiq.it.cloudbreak.tags.OpenstackTagsTest
+      - com.sequenceiq.it.cloudbreak.tags.TagsTest

@@ -43,7 +43,7 @@ public class RecoveryUtil {
             }
         }
         Assert.assertNotNull(instanceId);
-    return instanceId;
+        return instanceId;
     }
 
     public static void deleteInstance(Map<String, String> cloudProviderParams, String instanceId) {
