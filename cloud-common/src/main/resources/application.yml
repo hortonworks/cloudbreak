@@ -36,7 +36,7 @@ cb:
     user: postgres
     pass:
     db: postgres
-    schema:
+    schema: public
 
   aws:
     spotinstances.enabled: true
