@@ -44,20 +44,19 @@ import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.it.util.ResourceUtil;
 
-
 public class TagsUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(TagsUtil.class);
 
     private TagsUtil() {
     }
 
-    protected static Map<String, String> getTagsToCheck(String tags) {
-    List<String> tagsToCheckList = Arrays.asList(tags.split(";"));
-    Map<String, String> tagsToCheckMap = new HashMap<>();
-    for (String elem : tagsToCheckList) {
-        String [] tmpList = elem.split(":");
-        Assert.assertTrue(tmpList.length > 1);
-        tagsToCheckMap.put(tmpList[0], tmpList[1]);
+    public static Map<String, String> getTagsToCheck(String tags) {
+        List<String> tagsToCheckList = Arrays.asList(tags.split(";"));
+        Map<String, String> tagsToCheckMap = new HashMap<>();
+        for (String elem : tagsToCheckList) {
+            String[] tmpList = elem.split(":");
+            Assert.assertTrue(tmpList.length > 1);
+            tagsToCheckMap.put(tmpList[0], tmpList[1]);
         }
         return tagsToCheckMap;
     }
@@ -75,7 +74,7 @@ public class TagsUtil {
     }
 
     protected static void checkTags(Map<String, String> tagsToCheck, Map<String, String> extractedTagsToCheck) {
-        for (Map.Entry entry: tagsToCheck.entrySet()) {
+        for (Map.Entry entry : tagsToCheck.entrySet()) {
             Assert.assertTrue(extractedTagsToCheck.keySet().contains(entry.getKey()));
             Assert.assertEquals(extractedTagsToCheck.get(entry.getKey()), entry.getValue());
         }
@@ -88,7 +87,7 @@ public class TagsUtil {
         return userDefinedTagsList;
     }
 
-    protected static void checkTagsWithProvider(Map<String, String> cloudProviderParams, ApplicationContext applicationcontext,
+    protected static void checkTagsWithProvider(String stackName, Map<String, String> cloudProviderParams, ApplicationContext applicationcontext,
             List<String> instanceIds, Map<String, String> tagsToCheckMap) throws
             Exception {
         switch (cloudProviderParams.get("cloudProvider")) {
@@ -96,13 +95,12 @@ public class TagsUtil {
                 checkTagsAws(Regions.fromName(cloudProviderParams.get("region")), instanceIds, tagsToCheckMap);
                 break;
             case "AZURE":
-                checkTagsAzure(cloudProviderParams.get("accesKey"), cloudProviderParams.get("tenantId"),
-                        cloudProviderParams.get("secretKey"), cloudProviderParams.get("subscriptionId"),
-                        cloudProviderParams.get("stackName"), tagsToCheckMap);
+                checkTagsAzure(cloudProviderParams.get("accesKey"), cloudProviderParams.get("tenantId"), cloudProviderParams.get("secretKey"),
+                        cloudProviderParams.get("subscriptionId"), stackName, tagsToCheckMap);
                 break;
             case "GCP":
                 checkTagsGcp(applicationcontext, cloudProviderParams.get("applicationName"), cloudProviderParams.get("projectId"),
-                        cloudProviderParams.get("serviceAccountId"), cloudProviderParams.get("p12File"), cloudProviderParams.get("region"),
+                        cloudProviderParams.get("serviceAccountId"), cloudProviderParams.get("p12File"), cloudProviderParams.get("availabilityZone"),
                         instanceIds, tagsToCheckMap);
                 break;
             case "OPENSTACK":
@@ -141,7 +139,7 @@ public class TagsUtil {
             String stackName, Map<String, String> tagsToCheckMap) throws Exception {
         ServiceClientCredentials serviceClientCredentials = new ApplicationTokenCredentials(accesKey, tenantId, secretKey, null);
         Azure azure = Azure.authenticate(serviceClientCredentials).withSubscription(subscriptionId);
-        PagedList<VirtualMachine> virtualMachinesList =  azure.virtualMachines().list();
+        PagedList<VirtualMachine> virtualMachinesList = azure.virtualMachines().list();
         for (VirtualMachine vm : virtualMachinesList) {
             if (vm.name().contains(stackName)) {
                 Map<String, String> extractedTags = vm.tags();
@@ -151,8 +149,7 @@ public class TagsUtil {
     }
 
     protected static void checkTagsGcp(ApplicationContext applicationContext, String applicationName, String projectId, String serviceAccountId, String p12File,
-            String region, List<String> instanceIdList, Map<String, String> tagsToCheckMap) throws Exception {
-
+            String availabilityZone, List<String> instanceIdList, Map<String, String> tagsToCheckMap) throws Exception {
         String serviceAccountPrivateKey = ResourceUtil.readBase64EncodedContentFromResource(applicationContext, p12File);
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         PrivateKey privateKey = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
@@ -174,7 +171,7 @@ public class TagsUtil {
         Compute.Instances instances = compute.instances();
 
         for (String id : instanceIdList) {
-            Compute.Instances.Get response = instances.get(projectId, region, id);
+            Compute.Instances.Get response = instances.get(projectId, availabilityZone, id);
             com.google.api.services.compute.model.Instance instance = response.execute();
             Tags gcpTags = instance.getTags();
             Map<String, String> extractedTags = new HashMap<>();
@@ -200,7 +197,7 @@ public class TagsUtil {
                 .tenantName(tenantName)
                 .authenticate();
 
-        for (String instanceId: instanceIdList) {
+        for (String instanceId : instanceIdList) {
             Map<String, String> serverMetadata = os.compute().servers().getMetadata(instanceId);
             TagsUtil.checkTags(tagsToCheckMap, serverMetadata);
         }

@@ -1,6 +1,6 @@
-name: AzureRM_simple_smoketest_cred_tags
+name: Azure_simple_smoketest_cred_tags
 parameters:
-  cloudProvider: AZURE_RM
+  cloudProvider: AZURE
   blueprintName: hdp-small-default
 
 tests:
@@ -8,13 +8,21 @@ tests:
     classes:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
 
   # integratontest.azurermcredential params must be set in application.yml
   - name: azure_rm_credential_test
     parameters:
       credentialName: itazurermcredentialtag
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureRmCredentialCreationTest
+      - com.sequenceiq.it.cloudbreak.azure.AzureCredentialCreationTest
+
+  - name: create security group
+    parameters:
+      name: it-azurerm-credandsmoke-secgroup-tags
+      provider: AZURE
+    classes:
+      - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 
   - name: create gateway template
     parameters:
@@ -24,7 +32,7 @@ tests:
       azureVolumeSize: 50
       templateAdditions: "host_group_master_1,1,GATEWAY"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
 
   - name: create master template
     parameters:
@@ -34,7 +42,7 @@ tests:
       azureVolumeSize: 100
       templateAdditions: "host_group_master_2,1;host_group_master_3,1"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
 
   - name: create slave template
     parameters:
@@ -44,7 +52,7 @@ tests:
       azureVolumeSize: 200
       templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
     classes:
-      - com.sequenceiq.it.cloudbreak.AzureTemplateCreationTest
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
 
   - name: create cluster
     parameters:
@@ -62,4 +70,4 @@ tests:
     parameters:
       tags: ittest:itvalue;customtag:customvalue;result:success
     classes:
-      - com.sequenceiq.it.cloudbreak.tags.AzureTagsTest
+      - com.sequenceiq.it.cloudbreak.tags.TagsTest

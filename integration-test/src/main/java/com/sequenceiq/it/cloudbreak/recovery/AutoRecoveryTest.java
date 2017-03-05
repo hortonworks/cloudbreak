@@ -3,8 +3,6 @@ package com.sequenceiq.it.cloudbreak.recovery;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
@@ -20,17 +18,15 @@ import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.WaitResult;
 import com.sequenceiq.it.cloudbreak.scaling.ScalingUtil;
 
-public class AbstractAutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAutoRecoveryTest.class);
-
-    private Map<String, String> cloudProviderParams = new HashMap<>();
-
+public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
     public void setContextParameters() {
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID), "Ambari user id is mandatory.");
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), "Ambari password id is mandatory.");
         Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID), "Ambari port id is mandatory.");
+        Assert.assertNotNull(getItContext().getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class),
+                "Cloudprovider parameters are mandatory.");
     }
 
     @Test
@@ -42,6 +38,7 @@ public class AbstractAutoRecoveryTest extends AbstractCloudbreakIntegrationTest 
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
+        Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
 
         StackEndpoint stackEndpoint = getCloudbreakClient().stackEndpoint();
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
@@ -65,9 +62,5 @@ public class AbstractAutoRecoveryTest extends AbstractCloudbreakIntegrationTest 
         CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
         Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext);
         Assert.assertEquals(expectedNodeCountAmbari, actualNodeCountAmbari);
-    }
-
-    protected Map<String, String> getCloudProviderParams() {
-        return cloudProviderParams;
     }
 }

@@ -1,6 +1,7 @@
 name: Aws_simple_smokettest_tags
 parameters:
   cloudProvider: AWS
+  region: eu-west-1
   blueprintName: hdp-small-default
 
 tests:
@@ -8,6 +9,7 @@ tests:
     classes:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
 
   # integratontest.awscredential params must be set in application.yml
   - name: aws_credential_test
@@ -52,7 +54,6 @@ tests:
   - name: create cluster
     parameters:
       stackName: it-aws-cred-tags
-      region: eu-west-1
       clusterName: it-aws-cred-tags
       userDefinedTags: ittest:itvalue;awstag:awsvalue;result:success
     classes:
@@ -61,8 +62,6 @@ tests:
 
   - name: check tags
     parameters:
-      region: EU_WEST_1
       tags: ittest:itvalue;awstag:awsvalue;result:success
     classes:
-      - com.sequenceiq.it.cloudbreak.tags.AwsTagsTest
-
+      - com.sequenceiq.it.cloudbreak.tags.TagsTest

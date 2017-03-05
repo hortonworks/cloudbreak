@@ -148,9 +148,6 @@ public class CloudbreakUtil {
     public static boolean isAmbariRunning(AmbariClient ambariClient) {
         try {
             String ambariHealth = ambariClient.healthCheck();
-
-
-
             return "RUNNING".equals(ambariHealth);
         } catch (Exception e) {
             return false;

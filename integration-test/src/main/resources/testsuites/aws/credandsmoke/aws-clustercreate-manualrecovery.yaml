@@ -2,12 +2,14 @@ name: Aws_simple_smokettest_cred-manualrecovery
 parameters:
   cloudProvider: AWS
   blueprintName: hdp-small-default
+  region: eu-west-1
 
 tests:
   - name: init
     classes:
       - com.sequenceiq.it.TestSuiteInitializer
       - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
 
   # integratontest.awscredential params must be set in application.yml
   - name: aws_credential_test
@@ -53,7 +55,6 @@ tests:
   - name: create cluster
     parameters:
       stackName: it-aws-cred-mr
-      region: eu-west-1
       clusterName: it-aws-cred-mr
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
@@ -61,16 +62,14 @@ tests:
 
   - name: manual recovery with repair
     parameters:
-      region: EU_WEST_1
       hostGroup: host_group_slave_1
     classes:
-      - com.sequenceiq.it.cloudbreak.recovery.AwsManualRecoveryTest
+      - com.sequenceiq.it.cloudbreak.recovery.ManualRecoveryTest
 
   - name: manual recovery with remove only
     parameters:
-      region: eu-west-1
       hostGroup: host_group_slave_1
       removedInstanceCount: 1
       removeOnly: True
     classes:
-      - com.sequenceiq.it.cloudbreak.recovery.AwsManualRecoveryTest
+      - com.sequenceiq.it.cloudbreak.recovery.ManualRecoveryTest

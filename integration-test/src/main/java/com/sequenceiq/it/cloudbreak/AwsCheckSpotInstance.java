@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 
-
 public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
 
     @BeforeMethod
