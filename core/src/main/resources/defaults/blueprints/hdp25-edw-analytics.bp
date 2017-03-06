@@ -20,15 +20,15 @@
       },
       {
         "hdfs-site": {
-          "dfs.namenode.safemode.threshold-pct": "0.99",
-          "hive.server2.transport.mode": "http"
+          "dfs.namenode.safemode.threshold-pct": "0.99"
         }
       },
       {
         "hive-site": {
           "hive.exec.compress.output": "true",
           "hive.merge.mapfiles": "true",
-          "hive.server2.tez.initialize.default.sessions": "true"
+          "hive.server2.tez.initialize.default.sessions": "true",
+          "hive.server2.transport.mode": "http"
         }
       },
       {
