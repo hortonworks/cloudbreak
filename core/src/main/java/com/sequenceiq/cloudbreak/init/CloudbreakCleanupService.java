@@ -12,11 +12,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
@@ -37,7 +38,7 @@ import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
-public class CloudbreakCleanupService {
+public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupService.class);
 
     @Inject
@@ -70,8 +71,7 @@ public class CloudbreakCleanupService {
     @Inject
     private Flow2Handler flow2Handler;
 
-    @PostConstruct
-    public void init() {
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         List<Long> stackIdsUnderOperation = restartDistruptedFlows();
         usageService.fixUsages();
         List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);

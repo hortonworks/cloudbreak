@@ -65,7 +65,7 @@ public class BlueprintUpdateServiceTest {
         when(blueprintUtils.readDefaultBlueprintFromFile(anyObject())).thenReturn(JSON);
         when(blueprintUtils.countHostGroups(anyObject())).thenReturn(2);
         when(blueprintRepository.save(any(Blueprint.class))).thenReturn(new Blueprint());
-        underTest.init();
+        underTest.onApplicationEvent(null);
         verify(blueprintRepository, times(1)).save(any(Blueprint.class));
     }
 
@@ -80,7 +80,7 @@ public class BlueprintUpdateServiceTest {
         when(blueprintUtils.readDefaultBlueprintFromFile(anyObject())).thenReturn(JSON);
         when(blueprintUtils.countHostGroups(anyObject())).thenReturn(2);
         when(blueprintRepository.save(any(Blueprint.class))).thenReturn(new Blueprint());
-        underTest.init();
+        underTest.onApplicationEvent(null);
         verify(blueprintRepository, times(3)).save(any(Blueprint.class));
     }
 }
