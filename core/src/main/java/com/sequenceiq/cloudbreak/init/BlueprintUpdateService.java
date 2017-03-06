@@ -3,12 +3,13 @@ package com.sequenceiq.cloudbreak.init;
 import java.io.FileNotFoundException;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,7 +21,7 @@ import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 
 @Component
-public class BlueprintUpdateService {
+public class BlueprintUpdateService implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintUpdateService.class);
 
     @Value("#{'${cb.blueprint.defaults:}'.split(';')}")
@@ -32,8 +33,7 @@ public class BlueprintUpdateService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
-    @PostConstruct
-    public void init() {
+    public void onApplicationEvent(ContextRefreshedEvent event) {
         Iterable<Blueprint> allBlueprint = blueprintRepository.findAll();
         for (String blueprintStrings : blueprintArray) {
             String[] split = blueprintStrings.split("=");
