@@ -29,6 +29,7 @@ public class PrometheusAlertTemplateService {
         ALERT_DEFINITIONS.add(new AlertRuleDefinitionEntry("cpu_threshold_exceeded", "CPU usage"));
         ALERT_DEFINITIONS.add(new AlertRuleDefinitionEntry("memory_threshold_exceeded", "Memory usage"));
         ALERT_DEFINITIONS.add(new AlertRuleDefinitionEntry("namenode_capacity_threshold_exceeded", "HDFS usage"));
+        ALERT_DEFINITIONS.add(new AlertRuleDefinitionEntry("yarn_root_queue_memory", "Cluster capacity"));
     }
 
     @Inject

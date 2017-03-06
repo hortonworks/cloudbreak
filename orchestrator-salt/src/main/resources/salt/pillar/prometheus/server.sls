@@ -65,6 +65,29 @@ prometheus:
                  regex:         ',(installed|maintenance),'
                  target_label:  'service_status'
                  replacement:   '$1'
+          - job_name: 'resourcemanager'
+            metrics_path: /exporter/20101/metrics
+            consul_sd_configs:
+              - server:    'consul.service.consul:8500'
+                datacenter: 'dc1'
+                services: [ 'resourcemanager' ]
+            relabel_configs:
+               - source_labels: ['__meta_consul_service']
+                 regex:         '(.*)'
+                 target_label:  'job'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_tags']
+                 regex:         '.*,jobname=(.*?),.*'
+                 target_label:  'job'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_node']
+                 regex:         '(.*)'
+                 target_label:  'instance'
+                 replacement:   '$1'
+               - source_labels: ['__meta_consul_tags']
+                 regex:         ',(installed|maintenance),'
+                 target_label:  'service_status'
+                 replacement:   '$1'
           - job_name: 'hive_server'
             metrics_path: /exporter/20105/metrics
             consul_sd_configs:
