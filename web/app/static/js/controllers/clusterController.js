@@ -969,9 +969,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function setNetwork() {
             if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform !== "BYOS") {
                 var nets = $filter('filter')($rootScope.networks, function(value, index, array) {
-                    value.cloudPlatform === $rootScope.activeCredential.cloudPlatform
+                    return value.cloudPlatform == $rootScope.activeCredential.cloudPlatform
                 }, true);
-                var orderedNets = $filter('orderBy')($rootScope.networks, 'name', false);
+                var orderedNets = $filter('orderBy')(nets, 'name', false);
                 if (orderedNets.length > 0) {
                     $scope.cluster.networkId = orderedNets[0].id;
                 }
