@@ -131,13 +131,13 @@ cloudbreak-conf-db() {
     env-import CB_DB_ENV_USER "postgres"
     env-import CB_DB_ENV_DB ""
     env-import CB_DB_ENV_PASS ""
-    env-import CB_DB_ENV_SCHEMA ""
+    env-import CB_DB_ENV_SCHEMA "public"
     env-import CB_HBM2DDL_STRATEGY "validate"
 
     env-import PERISCOPE_DB_USER "postgres"
     env-import PERISCOPE_DB_NAME ""
     env-import PERISCOPE_DB_PASS ""
-    env-import PERISCOPE_DB_SCHEMA_NAME ""
+    env-import PERISCOPE_DB_SCHEMA_NAME "public"
     env-import PERISCOPE_DB_HBM2DDL_STRATEGY "validate"
 
     env-import IDENTITY_DB_URL "uaadb.service.consul:5434"
