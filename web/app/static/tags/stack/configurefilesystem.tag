@@ -8,7 +8,6 @@
             <option value="ADLS" ng-if="activeCredential.cloudPlatform == 'AZURE'">{{msg.filesystem_adls_label}}</option>
         </select>
 
-        <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE') &&  cluster.fileSystem.type == 'LOCAL'"><i class="fa fa-warning"></i> {{msg.filesystem_local_label_azure_warning}}</div>
         <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE') &&  cluster.fileSystem.type == 'WASB'"><i class="fa fa-warning"></i> {{msg.filesystem_wasb_label_azure_warning}}</div>
     </div>
 </div>
