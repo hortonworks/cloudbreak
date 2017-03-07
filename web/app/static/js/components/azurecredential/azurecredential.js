@@ -64,14 +64,19 @@ function AzureCredentialController($rootScope, $filter, InteractiveLogin, Accoun
             AccountCredential.save(azureCredential, function (result) {
                 ctrl.activePanel = 3;
             }, function (error) {
-                showError(error, $filter("format")($rootScope.msg.azure_credential_failed))
+                showError(error, $filter("format")($rootScope.msg.azure_credential_failed, azureCredential.name))
             });
         } else {
             UserCredential.save(azureCredential, function (result) {
                 ctrl.activePanel = 3;
             }, function (error) {
-                showError(error, $filter("format")($rootScope.msg.azure_credential_failed));
+                showError(error, $filter("format")($rootScope.msg.azure_credential_failed, azureCredential.name));
             });
         }
     };
+
+    ctrl.handleAzureCredentialSuccess = function () {
+        init();
+        $jq('#panel-credentials-collapse').collapse('hide');
+    }
 }
