@@ -202,7 +202,8 @@ public class OperationDescriptions {
     }
 
     public static class UtilityOpDescription {
-        public static final String TEST_CONNECTION = "tests a RDS connection";
+        public static final String TEST_RDS_CONNECTION = "tests an RDS connection";
+        public static final String TEST_LDAP_CONNECTION = "tests an LDAP connection";
         public static final String TEST_DATABASE = "tests a database connection parameters";
     }
 

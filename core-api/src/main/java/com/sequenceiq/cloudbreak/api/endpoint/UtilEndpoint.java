@@ -9,6 +9,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
+import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
@@ -26,8 +28,14 @@ public interface UtilEndpoint {
     @POST
     @Path("rds")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_CONNECTION, produces = ContentType.JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_RDS_CONNECTION, produces = ContentType.JSON)
     RdsTestResult testRdsConnection(@Valid RDSConfigJson rdsConfigJson);
+
+    @POST
+    @Path("ldap")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON)
+    LdapTestResult testLdapConnection(@Valid LdapConfigRequest ldapConfigRequest);
 
     @POST
     @Path("ambari-database")
