@@ -214,6 +214,7 @@ cloudbreak-conf-defaults() {
     env-import DEFAULT_INBOUND_ACCESS_IP ""
     env-import CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP ""
     env-import CB_AWS_VPC ""
+    env-import CB_ENABLE_CUSTOM_IMAGE "false"
 }
 
 cloudbreak-conf-cloud-provider() {

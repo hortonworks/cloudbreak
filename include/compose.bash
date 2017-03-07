@@ -423,6 +423,7 @@ cloudbreak:
         - CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP
         - CB_AWS_VPC
         - CB_ENABLEDPLATFORMS
+        - CB_ENABLE_CUSTOM_IMAGE
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
