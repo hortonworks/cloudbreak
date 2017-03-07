@@ -134,7 +134,7 @@ uluwatuControllers.controller('uluwatuController', ['$scope', '$http', 'User', '
         }
 
         $scope.addCredentialPanelQueryEventListener = function () {
-            addPanelJQueryEventListeners('crendetial');
+            addPanelJQueryEventListeners('credentials');
             var credentials = AccountCredential.query(function () {
                 if (credentials != null && credentials.length == 0 && $rootScope.params.platforms.length == 1) {
                     $jq('#panel-credentials' + ' .panel-heading > a').click();
