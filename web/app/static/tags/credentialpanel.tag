@@ -24,7 +24,7 @@
                 <!-- ............ CREATE FORM ............................................. -->
 
                 <div class="panel panel-default">
-                    <div id="panel-create-credentials-collapse" class="panel-under-btn-collapse collapse">
+                    <div id="panel-create-credentials-collapse" class="panel-collapse panel-under-btn-collapse collapse">
                         <div class="panel-body">
                             <div class="row " style="padding-bottom: 10px">
                                 <div class="btn-segmented-control" id="providerSelector1">
@@ -43,7 +43,7 @@
                             </div>
                             <div class="alert alert-danger" role="alert" ng-show="showAlert" ng-click="unShowErrorMessageAlert()">{{alertMessage}}</div>
 
-                            <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential && isVisible('AWS')" name="awsCredentialForm">
+                            <form class="form-horizontal" role="form" name="awsCredentialForm" ng-show="awsCredential && isVisible('AWS')">
                                 <div ng-include src="'tags/credential/awsform.tag'"></div>
                             </form>
 
