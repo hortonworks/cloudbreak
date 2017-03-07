@@ -124,7 +124,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             function handleAwsCredentialSuccess(result) {
                 $scope.credentialAws.id = result.id;
                 $rootScope.credentials.push($scope.credentialAws);
-                $scope.showSuccess($filter("format")($rootScope.msg.aws_credential_success, String(result.id)));
+                $scope.showSuccess($filter("format")($rootScope.msg.aws_credential_success, String(result.name)));
                 $scope.awsCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;
@@ -161,7 +161,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
                         facing: "public"
                     }
                 };
-                $scope.showSuccess($filter("format")($rootScope.msg.openstack_credential_success, String(result.id)));
+                $scope.showSuccess($filter("format")($rootScope.msg.openstack_credential_success, String(result.name)));
                 $scope.openstackCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;
@@ -210,7 +210,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $scope.credentialGcp.id = result.id;
                 $rootScope.credentials.push($scope.credentialGcp);
                 $scope.credentialGcp = {};
-                $scope.showSuccess($filter("format")($rootScope.msg.gcp_credential_success, result.id));
+                $scope.showSuccess($filter("format")($rootScope.msg.gcp_credential_success, result.name));
                 $scope.credentialInCreation = false;
                 $scope.gcpCredentialForm.$setPristine();
                 collapseCreateCredentialFormPanel();
@@ -247,7 +247,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $scope.mesosStack.id = result.id;
                 $rootScope.importedStacks.push($scope.mesosStack);
                 $scope.mesosStack = {};
-                $scope.showSuccess($filter("format")($rootScope.msg.mesos_credential_success, String(result.id)));
+                $scope.showSuccess($filter("format")($rootScope.msg.mesos_credential_success, String(result.name)));
                 $scope.mesosImportStackForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;
@@ -282,7 +282,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $scope.credentialYarn.id = result.id;
                 $rootScope.credentials.push($scope.credentialYarn);
                 $scope.credentialYarn = {};
-                $scope.showSuccess($filter("format")($rootScope.msg.yarn_credential_success, String(result.id)));
+                $scope.showSuccess($filter("format")($rootScope.msg.yarn_credential_success, String(result.name)));
                 $scope.yarnImportStackForm.$setPristine();
                 collapseCreateCredentialFormPanel();
                 $scope.credentialInCreation = false;

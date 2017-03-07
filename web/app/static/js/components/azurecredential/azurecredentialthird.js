@@ -49,7 +49,8 @@ function AzureCredentialThirdController($rootScope, $filter) {
             }
             $rootScope.credentials.push(createdCredential);
             ctrl.credentialAzure.id = createdCredential.id;
-            $rootScope.$broadcast('showSuccessMessage', $filter("format")($rootScope.msg.azure_credential_success, createdCredential.id));
+            $rootScope.$broadcast('showSuccessMessage', $filter("format")($rootScope.msg.azure_credential_success, createdCredential.name));
+            ctrl.credentialSuccess()
         }
     });
 
