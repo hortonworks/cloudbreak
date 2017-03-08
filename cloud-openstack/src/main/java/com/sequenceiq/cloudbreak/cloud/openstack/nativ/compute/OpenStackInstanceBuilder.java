@@ -107,7 +107,7 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
         List<CloudVmInstanceStatus> statuses = Lists.newArrayList();
         OSClient osClient = createOSClient(auth);
         for (CloudInstance instance : instances) {
-            Server server = osClient.compute().servers().get(instance.getStringParameter(OpenStackConstants.INSTANCE_ID));
+            Server server = osClient.compute().servers().get(instance.getInstanceId());
             if (server == null) {
                 statuses.add(new CloudVmInstanceStatus(instance, InstanceStatus.TERMINATED));
             } else {

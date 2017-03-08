@@ -80,8 +80,8 @@ public class CleanupService {
         }
         Set<CredentialResponse> credentials = cloudbreakClient.credentialEndpoint().getPrivates();
         for (CredentialResponse credential : credentials) {
-            if (("AZURE_RM".equals(credential.getCloudPlatform()) && credential.getName().startsWith("its"))
-                    || (!"AZURE_RM".equals(credential.getCloudPlatform()) && credential.getName().startsWith("its-"))) {
+            if (("AZURE".equals(credential.getCloudPlatform()) && credential.getName().startsWith("its"))
+                    || (!"AZURE".equals(credential.getCloudPlatform()) && credential.getName().startsWith("its-"))) {
                 deleteCredential(cloudbreakClient, String.valueOf(credential.getId()));
             }
         }
