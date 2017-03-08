@@ -2,7 +2,7 @@
   "inputs": [],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp-data-science",
+      "blueprint_name": "hdp26-data-science",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
