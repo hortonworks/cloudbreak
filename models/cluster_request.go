@@ -70,10 +70,6 @@ type ClusterRequest struct {
 	 */
 	EmailTo *string `json:"emailTo,omitempty"`
 
-	/* enable Knox gateway security
-	 */
-	EnableKnoxGateway *bool `json:"enableKnoxGateway,omitempty"`
-
 	/* enable Kerberos security
 	 */
 	EnableSecurity *bool `json:"enableSecurity,omitempty"`
@@ -82,13 +78,13 @@ type ClusterRequest struct {
 	 */
 	EnableShipyard *bool `json:"enableShipyard,omitempty"`
 
-	/* exposed Knox services
-	 */
-	ExposedKnoxServices []string `json:"exposedKnoxServices,omitempty"`
-
 	/* external file system configuration
 	 */
 	FileSystem *FileSystem `json:"fileSystem,omitempty"`
+
+	/* gateway
+	 */
+	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
 	/* collection of hostgroups
 
@@ -99,10 +95,6 @@ type ClusterRequest struct {
 	/* kerberos
 	 */
 	Kerberos *KerberosRequest `json:"kerberos,omitempty"`
-
-	/* Knox topology name
-	 */
-	KnoxTopologyName *string `json:"knoxTopologyName,omitempty"`
 
 	/* LDAP config for the cluster
 	 */
@@ -182,11 +174,6 @@ func (m *ClusterRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateDescription(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateExposedKnoxServices(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -294,23 +281,6 @@ func (m *ClusterRequest) validateDescription(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterRequest) validateExposedKnoxServices(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ExposedKnoxServices) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.ExposedKnoxServices); i++ {
-
-		if err := validate.RequiredString("exposedKnoxServices"+"."+strconv.Itoa(i), "body", string(m.ExposedKnoxServices[i])); err != nil {
-			return err
-		}
-
 	}
 
 	return nil

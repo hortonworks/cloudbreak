@@ -377,9 +377,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			RdsConfigIds:              rdsConfigIds,
 			BlueprintInputs:           inputs,
 			BlueprintCustomProperties: skeleton.Configurations,
-			EnableKnoxGateway:         &enableKnoxGateway,
-			KnoxTopologyName:          &knoxTopologyName,
-			ExposedKnoxServices:       exposedServices,
+			Gateway: &models.GatewayJSON{
+				EnableGateway:   &enableKnoxGateway,
+				TopologyName:    &knoxTopologyName,
+				ExposedServices: exposedServices,
+			},
 		}
 
 		resp, err := postCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})

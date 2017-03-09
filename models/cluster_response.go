@@ -63,17 +63,13 @@ type ClusterResponse struct {
 	 */
 	Description *string `json:"description,omitempty"`
 
-	/* enable Knox gateway security
-	 */
-	EnableKnoxGateway *bool `json:"enableKnoxGateway,omitempty"`
-
 	/* shipyard service enabled in the cluster
 	 */
 	EnableShipyard *bool `json:"enableShipyard,omitempty"`
 
-	/* exposed Knox services
+	/* gateway
 	 */
-	ExposedKnoxServices []string `json:"exposedKnoxServices,omitempty"`
+	Gateway *GatewayJSON `json:"gateway,omitempty"`
 
 	/* host groups
 
@@ -88,10 +84,6 @@ type ClusterResponse struct {
 	/* id of the resource
 	 */
 	ID *int64 `json:"id,omitempty"`
-
-	/* Knox topology name
-	 */
-	KnoxTopologyName *string `json:"knoxTopologyName,omitempty"`
 
 	/* LDAP config for the cluster
 	 */
@@ -172,11 +164,6 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateExposedKnoxServices(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateHostGroups(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -253,23 +240,6 @@ func (m *ClusterResponse) validateConfigStrategy(formats strfmt.Registry) error 
 
 	if err := m.validateConfigStrategyEnum("configStrategy", "body", *m.ConfigStrategy); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (m *ClusterResponse) validateExposedKnoxServices(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ExposedKnoxServices) { // not required
-		return nil
-	}
-
-	for i := 0; i < len(m.ExposedKnoxServices); i++ {
-
-		if err := validate.RequiredString("exposedKnoxServices"+"."+strconv.Itoa(i), "body", string(m.ExposedKnoxServices[i])); err != nil {
-			return err
-		}
-
 	}
 
 	return nil

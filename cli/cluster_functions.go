@@ -237,24 +237,27 @@ func (c *ClusterSkeletonResult) fill(
 
 func fillWebAccess(cluster *models.ClusterResponse, skeleton *ClusterSkeletonResult) {
 	serviceMap := make(map[string]int)
-	for index, service := range cluster.ExposedKnoxServices {
-		serviceMap[service] = index
-	}
-	for _, service := range BASE_EXPOSED_SERVICES {
-		if _, ok := serviceMap[service]; ok {
-			skeleton.WebAccess = true
-		}
-	}
 
-	for _, service := range HIVE_EXPOSED_SERVICES {
-		if _, ok := serviceMap[service]; ok {
-			skeleton.HiveJDBCAccess = true
+	if cluster.Gateway != nil {
+		for index, service := range cluster.Gateway.ExposedServices {
+			serviceMap[service] = index
 		}
-	}
+		for _, service := range BASE_EXPOSED_SERVICES {
+			if _, ok := serviceMap[service]; ok {
+				skeleton.WebAccess = true
+			}
+		}
 
-	for _, service := range CLUSTER_MANAGER_EXPOSED_SERVICES {
-		if _, ok := serviceMap[service]; ok {
-			skeleton.ClusterComponentAccess = true
+		for _, service := range HIVE_EXPOSED_SERVICES {
+			if _, ok := serviceMap[service]; ok {
+				skeleton.HiveJDBCAccess = true
+			}
+		}
+
+		for _, service := range CLUSTER_MANAGER_EXPOSED_SERVICES {
+			if _, ok := serviceMap[service]; ok {
+				skeleton.ClusterComponentAccess = true
+			}
 		}
 	}
 }

@@ -221,7 +221,9 @@ func TestFillWithSecurityMap(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
 	cl := models.ClusterResponse{
-		ExposedKnoxServices: []string{"AMBARI"},
+		Gateway: &models.GatewayJSON{
+			ExposedServices: []string{"AMBARI"},
+		},
 	}
 	sr.Cluster = &cl
 
