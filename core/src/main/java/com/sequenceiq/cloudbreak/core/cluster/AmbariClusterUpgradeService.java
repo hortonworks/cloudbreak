@@ -67,7 +67,7 @@ public class AmbariClusterUpgradeService {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
                 InstanceMetaData gatewayInstance = gatewayInstanceGroup.getInstanceMetaData().iterator().next();
-                GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getEnableKnoxGateway());
+                GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway().getEnableGateway());
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
                 ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId());
                 AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(cluster.getId());

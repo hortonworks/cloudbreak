@@ -147,9 +147,9 @@ public class ClusterHostServiceRunner {
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
-        gateway.put("topology", cluster.getKnoxTopologyName());
+        gateway.put("topology", cluster.getGateway().getTopologyName());
 
-        Json exposedJson = cluster.getExposedKnoxServices();
+        Json exposedJson = cluster.getGateway().getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
             List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
             if (blueprintProcessor.componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE", cluster.getBlueprint().getBlueprintText())) {

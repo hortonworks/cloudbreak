@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
+import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -185,17 +187,22 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private void convertKnox(Cluster source, ClusterResponse clusterResponse) {
-        clusterResponse.setEnableKnoxGateway(source.getEnableKnoxGateway());
-        clusterResponse.setKnoxTopologyName(source.getKnoxTopologyName());
-        Json exposedJson = source.getExposedKnoxServices();
+        Gateway gateway = source.getGateway();
+        GatewayJson gatewayJson = new GatewayJson();
+
+        gatewayJson.setEnableGateway(gateway.getEnableGateway());
+        gatewayJson.setTopologyName(gateway.getTopologyName());
+        Json exposedJson = gateway.getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
             try {
-                clusterResponse.setExposedKnoxServices(exposedJson.get(ExposedServices.class).getServices());
+                gatewayJson.setExposedServices(exposedJson.get(ExposedServices.class).getServices());
             } catch (IOException e) {
                 LOGGER.error("Failed to add exposedServices to response", e);
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
             }
         }
+        clusterResponse.setGateway(gatewayJson);
+
     }
 
     private void convertContainerConfig(Cluster source, ClusterResponse clusterResponse) {
@@ -303,15 +310,16 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
             List<String> exposedServices = new ArrayList<>();
-            if (cluster.getExposedKnoxServices() != null && cluster.getExposedKnoxServices().getValue() != null) {
-                exposedServices = cluster.getExposedKnoxServices().get(ExposedServices.class).getServices();
+            Gateway gateway = cluster.getGateway();
+            if (gateway.getExposedServices() != null && gateway.getExposedServices().getValue() != null) {
+                exposedServices = gateway.getExposedServices().get(ExposedServices.class).getServices();
             }
 
             for (Port port : ports) {
                 if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
                     String url;
-                    if (cluster.getEnableKnoxGateway()) {
-                        url = String.format("https://%s:8443/gateway/%s%s", cluster.getAmbariIp(), cluster.getKnoxTopologyName(),
+                    if (gateway.getEnableGateway()) {
+                        url = String.format("https://%s:8443/gateway/%s%s", cluster.getAmbariIp(), gateway.getTopologyName(),
                                 port.getExposedService().getKnoxUrl());
                         if (exposedServices.contains(port.getExposedService().getKnoxService())) {
                             result.put(port.getExposedService().getPortName(), url);
@@ -329,11 +337,12 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         String url;
         String orchestrator = cluster.getStack().getOrchestrator().getType();
         if (cluster.getAmbariIp() != null) {
+            Gateway gateway = cluster.getGateway();
             if (YARN.equals(orchestrator) || MARATHON.equals(orchestrator)) {
                 url = String.format("http://%s:8080", cluster.getAmbariIp());
             } else {
-                if (cluster.getEnableKnoxGateway() != null && cluster.getEnableKnoxGateway()) {
-                    url = String.format("https://%s:8443/gateway/%s/ambari/", cluster.getAmbariIp(), cluster.getKnoxTopologyName());
+                if (gateway.getEnableGateway() != null && gateway.getEnableGateway()) {
+                    url = String.format("https://%s:8443/gateway/%s/ambari/", cluster.getAmbariIp(), gateway.getTopologyName());
                 } else {
                     url = String.format("https://%s/ambari/", cluster.getAmbariIp());
                 }

@@ -162,14 +162,8 @@ public class Cluster implements ProvisionEntity {
 
     private String emailTo;
 
-    @Column(nullable = false)
-    private Boolean enableKnoxGateway;
-
-    private String knoxTopologyName;
-
-    @Convert(converter = JsonToString.class)
-    @Column(columnDefinition = "TEXT")
-    private Json exposedKnoxServices;
+    @OneToOne(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Gateway gateway;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HostGroup> hostGroups = new HashSet<>();
@@ -245,6 +239,10 @@ public class Cluster implements ProvisionEntity {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public String getOwner() {
         return owner;
     }
@@ -259,10 +257,6 @@ public class Cluster implements ProvisionEntity {
 
     public void setAccount(String account) {
         this.account = account;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public Status getStatus() {
@@ -335,10 +329,6 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isSecure() {
         return secure == null ? false : secure;
-    }
-
-    public void setSecure(Boolean secure) {
-        this.secure = secure;
     }
 
     public Boolean isLdapRequired() {
@@ -441,6 +431,10 @@ public class Cluster implements ProvisionEntity {
         return secure;
     }
 
+    public void setSecure(Boolean secure) {
+        this.secure = secure;
+    }
+
     public Boolean getEnableShipyard() {
         return enableShipyard;
     }
@@ -477,28 +471,12 @@ public class Cluster implements ProvisionEntity {
         this.emailTo = emailTo;
     }
 
-    public Boolean getEnableKnoxGateway() {
-        return enableKnoxGateway;
+    public Gateway getGateway() {
+        return gateway;
     }
 
-    public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
-        this.enableKnoxGateway = enableKnoxGateway;
-    }
-
-    public String getKnoxTopologyName() {
-        return knoxTopologyName;
-    }
-
-    public void setKnoxTopologyName(String knoxTopologyName) {
-        this.knoxTopologyName = knoxTopologyName;
-    }
-
-    public Json getExposedKnoxServices() {
-        return exposedKnoxServices;
-    }
-
-    public void setExposedKnoxServices(Json exposedKnoxServices) {
-        this.exposedKnoxServices = exposedKnoxServices;
+    public void setGateway(Gateway gateway) {
+        this.gateway = gateway;
     }
 
     public ConfigStrategy getConfigStrategy() {

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 
@@ -58,8 +59,9 @@ public class ZeppelinConfigProvider {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
         try {
             Map<String, Object> model = new HashMap<>();
+            Gateway gateway = cluster.getGateway();
             model.put("zeppelin_admin_password", cluster.getPassword());
-            model.put("knoxGateway", cluster.getEnableKnoxGateway());
+            model.put("knoxGateway", gateway.getEnableGateway());
             String shiroIniContent = processTemplateIntoString(freemarkerConfiguration.getTemplate("hdp/zeppelin/shiro_ini_content.ftl", "UTF-8"), model);
 
             HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(cluster.getId());

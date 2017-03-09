@@ -22,7 +22,7 @@ public class GatewayConfigService {
     public GatewayConfig getGatewayConfig(Stack stack) throws CloudbreakSecuritySetupException {
         InstanceGroup gateway = stack.getGatewayInstanceGroup();
         InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
-        return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getEnableKnoxGateway());
+        return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
     }
 
     public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance, Boolean knoxGatewayEnabled)
