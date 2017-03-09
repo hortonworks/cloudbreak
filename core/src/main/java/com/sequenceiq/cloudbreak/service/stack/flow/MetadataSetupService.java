@@ -63,7 +63,7 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
             instanceMetaDataEntry.setPublicIp(md.getPublicIp());
             instanceMetaDataEntry.setSshPort(md.getSshPort());
-            instanceMetaDataEntry.setHypervisor(md.getHypervisor());
+            instanceMetaDataEntry.setLocalityIndicator(md.getLocalityIndicator());
             instanceMetaDataEntry.setInstanceGroup(instanceGroup);
             instanceMetaDataEntry.setInstanceId(instanceId);
             instanceMetaDataEntry.setPrivateId(privateId);

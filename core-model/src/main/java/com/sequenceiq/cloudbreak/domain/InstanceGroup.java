@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -19,6 +20,8 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @NamedQueries({
@@ -59,6 +62,10 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     @OneToMany(mappedBy = "instanceGroup", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Set<InstanceMetaData> instanceMetaData = new HashSet<>();
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json attributes;
 
     public String getGroupName() {
         return groupName;
@@ -132,6 +139,14 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     public void setInstanceGroupType(InstanceGroupType instanceGroupType) {
         this.instanceGroupType = instanceGroupType;
+    }
+
+    public Json getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Json attributes) {
+        this.attributes = attributes;
     }
 
     @Override

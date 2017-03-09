@@ -9,12 +9,14 @@ import javax.inject.Inject;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
@@ -63,6 +65,13 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
         if (json.getSecurityGroup() != null) {
             instanceGroup.setSecurityGroup(getConversionService().convert(json.getSecurityGroup(), SecurityGroup.class));
         }
+        try {
+            Json jsonProperties = new Json(json.getParameters());
+            instanceGroup.setAttributes(jsonProperties);
+        } catch (JsonProcessingException e) {
+            instanceGroup.setAttributes(null);
+        }
+
         return instanceGroup;
     }
 }

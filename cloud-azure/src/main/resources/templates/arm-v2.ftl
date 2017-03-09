@@ -88,11 +88,30 @@
       "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
       </#if>
       <#list igs as group>
-      "${group?replace('_', '')}secGroupName": "${group?replace('_', '')}${stackname}sg",
+      "${group.compressedName}secGroupName": "${group.compressedName}${stackname}sg",
+          <#if group.availabilitySetName?? && group.availabilitySetName?has_content>
+          "${group.compressedName}AsName": "${group.availabilitySetName}",
+          "${group.compressedName}AsFaultDomainCount": ${group.platformFaultDomainCount},
+          "${group.compressedName}AsUpdateDomainCount": ${group.platformUpdateDomainCount},
+          </#if>
       </#list>
       "sshKeyPath" : "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
   	},
     "resources": [
+            <#list igs as group>
+                <#if group.availabilitySetName?? && group.availabilitySetName?has_content>
+            {
+                "type": "Microsoft.Compute/availabilitySets",
+                "name": "[variables('${group.compressedName}AsName')]",
+                "apiVersion": "2016-03-30",
+                "location": "[resourceGroup().location]",
+                "properties": {
+                    "platformFaultDomainCount": "[variables('${group.compressedName}AsFaultDomainCount')]",
+                    "platformUpdateDomainCount": "[variables('${group.compressedName}AsUpdateDomainCount')]"
+                }
+            },
+                </#if>
+            </#list>
             <#if !existingVPC>
             {
                  "apiVersion": "2015-05-01-preview",
@@ -100,7 +119,7 @@
                  <#if !noFirewallRules>
                  "dependsOn": [
                     <#list igs as group>
-                        "[concat('Microsoft.Network/networkSecurityGroups/', variables('${group?replace('_', '')}secGroupName'))]"<#if (group_index + 1) != igs?size>,</#if>
+                        "[concat('Microsoft.Network/networkSecurityGroups/', variables('${group.compressedName}secGroupName'))]"<#if (group_index + 1) != igs?size>,</#if>
                     </#list>
                  ],
                  </#if>
@@ -135,7 +154,7 @@
              {
                "apiVersion": "2015-05-01-preview",
                "type": "Microsoft.Network/networkSecurityGroups",
-               "name": "[variables('${group?replace('_', '')}secGroupName')]",
+               "name": "[variables('${group.compressedName}secGroupName')]",
                "location": "[parameters('region')]",
                <#if userDefinedTags?? && userDefinedTags?has_content>
                "tags": {
@@ -159,7 +178,7 @@
                            "direction": "Outbound"
                        }
                    },
-                   <#list securities[group] as port>
+                   <#list securities[group.name] as port>
                    {
                        "name": "endpoint${port_index}inr",
                        "properties": {
@@ -172,7 +191,7 @@
                            "priority": ${port_index + 102},
                            "direction": "Inbound"
                        }
-                   }<#if (port_index + 1) != securities[group]?size>,</#if>
+                   }<#if (port_index + 1) != securities[group.name]?size>,</#if>
                    </#list>
                    ]
                }
@@ -264,6 +283,11 @@
                    },
                    </#if>
                    "properties": {
+                        <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                        "availabilitySet": {
+                            "id": "[resourceId('Microsoft.Compute/availabilitySets', '${instance.availabilitySetName}')]"
+                        },
+                        </#if>
                        "hardwareProfile": {
                            "vmSize": "${instance.flavor}"
                        },

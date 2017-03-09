@@ -12,9 +12,15 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class AzureStackView {
 
+    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 3;
+
+    private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
+
     private Map<String, List<AzureInstanceView>> groups = new HashMap<>();
 
-    private List<String> instanceGroups = new ArrayList<>();
+    private List<AzureInstanceGroupView> instanceGroups = new ArrayList<>();
+
+    private List<String> instanceGroupNames = new ArrayList<>();
 
     public AzureStackView(String stackName, int stackNamePrefixLength, List<Group> groupList, AzureStorageView armStorageView) {
         for (Group group : groupList) {
@@ -24,14 +30,29 @@ public class AzureStackView {
                 existingInstances = new ArrayList<>();
                 groups.put(groupName, existingInstances);
             }
+            AzureInstanceGroupView instanceGroupView;
+            Map asMap = group.getParameter("availabilitySet", HashMap.class);
+            if (asMap != null) {
+                String asName = (String) asMap.get("name");
+                Integer faultDomainCount = (asMap != null && asMap.get("faultDomainCount") != null)
+                        ? (Integer) asMap.get("faultDomainCount") : DEFAULT_FAULT_DOMAIN_COUNTER;
+                Integer updateDomainCount = (asMap != null && asMap.get("updateDomainCount") != null)
+                        ? (Integer) asMap.get("updateDomainCount") : DEFAULT_UPDATE_DOMAIN_COUNTER;
+
+                instanceGroupView = new AzureInstanceGroupView(group.getName(), faultDomainCount, updateDomainCount,
+                        asName);
+            } else {
+                instanceGroupView = new AzureInstanceGroupView(group.getName());
+            }
             for (CloudInstance instance : group.getInstances()) {
                 InstanceTemplate template = instance.getTemplate();
                 String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
                 AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(), attachedDiskStorageName,
-                        template.getVolumeType(), group.getName());
+                        template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName());
                 existingInstances.add(azureInstance);
             }
-            instanceGroups.add(group.getName());
+            instanceGroupNames.add(group.getName());
+            instanceGroups.add(instanceGroupView);
         }
     }
 
@@ -39,8 +60,12 @@ public class AzureStackView {
         return groups;
     }
 
-    public List<String> getInstanceGroups() {
+    public List<AzureInstanceGroupView> getInstanceGroups() {
         return instanceGroups;
+    }
+
+    public List<String> getInstanceGroupNames() {
+        return instanceGroupNames;
     }
 
     public Map<String, AzureDiskType> getStorageAccounts() {

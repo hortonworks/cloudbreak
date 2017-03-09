@@ -128,7 +128,7 @@ public class CommandDefinition {
     @Bean
     public AzureCommands azureCredentialCommands() {
         return new AzureCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
-                baseTemplateCommands(), basePlatformCommands(), stackCommands());
+                baseTemplateCommands(), basePlatformCommands(), stackCommands(), instanceGroupCommands());
     }
 
     @Bean

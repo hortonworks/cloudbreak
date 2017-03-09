@@ -69,6 +69,15 @@
                                     </select>
                                 </div>
                             </div>
+                             <div class="form-group" ng-show="cluster.parameters.azureAvailabilitySetsEnabled">
+                                <label class="col-sm-3 control-label" for="availabilitySet{{$index}}">{{msg.cluster_form_availabilityset_label}}</label>
+                                <div class="col-sm-8">
+                                    <select class="form-control" id="availabilitySet{{$index}}" name="availabilitySet{{$index}}" ng-model="instanceGroup.parameters.availabilitySet" ng-options="availabilityset as availabilityset.name disable when isAvailabilitySetDisabled(availabilityset.name, instanceGroup) for availabilityset in cluster.azureAvailabilitySets | orderBy:'name'" ng-required="activeCredential">
+                                        <option value="">-- use none --</option>
+                                    </select>
+                                    <div class="help-block" ng-hide="hideAvailabilitySetHostgroupWarning(instanceGroup)"><i class="fa fa-warning"></i> {{msg.cluster_form_hostgroup_availabilityset_warning}}</div>
+                                </div>
+                            </div>
                             <div class="form-group" ng-hide='instanceGroup.nodeCount !== 1'>
                                 <label class="col-sm-3 control-label" for="template-ambari-{{$index}}">{{msg.cluster_form_hostgroup_ambari_label}}</label>
                                 <div class="col-sm-8">

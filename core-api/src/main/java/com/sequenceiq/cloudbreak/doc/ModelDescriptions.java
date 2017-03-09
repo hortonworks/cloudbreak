@@ -255,6 +255,7 @@ public class ModelDescriptions {
         public static final String STATUS = "status of the instance";
         public static final String SECURITY_GROUP_ID = "security group resource id for the instance group";
         public static final String METADATA = "metadata of instances";
+        public static final String PARAMETERS = "cloud specific parameters for instance group";
     }
 
     public static class InstanceGroupAdjustmentModelDescription {

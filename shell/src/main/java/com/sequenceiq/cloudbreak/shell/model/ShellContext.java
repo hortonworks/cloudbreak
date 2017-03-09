@@ -83,6 +83,8 @@ public class ShellContext {
 
     private Map<Long, String> rdsConfigs = new HashMap<>();
 
+    private Map<String, AvailabilitySetEntry> azureAvailabilitySets = new HashMap<>();
+
     private Long activeNetworkId;
 
     private FileSystemType fileSystemType;
@@ -136,6 +138,7 @@ public class ShellContext {
         this.constraintTemplates = new HashSet<>();
         this.marathonHostgroups = new HashMap<>();
         this.yarnHostgroups = new HashMap<>();
+        this.azureAvailabilitySets = new HashMap<>();
     }
 
     public ResponseTransformer responseTransformer() {
@@ -254,7 +257,8 @@ public class ShellContext {
                             instanceGroup.getTemplateId(),
                             instanceGroup.getSecurityGroupId(),
                             instanceGroup.getNodeCount(),
-                            instanceGroup.getType().name()
+                            instanceGroup.getType().name(),
+                            instanceGroup.getParameters()
                     )
             );
         }
@@ -350,6 +354,15 @@ public class ShellContext {
 
     public Map<String, MarathonHostgroupEntry> getMarathonHostGroups() {
         return marathonHostgroups;
+    }
+
+    public Map<String, AvailabilitySetEntry> putAzureAvailabilitySet(String name, AvailabilitySetEntry azureAvailabilitySetEntry) {
+        this.azureAvailabilitySets.put(name, azureAvailabilitySetEntry);
+        return this.azureAvailabilitySets;
+    }
+
+    public Map<String, AvailabilitySetEntry> getAzureAvailabilitySets() {
+        return azureAvailabilitySets;
     }
 
     public Map<String, YarnHostgroupEntry> putYarnHostGroup(String name, YarnHostgroupEntry hostgroupEntry) {

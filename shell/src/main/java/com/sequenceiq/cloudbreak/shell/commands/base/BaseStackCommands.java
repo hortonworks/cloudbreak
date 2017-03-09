@@ -301,6 +301,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 instanceGroupRequest.setNodeCount(instanceGroupEntry.getNodeCount());
                 instanceGroupRequest.setGroup(stringObjectEntry.getKey());
                 instanceGroupRequest.setSecurityGroupId(instanceGroupEntry.getSecurityGroupId());
+                instanceGroupRequest.setParameters(instanceGroupEntry.getAttributes());
                 instanceGroupRequestList.add(instanceGroupRequest);
             }
             stackRequest.setInstanceGroups(instanceGroupRequestList);

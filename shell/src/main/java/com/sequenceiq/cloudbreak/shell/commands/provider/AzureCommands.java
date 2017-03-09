@@ -21,13 +21,23 @@ import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
 import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.completion.ArmOrchestratorType;
+import com.sequenceiq.cloudbreak.shell.completion.AvailabilitySetName;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.AzureVolumeType;
+import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
+import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
+import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupId;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupName;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
+import com.sequenceiq.cloudbreak.shell.model.AvailabilitySetEntry;
+import com.sequenceiq.cloudbreak.shell.model.AvailabilitySetFaultDomainNumber;
+import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.util.TagParser;
 
@@ -51,13 +61,16 @@ public class AzureCommands implements CommandMarker {
 
     private StackCommands stackCommands;
 
+    private InstanceGroupCommands instanceGroupCommands;
+
     public AzureCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
             NetworkCommands baseNetworkCommands,
             SecurityGroupCommands baseSecurityGroupCommands,
             TemplateCommands baseTemplateCommands,
             PlatformCommands basePlatformCommands,
-            StackCommands stackCommands) {
+            StackCommands stackCommands,
+            InstanceGroupCommands instanceGroupCommands) {
         this.baseCredentialCommands = baseCredentialCommands;
         this.baseNetworkCommands = baseNetworkCommands;
         this.baseSecurityGroupCommands = baseSecurityGroupCommands;
@@ -65,6 +78,7 @@ public class AzureCommands implements CommandMarker {
         this.baseTemplateCommands = baseTemplateCommands;
         this.basePlatformCommands = basePlatformCommands;
         this.stackCommands = stackCommands;
+        this.instanceGroupCommands = instanceGroupCommands;
     }
 
     @CliAvailabilityIndicator(value = "stack create --AZURE")
@@ -95,6 +109,11 @@ public class AzureCommands implements CommandMarker {
     @CliAvailabilityIndicator(value = "credential create --AZURE")
     public boolean createCredentialAvailable() {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
+    }
+
+    @CliAvailabilityIndicator(value = "instancegroup configure --AZURE")
+    public boolean configureInstanceGroupAvailable() {
+        return instanceGroupCommands.createAvailable() && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliCommand(value = "credential create --AZURE", help = "Create a new Azure credential")
@@ -246,6 +265,71 @@ public class AzureCommands implements CommandMarker {
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
+    }
+
+    @CliCommand(value = "availabilityset", help = "Create an Azure availability set configuration")
+    public String createAvailabilitySet(
+            @CliOption(key = "name", mandatory = true, help = "Name of the availability set") String name,
+            @CliOption(key = "platformFaultDomainCount", mandatory = true, help = "Number of fault domains")
+            final AvailabilitySetFaultDomainNumber platformFaultDomainCount) {
+        try {
+            if (platformFaultDomainCount.number() > AvailabilitySetFaultDomainNumber.THREE.number()
+                    || platformFaultDomainCount.number() < AvailabilitySetFaultDomainNumber.TWO.number()) {
+                throw shellContext.exceptionTransformer()
+                        .transformToRuntimeException("The number of fault domains must be between 2 and 3!");
+            }
+            AvailabilitySetEntry as = new AvailabilitySetEntry();
+            as.setName(name);
+            as.setFaultDomainCount(platformFaultDomainCount);
+            shellContext.putAzureAvailabilitySet(name, as);
+            return shellContext.outputTransformer().render(shellContext.getAzureAvailabilitySets(), "Availability sets");
+
+        } catch (Exception e) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(e);
+        }
+    }
+
+    @CliCommand(value = "instancegroup configure --AZURE", help = "Configure instance groups")
+    public String create(
+            @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
+            @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
+            @CliOption(key = "ambariServer", mandatory = true, help = "Ambari server will be installed here if true") boolean ambariServer,
+            @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
+            @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
+            @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
+            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName,
+            @CliOption(key = "availabilitySetName", help = "Availability set name for the instanceGroup") AvailabilitySetName availabilitySetName)
+            throws Exception {
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        if (availabilitySetName != null) {
+            String asName = availabilitySetName.getName();
+            for (String otherIgName : shellContext.getInstanceGroups().keySet()) {
+                InstanceGroupEntry otherIgEntry = shellContext.getInstanceGroups().get(otherIgName);
+                if (instanceGroup.getName().equals(otherIgName)) {
+                    continue;
+                }
+                if (otherIgEntry.getAttributes() != null && otherIgEntry.getAttributes().get("availabilitySet") != null) {
+                    Object otherIgAs = otherIgEntry.getAttributes().get("availabilitySet");
+                    if (otherIgAs != null && otherIgAs instanceof HashMap) {
+                        String otherIgAsName =  (String) ((HashMap) otherIgAs).get("name");
+                        if (asName.equals(otherIgAsName)) {
+                            throw shellContext.exceptionTransformer()
+                                    .transformToRuntimeException("Cannot use the same availability set for two different instance groups!");
+                        }
+                    }
+                }
+            }
+
+            AvailabilitySetEntry as = shellContext.getAzureAvailabilitySets().get(availabilitySetName.getName());
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("name", as.getName());
+            map.put("faultDomainCount", as.getFaultDomainCount().number());
+            parameters.put("availabilitySet", map);
+        }
+        return instanceGroupCommands.create(instanceGroup, nodeCount, ambariServer, instanceGroupTemplateId, instanceGroupTemplateName,
+                instanceGroupSecurityGroupId, instanceGroupSecurityGroupName, parameters);
     }
 
     @CliCommand(value = "stack create --AZURE", help = "Create a new Azure stack based on a template")

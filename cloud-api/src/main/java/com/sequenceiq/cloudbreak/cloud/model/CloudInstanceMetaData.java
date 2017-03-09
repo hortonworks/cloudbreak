@@ -12,20 +12,20 @@ public class CloudInstanceMetaData {
 
     private final int sshPort;
 
-    private final String hypervisor;
+    private final String localityIndicator;
 
     public CloudInstanceMetaData(String privateIp, String publicIp) {
         this(privateIp, publicIp, null);
     }
 
-    public CloudInstanceMetaData(String privateIp, String publicIp, String hypervisor) {
-        this(privateIp, publicIp, DEFAULT_SSH_PORT, hypervisor);
+    public CloudInstanceMetaData(String privateIp, String publicIp, String localityIndicator) {
+        this(privateIp, publicIp, DEFAULT_SSH_PORT, localityIndicator);
     }
 
-    public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String hypervisor) {
+    public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String localityIndicator) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
-        this.hypervisor = hypervisor;
+        this.localityIndicator = localityIndicator;
         this.sshPort = sshPort;
     }
 
@@ -41,8 +41,8 @@ public class CloudInstanceMetaData {
         return sshPort;
     }
 
-    public String getHypervisor() {
-        return hypervisor;
+    public String getLocalityIndicator() {
+        return localityIndicator;
     }
 
     //BEGIN GENERATED CODE
@@ -51,7 +51,7 @@ public class CloudInstanceMetaData {
         return "InstanceMetaData{" +
                 ", privateIp='" + privateIp + '\'' +
                 ", publicIp='" + publicIp + '\'' +
-                ", hypervisor='" + hypervisor + '\'' +
+                ", localityIndicator='" + localityIndicator + '\'' +
                 '}';
     }
     //END GENERATED CODE

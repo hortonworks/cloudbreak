@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 @Service
 public class AzureMetadataCollector implements MetadataCollector {
 
+    public static final Character LOCALITY_SEPARATOR = '/';
+
     @Inject
     private AzureUtils azureUtils;
 
@@ -38,18 +40,34 @@ public class AzureMetadataCollector implements MetadataCollector {
 
         List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
 
-        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> azureUtils.getPrivateInstanceId(resource.getName(),
+        String resourceName = resource.getName();
+        Map<String, InstanceTemplate> templateMap = Maps.uniqueIndex(templates, from -> azureUtils.getPrivateInstanceId(resourceName,
                 from.getGroupName(), Long.toString(from.getPrivateId())));
 
         try {
             for (Map.Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
                 AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
-                VirtualMachine vm = azureClient.getVirtualMachine(resource.getName(), instance.getKey());
+                VirtualMachine vm = azureClient.getVirtualMachine(resourceName, instance.getKey());
 
                 NetworkInterface networkInterface = null;
                 String privateIp = null;
                 String publicIp = null;
-
+                Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceName, vm.name());
+                String platform = authenticatedContext.getCloudContext().getPlatform().value();
+                String location = authenticatedContext.getCloudContext().getLocation().getRegion().value();
+                String hostgroupNm = AzureUtils.getGroupName(instance.getValue().getGroupName());
+                StringBuilder localityIndicatorBuilder = new StringBuilder();
+                localityIndicatorBuilder.append(LOCALITY_SEPARATOR)
+                        .append(platform)
+                        .append(LOCALITY_SEPARATOR)
+                        .append(location)
+                        .append(LOCALITY_SEPARATOR)
+                        .append(resourceName)
+                        .append(LOCALITY_SEPARATOR)
+                        .append(hostgroupNm)
+                        .append(LOCALITY_SEPARATOR)
+                        .append(faultDomainCount);
+                AzureUtils.removeBlankSpace(localityIndicatorBuilder);
 
                 List<String> networkInterfaceIdList = vm.networkInterfaceIds();
                 for (String networkInterfaceId: networkInterfaceIdList) {
@@ -57,7 +75,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                     privateIp = networkInterface.primaryPrivateIp();
                     PublicIpAddress publicIpAddress = networkInterface.primaryIpConfiguration().getPublicIpAddress();
                     if (publicIpAddress == null || publicIpAddress.ipAddress() == null) {
-                        publicIp = azureClient.getLoadBalancerIps(resource.getName(), azureUtils.getLoadBalancerId(resource.getName())).get(0);
+                        publicIp = azureClient.getLoadBalancerIps(resourceName, azureUtils.getLoadBalancerId(resourceName)).get(0);
                     } else {
                         publicIp = publicIpAddress.ipAddress();
                     }
@@ -67,7 +85,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                 if (publicIp == null) {
                     throw new CloudConnectorException(String.format("Public ip address can not be null but it was on %s instance.", instance.getKey()));
                 }
-                CloudInstanceMetaData md = new CloudInstanceMetaData(privateIp, publicIp);
+                CloudInstanceMetaData md = new CloudInstanceMetaData(privateIp, publicIp, faultDomainCount == null ? null : localityIndicatorBuilder.toString());
 
                 InstanceTemplate template = templateMap.get(instanceId);
                 if (template != null) {

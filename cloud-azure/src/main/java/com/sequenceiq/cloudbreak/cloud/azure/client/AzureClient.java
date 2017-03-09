@@ -9,6 +9,7 @@ import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.network.LoadBalancer;
@@ -228,6 +229,14 @@ public class AzureClient {
 
     public Integer getUpdateDomainNumber(String resourceGroup, String vmName) {
         return getVirtualMachineInstanceView(resourceGroup, vmName).platformUpdateDomain();
+    }
+
+    public AvailabilitySet getAvailabilitySet(String resourceGroup, String asName) {
+        return azure.availabilitySets().getByGroup(resourceGroup, asName);
+    }
+
+    public void deleteAvailabilitySet(String resourceGroup, String asName) {
+        azure.availabilitySets().delete(resourceGroup, asName);
     }
 
     public void deallocateVirtualMachine(String resourceGroup, String vmName) {

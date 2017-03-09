@@ -20,6 +20,7 @@ import org.springframework.shell.converters.StaticFieldConverterImpl;
 import org.springframework.shell.converters.StringConverter;
 import org.springframework.shell.core.Converter;
 
+import com.sequenceiq.cloudbreak.shell.converter.AvailabilitySetNameConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AwsInstanceTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AwsOrchestratorTypeConverter;
 import com.sequenceiq.cloudbreak.shell.converter.AwsVolumeTypeConverter;
@@ -220,6 +221,11 @@ public class ConverterConfiguration {
     @Bean
     Converter azureInstanceTypeConverter() {
         return new AzureInstanceTypeConverter();
+    }
+
+    @Bean
+    Converter availabilitySetNameConverter() {
+        return new AvailabilitySetNameConverter();
     }
 
     @Bean

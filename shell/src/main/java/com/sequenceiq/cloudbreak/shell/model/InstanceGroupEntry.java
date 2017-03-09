@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.shell.model;
 
+import java.util.Map;
+
 public class InstanceGroupEntry {
 
     private Long templateId;
@@ -10,11 +12,14 @@ public class InstanceGroupEntry {
 
     private Long securityGroupId;
 
-    public InstanceGroupEntry(Long templateId, Long securityGroupId, Integer nodeCount, String type) {
+    private Map<String, Object> attributes;
+
+    public InstanceGroupEntry(Long templateId, Long securityGroupId, Integer nodeCount, String type, Map<String, Object>  attributes) {
         this.templateId = templateId;
         this.nodeCount = nodeCount;
         this.type = type;
         this.securityGroupId = securityGroupId;
+        this.attributes = attributes;
     }
 
     public Integer getNodeCount() {
@@ -35,5 +40,9 @@ public class InstanceGroupEntry {
 
     public void setType(String type) {
         this.type = type;
+    }
+
+    public Map<String, Object> getAttributes() {
+        return attributes;
     }
 }

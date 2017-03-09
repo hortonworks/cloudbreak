@@ -49,7 +49,8 @@ public class InstanceGroupCommands implements CommandMarker {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
-    @CliCommand(value = "instancegroup configure", help = "Configure instance groups")
+    @CliCommand(value = { "instancegroup configure --AWS", "instancegroup configure --GCP", "instancegroup configure --OPENSTACK"},
+            help = "Configure instance groups")
     public String create(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
@@ -57,8 +58,8 @@ public class InstanceGroupCommands implements CommandMarker {
             @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
             @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
             @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
-            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup")
-            SecurityGroupName instanceGroupSecurityGroupName) throws Exception {
+            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName,
+            Map<String, Object> parameters) throws Exception {
         try {
             String templateId;
             if (instanceGroupTemplateId != null) {
@@ -102,10 +103,10 @@ public class InstanceGroupCommands implements CommandMarker {
                         return "Allowed node count for Ambari server: 1";
                     }
                     shellContext.putInstanceGroup(instanceGroup.getName(),
-                            new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "GATEWAY"));
+                            new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "GATEWAY", parameters));
                 } else {
                     shellContext.putInstanceGroup(instanceGroup.getName(),
-                            new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "CORE"));
+                            new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "CORE", parameters));
                 }
                 shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<>(), RecoveryMode.MANUAL));
                 if (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
