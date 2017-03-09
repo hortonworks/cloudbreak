@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.compute.DataDisk;
 import com.microsoft.azure.management.compute.OSDisk;
@@ -96,8 +98,14 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 azureStorage.createStorage(ac, client, name, storageAccounts.get(name), resourceGroupName, region);
             }
             client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+        } catch (CloudException e) {
+            LOGGER.error("Provisioning error, cloud exception happened: ", e);
+            String details = e.getBody().getDetails().stream().map(CloudError::getMessage).collect(Collectors.joining(", "));
+            throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
+                    e.getBody().getCode(), e.getBody().getMessage(), details));
         } catch (Exception e) {
-            throw new CloudConnectorException(String.format("Invalid provisioning type: %s", stackName));
+            LOGGER.error("Provisioning error:", e);
+            throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
         }
 
         CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(stackName).build();
