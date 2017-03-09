@@ -43,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -363,15 +364,16 @@ public class TestUtil {
         cluster.setPassword("admin");
         cluster.setSssdConfig(sssdConfig);
         cluster.setEnableShipyard(true);
-        cluster.setEnableKnoxGateway(false);
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(true);
+        gateway.setTopologyName("cb");
+        cluster.setGateway(gateway);
         RDSConfig rdsConfig = new RDSConfig();
         Set<RDSConfig> rdsConfigs = new HashSet<>();
         rdsConfigs.add(rdsConfig);
         cluster.setRdsConfigs(rdsConfigs);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
-        cluster.setEnableKnoxGateway(true);
-        cluster.setKnoxTopologyName("cb");
         Map<String, String> map = new HashMap<>();
         try {
             cluster.setAttributes(new Json(map));

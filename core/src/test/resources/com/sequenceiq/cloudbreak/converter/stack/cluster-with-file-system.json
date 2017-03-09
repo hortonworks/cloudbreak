@@ -1,6 +1,5 @@
 {
   "name" : "mycluster",
-  "enableKnoxGateway" : true,
   "knoxTopologyName" : "cb",
   "emailNeeded" : true,
   "blueprintId": 50,
@@ -8,11 +7,13 @@
   "userName" : "user",
   "password" : "pass",
   "enableSecurity": false,
-  "enableKnoxGateway": false,
   "kerberos" : {
     "masterKey": "masterkey",
     "admin" : "admin",
     "password" : "passw"
+  },
+  "gateway" : {
+    "enableKnoxGateway": "false"
   },
   "validateBlueprint" : true,
   "emailTo": "admin@example.com",

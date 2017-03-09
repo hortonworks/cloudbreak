@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
+import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
@@ -189,8 +190,11 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setEnableSecurity(enableSecurity);
             clusterRequest.setHostGroups(hostGroupList);
             clusterRequest.setBlueprintInputs(new HashSet<>());
-            clusterRequest.setEnableKnoxGateway(enableKnoxGateway);
-            clusterRequest.setExposedKnoxServices(ImmutableList.of(ExposedService.ALL.name()));
+
+            GatewayJson gateway = new GatewayJson();
+            gateway.setEnableGateway(enableKnoxGateway);
+            gateway.setExposedServices(ImmutableList.of(ExposedService.ALL.name()));
+            clusterRequest.setGateway(gateway);
 
             if (strategy != null) {
                 clusterRequest.setConfigStrategy(strategy);

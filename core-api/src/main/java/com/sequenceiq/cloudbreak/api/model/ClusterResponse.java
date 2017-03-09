@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -102,14 +101,7 @@ public class ClusterResponse {
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_KNOX_GATEWAY)
-    private Boolean enableKnoxGateway;
-
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KNOX_TOPOLOGY_NAME)
-    private String knoxTopologyName;
-
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.EXPOSED_KNOX_SERVICES)
-    private List<String> exposedKnoxServices;
+    private GatewayJson gateway;
 
     @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerResponse customContainers;
@@ -358,28 +350,12 @@ public class ClusterResponse {
         this.blueprint = blueprint;
     }
 
-    public Boolean getEnableKnoxGateway() {
-        return enableKnoxGateway;
+    public GatewayJson getGateway() {
+        return gateway;
     }
 
-    public void setEnableKnoxGateway(Boolean enableKnoxGateway) {
-        this.enableKnoxGateway = enableKnoxGateway;
-    }
-
-    public String getKnoxTopologyName() {
-        return knoxTopologyName;
-    }
-
-    public void setKnoxTopologyName(String knoxTopologyName) {
-        this.knoxTopologyName = knoxTopologyName;
-    }
-
-    public List<String> getExposedKnoxServices() {
-        return exposedKnoxServices;
-    }
-
-    public void setExposedKnoxServices(List<String> exposedKnoxServices) {
-        this.exposedKnoxServices = exposedKnoxServices;
+    public void setGateway(GatewayJson gateway) {
+        this.gateway = gateway;
     }
 
     public CustomContainerResponse getCustomContainers() {

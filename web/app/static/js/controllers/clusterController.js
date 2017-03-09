@@ -527,8 +527,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     password: $scope.cluster.password,
                     userName: $scope.cluster.userName,
                     enableSecurity: $scope.cluster.enableSecurity || false,
-                    enableKnoxGateway: $scope.cluster.enableKnoxGateway || false,
-                    exposedKnoxServices: ['ALL'],
+                    gateway: $scope.cluster.gateway,
                     validateBlueprint: $scope.cluster.validateBlueprint,
                     imageId:  $scope.cluster.imageId || null,
                     fileSystem: $scope.cluster.fileSystem || null,
@@ -886,8 +885,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.orchestrator = {};
                 $scope.cluster.availabilityZone = null;
                 $scope.cluster.region = null;
-                $scope.cluster.enableKnoxGateway = false;
-                $scope.cluster.exposedKnoxServices = ['ALL'];
+                $scope.cluster.gateway = {};
                 delete $scope.cluster.hostGroups;
                 delete $scope.cluster.instanceGroups;
                 delete $scope.cluster.blueprintId;
@@ -1280,8 +1278,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 onFailureAction: "DO_NOTHING",
                 bestEffort: "BEST_EFFORT",
                 validateBlueprint: true,
-                enableKnoxGateway: false,
-                exposedKnoxServices: ['ALL'],
+                gateway: {
+                  enableGateway: false,
+                  exposedServices: ['ALL']
+                },
                 parameters: {},
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",

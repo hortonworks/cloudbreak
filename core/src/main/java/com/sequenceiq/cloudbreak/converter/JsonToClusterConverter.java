@@ -14,14 +14,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
+import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
+import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
@@ -88,26 +90,35 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
     }
 
     private void convertKnox(ClusterRequest source, Cluster cluster) {
-        cluster.setEnableKnoxGateway(source.getEnableKnoxGateway());
-        if (Strings.isNullOrEmpty(source.getKnoxTopologyName())) {
-            cluster.setKnoxTopologyName(source.getName());
-        } else {
-            cluster.setKnoxTopologyName(source.getKnoxTopologyName());
-        }
-        try {
-            ExposedServices exposedServices = new ExposedServices();
-            if (source.getExposedKnoxServices() != null) {
-                if (source.getExposedKnoxServices().contains(ExposedService.ALL.name())) {
+        GatewayJson gatewayJson = source.getGateway();
+        Gateway gateway = new Gateway();
+        gateway.setEnableGateway(Boolean.FALSE);
+        gateway.setTopologyName(source.getName());
+        ExposedServices exposedServices = new ExposedServices();
+
+        if (gatewayJson != null && gatewayJson.getEnableGateway() != null) {
+            gateway.setEnableGateway(gatewayJson.getEnableGateway());
+            if (!Strings.isNullOrEmpty(gatewayJson.getTopologyName())) {
+                gateway.setTopologyName(gatewayJson.getTopologyName());
+            }
+            if (gatewayJson.getExposedServices() != null) {
+                if (gatewayJson.getExposedServices().contains(ExposedService.ALL.name())) {
                     exposedServices.setServices(ExposedService.getAllKnoxExposed());
                 } else {
-                    exposedServices.setServices(source.getExposedKnoxServices());
+                    exposedServices.setServices(gatewayJson.getExposedServices());
                 }
             }
-            cluster.setExposedKnoxServices(new Json(exposedServices));
+        }
+        try {
+            gateway.setExposedServices(new Json(exposedServices));
         } catch (JsonProcessingException e) {
             LOGGER.error("Failed to store exposedServices", e);
             throw new CloudbreakApiException("Failed to store exposedServices", e);
         }
+
+        gateway.setPath("gateway");
+        cluster.setGateway(gateway);
+        gateway.setCluster(cluster);
     }
 
     private Map<String, String> convertBlueprintInputJsons(Set<BlueprintInputJson> inputs) {

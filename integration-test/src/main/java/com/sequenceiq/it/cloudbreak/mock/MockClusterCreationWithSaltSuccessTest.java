@@ -25,9 +25,11 @@ import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -101,6 +103,10 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         kerberosRequest.setPassword(kerberosPassword);
         kerberosRequest.setMasterKey(kerberosMasterKey);
         clusterRequest.setKerberos(kerberosRequest);
+        GatewayJson gatewayJson = new GatewayJson();
+        gatewayJson.setEnableGateway(Boolean.TRUE);
+        gatewayJson.setExposedServices(ImmutableList.of("ALL"));
+        clusterRequest.setGateway(gatewayJson);
         initSpark();
 
         Map<String, CloudVmMetaDataStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);

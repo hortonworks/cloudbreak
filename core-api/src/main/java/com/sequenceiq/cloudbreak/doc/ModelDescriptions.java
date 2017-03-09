@@ -73,9 +73,6 @@ public class ModelDescriptions {
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
         public static final String ENABLE_SECURITY = "enable Kerberos security";
-        public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
-        public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
-        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
         public static final String KERBEROS_MASTER_KEY = "kerberos master key";
         public static final String KERBEROS_ADMIN = "kerberos admin user";
         public static final String KERBEROS_PASSWORD = "kerberos admin password";
@@ -148,6 +145,15 @@ public class ModelDescriptions {
         public static final String RDS_CONFIGS = "details of the external database for Hadoop components";
         public static final String RDS_CONNECTION_RESULT = "result of RDS connection test";
         public static final String LDAP_CONNECTION_RESULT = "result of Ldap connection test";
+    }
+
+    public static class GatewayModelDescription {
+        public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
+        public static final String KNOX_PATH = "enable Knox gateway security";
+        public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
+        public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
+        public static final String KNOX_SSO_PROVIDER = "SSO provider cluster name";
+        public static final String KNOX_SSO_CERT = "SSO Provider certificate";
     }
 
     public static class ClusterTemplateModelDescription {
