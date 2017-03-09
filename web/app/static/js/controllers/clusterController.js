@@ -209,7 +209,14 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         securityGroupId: sgroupsActiveId,
                         group: k.name,
                         nodeCount: 1,
-                        type: "CORE"
+                        type: "CORE",
+                        parameters : {
+                            availabilitySet: {
+                                name: "",
+                                faultDomainCount: 3
+                            }
+                        },
+
                     });
                     if ($rootScope.activeCredential.cloudPlatform === "BYOS") {
                         var constraintTemplates = $rootScope.constraints;
@@ -1291,7 +1298,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 enableShipyard: false,
                 customImage: false,
                 customContainer: false,
-                userDefinedTags: []
+                userDefinedTags: [],
+                azureAvailabilitySets: []
             };
             $scope.selectSssd = {
                 show: false
@@ -1325,6 +1333,47 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.userDefinedTags.splice(index, 1);
             }
         }
+
+        $scope.addAvailabilitySet = function () {
+            $scope.cluster.azureAvailabilitySets.push({"name": "", "faultDomainCount": 3});
+        }
+
+        $scope.removeAvailabilitySet = function (availabilitySet) {
+            var index = $scope.cluster.azureAvailabilitySets.indexOf(availabilitySet);
+            if (index > -1) {
+                $scope.cluster.azureAvailabilitySets.splice(index, 1);
+            }
+        }
+
+        $scope.isAvailabilitySetsInvalid = function() {
+            var hasError = false;
+            var counts = {};
+            angular.forEach($scope.cluster.azureAvailabilitySets, function (availabilitySet) {
+                counts[availabilitySet.name] = (counts[availabilitySet.name] || 0)+1;
+                // there must be no multiplications in names
+                if (counts[availabilitySet.name] > 1) {
+                    hasError = true;
+                }
+                if (!availabilitySet["name"] || availabilitySet["name"].length < 3) {
+                    hasError = true;
+                }
+                if (!availabilitySet["faultDomainCount"] || availabilitySet["faultDomainCount"] < 2 || availabilitySet["faultDomainCount"] > 3) {
+                    hasError = true;
+                }
+            });
+            return hasError;
+        }
+
+        function uniqueUsingSet(array){
+            var seen = new Set;
+            return array.filter(function(item){
+                if (!seen.has(item)) {
+                    seen.add(item);
+                    return true;
+                }
+            });
+        }
+
 
         $scope.showDetails = function() {
             $scope.detailsShow = true;
@@ -1435,6 +1484,30 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
             return result
         }
+
+        $scope.hideAvailabilitySetHostgroupWarning = function(instanceGroup) {
+            var result = false;
+            // Show warning
+            if (instanceGroup.nodeCount == 1) {
+                if (instanceGroup.parameters.availabilitySet == null || instanceGroup.parameters.availabilitySet.name === "") {
+                    result = true;
+                }
+            } else {
+                result = true;
+            }
+            return result;
+        }
+
+        $scope.isAvailabilitySetDisabled = function(asName, instanceGroup) {
+            var result = false;
+            angular.forEach($scope.cluster.instanceGroups, function(ig) {
+                if (ig.group != instanceGroup.group && ig.parameters.availabilitySet != null && ig.parameters.availabilitySet.name === asName) {
+                    result = true;
+                }
+            });
+            return result;
+        }
+
 
         $scope.getUserDefinedTags = function() {
             return ($rootScope.activeCluster.tags && $rootScope.activeCluster.tags.userDefined) ? $rootScope.activeCluster.tags.userDefined : [];

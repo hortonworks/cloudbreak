@@ -33,8 +33,10 @@ public class AzureInstanceView {
 
     private String stackName;
 
+    private String availabilitySetName;
+
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
-            String attachedDiskStorageType, String groupName) {
+            String attachedDiskStorageType, String groupName, String availabilitySetName) {
         this.instance = instance;
         this.instanceTemplate = instance.getTemplate();
         this.stackNamePrefixLength = stackNamePrefixLength;
@@ -43,6 +45,7 @@ public class AzureInstanceView {
         this.attachedDiskStorageType = attachedDiskStorageType;
         this.groupName = groupName;
         this.stackName = stackName;
+        this.availabilitySetName = availabilitySetName;
     }
 
     /**
@@ -128,5 +131,9 @@ public class AzureInstanceView {
 
     private Map<String, String> generateMetadata() {
         return new HashMap<>();
+    }
+
+    public String getAvailabilitySetName() {
+        return availabilitySetName;
     }
 }

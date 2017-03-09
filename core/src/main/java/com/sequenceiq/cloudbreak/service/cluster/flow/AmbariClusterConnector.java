@@ -851,9 +851,15 @@ public class AmbariClusterConnector {
                 for (InstanceMetaData meta : metas) {
                     Map<String, String> hostInfo = new HashMap<>();
                     hostInfo.put(FQDN, meta.getDiscoveryFQDN());
-                    if (meta.getHypervisor() != null) {
-                        hostInfo.put("hypervisor", meta.getHypervisor());
-                        hostInfo.put("rack", topologyMapping.get(meta.getHypervisor()));
+                    if (meta.getLocalityIndicator() != null) {
+                        // Azure
+                        if (topologyMapping.isEmpty()) {
+                            hostInfo.put("rack", meta.getLocalityIndicator());
+                        // Openstack
+                        } else {
+                            hostInfo.put("hypervisor", meta.getLocalityIndicator());
+                            hostInfo.put("rack", topologyMapping.get(meta.getLocalityIndicator()));
+                        }
                     }
                     hostInfoForHostGroup.add(hostInfo);
                 }

@@ -79,6 +79,16 @@ public class AzureUtils {
         return shortened.length() <= HOST_GROUP_LENGTH ? shortened : shortened.substring(0, HOST_GROUP_LENGTH);
     }
 
+    public static void removeBlankSpace(StringBuilder sb) {
+        int j = 0;
+        for (int i = 0; i < sb.length(); i++) {
+            if (!Character.isWhitespace(sb.charAt(i))) {
+                sb.setCharAt(j++, sb.charAt(i));
+            }
+        }
+        sb.delete(j, sb.length());
+    }
+
     public String getLoadBalancerId(String stackName) {
         return String.format("%s%s", stackName, "lb");
     }

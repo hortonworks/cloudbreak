@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -33,6 +36,9 @@ public abstract class InstanceGroupBase implements JsonEntity {
 
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_GROUP_TYPE)
     private InstanceGroupType type = InstanceGroupType.CORE;
+
+    @ApiModelProperty(value = InstanceGroupModelDescription.PARAMETERS)
+    private Map<String, Object> parameters = new HashMap<>();
 
     public InstanceGroupBase() {
 
@@ -76,5 +82,13 @@ public abstract class InstanceGroupBase implements JsonEntity {
 
     public void setType(InstanceGroupType type) {
         this.type = type;
+    }
+
+    public Map<String, Object> getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(Map<String, Object> parameters) {
+        this.parameters = parameters;
     }
 }

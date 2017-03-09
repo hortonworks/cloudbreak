@@ -8,6 +8,9 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyVararg;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -43,6 +46,8 @@ public class InstanceGroupCommandsTest {
 
     private SecurityGroupId dummySecurityGroupId = new SecurityGroupId("1");
 
+    private Map<String, Object> params = new HashMap<>();
+
     @InjectMocks
     private InstanceGroupCommands underTest;
 
@@ -76,21 +81,21 @@ public class InstanceGroupCommandsTest {
 
     @Test
     public void testConfigureByTemplateId() throws Exception {
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, null, dummySecurityGroupId, null);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, null, dummySecurityGroupId, null, params);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateName() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(dummyResult);
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null, params);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }
 
     @Test
     public void testConfigureByTemplateIdAndName() throws Exception {
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, dummyTemplateName, dummySecurityGroupId, null);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, dummyTemplateId, dummyTemplateName, dummySecurityGroupId, null, params);
         verify(mockContext, times(1)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
         verify(mockClient, times(0)).getPublic(anyString());
     }
@@ -98,7 +103,7 @@ public class InstanceGroupCommandsTest {
     @Test
     public void testConfigureByTemplateNameWhenTemplateNotFound() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(null);
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null);
+        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null, params);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(0)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }

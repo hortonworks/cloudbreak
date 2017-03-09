@@ -125,7 +125,10 @@ public class StackToCloudStackConverter {
                 if (existingNodesSize == desiredNodeCount && desiredNodeCount == 0) {
                     skeleton = buildInstance(null, template, instanceGroup.getGroupName(), 0L, null, InstanceStatus.CREATE_REQUESTED);
                 }
-                groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup), skeleton));
+                Json attributes = instanceGroup.getAttributes();
+                Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
+                groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup), skeleton,
+                        fields));
             }
         }
         return groups;

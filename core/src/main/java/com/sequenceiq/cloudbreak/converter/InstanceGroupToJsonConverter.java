@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
 public class InstanceGroupToJsonConverter extends AbstractConversionServiceAwareConverter<InstanceGroup, InstanceGroupResponse> {
@@ -30,6 +31,10 @@ public class InstanceGroupToJsonConverter extends AbstractConversionServiceAware
         if (entity.getSecurityGroup() != null) {
             instanceGroupResponse.setSecurityGroup(getConversionService().convert(entity.getSecurityGroup(), SecurityGroupResponse.class));
             instanceGroupResponse.setSecurityGroupId(entity.getSecurityGroup().getId());
+        }
+        Json attributes = entity.getAttributes();
+        if (attributes != null) {
+            instanceGroupResponse.setParameters(attributes.getMap());
         }
         return instanceGroupResponse;
     }

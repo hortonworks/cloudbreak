@@ -117,7 +117,7 @@
     </div>
 </div>
 
-<div class="form-group" ng-show="activeCredential && showAdvancedOptionForm && activeCredential.cloudPlatform !== 'BYOS'">
+<div class="form-group" ng-show="activeCredential && showAdvancedOptionForm && activeCredential.cloudPlatform === 'BYOS'">
     <label class="col-sm-3 control-label" for="provisionCluster">Provision cluster </label>
     <div class="col-sm-8">
         <label class="control-label" for="provisionCluster">{{activeCredential.parameters.type}}</label>
@@ -179,6 +179,48 @@
     </div>
 </div>
 
+<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
+    <label class="col-sm-3 control-label" for="azureAvailabilitySetsEnabled">{{msg.cluster_form_enable_availabilitysets_label}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.cluster_form_availabilitysets_popup}} popover-trigger="mouseenter"></i></label>
+    <div class="col-sm-8">
+        <input type="checkbox" id="azureAvailabilitySetsEnabled" ng-model="cluster.parameters.azureAvailabilitySetsEnabled" name="azureAvailabilitySetsEnabled">
+    </div>
+</div>
+
+<div class="form-group" ng-class="{ 'has-error': clusterCreationForm.azureAvailabilitySets.$dirty && clusterCreationForm.azureAvailabilitySets.$invalid }">
+    <label class="col-sm-3 control-label" ng-show="cluster.parameters.azureAvailabilitySetsEnabled" for="azureAvailabilitySets">{{msg.cluster_form_availabilitysets_label}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.cluster_form_availabilitysets_uniqeness}} popover-trigger="mouseenter"></i></label>
+    <div class="col-sm-8" name="azureAvailabilitySets" id="azureAvailabilitySets" ng-show="cluster.parameters.azureAvailabilitySetsEnabled">
+        <div class="col-sm-12" ng-repeat="as in cluster.azureAvailabilitySets track by $index" style="padding-bottom: 15px;    padding-left: 0px;" ng-class="{ 'has-error': (clusterCreationForm.asname{{$index}}.$dirty && clusterCreationForm.asname{{$index}}.$invalid) || (clusterCreationForm.asfaultdomainnumber{{$index}}.$dirty && clusterCreationForm.asfaultdomainnumber{{$index}}.$invalid) }">
+            <div>
+                <div class="form-inline">
+
+                    <div class="col-md-4 input-group" >
+                        <span class="input-group-addon">AS name</span>
+                        <input type="text" class="form-control" id="asname{{$index}}" name="asname{{$index}}" required ng-model="as.name" ng-maxlength="80" ng-minlength="3" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-required="true" placeholder="(REQUIRED) Name of availabilty set">
+                    </div>
+                    <div class="col-md-offset-1 col-md-4 input-group">
+                        <span class="input-group-addon">Fault domain count</span>
+                        <input type="number" class="form-control" id="asfaultdomainnumber{{$index}}" name="asfaultdomainnumber{{$index}}" required ng-model="as.faultDomainCount" min="2" max="3" placeholder="{{cluster_form_availabilitysets_faultdomaincount_placeholder}}" ng-required="true" placeholder="Fault domain count">
+                    </div>
+                    <div class="col-md-2 pull-right">
+                        <a class="btn btn-info btn-block" role="button" ng-click="removeAvailabilitySet(as)" style="margin-top: 0px;margin-bottom: 0px;"> - Remove</a>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <div class="help-block" ng-show="(clusterCreationForm.asname{{$index}}.$dirty && clusterCreationForm.asname{{$index}}.$invalid)">
+                    <i class="fa fa-warning"></i> {{msg.cluster_form_availabilitysets_missing_name}}
+                </div>
+                <div class="help-block" ng-show="(clusterCreationForm.asfaultdomainnumber{{$index}}.$dirty && clusterCreationForm.asfaultdomainnumber{{$index}}.$invalid)">
+                    <i class="fa fa-warning"></i> {{msg.cluster_form_availabilitysets_incorrect_fault_domain}}
+                </div>
+            </div>
+        </div>
+        <div class="row col-md-4" style="padding-top: 0px;padding-bottom: 0px;">
+            <a class="btn btn-success btn-block" role="button" ng-disabled="isAvailabilitySetsInvalid()" ng-click="addAvailabilitySet()"> + Add</a>
+        </div>
+    </div>
+</div>
+
 <div class="form-group">
     <label class="col-sm-3 control-label" for="emailneeded">{{msg.cluster_form_email_label}}</label>
     <div class="col-sm-8">
@@ -217,7 +259,7 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || isUserDefinedTagsInvalid() || (activeCredential !== undefined && !cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && !cluster.availabilityZone)" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
+                <button type="button" class="btn btn-sm btn-sm btn-default" ng-disabled="!cluster.name || isUserDefinedTagsInvalid() || isAvailabilitySetsInvalid() || (activeCredential !== undefined && !cluster.region) || (activeCredential.cloudPlatform == 'OPENSTACK' && !cluster.availabilityZone)" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureSecurity') : showWizardActualElement('configureHostGroups')">
                     {{(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? msg.cluster_form_ambari_network_tag : msg.cluster_form_ambari_blueprint_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>

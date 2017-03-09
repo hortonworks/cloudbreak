@@ -96,7 +96,7 @@ public class InstanceMetaData implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private InstanceStatus instanceStatus;
 
-    private String hypervisor;
+    private String localityIndicator;
 
     @ManyToOne
     private InstanceGroup instanceGroup;
@@ -252,12 +252,12 @@ public class InstanceMetaData implements ProvisionEntity {
         return InstanceStatus.REGISTERED.equals(instanceStatus) || InstanceStatus.UNREGISTERED.equals(instanceStatus);
     }
 
-    public String getHypervisor() {
-        return hypervisor;
+    public String getLocalityIndicator() {
+        return localityIndicator;
     }
 
-    public void setHypervisor(String hypervisor) {
-        this.hypervisor = hypervisor;
+    public void setLocalityIndicator(String localityIndicator) {
+        this.localityIndicator = localityIndicator;
     }
 
     public String getPublicIpWrapper() {

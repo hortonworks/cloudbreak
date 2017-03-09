@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
-public class Group {
+public class Group extends DynamicModel {
 
     private final String name;
 
@@ -19,6 +21,16 @@ public class Group {
     private Optional<CloudInstance> skeleton = Optional.empty();
 
     public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton) {
+        this.name = name;
+        this.type = type;
+        this.instances = ImmutableList.copyOf(instances);
+        this.security = security;
+        this.skeleton = Optional.ofNullable(skeleton);
+    }
+
+    public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
+            Map<String, Object> parameters) {
+        super(parameters);
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
