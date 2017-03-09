@@ -302,11 +302,15 @@ function continueInit() {
                     res.end("Client cannot access resource server. Check that UAA server is running. code: 500")
                 } else {
                     if (confirmResp.statusCode == 200) {
-                        req.session.userScopes = confirmResp.body.auth_request.scope
-                        res.render('confirm', {
-                            basePath: getBasePath(req),
-                            client_id: req.session.client_id
-                        })
+                        if (process.env.SL_DISPLAY_TERMS_AND_SERVICES === "true") {
+                            req.session.userScopes = confirmResp.body.auth_request.scope
+                            res.render('confirm', {
+                                basePath: getBasePath(req),
+                                client_id: req.session.client_id
+                            })
+                        } else {
+                            sendOauthApproval(req.session.uaa_sessionid, confirmResp.body.auth_request.scope, req, res)
+                        }
                     } else if (confirmResp.statusCode == 302) {
                         if (endsWith(confirmResp.headers.location, '/login')) { // when redirects to UAA API login page
                             res.render('login', {
@@ -337,21 +341,25 @@ function continueInit() {
     }
 
     app.post('/confirm', function(req, res) {
+        sendOauthApproval(req.session.uaa_sessionid, req.session.userScopes, req, res)
+    });
+
+    sendOauthApproval = function(uaaSessionId, scopes, req, res) {
         var confirmOptions = {
             headers: {
                 'Accept': 'text/html,application/xhtml+xml,application/xml',
-                'Cookie': 'JSESSIONID=' + req.session.uaa_sessionid,
+                'Cookie': 'JSESSIONID=' + uaaSessionId,
                 'Content-Type': 'application/x-www-form-urlencoded'
             }
         }
         var formData = '';
-        var scopes = req.session.userScopes
         if (scopes != undefined) {
             for (var i = 0; i < scopes.length; i++) {
                 formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
             }
         }
         formData = formData + 'user_oauth_approval=true'
+        console.log("The formdata for scopes are: " + formData);
         needle.post(config.uaaAddress + '/oauth/authorize', formData, confirmOptions,
             function(err, confirmResp) {
                 if (err != null) {
@@ -372,7 +380,7 @@ function continueInit() {
                     }
                 }
             });
-    });
+    }
 
     postGroup = function(token, userId, displayName) {
         var groupOptions = {
