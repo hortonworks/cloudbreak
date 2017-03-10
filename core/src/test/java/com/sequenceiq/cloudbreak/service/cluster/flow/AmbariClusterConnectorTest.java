@@ -30,6 +30,7 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -49,7 +50,6 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.bus.EventBus;
@@ -156,7 +156,7 @@ public class AmbariClusterConnectorTest {
 
     @Test(expected = AmbariOperationFailedException.class)
     public void testInstallAmbariWhenExceptionOccursShouldInstallationFailed() throws Exception {
-        doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(anyString(), anyString(), anyMap(), anyString(), anyString());
+        doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(anyString(), anyString(), anyMap(), anyString(), anyString(), anyBoolean());
         underTest.buildAmbariCluster(stack);
     }
 

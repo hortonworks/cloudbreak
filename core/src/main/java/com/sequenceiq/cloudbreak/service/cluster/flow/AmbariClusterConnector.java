@@ -291,16 +291,17 @@ public class AmbariClusterConnector {
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             String configStrategy = cluster.getConfigStrategy().name();
+            Boolean hideQuickLinks = cluster.getGateway().getEnableGateway();
             String clusterTemplate;
             if (ambariClient.getClusterName() == null) {
                 if (cluster.isSecure()) {
                     KerberosConfig kerberosConfig = cluster.getKerberosConfig();
                     String principal = kerberosPrincipalResolver.resolvePrincipalForKerberos(kerberosConfig);
                     clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            cluster.getPassword(), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE);
+                            cluster.getPassword(), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, hideQuickLinks);
                 } else {
                     clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariAuthenticationProvider.getAmbariPassword(cluster));
+                            ambariAuthenticationProvider.getAmbariPassword(cluster), hideQuickLinks);
                 }
                 LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate));
             } else {
