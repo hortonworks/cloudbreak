@@ -11,6 +11,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -273,7 +274,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private void saveS3AccessRoleArn(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
             PersistenceNotifier resourceNotifier) {
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-        if (awsInstanceProfileView.isEnableInstanceProfileStrategy() &&  !awsInstanceProfileView.isInstanceProfileAvailable()) {
+        if (awsInstanceProfileView.isEnableInstanceProfileStrategy() && !awsInstanceProfileView.isInstanceProfileAvailable()) {
             String s3AccessRoleArn = getCreatedS3AccessRoleArn(cFStackName, client);
             CloudResource s3AccessRoleArnCloudResource = new CloudResource.Builder().type(ResourceType.S3_ACCESS_ROLE_ARN).name(s3AccessRoleArn).build();
             resourceNotifier.notifyAllocation(s3AccessRoleArnCloudResource, ac.getCloudContext());
@@ -720,24 +721,47 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         List<String> subnetCidrs = awsSubnets.stream().map(Subnet::getCidrBlock).collect(Collectors.toList());
         LOGGER.info("The selected VPCs: {}, has the following subnets: {}", vpc.getVpcId(), subnetCidrs.stream().collect(Collectors.joining(",")));
 
-        return calculateSubnet(vpc, subnetCidrs);
+        return calculateSubnet(ac.getCloudContext().getName(), vpc, subnetCidrs);
     }
 
-    private String calculateSubnet(Vpc vpc, List<String> subnetCidrs) {
+    private String calculateSubnet(String stackName, Vpc vpc, List<String> subnetCidrs) {
         SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
-
         String[] cidrParts = vpcInfo.getCidrSignature().split("/");
         int netmask = Integer.valueOf(cidrParts[cidrParts.length - 1]);
         int netmaskBits = CIDR_PREFIX - netmask;
         if (netmaskBits <= 0) {
             throw new CloudConnectorException("The selected VPC has to be in a bigger CIDR range than /24");
         }
-
         int numberOfSubnets = Double.valueOf(Math.pow(2, netmaskBits)).intValue();
+        int targetSubnet = 0;
+        if (stackName != null) {
+            byte[] b = stackName.getBytes(Charset.forName("UTF-8"));
+            for (byte ascii : b) {
+                targetSubnet += ascii;
+            }
+        }
+        targetSubnet = Long.valueOf(targetSubnet % numberOfSubnets).intValue();
+        String cidr = getSubnetCidrInRange(vpc, subnetCidrs, targetSubnet, numberOfSubnets);
+        if (cidr == null) {
+            cidr = getSubnetCidrInRange(vpc, subnetCidrs, 0, targetSubnet);
+        }
+        if (cidr == null) {
+            throw new CloudConnectorException("Cannot find non-overlapping CIDR range");
+        }
+        return cidr;
+    }
+
+    private String getSubnetCidrInRange(Vpc vpc, List<String> subnetCidrs, int start, int end) {
+        SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
         String lowProbe = incrementIp(vpcInfo.getLowAddress());
         String highProbe = new SubnetUtils(toSubnetCidr(lowProbe)).getInfo().getHighAddress();
+        // start from the target subnet
+        for (int i = 0; i < start - 1; i++) {
+            lowProbe = incrementIp(lowProbe);
+            highProbe = incrementIp(highProbe);
+        }
         boolean foundProbe = false;
-        for (int i = 0; i < numberOfSubnets - 1; i++) {
+        for (int i = start; i < end; i++) {
             boolean overlapping = false;
             for (String subnetCidr : subnetCidrs) {
                 SubnetUtils.SubnetInfo subnetInfo = new SubnetUtils(subnetCidr).getInfo();
@@ -759,7 +783,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             LOGGER.info("The following subnet cidr found: {} for VPC: {}", subnet, vpc.getVpcId());
             return subnet;
         } else {
-            throw new CloudConnectorException("Cannot find non-overlapping CIDR range");
+            return null;
         }
     }
 

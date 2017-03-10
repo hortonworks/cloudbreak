@@ -89,6 +89,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{100}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -105,7 +106,7 @@ public class AwsResourceConnectorTest {
 
         String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
 
-        Assert.assertEquals("10.0.4.0/24", cidr);
+        Assert.assertEquals("10.0.100.0/24", cidr);
     }
 
     @Test
@@ -130,6 +131,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{23}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -145,6 +147,86 @@ public class AwsResourceConnectorTest {
         String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
 
         Assert.assertEquals("10.0.49.0/24", cidr);
+    }
+
+    @Test
+    public void testFindNonOverLappingCIDRWithNon24Subnets2() {
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Map<String, Object> networkParameters = new HashMap<>();
+        networkParameters.put("vpcId", "vpc-12345678");
+        networkParameters.put("internetGatewayId", "igw-12345678");
+        Network network = new Network(new Subnet(null), networkParameters);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        Location location = mock(Location.class);
+        Vpc vpc = mock(Vpc.class);
+        DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
+        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet4 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
+
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{76}));
+        when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
+        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
+        when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
+        when(vpc.getCidrBlock()).thenReturn("10.0.0.0/16");
+        when(ec2Client.describeSubnets(any())).thenReturn(subnetsResult);
+        when(subnetsResult.getSubnets()).thenReturn(Arrays.asList(subnet1, subnet2, subnet3, subnet4));
+        when(subnet1.getCidrBlock()).thenReturn("10.0.0.0/20");
+        when(subnet2.getCidrBlock()).thenReturn("10.0.16.0/20");
+        when(subnet3.getCidrBlock()).thenReturn("10.0.32.0/20");
+        when(subnet4.getCidrBlock()).thenReturn("10.0.48.0/20");
+
+        String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
+
+        Assert.assertEquals("10.0.76.0/24", cidr);
+    }
+
+    @Test
+    public void testFindNonOverLappingCIDRWithNon24Subnets3() {
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Map<String, Object> networkParameters = new HashMap<>();
+        networkParameters.put("vpcId", "vpc-12345678");
+        networkParameters.put("internetGatewayId", "igw-12345678");
+        Network network = new Network(new Subnet(null), networkParameters);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        Location location = mock(Location.class);
+        Vpc vpc = mock(Vpc.class);
+        DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
+        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet4 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
+
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{15}));
+        when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
+        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
+        when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
+        when(vpc.getCidrBlock()).thenReturn("10.0.0.0/16");
+        when(ec2Client.describeSubnets(any())).thenReturn(subnetsResult);
+        when(subnetsResult.getSubnets()).thenReturn(Arrays.asList(subnet1, subnet2, subnet3, subnet4));
+        when(subnet1.getCidrBlock()).thenReturn("10.0.0.0/20");
+        when(subnet2.getCidrBlock()).thenReturn("10.0.16.0/20");
+        when(subnet3.getCidrBlock()).thenReturn("10.0.32.0/20");
+        when(subnet4.getCidrBlock()).thenReturn("10.0.48.0/20");
+
+        String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
+
+        Assert.assertEquals("10.0.64.0/24", cidr);
     }
 
     @Test(expected = CloudConnectorException.class)
@@ -229,6 +311,47 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{15}));
+        when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
+        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
+        when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
+        when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
+        when(ec2Client.describeSubnets(any())).thenReturn(subnetsResult);
+        when(subnetsResult.getSubnets()).thenReturn(Arrays.asList(subnet1, subnet2, subnet3, subnet4));
+        when(subnet1.getCidrBlock()).thenReturn("10.0.0.0/24");
+        when(subnet2.getCidrBlock()).thenReturn("10.0.1.0/24");
+        when(subnet3.getCidrBlock()).thenReturn("10.0.2.0/24");
+        when(subnet4.getCidrBlock()).thenReturn("10.0.3.0/24");
+
+        String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
+
+        Assert.assertEquals("10.0.15.0/24", cidr);
+    }
+
+    @Test
+    public void testFindNonOverLappingCIDRWit20Vpc2() {
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Map<String, Object> networkParameters = new HashMap<>();
+        networkParameters.put("vpcId", "vpc-12345678");
+        networkParameters.put("internetGatewayId", "igw-12345678");
+        Network network = new Network(new Subnet(null), networkParameters);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        Location location = mock(Location.class);
+        Vpc vpc = mock(Vpc.class);
+        DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
+        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet4 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
+
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{16}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -272,6 +395,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{15}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -317,6 +441,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 200, (byte) 200, (byte) 200, (byte) 200, (byte) 200, (byte) 200, (byte) 83}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -336,6 +461,54 @@ public class AwsResourceConnectorTest {
         String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
 
         Assert.assertEquals("10.0.15.0/24", cidr);
+    }
+
+    @Test
+    public void testFindNonOverLappingCIDRWit20Vpc1Empty2() {
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Map<String, Object> networkParameters = new HashMap<>();
+        networkParameters.put("vpcId", "vpc-12345678");
+        networkParameters.put("internetGatewayId", "igw-12345678");
+        Network network = new Network(new Subnet(null), networkParameters);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        Location location = mock(Location.class);
+        Vpc vpc = mock(Vpc.class);
+        DescribeVpcsResult describeVpcsResult = mock(DescribeVpcsResult.class);
+        AmazonEC2Client ec2Client = mock(AmazonEC2Client.class);
+        com.amazonaws.services.ec2.model.Subnet subnet1 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet2 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet3 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet4 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet5 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet6 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet7 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        com.amazonaws.services.ec2.model.Subnet subnet8 = mock(com.amazonaws.services.ec2.model.Subnet.class);
+        DescribeSubnetsResult subnetsResult = mock(DescribeSubnetsResult.class);
+
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{4}));
+        when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
+        when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
+        when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
+        when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
+        when(vpc.getCidrBlock()).thenReturn("10.0.0.0/20");
+        when(ec2Client.describeSubnets(any())).thenReturn(subnetsResult);
+        when(subnetsResult.getSubnets()).thenReturn(Arrays.asList(subnet1, subnet2, subnet3, subnet4, subnet5, subnet6, subnet7, subnet8));
+        when(subnet1.getCidrBlock()).thenReturn("10.0.0.0/23");
+        when(subnet2.getCidrBlock()).thenReturn("10.0.2.0/24");
+        when(subnet3.getCidrBlock()).thenReturn("10.0.4.0/23");
+        when(subnet4.getCidrBlock()).thenReturn("10.0.6.0/23");
+        when(subnet5.getCidrBlock()).thenReturn("10.0.8.0/23");
+        when(subnet6.getCidrBlock()).thenReturn("10.0.10.0/23");
+        when(subnet7.getCidrBlock()).thenReturn("10.0.12.0/23");
+        when(subnet8.getCidrBlock()).thenReturn("10.0.14.0/23");
+
+        String cidr = underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
+
+        Assert.assertEquals("10.0.3.0/24", cidr);
     }
 
     @Test
@@ -364,6 +537,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{(byte) 200, (byte) 200, (byte) 200, (byte) 172}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -403,6 +577,7 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn(new String(new byte[]{7}));
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
@@ -441,13 +616,13 @@ public class AwsResourceConnectorTest {
 
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getLocation()).thenReturn(location);
+        when(cloudContext.getName()).thenReturn("");
         when(location.getRegion()).thenReturn(Region.region("eu-west-1"));
         when(awsClient.createAccess(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeVpcs(any())).thenReturn(describeVpcsResult);
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("172.14.0.0/16");
         when(ec2Client.describeSubnets(any())).thenReturn(subnetsResult);
-
 
         List<com.amazonaws.services.ec2.model.Subnet> subnetList = new ArrayList<>();
         String startRange = "172.14.0.0";
