@@ -7,18 +7,17 @@ import java.util.Properties;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 @Component
 public class RdsConnectionValidator {
 
-    public void validateRdsConnection(RDSConfigJson rdsConfigJson) {
+    public void validateRdsConnection(String connectionURL, String connectionUserName, String connectionPassword) {
         Properties connectionProps = new Properties();
-        connectionProps.put("user", rdsConfigJson.getConnectionUserName());
-        connectionProps.put("password", rdsConfigJson.getConnectionPassword());
+        connectionProps.put("user", connectionUserName);
+        connectionProps.put("password", connectionPassword);
         try {
-            Connection conn = DriverManager.getConnection(rdsConfigJson.getConnectionURL(), connectionProps);
+            Connection conn = DriverManager.getConnection(connectionURL, connectionProps);
             conn.close();
         } catch (SQLException e) {
             throw new BadRequestException("Failed to connect to RDS: " + e.getMessage(), e);

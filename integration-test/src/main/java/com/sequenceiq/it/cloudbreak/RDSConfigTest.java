@@ -7,7 +7,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.it.IntegrationTestContext;
 
@@ -32,7 +32,7 @@ public class RDSConfigTest extends AbstractCloudbreakIntegrationTest {
         rdsPassword = StringUtils.hasLength(rdsPassword) ? rdsPassword : defaultRdsPassword;
         rdsConnectionUrl = StringUtils.hasLength(rdsConnectionUrl) ? rdsConnectionUrl : defaultRdsConnectionUrl;
 
-        RDSConfigJson rdsCreateRequest = new RDSConfigJson();
+        RDSConfigRequest rdsCreateRequest = new RDSConfigRequest();
         rdsCreateRequest.setName(rdsName);
         rdsCreateRequest.setConnectionUserName(rdsUser);
         rdsCreateRequest.setConnectionPassword(rdsPassword);

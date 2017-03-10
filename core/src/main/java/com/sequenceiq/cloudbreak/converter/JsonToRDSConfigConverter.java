@@ -8,7 +8,7 @@ import java.util.Set;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RdsConfigPropertyJson;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
@@ -16,9 +16,9 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
-public class JsonToRDSConfigConverter extends AbstractConversionServiceAwareConverter<RDSConfigJson, RDSConfig> {
+public class JsonToRDSConfigConverter extends AbstractConversionServiceAwareConverter<RDSConfigRequest, RDSConfig> {
     @Override
-    public RDSConfig convert(RDSConfigJson source) {
+    public RDSConfig convert(RDSConfigRequest source) {
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setName(source.getName());
         rdsConfig.setConnectionURL(source.getConnectionURL());

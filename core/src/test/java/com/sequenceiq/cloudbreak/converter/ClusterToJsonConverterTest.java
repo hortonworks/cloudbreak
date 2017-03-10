@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
@@ -180,7 +181,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         given(jsonNode.iterator()).willReturn(mockIterator);
         given(mockIterator.hasNext()).willReturn(true).willReturn(false);
         given(mockIterator.next()).willReturn(jsonNode);
-        given(conversionService.convert(any(RDSConfig.class), eq(RDSConfigJson.class))).willReturn(new RDSConfigJson());
+        given(conversionService.convert(any(RDSConfig.class), eq(RDSConfigJson.class))).willReturn(new RDSConfigRequest());
         given(blueprintValidator.getHostGroupName(jsonNode)).willReturn("slave_1");
         given(blueprintValidator.createHostGroupMap(any(Set.class))).willReturn(hostGroupMap);
         given(hostGroupMap.get("slave_1")).willReturn(hostGroup);

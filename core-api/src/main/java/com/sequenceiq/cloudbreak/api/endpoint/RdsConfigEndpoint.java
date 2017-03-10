@@ -12,7 +12,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -46,7 +46,7 @@ public interface RdsConfigEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "postPrivateRds")
-    RDSConfigResponse postPrivate(@Valid RDSConfigJson rdsConfigJson);
+    RDSConfigResponse postPrivate(@Valid RDSConfigRequest rdsConfigRequest);
 
     @GET
     @Path("user")
@@ -60,7 +60,7 @@ public interface RdsConfigEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getPrivateRds")
-    RDSConfigJson getPrivate(@PathParam(value = "name") String name);
+    RDSConfigResponse getPrivate(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("user/{name}")
@@ -74,7 +74,7 @@ public interface RdsConfigEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "postPublicRds")
-    RDSConfigResponse postPublic(@Valid RDSConfigJson rdsConfigJson);
+    RDSConfigResponse postPublic(@Valid RDSConfigRequest rdsConfigRequest);
 
     @GET
     @Path("account")

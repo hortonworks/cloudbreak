@@ -100,7 +100,7 @@ public class ClusterRequest {
 
     @Valid
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.RDS_CONFIGS)
-    private Set<RDSConfigJson> rdsConfigJsons = new HashSet<>();
+    private Set<RDSConfigRequest> rdsConfigJsons = new HashSet<>();
 
     @Valid
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.FILE_SYSTEM)
@@ -233,11 +233,11 @@ public class ClusterRequest {
         this.rdsConfigIds = rdsConfigIds;
     }
 
-    public Set<RDSConfigJson> getRdsConfigJsons() {
+    public Set<RDSConfigRequest> getRdsConfigJsons() {
         return rdsConfigJsons;
     }
 
-    public void setRdsConfigJsons(Set<RDSConfigJson> rdsConfigJsons) {
+    public void setRdsConfigJsons(Set<RDSConfigRequest> rdsConfigJsons) {
         this.rdsConfigJsons = rdsConfigJsons;
     }
 

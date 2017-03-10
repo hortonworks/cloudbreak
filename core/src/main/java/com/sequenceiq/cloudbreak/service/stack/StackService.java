@@ -24,6 +24,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -187,6 +188,15 @@ public class StackService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack get(Long id) {
+        Stack stack = stackRepository.findOne(id);
+        if (stack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        return stack;
+    }
+
+    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
+    public Stack getFull(Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));

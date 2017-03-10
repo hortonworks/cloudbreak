@@ -55,9 +55,6 @@ public class ClusterResponse {
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME)
     private String userName;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD)
-    private String password;
-
     private boolean secure;
 
     @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
@@ -259,14 +256,6 @@ public class ClusterResponse {
 
     public void setUserName(String userName) {
         this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public Map<String, String> getServiceEndPoints() {
