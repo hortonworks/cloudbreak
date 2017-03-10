@@ -6,7 +6,7 @@ package models
 import (
 	"strconv"
 
-	"github.com/go-openapi/swag"
+	"github.com/go-swagger/go-swagger/swag"
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
 
 	"github.com/go-swagger/go-swagger/errors"
