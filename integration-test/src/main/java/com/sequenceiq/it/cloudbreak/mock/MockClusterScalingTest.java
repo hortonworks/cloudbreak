@@ -171,7 +171,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("arg=roles&arg=ambari_server").exactTimes(1).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=saltutil.sync_grains").atLeast(2).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=state.highstate").exactTimes(2).verify();
-            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(3).verify();
+            verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").exactTimes(4).verify();
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
                     .exactTimes(1).verify();
