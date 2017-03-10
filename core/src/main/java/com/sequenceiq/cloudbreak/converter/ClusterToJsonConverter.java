@@ -101,7 +101,15 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Override
     public ClusterResponse convert(Cluster source) {
-        ClusterResponse clusterResponse = new ClusterResponse();
+        try {
+            return convert(source, ClusterResponse.class);
+        } catch (IllegalAccessException | InstantiationException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected <R extends ClusterResponse> R convert(Cluster source, Class<R> clazz) throws IllegalAccessException, InstantiationException {
+        R clusterResponse = clazz.newInstance();
         clusterResponse.setId(source.getId());
         clusterResponse.setName(source.getName());
         clusterResponse.setStatus(source.getStatus().name());
@@ -137,7 +145,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         String ambariIp = stackUtil.extractAmbariIp(source.getStack());
         clusterResponse.setAmbariServerIp(ambariIp);
         clusterResponse.setUserName(source.getUserName());
-        clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source, ambariIp));

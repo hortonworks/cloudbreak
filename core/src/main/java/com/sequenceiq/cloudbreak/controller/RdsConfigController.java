@@ -10,7 +10,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.RdsConfigEndpoint;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
@@ -37,14 +37,14 @@ public class RdsConfigController implements RdsConfigEndpoint {
     private ConversionService conversionService;
 
     @Override
-    public RDSConfigResponse postPrivate(RDSConfigJson rdsConfigRequest) {
+    public RDSConfigResponse postPrivate(RDSConfigRequest rdsConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRdsConfig(user, rdsConfigRequest, false);
     }
 
     @Override
-    public RDSConfigResponse postPublic(RDSConfigJson rdsConfigRequest) {
+    public RDSConfigResponse postPublic(RDSConfigRequest rdsConfigRequest) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRdsConfig(user, rdsConfigRequest, true);
@@ -110,9 +110,10 @@ public class RdsConfigController implements RdsConfigEndpoint {
         rdsConfigService.delete(name, user);
     }
 
-    private RDSConfigResponse createRdsConfig(CbUser user, RDSConfigJson rdsConfigJson, boolean publicInAccount) {
+    private RDSConfigResponse createRdsConfig(CbUser user, RDSConfigRequest rdsConfigJson, boolean publicInAccount) {
         if (rdsConfigJson.isValidated()) {
-            rdsConnectionValidator.validateRdsConnection(rdsConfigJson);
+            rdsConnectionValidator.validateRdsConnection(rdsConfigJson.getConnectionURL(), rdsConfigJson.getConnectionUserName(),
+                    rdsConfigJson.getConnectionPassword());
         }
         RDSConfig rdsConfig = conversionService.convert(rdsConfigJson, RDSConfig.class);
         rdsConfig.setPublicInAccount(publicInAccount);

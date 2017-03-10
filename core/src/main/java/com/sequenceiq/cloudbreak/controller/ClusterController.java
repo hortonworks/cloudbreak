@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.ClusterFullResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -29,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -133,13 +134,11 @@ public class ClusterController implements ClusterEndpoint {
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
         validateRdsConfigParams(request);
         if (request.getRdsConfigJsons() != null && !request.getRdsConfigJsons().isEmpty()) {
-            for (RDSConfigJson rdsConfigJson : request.getRdsConfigJsons()) {
+            for (RDSConfigRequest rdsConfigJson : request.getRdsConfigJsons()) {
                 validateRdsConnection(rdsConfigJson);
                 RDSConfig rdsConfig = rdsConfigService.create(user, conversionService.convert(rdsConfigJson, RDSConfig.class));
                 request.getRdsConfigIds().add(rdsConfig.getId());
             }
-
-
         }
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, user,
@@ -157,9 +156,9 @@ public class ClusterController implements ClusterEndpoint {
         return conversionService.convert(resp, ClusterResponse.class);
     }
 
-    private void validateRdsConnection(RDSConfigJson request) {
+    private void validateRdsConnection(RDSConfigRequest request) {
         if (request.isValidated()) {
-            rdsConnectionValidator.validateRdsConnection(request);
+            rdsConnectionValidator.validateRdsConnection(request.getConnectionURL(), request.getConnectionUserName(), request.getConnectionPassword());
         }
     }
 
@@ -168,7 +167,17 @@ public class ClusterController implements ClusterEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.get(stackId);
-        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId);
+        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, ClusterResponse.class);
+        String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
+        return clusterService.getClusterResponse(cluster, clusterJson);
+    }
+
+    @Override
+    public ClusterFullResponse getFull(Long stackId) {
+        CbUser user = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(user);
+        Stack stack = stackService.getFull(stackId);
+        ClusterFullResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, ClusterFullResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
         return clusterService.getClusterResponse(cluster, clusterJson);
     }
@@ -178,7 +187,7 @@ public class ClusterController implements ClusterEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPrivateStack(name, user);
-        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
+        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         return clusterService.getClusterResponse(cluster, clusterJson);
     }
@@ -188,7 +197,7 @@ public class ClusterController implements ClusterEndpoint {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPublicStack(name, user);
-        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId());
+        ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
         return clusterService.getClusterResponse(cluster, clusterJson);
     }

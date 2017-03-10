@@ -25,8 +25,6 @@ public class RDSConfigToJsonConverter extends AbstractConversionServiceAwareConv
         RDSConfigResponse json = new RDSConfigResponse();
         json.setName(source.getName());
         json.setConnectionURL(source.getConnectionURL());
-        json.setConnectionUserName(source.getConnectionUserName());
-        json.setConnectionPassword(source.getConnectionPassword());
         json.setDatabaseType(source.getDatabaseType());
         json.setId(source.getId());
         json.setPublicInAccount(source.isPublicInAccount());

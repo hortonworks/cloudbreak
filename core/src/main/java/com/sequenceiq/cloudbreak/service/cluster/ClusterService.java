@@ -30,7 +30,7 @@ public interface ClusterService {
 
     Cluster retrieveClusterByStackId(Long stackId);
 
-    ClusterResponse retrieveClusterForCurrentUser(Long stackId);
+    <R extends ClusterResponse> R retrieveClusterForCurrentUser(Long stackId, Class<R> clazz);
 
     Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig);
 
@@ -58,7 +58,7 @@ public interface ClusterService {
 
     void updateUserNamePassword(Long stackId, UserNamePasswordJson userNamePasswordJson);
 
-    ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson);
+    <R extends ClusterResponse> R getClusterResponse(R response, String clusterJson);
 
     Cluster getById(Long clusterId);
 

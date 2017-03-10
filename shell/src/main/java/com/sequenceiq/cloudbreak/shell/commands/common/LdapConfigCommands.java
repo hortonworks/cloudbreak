@@ -139,7 +139,6 @@ public class LdapConfigCommands implements BaseCommands {
             map.put("serverPort", response.getServerPort().toString());
             map.put("serverSSL", response.getServerSSL().toString());
             map.put("bindDn", response.getBindDn());
-            map.put("bindPassword", response.getBindPassword());
             map.put("userSearchBase", response.getUserSearchBase());
             map.put("userSearchFilter", response.getUserSearchFilter());
             map.put("groupSearchBase", response.getGroupSearchBase());

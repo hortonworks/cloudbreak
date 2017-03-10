@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
@@ -295,16 +295,16 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setAmbariStackDetails(ambariStackDetailsJson);
 
             if (connectionURL != null && connectionUserName != null && connectionPassword != null && databaseType != null && hdpVersion != null) {
-                RDSConfigJson rdsConfigJson = new RDSConfigJson();
-                rdsConfigJson.setName(clusterRequest.getName());
-                rdsConfigJson.setConnectionURL(connectionURL);
-                rdsConfigJson.setDatabaseType(databaseType);
-                rdsConfigJson.setConnectionUserName(connectionUserName);
-                rdsConfigJson.setConnectionPassword(connectionPassword);
-                rdsConfigJson.setHdpVersion(hdpVersion);
-                rdsConfigJson.setValidated(validated);
-                Set<RDSConfigJson> rdsConfigJsons = new HashSet<>();
-                rdsConfigJsons.add(rdsConfigJson);
+                RDSConfigRequest rdsConfigRequest = new RDSConfigRequest();
+                rdsConfigRequest.setName(clusterRequest.getName());
+                rdsConfigRequest.setConnectionURL(connectionURL);
+                rdsConfigRequest.setDatabaseType(databaseType);
+                rdsConfigRequest.setConnectionUserName(connectionUserName);
+                rdsConfigRequest.setConnectionPassword(connectionPassword);
+                rdsConfigRequest.setHdpVersion(hdpVersion);
+                rdsConfigRequest.setValidated(validated);
+                Set<RDSConfigRequest> rdsConfigJsons = new HashSet<>();
+                rdsConfigJsons.add(rdsConfigRequest);
                 clusterRequest.setRdsConfigJsons(rdsConfigJsons);
             } else if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
                 return "connectionURL, databaseType, connectionUserName, connectionPassword and hdpVersion must be all set.";

@@ -235,9 +235,9 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public ClusterResponse retrieveClusterForCurrentUser(Long stackId) {
+    public <R extends ClusterResponse> R retrieveClusterForCurrentUser(Long stackId, Class<R> clazz) {
         Stack stack = stackService.get(stackId);
-        return conversionService.convert(stack.getCluster(), ClusterResponse.class);
+        return conversionService.convert(stack.getCluster(), clazz);
     }
 
     @Override
@@ -826,7 +826,8 @@ public class AmbariClusterService implements ClusterService {
         return stateChanged;
     }
 
-    public ClusterResponse getClusterResponse(ClusterResponse response, String clusterJson) {
+    @Override
+    public <R extends ClusterResponse> R getClusterResponse(R response, String clusterJson) {
         response.setCluster(jsonHelper.createJsonFromString(clusterJson));
         return response;
     }

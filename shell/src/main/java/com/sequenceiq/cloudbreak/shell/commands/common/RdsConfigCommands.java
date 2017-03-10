@@ -9,7 +9,7 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.RDSDatabase;
 import com.sequenceiq.cloudbreak.shell.commands.BaseCommands;
@@ -42,7 +42,7 @@ public class RdsConfigCommands implements BaseCommands {
             @CliOption(key = "validated", unspecifiedDefaultValue = "true", specifiedDefaultValue = "true",
                     help = "the RDS config parameters will be validated") Boolean validated) {
         try {
-            RDSConfigJson rdsConfig = new RDSConfigJson();
+            RDSConfigRequest rdsConfig = new RDSConfigRequest();
             rdsConfig.setName(name);
             rdsConfig.setDatabaseType(databaseType);
             rdsConfig.setConnectionURL(connectionUrl);
@@ -123,7 +123,6 @@ public class RdsConfigCommands implements BaseCommands {
             map.put("name", response.getName());
             map.put("databaseType", response.getDatabaseType().toString());
             map.put("connectionUrl", response.getConnectionURL());
-            map.put("connectionUsername", response.getConnectionUserName());
             map.put("hdpVersion", response.getHdpVersion());
             return shellContext.outputTransformer().render(outPutType, map, "FIELD", "INFO");
         } catch (Exception ex) {
