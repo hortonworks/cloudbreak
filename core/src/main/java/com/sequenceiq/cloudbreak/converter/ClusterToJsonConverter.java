@@ -316,19 +316,24 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             }
 
             for (Port port : ports) {
-                if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
-                    String url;
-                    if (gateway.getEnableGateway()) {
-                        url = String.format("https://%s:8443/gateway/%s%s", cluster.getAmbariIp(), gateway.getTopologyName(),
-                                port.getExposedService().getKnoxUrl());
-                        if (exposedServices.contains(port.getExposedService().getKnoxService())) {
-                            result.put(port.getExposedService().getPortName(), url);
-                        }
-                    } else {
-                        url = String.format("http://%s:%s%s", serviceAddress, port.getPort(), port.getExposedService().getPostFix());
-                        result.put(port.getExposedService().getPortName(), url);
-                    }
+                collectServicePort(result, port, serviceAddress, cluster.getAmbariIp(), componentDescriptor, exposedServices, gateway);
+            }
+        }
+    }
+
+    private void collectServicePort(Map<String, String> result, Port port, String serviceAddress, String ambariIp,
+            StackServiceComponentDescriptor componentDescriptor, List<String> exposedServices, Gateway gateway) {
+        if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
+            String url;
+            if (gateway.getEnableGateway() && ambariIp != null) {
+                url = String.format("https://%s:8443/gateway/%s%s", ambariIp, gateway.getTopologyName(),
+                        port.getExposedService().getKnoxUrl());
+                if (exposedServices.contains(port.getExposedService().getKnoxService())) {
+                    result.put(port.getExposedService().getPortName(), url);
                 }
+            } else if (serviceAddress != null) {
+                url = String.format("http://%s:%s%s", serviceAddress, port.getPort(), port.getExposedService().getPostFix());
+                result.put(port.getExposedService().getPortName(), url);
             }
         }
     }

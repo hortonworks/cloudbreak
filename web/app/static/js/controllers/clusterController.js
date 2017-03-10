@@ -291,10 +291,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             }
         }
 
-        $scope.isVisibleServiceValue = function(element) {
-            return element.indexOf("null") !== 0
-        }
-
         $scope.isEmptyObj = function(obj) {
             var prop;
             for (prop in obj) {
