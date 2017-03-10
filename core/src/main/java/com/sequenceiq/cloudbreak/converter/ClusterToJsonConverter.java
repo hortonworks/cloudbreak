@@ -140,7 +140,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setPassword(source.getPassword());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
-        clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source));
+        clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source, ambariIp));
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source, ambariIp));
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
         clusterResponse.setEnableShipyard(source.getEnableShipyard());
@@ -290,7 +290,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 for (JsonNode componentNode : componentsNode) {
                     String componentName = componentNode.get("name").asText();
                     StackServiceComponentDescriptor componentDescriptor = stackServiceComponentDescs.get(componentName);
-                    collectServicePorts(result, ports, serviceAddress, componentDescriptor, cluster);
+                    collectServicePorts(result, ports, ambariIp, serviceAddress, componentDescriptor, cluster);
                 }
             }
         } catch (Exception ex) {
@@ -306,7 +306,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
     }
 
-    private void collectServicePorts(Map<String, String> result, List<Port> ports, String serviceAddress,
+    private void collectServicePorts(Map<String, String> result, List<Port> ports, String ambariIp, String serviceAddress,
             StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
             List<String> exposedServices = new ArrayList<>();
@@ -316,7 +316,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             }
 
             for (Port port : ports) {
-                collectServicePort(result, port, serviceAddress, cluster.getAmbariIp(), componentDescriptor, exposedServices, gateway);
+                collectServicePort(result, port, serviceAddress, ambariIp, componentDescriptor, exposedServices, gateway);
             }
         }
     }
@@ -338,18 +338,18 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
     }
 
-    private String getAmbariServerUrl(Cluster cluster) {
+    private String getAmbariServerUrl(Cluster cluster, String ambariIp) {
         String url;
         String orchestrator = cluster.getStack().getOrchestrator().getType();
-        if (cluster.getAmbariIp() != null) {
+        if (ambariIp != null) {
             Gateway gateway = cluster.getGateway();
             if (YARN.equals(orchestrator) || MARATHON.equals(orchestrator)) {
-                url = String.format("http://%s:8080", cluster.getAmbariIp());
+                url = String.format("http://%s:8080", ambariIp);
             } else {
                 if (gateway.getEnableGateway() != null && gateway.getEnableGateway()) {
-                    url = String.format("https://%s:8443/gateway/%s/ambari/", cluster.getAmbariIp(), gateway.getTopologyName());
+                    url = String.format("https://%s:8443/gateway/%s/ambari/", ambariIp, gateway.getTopologyName());
                 } else {
-                    url = String.format("https://%s/ambari/", cluster.getAmbariIp());
+                    url = String.format("https://%s/ambari/", ambariIp);
                 }
             }
         } else {
