@@ -28,7 +28,7 @@ func CreateCredential(c *cli.Context) error {
 	checkRequiredFlags(c)
 
 	client := &http.Client{Transport: TransportConfig}
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	createCredential(c.String, client.Get, oAuth2Client.CreateCredential)
 	return nil
 }
@@ -56,7 +56,7 @@ func createCredential(finder func(string) string, getResponse func(string) (*htt
 
 func DeleteCredential(c *cli.Context) error {
 	checkRequiredFlags(c)
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	if err := oAuth2Client.DeleteCredential(c.String(FlCredentialName.Name)); err != nil {
 		logErrorAndExit(err)
 	}
@@ -166,7 +166,7 @@ func ListPrivateCredentials(c *cli.Context) error {
 	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "list the private credentials")
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	listPrivateCredentialsImpl(oAuth2Client.GetPrivateCredentials, output.WriteList)

@@ -43,7 +43,7 @@ func (c *ClusterNode) DataAsStringArray() []string {
 
 func ListClusters(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list clusters")
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := Output{Format: c.String(FlOutput.Name)}
 
 	return listClustersImpl(oAuth2Client.Cloudbreak.Stacks.GetStacksUser, oAuth2Client.FetchCluster, output.WriteList)
@@ -97,7 +97,7 @@ func ListClusterNodes(c *cli.Context) error {
 		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := Output{Format: c.String(FlOutput.Name)}
 
 	listClusterNodesImpl(clusterName, oAuth2Client.Cloudbreak.Stacks.GetStacksUserName, output.WriteList)

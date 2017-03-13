@@ -204,6 +204,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "list-scaling-definitions",
+			Usage:  "list the available scaling definitions",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.ListDefinitions,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-metastores",
 			Usage:  "list the available metastores",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},

@@ -73,7 +73,7 @@ func CreateNetworkCommand(c *cli.Context) error {
 	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "create network")
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	return createNetworkCommandImpl(c.String, oAuth2Client.Cloudbreak.Networks.PostNetworksAccount)
 }
@@ -132,7 +132,7 @@ func (c *Cloudbreak) GetNetworkById(id int64) *models_cloudbreak.NetworkResponse
 
 func DeleteNetwork(c *cli.Context) error {
 	checkRequiredFlags(c)
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	if err := oAuth2Client.DeleteNetwork(c.String(FlNetworkName.Name)); err != nil {
 		logErrorAndExit(err)
 	}
@@ -158,7 +158,7 @@ func ListPrivateNetworks(c *cli.Context) error {
 	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "list the private networks")
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	return listPrivateNetworksImpl(oAuth2Client.GetPrivateNetworks, output.WriteList)

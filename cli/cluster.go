@@ -81,7 +81,7 @@ func DescribeCluster(c *cli.Context) error {
 		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	format := c.String(FlOutput.Name)
 	clusterSkeleton := describeClusterImpl(clusterName, format, oAuth2Client.GetClusterByName, oAuth2Client.FetchCluster)
@@ -114,7 +114,7 @@ func TerminateCluster(c *cli.Context) error {
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s", clusterName)
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	deleteDependencies := true
 	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName, DeleteDependencies: &deleteDependencies})
@@ -135,7 +135,7 @@ func CreateCluster(c *cli.Context) error {
 		logErrorAndExit(err)
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	stackId := createClusterImpl(skeleton,
 		createMasterTemplateRequest,
@@ -405,7 +405,7 @@ func RepairCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "repair cluster")
 	checkRequiredFlags(c)
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	clusterName := c.String(FlClusterName.Name)
 	nodeType := c.String(FlNodeType.Name)
 	removeOnly := c.Bool(FlRemoveOnly.Name)
@@ -446,7 +446,7 @@ func ResizeCluster(c *cli.Context) error {
 		logMissingParameterMessageAndExit(c, fmt.Sprintf("the %s must be one of [worker, compute]\n", FlNodeType.Name))
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	clusterName := c.String(FlClusterName.Name)
 	stack := resizeClusterImpl(clusterName, nodeType, adjustment,
@@ -521,7 +521,7 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 	checkRequiredFlags(c)
 
 	skeleton := getBaseSkeleton()
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	clusterType := c.String(FlClusterType.Name)
 	clusterName := c.String(FlClusterNameOptional.Name)

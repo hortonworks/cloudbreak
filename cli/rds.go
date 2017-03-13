@@ -56,7 +56,7 @@ func (c *Cloudbreak) GetRDSConfigById(id int64) *models_cloudbreak.RDSConfigResp
 func ListRDSConfigs(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list rds configs")
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	return listRDSConfigsImpl(oAuth2Client.Cloudbreak.Rdsconfigs.GetRdsconfigsAccount, output.WriteList)
@@ -107,7 +107,7 @@ func CreateRDSConfig(c *cli.Context) error {
 	}
 
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	return createRDSConfigImpl(rdsType, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
 }
@@ -140,7 +140,7 @@ func DeleteRDSConfig(c *cli.Context) error {
 	defer timeTrack(time.Now(), "delete rds config")
 
 	log.Infof("[DeleteRDSConfig] delete RDS config by name: %s", c.String(FlRdsName.Name))
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	deleteRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.DeleteRdsconfigsAccountName)
 	return nil

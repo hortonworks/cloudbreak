@@ -51,7 +51,7 @@ func (b *Blueprint) DataAsStringArray() []string {
 }
 
 func ListBlueprints(c *cli.Context) error {
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	return listBlueprintsImpl(oAuth2Client.GetPublicBlueprints, output.WriteList)

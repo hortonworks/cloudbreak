@@ -13,7 +13,7 @@ import (
 func CleanupResources(c *cli.Context) error {
 	defer timeTrack(time.Now(), "resource cleanup")
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	var wg sync.WaitGroup
 	wg.Add(6)
