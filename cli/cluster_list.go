@@ -4,11 +4,11 @@ import (
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/stacks"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
 
 	"time"
 
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -50,7 +50,7 @@ func ListClusters(c *cli.Context) error {
 }
 
 func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error),
-	fetchCluster func(*models.StackResponse) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
+	fetchCluster func(*models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
 
 	respStacks, err := getStacks(&stacks.GetStacksUserParams{})
 	if err != nil {
@@ -61,7 +61,7 @@ func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetSt
 	clusters := make([]ClusterSkeletonResult, len(respStacks.Payload))
 	for i, stack := range respStacks.Payload {
 		wg.Add(1)
-		go func(i int, stack *models.StackResponse) {
+		go func(i int, stack *models_cloudbreak.StackResponse) {
 			defer wg.Done()
 
 			clusterSkeleton, _ := fetchCluster(stack)
@@ -140,7 +140,7 @@ func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetStacksUse
 	writer(ClusterNodeHeader, tableRows)
 }
 
-func getHostStatus(stack *models.StackResponse, imd *models.InstanceMetaData) string {
+func getHostStatus(stack *models_cloudbreak.StackResponse, imd *models_cloudbreak.InstanceMetaData) string {
 	var result string = ""
 	if stack.Cluster != nil && imd.DiscoveryFQDN != nil {
 		for _, hg := range stack.Cluster.HostGroups {

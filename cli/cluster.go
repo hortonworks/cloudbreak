@@ -6,9 +6,9 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/cluster"
-	"github.com/hortonworks/hdc-cli/client/stacks"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/cluster"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 
 	"errors"
@@ -19,7 +19,7 @@ var BASE_EXPOSED_SERVICES = []string{"AMBARI", "AMBARIUI", "ZEPPELINWS", "ZEPPEL
 var HIVE_EXPOSED_SERVICES = []string{"HIVE"}
 var CLUSTER_MANAGER_EXPOSED_SERVICES = []string{"HDFSUI", "YARNUI", "JOBHISTORYUI", "SPARKHISTORYUI"}
 
-func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
+func (c *Cloudbreak) GetClusterByName(name string) *models_cloudbreak.StackResponse {
 	defer timeTrack(time.Now(), "get cluster by name")
 
 	stack, err := c.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: name})
@@ -29,24 +29,24 @@ func (c *Cloudbreak) GetClusterByName(name string) *models.StackResponse {
 	return stack.Payload
 }
 
-func (c *Cloudbreak) FetchCluster(stack *models.StackResponse) (*ClusterSkeletonResult, error) {
+func (c *Cloudbreak) FetchCluster(stack *models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 
 	return fetchClusterImpl(stack)
 }
 
-func fetchClusterImpl(stack *models.StackResponse) (*ClusterSkeletonResult, error) {
-	var blueprint *models.BlueprintResponse = nil
+func fetchClusterImpl(stack *models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error) {
+	var blueprint *models_cloudbreak.BlueprintResponse = nil
 	if stack.Cluster != nil {
 		blueprint = stack.Cluster.Blueprint
 	}
 
-	var templateMap = make(map[string]*models.TemplateResponse)
+	var templateMap = make(map[string]*models_cloudbreak.TemplateResponse)
 	for _, v := range stack.InstanceGroups {
 		templateMap[v.Group] = v.Template
 	}
 
-	var recipeMap = make(map[string][]*models.RecipeResponse)
+	var recipeMap = make(map[string][]*models_cloudbreak.RecipeResponse)
 	var recoveryModeMap = make(map[string]string)
 	if stack.Cluster != nil {
 		for _, hg := range stack.Cluster.HostGroups {
@@ -57,15 +57,15 @@ func fetchClusterImpl(stack *models.StackResponse) (*ClusterSkeletonResult, erro
 		}
 	}
 
-	var securityMap = make(map[string][]*models.SecurityRuleResponse)
+	var securityMap = make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	for _, v := range stack.InstanceGroups {
 		for _, sr := range v.SecurityGroup.SecurityRules {
 			securityMap[sr.Subnet] = append(securityMap[sr.Subnet], sr)
 		}
 	}
 
-	var credential *models.CredentialResponse = stack.Credential
-	var network *models.NetworkResponse = stack.Network
+	var credential *models_cloudbreak.CredentialResponse = stack.Credential
+	var network *models_cloudbreak.NetworkResponse = stack.Network
 
 	clusterSkeleton := &ClusterSkeletonResult{}
 	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, stack.Cluster.RdsConfigs, recipeMap, recoveryModeMap)
@@ -93,8 +93,8 @@ func DescribeCluster(c *cli.Context) error {
 }
 
 func describeClusterImpl(clusterName string, format string,
-	getCluster func(string) *models.StackResponse,
-	fetchCluster func(*models.StackResponse) (*ClusterSkeletonResult, error)) *ClusterSkeletonResult {
+	getCluster func(string) *models_cloudbreak.StackResponse,
+	fetchCluster func(*models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error)) *ClusterSkeletonResult {
 	stack := getCluster(clusterName)
 	clusterSkeleton, _ := fetchCluster(stack)
 	if format == "table" {
@@ -159,20 +159,20 @@ func CreateCluster(c *cli.Context) error {
 }
 
 func createClusterImpl(skeleton ClusterSkeleton,
-	createMasterTemplateRequest func(skeleton ClusterSkeleton) *models.TemplateRequest,
-	createWorkerTemplateRequest func(skeleton ClusterSkeleton) *models.TemplateRequest,
-	createComputeTemplateRequest func(skeleton ClusterSkeleton) *models.TemplateRequest,
-	createSecurityGroupRequest func(skeleton ClusterSkeleton, group string) *models.SecurityGroupRequest,
-	createCredentialRequest func(name string, defaultCredential models.CredentialResponse, existingKey string) *models.CredentialRequest,
-	createNetworkRequest func(skeleton ClusterSkeleton, getNetwork func(string) models.NetworkResponse) *models.NetworkRequest,
-	createRecipeRequests func(recipes []Recipe) []*models.RecipeRequest,
-	createBlueprintRequest func(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse) *models.BlueprintRequest,
-	createRDSRequest func(metastore MetaStore, rdsType string, hdpVersion string) *models.RDSConfig,
-	getBlueprint func(string) *models.BlueprintResponse,
-	getCredential func(string) models.CredentialResponse,
-	getNetwork func(name string) models.NetworkResponse,
+	createMasterTemplateRequest func(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest,
+	createWorkerTemplateRequest func(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest,
+	createComputeTemplateRequest func(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest,
+	createSecurityGroupRequest func(skeleton ClusterSkeleton, group string) *models_cloudbreak.SecurityGroupRequest,
+	createCredentialRequest func(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string) *models_cloudbreak.CredentialRequest,
+	createNetworkRequest func(skeleton ClusterSkeleton, getNetwork func(string) models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkRequest,
+	createRecipeRequests func(recipes []Recipe) []*models_cloudbreak.RecipeRequest,
+	createBlueprintRequest func(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse) *models_cloudbreak.BlueprintRequest,
+	createRDSRequest func(metastore MetaStore, rdsType string, hdpVersion string) *models_cloudbreak.RDSConfig,
+	getBlueprint func(string) *models_cloudbreak.BlueprintResponse,
+	getCredential func(string) models_cloudbreak.CredentialResponse,
+	getNetwork func(name string) models_cloudbreak.NetworkResponse,
 	postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
-	getRdsConfig func(string) models.RDSConfigResponse,
+	getRdsConfig func(string) models_cloudbreak.RDSConfigResponse,
 	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error)) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
@@ -186,7 +186,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		computeType := "CORE"
 		platform := "AWS"
 
-		instanceGroups := []*models.InstanceGroups{
+		instanceGroups := []*models_cloudbreak.InstanceGroups{
 			{
 				Group:         MASTER,
 				NodeCount:     1,
@@ -221,7 +221,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			}
 		}
 
-		orchestrator := models.OrchestratorRequest{Type: "SALT"}
+		orchestrator := models_cloudbreak.OrchestratorRequest{Type: "SALT"}
 
 		log.Infof("[CreateStack] selected HDPVersion %s", skeleton.HDPVersion)
 
@@ -239,10 +239,10 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			userDefinedTags[USER_TAGS] = skeleton.Tags
 		}
 
-		stackReq := models.StackRequest{
+		stackReq := models_cloudbreak.StackRequest{
 			Name:            skeleton.ClusterName,
 			Credential:      credReq,
-			FailurePolicy:   &models.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
+			FailurePolicy:   &models_cloudbreak.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
 			OnFailureAction: &failureAction,
 			InstanceGroups:  instanceGroups,
 			Parameters:      stackParameters,
@@ -269,17 +269,17 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	// create cluster
 
 	func() {
-		masterConstraint := models.Constraint{
+		masterConstraint := models_cloudbreak.Constraint{
 			InstanceGroupName: MASTER,
 			HostCount:         int32(1),
 		}
 
-		workerConstraint := models.Constraint{
+		workerConstraint := models_cloudbreak.Constraint{
 			InstanceGroupName: WORKER,
 			HostCount:         int32(skeleton.Worker.InstanceCount),
 		}
 
-		computeConstraint := models.Constraint{
+		computeConstraint := models_cloudbreak.Constraint{
 			InstanceGroupName: COMPUTE,
 			HostCount:         int32(skeleton.Compute.InstanceCount),
 		}
@@ -301,7 +301,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			}
 		}
 
-		hostGroups := []*models.HostGroupRequest{
+		hostGroups := []*models_cloudbreak.HostGroupRequest{
 			{
 				Name:       MASTER,
 				Constraint: &masterConstraint,
@@ -321,7 +321,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			},
 		}
 
-		rdsConfigs := make([]*models.RDSConfig, 0)
+		rdsConfigs := make([]*models_cloudbreak.RDSConfig, 0)
 		rdsConfigIds := make([]int64, 0)
 		// hive metastore
 		hiveMetastore := skeleton.HiveMetastore
@@ -344,11 +344,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			}
 		}
 
-		var inputs []*models.BlueprintInput
+		var inputs []*models_cloudbreak.BlueprintInput
 		for key, value := range skeleton.ClusterInputs {
 			newKey := key
 			newValue := value
-			inputs = append(inputs, &models.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
 		}
 
 		exposedServices := []string{}
@@ -367,7 +367,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		enableKnoxGateway := true
 		knoxTopologyName := "hdc"
-		clusterReq := models.ClusterRequest{
+		clusterReq := models_cloudbreak.ClusterRequest{
 			Name:                      skeleton.ClusterName,
 			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
 			HostGroups:                hostGroups,
@@ -377,7 +377,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			RdsConfigIds:              rdsConfigIds,
 			BlueprintInputs:           inputs,
 			BlueprintCustomProperties: skeleton.Configurations,
-			Gateway: &models.GatewayJSON{
+			Gateway: &models_cloudbreak.GatewayJSON{
 				EnableGateway:   &enableKnoxGateway,
 				TopologyName:    &knoxTopologyName,
 				ExposedServices: exposedServices,
@@ -421,12 +421,12 @@ func RepairCluster(c *cli.Context) error {
 }
 
 func repairClusterImp(clusterName string, nodeType string, removeOnly bool,
-	getStack func(string) *models.StackResponse,
+	getStack func(string) *models_cloudbreak.StackResponse,
 	repairCluster func(params *cluster.RepairClusterParams) error) {
 
 	stack := getStack(clusterName)
 
-	repairBody := &models.ClusterRepairRequest{HostGroups: []string{nodeType}, RemoveOnly: &removeOnly}
+	repairBody := &models_cloudbreak.ClusterRepairRequest{HostGroups: []string{nodeType}, RemoveOnly: &removeOnly}
 	if err := repairCluster(&cluster.RepairClusterParams{Body: repairBody, ID: *stack.ID}); err != nil {
 		logErrorAndExit(err)
 	}
@@ -460,16 +460,16 @@ func ResizeCluster(c *cli.Context) error {
 }
 
 func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
-	getStack func(string) *models.StackResponse,
+	getStack func(string) *models_cloudbreak.StackResponse,
 	putStack func(*stacks.PutStacksIDParams) error,
-	putCluster func(*cluster.PutStacksIDClusterParams) error) *models.StackResponse {
+	putCluster func(*cluster.PutStacksIDClusterParams) error) *models_cloudbreak.StackResponse {
 
 	stack := getStack(clusterName)
 
 	if adjustment > 0 {
 		withClusterScale := true
-		update := &models.UpdateStack{
-			InstanceGroupAdjustment: &models.InstanceGroupAdjustment{
+		update := &models_cloudbreak.UpdateStack{
+			InstanceGroupAdjustment: &models_cloudbreak.InstanceGroupAdjustment{
 				InstanceGroup:     nodeType,
 				ScalingAdjustment: adjustment,
 				WithClusterEvent:  &withClusterScale,
@@ -495,8 +495,8 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 			}
 		}
 		withStackScale := true
-		update := &models.UpdateCluster{
-			HostGroupAdjustment: &models.HostGroupAdjustment{
+		update := &models_cloudbreak.UpdateCluster{
+			HostGroupAdjustment: &models_cloudbreak.HostGroupAdjustment{
 				ScalingAdjustment: adjustment,
 				HostGroup:         nodeType,
 				WithStackUpdate:   &withStackScale,
@@ -536,9 +536,9 @@ func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
 }
 
 func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterName string, clusterType string,
-	getBlueprint func(string) *models.BlueprintResponse,
-	getCluster func(string) *models.StackResponse,
-	getClusterConfig func(int64, []*models.BlueprintParameter) []*models.BlueprintInput) {
+	getBlueprint func(string) *models_cloudbreak.BlueprintResponse,
+	getCluster func(string) *models_cloudbreak.StackResponse,
+	getClusterConfig func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput) {
 
 	ambariBp := getBlueprint(clusterType)
 
@@ -633,6 +633,6 @@ func getBaseSkeleton() *ClusterSkeleton {
 		},
 		HiveMetastore:  &HiveMetastore{},
 		DruidMetastore: &DruidMetastore{},
-		Configurations: []models.Configurations{},
+		Configurations: []models_cloudbreak.Configurations{},
 	}
 }

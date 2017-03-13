@@ -6,8 +6,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/networks"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/networks"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -31,7 +31,7 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 
 func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
 	postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error),
-	getNetwork func(string) models.NetworkResponse) {
+	getNetwork func(string) models_cloudbreak.NetworkResponse) {
 
 	network := createNetworkRequest(skeleton, getNetwork)
 
@@ -46,7 +46,7 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
 	channel <- *resp.Payload.ID
 }
 
-func createNetworkRequest(skeleton ClusterSkeleton, getNetwork func(string) models.NetworkResponse) *models.NetworkRequest {
+func createNetworkRequest(skeleton ClusterSkeleton, getNetwork func(string) models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkRequest {
 	networkName := "net" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	vpc := skeleton.Network
@@ -60,7 +60,7 @@ func createNetworkRequest(skeleton ClusterSkeleton, getNetwork func(string) mode
 		vpcParams["internetGatewayId"] = defaultNetwork.Parameters["internetGatewayId"]
 	}
 
-	network := models.NetworkRequest{
+	network := models_cloudbreak.NetworkRequest{
 		Name:          networkName,
 		CloudPlatform: "AWS",
 		Parameters:    vpcParams,
@@ -87,7 +87,7 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 	vpcParams["internetGatewayId"] = finder(FlIGW.Name)
 	subnet := finder(FlSubnet.Name)
 
-	network := models.NetworkRequest{
+	network := models_cloudbreak.NetworkRequest{
 		Name:          networkName,
 		CloudPlatform: "AWS",
 		Parameters:    vpcParams,
@@ -104,7 +104,7 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 	return nil
 }
 
-func (c *Cloudbreak) GetNetwork(name string) models.NetworkResponse {
+func (c *Cloudbreak) GetNetwork(name string) models_cloudbreak.NetworkResponse {
 	log.Infof("[GetNetwork] sending get request to find network with name: %s", name)
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccountName(&networks.GetNetworksAccountNameParams{Name: name})
 
@@ -117,7 +117,7 @@ func (c *Cloudbreak) GetNetwork(name string) models.NetworkResponse {
 	return defaultNetwork
 }
 
-func (c *Cloudbreak) GetNetworkById(id int64) *models.NetworkResponse {
+func (c *Cloudbreak) GetNetworkById(id int64) *models_cloudbreak.NetworkResponse {
 	log.Infof("[GetNetwork] sending get request to find network with id: %d", id)
 	resp, err := c.Cloudbreak.Networks.GetNetworksID(&networks.GetNetworksIDParams{ID: id})
 
@@ -139,7 +139,7 @@ func DeleteNetwork(c *cli.Context) error {
 	return nil
 }
 
-func (c *Cloudbreak) GetPublicNetworks() []*models.NetworkResponse {
+func (c *Cloudbreak) GetPublicNetworks() []*models_cloudbreak.NetworkResponse {
 	defer timeTrack(time.Now(), "get public networks")
 	resp, err := c.Cloudbreak.Networks.GetNetworksAccount(&networks.GetNetworksAccountParams{})
 	if err != nil {
@@ -164,7 +164,7 @@ func ListPrivateNetworks(c *cli.Context) error {
 	return listPrivateNetworksImpl(oAuth2Client.GetPrivateNetworks, output.WriteList)
 }
 
-func listPrivateNetworksImpl(getNetworks func() []*models.NetworkResponse, writer func([]string, []Row)) error {
+func listPrivateNetworksImpl(getNetworks func() []*models_cloudbreak.NetworkResponse, writer func([]string, []Row)) error {
 	networkResp := getNetworks()
 
 	var tableRows []Row
@@ -177,7 +177,7 @@ func listPrivateNetworksImpl(getNetworks func() []*models.NetworkResponse, write
 	return nil
 }
 
-func (c *Cloudbreak) GetPrivateNetworks() []*models.NetworkResponse {
+func (c *Cloudbreak) GetPrivateNetworks() []*models_cloudbreak.NetworkResponse {
 	defer timeTrack(time.Now(), "get private networks")
 	resp, err := c.Cloudbreak.Networks.GetNetworksUser(&networks.GetNetworksUserParams{})
 	if err != nil {

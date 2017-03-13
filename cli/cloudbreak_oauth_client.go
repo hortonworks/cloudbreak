@@ -22,7 +22,7 @@ import (
 	"github.com/go-swagger/go-swagger/httpkit"
 	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
 	"github.com/go-swagger/go-swagger/strfmt"
-	apiclient "github.com/hortonworks/hdc-cli/client"
+	apiclient "github.com/hortonworks/hdc-cli/client_cloudbreak"
 )
 
 var PREFIX_TRIM []string = []string{"http://", "https://"}

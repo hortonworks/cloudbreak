@@ -6,7 +6,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -36,7 +36,7 @@ func (c *Cloudbreak) cleanupBlueprints(wg *sync.WaitGroup) {
 	cleanupBlueprintsImpl(c.GetPublicBlueprints, c.DeleteBlueprint)
 }
 
-func cleanupBlueprintsImpl(getBlueprints func() []*models.BlueprintResponse, deleteBlueprint func(string) error) {
+func cleanupBlueprintsImpl(getBlueprints func() []*models_cloudbreak.BlueprintResponse, deleteBlueprint func(string) error) {
 	for _, bp := range getBlueprints() {
 		if bp.Name[0] == 'b' && len(BlueprintMap[*bp.AmbariBlueprint.Blueprint.Name]) > 0 {
 			if err := deleteBlueprint(bp.Name); err != nil {
@@ -53,7 +53,7 @@ func (c *Cloudbreak) cleanupTemplates(wg *sync.WaitGroup) {
 	cleanupTemplatesImpl(c.GetPublicTemplates, c.DeleteTemplate)
 }
 
-func cleanupTemplatesImpl(getTemplates func() []*models.TemplateResponse, deleteTemplate func(string) error) {
+func cleanupTemplatesImpl(getTemplates func() []*models_cloudbreak.TemplateResponse, deleteTemplate func(string) error) {
 	for _, template := range getTemplates() {
 		if strings.Contains(template.Name, "mtempl") || strings.Contains(template.Name, "wtempl") || strings.Contains(template.Name, "ctempl") {
 			if err := deleteTemplate(template.Name); err != nil {
@@ -70,7 +70,7 @@ func (c *Cloudbreak) cleanupCredentials(wg *sync.WaitGroup) {
 	cleanupCredentialsImpl(c.GetPublicCredentials, c.DeleteCredential)
 }
 
-func cleanupCredentialsImpl(getCredentials func() []*models.CredentialResponse, deleteCredential func(string) error) {
+func cleanupCredentialsImpl(getCredentials func() []*models_cloudbreak.CredentialResponse, deleteCredential func(string) error) {
 	for _, cred := range getCredentials() {
 		credName := cred.Name
 		if len(credName) > 5 && credName[0:4] == "cred" {
@@ -88,7 +88,7 @@ func (c *Cloudbreak) cleanupNetworks(wg *sync.WaitGroup) {
 	cleanupNetworksImpl(c.GetPublicNetworks, c.DeleteNetwork)
 }
 
-func cleanupNetworksImpl(getNetworks func() []*models.NetworkResponse, deleteNetwork func(string) error) {
+func cleanupNetworksImpl(getNetworks func() []*models_cloudbreak.NetworkResponse, deleteNetwork func(string) error) {
 	for _, network := range getNetworks() {
 		netName := network.Name
 		if len(netName) > 4 && netName[0:3] == "net" {
@@ -106,7 +106,7 @@ func (c *Cloudbreak) cleanupSecurityGroups(wg *sync.WaitGroup) {
 	cleanupSecurityGroupsImpl(c.GetPublicSecurityGroups, c.DeleteSecurityGroup)
 }
 
-func cleanupSecurityGroupsImpl(getGroups func() []*models.SecurityGroupResponse, deleteGroup func(string) error) {
+func cleanupSecurityGroupsImpl(getGroups func() []*models_cloudbreak.SecurityGroupResponse, deleteGroup func(string) error) {
 	for _, secGroup := range getGroups() {
 		secGroupName := secGroup.Name
 		if len(secGroupName) > 6 && (secGroupName[0:7] == "hdc-sg-") {
@@ -124,7 +124,7 @@ func (c *Cloudbreak) cleanupRecipes(wg *sync.WaitGroup) {
 	cleanupRecipesImpl(c.GetPublicRecipes, c.DeleteRecipe)
 }
 
-func cleanupRecipesImpl(getRecipes func() []*models.RecipeResponse, deleteRecipe func(string) error) {
+func cleanupRecipesImpl(getRecipes func() []*models_cloudbreak.RecipeResponse, deleteRecipe func(string) error) {
 	for _, recipe := range getRecipes() {
 		recipeName := recipe.Name
 		if strings.Contains(recipeName, "hrec") {

@@ -5,8 +5,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/client/templates"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/templates"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestCreateTemplateImpl(t *testing.T) {
@@ -38,9 +38,9 @@ func TestCreateTemplateImpl(t *testing.T) {
 	expectedMasterId := int64(1)
 	expectedWorkerId := int64(2)
 	expectedComputeId := int64(3)
-	var actualMasterTemplate *models.TemplateRequest
-	var actualWorkerTemplate *models.TemplateRequest
-	var actualComputeTemplate *models.TemplateRequest
+	var actualMasterTemplate *models_cloudbreak.TemplateRequest
+	var actualWorkerTemplate *models_cloudbreak.TemplateRequest
+	var actualComputeTemplate *models_cloudbreak.TemplateRequest
 
 	postTemplate := func(params *templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error) {
 		var id int64
@@ -55,7 +55,7 @@ func TestCreateTemplateImpl(t *testing.T) {
 			actualComputeTemplate = params.Body
 		}
 		resp := templates.PostTemplatesAccountOK{
-			Payload: &models.TemplateResponse{ID: &id},
+			Payload: &models_cloudbreak.TemplateResponse{ID: &id},
 		}
 		return &resp, nil
 	}
@@ -67,7 +67,7 @@ func TestCreateTemplateImpl(t *testing.T) {
 	//validateTemplate("compute", skeleton.Compute, expectedComputeId, actualComputeTemplate, c, t)
 }
 
-func validateTemplate(kind string, config InstanceConfig, expId int64, actual *models.TemplateRequest, c chan int64, t *testing.T) {
+func validateTemplate(kind string, config InstanceConfig, expId int64, actual *models_cloudbreak.TemplateRequest, c chan int64, t *testing.T) {
 	id := <-c
 	if id != expId {
 		t.Errorf(kind+" id not match %d == %d", expId, id)

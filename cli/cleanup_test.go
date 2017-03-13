@@ -3,14 +3,14 @@ package cli
 import (
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestCleanupBlueprintsImplNotGenerated(t *testing.T) {
-	items := make([]*models.BlueprintResponse, 0)
-	items = append(items, &models.BlueprintResponse{Name: "name"})
-	items = append(items, &models.BlueprintResponse{Name: "name2"})
-	getItems := func() []*models.BlueprintResponse {
+	items := make([]*models_cloudbreak.BlueprintResponse, 0)
+	items = append(items, &models_cloudbreak.BlueprintResponse{Name: "name"})
+	items = append(items, &models_cloudbreak.BlueprintResponse{Name: "name2"})
+	getItems := func() []*models_cloudbreak.BlueprintResponse {
 		return items
 	}
 
@@ -28,17 +28,17 @@ func TestCleanupBlueprintsImplNotGenerated(t *testing.T) {
 }
 
 func TestCleanupBlueprintsImplNotGeneratedButStartsWithB(t *testing.T) {
-	items := make([]*models.BlueprintResponse, 0)
-	item := models.BlueprintResponse{
+	items := make([]*models_cloudbreak.BlueprintResponse, 0)
+	item := models_cloudbreak.BlueprintResponse{
 		Name: "bname",
-		AmbariBlueprint: models.AmbariBlueprint{
-			Blueprint: models.Blueprint{
+		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
+			Blueprint: models_cloudbreak.Blueprint{
 				Name: &(&stringWrapper{"name"}).s,
 			},
 		},
 	}
 	items = append(items, &item)
-	getItems := func() []*models.BlueprintResponse {
+	getItems := func() []*models_cloudbreak.BlueprintResponse {
 		return items
 	}
 
@@ -56,11 +56,11 @@ func TestCleanupBlueprintsImplNotGeneratedButStartsWithB(t *testing.T) {
 }
 
 func TestCleanupBlueprintsImplGenerated(t *testing.T) {
-	items := make([]*models.BlueprintResponse, 0)
-	item := models.BlueprintResponse{
+	items := make([]*models_cloudbreak.BlueprintResponse, 0)
+	item := models_cloudbreak.BlueprintResponse{
 		Name: "bname",
-		AmbariBlueprint: models.AmbariBlueprint{
-			Blueprint: models.Blueprint{
+		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
+			Blueprint: models_cloudbreak.Blueprint{
 				Name: func() *string {
 					for k, _ := range BlueprintMap {
 						return &k
@@ -71,7 +71,7 @@ func TestCleanupBlueprintsImplGenerated(t *testing.T) {
 		},
 	}
 	items = append(items, &item)
-	getItems := func() []*models.BlueprintResponse {
+	getItems := func() []*models_cloudbreak.BlueprintResponse {
 		return items
 	}
 
@@ -89,9 +89,9 @@ func TestCleanupBlueprintsImplGenerated(t *testing.T) {
 }
 
 func TestCleanupTemplatesImplNotGenerated(t *testing.T) {
-	items := make([]*models.TemplateResponse, 0)
-	items = append(items, &models.TemplateResponse{Name: "name"})
-	getItems := func() []*models.TemplateResponse {
+	items := make([]*models_cloudbreak.TemplateResponse, 0)
+	items = append(items, &models_cloudbreak.TemplateResponse{Name: "name"})
+	getItems := func() []*models_cloudbreak.TemplateResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -108,10 +108,10 @@ func TestCleanupTemplatesImplNotGenerated(t *testing.T) {
 }
 
 func TestCleanupTemplatesImplGenerated(t *testing.T) {
-	items := make([]*models.TemplateResponse, 0)
-	items = append(items, &models.TemplateResponse{Name: "asd_mtempl_qwe"})
-	items = append(items, &models.TemplateResponse{Name: "qwe_wtempl_asd"})
-	getItems := func() []*models.TemplateResponse {
+	items := make([]*models_cloudbreak.TemplateResponse, 0)
+	items = append(items, &models_cloudbreak.TemplateResponse{Name: "asd_mtempl_qwe"})
+	items = append(items, &models_cloudbreak.TemplateResponse{Name: "qwe_wtempl_asd"})
+	getItems := func() []*models_cloudbreak.TemplateResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -128,10 +128,10 @@ func TestCleanupTemplatesImplGenerated(t *testing.T) {
 }
 
 func TestCleanupCredentialsImplNotGenerated(t *testing.T) {
-	items := make([]*models.CredentialResponse, 0)
-	items = append(items, &models.CredentialResponse{Name: "name"})
-	items = append(items, &models.CredentialResponse{Name: "longname"})
-	getItems := func() []*models.CredentialResponse {
+	items := make([]*models_cloudbreak.CredentialResponse, 0)
+	items = append(items, &models_cloudbreak.CredentialResponse{Name: "name"})
+	items = append(items, &models_cloudbreak.CredentialResponse{Name: "longname"})
+	getItems := func() []*models_cloudbreak.CredentialResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -148,9 +148,9 @@ func TestCleanupCredentialsImplNotGenerated(t *testing.T) {
 }
 
 func TestCleanupCredentialsImplGenerated(t *testing.T) {
-	items := make([]*models.CredentialResponse, 0)
-	items = append(items, &models.CredentialResponse{Name: "credname"})
-	getItems := func() []*models.CredentialResponse {
+	items := make([]*models_cloudbreak.CredentialResponse, 0)
+	items = append(items, &models_cloudbreak.CredentialResponse{Name: "credname"})
+	getItems := func() []*models_cloudbreak.CredentialResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -167,11 +167,11 @@ func TestCleanupCredentialsImplGenerated(t *testing.T) {
 }
 
 func TestCleanupNetworksImplNotGenerated(t *testing.T) {
-	items := make([]*models.NetworkResponse, 0)
-	items = append(items, &models.NetworkResponse{Name: "net"})
-	items = append(items, &models.NetworkResponse{Name: "netn"})
-	items = append(items, &models.NetworkResponse{Name: "longnetname"})
-	getItems := func() []*models.NetworkResponse {
+	items := make([]*models_cloudbreak.NetworkResponse, 0)
+	items = append(items, &models_cloudbreak.NetworkResponse{Name: "net"})
+	items = append(items, &models_cloudbreak.NetworkResponse{Name: "netn"})
+	items = append(items, &models_cloudbreak.NetworkResponse{Name: "longnetname"})
+	getItems := func() []*models_cloudbreak.NetworkResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -188,9 +188,9 @@ func TestCleanupNetworksImplNotGenerated(t *testing.T) {
 }
 
 func TestCleanupNetworksImplGenerated(t *testing.T) {
-	items := make([]*models.NetworkResponse, 0)
-	items = append(items, &models.NetworkResponse{Name: "network"})
-	getItems := func() []*models.NetworkResponse {
+	items := make([]*models_cloudbreak.NetworkResponse, 0)
+	items = append(items, &models_cloudbreak.NetworkResponse{Name: "network"})
+	getItems := func() []*models_cloudbreak.NetworkResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -207,11 +207,11 @@ func TestCleanupNetworksImplGenerated(t *testing.T) {
 }
 
 func TestCleanupSecurityGroupImplNotGenerated(t *testing.T) {
-	items := make([]*models.SecurityGroupResponse, 0)
-	items = append(items, &models.SecurityGroupResponse{Name: "secg"})
-	items = append(items, &models.SecurityGroupResponse{Name: "secgn"})
-	items = append(items, &models.SecurityGroupResponse{Name: "longsecgname"})
-	getItems := func() []*models.SecurityGroupResponse {
+	items := make([]*models_cloudbreak.SecurityGroupResponse, 0)
+	items = append(items, &models_cloudbreak.SecurityGroupResponse{Name: "secg"})
+	items = append(items, &models_cloudbreak.SecurityGroupResponse{Name: "secgn"})
+	items = append(items, &models_cloudbreak.SecurityGroupResponse{Name: "longsecgname"})
+	getItems := func() []*models_cloudbreak.SecurityGroupResponse {
 		return items
 	}
 	var deleteCalled []string
@@ -228,9 +228,9 @@ func TestCleanupSecurityGroupImplNotGenerated(t *testing.T) {
 }
 
 func TestCleanupSecurityGroupImplGenerated(t *testing.T) {
-	items := make([]*models.SecurityGroupResponse, 0)
-	items = append(items, &models.SecurityGroupResponse{Name: "hdc-sg-master-"})
-	getItems := func() []*models.SecurityGroupResponse {
+	items := make([]*models_cloudbreak.SecurityGroupResponse, 0)
+	items = append(items, &models_cloudbreak.SecurityGroupResponse{Name: "hdc-sg-master-"})
+	getItems := func() []*models_cloudbreak.SecurityGroupResponse {
 		return items
 	}
 	var deleteCalled []string

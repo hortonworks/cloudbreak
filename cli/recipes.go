@@ -2,8 +2,8 @@ package cli
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/recipes"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/recipes"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"strings"
 	"sync"
 	"time"
@@ -66,8 +66,8 @@ func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostRecip
 	return *resp.Payload.ID
 }
 
-func createRecipeRequests(recipes []Recipe) []*models.RecipeRequest {
-	var requests = make([]*models.RecipeRequest, 0)
+func createRecipeRequests(recipes []Recipe) []*models_cloudbreak.RecipeRequest {
+	var requests = make([]*models_cloudbreak.RecipeRequest, 0)
 
 	for _, r := range recipes {
 		requests = append(requests, createRecipeRequest(r))
@@ -76,8 +76,8 @@ func createRecipeRequests(recipes []Recipe) []*models.RecipeRequest {
 	return requests
 }
 
-func createRecipeRequest(recipe Recipe) *models.RecipeRequest {
-	recipeRequest := models.RecipeRequest{
+func createRecipeRequest(recipe Recipe) *models_cloudbreak.RecipeRequest {
+	recipeRequest := models_cloudbreak.RecipeRequest{
 		URI:        &recipe.URI,
 		RecipeType: strings.ToUpper(recipe.Phase),
 	}
@@ -85,7 +85,7 @@ func createRecipeRequest(recipe Recipe) *models.RecipeRequest {
 	return &recipeRequest
 }
 
-func (c *Cloudbreak) GetPublicRecipes() []*models.RecipeResponse {
+func (c *Cloudbreak) GetPublicRecipes() []*models_cloudbreak.RecipeResponse {
 	defer timeTrack(time.Now(), "get public recipes")
 	resp, err := c.Cloudbreak.Recipes.GetRecipesAccount(&recipes.GetRecipesAccountParams{})
 	if err != nil {

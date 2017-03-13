@@ -46,11 +46,11 @@ build-windows:
 	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger:
-	swagger generate client -f http://$(CB_IP):8080/cb/api/v1/swagger.json
+	swagger generate client -f http://$(CB_IP):8080/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
 
 generate-swagger-docker:
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.5.0 \
-	swagger generate client -f http://$(CB_IP):8080/cb/api/v1/swagger.json
+	swagger generate client -f http://$(CB_IP):8080/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
 
 generate-swagger-autoscale:
 	swagger generate client -f http://$(CB_IP):8085/as/api/v1/swagger.json -c client_autoscale -m models_autoscale

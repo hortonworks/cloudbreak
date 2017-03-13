@@ -6,22 +6,22 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/client/stacks"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestListClustersImpl(t *testing.T) {
-	resps := make([]*models.StackResponse, 0)
+	resps := make([]*models_cloudbreak.StackResponse, 0)
 	for i := 0; i <= 3; i++ {
 		id := int64(i)
-		resps = append(resps, &models.StackResponse{ID: &id})
+		resps = append(resps, &models_cloudbreak.StackResponse{ID: &id})
 	}
 	getStacks := func(params *stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error) {
 		return &stacks.GetStacksUserOK{Payload: resps}, nil
 	}
 	mtx := sync.Mutex{}
 	expected := make([]ClusterSkeletonResult, 0)
-	fetchCluster := func(stack *models.StackResponse) (*ClusterSkeletonResult, error) {
+	fetchCluster := func(stack *models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error) {
 		u := strconv.FormatInt(*stack.ID, 10)
 		skeleton := ClusterSkeletonResult{
 			ClusterSkeletonBase: ClusterSkeletonBase{
@@ -56,12 +56,12 @@ func TestListClustersImpl(t *testing.T) {
 }
 
 func TestListClusterNodesImplWithoutDiscoveryFQDN(t *testing.T) {
-	groups := make([]*models.InstanceGroupResponse, 0)
+	groups := make([]*models_cloudbreak.InstanceGroupResponse, 0)
 	for i := 0; i <= 3; i++ {
-		groups = append(groups, &models.InstanceGroupResponse{Metadata: []*models.InstanceMetaData{{}}})
+		groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Metadata: []*models_cloudbreak.InstanceMetaData{{}}})
 	}
 	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
-		return &stacks.GetStacksUserNameOK{Payload: &models.StackResponse{InstanceGroups: groups}}, nil
+		return &stacks.GetStacksUserNameOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
 	}
 	var rows []Row
 
@@ -74,13 +74,13 @@ func TestListClusterNodesImplWithoutDiscoveryFQDN(t *testing.T) {
 
 func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 	var expectedCount int
-	groups := make([]*models.InstanceGroupResponse, 0)
+	groups := make([]*models_cloudbreak.InstanceGroupResponse, 0)
 	for i := 0; i <= 3; i++ {
-		metas := make([]*models.InstanceMetaData, 0)
+		metas := make([]*models_cloudbreak.InstanceMetaData, 0)
 		for j := 0; j <= 3; j++ {
 			u := strconv.Itoa(expectedCount)
 			expectedCount++
-			metas = append(metas, &models.InstanceMetaData{
+			metas = append(metas, &models_cloudbreak.InstanceMetaData{
 				InstanceGroup: &(&stringWrapper{"group" + u}).s,
 				InstanceID:    &(&stringWrapper{"id" + u}).s,
 				DiscoveryFQDN: &(&stringWrapper{"fqdn" + u}).s,
@@ -88,10 +88,10 @@ func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 				PrivateIP:     &(&stringWrapper{"privip" + u}).s,
 			})
 		}
-		groups = append(groups, &models.InstanceGroupResponse{Metadata: metas})
+		groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Metadata: metas})
 	}
 	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
-		return &stacks.GetStacksUserNameOK{Payload: &models.StackResponse{InstanceGroups: groups}}, nil
+		return &stacks.GetStacksUserNameOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
 	}
 	var rows []Row
 
@@ -111,14 +111,14 @@ func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 }
 
 func TestListClusterNodesImplWithMaster(t *testing.T) {
-	groups := []*models.InstanceGroupResponse{{
-		Metadata: []*models.InstanceMetaData{{
+	groups := []*models_cloudbreak.InstanceGroupResponse{{
+		Metadata: []*models_cloudbreak.InstanceMetaData{{
 			InstanceGroup: &(&stringWrapper{MASTER}).s,
 			DiscoveryFQDN: &(&stringWrapper{"fqdn"}).s,
 		}},
 	}}
 	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
-		return &stacks.GetStacksUserNameOK{Payload: &models.StackResponse{InstanceGroups: groups}}, nil
+		return &stacks.GetStacksUserNameOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
 	}
 	var rows []Row
 

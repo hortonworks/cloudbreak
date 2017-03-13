@@ -5,15 +5,15 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/client/rdsconfigs"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/rdsconfigs"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestListRDSConfigsImpl(t *testing.T) {
-	configs := make([]*models.RDSConfigResponse, 0)
+	configs := make([]*models_cloudbreak.RDSConfigResponse, 0)
 	for i := 0; i < 3; i++ {
 		n := strconv.Itoa(i)
-		configs = append(configs, &models.RDSConfigResponse{
+		configs = append(configs, &models_cloudbreak.RDSConfigResponse{
 			HdpVersion:    "hdp-version" + n,
 			Name:          "rds-name" + n,
 			ConnectionURL: "jdbc:postgresql://lh:5432/p" + n,
@@ -63,10 +63,10 @@ func TestCreateRDSConfigImpl(t *testing.T) {
 		}
 	}
 	expectedId := int64(1)
-	var actual *models.RDSConfig
+	var actual *models_cloudbreak.RDSConfig
 	postConfig := func(params *rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error) {
 		actual = params.Body
-		return &rdsconfigs.PostRdsconfigsAccountOK{Payload: &models.RDSConfigResponse{ID: &expectedId}}, nil
+		return &rdsconfigs.PostRdsconfigsAccountOK{Payload: &models_cloudbreak.RDSConfigResponse{ID: &expectedId}}, nil
 	}
 
 	createRDSConfigImpl(HIVE_RDS, finder, postConfig)

@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/hortonworks/hdc-cli/models"
+import "github.com/hortonworks/hdc-cli/models_cloudbreak"
 
 const (
 	MASTER    = "master"
@@ -44,19 +44,19 @@ type ClusterSkeletonBase struct {
 
 type ClusterSkeleton struct {
 	ClusterSkeletonBase
-	HiveMetastore  *HiveMetastore          `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore *DruidMetastore         `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []models.Configurations `json:"Configurations" yaml:"Configurations"`
+	HiveMetastore  *HiveMetastore                     `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore *DruidMetastore                    `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	Configurations []models_cloudbreak.Configurations `json:"Configurations" yaml:"Configurations"`
 }
 
 type ClusterSkeletonResult struct {
 	ClusterSkeletonBase
-	HiveMetastore  *HiveMetastoreResult    `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore *DruidMetastoreResult   `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []models.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
-	Nodes          string                  `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
-	Status         string                  `json:"Status,omitempty" yaml:"Status,omitempty"`
-	StatusReason   string                  `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	HiveMetastore  *HiveMetastoreResult               `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore *DruidMetastoreResult              `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	Configurations []models_cloudbreak.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Nodes          string                             `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
+	Status         string                             `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason   string                             `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 }
 
 type InstanceConfig struct {

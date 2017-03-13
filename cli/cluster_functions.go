@@ -12,8 +12,8 @@ import (
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/stacks"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 )
@@ -38,7 +38,7 @@ func (c *InstanceConfig) Yaml() string {
 	return string(j)
 }
 
-func (c *InstanceConfig) fill(instanceGroup *models.InstanceGroupResponse, template *models.TemplateResponse) error {
+func (c *InstanceConfig) fill(instanceGroup *models_cloudbreak.InstanceGroupResponse, template *models_cloudbreak.TemplateResponse) error {
 	c.InstanceCount = instanceGroup.NodeCount
 	c.InstanceType = template.InstanceType
 	c.VolumeType = SafeStringConvert(template.VolumeType)
@@ -79,14 +79,14 @@ func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 }
 
 func (c *ClusterSkeletonResult) fill(
-	stack *models.StackResponse,
-	credential *models.CredentialResponse,
-	blueprint *models.BlueprintResponse,
-	templateMap map[string]*models.TemplateResponse,
-	securityMap map[string][]*models.SecurityRuleResponse,
-	network *models.NetworkResponse,
-	rdsConfigs []*models.RDSConfigResponse,
-	recipeMap map[string][]*models.RecipeResponse,
+	stack *models_cloudbreak.StackResponse,
+	credential *models_cloudbreak.CredentialResponse,
+	blueprint *models_cloudbreak.BlueprintResponse,
+	templateMap map[string]*models_cloudbreak.TemplateResponse,
+	securityMap map[string][]*models_cloudbreak.SecurityRuleResponse,
+	network *models_cloudbreak.NetworkResponse,
+	rdsConfigs []*models_cloudbreak.RDSConfigResponse,
+	recipeMap map[string][]*models_cloudbreak.RecipeResponse,
 	recoveryModeMap map[string]string) error {
 
 	if stack == nil {
@@ -235,7 +235,7 @@ func (c *ClusterSkeletonResult) fill(
 	return nil
 }
 
-func fillWebAccess(cluster *models.ClusterResponse, skeleton *ClusterSkeletonResult) {
+func fillWebAccess(cluster *models_cloudbreak.ClusterResponse, skeleton *ClusterSkeletonResult) {
 	serviceMap := make(map[string]int)
 
 	if cluster.Gateway != nil {
@@ -262,7 +262,7 @@ func fillWebAccess(cluster *models.ClusterResponse, skeleton *ClusterSkeletonRes
 	}
 }
 
-func convertRecipes(recipes []*models.RecipeResponse) []Recipe {
+func convertRecipes(recipes []*models_cloudbreak.RecipeResponse) []Recipe {
 	var convertedRecipes []Recipe = []Recipe{}
 	for _, resp := range recipes {
 		convertedRecipes = append(convertedRecipes, Recipe{URI: *resp.URI, Phase: strings.ToLower(resp.RecipeType)})
