@@ -328,7 +328,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             if (gateway.getEnableGateway() && ambariIp != null) {
                 url = String.format("https://%s:8443/gateway/%s%s", ambariIp, gateway.getTopologyName(),
                         port.getExposedService().getKnoxUrl());
-                if (exposedServices.contains(port.getExposedService().getKnoxService())) {
+                // filter out what is not exposed
+                // filter out what is not expected to be exposed e.g Zeppelin WS since it does not have Knox Url
+                if (!Strings.isNullOrEmpty(port.getExposedService().getKnoxUrl())
+                        && exposedServices.contains(port.getExposedService().getKnoxService())) {
                     result.put(port.getExposedService().getPortName(), url);
                 }
             } else if (serviceAddress != null) {

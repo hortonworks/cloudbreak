@@ -39,7 +39,7 @@ public enum ExposedService {
     KNOX_GW("Knox GW", "Knox GW", "", "", ""),
     SPARK_HISTORY_SERVER("Spark History Server", "SPARK_JOBHISTORYSERVER", "", "SPARKHISTORYUI", "/sparkhistory/"),
     CONTAINER_LOGS("Container logs", "Container logs", "", "", ""),
-    ZEPPELIN_WEB_SOCKET("Zeppelin Web Socket", "ZEPPELIN_MASTER", "", "ZEPPELINWS", "/ws/"),
+    ZEPPELIN_WEB_SOCKET("Zeppelin Web Socket", "ZEPPELIN_MASTER", "", "ZEPPELINWS", ""),
     ZEPPELIN_UI("Zeppelin UI", "ZEPPELIN_MASTER", "", "ZEPPELINUI", "/zeppelin/"),
     RANGER("Ranger Admin UI", "RANGER_ADMIN", "", "RANGERUI", "/ranger/"),
     KIBANA("Kibana", "KIBANA", "", "", ""),
