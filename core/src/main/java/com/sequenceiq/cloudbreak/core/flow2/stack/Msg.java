@@ -70,7 +70,8 @@ public enum Msg {
     AMBARI_CLUSTER_UPGRADE("ambari.cluster.upgrade"),
     AMBARI_CLUSTER_UPGRADE_FAILED("ambari.cluster.upgrade.failed"),
     AMBARI_CLUSTER_UPGRADE_FINISHED("ambari.cluster.upgrade.finished"),
-    AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup");
+    AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("ambari.cluster.removing.node.from.hostgroup"),
+    STACK_IMAGE_SETUP("stack.image.setup");
 
     private String code;
 

@@ -130,6 +130,7 @@ public class StackCreationService {
 
     public void prepareImage(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.IMAGE_SETUP, "Image setup");
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_IMAGE_SETUP, CREATE_IN_PROGRESS.name());
     }
 
     public void startProvisioning(StackContext context) {
