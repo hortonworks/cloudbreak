@@ -84,11 +84,11 @@
             "ranger_admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
             "is_solrCloud_enabled":"true",
             "ranger-hdfs-plugin-enabled":"No",
-            "ranger-hive-plugin-enabled":"Yes",
+            "ranger-hive-plugin-enabled":"No",
             "ranger-yarn-plugin-enabled":"No",
-            "xasecure.audit.destination.hdfs.dir":"hdfs://%HOSTGROUP::master%:8020/ranger/audit",
             "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}",
-            "ranger-atlas-plugin-enabled":"No"
+            "ranger-atlas-plugin-enabled":"No",
+            "create_db_dbuser":"false"
           }
         }
       },
@@ -159,6 +159,12 @@
 
         ],
         "components":[
+          {
+            "name":"ZOOKEEPER_SERVER"
+          },
+          {
+            "name":"INFRA_SOLR"
+          },
           {
             "name":"METRICS_MONITOR"
           },

@@ -1,8 +1,8 @@
 {
   "inputs": [
     {
-      "name":"LDAP_URL",
-      "referenceConfiguration":"hive.server2.authentication.ldap.url"
+    "name":"LDAP_URL",
+    "referenceConfiguration":"hive.server2.authentication.ldap.url"
     },
     {
       "name":"LDAP_DOMAIN",
@@ -47,7 +47,7 @@
   ],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp26-etl-edw-shared",
+      "blueprint_name": "hdp26-data-science-spark2-shared",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
@@ -97,45 +97,6 @@
           "yarn.acl.enable": "true"
         }
       },
-      {
-        "druid-common": {
-          "properties_attributes": {},
-          "properties": {
-            "druid.metadata.storage.type": "derby",
-            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true",
-            "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
-            "druid.selectors.indexing.serviceName": "druid/overlord"
-          }
-        }
-      },
-      {
-      "druid-overlord" : {
-        "properties_attributes" : { },
-        "properties" : {
-          "druid.indexer.storage.type" : "metadata",
-          "druid.indexer.runner.type" : "remote",
-          "druid.service" : "druid/overlord",
-          "druid.port" : "8090"
-        }
-      }
-    },
-      {
-      "druid-middlemanager" : {
-        "properties_attributes" : { },
-        "properties" : {
-          "druid.indexer.task.hadoopWorkingPath" : "/tmp/druid-indexing",
-          "druid.server.http.numThreads" : "50",
-          "druid.indexer.runner.startPort" : "8100",
-          "druid.worker.capacity" : "3",
-          "druid.processing.numThreads" : "2",
-          "druid.indexer.runner.javaOpts" : "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
-          "druid.indexer.task.baseTaskDir" : "/tmp/persistent/tasks",
-          "druid.processing.buffer.sizeBytes" : "256000000",
-          "druid.service" : "druid/middlemanager",
-          "druid.port" : "8091"
-        }
-      }
-    },
       {
         "ranger-hive-plugin-properties": {
           "properties": {
@@ -192,9 +153,6 @@
             "name": "JOURNALNODE"
           },
           {
-            "name": "LIVY_SERVER"
-          },
-          {
             "name": "MAPREDUCE2_CLIENT"
           },
           {
@@ -202,9 +160,6 @@
           },
           {
             "name": "METRICS_MONITOR"
-          },
-          {
-            "name": "MYSQL_SERVER"
           },
           {
             "name": "NAMENODE"
@@ -217,6 +172,15 @@
           },
           {
             "name": "SECONDARY_NAMENODE"
+          },
+          {
+            "name": "LIVY_SERVER"
+          },
+          {
+            "name": "SPARK2_CLIENT"
+          },
+          {
+            "name": "SPARK2_JOBHISTORYSERVER"
           },
           {
             "name": "SPARK_CLIENT"
@@ -237,26 +201,13 @@
             "name": "YARN_CLIENT"
           },
           {
+            "name": "ZEPPELIN_MASTER"
+          },
+          {
             "name": "ZOOKEEPER_CLIENT"
           },
           {
             "name": "ZOOKEEPER_SERVER"
-          },
-          {
-            "name" : "DRUID_OVERLORD",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_COORDINATOR",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_ROUTER",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_BROKER",
-            "provision_action": "INSTALL_ONLY"
           }
         ],
         "cardinality": "1"
@@ -272,6 +223,9 @@
             "name": "TEZ_CLIENT"
           },
           {
+            "name": "SPARK2_CLIENT"
+          },
+          {
             "name": "SPARK_CLIENT"
           },
           {
@@ -282,14 +236,6 @@
           },
           {
             "name": "NODEMANAGER"
-          },
-          {
-            "name" : "DRUID_MIDDLEMANAGER",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_HISTORICAL",
-            "provision_action": "INSTALL_ONLY"
           }
         ],
         "cardinality": "1+"
@@ -303,6 +249,9 @@
           },
           {
             "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "SPARK2_CLIENT"
           },
           {
             "name": "SPARK_CLIENT"
