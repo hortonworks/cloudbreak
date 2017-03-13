@@ -135,7 +135,7 @@ func CreateCluster(c *cli.Context) error {
 		logErrorAndExit(err)
 	}
 
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	stackId := createClusterImpl(skeleton,
 		createMasterTemplateRequest,
@@ -147,14 +147,18 @@ func CreateCluster(c *cli.Context) error {
 		createRecipeRequests,
 		createBlueprintRequest,
 		createRDSRequest,
-		oAuth2Client.GetBlueprintByName,
-		oAuth2Client.GetCredential,
-		oAuth2Client.GetNetwork,
-		oAuth2Client.Cloudbreak.Stacks.PostStacksUser,
-		oAuth2Client.GetRDSConfigByName,
-		oAuth2Client.Cloudbreak.Cluster.PostStacksIDCluster)
+		cbClient.GetBlueprintByName,
+		cbClient.GetCredential,
+		cbClient.GetNetwork,
+		cbClient.Cloudbreak.Stacks.PostStacksUser,
+		cbClient.GetRDSConfigByName,
+		cbClient.Cloudbreak.Cluster.PostStacksIDCluster,
+		asClient.createBaseAutoscalingCluster,
+		asClient.setConfiguration,
+		asClient.addPrometheusAlert,
+		asClient.addScalingPolicy)
 
-	oAuth2Client.waitForClusterToFinish(stackId, c)
+	cbClient.waitForClusterToFinish(stackId, c)
 	return nil
 }
 
@@ -173,7 +177,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	getNetwork func(name string) models_cloudbreak.NetworkResponse,
 	postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
 	getRdsConfig func(string) models_cloudbreak.RDSConfigResponse,
-	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error)) int64 {
+	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error),
+	createBaseAutoscalingCluster func(stackId int64) int64,
+	setScalingConfigurations func(int64, AutoscalingConfiguration),
+	addPrometheusAlert func(int64, AutoscalingPolicy) int64,
+	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 
@@ -391,6 +399,23 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		log.Infof("[CreateCluster] cluster created, id: %d", resp.Payload.ID)
+	}()
+
+	// create autoscaling policies
+
+	func() {
+		if skeleton.Autoscaling != nil && len(skeleton.Autoscaling.Policies) > 0 {
+			asClusterId := createBaseAutoscalingCluster(stackId)
+
+			if skeleton.Autoscaling.Configuration != nil {
+				setScalingConfigurations(asClusterId, *skeleton.Autoscaling.Configuration)
+			}
+
+			for _, p := range skeleton.Autoscaling.Policies {
+				alertId := addPrometheusAlert(asClusterId, p)
+				addScalingPolicy(asClusterId, p, alertId)
+			}
+		}
 	}()
 
 	return stackId
