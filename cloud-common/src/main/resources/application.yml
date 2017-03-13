@@ -128,7 +128,7 @@ cb:
     hostkey.verify: false
 
   byos:
-    dfs.data.dir: /hadoop/hdfs/data
+    dfs.data.dir: /hadoopfs/fs0
 
   nginx:
     port: 9443
