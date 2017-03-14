@@ -9,6 +9,7 @@ import (
 	"github.com/hortonworks/hdc-cli/client_autoscale/configurations"
 	"github.com/hortonworks/hdc-cli/client_autoscale/policies"
 	"github.com/hortonworks/hdc-cli/models_autoscale"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 	"time"
 )
@@ -118,6 +119,67 @@ func RemoveAutoscalingPolicy(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func DisableAutoscalingPolicy(c *cli.Context) error {
+	defer timeTrack(time.Now(), "disable autoscaling")
+	checkRequiredFlags(c)
+
+	clusterName := c.String(FlClusterName.Name)
+	if len(clusterName) == 0 {
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
+	}
+
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	setClusterState(clusterName,
+		"SUSPENDED",
+		cbClient.GetClusterByName,
+		asClient.getAutoscalingClusterByStackId,
+		asClient.AutoScaling.Clusters.SetState)
+
+	return nil
+}
+
+func EnableAutoscalingPolicy(c *cli.Context) error {
+	defer timeTrack(time.Now(), "enable autoscaling")
+	checkRequiredFlags(c)
+
+	clusterName := c.String(FlClusterName.Name)
+	if len(clusterName) == 0 {
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
+	}
+
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	setClusterState(clusterName,
+		"RUNNING",
+		cbClient.GetClusterByName,
+		asClient.getAutoscalingClusterByStackId,
+		asClient.AutoScaling.Clusters.SetState)
+
+	return nil
+}
+
+func setClusterState(clusterName string, state string,
+	getCluster func(string) *models_cloudbreak.StackResponse,
+	getAsCluster func(string, int64) (int64, error),
+	setState func(*clusters.SetStateParams) (*clusters.SetStateOK, error)) {
+
+	log.Infof("[setClusterState] set cluster: %s state to %s", clusterName, state)
+	clusterId := *getCluster(clusterName).ID
+	asClusterId, err := getAsCluster(clusterName, clusterId)
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	resp, err := setState(&clusters.SetStateParams{ClusterID: asClusterId, Body: &models_autoscale.ClusterState{State: &state}})
+
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	log.Infof("[setClusterState] cluster: %s state set %s", clusterName, *resp.Payload.State)
 }
 
 func (autosScaling *Autoscaling) getAlertByName(name string, asClusterId int64) *models_autoscale.PromhetheusAlert {
