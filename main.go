@@ -196,11 +196,11 @@ func main() {
 		{
 			Name:   "list-autoscaling-definitions",
 			Usage:  "list the available autoscaling definitions",
-			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
 			Action: hdc.ListDefinitions,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
 					printFlagCompletion(f)
 				}
 			},
@@ -251,6 +251,18 @@ func main() {
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType,
 					hdc.FlHdpVersion, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "remove-autoscaling-policy",
+			Usage:  "remove an existing autoscale policy",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.RemoveAutoscalingPolicy,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}
 			},

@@ -9,7 +9,6 @@ import (
 	"github.com/hortonworks/hdc-cli/client_autoscale/configurations"
 	"github.com/hortonworks/hdc-cli/client_autoscale/policies"
 	"github.com/hortonworks/hdc-cli/models_autoscale"
-	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 	"time"
 )
@@ -45,8 +44,28 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 	if len(clusterName) == 0 {
 		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
+	definitionName := c.String(FlScalingDefinition.Name)
+	if len(definitionName) == 0 {
+		logMissingParameterAndExit(c, []string{FlScalingDefinition.Name})
+	}
+	policyName := c.String(FlPolicyName.Name)
+	if len(policyName) == 0 {
+		logMissingParameterAndExit(c, []string{FlPolicyName.Name})
+	}
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	validDefinition := false
+	for _, alertDef := range asClient.getAlertDefinitions() {
+		if *alertDef.Name == definitionName {
+			validDefinition = true
+			break
+		}
+	}
+	if !validDefinition {
+		logErrorAndExit(errors.New(fmt.Sprintf("the provided scaling definition name '%s' is not valid", definitionName)))
+	}
+
 	clusterId := *cbClient.GetClusterByName(clusterName).ID
 	asClusterId, err := asClient.getAutoscalingClusterByStackId(clusterName, clusterId)
 	if err != nil {
@@ -55,17 +74,68 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 	}
 
 	policy := AutoscalingPolicy{
-		PolicyName:        c.String(FlPolicyName.Name),
+		PolicyName:        policyName,
 		NodeType:          nodeType,
 		Period:            period,
 		Operator:          c.String(FlOperator.Name),
 		ScalingAdjustment: scalingAdjustment,
-		ScalingDefinition: c.String(FlScalingDefinition.Name),
+		ScalingDefinition: definitionName,
 		Threshold:         c.Float64(FlThreshold.Name),
 	}
 
 	alertId := asClient.addPrometheusAlert(asClusterId, policy)
 	asClient.addScalingPolicy(asClusterId, policy, alertId)
+	return nil
+}
+
+func RemoveAutoscalingPolicy(c *cli.Context) error {
+	defer timeTrack(time.Now(), "remove autoscaling policy")
+	checkRequiredFlags(c)
+
+	clusterName := c.String(FlClusterName.Name)
+	if len(clusterName) == 0 {
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
+	}
+	policyName := c.String(FlPolicyName.Name)
+	if len(policyName) == 0 {
+		logMissingParameterAndExit(c, []string{FlPolicyName.Name})
+	}
+
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	clusterId := *cbClient.GetClusterByName(clusterName).ID
+	asClusterId, err := asClient.getAutoscalingClusterByStackId(clusterName, clusterId)
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	alert := asClient.getAlertByName(policyName, asClusterId)
+	if alert != nil {
+		log.Infof("[RemoveAutoscalingPolicy] remove autoscaling policy: %s", policyName)
+		asClient.AutoScaling.Alerts.DeletePrometheusAlarm(&alerts.DeletePrometheusAlarmParams{ClusterID: asClusterId, AlertID: *alert.ID})
+	} else {
+		logErrorAndExit(errors.New(fmt.Sprintf("autoscaling policy '%s' not found", policyName)))
+	}
+
+	return nil
+}
+
+func (autosScaling *Autoscaling) getAlertByName(name string, asClusterId int64) *models_autoscale.PromhetheusAlert {
+	defer timeTrack(time.Now(), "get autoscaling alert by name")
+	log.Infof("[getAlertByName] get autoscaling alert by name: %s", name)
+
+	resp, err := autosScaling.AutoScaling.Alerts.GetPrometheusAlerts(&alerts.GetPrometheusAlertsParams{ClusterID: asClusterId})
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	for _, a := range resp.Payload {
+		if a.AlertName != nil && *a.AlertName == name {
+			log.Infof("[getAlertByName] found alert by name: %s", name)
+			return a
+		}
+	}
+
 	return nil
 }
 
@@ -85,23 +155,16 @@ func (autosScaling *Autoscaling) getAutoscalingClusterByStackId(clusterName stri
 func ListDefinitions(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list scaling definitions")
 
-	clusterName := c.String(FlClusterName.Name)
-	if len(clusterName) == 0 {
-		logMissingParameterAndExit(c, []string{FlClusterName.Name})
-	}
-
-	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	asClient := NewAutoscalingOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := Output{Format: c.String(FlOutput.Name)}
 
-	return listDefinitionsImpl(clusterName, asClient.getAlertDefinitions, cbClient.GetClusterByName, output.WriteList)
+	return listDefinitionsImpl(asClient.getAlertDefinitions, output.WriteList)
 }
 
-func listDefinitionsImpl(clusterName string,
-	getAlertDefinitions func(string, func(name string) *models_cloudbreak.StackResponse) []*models_autoscale.AlertRuleDefinitionEntry,
-	getCluster func(name string) *models_cloudbreak.StackResponse,
+func listDefinitionsImpl(getAlertDefinitions func() []*models_autoscale.AlertRuleDefinitionEntry,
 	writer func([]string, []Row)) error {
 
-	alertDefinitions := getAlertDefinitions(clusterName, getCluster)
+	alertDefinitions := getAlertDefinitions()
 
 	tableRows := make([]Row, len(alertDefinitions))
 	for i, a := range alertDefinitions {
@@ -115,18 +178,11 @@ func listDefinitionsImpl(clusterName string,
 	return nil
 }
 
-func (autosScaling *Autoscaling) getAlertDefinitions(clusterName string,
-	getCluster func(name string) *models_cloudbreak.StackResponse) []*models_autoscale.AlertRuleDefinitionEntry {
-
-	log.Infof("[getAlertDefinitions] get cluster by name: %s", clusterName)
-	clusterId := getCluster(clusterName).ID
-	log.Infof("[getAlertDefinitions] found cluster, id: %d", *clusterId)
-
-	alertDefinitions, err := autosScaling.AutoScaling.Alerts.GetPrometheusDefinitions(&alerts.GetPrometheusDefinitionsParams{ClusterID: *clusterId})
+func (autosScaling *Autoscaling) getAlertDefinitions() []*models_autoscale.AlertRuleDefinitionEntry {
+	alertDefinitions, err := autosScaling.AutoScaling.Alerts.GetPrometheusDefinitions(&alerts.GetPrometheusDefinitionsParams{ClusterID: int64(0)})
 	if err != nil {
 		logErrorAndExit(err)
 	}
-
 	return alertDefinitions.Payload
 }
 
