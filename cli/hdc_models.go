@@ -111,7 +111,7 @@ type DruidMetastoreResult struct {
 
 type AutoscalingSkeleton struct {
 	Configuration *AutoscalingConfiguration `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
-	Policies      []AutoscalingPolicy       `json:"AutoscalingPolicies" yaml:"AutoscalingPolicies"`
+	Policies      []AutoscalingPolicy       `json:"Policies" yaml:"Policies"`
 }
 
 type AutoscalingConfiguration struct {
@@ -121,7 +121,7 @@ type AutoscalingConfiguration struct {
 }
 
 type AutoscalingPolicy struct {
-	Name              string  `json:"Name" yaml:"Name"`
+	PolicyName        string  `json:"PolicyName" yaml:"PolicyName"`
 	ScalingAdjustment int32   `json:"ScalingAdjustment" yaml:"ScalingAdjustment"`
 	ScalingDefinition string  `json:"ScalingDefinition" yaml:"ScalingDefinition"`
 	Operator          string  `json:"Operator" yaml:"Operator"`

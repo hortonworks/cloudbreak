@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client_autoscale/alerts"
 	"github.com/hortonworks/hdc-cli/client_autoscale/clusters"
@@ -24,16 +25,73 @@ func (c *AlertListElement) DataAsStringArray() []string {
 	return []string{c.Name, c.Label}
 }
 
-func ListDefinitions(c *cli.Context) error {
-	defer timeTrack(time.Now(), "list scaling definitions")
+func AddAutoscalingPolicy(c *cli.Context) error {
+	defer timeTrack(time.Now(), "add autoscaling policy")
+	checkRequiredFlags(c)
+
+	period := int32(c.Int(FlPeriod.Name))
+	if period <= 0 {
+		logErrorAndExit(errors.New("the period must be greater than 0"))
+	}
+	scalingAdjustment := int32(c.Int(FlScalingAdjustment.Name))
+	if scalingAdjustment == 0 {
+		logErrorAndExit(errors.New("the scalingAdjustment must be greater than or less than 0"))
+	}
+	nodeType := c.String(FlNodeType.Name)
+	if nodeType != WORKER && nodeType != COMPUTE {
+		logErrorAndExit(errors.New("the nodeType must be must be one of [worker, compute]"))
+	}
+	clusterName := c.String(FlClusterName.Name)
+	if len(clusterName) == 0 {
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
+	}
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	output := Output{Format: c.String(FlOutput.Name)}
+	clusterId := *cbClient.GetClusterByName(clusterName).ID
+	asClusterId, err := asClient.getAutoscalingClusterByStackId(clusterName, clusterId)
+	if err != nil {
+		log.Warn(err)
+		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
+	}
+
+	policy := AutoscalingPolicy{
+		PolicyName:        c.String(FlPolicyName.Name),
+		NodeType:          nodeType,
+		Period:            period,
+		Operator:          c.String(FlOperator.Name),
+		ScalingAdjustment: scalingAdjustment,
+		ScalingDefinition: c.String(FlScalingDefinition.Name),
+		Threshold:         c.Float64(FlThreshold.Name),
+	}
+
+	alertId := asClient.addPrometheusAlert(asClusterId, policy)
+	asClient.addScalingPolicy(asClusterId, policy, alertId)
+	return nil
+}
+
+func (autosScaling *Autoscaling) getAutoscalingClusterByStackId(clusterName string, stackId int64) (int64, error) {
+	resp, err := autosScaling.AutoScaling.Clusters.GetClusters(&clusters.GetClustersParams{})
+	if err != nil {
+		logErrorAndExit(err)
+	}
+	for _, c := range resp.Payload {
+		if c.StackID != nil && *c.StackID == stackId {
+			return *c.ID, nil
+		}
+	}
+	return 0, errors.New(fmt.Sprintf("no autoscaling cluster found for cluster: %s", clusterName))
+}
+
+func ListDefinitions(c *cli.Context) error {
+	defer timeTrack(time.Now(), "list scaling definitions")
 
 	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
 		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
+
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := Output{Format: c.String(FlOutput.Name)}
 
 	return listDefinitionsImpl(clusterName, asClient.getAlertDefinitions, cbClient.GetClusterByName, output.WriteList)
 }
@@ -115,11 +173,11 @@ func (autosScaling *Autoscaling) addPrometheusAlert(asClusterId int64, policy Au
 	defer timeTrack(time.Now(), "add prometheus alert")
 
 	log.Infof("[addPrometheusAlert] add prometheus alert to cluster: %d, name: %v", asClusterId, policy)
-	operatorString := policy.getOperatorName()
+	operatorString := getOperatorName(policy.Operator)
 	resp, err := autosScaling.AutoScaling.Alerts.CreatePrometheusAlert(
 		&alerts.CreatePrometheusAlertParams{
 			Body: &models_autoscale.PromhetheusAlert{
-				AlertName:     &policy.Name,
+				AlertName:     &policy.PolicyName,
 				AlertOperator: &operatorString,
 				AlertRuleName: &policy.ScalingDefinition,
 				Period:        &policy.Period,
@@ -147,7 +205,7 @@ func (autosScaling *Autoscaling) addScalingPolicy(asClusterId int64, policy Auto
 				AdjustmentType:    &adjustmentType,
 				AlertID:           &alertId,
 				HostGroup:         &policy.NodeType,
-				Name:              &policy.Name,
+				Name:              &policy.PolicyName,
 				ScalingAdjustment: &policy.ScalingAdjustment,
 			},
 			ClusterID: asClusterId,
@@ -160,14 +218,14 @@ func (autosScaling *Autoscaling) addScalingPolicy(asClusterId int64, policy Auto
 	return *resp.Payload.ID
 }
 
-func (p *AutoscalingPolicy) getOperatorName() string {
-	switch p.Operator {
+func getOperatorName(operator string) string {
+	switch operator {
 	case ">":
 		return "MORE_THAN"
 	case "<":
 		return "LESS_THAN"
 	default:
-		logErrorAndExit(errors.New("Unrecognised operator: " + p.Operator))
-		return ""
+		logErrorAndExit(errors.New("Unrecognised operator: " + operator))
 	}
+	return ""
 }

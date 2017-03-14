@@ -93,6 +93,20 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
+			Name:  "add-autoscaling-policy",
+			Usage: "add a new autoscaling policy to the cluster",
+			Flags: []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlScalingAdjustment, hdc.FlScalingDefinition, hdc.FlOperator, hdc.FlThreshold,
+				hdc.FlPeriod, hdc.FlNodeType, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.AddAutoscalingPolicy,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlScalingAdjustment, hdc.FlScalingDefinition, hdc.FlOperator, hdc.FlThreshold,
+					hdc.FlPeriod, hdc.FlNodeType, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name: "configure",
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
@@ -180,6 +194,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "list-autoscaling-definitions",
+			Usage:  "list the available autoscaling definitions",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.ListDefinitions,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-cluster-types",
 			Usage:  "list the available cluster types and HDP versions",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
@@ -199,18 +225,6 @@ func main() {
 			Action: hdc.ListClusters,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-scaling-definitions",
-			Usage:  "list the available scaling definitions",
-			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
-			Before: ConfigRead,
-			Action: hdc.ListDefinitions,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
 					printFlagCompletion(f)
 				}
 			},
