@@ -45,6 +45,9 @@ public class AutoscaleStackResponse {
     @ApiModelProperty(ModelDescriptions.StackModelDescription.STACK_STATUS)
     private Status status;
 
+    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.STATUS)
+    private Status clusterStatus;
+
     @ApiModelProperty(ModelDescriptions.StackModelDescription.CREATED)
     private Long created;
 
@@ -126,5 +129,13 @@ public class AutoscaleStackResponse {
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public Status getClusterStatus() {
+        return clusterStatus;
+    }
+
+    public void setClusterStatus(Status clusterStatus) {
+        this.clusterStatus = clusterStatus;
     }
 }

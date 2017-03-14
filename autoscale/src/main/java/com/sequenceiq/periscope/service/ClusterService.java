@@ -2,7 +2,8 @@ package com.sequenceiq.periscope.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -19,16 +20,16 @@ import com.sequenceiq.periscope.repository.UserRepository;
 @Service
 public class ClusterService {
 
-    @Autowired
+    @Inject
     private ClusterRepository clusterRepository;
 
-    @Autowired
+    @Inject
     private UserRepository userRepository;
 
-    @Autowired
+    @Inject
     private SecurityConfigRepository securityConfigRepository;
 
-    @Autowired
+    @Inject
     private AlertService alertService;
 
     public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {

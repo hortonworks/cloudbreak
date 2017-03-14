@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.monitor;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.model.ClusterCreationEvaluatorContext;
@@ -62,15 +65,21 @@ public class ClusterMonitor implements Monitor {
             Set<AutoscaleStackResponse> allStacks = cloudbreakClient.stackEndpoint().getAll();
 
             for (AutoscaleStackResponse stack : allStacks) {
-                String ambariIp = stack.getAmbariServerIp();
-                Optional<Cluster> clusterOptional = clusters.stream()
-                        .filter(c -> c.getStackId() != null && c.getStackId().equals(stack.getStackId())).findFirst();
-                if (ambariIp != null) {
-                    ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
-                    clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack, clusterOptional));
-                    executorService.submit(clusterCreationEvaluator);
+                Status clusterStatus = stack.getClusterStatus();
+                if (clusterStatus != null && AVAILABLE.equals(clusterStatus)) {
+                    String ambariIp = stack.getAmbariServerIp();
+                    Optional<Cluster> clusterOptional = clusters.stream()
+                            .filter(c -> c.getStackId() != null && c.getStackId().equals(stack.getStackId())).findFirst();
+                    if (ambariIp != null) {
+                        ClusterCreationEvaluator clusterCreationEvaluator = applicationContext.getBean(ClusterCreationEvaluator.class);
+                        clusterCreationEvaluator.setContext(new ClusterCreationEvaluatorContext(stack, clusterOptional));
+                        executorService.submit(clusterCreationEvaluator);
+                    } else {
+                        LOGGER.info("Could not find Ambari for stack: {}(ID:{})", stack.getName(), stack.getStackId());
+                    }
                 } else {
-                    LOGGER.info("Could not find Ambari for stack: {}(ID:{})", stack.getName(), stack.getStackId());
+                    LOGGER.info("Do not create or update cluster while the Cloudbreak cluster {}(ID:{}) is in '{}' state instead of 'AVAILABLE'!",
+                            stack.getName(), stack.getStackId(), stack.getClusterStatus());
                 }
             }
         } catch (Exception ex) {
