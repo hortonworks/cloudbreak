@@ -123,7 +123,7 @@ type AutoscalingConfiguration struct {
 type AutoscalingPolicy struct {
 	PolicyName        string  `json:"PolicyName" yaml:"PolicyName"`
 	ScalingAdjustment int32   `json:"ScalingAdjustment" yaml:"ScalingAdjustment"`
-	ScalingDefinition string  `json:"ScalingDefinition" yaml:"ScalingDefinition"`
+	ScalingDefinition *string `json:"ScalingDefinition,omitempty" yaml:"ScalingDefinition,omitempty"`
 	Operator          string  `json:"Operator" yaml:"Operator"`
 	Threshold         float64 `json:"Threshold" yaml:"Threshold"`
 	Period            int32   `json:"Period" yaml:"Period"`

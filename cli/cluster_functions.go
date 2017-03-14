@@ -87,7 +87,8 @@ func (c *ClusterSkeletonResult) fill(
 	network *models_cloudbreak.NetworkResponse,
 	rdsConfigs []*models_cloudbreak.RDSConfigResponse,
 	recipeMap map[string][]*models_cloudbreak.RecipeResponse,
-	recoveryModeMap map[string]string) error {
+	recoveryModeMap map[string]string,
+	autoscaling *AutoscalingSkeleton) error {
 
 	if stack == nil {
 		return errors.New("Stack definition is not returned from Cloudbreak")
@@ -231,6 +232,10 @@ func (c *ClusterSkeletonResult) fill(
 		}
 	}
 	c.Tags = tags
+
+	if autoscaling != nil && (autoscaling.Configuration != nil || len(autoscaling.Policies) > 0) {
+		c.Autoscaling = autoscaling
+	}
 
 	return nil
 }

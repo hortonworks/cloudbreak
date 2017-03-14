@@ -68,7 +68,7 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 	}
 
 	clusterId := *cbClient.GetClusterByName(clusterName).ID
-	asClusterId, err := asClient.getAutoscalingClusterByStackId(clusterName, clusterId)
+	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		log.Warn(err)
 		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
@@ -80,7 +80,7 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 		Period:            period,
 		Operator:          c.String(FlOperator.Name),
 		ScalingAdjustment: scalingAdjustment,
-		ScalingDefinition: definitionName,
+		ScalingDefinition: &definitionName,
 		Threshold:         c.Float64(FlThreshold.Name),
 	}
 
@@ -105,7 +105,7 @@ func RemoveAutoscalingPolicy(c *cli.Context) error {
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	clusterId := *cbClient.GetClusterByName(clusterName).ID
-	asClusterId, err := asClient.getAutoscalingClusterByStackId(clusterName, clusterId)
+	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -145,7 +145,7 @@ func ConfigureAutoscaling(c *cli.Context) error {
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	clusterId := *cbClient.GetClusterByName(clusterName).ID
-	asClusterId, err := asClient.getAutoscalingClusterByStackId(clusterName, clusterId)
+	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -188,7 +188,7 @@ func DisableAutoscalingPolicy(c *cli.Context) error {
 	setClusterState(clusterName,
 		"DISABLED",
 		cbClient.GetClusterByName,
-		asClient.getAutoscalingClusterByStackId,
+		asClient.getAutoscalingClusterIdByStackId,
 		asClient.AutoScaling.Clusters.SetState)
 
 	return nil
@@ -208,7 +208,7 @@ func EnableAutoscalingPolicy(c *cli.Context) error {
 	setClusterState(clusterName,
 		"RUNNING",
 		cbClient.GetClusterByName,
-		asClient.getAutoscalingClusterByStackId,
+		asClient.getAutoscalingClusterIdByStackId,
 		asClient.AutoScaling.Clusters.SetState)
 
 	return nil
@@ -239,12 +239,7 @@ func (autosScaling *Autoscaling) getAlertByName(name string, asClusterId int64) 
 	defer timeTrack(time.Now(), "get autoscaling alert by name")
 	log.Infof("[getAlertByName] get autoscaling alert by name: %s", name)
 
-	resp, err := autosScaling.AutoScaling.Alerts.GetPrometheusAlerts(&alerts.GetPrometheusAlertsParams{ClusterID: asClusterId})
-	if err != nil {
-		logErrorAndExit(err)
-	}
-
-	for _, a := range resp.Payload {
+	for _, a := range autosScaling.getAlerts(asClusterId) {
 		if a.AlertName != nil && *a.AlertName == name {
 			log.Infof("[getAlertByName] found alert by name: %s", name)
 			return a
@@ -254,7 +249,83 @@ func (autosScaling *Autoscaling) getAlertByName(name string, asClusterId int64) 
 	return nil
 }
 
-func (autosScaling *Autoscaling) getAutoscalingClusterByStackId(clusterName string, stackId int64) (int64, error) {
+func (autosScaling *Autoscaling) getAlerts(asClusterId int64) []*models_autoscale.PromhetheusAlert {
+	defer timeTrack(time.Now(), "get autoscaling alerts for cluster")
+
+	resp, err := autosScaling.AutoScaling.Alerts.GetPrometheusAlerts(&alerts.GetPrometheusAlertsParams{ClusterID: asClusterId})
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	return resp.Payload
+}
+
+func (autosScaling *Autoscaling) getPolicies(asClusterId int64) []*models_autoscale.ScalingPolicy {
+	defer timeTrack(time.Now(), "get autoscaling policies for cluster")
+
+	resp, err := autosScaling.AutoScaling.Policies.GetScaling(&policies.GetScalingParams{ClusterID: asClusterId})
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	return resp.Payload
+}
+
+func (autosScaling *Autoscaling) getConfiguration(asClusterId int64) *AutoscalingConfiguration {
+	defer timeTrack(time.Now(), "get autoscaling configuration")
+	log.Infof("[getAutoscaling] get autoscaling by autoscaling cluster id: %d", asClusterId)
+
+	resp, err := autosScaling.AutoScaling.Configurations.GetScalingConfiguration(&configurations.GetScalingConfigurationParams{ClusterID: asClusterId})
+
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	payload := resp.Payload
+	scaleConfig := AutoscalingConfiguration{
+		CooldownTime:   *payload.Cooldown,
+		ClusterMinSize: *payload.MinSize,
+		ClusterMaxSize: *payload.MaxSize,
+	}
+	return &scaleConfig
+}
+
+func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int64) *AutoscalingSkeleton {
+	defer timeTrack(time.Now(), "get autoscaling skeleton for cluster")
+	log.Infof("[getAutoscaling] get autoscaling by cluster id: %d", stackId)
+
+	asClusterId, err := autosScaling.getAutoscalingClusterIdByStackId(clusterName, stackId)
+	if err != nil {
+		log.Warn(err)
+		return nil
+	}
+
+	policyList := make([]AutoscalingPolicy, 0)
+	for _, alert := range autosScaling.getAlerts(asClusterId) {
+		for _, policy := range autosScaling.getPolicies(asClusterId) {
+			if alert.ID != nil && policy.AlertID != nil && *alert.ID == *policy.AlertID {
+				asp := AutoscalingPolicy{
+					PolicyName:        *policy.Name,
+					NodeType:          *policy.HostGroup,
+					Period:            *alert.Period,
+					ScalingAdjustment: *policy.ScalingAdjustment,
+					Threshold:         *alert.Threshold,
+					Operator:          getOperator(*alert.AlertOperator),
+				}
+				policyList = append(policyList, asp)
+			}
+		}
+	}
+
+	scaleConfig := autosScaling.getConfiguration(asClusterId)
+	skeleton := AutoscalingSkeleton{}
+	skeleton.Policies = policyList
+	skeleton.Configuration = scaleConfig
+
+	return &skeleton
+}
+
+func (autosScaling *Autoscaling) getAutoscalingClusterIdByStackId(clusterName string, stackId int64) (int64, error) {
 	resp, err := autosScaling.AutoScaling.Clusters.GetClusters(&clusters.GetClustersParams{})
 	if err != nil {
 		logErrorAndExit(err)
@@ -350,7 +421,7 @@ func (autosScaling *Autoscaling) addPrometheusAlert(asClusterId int64, policy Au
 			Body: &models_autoscale.PromhetheusAlert{
 				AlertName:     &policy.PolicyName,
 				AlertOperator: &operatorString,
-				AlertRuleName: &policy.ScalingDefinition,
+				AlertRuleName: policy.ScalingDefinition,
 				Period:        &policy.Period,
 				Threshold:     &policy.Threshold,
 			},
@@ -387,6 +458,18 @@ func (autosScaling *Autoscaling) addScalingPolicy(asClusterId int64, policy Auto
 
 	log.Infof("[addScalingPolicy] scaling policy added, id: %d", *resp.Payload.ID)
 	return *resp.Payload.ID
+}
+
+func getOperator(operatorName string) string {
+	switch operatorName {
+	case "MORE_THAN":
+		return ">"
+	case "LESS_THAN":
+		return "<"
+	default:
+		logErrorAndExit(errors.New("Unrecognised operator name: " + operatorName))
+	}
+	return ""
 }
 
 func getOperatorName(operator string) string {

@@ -29,13 +29,13 @@ func (c *Cloudbreak) GetClusterByName(name string) *models_cloudbreak.StackRespo
 	return stack.Payload
 }
 
-func (c *Cloudbreak) FetchCluster(stack *models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error) {
+func (c *Cloudbreak) FetchCluster(stack *models_cloudbreak.StackResponse, autoscaling *AutoscalingSkeleton) (*ClusterSkeletonResult, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 
-	return fetchClusterImpl(stack)
+	return fetchClusterImpl(stack, autoscaling)
 }
 
-func fetchClusterImpl(stack *models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error) {
+func fetchClusterImpl(stack *models_cloudbreak.StackResponse, autoscaling *AutoscalingSkeleton) (*ClusterSkeletonResult, error) {
 	var blueprint *models_cloudbreak.BlueprintResponse = nil
 	if stack.Cluster != nil {
 		blueprint = stack.Cluster.Blueprint
@@ -68,7 +68,7 @@ func fetchClusterImpl(stack *models_cloudbreak.StackResponse) (*ClusterSkeletonR
 	var network *models_cloudbreak.NetworkResponse = stack.Network
 
 	clusterSkeleton := &ClusterSkeletonResult{}
-	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, stack.Cluster.RdsConfigs, recipeMap, recoveryModeMap)
+	clusterSkeleton.fill(stack, credential, blueprint, templateMap, securityMap, network, stack.Cluster.RdsConfigs, recipeMap, recoveryModeMap, autoscaling)
 
 	return clusterSkeleton, nil
 }
@@ -81,10 +81,10 @@ func DescribeCluster(c *cli.Context) error {
 		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	format := c.String(FlOutput.Name)
-	clusterSkeleton := describeClusterImpl(clusterName, format, oAuth2Client.GetClusterByName, oAuth2Client.FetchCluster)
+	clusterSkeleton := describeClusterImpl(clusterName, format, cbClient.GetClusterByName, cbClient.FetchCluster, asClient.getAutoscaling)
 
 	output := Output{Format: format}
 	output.Write(ClusterSkeletonHeader, clusterSkeleton)
@@ -94,9 +94,11 @@ func DescribeCluster(c *cli.Context) error {
 
 func describeClusterImpl(clusterName string, format string,
 	getCluster func(string) *models_cloudbreak.StackResponse,
-	fetchCluster func(*models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error)) *ClusterSkeletonResult {
+	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeleton) (*ClusterSkeletonResult, error),
+	getAutoscaling func(string, int64) *AutoscalingSkeleton) *ClusterSkeletonResult {
 	stack := getCluster(clusterName)
-	clusterSkeleton, _ := fetchCluster(stack)
+	autoscalingSkeleton := getAutoscaling(clusterName, *stack.ID)
+	clusterSkeleton, _ := fetchCluster(stack, autoscalingSkeleton)
 	if format == "table" {
 		clusterSkeleton.Master.Recipes = []Recipe{}
 		clusterSkeleton.Worker.Recipes = []Recipe{}

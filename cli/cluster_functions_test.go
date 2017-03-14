@@ -44,7 +44,7 @@ func defaultNetworkParams() map[string]interface{} {
 func TestFillMinimumSet(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.ClusterName != sr.Name {
 		t.Errorf("name not match %s == %s", sr.Name, skeleton.ClusterName)
@@ -89,7 +89,7 @@ func TestFillWithInstanceProfileStrategy(t *testing.T) {
 	sp["instanceProfileStrategy"] = "strategy"
 	skeleton, sr, cr, br, nj := clusterSkeleton(sp, nil, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.InstanceRole != sp["instanceProfileStrategy"] {
 		t.Errorf("instance role not match %s == %s", sp["instanceProfileStrategy"], skeleton.InstanceRole)
@@ -102,7 +102,7 @@ func TestFillWithUseExistingInstanceProfileStrategy(t *testing.T) {
 	sp["instanceProfile"] = "s3-role"
 	skeleton, sr, cr, br, nj := clusterSkeleton(sp, nil, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.InstanceRole != sp["instanceProfile"] {
 		t.Errorf("instance role not match %s == %s", sp["instanceProfile"], skeleton.InstanceRole)
@@ -115,7 +115,7 @@ func TestFillWithExistingNetwork(t *testing.T) {
 	np["subnetId"] = "subnetId"
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, np)
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	expected := Network{VpcId: "vpcId", SubnetId: "subnetId"}
 	if *skeleton.Network != expected {
@@ -133,7 +133,7 @@ func TestFillWithRDSConfig(t *testing.T) {
 	},
 	}
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, rcr, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, rcr, nil, nil, nil)
 
 	if skeleton.HiveMetastore == nil {
 		t.Error("meta store is empty")
@@ -171,7 +171,7 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "ports"})
 	sm["master"] = rules
 
-	skeleton.fill(sr, cr, br, tm, sm, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, tm, sm, nj, nil, nil, nil, nil)
 
 	if skeleton.Master.InstanceCount != 1 {
 		t.Errorf("master instance count not match 1 == %d", skeleton.Master.InstanceCount)
@@ -210,7 +210,7 @@ func TestFillWithSshKey(t *testing.T) {
 	cp["existingKeyPairName"] = "ssh-key-name"
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, cp, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.SSHKeyName != cp["existingKeyPairName"] {
 		t.Errorf("ssh key name not match %s == %s", cp["existingKeyPairName"], skeleton.SSHKeyName)
@@ -233,7 +233,7 @@ func TestFillWithSecurityMap(t *testing.T) {
 	sm["master"] = rules
 	sm["worker"] = rules
 
-	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil, nil)
 
 	expected := []string{"master", "worker"}
 	sort.Strings(expected)
@@ -256,7 +256,7 @@ func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "22,9443"})
 	sm["master"] = rules
 
-	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil, nil)
 
 	if skeleton.WebAccess != false {
 		t.Error("web access must be false")
@@ -274,7 +274,7 @@ func TestFillWithCluster(t *testing.T) {
 		BlueprintInputs: inputs,
 	}
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.Status != *sr.Cluster.Status {
 		t.Errorf("status not match %s == %s", *sr.Cluster.Status, skeleton.Status)
@@ -291,7 +291,7 @@ func TestFillWithCluster(t *testing.T) {
 func TestFillWithNoInstances(t *testing.T) {
 	skeleton, sr, _, _, _ := clusterSkeleton(nil, nil, nil)
 
-	skeleton.fill(sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != UNKNOWN {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNKNOWN)
@@ -328,7 +328,7 @@ func TestFillWitMixedHostStatuses(t *testing.T) {
 		Cluster:        &cr,
 	}
 
-	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != UNHEALTHY {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNHEALTHY)
@@ -365,7 +365,7 @@ func TestFillWithHealthyHostStatuses(t *testing.T) {
 		Cluster:        &cr,
 	}
 
-	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != HEALTHY {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, HEALTHY)
@@ -390,7 +390,7 @@ func TestFillWithUnknownHostStatuses(t *testing.T) {
 		Cluster:        &cr,
 	}
 
-	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != UNKNOWN {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNKNOWN)
@@ -404,7 +404,7 @@ func TestFillWithClusterAvailable(t *testing.T) {
 		Status: &(&stringWrapper{"AVAILABLE"}).s,
 	}
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.Status != *sr.Status {
 		t.Errorf("status not match %s == %s", *sr.Status, skeleton.Status)

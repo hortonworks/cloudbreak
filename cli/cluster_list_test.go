@@ -21,7 +21,7 @@ func TestListClustersImpl(t *testing.T) {
 	}
 	mtx := sync.Mutex{}
 	expected := make([]ClusterSkeletonResult, 0)
-	fetchCluster := func(stack *models_cloudbreak.StackResponse) (*ClusterSkeletonResult, error) {
+	fetchCluster := func(stack *models_cloudbreak.StackResponse, as *AutoscalingSkeleton) (*ClusterSkeletonResult, error) {
 		u := strconv.FormatInt(*stack.ID, 10)
 		skeleton := ClusterSkeletonResult{
 			ClusterSkeletonBase: ClusterSkeletonBase{
