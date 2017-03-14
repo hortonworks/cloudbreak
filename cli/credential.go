@@ -8,8 +8,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/credentials"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/credentials"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -28,12 +28,12 @@ func CreateCredential(c *cli.Context) error {
 	checkRequiredFlags(c)
 
 	client := &http.Client{Transport: TransportConfig}
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	createCredential(c.String, client.Get, oAuth2Client.CreateCredential)
 	return nil
 }
 
-func createCredential(finder func(string) string, getResponse func(string) (*http.Response, error), createCredential func(string, models.CredentialResponse, string, bool) int64) int64 {
+func createCredential(finder func(string) string, getResponse func(string) (*http.Response, error), createCredential func(string, models_cloudbreak.CredentialResponse, string, bool) int64) int64 {
 	sshKeyURL := finder(FlSSHKeyURL.Name)
 	log.Infof("[CreateCredential] sending GET request for SSH key to %s", sshKeyURL)
 
@@ -46,7 +46,7 @@ func createCredential(finder func(string) string, getResponse func(string) (*htt
 
 	var credentialMap = make(map[string]interface{})
 	credentialMap["roleArn"] = finder(FlRoleARN.Name)
-	defaultCredential := models.CredentialResponse{
+	defaultCredential := models_cloudbreak.CredentialResponse{
 		Parameters: credentialMap,
 		PublicKey:  string(sshKey),
 	}
@@ -56,7 +56,7 @@ func createCredential(finder func(string) string, getResponse func(string) (*htt
 
 func DeleteCredential(c *cli.Context) error {
 	checkRequiredFlags(c)
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	if err := oAuth2Client.DeleteCredential(c.String(FlCredentialName.Name)); err != nil {
 		logErrorAndExit(err)
 	}
@@ -69,19 +69,19 @@ func (c *Cloudbreak) CopyDefaultCredential(skeleton ClusterSkeleton, channel cha
 	copyDefaultCredentialImpl(skeleton, channel, c.GetCredential, c.CreateCredential)
 }
 
-func copyDefaultCredentialImpl(skeleton ClusterSkeleton, channel chan int64, getCred func(string) models.CredentialResponse, createCred func(string, models.CredentialResponse, string, bool) int64) {
+func copyDefaultCredentialImpl(skeleton ClusterSkeleton, channel chan int64, getCred func(string) models_cloudbreak.CredentialResponse, createCred func(string, models_cloudbreak.CredentialResponse, string, bool) int64) {
 	defaultCred := getCred("aws-access")
 	credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
 	channel <- createCred(credentialName, defaultCred, skeleton.SSHKeyName, true)
 }
 
-func (c *Cloudbreak) CreateCredential(name string, defaultCredential models.CredentialResponse, existingKey string, public bool) int64 {
+func (c *Cloudbreak) CreateCredential(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string, public bool) int64 {
 	defer timeTrack(time.Now(), "create credential")
 
 	return createCredentialImpl(name, defaultCredential, existingKey, public, c.Cloudbreak.Credentials.PostCredentialsAccount, c.Cloudbreak.Credentials.PostCredentialsUser)
 }
 
-func createCredentialImpl(name string, defaultCredential models.CredentialResponse, existingKey string, public bool,
+func createCredentialImpl(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string, public bool,
 	postAccountCredential func(*credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error),
 	postUserCredential func(*credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error)) int64 {
 
@@ -107,13 +107,13 @@ func createCredentialImpl(name string, defaultCredential models.CredentialRespon
 	return id
 }
 
-func createCredentialRequest(name string, defaultCredential models.CredentialResponse, existingKey string) *models.CredentialRequest {
+func createCredentialRequest(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string) *models_cloudbreak.CredentialRequest {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["selector"] = "role-based"
 	credentialMap["roleArn"] = defaultCredential.Parameters["roleArn"]
 	credentialMap["existingKeyPairName"] = existingKey
 
-	credReq := models.CredentialRequest{
+	credReq := models_cloudbreak.CredentialRequest{
 		Name:          name,
 		CloudPlatform: "AWS",
 		PublicKey:     defaultCredential.PublicKey,
@@ -123,17 +123,17 @@ func createCredentialRequest(name string, defaultCredential models.CredentialRes
 	return &credReq
 }
 
-func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models.CredentialResponse, error) {
+func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models_cloudbreak.CredentialResponse, error) {
 	defer timeTrack(time.Now(), "get credential by id")
 	respCredential, err := c.Cloudbreak.Credentials.GetCredentialsID(&credentials.GetCredentialsIDParams{ID: credentialID})
-	var credential *models.CredentialResponse
+	var credential *models_cloudbreak.CredentialResponse
 	if respCredential != nil {
 		credential = respCredential.Payload
 	}
 	return credential, err
 }
 
-func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
+func (c *Cloudbreak) GetCredential(name string) models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get credential by name")
 	log.Infof("[GetCredential] sending get request to find credential with name: %s", name)
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsUserName(&credentials.GetCredentialsUserNameParams{Name: name})
@@ -147,7 +147,7 @@ func (c *Cloudbreak) GetCredential(name string) models.CredentialResponse {
 	return awsAccess
 }
 
-func (c *Cloudbreak) GetPublicCredentials() []*models.CredentialResponse {
+func (c *Cloudbreak) GetPublicCredentials() []*models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get public credentials")
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsAccount(&credentials.GetCredentialsAccountParams{})
 	if err != nil {
@@ -166,14 +166,14 @@ func ListPrivateCredentials(c *cli.Context) error {
 	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "list the private credentials")
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	listPrivateCredentialsImpl(oAuth2Client.GetPrivateCredentials, output.WriteList)
 	return nil
 }
 
-func listPrivateCredentialsImpl(getPrivateCredentials func() []*models.CredentialResponse, writer func([]string, []Row)) {
+func listPrivateCredentialsImpl(getPrivateCredentials func() []*models_cloudbreak.CredentialResponse, writer func([]string, []Row)) {
 	credResp := getPrivateCredentials()
 
 	var tableRows []Row
@@ -185,7 +185,7 @@ func listPrivateCredentialsImpl(getPrivateCredentials func() []*models.Credentia
 	writer(CredentialHeader, tableRows)
 }
 
-func (c *Cloudbreak) GetPrivateCredentials() []*models.CredentialResponse {
+func (c *Cloudbreak) GetPrivateCredentials() []*models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get private credentials")
 	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
 	if err != nil {

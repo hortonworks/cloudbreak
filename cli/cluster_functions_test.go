@@ -5,30 +5,30 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
-func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeletonResult, *models.StackResponse, *models.CredentialResponse, *models.BlueprintResponse, *models.NetworkResponse) {
+func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeletonResult, *models_cloudbreak.StackResponse, *models_cloudbreak.CredentialResponse, *models_cloudbreak.BlueprintResponse, *models_cloudbreak.NetworkResponse) {
 	skeleton := ClusterSkeletonResult{}
-	sr := models.StackResponse{
+	sr := models_cloudbreak.StackResponse{
 		Name:         "stack-name",
 		Status:       &(&stringWrapper{"status"}).s,
 		StatusReason: &(&stringWrapper{"status-reason"}).s,
 		HdpVersion:   &(&stringWrapper{"hdp-version"}).s,
 		Parameters:   stackParams,
 	}
-	cr := models.CredentialResponse{
+	cr := models_cloudbreak.CredentialResponse{
 		Parameters: credParams,
 	}
-	br := models.BlueprintResponse{
+	br := models_cloudbreak.BlueprintResponse{
 		Name: "blueprint-name",
-		AmbariBlueprint: models.AmbariBlueprint{
-			Blueprint: models.Blueprint{
+		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
+			Blueprint: models_cloudbreak.Blueprint{
 				Name: &(&stringWrapper{"ambari-blueprint-name"}).s,
 			},
 		},
 	}
-	nj := models.NetworkResponse{
+	nj := models_cloudbreak.NetworkResponse{
 		Parameters: netParams,
 	}
 
@@ -44,7 +44,7 @@ func defaultNetworkParams() map[string]interface{} {
 func TestFillMinimumSet(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.ClusterName != sr.Name {
 		t.Errorf("name not match %s == %s", sr.Name, skeleton.ClusterName)
@@ -89,7 +89,7 @@ func TestFillWithInstanceProfileStrategy(t *testing.T) {
 	sp["instanceProfileStrategy"] = "strategy"
 	skeleton, sr, cr, br, nj := clusterSkeleton(sp, nil, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.InstanceRole != sp["instanceProfileStrategy"] {
 		t.Errorf("instance role not match %s == %s", sp["instanceProfileStrategy"], skeleton.InstanceRole)
@@ -102,7 +102,7 @@ func TestFillWithUseExistingInstanceProfileStrategy(t *testing.T) {
 	sp["instanceProfile"] = "s3-role"
 	skeleton, sr, cr, br, nj := clusterSkeleton(sp, nil, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.InstanceRole != sp["instanceProfile"] {
 		t.Errorf("instance role not match %s == %s", sp["instanceProfile"], skeleton.InstanceRole)
@@ -115,7 +115,7 @@ func TestFillWithExistingNetwork(t *testing.T) {
 	np["subnetId"] = "subnetId"
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, np)
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	expected := Network{VpcId: "vpcId", SubnetId: "subnetId"}
 	if *skeleton.Network != expected {
@@ -127,13 +127,13 @@ func TestFillWithRDSConfig(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
 	rdsName := "rds-name"
-	rcr := []*models.RDSConfigResponse{{
+	rcr := []*models_cloudbreak.RDSConfigResponse{{
 		Name: rdsName,
 		Type: &(&stringWrapper{HIVE_RDS}).s,
 	},
 	}
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, rcr, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, rcr, nil, nil, nil)
 
 	if skeleton.HiveMetastore == nil {
 		t.Error("meta store is empty")
@@ -145,33 +145,33 @@ func TestFillWithRDSConfig(t *testing.T) {
 func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	groups := make([]*models.InstanceGroupResponse, 0)
-	groups = append(groups, &models.InstanceGroupResponse{Group: MASTER, NodeCount: 1})
-	groups = append(groups, &models.InstanceGroupResponse{Group: WORKER, NodeCount: 2})
+	groups := make([]*models_cloudbreak.InstanceGroupResponse, 0)
+	groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Group: MASTER, NodeCount: 1})
+	groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Group: WORKER, NodeCount: 2})
 	sr.InstanceGroups = groups
 
 	n := int32(10)
 
-	tm := make(map[string]*models.TemplateResponse)
-	tm[MASTER] = &models.TemplateResponse{
+	tm := make(map[string]*models_cloudbreak.TemplateResponse)
+	tm[MASTER] = &models_cloudbreak.TemplateResponse{
 		InstanceType: "master",
 		VolumeType:   &(&stringWrapper{"type"}).s,
 		VolumeSize:   n,
 		VolumeCount:  n,
 	}
-	tm[WORKER] = &models.TemplateResponse{
+	tm[WORKER] = &models_cloudbreak.TemplateResponse{
 		InstanceType: "worker",
 		VolumeType:   &(&stringWrapper{"type"}).s,
 		VolumeSize:   n,
 		VolumeCount:  n,
 	}
 
-	sm := make(map[string][]*models.SecurityRuleResponse)
-	rules := make([]*models.SecurityRuleResponse, 0)
-	rules = append(rules, &models.SecurityRuleResponse{Ports: "ports"})
+	sm := make(map[string][]*models_cloudbreak.SecurityRuleResponse)
+	rules := make([]*models_cloudbreak.SecurityRuleResponse, 0)
+	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "ports"})
 	sm["master"] = rules
 
-	skeleton.fill(sr, cr, br, tm, sm, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, tm, sm, nj, nil, nil, nil, nil)
 
 	if skeleton.Master.InstanceCount != 1 {
 		t.Errorf("master instance count not match 1 == %d", skeleton.Master.InstanceCount)
@@ -210,7 +210,7 @@ func TestFillWithSshKey(t *testing.T) {
 	cp["existingKeyPairName"] = "ssh-key-name"
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, cp, defaultNetworkParams())
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.SSHKeyName != cp["existingKeyPairName"] {
 		t.Errorf("ssh key name not match %s == %s", cp["existingKeyPairName"], skeleton.SSHKeyName)
@@ -220,20 +220,20 @@ func TestFillWithSshKey(t *testing.T) {
 func TestFillWithSecurityMap(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	cl := models.ClusterResponse{
-		Gateway: &models.GatewayJSON{
+	cl := models_cloudbreak.ClusterResponse{
+		Gateway: &models_cloudbreak.GatewayJSON{
 			ExposedServices: []string{"AMBARI"},
 		},
 	}
 	sr.Cluster = &cl
 
-	sm := make(map[string][]*models.SecurityRuleResponse)
-	rules := make([]*models.SecurityRuleResponse, 0)
-	rules = append(rules, &models.SecurityRuleResponse{Ports: "22,9443,8443"})
+	sm := make(map[string][]*models_cloudbreak.SecurityRuleResponse)
+	rules := make([]*models_cloudbreak.SecurityRuleResponse, 0)
+	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "22,9443,8443"})
 	sm["master"] = rules
 	sm["worker"] = rules
 
-	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil, nil)
 
 	expected := []string{"master", "worker"}
 	sort.Strings(expected)
@@ -251,12 +251,12 @@ func TestFillWithSecurityMap(t *testing.T) {
 func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	sm := make(map[string][]*models.SecurityRuleResponse)
-	rules := make([]*models.SecurityRuleResponse, 0)
-	rules = append(rules, &models.SecurityRuleResponse{Ports: "22,9443"})
+	sm := make(map[string][]*models_cloudbreak.SecurityRuleResponse)
+	rules := make([]*models_cloudbreak.SecurityRuleResponse, 0)
+	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "22,9443"})
 	sm["master"] = rules
 
-	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil, nil)
 
 	if skeleton.WebAccess != false {
 		t.Error("web access must be false")
@@ -266,15 +266,15 @@ func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 func TestFillWithCluster(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	inputs := make([]*models.BlueprintInput, 0)
-	inputs = append(inputs, &models.BlueprintInput{Name: &(&stringWrapper{"property"}).s, PropertyValue: &(&stringWrapper{"value"}).s})
-	sr.Cluster = &models.ClusterResponse{
+	inputs := make([]*models_cloudbreak.BlueprintInput, 0)
+	inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"property"}).s, PropertyValue: &(&stringWrapper{"value"}).s})
+	sr.Cluster = &models_cloudbreak.ClusterResponse{
 		Status:          &(&stringWrapper{"cluster-status"}).s,
 		StatusReason:    &(&stringWrapper{"cluster-reason"}).s,
 		BlueprintInputs: inputs,
 	}
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.Status != *sr.Cluster.Status {
 		t.Errorf("status not match %s == %s", *sr.Cluster.Status, skeleton.Status)
@@ -291,7 +291,7 @@ func TestFillWithCluster(t *testing.T) {
 func TestFillWithNoInstances(t *testing.T) {
 	skeleton, sr, _, _, _ := clusterSkeleton(nil, nil, nil)
 
-	skeleton.fill(sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != UNKNOWN {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNKNOWN)
@@ -302,33 +302,33 @@ func TestFillWitMixedHostStatuses(t *testing.T) {
 	skeleton, _, _, _, _ := clusterSkeleton(nil, nil, nil)
 	host1 := "host1.example.com"
 	host2 := "host2.example.com"
-	metadata := []*models.InstanceMetaData{
+	metadata := []*models_cloudbreak.InstanceMetaData{
 		{DiscoveryFQDN: &host1,
 			InstanceGroup: &(&stringWrapper{MASTER}).s},
 		{DiscoveryFQDN: &host2,
 			InstanceGroup: &(&stringWrapper{WORKER}).s},
 	}
-	ig := []*models.InstanceGroupResponse{{Metadata: metadata}}
-	hm := []*models.HostMetadata{
+	ig := []*models_cloudbreak.InstanceGroupResponse{{Metadata: metadata}}
+	hm := []*models_cloudbreak.HostMetadata{
 		{Name: host1,
 			State: &(&stringWrapper{UNHEALTHY}).s},
 		{Name: host2,
 			State: &(&stringWrapper{HEALTHY}).s},
 	}
-	hg := []*models.HostGroupResponse{
+	hg := []*models_cloudbreak.HostGroupResponse{
 		{Name: MASTER,
 			Metadata: hm},
 	}
-	cr := models.ClusterResponse{
+	cr := models_cloudbreak.ClusterResponse{
 		HostGroups: hg,
 	}
-	sr := models.StackResponse{
+	sr := models_cloudbreak.StackResponse{
 		Name:           "stack-name",
 		InstanceGroups: ig,
 		Cluster:        &cr,
 	}
 
-	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != UNHEALTHY {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNHEALTHY)
@@ -339,33 +339,33 @@ func TestFillWithHealthyHostStatuses(t *testing.T) {
 	skeleton, _, _, _, _ := clusterSkeleton(nil, nil, nil)
 	host1 := "host1.example.com"
 	host2 := "host2.example.com"
-	metadata := []*models.InstanceMetaData{
+	metadata := []*models_cloudbreak.InstanceMetaData{
 		{DiscoveryFQDN: &host1,
 			InstanceGroup: &(&stringWrapper{MASTER}).s},
 		{DiscoveryFQDN: &host2,
 			InstanceGroup: &(&stringWrapper{WORKER}).s},
 	}
-	ig := []*models.InstanceGroupResponse{{Metadata: metadata}}
-	hm := []*models.HostMetadata{
+	ig := []*models_cloudbreak.InstanceGroupResponse{{Metadata: metadata}}
+	hm := []*models_cloudbreak.HostMetadata{
 		{Name: host1,
 			State: &(&stringWrapper{HEALTHY}).s},
 		{Name: host2,
 			State: &(&stringWrapper{HEALTHY}).s},
 	}
-	hg := []*models.HostGroupResponse{
+	hg := []*models_cloudbreak.HostGroupResponse{
 		{Name: MASTER,
 			Metadata: hm},
 	}
-	cr := models.ClusterResponse{
+	cr := models_cloudbreak.ClusterResponse{
 		HostGroups: hg,
 	}
-	sr := models.StackResponse{
+	sr := models_cloudbreak.StackResponse{
 		Name:           "stack-name",
 		InstanceGroups: ig,
 		Cluster:        &cr,
 	}
 
-	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != HEALTHY {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, HEALTHY)
@@ -376,21 +376,21 @@ func TestFillWithUnknownHostStatuses(t *testing.T) {
 	skeleton, _, _, _, _ := clusterSkeleton(nil, nil, nil)
 	host1 := "host1.example.com"
 	host2 := "host2.example.com"
-	metadata := []*models.InstanceMetaData{
+	metadata := []*models_cloudbreak.InstanceMetaData{
 		{DiscoveryFQDN: &host1,
 			InstanceGroup: &(&stringWrapper{MASTER}).s},
 		{DiscoveryFQDN: &host2,
 			InstanceGroup: &(&stringWrapper{WORKER}).s},
 	}
-	ig := []*models.InstanceGroupResponse{{Metadata: metadata}}
-	cr := models.ClusterResponse{}
-	sr := models.StackResponse{
+	ig := []*models_cloudbreak.InstanceGroupResponse{{Metadata: metadata}}
+	cr := models_cloudbreak.ClusterResponse{}
+	sr := models_cloudbreak.StackResponse{
 		Name:           "stack-name",
 		InstanceGroups: ig,
 		Cluster:        &cr,
 	}
 
-	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil)
+	skeleton.fill(&sr, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	if skeleton.Nodes != UNKNOWN {
 		t.Errorf("nodes status not match %s == %s", skeleton.Nodes, UNKNOWN)
@@ -400,11 +400,11 @@ func TestFillWithUnknownHostStatuses(t *testing.T) {
 func TestFillWithClusterAvailable(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
-	sr.Cluster = &models.ClusterResponse{
+	sr.Cluster = &models_cloudbreak.ClusterResponse{
 		Status: &(&stringWrapper{"AVAILABLE"}).s,
 	}
 
-	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil)
+	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.Status != *sr.Status {
 		t.Errorf("status not match %s == %s", *sr.Status, skeleton.Status)

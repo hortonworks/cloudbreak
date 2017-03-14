@@ -6,8 +6,8 @@ import (
 
 	"errors"
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/rdsconfigs"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/rdsconfigs"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -23,7 +23,7 @@ func (r *RdsConfig) DataAsStringArray() []string {
 	return []string{r.Name, r.Username, r.URL, r.DatabaseType, r.HDPVersion, r.Type}
 }
 
-func (c *Cloudbreak) GetRDSConfigByName(name string) models.RDSConfigResponse {
+func (c *Cloudbreak) GetRDSConfigByName(name string) models_cloudbreak.RDSConfigResponse {
 	defer timeTrack(time.Now(), "get rds config by name")
 	log.Infof("[GetRDSConfigByName] get rds config by name: %s", name)
 
@@ -38,7 +38,7 @@ func (c *Cloudbreak) GetRDSConfigByName(name string) models.RDSConfigResponse {
 	return rdsConfig
 }
 
-func (c *Cloudbreak) GetRDSConfigById(id int64) *models.RDSConfigResponse {
+func (c *Cloudbreak) GetRDSConfigById(id int64) *models_cloudbreak.RDSConfigResponse {
 	defer timeTrack(time.Now(), "get rds config by id")
 	log.Infof("[GetRDSConfigById] get rds config by id: %d", id)
 
@@ -56,7 +56,7 @@ func (c *Cloudbreak) GetRDSConfigById(id int64) *models.RDSConfigResponse {
 func ListRDSConfigs(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list rds configs")
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	return listRDSConfigsImpl(oAuth2Client.Cloudbreak.Rdsconfigs.GetRdsconfigsAccount, output.WriteList)
@@ -107,14 +107,14 @@ func CreateRDSConfig(c *cli.Context) error {
 	}
 
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	return createRDSConfigImpl(rdsType, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
 }
 
 func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {
 	validate := false
-	rdsConfig := models.RDSConfig{
+	rdsConfig := models_cloudbreak.RDSConfig{
 		Name:               finder(FlRdsName.Name),
 		ConnectionUserName: finder(FlRdsUsername.Name),
 		ConnectionPassword: finder(FlRdsPassword.Name),
@@ -140,7 +140,7 @@ func DeleteRDSConfig(c *cli.Context) error {
 	defer timeTrack(time.Now(), "delete rds config")
 
 	log.Infof("[DeleteRDSConfig] delete RDS config by name: %s", c.String(FlRdsName.Name))
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	deleteRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.DeleteRdsconfigsAccountName)
 	return nil
@@ -155,9 +155,9 @@ func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params
 	log.Infof("[DeleteRDSConfig] RDS config deleted: %s", rdsName)
 }
 
-func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string) *models.RDSConfig {
+func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string) *models_cloudbreak.RDSConfig {
 	validate := false
-	return &models.RDSConfig{
+	return &models_cloudbreak.RDSConfig{
 		Name:               metastore.Name,
 		ConnectionUserName: metastore.Username,
 		ConnectionPassword: metastore.Password,

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/olekukonko/tablewriter"
@@ -23,8 +24,12 @@ func (o *Output) Write(header []string, row Row) {
 		y, _ := yaml.Marshal(row)
 		fmt.Println(string(y))
 	} else {
-		j, _ := json.MarshalIndent(row, "", "  ")
-		fmt.Println(string(j))
+		buf := new(bytes.Buffer)
+		enc := json.NewEncoder(buf)
+		enc.SetEscapeHTML(false)
+		enc.SetIndent("", "  ")
+		enc.Encode(row)
+		fmt.Println(buf.String())
 	}
 }
 

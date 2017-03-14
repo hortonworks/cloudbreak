@@ -229,6 +229,62 @@ var (
 			Value: strconv.FormatFloat(SUPPORTED_HDP_VERSIONS[0], 'f', 6, 64)[0:3],
 		},
 	}
+	FlPolicyName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "policy-name",
+			Usage: "name of the autoscaling policy",
+		},
+	}
+	FlScalingDefinition = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "scaling-definition",
+			Usage: "name of the autoscaling definition",
+		},
+	}
+	FlOperator = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "operator",
+			Usage: "operater ('>', '<')",
+		},
+	}
+	FlThreshold = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "threshold",
+			Usage: "threshold value",
+		},
+	}
+	FlPeriod = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "period",
+			Usage: "period in minutes",
+		},
+	}
+	FlCooldownTime = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "cooldown-time",
+			Usage: "cooldown time in minutes",
+		},
+	}
+	FlClusterMinSize = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "min-cluster-size",
+			Usage: "minimum size of the cluster",
+		},
+	}
+	FlClusterMaxSize = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "max-cluster-size",
+			Usage: "maximum size of the cluster",
+		},
+	}
 )
 
 type RequiredFlag struct {

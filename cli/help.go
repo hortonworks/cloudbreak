@@ -88,6 +88,24 @@ var AWSCreateClusterSkeletonHelp = `
    "DatabaseType": "POSTGRES",                                             // Database type of the Druid metastore, accepted value: POSTGRES
   }
   "Configurations: [{"core-site":{"fs.trash.interval":"5000"}}]            // Custom configurations, format: [{"configuration-type": {"property-name": "property-value"}}, {"configuration-type2": {"property-name": "property-value"}}]
+  "Autoscaling": {                                                         // (Optional) Enable autoscaling on the cluster by default
+    "Configurations": {                                                    // (Optional) Autoscaling configuration
+      "CooldownTime": 30,                                                  // Specify the time between 2 scaling activity in minutes (default: 30)
+      "ClusterMinSize": 3,                                                 // During autoscaling the cluster cannot be scaled below the given number (default: 3)
+      "ClusterMaxSize": 100                                                // During autoscaling the cluster cannot be scaled above the given number (default: 100)
+    },
+    "Policies": [                                                          // List of autoscaling policies
+      {
+        "PolicyName": "upscale-on-high-hdfs-usage",                        // Name of the autoscaling policy
+        "ScalingAdjustment": 1,                                            // The number of nodes to adjust the cluster size with, accepted value x>0 x<0
+        "ScalingDefinition": "namenode_capacity_threshold_exceeded",       // The name of the definition, to see the available options use the list-autoscaling-definitions command
+        "Operator": ">",                                                   // Evaluation operator, accepted values: '<' '>'
+        "Threshold": 80,                                                   // Evaluation threshold
+        "Period": 1,                                                       // Time in minutes for the scaling definition to be true
+        "NodeType": "worker"                                               // Node type to scale, accepted value: worker/compute
+      }
+    ]
+  }
 }`
 
 var SharedDescription = `You can either start a new shared cluster or connect to an existing one. To start a new cluster provide only the input

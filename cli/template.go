@@ -6,8 +6,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/templates"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/templates"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64, wg *sync.WaitGroup) {
@@ -53,10 +53,10 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	channel <- *resp.Payload.ID
 }
 
-func createMasterTemplateRequest(skeleton ClusterSkeleton) *models.TemplateRequest {
+func createMasterTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest {
 	masterTemplateName := "mtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	masterTemplateReqBody := models.TemplateRequest{
+	masterTemplateReqBody := models_cloudbreak.TemplateRequest{
 		Name:          masterTemplateName,
 		CloudPlatform: "AWS",
 		InstanceType:  skeleton.Master.InstanceType,
@@ -69,10 +69,10 @@ func createMasterTemplateRequest(skeleton ClusterSkeleton) *models.TemplateReque
 	return &masterTemplateReqBody
 }
 
-func createWorkerTemplateRequest(skeleton ClusterSkeleton) *models.TemplateRequest {
+func createWorkerTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest {
 	workerTemplateName := "wtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	workerTemplateReqBody := models.TemplateRequest{
+	workerTemplateReqBody := models_cloudbreak.TemplateRequest{
 		Name:          workerTemplateName,
 		CloudPlatform: "AWS",
 		InstanceType:  skeleton.Worker.InstanceType,
@@ -85,7 +85,7 @@ func createWorkerTemplateRequest(skeleton ClusterSkeleton) *models.TemplateReque
 	return &workerTemplateReqBody
 }
 
-func createComputeTemplateRequest(skeleton ClusterSkeleton) *models.TemplateRequest {
+func createComputeTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest {
 	computeTemplateName := "ctempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
 	computeParameters := make(map[string]interface{})
@@ -94,7 +94,7 @@ func createComputeTemplateRequest(skeleton ClusterSkeleton) *models.TemplateRequ
 		computeParameters["spotPrice"] = floatPrice
 	}
 
-	computeTemplateReqBody := models.TemplateRequest{
+	computeTemplateReqBody := models_cloudbreak.TemplateRequest{
 		Name:          computeTemplateName,
 		CloudPlatform: "AWS",
 		InstanceType:  skeleton.Compute.InstanceType,
@@ -107,7 +107,7 @@ func createComputeTemplateRequest(skeleton ClusterSkeleton) *models.TemplateRequ
 	return &computeTemplateReqBody
 }
 
-func (c *Cloudbreak) GetPublicTemplates() []*models.TemplateResponse {
+func (c *Cloudbreak) GetPublicTemplates() []*models_cloudbreak.TemplateResponse {
 	defer timeTrack(time.Now(), "get public templates")
 	resp, err := c.Cloudbreak.Templates.GetTemplatesAccount(&templates.GetTemplatesAccountParams{})
 	if err != nil {

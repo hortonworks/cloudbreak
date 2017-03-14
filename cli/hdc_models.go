@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/hortonworks/hdc-cli/models"
+import "github.com/hortonworks/hdc-cli/models_cloudbreak"
 
 const (
 	MASTER    = "master"
@@ -23,40 +23,41 @@ var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cl
 	"SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
 
 type ClusterSkeletonBase struct {
-	ClusterName              string             `json:"ClusterName" yaml:"ClusterName"`
-	HDPVersion               string             `json:"HDPVersion" yaml:"HDPVersion"`
-	ClusterType              string             `json:"ClusterType" yaml:"ClusterType"`
-	Master                   InstanceConfig     `json:"Master" yaml:"Master"`
-	Worker                   InstanceConfig     `json:"Worker" yaml:"Worker"`
-	Compute                  SpotInstanceConfig `json:"Compute" yaml:"Compute"`
-	SSHKeyName               string             `json:"SSHKeyName" yaml:"SSHKeyName"`
-	RemoteAccess             string             `json:"RemoteAccess" yaml:"RemoteAccess"`
-	WebAccess                bool               `json:"WebAccess" yaml:"WebAccess"`
-	HiveJDBCAccess           bool               `json:"HiveJDBCAccess" yaml:"HiveJDBCAccess"`
-	ClusterComponentAccess   bool               `json:"ClusterComponentAccess" yaml:"ClusterComponentAccess"`
-	ClusterAndAmbariUser     string             `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
-	ClusterAndAmbariPassword string             `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
-	InstanceRole             string             `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
-	Network                  *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
-	ClusterInputs            map[string]string  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
-	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
+	ClusterName              string               `json:"ClusterName" yaml:"ClusterName"`
+	HDPVersion               string               `json:"HDPVersion" yaml:"HDPVersion"`
+	ClusterType              string               `json:"ClusterType" yaml:"ClusterType"`
+	Master                   InstanceConfig       `json:"Master" yaml:"Master"`
+	Worker                   InstanceConfig       `json:"Worker" yaml:"Worker"`
+	Compute                  SpotInstanceConfig   `json:"Compute" yaml:"Compute"`
+	SSHKeyName               string               `json:"SSHKeyName" yaml:"SSHKeyName"`
+	RemoteAccess             string               `json:"RemoteAccess" yaml:"RemoteAccess"`
+	WebAccess                bool                 `json:"WebAccess" yaml:"WebAccess"`
+	HiveJDBCAccess           bool                 `json:"HiveJDBCAccess" yaml:"HiveJDBCAccess"`
+	ClusterComponentAccess   bool                 `json:"ClusterComponentAccess" yaml:"ClusterComponentAccess"`
+	ClusterAndAmbariUser     string               `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
+	ClusterAndAmbariPassword string               `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
+	InstanceRole             string               `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
+	Network                  *Network             `json:"Network,omitempty" yaml:"Network,omitempty"`
+	ClusterInputs            map[string]string    `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
+	Tags                     map[string]string    `json:"Tags" yaml:"Tags"`
+	Autoscaling              *AutoscalingSkeleton `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
 }
 
 type ClusterSkeleton struct {
 	ClusterSkeletonBase
-	HiveMetastore  *HiveMetastore          `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore *DruidMetastore         `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []models.Configurations `json:"Configurations" yaml:"Configurations"`
+	HiveMetastore  *HiveMetastore                     `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore *DruidMetastore                    `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	Configurations []models_cloudbreak.Configurations `json:"Configurations" yaml:"Configurations"`
 }
 
 type ClusterSkeletonResult struct {
 	ClusterSkeletonBase
-	HiveMetastore  *HiveMetastoreResult    `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore *DruidMetastoreResult   `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []models.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
-	Nodes          string                  `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
-	Status         string                  `json:"Status,omitempty" yaml:"Status,omitempty"`
-	StatusReason   string                  `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	HiveMetastore  *HiveMetastoreResult               `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore *DruidMetastoreResult              `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	Configurations []models_cloudbreak.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Nodes          string                             `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
+	Status         string                             `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason   string                             `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 }
 
 type InstanceConfig struct {
@@ -106,4 +107,25 @@ type DruidMetastore struct {
 
 type DruidMetastoreResult struct {
 	Name string `json:"Name" yaml:"Name"`
+}
+
+type AutoscalingSkeleton struct {
+	Configuration *AutoscalingConfiguration `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Policies      []AutoscalingPolicy       `json:"Policies" yaml:"Policies"`
+}
+
+type AutoscalingConfiguration struct {
+	CooldownTime   int32 `json:"CooldownTime" yaml:"CooldownTime"`
+	ClusterMinSize int32 `json:"ClusterMinSize" yaml:"ClusterMinSize"`
+	ClusterMaxSize int32 `json:"ClusterMaxSize" yaml:"ClusterMaxSize"`
+}
+
+type AutoscalingPolicy struct {
+	PolicyName        string  `json:"PolicyName" yaml:"PolicyName"`
+	ScalingAdjustment int32   `json:"ScalingAdjustment" yaml:"ScalingAdjustment"`
+	ScalingDefinition *string `json:"ScalingDefinition,omitempty" yaml:"ScalingDefinition,omitempty"`
+	Operator          string  `json:"Operator" yaml:"Operator"`
+	Threshold         float64 `json:"Threshold" yaml:"Threshold"`
+	Period            int32   `json:"Period" yaml:"Period"`
+	NodeType          string  `json:"NodeType" yaml:"NodeType"`
 }

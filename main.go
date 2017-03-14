@@ -93,6 +93,20 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
+			Name:  "add-autoscaling-policy",
+			Usage: "add a new autoscaling policy to the cluster",
+			Flags: []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlScalingAdjustment, hdc.FlScalingDefinition, hdc.FlOperator, hdc.FlThreshold,
+				hdc.FlPeriod, hdc.FlNodeType, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.AddAutoscalingPolicy,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlScalingAdjustment, hdc.FlScalingDefinition, hdc.FlOperator, hdc.FlThreshold,
+					hdc.FlPeriod, hdc.FlNodeType, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name: "configure",
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
@@ -101,6 +115,19 @@ func main() {
 			Action: hdc.Configure,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "configure-autoscaling",
+			Usage:  "configure autoscaling (cooldown time, min/max cluster size)",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlCooldownTime, hdc.FlClusterMinSize, hdc.FlClusterMaxSize, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.ConfigureAutoscaling,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlCooldownTime, hdc.FlClusterMinSize,
+					hdc.FlClusterMaxSize, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}
 			},
@@ -180,6 +207,42 @@ func main() {
 			},
 		},
 		{
+			Name:   "disable-autoscaling",
+			Usage:  "disable autoscaling on a cluster",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.DisableAutoscalingPolicy,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "enable-autoscaling",
+			Usage:  "enable autoscaling on a cluster",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.EnableAutoscalingPolicy,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "list-autoscaling-definitions",
+			Usage:  "list the available autoscaling definitions",
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.ListDefinitions,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-cluster-types",
 			Usage:  "list the available cluster types and HDP versions",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
@@ -225,6 +288,18 @@ func main() {
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlRdsName, hdc.FlRdsUsername, hdc.FlRdsPassword, hdc.FlRdsUrl, hdc.FlRdsType, hdc.FlRdsDbType,
 					hdc.FlHdpVersion, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "remove-autoscaling-policy",
+			Usage:  "remove an existing autoscale policy",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.RemoveAutoscalingPolicy,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlPolicyName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}
 			},

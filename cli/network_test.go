@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/client/networks"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/networks"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestCreateNetworkImplCustomNetwork(t *testing.T) {
@@ -22,10 +22,10 @@ func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 	}
 	c := make(chan int64, 1)
 	expectedId := int64(1)
-	var actual *models.NetworkRequest
+	var actual *models_cloudbreak.NetworkRequest
 	postNetwork := func(params *networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error) {
 		actual = params.Body
-		return &networks.PostNetworksAccountOK{Payload: &models.NetworkResponse{ID: &expectedId}}, nil
+		return &networks.PostNetworksAccountOK{Payload: &models_cloudbreak.NetworkResponse{ID: &expectedId}}, nil
 	}
 
 	createNetworkImpl(skeleton, c, postNetwork, nil)
@@ -51,19 +51,19 @@ func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 func TestCreateNetworkImplDefaultNetwork(t *testing.T) {
 	skeleton := ClusterSkeleton{}
 	c := make(chan int64, 1)
-	var actual *models.NetworkRequest
+	var actual *models_cloudbreak.NetworkRequest
 	postNetwork := func(params *networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error) {
 		actual = params.Body
 		id := int64(1)
-		return &networks.PostNetworksAccountOK{Payload: &models.NetworkResponse{ID: &id}}, nil
+		return &networks.PostNetworksAccountOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
 	}
 	expectedParams := make(map[string]interface{})
 	expectedParams["vpcId"] = "vpcid"
 	expectedParams["internetGatewayId"] = "internetGatewayId"
 	var actualName string
-	getNetwork := func(name string) models.NetworkResponse {
+	getNetwork := func(name string) models_cloudbreak.NetworkResponse {
 		actualName = name
-		return models.NetworkResponse{Parameters: expectedParams}
+		return models_cloudbreak.NetworkResponse{Parameters: expectedParams}
 	}
 
 	createNetworkImpl(skeleton, c, postNetwork, getNetwork)
@@ -92,11 +92,11 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 			return ""
 		}
 	}
-	var actual *models.NetworkRequest
+	var actual *models_cloudbreak.NetworkRequest
 	postNetwork := func(params *networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error) {
 		actual = params.Body
 		id := int64(1)
-		return &networks.PostNetworksAccountOK{Payload: &models.NetworkResponse{ID: &id}}, nil
+		return &networks.PostNetworksAccountOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
 	}
 
 	createNetworkCommandImpl(finder, postNetwork)
@@ -119,17 +119,17 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 }
 
 func TestListPrivateNetworksImpl(t *testing.T) {
-	netwroks := make([]*models.NetworkResponse, 0)
+	netwroks := make([]*models_cloudbreak.NetworkResponse, 0)
 	for i := 0; i < 3; i++ {
 		id := int64(i)
-		netwroks = append(netwroks, &models.NetworkResponse{
+		netwroks = append(netwroks, &models_cloudbreak.NetworkResponse{
 			ID:   &id,
 			Name: "name" + strconv.Itoa(i),
 		})
 	}
 	var rows []Row
 
-	listPrivateNetworksImpl(func() []*models.NetworkResponse { return netwroks }, func(h []string, r []Row) { rows = r })
+	listPrivateNetworksImpl(func() []*models_cloudbreak.NetworkResponse { return netwroks }, func(h []string, r []Row) { rows = r })
 
 	if len(rows) != len(netwroks) {
 		t.Fatalf("row number not match %d == %d", len(netwroks), len(rows))

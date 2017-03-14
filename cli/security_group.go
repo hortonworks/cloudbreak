@@ -8,8 +8,8 @@ import (
 
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/securitygroups"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/securitygroups"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 var SECURITY_GROUP_DEFAULT_PORTS = []string{"22"}
@@ -38,7 +38,7 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, group string, channel cha
 	channel <- *resp.Payload.ID
 }
 
-func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models.SecurityGroupRequest {
+func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models_cloudbreak.SecurityGroupRequest {
 	secGroupName := fmt.Sprintf("hdc-sg-%s-%s", strings.ToLower(group), strconv.FormatInt(time.Now().UnixNano(), 10))
 
 	openPorts := SECURITY_GROUP_DEFAULT_PORTS
@@ -51,7 +51,7 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models.
 	}
 
 	modifiable := false
-	secRules := []*models.SecurityRuleRequest{
+	secRules := []*models_cloudbreak.SecurityRuleRequest{
 		{
 			Subnet:     skeleton.RemoteAccess,
 			Protocol:   "tcp",
@@ -60,7 +60,7 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models.
 		},
 	}
 
-	secGroup := models.SecurityGroupRequest{
+	secGroup := models_cloudbreak.SecurityGroupRequest{
 		Name:          secGroupName,
 		SecurityRules: secRules,
 		CloudPlatform: "AWS",
@@ -69,15 +69,15 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models.
 	return &secGroup
 }
 
-func (c *Cloudbreak) GetSecurityDetails(stack *models.StackResponse) (map[string][]*models.SecurityRuleResponse, error) {
+func (c *Cloudbreak) GetSecurityDetails(stack *models_cloudbreak.StackResponse) (map[string][]*models_cloudbreak.SecurityRuleResponse, error) {
 	defer timeTrack(time.Now(), "get security group by id")
 
 	return getSecurityDetailsImpl(stack, c.Cloudbreak.Securitygroups.GetSecuritygroupsID)
 }
 
-func getSecurityDetailsImpl(stack *models.StackResponse,
-	getIds func(*securitygroups.GetSecuritygroupsIDParams) (*securitygroups.GetSecuritygroupsIDOK, error)) (securityMap map[string][]*models.SecurityRuleResponse, err error) {
-	securityMap = make(map[string][]*models.SecurityRuleResponse)
+func getSecurityDetailsImpl(stack *models_cloudbreak.StackResponse,
+	getIds func(*securitygroups.GetSecuritygroupsIDParams) (*securitygroups.GetSecuritygroupsIDOK, error)) (securityMap map[string][]*models_cloudbreak.SecurityRuleResponse, err error) {
+	securityMap = make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	for _, v := range stack.InstanceGroups {
 		if respSecurityGroup, err := getIds(&securitygroups.GetSecuritygroupsIDParams{ID: *v.SecurityGroupID}); err == nil {
 			securityGroup := respSecurityGroup.Payload
@@ -89,7 +89,7 @@ func getSecurityDetailsImpl(stack *models.StackResponse,
 	return securityMap, err
 }
 
-func (c *Cloudbreak) GetPublicSecurityGroups() []*models.SecurityGroupResponse {
+func (c *Cloudbreak) GetPublicSecurityGroups() []*models_cloudbreak.SecurityGroupResponse {
 	defer timeTrack(time.Now(), "get public security groups")
 	resp, err := c.Cloudbreak.Securitygroups.GetSecuritygroupsAccount(&securitygroups.GetSecuritygroupsAccountParams{})
 	if err != nil {

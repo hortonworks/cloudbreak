@@ -4,11 +4,11 @@ import (
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/stacks"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
 
 	"time"
 
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -43,14 +43,14 @@ func (c *ClusterNode) DataAsStringArray() []string {
 
 func ListClusters(c *cli.Context) error {
 	defer timeTrack(time.Now(), "list clusters")
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := Output{Format: c.String(FlOutput.Name)}
 
 	return listClustersImpl(oAuth2Client.Cloudbreak.Stacks.GetStacksUser, oAuth2Client.FetchCluster, output.WriteList)
 }
 
 func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error),
-	fetchCluster func(*models.StackResponse) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
+	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeleton) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
 
 	respStacks, err := getStacks(&stacks.GetStacksUserParams{})
 	if err != nil {
@@ -61,10 +61,10 @@ func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetSt
 	clusters := make([]ClusterSkeletonResult, len(respStacks.Payload))
 	for i, stack := range respStacks.Payload {
 		wg.Add(1)
-		go func(i int, stack *models.StackResponse) {
+		go func(i int, stack *models_cloudbreak.StackResponse) {
 			defer wg.Done()
 
-			clusterSkeleton, _ := fetchCluster(stack)
+			clusterSkeleton, _ := fetchCluster(stack, nil)
 			clusters[i] = *clusterSkeleton
 
 		}(i, stack)
@@ -97,7 +97,7 @@ func ListClusterNodes(c *cli.Context) error {
 		logMissingParameterAndExit(c, []string{FlClusterName.Name})
 	}
 
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := Output{Format: c.String(FlOutput.Name)}
 
 	listClusterNodesImpl(clusterName, oAuth2Client.Cloudbreak.Stacks.GetStacksUserName, output.WriteList)
@@ -140,7 +140,7 @@ func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetStacksUse
 	writer(ClusterNodeHeader, tableRows)
 }
 
-func getHostStatus(stack *models.StackResponse, imd *models.InstanceMetaData) string {
+func getHostStatus(stack *models_cloudbreak.StackResponse, imd *models_cloudbreak.InstanceMetaData) string {
 	var result string = ""
 	if stack.Cluster != nil && imd.DiscoveryFQDN != nil {
 		for _, hg := range stack.Cluster.HostGroups {

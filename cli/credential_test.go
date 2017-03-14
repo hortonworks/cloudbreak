@@ -9,8 +9,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/client/credentials"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/credentials"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestCreateCredential(t *testing.T) {
@@ -37,10 +37,10 @@ func TestCreateCredential(t *testing.T) {
 	}
 
 	var actualName string
-	var actualCredential models.CredentialResponse
+	var actualCredential models_cloudbreak.CredentialResponse
 	var actualExistingKey string
 	var actualPublic bool
-	createCred := func(name string, defaultCredential models.CredentialResponse, existingKey string, public bool) int64 {
+	createCred := func(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string, public bool) int64 {
 		actualName = name
 		actualCredential = defaultCredential
 		actualExistingKey = existingKey
@@ -75,14 +75,14 @@ func TestCreateCredential(t *testing.T) {
 func TestCopyDefaultCredentialImpl(t *testing.T) {
 	skeleton := ClusterSkeleton{ClusterSkeletonBase: ClusterSkeletonBase{SSHKeyName: "ssh-key"}}
 	c := make(chan int64, 1)
-	getCred := func(name string) models.CredentialResponse {
-		return models.CredentialResponse{}
+	getCred := func(name string) models_cloudbreak.CredentialResponse {
+		return models_cloudbreak.CredentialResponse{}
 	}
 	expectedId := int64(1)
 	var actualName string
 	var actualExistingKey string
 	var actualPublic bool
-	createCred := func(name string, defaultCredential models.CredentialResponse, existingKey string, public bool) int64 {
+	createCred := func(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string, public bool) int64 {
 		actualName = name
 		actualExistingKey = existingKey
 		actualPublic = public
@@ -108,14 +108,14 @@ func TestCopyDefaultCredentialImpl(t *testing.T) {
 
 func TestCreateCredentialImplPublic(t *testing.T) {
 	expectedId := int64(1)
-	var actualCredential *models.CredentialRequest
+	var actualCredential *models_cloudbreak.CredentialRequest
 	postAccountCredentail := func(params *credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error) {
 		actualCredential = params.Body
-		return &credentials.PostCredentialsAccountOK{Payload: &models.CredentialResponse{ID: &expectedId}}, nil
+		return &credentials.PostCredentialsAccountOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
 	}
 	defaultParams := make(map[string]interface{})
 	defaultParams["roleArn"] = "role"
-	defaultCredential := models.CredentialResponse{
+	defaultCredential := models_cloudbreak.CredentialResponse{
 		Parameters: defaultParams,
 		PublicKey:  "pub-key",
 	}
@@ -146,10 +146,10 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 func TestCreateCredentialImplPrivate(t *testing.T) {
 	expectedId := int64(1)
 	postUserCredential := func(params *credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error) {
-		return &credentials.PostCredentialsUserOK{Payload: &models.CredentialResponse{ID: &expectedId}}, nil
+		return &credentials.PostCredentialsUserOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
 	}
 
-	actualId := createCredentialImpl("name", models.CredentialResponse{}, "ssh-key", false, nil, postUserCredential)
+	actualId := createCredentialImpl("name", models_cloudbreak.CredentialResponse{}, "ssh-key", false, nil, postUserCredential)
 
 	if actualId != expectedId {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
@@ -157,17 +157,17 @@ func TestCreateCredentialImplPrivate(t *testing.T) {
 }
 
 func TestListPrivateCredentialsImpl(t *testing.T) {
-	credentials := make([]*models.CredentialResponse, 0)
+	credentials := make([]*models_cloudbreak.CredentialResponse, 0)
 	for i := 0; i < 3; i++ {
 		id := int64(i)
-		credentials = append(credentials, &models.CredentialResponse{
+		credentials = append(credentials, &models_cloudbreak.CredentialResponse{
 			ID:   &id,
 			Name: "name" + strconv.Itoa(i),
 		})
 	}
 	var rows []Row
 
-	listPrivateCredentialsImpl(func() []*models.CredentialResponse { return credentials }, func(h []string, r []Row) { rows = r })
+	listPrivateCredentialsImpl(func() []*models_cloudbreak.CredentialResponse { return credentials }, func(h []string, r []Row) { rows = r })
 
 	if len(rows) != len(credentials) {
 		t.Fatalf("row number not match %d == %d", len(credentials), len(rows))

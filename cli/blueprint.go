@@ -7,8 +7,8 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/client/blueprints"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/blueprints"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
 
@@ -51,13 +51,13 @@ func (b *Blueprint) DataAsStringArray() []string {
 }
 
 func ListBlueprints(c *cli.Context) error {
-	oAuth2Client := NewOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
 	return listBlueprintsImpl(oAuth2Client.GetPublicBlueprints, output.WriteList)
 }
 
-func listBlueprintsImpl(getPublicBlueprints func() []*models.BlueprintResponse, writer func([]string, []Row)) error {
+func listBlueprintsImpl(getPublicBlueprints func() []*models_cloudbreak.BlueprintResponse, writer func([]string, []Row)) error {
 	respBlueprints := getPublicBlueprints()
 
 	var tableRows []Row
@@ -74,7 +74,7 @@ func listBlueprintsImpl(getPublicBlueprints func() []*models.BlueprintResponse, 
 	return nil
 }
 
-func (c *Cloudbreak) GetPublicBlueprints() []*models.BlueprintResponse {
+func (c *Cloudbreak) GetPublicBlueprints() []*models_cloudbreak.BlueprintResponse {
 	defer timeTrack(time.Now(), "get public blueprints")
 	resp, err := c.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
 	if err != nil {
@@ -89,7 +89,7 @@ func (c *Cloudbreak) DeleteBlueprint(name string) error {
 	return c.Cloudbreak.Blueprints.DeletePublic(&blueprints.DeletePublicParams{Name: name})
 }
 
-func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
+func (c *Cloudbreak) GetBlueprintByName(name string) *models_cloudbreak.BlueprintResponse {
 	defer timeTrack(time.Now(), "get blueprint by name")
 	log.Infof("[GetBlueprintByName] get blueprint by name: %s", name)
 
@@ -103,12 +103,12 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models.BlueprintResponse {
 	return resp.Payload
 }
 
-func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, wg *sync.WaitGroup) {
+func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse, channel chan int64, wg *sync.WaitGroup) {
 	defer wg.Done()
 	createBlueprintImpl(skeleton, blueprint, channel, c.Cloudbreak.Blueprints.PostPublic)
 }
 
-func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse, channel chan int64, postPublicBlueprint func(*blueprints.PostPublicParams) (*blueprints.PostPublicOK, error)) {
+func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse, channel chan int64, postPublicBlueprint func(*blueprints.PostPublicParams) (*blueprints.PostPublicOK, error)) {
 	if len(skeleton.Configurations) == 0 {
 		log.Info("[CreateBlueprint] there are no custom configurations, use the default blueprint")
 		channel <- *blueprint.ID
@@ -129,10 +129,10 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models.BlueprintRe
 	channel <- *resp.Payload.ID
 }
 
-func createBlueprintRequest(skeleton ClusterSkeleton, blueprint *models.BlueprintResponse) *models.BlueprintRequest {
+func createBlueprintRequest(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse) *models_cloudbreak.BlueprintRequest {
 	blueprintName := "b" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	bpRequest := models.BlueprintRequest{
+	bpRequest := models_cloudbreak.BlueprintRequest{
 		Name:            blueprintName,
 		AmbariBlueprint: blueprint.AmbariBlueprint,
 		Properties:      skeleton.Configurations,
@@ -141,7 +141,7 @@ func createBlueprintRequest(skeleton ClusterSkeleton, blueprint *models.Blueprin
 	return &bpRequest
 }
 
-func getFancyBlueprintName(blueprint *models.BlueprintResponse) string {
+func getFancyBlueprintName(blueprint *models_cloudbreak.BlueprintResponse) string {
 	var name string
 	ambariBpName := *blueprint.AmbariBlueprint.Blueprint.Name
 	if len(ambariBpName) > 0 {

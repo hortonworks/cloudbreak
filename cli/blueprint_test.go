@@ -5,16 +5,16 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/client/blueprints"
-	"github.com/hortonworks/hdc-cli/models"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/blueprints"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestListBlueprintsImplPrefixed(t *testing.T) {
-	prints := make([]*models.BlueprintResponse, 0)
-	prints = append(prints, &models.BlueprintResponse{Name: "blueprint-name"})
+	prints := make([]*models_cloudbreak.BlueprintResponse, 0)
+	prints = append(prints, &models_cloudbreak.BlueprintResponse{Name: "blueprint-name"})
 	var rows []Row
 
-	listBlueprintsImpl(func() []*models.BlueprintResponse { return prints }, func(h []string, r []Row) { rows = r })
+	listBlueprintsImpl(func() []*models_cloudbreak.BlueprintResponse { return prints }, func(h []string, r []Row) { rows = r })
 
 	if len(rows) != 0 {
 		t.Errorf("rows not empty %s", rows)
@@ -22,12 +22,12 @@ func TestListBlueprintsImplPrefixed(t *testing.T) {
 }
 
 func TestListBlueprintsImplNotPrefixed(t *testing.T) {
-	prints := make([]*models.BlueprintResponse, 0)
+	prints := make([]*models_cloudbreak.BlueprintResponse, 0)
 	for i := 0; i < 3; i++ {
-		prints = append(prints, &models.BlueprintResponse{
+		prints = append(prints, &models_cloudbreak.BlueprintResponse{
 			Name: "name" + strconv.Itoa(i),
-			AmbariBlueprint: models.AmbariBlueprint{
-				Blueprint: models.Blueprint{
+			AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
+				Blueprint: models_cloudbreak.Blueprint{
 					Name:         &(&stringWrapper{"blueprint-name"}).s,
 					StackVersion: "version" + strconv.Itoa(i),
 				},
@@ -36,7 +36,7 @@ func TestListBlueprintsImplNotPrefixed(t *testing.T) {
 	}
 	var rows []Row
 
-	listBlueprintsImpl(func() []*models.BlueprintResponse { return prints }, func(h []string, r []Row) { rows = r })
+	listBlueprintsImpl(func() []*models_cloudbreak.BlueprintResponse { return prints }, func(h []string, r []Row) { rows = r })
 
 	if len(rows) != len(prints) {
 		t.Fatalf("row number not match %d == %d", len(prints), len(rows))
@@ -55,9 +55,9 @@ func TestCreateBlueprintImplDefaultBlueprint(t *testing.T) {
 	blueprintId := make(chan int64, 1)
 
 	id := int64(123)
-	blueprint := models.BlueprintResponse{
+	blueprint := models_cloudbreak.BlueprintResponse{
 		ID:              &id,
-		AmbariBlueprint: models.AmbariBlueprint{},
+		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{},
 	}
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
 		return nil, nil
@@ -72,20 +72,20 @@ func TestCreateBlueprintImplDefaultBlueprint(t *testing.T) {
 }
 
 func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
-	confs := make([]models.Configurations, 0)
-	confs = append(confs, models.Configurations{})
+	confs := make([]models_cloudbreak.Configurations, 0)
+	confs = append(confs, models_cloudbreak.Configurations{})
 	skeleton := ClusterSkeleton{
 		Configurations: confs,
 	}
 	blueprintId := make(chan int64, 1)
 	id := int64(123)
-	blueprint := models.BlueprintResponse{
+	blueprint := models_cloudbreak.BlueprintResponse{
 		ID:              &id,
-		AmbariBlueprint: models.AmbariBlueprint{},
+		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{},
 	}
 	expected := int64(321)
 	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
-		return &blueprints.PostPublicOK{Payload: &models.BlueprintResponse{ID: &expected}}, nil
+		return &blueprints.PostPublicOK{Payload: &models_cloudbreak.BlueprintResponse{ID: &expected}}, nil
 	}
 
 	createBlueprintImpl(skeleton, &blueprint, blueprintId, resolver)
@@ -97,10 +97,10 @@ func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
 }
 
 func TestGetFancyBlueprintNameIsEmpty(t *testing.T) {
-	bp := &models.BlueprintResponse{
+	bp := &models_cloudbreak.BlueprintResponse{
 		Name: "name",
-		AmbariBlueprint: models.AmbariBlueprint{
-			Blueprint: models.Blueprint{Name: &(&stringWrapper{""}).s},
+		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
+			Blueprint: models_cloudbreak.Blueprint{Name: &(&stringWrapper{""}).s},
 		},
 	}
 
@@ -113,10 +113,10 @@ func TestGetFancyBlueprintNameIsEmpty(t *testing.T) {
 }
 
 func TestGetFancyBlueprintNameNotExists(t *testing.T) {
-	bp := &models.BlueprintResponse{
+	bp := &models_cloudbreak.BlueprintResponse{
 		Name: "name",
-		AmbariBlueprint: models.AmbariBlueprint{
-			Blueprint: models.Blueprint{Name: &(&stringWrapper{"blueprint-name"}).s},
+		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
+			Blueprint: models_cloudbreak.Blueprint{Name: &(&stringWrapper{"blueprint-name"}).s},
 		},
 	}
 
@@ -130,10 +130,10 @@ func TestGetFancyBlueprintNameNotExists(t *testing.T) {
 
 func TestGetFancyBlueprintNameExists(t *testing.T) {
 	for k, v := range BlueprintMap {
-		bp := &models.BlueprintResponse{
+		bp := &models_cloudbreak.BlueprintResponse{
 			Name: "name",
-			AmbariBlueprint: models.AmbariBlueprint{
-				Blueprint: models.Blueprint{Name: &k},
+			AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
+				Blueprint: models_cloudbreak.Blueprint{Name: &k},
 			},
 		}
 
