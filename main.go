@@ -120,6 +120,19 @@ func main() {
 			},
 		},
 		{
+			Name:   "configure-autoscaling",
+			Usage:  "configure autoscaling (cooldown time, min/max cluster size)",
+			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlCooldownTime, hdc.FlClusterMinSize, hdc.FlClusterMaxSize, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.ConfigureAutoscaling,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlCooldownTime, hdc.FlClusterMinSize,
+					hdc.FlClusterMaxSize, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "create-cluster",
 			Usage:  "creates a new cluster",
 			Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlAmbariPasswordOptional},

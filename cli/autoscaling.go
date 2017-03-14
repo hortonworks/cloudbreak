@@ -121,6 +121,59 @@ func RemoveAutoscalingPolicy(c *cli.Context) error {
 	return nil
 }
 
+func ConfigureAutoscaling(c *cli.Context) error {
+	defer timeTrack(time.Now(), "configure autoscaling")
+	checkRequiredFlags(c)
+
+	clusterName := c.String(FlClusterName.Name)
+	if len(clusterName) == 0 {
+		logMissingParameterAndExit(c, []string{FlClusterName.Name})
+	}
+	cooldown := int32(c.Int(FlCooldownTime.Name))
+	if cooldown == 0 {
+		logErrorAndExit(errors.New("the cooldown time must be greater than 0"))
+	}
+	minClusterSize := int32(c.Int(FlClusterMinSize.Name))
+	if minClusterSize < 1 {
+		logErrorAndExit(errors.New("the minimum cluster size must be greater than 0"))
+	}
+	maxClusterSize := int32(c.Int(FlClusterMaxSize.Name))
+	if maxClusterSize < 1 {
+		logErrorAndExit(errors.New("the maximum cluster size must be greater than 0"))
+	}
+
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	clusterId := *cbClient.GetClusterByName(clusterName).ID
+	asClusterId, err := asClient.getAutoscalingClusterByStackId(clusterName, clusterId)
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	configureAutoscalingImpl(clusterName, asClusterId, cooldown, minClusterSize, maxClusterSize, asClient.AutoScaling.Configurations.SetScalingConfiguration)
+	return nil
+}
+
+func configureAutoscalingImpl(clusterName string, asClusterId int64, cooldown int32, minSize int32, maxSize int32,
+	setConfig func(*configurations.SetScalingConfigurationParams) (*configurations.SetScalingConfigurationOK, error)) {
+
+	log.Infof("[configureAutoscalingImpl] set cluster: %s, configuration: (cooldown: %d, minSize: %d, maxSize: %d)", clusterName, cooldown, minSize, maxSize)
+	resp, err := setConfig(&configurations.SetScalingConfigurationParams{
+		ClusterID: asClusterId,
+		Body: &models_autoscale.ScalingConfiguration{
+			Cooldown: &cooldown,
+			MinSize:  &minSize,
+			MaxSize:  &maxSize,
+		},
+	})
+
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	log.Infof("[configureAutoscalingImpl] cluster: %s, configuration set: %v", clusterName, resp.Payload)
+}
+
 func DisableAutoscalingPolicy(c *cli.Context) error {
 	defer timeTrack(time.Now(), "disable autoscaling")
 	checkRequiredFlags(c)
@@ -133,7 +186,7 @@ func DisableAutoscalingPolicy(c *cli.Context) error {
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	setClusterState(clusterName,
-		"SUSPENDED",
+		"DISABLED",
 		cbClient.GetClusterByName,
 		asClient.getAutoscalingClusterByStackId,
 		asClient.AutoScaling.Clusters.SetState)
