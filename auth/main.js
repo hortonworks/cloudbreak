@@ -177,15 +177,14 @@ function continueInit() {
     }
 
     app.post('/', function(req, res) {
-        needle.get(config.uaaAddress + '/login', function(err, resp) {
-            var cookies = resp.headers['set-cookie'];
-            var csrfToken = getCookieFieldValue(cookies, 'X-Uaa-Csrf');
+        getCrsfToken('/login', req, res, function (csrfToken) {
             var username = req.body.email
             var password = req.body.password
             var userCredentials = "username=" + username + "&password=" + encodeURIComponent(password) + "&X-Uaa-Csrf=" + csrfToken;
             var options = {
                 headers: {
                     'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
                     'Cookie': 'X-Uaa-Csrf=' + csrfToken,
                     'Authorization': 'Basic ' + new Buffer(config.clientId + ':' + config.clientSecret).toString('base64')
                 }
@@ -283,48 +282,51 @@ function continueInit() {
 
     app.get('/confirm', function(req, res) {
         if (isUaaSession(req)) {
-            var confirmData = {
-                'client_id': req.session.client_id,
-                'response_type': req.session.response_type,
-                'scope': req.session.scope,
-                'redirect_uri': req.session.redirect_uri
-            }
-            var confirmOptions = {
-                headers: {
-                    'Accept': 'application/json',
-                    'Cookie': 'JSESSIONID=' + req.session.uaa_sessionid
+            getCrsfToken('/oauth/authorize', req, res, function (csrfToken) {
+                var confirmData = {
+                    'client_id': req.session.client_id,
+                    'response_type': req.session.response_type,
+                    'scope': req.session.scope,
+                    'redirect_uri': req.session.redirect_uri
                 }
-            }
-            needle.post(config.uaaAddress + '/oauth/authorize', confirmData, confirmOptions, function(err, confirmResp) {
-                if (err != null) {
-                    console.log("POST /oauth/authorize - Client cannot access resource server. Check that UAA server is running.");
-                    res.statusCode = 500
-                    res.end("Client cannot access resource server. Check that UAA server is running. code: 500")
-                } else {
-                    if (confirmResp.statusCode == 200) {
-                        if (process.env.SL_DISPLAY_TERMS_AND_SERVICES === "true") {
-                            req.session.userScopes = confirmResp.body.auth_request.scope
-                            res.render('confirm', {
-                                basePath: getBasePath(req),
-                                client_id: req.session.client_id
-                            })
-                        } else {
-                            sendOauthApproval(req.session.uaa_sessionid, confirmResp.body.auth_request.scope, req, res)
-                        }
-                    } else if (confirmResp.statusCode == 302) {
-                        if (endsWith(confirmResp.headers.location, '/login')) { // when redirects to UAA API login page
-                            res.render('login', {
-                                basePath: getBasePath(req),
-                                errorMessage: ""
-                            });
-                        } else {
-                            res.redirect(confirmResp.headers.location)
-                        }
-                    } else {
-                        console.log('Confirm error - code: ' + confirmResp.statusCode + ', message: ' + confirmResp.message)
-                        res.end('Login/confirm: Error from token server, code: ' + confirmResp.statusCode)
+                var confirmOptions = {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Cookie': 'X-Uaa-Csrf=' + csrfToken + '; JSESSIONID=' + req.session.uaa_sessionid
                     }
                 }
+                needle.post(config.uaaAddress + '/oauth/authorize', confirmData, confirmOptions, function(err, confirmResp) {
+                    if (err != null) {
+                        console.log("POST /oauth/authorize - Client cannot access resource server. Check that UAA server is running.");
+                        res.statusCode = 500
+                        res.end("Client cannot access resource server. Check that UAA server is running. code: 500")
+                    } else {
+                        if (confirmResp.statusCode == 200) {
+                            if (process.env.SL_DISPLAY_TERMS_AND_SERVICES === "true") {
+                                req.session.userScopes = confirmResp.body.auth_request.scope
+                                res.render('confirm', {
+                                    basePath: getBasePath(req),
+                                    client_id: req.session.client_id
+                                })
+                            } else {
+                                sendOauthApproval(req.session.uaa_sessionid, confirmResp.body.auth_request.scope, req, res)
+                            }
+                        } else if (confirmResp.statusCode == 302) {
+                            if (endsWith(confirmResp.headers.location, '/login')) { // when redirects to UAA API login page
+                                res.render('login', {
+                                    basePath: getBasePath(req),
+                                    errorMessage: ""
+                                });
+                            } else {
+                                res.redirect(confirmResp.headers.location)
+                            }
+                        } else {
+                            console.log('Confirm error - code: ' + confirmResp.statusCode + ', message: ' + confirmResp.message)
+                            res.end('Login/confirm: Error from token server, code: ' + confirmResp.statusCode)
+                        }
+                    }
+                })
             })
         } else {
             res.statusCode = 500
@@ -345,41 +347,44 @@ function continueInit() {
     });
 
     sendOauthApproval = function(uaaSessionId, scopes, req, res) {
-        var confirmOptions = {
-            headers: {
-                'Accept': 'text/html,application/xhtml+xml,application/xml',
-                'Cookie': 'JSESSIONID=' + uaaSessionId,
-                'Content-Type': 'application/x-www-form-urlencoded'
+        getCrsfToken('/oauth/authorize', req, res, function (csrfToken) {
+            var confirmOptions = {
+                headers: {
+                    'Accept': 'text/html,application/xhtml+xml,application/xml',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Cookie': 'X-Uaa-Csrf=' + csrfToken + '; JSESSIONID=' + req.session.uaa_sessionid,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
             }
-        }
-        var formData = '';
-        if (scopes != undefined) {
-            for (var i = 0; i < scopes.length; i++) {
-                formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
+            var formData = '';
+            if (scopes != undefined) {
+                for (var i = 0; i < scopes.length; i++) {
+                    formData = formData + 'scope.' + i.toString() + '=scope.' + scopes[i] + '&'
+                }
             }
-        }
-        formData = formData + 'user_oauth_approval=true'
-        console.log("The formdata for scopes are: " + formData);
-        needle.post(config.uaaAddress + '/oauth/authorize', formData, confirmOptions,
-            function(err, confirmResp) {
-                if (err != null) {
-                    console.log("POST /oauth/authorize - Client cannot access resource server. Check UAA server is running.");
-                    res.render('login', {
-                        basePath: getBasePath(req),
-                        errorMessage: "Client cannot access resource server. Check UAA server is running."
-                    });
-                } else {
-                    if (confirmResp.statusCode == 302) {
-                        res.redirect(confirmResp.headers.location)
-                    } else {
-                        console.log('Authorization failed - ' + confirmResp.message)
+            formData = formData + 'user_oauth_approval=true'
+            console.log("The formdata for scopes are: " + formData);
+            needle.post(config.uaaAddress + '/oauth/authorize', formData, confirmOptions,
+                function(err, confirmResp) {
+                    if (err != null) {
+                        console.log("POST /oauth/authorize - Client cannot access resource server. Check UAA server is running.");
                         res.render('login', {
                             basePath: getBasePath(req),
-                            errorMessage: ""
+                            errorMessage: "Client cannot access resource server. Check UAA server is running."
                         });
+                    } else {
+                        if (confirmResp.statusCode == 302) {
+                            res.redirect(confirmResp.headers.location)
+                        } else {
+                            console.log('Authorization failed - ' + confirmResp.message)
+                            res.render('login', {
+                                basePath: getBasePath(req),
+                                errorMessage: ""
+                            });
+                        }
                     }
-                }
-            });
+                });
+        })
     }
 
     postGroup = function(token, userId, displayName) {
@@ -1039,33 +1044,54 @@ function continueInit() {
 
     // service methods
 
+    getCrsfToken = function(path, req, res, callback) {
+        needle.get(config.uaaAddress + path, function(err, tokenResp) {
+            if (err != null) {
+                console.log("GET " + path + " - Client cannot access resource server. Check that UAA server is running");
+                res.statusCode = 500
+                res.json({
+                    message: 'Cannot retrieve csrf token'
+                })
+            } else {
+                var cookies = tokenResp.headers['set-cookie'];
+                if (cookies != null) {
+                    var csrfToken = getCookieFieldValue(cookies, 'X-Uaa-Csrf');
+                    callback(csrfToken)
+                } else {
+                    res.statusCode = tokenResp.statusCode
+                    res.json({
+                        message: 'Cannot retrieve token'
+                    })
+                }
+            }
+        });
+    }
+
     getToken = function(req, res, callback) {
         var options = {
             headers: {
                 'Authorization': 'Basic ' + new Buffer(config.clientId + ':' + config.clientSecret).toString('base64')
             }
         }
-        needle.post(config.uaaAddress + '/oauth/token', 'grant_type=client_credentials',
-            options,
-            function(err, tokenResp) {
-                if (err != null) {
-                    console.log("POST /oauth/token - Client cannot access resource server. Check that UAA server is running");
-                    res.statusCode = 500
+        needle.post(config.uaaAddress + '/oauth/token', 'grant_type=client_credentials', options, function(err, tokenResp) {
+            if (err != null) {
+                console.log("POST /oauth/token - Client cannot access resource server. Check that UAA server is running");
+                res.statusCode = 500
+                res.json({
+                    message: 'Cannot retrieve token'
+                })
+            } else {
+                if (tokenResp.statusCode == 200) {
+                    var token = tokenResp.body.access_token;
+                    callback(token)
+                } else {
+                    res.statusCode = tokenResp.statusCode
                     res.json({
                         message: 'Cannot retrieve token'
                     })
-                } else {
-                    if (tokenResp.statusCode == 200) {
-                        var token = tokenResp.body.access_token;
-                        callback(token)
-                    } else {
-                        res.statusCode = tokenResp.statusCode
-                        res.json({
-                            message: 'Cannot retrieve token'
-                        })
-                    }
                 }
-            });
+            }
+        });
     }
 
     getUserByName = function(req, res, token, userName, callback) {
