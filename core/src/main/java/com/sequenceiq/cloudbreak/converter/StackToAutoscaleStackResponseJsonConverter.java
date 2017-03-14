@@ -32,6 +32,7 @@ public class StackToAutoscaleStackResponseJsonConverter extends AbstractConversi
             result.setAmbariServerIp(gatewayIp);
             result.setUserName(cluster.getUserName());
             result.setPassword(cluster.getPassword());
+            result.setClusterStatus(cluster.getStatus());
         }
         return result;
     }
