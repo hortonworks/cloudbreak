@@ -175,7 +175,7 @@ cloudbreak-delete-certs() {
 
 cloudbreak-conf-uaa() {
 
-    env-import UAA_DEFAULT_SECRET "cbsecret2015"
+    env-import UAA_DEFAULT_SECRET
 
     env-import UAA_CLOUDBREAK_ID cloudbreak
     env-import UAA_CLOUDBREAK_SECRET $UAA_DEFAULT_SECRET
@@ -192,7 +192,7 @@ cloudbreak-conf-uaa() {
     env-import UAA_CLOUDBREAK_SHELL_ID cloudbreak_shell
 
     env-import UAA_DEFAULT_USER_EMAIL admin@example.com
-    env-import UAA_DEFAULT_USER_PW cloudbreak
+    env-import UAA_DEFAULT_USER_PW
     env-import UAA_DEFAULT_USER_FIRSTNAME Joe
     env-import UAA_DEFAULT_USER_LASTNAME Admin
     env-import UAA_ZONE_DOMAIN example.com
