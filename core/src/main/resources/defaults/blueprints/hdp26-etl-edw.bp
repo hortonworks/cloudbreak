@@ -49,6 +49,15 @@
         }
       },
       {
+        "druid-superset": {
+          "properties_attributes": {},
+          "properties": {
+            "SECRET_KEY" : "123admin123",
+            "SUPERSET_DATABASE_TYPE" : "sqlite"
+          }
+        }
+      },
+      {
       "druid-overlord" : {
         "properties_attributes" : { },
         "properties" : {
@@ -171,6 +180,10 @@
           },
           {
             "name" : "DRUID_BROKER",
+            "provision_action": "INSTALL_ONLY"
+          },
+          {
+            "name" : "DRUID_SUPERSET",
             "provision_action": "INSTALL_ONLY"
           }
         ],
