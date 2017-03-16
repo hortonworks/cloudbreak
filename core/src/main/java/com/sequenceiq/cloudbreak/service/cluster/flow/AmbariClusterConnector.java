@@ -26,6 +26,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import javax.annotation.Resource;
@@ -38,6 +39,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
@@ -747,10 +749,15 @@ public class AmbariClusterConnector {
     private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {
         try {
             Cluster cluster = stack.getCluster();
-            Map<String, Map<String, Map<String, String>>> hostGroupConfig = hadoopConfigurationService.getHostGroupConfiguration(cluster);
-            blueprintText = ambariClient.extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);
-            Map<String, Map<String, String>> globalConfig = hadoopConfigurationService.getGlobalConfiguration(cluster);
-            blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
+            HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
+            Map<String, String> hdpRepoStack = hdpRepo.getStack();
+            String repoid = hdpRepoStack.get("repoid");
+            if (!repoid.startsWith("HDF") && !repoid.startsWith("hdf")) {
+                Map<String, Map<String, Map<String, String>>> hostGroupConfig = hadoopConfigurationService.getHostGroupConfiguration(cluster);
+                blueprintText = ambariClient.extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);
+                Map<String, Map<String, String>> globalConfig = hadoopConfigurationService.getGlobalConfiguration(cluster);
+                blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, globalConfig);
+            }
             if (cluster.isSecure()) {
                 String gatewayHost = cluster.getAmbariIp();
                 if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
@@ -776,7 +783,12 @@ public class AmbariClusterConnector {
                             kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
                             !cluster.getKerberosConfig().getKerberosTcpAllowed());
                 }
-                blueprintText = addHBaseClient(blueprintText);
+                if (!repoid.startsWith("HDF") && !repoid.startsWith("hdf")) {
+                    blueprintText = addHBaseClient(blueprintText);
+                }
+            }
+            if (repoid.startsWith("HDF") || repoid.startsWith("hdf")) {
+                blueprintText = addHDFConfigToBlueprint(stack, ambariClient, blueprintText);
             }
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText, cluster.getTopologyValidation());
@@ -790,6 +802,20 @@ public class AmbariClusterConnector {
                 throw new CloudbreakServiceException(e);
             }
         }
+    }
+
+    private String addHDFConfigToBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {
+        List<String> nifiFqdns = stack.getInstanceGroupByInstanceGroupName("NiFi").getAllInstanceMetaData().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
+        AtomicInteger index = new AtomicInteger(0);
+        String nodeIdentities = nifiFqdns.stream().map(fqdn -> String.format("<property name=\"Node Identity %s\">CN=%s, OU=NIFI</property>", index.addAndGet(1), fqdn)).collect(Collectors.joining());
+        blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, ImmutableMap.of("nifi-ambari-ssl-config", ImmutableMap.of(
+                "content", nodeIdentities)));
+        blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, ImmutableMap.of("nifi-ambari-ssl-config", ImmutableMap.of(
+                "nifi.initial.admin.identity", stack.getCluster().getUserName())));
+        blueprintText = ambariClient.extendBlueprintGlobalConfiguration(blueprintText, ImmutableMap.of("ams-grafana-env", ImmutableMap.of(
+                "metrics_grafana_username", stack.getCluster().getUserName(),
+                "metrics_grafana_password", stack.getCluster().getPassword())));
+        return blueprintText;
     }
 
     private String addHBaseClient(String blueprint) {

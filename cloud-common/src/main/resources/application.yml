@@ -52,7 +52,7 @@ cb:
   yarn:
     domain: default.com
 
-  blueprint.defaults: hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp-etl-edw;hdp25-data-science;hdp25-edw-analytics;hdp25-etl-edw;hdp25-etl-edw-spark2
+  blueprint.defaults: hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp-etl-edw;hdp25-data-science;hdp25-edw-analytics;hdp25-etl-edw;hdp25-etl-edw-spark2;hdf21-nifi
   template.defaults: minviable-gcp,minviable-azure,minviable-aws
   custom.user.data: |
     touch /tmp/custom-user-data
@@ -135,9 +135,9 @@ cb:
 
   ambari:
     repo:
-      version: 2.4.2.2-1
-      baseurl: http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1
-      gpgkey: http://private-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      version: 2.4.2.0
+      baseurl: http://public-repo-1.hortonworks.com/ambari/centos7/2.x/updates/2.4.2.0
+      gpgkey: http://public-repo-1.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
       host: localhost
@@ -147,13 +147,13 @@ cb:
       password: bigdata
 
   hdp:
-    version: 2.5.0.1-210
-    repoid: HDP-2.5
+    version: 2.1
+    repoid: HDF-2.1
     repo:
       stack:
-        repoid: HDP-2.5
-        redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
-        redhat7: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
+        repoid: HDF-2.1
+        redhat6: http://public-repo-1.hortonworks.com/HDF/centos6/2.x/updates/2.1.2.0
+        redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/2.x/updates/2.1.2.0
       util:
         repoid: HDP-UTILS-1.1.0.21
         redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6

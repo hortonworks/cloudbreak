@@ -86,6 +86,13 @@ modify_hadoop_env_template:
   cmd.run:
     - name: /opt/javaagent.sh
 
+/opt/ambari-server/install-hdf-mpack.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/install-hdf-mpack.sh
+    - template: jinja
+    - mode: 744
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-server.service:
@@ -123,3 +130,15 @@ start-ambari-server:
     - name: ambari-server
 
 {% endif %}
+
+install_hdf_mpack:
+  cmd.run:
+    - name: /opt/ambari-server/install-hdf-mpack.sh
+    - shell: /bin/bash
+    - unless: test -f /var/hdf_mpack_installed
+
+hdf_mpack_installed:
+  cmd.run:
+    - name: touch /var/hdf_mpack_installed
+    - shell: /bin/bash
+    - unless: test -f /var/hdf_mpack_installed

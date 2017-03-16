@@ -3,6 +3,8 @@
 {% set password = salt['pillar.get']('kerberos:password') %}
 {% set user = salt['pillar.get']('kerberos:user') %}
 {% set url = salt['pillar.get']('kerberos:url') %}
+{% set clusterUser = salt['pillar.get']('kerberos:clusterUser') %}
+{% set clusterPassword = salt['pillar.get']('kerberos:clusterPassword') %}
 
 {% set kerberos = {} %}
 {% do kerberos.update({
@@ -10,5 +12,7 @@
     'realm': realm|upper,
     'password': password,
     'user': user,
-    'url': url
+    'url': url,
+    'clusterUser': clusterUser,
+    'clusterPassword': clusterPassword
 }) %}

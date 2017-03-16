@@ -34,6 +34,12 @@ create_admin_user:
     - shell: /bin/bash
     - unless: kadmin.local -q "list_principals *" | grep "*/admin@{{ kerberos.realm }} *"
 
+create_cluster_user:
+  cmd.run:
+    - name: 'kadmin.local -q "addprinc -pw {{ kerberos.clusterPassword }} {{ kerberos.clusterUser }}"'
+    - shell: /bin/bash
+    - unless: kadmin.local -q "list_principals *" | grep "^{{ kerberos.clusterUser }}@{{ kerberos.clusterPassword }} *"
+
 /var/kerberos/krb5kdc/kadm5.acl:
   cmd.run:
     - name: 'echo "*/admin@{{ kerberos.realm }} *" >> /var/kerberos/krb5kdc/kadm5.acl'
