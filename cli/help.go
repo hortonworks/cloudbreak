@@ -21,10 +21,10 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeType": "gp2",                                                   // Volume type of master instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 32,                                                      // Volume size of master instance group
     "VolumeCount": 1,                                                      // Volume count of master instance group
-    "Recipes:" [                                                           // (Optional) List of recipes
+    "Recipes": [                                                           // (Optional) List of recipes
       {
         "URI": "http://some-site.com/test.sh",                             // URI of the script
-        "Phase: "pre"                                                      // Which phase to run the script on, accepted values: pre, post
+        "Phase": "pre"                                                     // Which phase to run the script on, accepted values: pre, post
       }
     ]
   },
@@ -33,13 +33,13 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeType": "ephemeral",                                             // Volume type of worker instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 40,                                                      // Volume size of worker instance group
     "VolumeCount": 2,                                                      // Volume count of worker instance group
-    "InstanceCount": 3                                                     // Instance count of worker instance group, accepted value: >0
-    "Recipes:" [                                                           // (Optional) List of recipes
+    "InstanceCount": 3,                                                    // Instance count of worker instance group, accepted value: >0
+    "Recipes": [                                                           // (Optional) List of recipes
       {
         "URI": "http://some-site.com/test.sh",                             // URI of the script
-        "Phase: "post"                                                     // Which phase to run the script on, accepted values: pre, post
+        "Phase": "post"                                                    // Which phase to run the script on, accepted values: pre, post
       }
-    ]
+    ],
     "RecoveryMode": "AUTO"                                                 // Recovery mode: AUTO or MANUAL
   },
   "Compute": {                                                             // Compute instance group
@@ -47,11 +47,11 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeType": "ephemeral",                                             // Volume type of compute instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 40,                                                      // Volume size of compute instance group
     "VolumeCount": 2,                                                      // Volume count of compute instance group
-    "InstanceCount": 0                                                     // Instance count of compute instance group, accepted value: >=0
-    "Recipes:" [                                                           // (Optional) List of recipes
+    "InstanceCount": 0,                                                    // Instance count of compute instance group, accepted value: >=0
+    "Recipes": [                                                           // (Optional) List of recipes
       {
         "URI": "http://some-site.com/test.sh",                             // URI of the script
-        "Phase: "post"                                                     // Which phase to run the script on, accepted values: pre, post
+        "Phase": "post"                                                    // Which phase to run the script on, accepted values: pre, post
       }
     ],
     "SpotPrice": "0.231",                                                  // (Optional) Bid price to use for spot instances in compute instance group
@@ -78,16 +78,16 @@ var AWSCreateClusterSkeletonHelp = `
    "Username": "hive-metastore-username",                                  // Username of the Hive metastore
    "Password": "hive-metastore-password",                                  // Password of the Hive metastore
    "URL": "hive.eu-west-1.rds.amazonaws.com:5432/hive",                    // Connection URL of the Hive metastore
-   "DatabaseType": "POSTGRES",                                             // Database type of the Hive metastore, accepted value: POSTGRES
-  }
+   "DatabaseType": "POSTGRES"                                              // Database type of the Hive metastore, accepted value: POSTGRES
+  },
   "DruidMetastore": {                                                      // (Optional) You can specify an existing Druid metastore or register a new one
    "Name": "my-druid-metastore",                                           // Name of the Druid metastore, if it's an existing one only provide the name, otherwise one will be created with this name
    "Username": "druid-metastore-username",                                 // Username of the Druid metastore
    "Password": "druid-metastore-password",                                 // Password of the Druid metastore
    "URL": "druid.eu-west-1.rds.amazonaws.com:5432/druid",                  // Connection URL of the Druid metastore
-   "DatabaseType": "POSTGRES",                                             // Database type of the Druid metastore, accepted value: POSTGRES
-  }
-  "Configurations: [{"core-site":{"fs.trash.interval":"5000"}}]            // Custom configurations, format: [{"configuration-type": {"property-name": "property-value"}}, {"configuration-type2": {"property-name": "property-value"}}]
+   "DatabaseType": "POSTGRES"                                              // Database type of the Druid metastore, accepted value: POSTGRES
+  },
+  "Configurations": [{"core-site":{"fs.trash.interval":"5000"}}],          // Custom configurations, format: [{"configuration-type": {"property-name": "property-value"}}, {"configuration-type2": {"property-name": "property-value"}}]
   "Autoscaling": {                                                         // (Optional) Enable autoscaling on the cluster by default
     "Configurations": {                                                    // (Optional) Autoscaling configuration
       "CooldownTime": 30,                                                  // Specify the time between 2 scaling activity in minutes (default: 30)
