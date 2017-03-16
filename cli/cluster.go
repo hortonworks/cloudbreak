@@ -406,7 +406,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	// create autoscaling policies
 
 	func() {
-		if skeleton.Autoscaling != nil && len(skeleton.Autoscaling.Policies) > 0 {
+		if skeleton.Autoscaling != nil && (len(skeleton.Autoscaling.Policies) > 0 || skeleton.Configurations != nil) {
 			asClusterId := createBaseAutoscalingCluster(stackId)
 
 			if skeleton.Autoscaling.Configuration != nil {
@@ -657,6 +657,14 @@ func getBaseSkeleton() *ClusterSkeleton {
 			InstanceRole:           "CREATE",
 			Network:                &Network{},
 			Tags:                   make(map[string]string, 0),
+			Autoscaling: &AutoscalingSkeleton{
+				Configuration: &AutoscalingConfiguration{
+					CooldownTime:   30,
+					ClusterMinSize: 3,
+					ClusterMaxSize: 100,
+				},
+				Policies: []AutoscalingPolicy{},
+			},
 		},
 		HiveMetastore:  &HiveMetastore{},
 		DruidMetastore: &DruidMetastore{},
