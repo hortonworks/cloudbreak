@@ -2,8 +2,10 @@ package com.sequenceiq.periscope.model;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PrometheusResponse {
 
     @JsonProperty("status")
@@ -31,6 +33,7 @@ public class PrometheusResponse {
         this.data = data;
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Data {
 
         @JsonProperty("resultType")
@@ -59,6 +62,7 @@ public class PrometheusResponse {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Result {
 
         @JsonProperty("metric")
@@ -87,6 +91,7 @@ public class PrometheusResponse {
         }
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Metric {
 
         @JsonProperty("__name__")
