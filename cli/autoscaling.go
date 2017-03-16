@@ -325,6 +325,18 @@ func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int6
 	return &skeleton
 }
 
+func (autosScaling *Autoscaling) deleteCluster(clusterName string, getCluster func(string) *models_cloudbreak.StackResponse) {
+	defer timeTrack(time.Now(), "delete autoscaling cluster")
+
+	log.Infof("[deleteCluster] delete autoscaling cluster, name: %s", clusterName)
+	clusterId := *getCluster(clusterName).ID
+	if asClusterId, err := autosScaling.getAutoscalingClusterIdByStackId(clusterName, clusterId); err == nil {
+		autosScaling.AutoScaling.Clusters.DeleteCluster(&clusters.DeleteClusterParams{ClusterID: asClusterId})
+	} else {
+		log.Infof("[deleteCluster] autoscaling is not enabled for cluster: %s", clusterName)
+	}
+}
+
 func (autosScaling *Autoscaling) getAutoscalingClusterIdByStackId(clusterName string, stackId int64) (int64, error) {
 	resp, err := autosScaling.AutoScaling.Clusters.GetClusters(&clusters.GetClustersParams{})
 	if err != nil {
