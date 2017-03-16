@@ -23,12 +23,6 @@ type LdapConfigResponse struct {
 	*/
 	BindDn string `json:"bindDn"`
 
-	/* password for the provided bind DN
-
-	Required: true
-	*/
-	BindPassword string `json:"bindPassword"`
-
 	/* description of the resource
 
 	Max Length: 1000
@@ -110,11 +104,6 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateBindPassword(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateDescription(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -149,15 +138,6 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 func (m *LdapConfigResponse) validateBindDn(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("bindDn", "body", string(m.BindDn)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *LdapConfigResponse) validateBindPassword(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("bindPassword", "body", string(m.BindPassword)); err != nil {
 		return err
 	}
 

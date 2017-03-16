@@ -76,8 +76,6 @@ func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetPublicsRdsParams) (*rdsco
 			Type:       *rds.Type,
 			MetaStore: MetaStore{
 				Name:         rds.Name,
-				Username:     rds.ConnectionUserName,
-				Password:     "",
 				URL:          rawRdsUrl(rds.ConnectionURL),
 				DatabaseType: rds.DatabaseType,
 			},

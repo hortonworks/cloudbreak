@@ -26,23 +26,11 @@ type RDSConfigResponse struct {
 	*/
 	ClusterNames []string `json:"clusterNames,omitempty"`
 
-	/* Password to use for the jdbc connection
-
-	Required: true
-	*/
-	ConnectionPassword string `json:"connectionPassword"`
-
 	/* JDBC connection URL in the form of jdbc:<db-type>://<address>:<port>/<db>
 
 	Required: true
 	*/
 	ConnectionURL string `json:"connectionURL"`
-
-	/* Username to use for the jdbc connection
-
-	Required: true
-	*/
-	ConnectionUserName string `json:"connectionUserName"`
 
 	/* creation time of the resource in long
 	 */
@@ -98,17 +86,7 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateConnectionPassword(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if err := m.validateConnectionURL(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateConnectionUserName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -165,15 +143,6 @@ func (m *RDSConfigResponse) validateClusterNames(formats strfmt.Registry) error 
 	return nil
 }
 
-func (m *RDSConfigResponse) validateConnectionPassword(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("connectionPassword", "body", string(m.ConnectionPassword)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("connectionURL", "body", string(m.ConnectionURL)); err != nil {
@@ -181,15 +150,6 @@ func (m *RDSConfigResponse) validateConnectionURL(formats strfmt.Registry) error
 	}
 
 	if err := validate.Pattern("connectionURL", "body", string(m.ConnectionURL), `^jdbc:postgresql://[-\w\.]*:?\d*/?\w*`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *RDSConfigResponse) validateConnectionUserName(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("connectionUserName", "body", string(m.ConnectionUserName)); err != nil {
 		return err
 	}
 

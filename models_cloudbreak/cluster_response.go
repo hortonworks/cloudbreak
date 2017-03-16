@@ -121,10 +121,6 @@ type ClusterResponse struct {
 	 */
 	Name *string `json:"name,omitempty"`
 
-	/* ambari password
-	 */
-	Password *string `json:"password,omitempty"`
-
 	/* RDS configuration ids for the cluster
 
 	Unique: true
