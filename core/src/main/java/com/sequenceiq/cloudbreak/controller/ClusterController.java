@@ -26,28 +26,18 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfos;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
-import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
-import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
-import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Controller
@@ -57,9 +47,6 @@ public class ClusterController implements ClusterEndpoint {
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
-
-    @Autowired
-    private Decorator<Cluster> clusterDecorator;
 
     @Autowired
     private Decorator<HostGroup> hostGroupDecorator;
@@ -74,40 +61,10 @@ public class ClusterController implements ClusterEndpoint {
     private BlueprintValidator blueprintValidator;
 
     @Autowired
-    private FileSystemValidator fileSystemValidator;
-
-    @Autowired
-    private RdsConnectionValidator rdsConnectionValidator;
-
-    @Autowired
     private StackService stackService;
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
-
-    @Autowired
-    private SssdConfigService sssdConfigService;
-
-    @Autowired
-    private BlueprintService blueprintService;
-
-    @Autowired
-    private BlueprintUtils blueprintUtils;
-
-    @Autowired
-    private RdsConfigService rdsConfigService;
-
-    @Autowired
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Autowired
-    private ComponentConfigProvider componentConfigProvider;
-
-    @Autowired
-    private DefaultHDPInfos defaultHDPInfos;
-
-    @Autowired
-    private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
     @Autowired
     private ClusterCreationSetupService clusterCreationSetupService;

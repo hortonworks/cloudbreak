@@ -45,6 +45,10 @@ public class BlueprintUtils {
         return root.get("Blueprints").get("stack_version").asText();
     }
 
+    public String getBlueprintStackName(JsonNode root) {
+        return root.get("Blueprints").get("stack_name").asText();
+    }
+
     public JsonNode convertStringToJsonNode(String json) {
         return jsonHelper.createJsonFromString(json);
     }

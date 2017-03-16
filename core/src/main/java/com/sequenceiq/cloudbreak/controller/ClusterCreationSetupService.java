@@ -23,8 +23,11 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDFEntries;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDFInfo;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfos;
+import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -43,7 +46,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -53,9 +55,6 @@ public class ClusterCreationSetupService {
 
     @Autowired
     private FileSystemValidator fileSystemValidator;
-
-    @Autowired
-    private StackService stackService;
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -80,7 +79,10 @@ public class ClusterCreationSetupService {
     private BlueprintUtils blueprintUtils;
 
     @Autowired
-    private DefaultHDPInfos defaultHDPInfos;
+    private DefaultHDPEntries defaultHDPEntries;
+
+    @Autowired
+    private DefaultHDFEntries defaultHDFEntries;
 
     @Autowired
     private BlueprintService blueprintService;
@@ -157,9 +159,9 @@ public class ClusterCreationSetupService {
         return components;
     }
 
-    private DefaultHDPInfo defaultHDPInfo(ClusterRequest clusterRequest) {
+    private HDPInfo defaultHDPInfo(ClusterRequest clusterRequest) {
         try {
-            JsonNode root = null;
+            JsonNode root;
             if (clusterRequest.getBlueprintId() != null) {
                 Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintId());
                 root = JsonUtil.readTree(blueprint.getBlueprintText());
@@ -168,17 +170,28 @@ public class ClusterCreationSetupService {
 
             }
             if (root != null) {
-                String blueprintHdpVersion = blueprintUtils.getBlueprintHdpVersion(root);
-                for (Map.Entry<String, DefaultHDPInfo> entry : defaultHDPInfos.getEntries().entrySet()) {
-                    if (entry.getKey().equals(blueprintHdpVersion)) {
-                        return entry.getValue();
+                String stackVersion = blueprintUtils.getBlueprintHdpVersion(root);
+                String stackName = blueprintUtils.getBlueprintStackName(root);
+                if ("HDF".equalsIgnoreCase(stackName)) {
+                    LOGGER.info("Stack name is HDF, use the default HDF repo for version: " + stackVersion);
+                    for (Map.Entry<String, DefaultHDFInfo> entry : defaultHDFEntries.getEntries().entrySet()) {
+                        if (entry.getKey().equals(stackVersion)) {
+                            return entry.getValue();
+                        }
+                    }
+                } else {
+                    LOGGER.info("Stack name is HDP, use the default HDP repo for version: " + stackVersion);
+                    for (Map.Entry<String, DefaultHDPInfo> entry : defaultHDPEntries.getEntries().entrySet()) {
+                        if (entry.getKey().equals(stackVersion)) {
+                            return entry.getValue();
+                        }
                     }
                 }
             }
         } catch (IOException ex) {
             LOGGER.warn("Can not initiate default hdp info: ", ex);
         }
-        return defaultHDPInfos.getEntries().values().iterator().next();
+        return defaultHDPEntries.getEntries().values().iterator().next();
     }
 
     private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
