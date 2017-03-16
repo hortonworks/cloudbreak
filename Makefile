@@ -67,7 +67,7 @@ release-docker:
 	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} golang:1.8 bash -c "make deps && make release"
 
 upload_s3:
-	ls -1 release | xargs -I@ aws s3 cp release/@ s3:///hdc-cli/@ --acl public-read
+	ls -1 release | xargs -I@ aws s3 cp release/@ s3://hdc-cli/@ --acl public-read
 
 linux-test: build-linux
 	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name hdc alpine sh
