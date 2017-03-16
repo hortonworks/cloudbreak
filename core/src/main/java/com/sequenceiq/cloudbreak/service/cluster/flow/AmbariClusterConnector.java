@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -87,6 +86,7 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
@@ -270,6 +270,11 @@ public class AmbariClusterConnector {
                 cluster = clusterRepository.save(cluster);
             }
 
+            Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
+            Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
+
+            recipeEngine.executePreInstall(stack, hostGroups);
+
             String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint());
 
             Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
@@ -279,14 +284,10 @@ public class AmbariClusterConnector {
             AmbariClient ambariClient = getAmbariClient(stack);
             setBaseRepoURL(stack, ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
-            Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
-            Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
-
-            recipeEngine.executePreInstall(stack, hostGroups);
 
             String clusterName = cluster.getName();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
