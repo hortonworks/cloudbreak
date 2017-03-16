@@ -249,4 +249,30 @@ public class OperationDescriptions {
     public static class SubscriptionOpDescription {
         public static final String SUBSCRIBE = "retrive subscribe identifier";
     }
+
+    public static class SmartSenseSubOpDescription {
+        public static final String POST_PRIVATE = "create SmartSense subscription as private resource";
+        public static final String POST_PUBLIC = "create SmartSense subscription as public resource";
+        public static final String GET_PRIVATE = "retrieve private SmartSense subscriptions";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) SmartSense subscriptions";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private SmartSense subscription by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) SmartSense subscription by name";
+        public static final String GET_BY_ID = "retrieve SmartSense subscription by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private SmartSense subscription by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private SmartSense subscription by name";
+        public static final String DELETE_BY_ID = "delete SmartSense subscription by id";
+    }
+
+    public static class FlexSubOpDescription {
+        public static final String POST_PRIVATE = "create Flex subscription as private resource";
+        public static final String POST_PUBLIC = "create Flex subscription as public resource";
+        public static final String GET_PRIVATE = "retrieve private Flex subscriptions";
+        public static final String GET_PUBLIC = "retrieve public and private (owned) Flex subscriptions";
+        public static final String GET_PRIVATE_BY_NAME = "retrieve a private Flex subscription by name";
+        public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) Flex subscription by name";
+        public static final String GET_BY_ID = "retrieve Flex subscription by id";
+        public static final String DELETE_PRIVATE_BY_NAME = "delete private Flex subscription by name";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Flex subscription by name";
+        public static final String DELETE_BY_ID = "delete Flex subscription by id";
+    }
 }

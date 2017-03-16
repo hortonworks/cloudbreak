@@ -124,6 +124,8 @@ public class EndpointConfig extends ResourceConfig {
         register(UtilController.class);
         register(RdsConfigController.class);
         register(LdapController.class);
+        register(SmartSenseSubscriptionController.class);
+        register(FlexSubscriptionController.class);
 
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);

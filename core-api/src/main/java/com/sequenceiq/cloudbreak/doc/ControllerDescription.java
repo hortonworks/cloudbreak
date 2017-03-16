@@ -24,6 +24,8 @@ public class ControllerDescription {
     public static final String CONNECTOR_DESCRIPTION = "Returns cloud provider specific resource types";
     public static final String SETTINGS_DESCRIPTION = "Returns Cloudbreak specific resource settings";
     public static final String SUBSCRIPTION_DESCRIPTION = "Client subscription for event notifications";
+    public static final String SMARTSENSE_SUBSCRIPTION_DESCRIPTION = "Operations on SmartSense subscriptions";
+    public static final String FLEX_SUBSCRIPTION_DESCRIPTION = "Operations on Flex subscriptions";
 
     private ControllerDescription() {
     }

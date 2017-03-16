@@ -61,6 +61,8 @@ public class Notes {
     public static final String FAILURE_REPORT_NOTES = "Endpoint to report the failed nodes in the given cluster. If recovery mode for the node's hostgroup "
             + "is AUTO then autorecovery would be started. If recovery mode for the node's hostgroup is MANUAL, the nodes will be marked as unhealthy.";
     public static final String CLUSTER_REPAIR_NOTES = "Removing the failed nodes and starting new nodes to substitute them.";
+    public static final String SMARTSENSE_SUBSCRIPTION_NOTES = "SmartSense subscriptions could be configured.";
+    public static final String FLEX_SUBSCRIPTION_NOTES = "Flex subscriptions could be configured.";
 
     private Notes() {
     }
