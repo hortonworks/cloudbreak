@@ -116,16 +116,18 @@ func TerminateCluster(c *cli.Context) error {
 	}
 
 	log.Infof("[TerminateCluster] sending request to terminate cluster: %s", clusterName)
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	asClient.deleteCluster(clusterName, cbClient.GetClusterByName)
 
 	deleteDependencies := true
-	err := oAuth2Client.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName, DeleteDependencies: &deleteDependencies})
+	err := cbClient.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName, DeleteDependencies: &deleteDependencies})
 
 	if err != nil {
 		logErrorAndExit(err)
 	}
 
-	oAuth2Client.waitForClusterToTerminate(clusterName, c)
+	cbClient.waitForClusterToTerminate(clusterName, c)
 	return nil
 }
 
