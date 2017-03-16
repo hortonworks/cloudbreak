@@ -1,0 +1,1 @@
+curl -k -X GET -H "Authorization: Bearer $TOKEN" $HOST/cb/api/v1/smartsensesubscription/account

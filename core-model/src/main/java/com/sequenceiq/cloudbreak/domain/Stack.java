@@ -307,6 +307,9 @@ public class Stack implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json tags;
 
+    @ManyToOne
+    private FlexSubscription flexSubscription;
+
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
     }
@@ -721,4 +724,11 @@ public class Stack implements ProvisionEntity {
         this.tags = tags;
     }
 
+    public FlexSubscription getFlexSubscription() {
+        return flexSubscription;
+    }
+
+    public void setFlexSubscription(FlexSubscription flexSubscription) {
+        this.flexSubscription = flexSubscription;
+    }
 }

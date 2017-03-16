@@ -173,6 +173,8 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/ldap/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/util/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/rdsconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/smartsensesubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/flexsubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/connectors/**").permitAll()

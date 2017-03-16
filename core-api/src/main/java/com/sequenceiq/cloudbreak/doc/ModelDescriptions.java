@@ -385,4 +385,14 @@ public class ModelDescriptions {
         public static final String REMOVE_ONLY = "If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and "
                 + "new nodes will be started.";
     }
+
+    public static class SmartSenseSubscriptionModelDescription {
+        public static final String SUBSCRIPTION_ID = "Identifier of SmartSense subscription.";
+    }
+
+    public static class FlexSubscriptionModelDescription {
+        public static final String FLEX_SUBSCRIPTION_ID = "Identifier of Flex subscription.";
+        public static final String SMARTSENSE_SUBSCRIPTION_ID = "Identifier of SmartSense subscription Cloudbreak domain object json representation.";
+        public static final String SMARTSENSE_SUBSCRIPTION = "The associated SmartSense subscription Cloudbreak domain object json representation.";
+    }
 }
