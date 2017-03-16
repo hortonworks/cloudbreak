@@ -8,6 +8,10 @@ CB_IP = $(shell echo \${IP})
 ifeq ($(CB_IP),)
         CB_IP = 192.168.99.100
 endif
+CB_PORT = $(shell echo \${PORT})
+ifeq ($(CB_PORT),)
+        CB_PORT = 8080
+endif
 
 deps:
 	go get github.com/keyki/glu
@@ -46,11 +50,11 @@ build-windows:
 	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger:
-	swagger generate client -f http://$(CB_IP):8080/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
+	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
 
 generate-swagger-docker:
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.5.0 \
-	swagger generate client -f http://$(CB_IP):8080/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
+	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
 
 generate-swagger-autoscale:
 	swagger generate client -f http://$(CB_IP):8085/as/api/v1/swagger.json -c client_autoscale -m models_autoscale
