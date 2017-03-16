@@ -38,9 +38,13 @@ import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDFEntries;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDFInfo;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPEntries;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfos;
+import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -48,7 +52,6 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidato
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Component;
@@ -124,7 +127,10 @@ public class ClusterController implements ClusterEndpoint {
     private ComponentConfigProvider componentConfigProvider;
 
     @Autowired
-    private DefaultHDPInfos defaultHDPInfos;
+    private DefaultHDPEntries defaultHDPEntries;
+
+    @Autowired
+    private DefaultHDFEntries defaultHDFEntries;
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -293,7 +299,7 @@ public class ClusterController implements ClusterEndpoint {
             ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(), new Json(ambariRepo),
                     cluster);
             components.add(component);
-        }  else {
+        } else {
             ClusterComponent ambariRepo = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
                     stackAmbariRepoConfig.getAttributes(), cluster);
             components.add(ambariRepo);
@@ -325,28 +331,38 @@ public class ClusterController implements ClusterEndpoint {
         return components;
     }
 
-    private DefaultHDPInfo defaultHDPInfo(ClusterRequest clusterRequest) {
+    private HDPInfo defaultHDPInfo(ClusterRequest clusterRequest) {
         try {
-            JsonNode root = null;
+            JsonNode root;
             if (clusterRequest.getBlueprintId() != null) {
                 Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintId());
                 root = JsonUtil.readTree(blueprint.getBlueprintText());
             } else {
                 root = JsonUtil.readTree(clusterRequest.getBlueprint().getAmbariBlueprint());
-
             }
             if (root != null) {
-                String blueprintHdpVersion = blueprintUtils.getBlueprintHdpVersion(root);
-                for (Map.Entry<String, DefaultHDPInfo> entry: defaultHDPInfos.getEntries().entrySet()) {
-                    if (entry.getKey().equals(blueprintHdpVersion)) {
-                        return entry.getValue();
+                String stackVersion = blueprintUtils.getBlueprintHdpVersion(root);
+                String stackName = blueprintUtils.getBlueprintStackName(root);
+                if ("HDF".equalsIgnoreCase(stackName)) {
+                    LOGGER.info("Stack name is HDF, use the default HDF repo for version: " + stackVersion);
+                    for (Map.Entry<String, DefaultHDFInfo> entry : defaultHDFEntries.getEntries().entrySet()) {
+                        if (entry.getKey().equals(stackVersion)) {
+                            return entry.getValue();
+                        }
+                    }
+                } else {
+                    LOGGER.info("Stack name is HDP, use the default HDP repo for version: " + stackVersion);
+                    for (Map.Entry<String, DefaultHDPInfo> entry : defaultHDPEntries.getEntries().entrySet()) {
+                        if (entry.getKey().equals(stackVersion)) {
+                            return entry.getValue();
+                        }
                     }
                 }
             }
         } catch (IOException ex) {
             LOGGER.warn("Can not initiate default hdp info: ", ex);
         }
-        return defaultHDPInfos.getEntries().values().iterator().next();
+        return defaultHDPEntries.getEntries().values().iterator().next();
     }
 
     private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)

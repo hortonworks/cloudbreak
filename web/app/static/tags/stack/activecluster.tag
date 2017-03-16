@@ -729,7 +729,7 @@
                                                     <div class="form-group" name="ambari_stackRepoId1" ng-class="{ 'has-error': ambariStackDetailsreinstallpane.ambari_stackRepoId.$dirty && ambariStackDetailsreinstallpane.ambari_stackRepoId.$invalid }">
                                                         <label class="col-sm-3 control-label" for="ambari_stackRepoId">{{msg.cluster_form_hdp_repo_stack_repoid_label}}</label>
                                                         <div class="col-sm-9">
-                                                            <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="{{msg.cluster_form_hdp_repo_stack_repoid_placeholder}}" ng-pattern="/^HDP-([\d\W]+)$/">
+                                                            <input type="string" name="ambari_stackRepoId" class="form-control" ng-model="reinstallClusterObject.ambariStackDetails.stackRepoId" id="ambari_stackRepoId" placeholder="{{msg.cluster_form_hdp_repo_stack_repoid_placeholder}}" ng-pattern="/^HD.-([\d\W]+)$/">
                                                             <div class="help-block" ng-show="ambariStackDetailsreinstallpane.ambari_stackRepoId.$dirty && ambariStackDetailsreinstallpane.ambari_stackRepoId.$invalid"><i class="fa fa-warning"></i> Should be a valid Repo Id like HDP-2.5
                                                             </div>
                                                         </div>

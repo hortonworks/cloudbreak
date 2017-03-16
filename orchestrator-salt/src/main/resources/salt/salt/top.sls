@@ -39,14 +39,12 @@ base:
     - prometheus.server
     - ambari.server
     - ambari.server-start
-    - grafana
 
   'roles:ambari_server_standby':
     - match: grain
     - prometheus.server
     - ambari.server
     - ambari.server-stop
-    - grafana
 
   'roles:ambari_agent':
     - match: grain
