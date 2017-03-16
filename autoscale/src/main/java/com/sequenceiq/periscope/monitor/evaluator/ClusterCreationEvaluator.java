@@ -16,15 +16,19 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.model.ClusterCreationEvaluatorContext;
+import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
 import com.sequenceiq.periscope.service.security.TlsSecurityService;
 import com.sequenceiq.periscope.utils.AmbariClientProvider;
@@ -45,6 +49,12 @@ public class ClusterCreationEvaluator implements Runnable {
 
     @Inject
     private AlertService alertService;
+
+    @Inject
+    private HistoryService historyService;
+
+    @Inject
+    private HttpNotificationSender notificationSender;
 
     private ClusterCreationEvaluatorContext context;
 
@@ -77,6 +87,8 @@ public class ClusterCreationEvaluator implements Runnable {
                 LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
                 cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
                 alertService.addPrometheusAlertsToConsul(cluster);
+                History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0,  cluster);
+                notificationSender.send(history);
             }
         } else {
             LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());

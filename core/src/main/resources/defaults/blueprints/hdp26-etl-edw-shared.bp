@@ -109,25 +109,27 @@
         }
       },
       {
-      "druid-overlord" : {
-        "properties_attributes" : { },
-        "properties" : {
-          "druid.indexer.storage.type" : "metadata",
-          "druid.indexer.runner.type" : "remote",
-          "druid.service" : "druid/overlord",
-          "druid.port" : "8090"
+        "druid-common": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.metadata.storage.type": "derby",
+            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true"
+          }
         }
-      }
-    },
+      },
+      {
+        "druid-superset": {
+          "properties_attributes": {},
+          "properties": {
+            "SECRET_KEY" : "123admin123",
+            "SUPERSET_DATABASE_TYPE" : "sqlite"
+          }
+        }
+      },
       {
       "druid-middlemanager" : {
         "properties_attributes" : { },
         "properties" : {
-          "druid.indexer.task.hadoopWorkingPath" : "/tmp/druid-indexing",
-          "druid.server.http.numThreads" : "50",
-          "druid.indexer.runner.startPort" : "8100",
-          "druid.worker.capacity" : "3",
-          "druid.processing.numThreads" : "2",
           "druid.indexer.runner.javaOpts" : "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
           "druid.indexer.task.baseTaskDir" : "/tmp/persistent/tasks",
           "druid.processing.buffer.sizeBytes" : "256000000",

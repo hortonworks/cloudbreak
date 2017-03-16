@@ -1,5 +1,5 @@
 package com.sequenceiq.periscope.api.model;
 
 public enum ScalingStatus {
-    FAILED, SUCCESS
+    FAILED, SUCCESS, ENABLED, DISABLED
 }

@@ -2,9 +2,10 @@ package com.sequenceiq.periscope.rest.controller;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
@@ -12,16 +13,20 @@ import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.periscope.api.model.AmbariJson;
 import com.sequenceiq.periscope.api.model.ClusterJson;
 import com.sequenceiq.periscope.api.model.ClusterState;
+import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
+import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
+import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
 import com.sequenceiq.periscope.service.AuthenticatedUserService;
 import com.sequenceiq.periscope.service.ClusterService;
+import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.ClusterSecurityService;
 
 @Component
@@ -29,20 +34,26 @@ public class ClusterController implements ClusterEndpoint {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterController.class);
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private AmbariConverter ambariConverter;
 
-    @Autowired
+    @Inject
     private ClusterConverter clusterConverter;
 
-    @Autowired
+    @Inject
     private ClusterSecurityService clusterSecurityService;
 
-    @Autowired
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private HistoryService historyService;
+
+    @Inject
+    private HttpNotificationSender notificationSender;
 
     @Override
     public ClusterJson addCluster(AmbariJson ambariServer) {
@@ -84,7 +95,9 @@ public class ClusterController implements ClusterEndpoint {
     public ClusterJson setState(Long clusterId, StateJson stateJson) {
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
         MDCBuilder.buildMdcContext(user, clusterId);
-        return createClusterJsonResponse(clusterService.setState(clusterId, stateJson.getState()));
+        Cluster cluster = clusterService.setState(clusterId, stateJson.getState());
+        createHistoryAndNotification(cluster);
+        return createClusterJsonResponse(cluster);
     }
 
     private ClusterJson createClusterJsonResponse(Cluster cluster) {
@@ -99,17 +112,31 @@ public class ClusterController implements ClusterEndpoint {
             LOGGER.info("Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
             throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
         } else {
+            Cluster cluster;
             if (json.getStackId() != null && ClusterState.PENDING.equals(json.getClusterState())) {
                 AmbariStack ambariStack = new AmbariStack(ambari, json.getStackId(), null);
-                return createClusterJsonResponse(clusterService.create(user, ambariStack, json.getClusterState()));
-            }
-            AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);
-            if (clusterId == null) {
-                return createClusterJsonResponse(clusterService.create(user, resolvedAmbari, null));
+                cluster = clusterService.create(user, ambariStack, json.getClusterState());
             } else {
-                return createClusterJsonResponse(clusterService.update(clusterId, resolvedAmbari));
+                AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);
+                if (clusterId == null) {
+                    cluster = clusterService.create(user, resolvedAmbari, null);
+                } else {
+                    cluster = clusterService.update(clusterId, resolvedAmbari);
+                }
             }
+            createHistoryAndNotification(cluster);
+            return createClusterJsonResponse(cluster);
         }
+    }
+
+    private void createHistoryAndNotification(Cluster cluster) {
+        History history;
+        if (ClusterState.RUNNING.equals(cluster.getState())) {
+            history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
+        } else {
+            history = historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", 0, cluster);
+        }
+        notificationSender.send(history);
     }
 
 }

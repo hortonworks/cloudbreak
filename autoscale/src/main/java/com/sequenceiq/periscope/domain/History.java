@@ -40,6 +40,10 @@ public class History {
 
     public static final String CRON = "cron";
 
+    public static final String ALERT_RULE = "alertRule";
+
+    public static final String PARAMETERS = "parameters";
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "history_generator")
     @SequenceGenerator(name = "history_generator", sequenceName = "sequence_table")
@@ -113,6 +117,12 @@ public class History {
             this.properties.put(TIME_ZONE, ta.getTimeZone());
             this.properties.put(CRON, ta.getCron());
             this.alertType = AlertType.TIME;
+        } else if (alert instanceof PrometheusAlert) {
+            PrometheusAlert pa = (PrometheusAlert) alert;
+            this.properties.put(ALERT_RULE, pa.getAlertRule());
+            this.properties.put(PERIOD, "" + pa.getPeriod());
+            this.properties.put(ALERT_STATE, pa.getAlertState().name());
+            this.properties.put(PARAMETERS, pa.getParameters().getValue());
         }
         this.properties.put(ALERT_DESCRIPTION, alert.getDescription());
         return this;

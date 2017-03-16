@@ -110,7 +110,8 @@
         "druid-superset": {
           "properties_attributes": {},
           "properties": {
-            "SECRET_KEY" : "123admin123"
+            "SECRET_KEY" : "123admin123",
+            "SUPERSET_DATABASE_TYPE" : "sqlite"
           }
         }
       }
@@ -131,6 +132,9 @@
           },
           {
             "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "HISTORYSERVER"
           },
           {
             "name": "NAMENODE"

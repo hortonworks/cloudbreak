@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.periscope.api.model.ScalingStatus;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.History;
 import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.repository.HistoryRepository;
@@ -24,6 +25,12 @@ public class HistoryService {
                 .withScalingPolicy(scalingPolicy)
                 .withAlert(scalingPolicy.getAlert())
                 .withCluster(scalingPolicy.getAlert().getCluster());
+        return historyRepository.save(history);
+    }
+
+    public History createEntry(ScalingStatus scalingStatus, String statusReason, int originalNodeCount, Cluster cluster) {
+        History history = new History(scalingStatus, statusReason, originalNodeCount)
+                .withCluster(cluster);
         return historyRepository.save(history);
     }
 
