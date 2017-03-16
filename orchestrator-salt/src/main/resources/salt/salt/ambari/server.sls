@@ -119,3 +119,20 @@ stop-service-registration:
   service.dead:
     - enable: False
     - name: service-registration
+
+{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
+
+/opt/ambari-server/install-hdf-mpack.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/install-hdf-mpack.sh
+    - template: jinja
+    - mode: 744
+
+install_hdf_mpack:
+  cmd.run:
+    - name: /opt/ambari-server/install-hdf-mpack.sh
+    - shell: /bin/bash
+    - unless: test -f /var/hdf_mpack_installed
+
+{% endif %}

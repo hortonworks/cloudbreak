@@ -181,6 +181,20 @@ cb:
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
             redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
 
+  hdf:
+    entries:
+      3.0:
+        version: 3.0.0.0-345
+        repo:
+          stack:
+            repoid: HDF-3.0
+            redhat6: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos6/3.x/BUILDS/3.0.0.0-345
+            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/3.0.0.0-345
+          util:
+            repoid: HDP-UTILS-1.1.0.21
+            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
+            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
+
   smartsense.configure: false
   smartsense.id.pattern: A-9990%s-C-%s
 
