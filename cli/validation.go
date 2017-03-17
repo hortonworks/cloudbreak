@@ -115,7 +115,7 @@ func (s *ClusterSkeleton) Validate() error {
 	return nil
 }
 
-func (a *AutoscalingSkeleton) Validate() []error {
+func (a *AutoscalingSkeletonBase) Validate() []error {
 	var res []error = nil
 
 	if a != nil {

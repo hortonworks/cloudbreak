@@ -65,7 +65,7 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 		Threshold:         c.Float64(FlThreshold.Name),
 	}
 
-	asSkeleton := AutoscalingSkeleton{Policies: []AutoscalingPolicy{policy}}
+	asSkeleton := AutoscalingSkeletonBase{Policies: []AutoscalingPolicy{policy}}
 	validationErrors := asSkeleton.Validate()
 	if len(validationErrors) > 0 {
 		var messages []string = nil
@@ -305,16 +305,17 @@ func (autosScaling *Autoscaling) getConfiguration(asClusterId int64) *Autoscalin
 	return &scaleConfig
 }
 
-func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int64) *AutoscalingSkeleton {
+func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int64) *AutoscalingSkeletonResult {
 	defer timeTrack(time.Now(), "get autoscaling skeleton for cluster")
 	log.Infof("[getAutoscaling] get autoscaling by cluster id: %d", stackId)
 
-	asClusterId, err := autosScaling.getAutoscalingClusterIdByStackId(clusterName, stackId)
+	asCluster, err := autosScaling.getAutoscalingClusterByStackId(clusterName, stackId)
 	if err != nil {
 		log.Warn(err)
 		return nil
 	}
 
+	asClusterId := *asCluster.ID
 	policyList := make([]AutoscalingPolicy, 0)
 	for _, alert := range autosScaling.getAlerts(asClusterId) {
 		for _, policy := range autosScaling.getPolicies(asClusterId) {
@@ -332,8 +333,15 @@ func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int6
 		}
 	}
 
+	log.Infof("[getAutoscaling] autoscaling state: %s for cluster: %s", *asCluster.State, clusterName)
+	autoscalingEnabled := false
+	if *asCluster.State == "RUNNING" {
+		autoscalingEnabled = true
+	}
+
 	scaleConfig := autosScaling.getConfiguration(asClusterId)
-	skeleton := AutoscalingSkeleton{}
+	skeleton := AutoscalingSkeletonResult{}
+	skeleton.Enabled = autoscalingEnabled
 	skeleton.Policies = policyList
 	skeleton.Configuration = scaleConfig
 
@@ -353,16 +361,24 @@ func (autosScaling *Autoscaling) deleteCluster(clusterName string, getCluster fu
 }
 
 func (autosScaling *Autoscaling) getAutoscalingClusterIdByStackId(clusterName string, stackId int64) (int64, error) {
+	asCluster, err := autosScaling.getAutoscalingClusterByStackId(clusterName, stackId)
+	if err != nil {
+		logErrorAndExit(err)
+	}
+	return *asCluster.ID, nil
+}
+
+func (autosScaling *Autoscaling) getAutoscalingClusterByStackId(clusterName string, stackId int64) (*models_autoscale.ClusterSummary, error) {
 	resp, err := autosScaling.AutoScaling.Clusters.GetClusters(&clusters.GetClustersParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}
 	for _, c := range resp.Payload {
 		if c.StackID != nil && *c.StackID == stackId {
-			return *c.ID, nil
+			return c, nil
 		}
 	}
-	return 0, errors.New(fmt.Sprintf("no autoscaling cluster found for cluster: %s", clusterName))
+	return nil, errors.New(fmt.Sprintf("no autoscaling cluster found for cluster: %s", clusterName))
 }
 
 func ListDefinitions(c *cli.Context) error {

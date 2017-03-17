@@ -29,13 +29,13 @@ func (c *Cloudbreak) GetClusterByName(name string) *models_cloudbreak.StackRespo
 	return stack.Payload
 }
 
-func (c *Cloudbreak) FetchCluster(stack *models_cloudbreak.StackResponse, autoscaling *AutoscalingSkeleton) (*ClusterSkeletonResult, error) {
+func (c *Cloudbreak) FetchCluster(stack *models_cloudbreak.StackResponse, autoscaling *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error) {
 	defer timeTrack(time.Now(), "fetch cluster")
 
 	return fetchClusterImpl(stack, autoscaling)
 }
 
-func fetchClusterImpl(stack *models_cloudbreak.StackResponse, autoscaling *AutoscalingSkeleton) (*ClusterSkeletonResult, error) {
+func fetchClusterImpl(stack *models_cloudbreak.StackResponse, autoscaling *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error) {
 	var blueprint *models_cloudbreak.BlueprintResponse = nil
 	if stack.Cluster != nil {
 		blueprint = stack.Cluster.Blueprint
@@ -94,8 +94,8 @@ func DescribeCluster(c *cli.Context) error {
 
 func describeClusterImpl(clusterName string, format string,
 	getCluster func(string) *models_cloudbreak.StackResponse,
-	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeleton) (*ClusterSkeletonResult, error),
-	getAutoscaling func(string, int64) *AutoscalingSkeleton) *ClusterSkeletonResult {
+	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error),
+	getAutoscaling func(string, int64) *AutoscalingSkeletonResult) *ClusterSkeletonResult {
 	stack := getCluster(clusterName)
 	autoscalingSkeleton := getAutoscaling(clusterName, *stack.ID)
 	clusterSkeleton, _ := fetchCluster(stack, autoscalingSkeleton)
@@ -659,14 +659,14 @@ func getBaseSkeleton() *ClusterSkeleton {
 			InstanceRole:           "CREATE",
 			Network:                &Network{},
 			Tags:                   make(map[string]string, 0),
-			Autoscaling: &AutoscalingSkeleton{
-				Configuration: &AutoscalingConfiguration{
-					CooldownTime:   30,
-					ClusterMinSize: 3,
-					ClusterMaxSize: 100,
-				},
-				Policies: []AutoscalingPolicy{},
+		},
+		Autoscaling: &AutoscalingSkeletonBase{
+			Configuration: &AutoscalingConfiguration{
+				CooldownTime:   30,
+				ClusterMinSize: 3,
+				ClusterMaxSize: 100,
 			},
+			Policies: []AutoscalingPolicy{},
 		},
 		HiveMetastore:  &HiveMetastore{},
 		DruidMetastore: &DruidMetastore{},
