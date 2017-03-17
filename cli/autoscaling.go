@@ -366,7 +366,7 @@ func (autosScaling *Autoscaling) deleteCluster(clusterName string, getCluster fu
 func (autosScaling *Autoscaling) getAutoscalingClusterIdByStackId(clusterName string, stackId int64) (int64, error) {
 	asCluster, err := autosScaling.getAutoscalingClusterByStackId(clusterName, stackId)
 	if err != nil {
-		logErrorAndExit(err)
+		return 0, err
 	}
 	return *asCluster.ID, nil
 }
