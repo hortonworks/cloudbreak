@@ -88,7 +88,7 @@ var AWSCreateClusterSkeletonHelp = `
    "DatabaseType": "POSTGRES"                                              // Database type of the Druid metastore, accepted value: POSTGRES
   },
   "Configurations": [{"core-site":{"fs.trash.interval":"5000"}}],          // Custom configurations, format: [{"configuration-type": {"property-name": "property-value"}}, {"configuration-type2": {"property-name": "property-value"}}]
-  "Autoscaling": {                                                         // (Optional) Enable autoscaling on the cluster by default
+  "Autoscaling": {                                                         // (Optional) Enable autoscaling on the cluster by default (Note: autoscaling will be enabled effectively when the cluster is successfully installed)
     "Configurations": {                                                    // (Optional) Autoscaling configuration
       "CooldownTime": 30,                                                  // Specify the time between 2 scaling activity in minutes (default: 30)
       "ClusterMinSize": 3,                                                 // During autoscaling the cluster cannot be scaled below the given number (default: 3)
