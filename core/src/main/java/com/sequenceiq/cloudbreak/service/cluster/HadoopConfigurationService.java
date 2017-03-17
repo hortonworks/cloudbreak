@@ -169,7 +169,9 @@ public class HadoopConfigurationService {
 
     private String getValue(boolean global, Integer volumeCount, ConfigProperty property, String directory) {
         String value = null;
-        if (volumeCount != null && volumeCount > 0) {
+        if (volumeCount == null && global) {
+            value = property.getPrefix() + getLogVolume(directory);
+        } else if (volumeCount != null && volumeCount > 0) {
             value = global ? property.getPrefix() + getLogVolume(directory) : buildVolumePathString(volumeCount, directory);
         } else if (byosDataDirIsSet()) {
             value = global ? property.getPrefix() + byosDfsDataDirs.get(0) + "/" + directory : buildVolumePathString(byosDfsDataDirs, directory);
