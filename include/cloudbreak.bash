@@ -448,26 +448,26 @@ oauth:
   clients:
     ${UAA_SULTANS_ID}:
       id: ${UAA_SULTANS_ID}
-      secret: ${UAA_SULTANS_SECRET}
+      secret: '$(escape-string-yaml $UAA_SULTANS_SECRET \')'
       authorized-grant-types: client_credentials
       scope: scim.read,scim.write,password.write
       authorities: uaa.resource,scim.read,scim.write,password.write
     ${UAA_ULUWATU_ID}:
       id: ${UAA_ULUWATU_ID}
-      secret: ${UAA_ULUWATU_SECRET}
+      secret: '$(escape-string-yaml $UAA_ULUWATU_SECRET \')'
       authorized-grant-types: authorization_code,client_credentials
       scope: cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.templates,cloudbreak.networks,cloudbreak.securitygroups,openid,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.events,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read
       authorities: cloudbreak.subscribe
       redirect-uri: ${ULU_OAUTH_REDIRECT_URI}
     ${UAA_CLOUDBREAK_ID}:
       id: ${UAA_CLOUDBREAK_ID}
-      secret: ${UAA_CLOUDBREAK_SECRET}
+      secret: '$(escape-string-yaml $UAA_CLOUDBREAK_SECRET \')'
       authorized-grant-types: client_credentials
       scope: scim.read
       authorities: uaa.resource,scim.read
     ${UAA_PERISCOPE_ID}:
       id: ${UAA_PERISCOPE_ID}
-      secret: ${UAA_PERISCOPE_SECRET}
+      secret: '$(escape-string-yaml $UAA_PERISCOPE_SECRET \')'
       authorized-grant-types: client_credentials
       scope: none
       authorities: cloudbreak.autoscale,uaa.resource,scim.read
