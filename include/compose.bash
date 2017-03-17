@@ -366,7 +366,7 @@ cloudbreak:
         - "https_proxy=$CB_HTTPS_PROXY"
         - CB_JAVA_OPTS
         - "CB_CLIENT_ID=$UAA_CLOUDBREAK_ID"
-        - "CB_CLIENT_SECRET=$UAA_CLOUDBREAK_SECRET"
+        - 'CB_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_CLOUDBREAK_SECRET \')'
         - CB_BLUEPRINT_DEFAULTS
         - CB_TEMPLATE_DEFAULTS
         - CB_AZURE_IMAGE_URI
@@ -446,7 +446,7 @@ sultans:
         - http_proxy=$CB_HTTP_PROXY
         - https_proxy=$CB_HTTPS_PROXY
         - SL_CLIENT_ID=$UAA_SULTANS_ID
-        - SL_CLIENT_SECRET=$UAA_SULTANS_SECRET
+        - 'SL_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_SULTANS_SECRET \')'
         - SERVICE_NAME=sultans
           #- SERVICE_CHECK_HTTP=/
         - SL_PORT=3000
@@ -492,7 +492,7 @@ uluwatu:
         - ULU_OAUTH_REDIRECT_URI
         - ULU_SULTANS_ADDRESS
         - ULU_OAUTH_CLIENT_ID=$UAA_ULUWATU_ID
-        - ULU_OAUTH_CLIENT_SECRET=$UAA_ULUWATU_SECRET
+        - 'ULU_OAUTH_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_ULUWATU_SECRET \')'
         - ULU_HOST_ADDRESS
         - NODE_TLS_REJECT_UNAUTHORIZED=0
         - ULU_HWX_CLOUD_DEFAULT_CREDENTIAL
@@ -560,7 +560,7 @@ periscope:
           #- SERVICE_CHECK_HTTP=/info
         - CB_JAVA_OPTS
         - PERISCOPE_CLIENT_ID=$UAA_PERISCOPE_ID
-        - PERISCOPE_CLIENT_SECRET=$UAA_PERISCOPE_SECRET
+        - 'PERISCOPE_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_PERISCOPE_SECRET \')'
         - PERISCOPE_HOSTNAME_RESOLUTION=public
         - ENDPOINTS_AUTOCONFIG_ENABLED=false
         - ENDPOINTS_DUMP_ENABLED=false
