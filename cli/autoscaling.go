@@ -152,6 +152,9 @@ func ConfigureAutoscaling(c *cli.Context) error {
 	if maxClusterSize < 1 {
 		logErrorAndExit(errors.New("the maximum cluster size must be greater than 0"))
 	}
+	if maxClusterSize > 1000 {
+		logErrorAndExit(errors.New("the maximum cluster size cannot be greater than 1000"))
+	}
 	if minClusterSize > maxClusterSize {
 		logErrorAndExit(errors.New("the minimum cluster size cannot be greater than the maximum cluster size"))
 	}

@@ -124,6 +124,12 @@ func (a *AutoscalingSkeletonBase) Validate() []error {
 			if conf.ClusterMinSize > conf.ClusterMaxSize {
 				res = append(res, errors.New("The minimum cluster size cannot be greater than the maximum cluster size"))
 			}
+			if conf.ClusterMinSize < 1 {
+				res = append(res, errors.New("The minimum cluster size cannot be less than 1"))
+			}
+			if conf.ClusterMaxSize > 1000 {
+				res = append(res, errors.New("The maximum cluster size cannot be greater than 1000"))
+			}
 		}
 
 		policies := a.Policies
