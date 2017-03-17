@@ -30,11 +30,22 @@ public abstract class AbstractMonitor implements Monitor {
         }
     }
 
-    private void evalContext(JobExecutionContext context) {
+    void evalContext(JobExecutionContext context) {
         JobDataMap monitorContext = context.getJobDetail().getJobDataMap();
         applicationContext = (ApplicationContext) monitorContext.get(MonitorContext.APPLICATION_CONTEXT.name());
         executorService = applicationContext.getBean(ExecutorService.class);
         clusterService = applicationContext.getBean(ClusterService.class);
     }
 
+    ClusterService getClusterService() {
+        return clusterService;
+    }
+
+    ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    ExecutorService getExecutorService() {
+        return executorService;
+    }
 }
