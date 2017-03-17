@@ -105,10 +105,46 @@ func (s *ClusterSkeleton) Validate() error {
 		res = append(res, err...)
 	}
 
+	if err := s.Autoscaling.Validate(); err != nil {
+		res = append(res, err...)
+	}
+
 	if len(res) > 0 {
 		return swagerrors.CompositeValidationError(res...)
 	}
 	return nil
+}
+
+func (a *AutoscalingSkeleton) Validate() []error {
+	var res []error = nil
+
+	if a != nil {
+		if a.Configuration != nil {
+			conf := a.Configuration
+			if conf.ClusterMinSize > conf.ClusterMaxSize {
+				res = append(res, errors.New("The minimum cluster size cannot be greater than the maximum cluster size"))
+			}
+		}
+
+		policies := a.Policies
+		if policies != nil {
+			pattern := "^[a-zA-Z0-9]+$"
+			for _, p := range policies {
+				name := p.PolicyName
+
+				if len(name) < 5 || len(name) > 20 {
+					res = append(res, errors.New(fmt.Sprintf("The policy's name's (%s) length must be between 5 and 20 characters", name)))
+				}
+
+				if match, _ := regexp.Match(pattern, []byte(name)); !match {
+					res = append(res, errors.New(fmt.Sprintf("The policy's name (%s) contains invalid characters. "+
+						"Allowed characters are letters and numbers representable in UTF-8", name)))
+				}
+			}
+		}
+	}
+
+	return res
 }
 
 func (n *Network) Validate() []error {

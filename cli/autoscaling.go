@@ -11,6 +11,7 @@ import (
 	"github.com/hortonworks/hdc-cli/models_autoscale"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
+	"strings"
 	"time"
 )
 
@@ -54,6 +55,26 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 		logMissingParameterAndExit(c, []string{FlPolicyName.Name})
 	}
 
+	policy := AutoscalingPolicy{
+		PolicyName:        policyName,
+		NodeType:          nodeType,
+		Period:            period,
+		Operator:          c.String(FlOperator.Name),
+		ScalingAdjustment: scalingAdjustment,
+		ScalingDefinition: &definitionName,
+		Threshold:         c.Float64(FlThreshold.Name),
+	}
+
+	asSkeleton := AutoscalingSkeleton{Policies: []AutoscalingPolicy{policy}}
+	validationErrors := asSkeleton.Validate()
+	if len(validationErrors) > 0 {
+		var messages []string = nil
+		for _, e := range validationErrors {
+			messages = append(messages, e.Error())
+		}
+		logErrorAndExit(errors.New(strings.Join(messages, ", ")))
+	}
+
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	validDefinition := false
@@ -72,16 +93,6 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 	if err != nil {
 		log.Warn(err)
 		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
-	}
-
-	policy := AutoscalingPolicy{
-		PolicyName:        policyName,
-		NodeType:          nodeType,
-		Period:            period,
-		Operator:          c.String(FlOperator.Name),
-		ScalingAdjustment: scalingAdjustment,
-		ScalingDefinition: &definitionName,
-		Threshold:         c.Float64(FlThreshold.Name),
 	}
 
 	alertId := asClient.addPrometheusAlert(asClusterId, policy)
@@ -141,13 +152,17 @@ func ConfigureAutoscaling(c *cli.Context) error {
 	if maxClusterSize < 1 {
 		logErrorAndExit(errors.New("the maximum cluster size must be greater than 0"))
 	}
+	if minClusterSize > maxClusterSize {
+		logErrorAndExit(errors.New("the minimum cluster size cannot be greater than the maximum cluster size"))
+	}
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	clusterId := *cbClient.GetClusterByName(clusterName).ID
 	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
-		logErrorAndExit(err)
+		log.Warn(err)
+		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
 	}
 
 	configureAutoscalingImpl(clusterName, asClusterId, cooldown, minClusterSize, maxClusterSize, asClient.AutoScaling.Configurations.SetScalingConfiguration)
