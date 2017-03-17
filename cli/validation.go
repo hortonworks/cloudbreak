@@ -127,8 +127,14 @@ func (a *AutoscalingSkeletonBase) Validate() []error {
 			if conf.ClusterMinSize < 1 {
 				res = append(res, errors.New("The minimum cluster size cannot be less than 1"))
 			}
+			if conf.ClusterMaxSize == 0 {
+				res = append(res, errors.New("The maximum cluster size cannot be 0"))
+			}
 			if conf.ClusterMaxSize > 1000 {
 				res = append(res, errors.New("The maximum cluster size cannot be greater than 1000"))
+			}
+			if conf.CooldownTime < 1 {
+				res = append(res, errors.New("The cooldown time cannot be less than 1 minute"))
 			}
 		}
 
@@ -146,6 +152,27 @@ func (a *AutoscalingSkeletonBase) Validate() []error {
 					res = append(res, errors.New(fmt.Sprintf("The policy's name (%s) contains invalid characters. "+
 						"Allowed characters are letters and numbers representable in UTF-8", name)))
 				}
+
+				if p.ScalingAdjustment == 0 {
+					res = append(res, errors.New("The scaling adjustment cannot be 0"))
+				}
+
+				if p.ScalingDefinition == nil {
+					res = append(res, errors.New("The scaling definition must be provided"))
+				}
+
+				if len(p.Operator) == 0 {
+					res = append(res, errors.New("The operator must be provided"))
+				}
+
+				if p.Period < 1 {
+					res = append(res, errors.New("The period must be at least 1 minute"))
+				}
+
+				if p.NodeType != WORKER && p.NodeType != COMPUTE {
+					res = append(res, errors.New("The nodeType must be one of [worker, compute]"))
+				}
+
 			}
 		}
 	}
