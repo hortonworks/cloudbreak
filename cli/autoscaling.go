@@ -11,6 +11,7 @@ import (
 	"github.com/hortonworks/hdc-cli/models_autoscale"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
+	"strings"
 	"time"
 )
 
@@ -54,6 +55,26 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 		logMissingParameterAndExit(c, []string{FlPolicyName.Name})
 	}
 
+	policy := AutoscalingPolicy{
+		PolicyName:        policyName,
+		NodeType:          nodeType,
+		Period:            period,
+		Operator:          c.String(FlOperator.Name),
+		ScalingAdjustment: scalingAdjustment,
+		ScalingDefinition: &definitionName,
+		Threshold:         c.Float64(FlThreshold.Name),
+	}
+
+	asSkeleton := AutoscalingSkeletonBase{Policies: []AutoscalingPolicy{policy}}
+	validationErrors := asSkeleton.Validate()
+	if len(validationErrors) > 0 {
+		var messages []string = nil
+		for _, e := range validationErrors {
+			messages = append(messages, e.Error())
+		}
+		logErrorAndExit(errors.New(strings.Join(messages, ", ")))
+	}
+
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	validDefinition := false
@@ -72,16 +93,6 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 	if err != nil {
 		log.Warn(err)
 		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
-	}
-
-	policy := AutoscalingPolicy{
-		PolicyName:        policyName,
-		NodeType:          nodeType,
-		Period:            period,
-		Operator:          c.String(FlOperator.Name),
-		ScalingAdjustment: scalingAdjustment,
-		ScalingDefinition: &definitionName,
-		Threshold:         c.Float64(FlThreshold.Name),
 	}
 
 	alertId := asClient.addPrometheusAlert(asClusterId, policy)
@@ -141,13 +152,20 @@ func ConfigureAutoscaling(c *cli.Context) error {
 	if maxClusterSize < 1 {
 		logErrorAndExit(errors.New("the maximum cluster size must be greater than 0"))
 	}
+	if maxClusterSize > 1000 {
+		logErrorAndExit(errors.New("the maximum cluster size cannot be greater than 1000"))
+	}
+	if minClusterSize > maxClusterSize {
+		logErrorAndExit(errors.New("the minimum cluster size cannot be greater than the maximum cluster size"))
+	}
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	clusterId := *cbClient.GetClusterByName(clusterName).ID
 	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
-		logErrorAndExit(err)
+		log.Warn(err)
+		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
 	}
 
 	configureAutoscalingImpl(clusterName, asClusterId, cooldown, minClusterSize, maxClusterSize, asClient.AutoScaling.Configurations.SetScalingConfiguration)
@@ -290,16 +308,17 @@ func (autosScaling *Autoscaling) getConfiguration(asClusterId int64) *Autoscalin
 	return &scaleConfig
 }
 
-func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int64) *AutoscalingSkeleton {
+func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int64) *AutoscalingSkeletonResult {
 	defer timeTrack(time.Now(), "get autoscaling skeleton for cluster")
 	log.Infof("[getAutoscaling] get autoscaling by cluster id: %d", stackId)
 
-	asClusterId, err := autosScaling.getAutoscalingClusterIdByStackId(clusterName, stackId)
+	asCluster, err := autosScaling.getAutoscalingClusterByStackId(clusterName, stackId)
 	if err != nil {
 		log.Warn(err)
 		return nil
 	}
 
+	asClusterId := *asCluster.ID
 	policyList := make([]AutoscalingPolicy, 0)
 	for _, alert := range autosScaling.getAlerts(asClusterId) {
 		for _, policy := range autosScaling.getPolicies(asClusterId) {
@@ -317,8 +336,15 @@ func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int6
 		}
 	}
 
+	log.Infof("[getAutoscaling] autoscaling state: %s for cluster: %s", *asCluster.State, clusterName)
+	autoscalingEnabled := false
+	if *asCluster.State == "RUNNING" {
+		autoscalingEnabled = true
+	}
+
 	scaleConfig := autosScaling.getConfiguration(asClusterId)
-	skeleton := AutoscalingSkeleton{}
+	skeleton := AutoscalingSkeletonResult{}
+	skeleton.Enabled = autoscalingEnabled
 	skeleton.Policies = policyList
 	skeleton.Configuration = scaleConfig
 
@@ -338,16 +364,24 @@ func (autosScaling *Autoscaling) deleteCluster(clusterName string, getCluster fu
 }
 
 func (autosScaling *Autoscaling) getAutoscalingClusterIdByStackId(clusterName string, stackId int64) (int64, error) {
+	asCluster, err := autosScaling.getAutoscalingClusterByStackId(clusterName, stackId)
+	if err != nil {
+		logErrorAndExit(err)
+	}
+	return *asCluster.ID, nil
+}
+
+func (autosScaling *Autoscaling) getAutoscalingClusterByStackId(clusterName string, stackId int64) (*models_autoscale.ClusterSummary, error) {
 	resp, err := autosScaling.AutoScaling.Clusters.GetClusters(&clusters.GetClustersParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}
 	for _, c := range resp.Payload {
 		if c.StackID != nil && *c.StackID == stackId {
-			return *c.ID, nil
+			return c, nil
 		}
 	}
-	return 0, errors.New(fmt.Sprintf("no autoscaling cluster found for cluster: %s", clusterName))
+	return nil, errors.New(fmt.Sprintf("no autoscaling cluster found for cluster: %s", clusterName))
 }
 
 func ListDefinitions(c *cli.Context) error {

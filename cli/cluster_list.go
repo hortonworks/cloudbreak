@@ -50,7 +50,7 @@ func ListClusters(c *cli.Context) error {
 }
 
 func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error),
-	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeleton) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
+	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
 
 	respStacks, err := getStacks(&stacks.GetStacksUserParams{})
 	if err != nil {
