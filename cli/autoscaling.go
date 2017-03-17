@@ -40,7 +40,7 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 	}
 	nodeType := c.String(FlNodeType.Name)
 	if nodeType != WORKER && nodeType != COMPUTE {
-		logErrorAndExit(errors.New("the nodeType must be must be one of [worker, compute]"))
+		logErrorAndExit(errors.New("the nodeType must be one of [worker, compute]"))
 	}
 	clusterName := c.String(FlClusterName.Name)
 	if len(clusterName) == 0 {
