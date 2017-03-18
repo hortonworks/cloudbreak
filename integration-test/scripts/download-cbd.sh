@@ -4,4 +4,9 @@
 
 echo -e "\n\033[1;96m--- download latest cbd\033[0m\n"
 cd $INTEGCB_LOCATION
-curl -L s3.amazonaws.com/public-repo-1.hortonworks.com/HDP/cloudbreak/cloudbreak-deployer_snapshot_$(uname)_x86_64.tgz | tar -xz
+
+: ${branch:=rc-1.14}
+
+circle_url=https://circleci.com/api/v1/project/sequenceiq/cloudbreak-deployer
+latest_build=$(curl -s ${circle_url}/tree/${branch}\?filter=completed\&limit=1 | grep -m 1 build_num | sed 's/[^0-9]*//g')
+curl -sL $(curl -s ${circle_url}/${latest_build}/artifacts | grep url | grep -i $(uname) | cut -d\" -f 4) | tar -xz
