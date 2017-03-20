@@ -54,7 +54,7 @@
 
                     <!-- .............. SECURITY GROUP .............................................. -->
 
-                    <div class="panel panel-default" ng-repeat="securitygroup in $root.securitygroups | orderBy:'name'">
+                    <div class="panel panel-default" ng-repeat="securitygroup in $root.securitygroups | filter:filterByVisiblePlatform | orderBy:'name'">
 
 
                         <div class="panel-heading">
