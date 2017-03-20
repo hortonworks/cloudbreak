@@ -4,7 +4,11 @@ The Change Log summarizes the changes in Cloudbreak.
 
 ## [v1.14.0]
 
+### Changed
+
 - ability to specify more rdsconfig on one cluster
+- new azure connector implemented with interactive login
+- new alerting system implemented based on prometheus
 
 ## [v1.6.3]
 
