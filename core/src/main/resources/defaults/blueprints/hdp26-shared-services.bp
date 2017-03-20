@@ -1,14 +1,6 @@
 {
   "inputs":[
     {
-      "name":"RANGER_DB_ROOT_USER",
-      "referenceConfiguration":"db_root_user"
-    },
-    {
-      "name":"RANGER_DB_ROOT_PASSWORD",
-      "referenceConfiguration":"db_root_password"
-    },
-    {
       "name":"RANGER_DB_USER",
       "referenceConfiguration":"db_user"
     },
@@ -55,6 +47,10 @@
     {
       "name":"LDAP_GROUP_SEARCH_BASE",
       "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
+    },
+    {
+      "name":"S3_BUCKET",
+      "referenceConfiguration":"s3.bucket"
     }
   ],
   "blueprint":{
@@ -67,8 +63,6 @@
       {
         "admin-properties":{
           "properties":{
-            "db_root_user":"{{ RANGER_DB_ROOT_USER }}",
-            "db_root_password":"{{ RANGER_DB_ROOT_PASSWORD }}",
             "db_user":"{{ RANGER_DB_USER }}",
             "db_password":"{{ RANGER_DB_PASSWORD }}",
             "db_name":"{{ RANGER_DB_NAME }}",
@@ -160,13 +154,13 @@
         ],
         "components":[
           {
+            "name":"METRICS_MONITOR"
+          },
+          {
             "name":"ZOOKEEPER_SERVER"
           },
           {
             "name":"INFRA_SOLR"
-          },
-          {
-            "name":"METRICS_MONITOR"
           },
           {
             "name":"INFRA_SOLR_CLIENT"
