@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.init;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
@@ -80,7 +81,8 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private List<Stack> resetStackStatus(List<Long> excludeStackIds) {
-        return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
+        return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS,
+                STOP_IN_PROGRESS, AVAILABLE))
                 .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
                 .map(s -> {
                     if (!WAIT_FOR_SYNC.equals(s.getStatus())) {
