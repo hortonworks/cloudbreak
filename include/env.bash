@@ -1,6 +1,15 @@
 
 declare -a _env
 
+env-validate() {
+	declare var="$1" pattern="$2" patterntext="$3"
+
+	if [[ ${!var} == $pattern ]]; then
+		echo "!! Imported variable $var contains $patterntext." | red
+		_exit 3
+	fi
+}
+
 env-import() {
 	declare var="$1" default="$2"
 	if [[ -z "${!var+x}" ]]; then
