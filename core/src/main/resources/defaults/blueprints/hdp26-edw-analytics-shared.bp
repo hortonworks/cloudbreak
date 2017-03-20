@@ -51,11 +51,26 @@
   ],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp26-etl-edw-shared",
+      "blueprint_name": "hdp26-edw-analytics-shared",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
     "configurations": [
+      {
+        "hive-interactive-env": {
+          "enable_hive_interactive": "true",
+          "llap_queue_capacity": "75",
+          "hive_security_authorization": "Ranger"
+        }
+      },
+      {
+        "hive-interactive-site": {
+          "hive.server2.authentication.ldap.url":"{{ LDAP_URL }}",
+          "hive.server2.authentication.ldap.Domain":"{{ LDAP_DOMAIN }}",
+          "hive.server2.authentication":"LDAP",
+          "hive.metastore.warehouse.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
+        }
+      },
       {
         "core-site": {
           "fs.trash.interval": "4320",
@@ -103,47 +118,6 @@
         }
       },
       {
-        "druid-common": {
-          "properties_attributes": {},
-          "properties": {
-            "druid.metadata.storage.type": "derby",
-            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true",
-            "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
-            "druid.selectors.indexing.serviceName": "druid/overlord"
-          }
-        }
-      },
-      {
-        "druid-common": {
-          "properties_attributes": {},
-          "properties": {
-            "druid.metadata.storage.type": "derby",
-            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true"
-          }
-        }
-      },
-      {
-        "druid-superset": {
-          "properties_attributes": {},
-          "properties": {
-            "SECRET_KEY" : "123admin123",
-            "SUPERSET_DATABASE_TYPE" : "sqlite"
-          }
-        }
-      },
-      {
-      "druid-middlemanager" : {
-        "properties_attributes" : { },
-        "properties" : {
-          "druid.indexer.runner.javaOpts" : "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
-          "druid.indexer.task.baseTaskDir" : "/tmp/persistent/tasks",
-          "druid.processing.buffer.sizeBytes" : "256000000",
-          "druid.service" : "druid/middlemanager",
-          "druid.port" : "8091"
-        }
-      }
-    },
-      {
         "ranger-hive-plugin-properties": {
           "properties": {
             "external_admin_username": "{{ ADMIN_USERNAME }}",
@@ -163,7 +137,7 @@
         "ranger-hive-audit": {
           "xasecure.audit.is.enabled": "true",
           "xasecure.audit.destination.hdfs": "true",
-          "xasecure.audit.destination.hdfs.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/ranger/audit/{{cluster_name}}",
+          "xasecure.audit.destination.hdfs.dir":"s3a:/{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/ranger/audit/{{cluster_name}}",
           "xasecure.audit.destination.solr": "true",
           "xasecure.audit.destination.solr.zookeepers": "{{ SOLR_ZOOKEPERS_URL }}"
         }
@@ -196,6 +170,9 @@
             "name": "HIVE_SERVER"
           },
           {
+            "name": "HIVE_SERVER_INTERACTIVE"
+          },
+          {
             "name": "JOURNALNODE"
           },
           {
@@ -226,13 +203,13 @@
             "name": "SECONDARY_NAMENODE"
           },
           {
+            "name": "SLIDER"
+          },
+          {
             "name": "SPARK_CLIENT"
           },
           {
             "name": "SPARK_JOBHISTORYSERVER"
-          },
-          {
-            "name": "SQOOP"
           },
           {
             "name": "TEZ_CLIENT"
@@ -244,26 +221,13 @@
             "name": "YARN_CLIENT"
           },
           {
+            "name": "ZEPPELIN_MASTER"
+          },
+          {
             "name": "ZOOKEEPER_CLIENT"
           },
           {
             "name": "ZOOKEEPER_SERVER"
-          },
-          {
-            "name" : "DRUID_OVERLORD",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_COORDINATOR",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_ROUTER",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_BROKER",
-            "provision_action": "INSTALL_ONLY"
           }
         ],
         "cardinality": "1"
@@ -289,14 +253,6 @@
           },
           {
             "name": "NODEMANAGER"
-          },
-          {
-            "name" : "DRUID_MIDDLEMANAGER",
-            "provision_action": "INSTALL_ONLY"
-          },
-          {
-            "name" : "DRUID_HISTORICAL",
-            "provision_action": "INSTALL_ONLY"
           }
         ],
         "cardinality": "1+"

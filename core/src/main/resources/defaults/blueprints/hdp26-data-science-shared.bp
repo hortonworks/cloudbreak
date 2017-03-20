@@ -43,6 +43,10 @@
     {
       "name":"RANGER_ADMIN_PASSWORD",
       "referenceConfiguration":"ranger_admin_password"
+    },
+    {
+      "name":"S3_BUCKET",
+      "referenceConfiguration":"s3.bucket"
     }
   ],
   "blueprint": {
@@ -82,7 +86,8 @@
           "hive.server2.transport.mode": "http",
           "hive.server2.authentication.ldap.url":"{{ LDAP_URL }}",
           "hive.server2.authentication.ldap.Domain":"{{ LDAP_DOMAIN }}",
-          "hive.server2.authentication":"LDAP"
+          "hive.server2.authentication":"LDAP",
+          "hive.metastore.warehouse.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
         }
       },
       {
@@ -105,7 +110,7 @@
         "ranger-hive-audit":{
           "xasecure.audit.is.enabled":"true",
           "xasecure.audit.destination.hdfs":"true",
-          "xasecure.audit.destination.hdfs.dir":"s3a://ss-datasets/apps/ranger/audit/{{ cluster_name }}",
+          "xasecure.audit.destination.hdfs.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/ranger/audit/{{cluster_name}}",
           "xasecure.audit.destination.solr":"true",
           "xasecure.audit.destination.solr.zookeepers":"{{ SOLR_ZOOKEPERS_URL }}"
         }

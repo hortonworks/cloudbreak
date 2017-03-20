@@ -1,0 +1,263 @@
+{
+  "inputs": [
+    {
+      "name":"LDAP_URL",
+      "referenceConfiguration":"hive.server2.authentication.ldap.url"
+    },
+    {
+      "name":"LDAP_DOMAIN",
+      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
+    },
+    {
+      "name":"LDAP_BIND_DN",
+      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
+    },
+    {
+      "name":"LDAP_BIND_PASSWORD",
+      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
+    },
+    {
+      "name":"LDAP_GROUP_SEARCH_BASE",
+      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
+    },
+    {
+      "name":"RANGER_REST_ADDRESS",
+      "referenceConfiguration":"policymgr_external_url"
+    },
+    {
+      "name":"REMOTE_CLUSTER_NAME",
+      "referenceConfiguration":"cluster_name"
+    },
+    {
+      "name":"SOLR_ZOOKEPERS_URL",
+      "referenceConfiguration":"ranger.audit.solr.zookeepers"
+    },
+    {
+      "name":"ADMIN_USERNAME",
+      "referenceConfiguration":"admin_username"
+    },
+    {
+      "name":"RANGER_ADMIN_USERNAME",
+      "referenceConfiguration":"ranger_admin_username"
+    },
+    {
+      "name":"RANGER_ADMIN_PASSWORD",
+      "referenceConfiguration":"ranger_admin_password"
+    },
+    {
+      "name":"S3_BUCKET",
+      "referenceConfiguration":"s3.bucket"
+    }
+  ],
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdp26-druid-bi-shared",
+      "stack_name": "HDP",
+      "stack_version": "2.6"
+    },
+    "configurations": [
+      {
+        "core-site": {
+          "fs.trash.interval": "4320"
+        }
+      },
+      {
+        "hdfs-site": {
+          "dfs.namenode.safemode.threshold-pct": "0.99"
+        }
+      },
+      {
+        "mapred-site": {
+          "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
+          "mapreduce.map.output.compress": "true",
+          "mapreduce.output.fileoutputformat.compress": "true"
+        }
+      },
+      {
+        "yarn-site": {
+          "yarn.acl.enable": "true"
+        }
+      },
+      {
+        "druid-common": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.metadata.storage.type": "derby",
+            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true",
+            "druid.extensions.loadList": "[\"postgresql-metadata-storage\", \"druid-s3-extensions\"]",
+            "druid.selectors.indexing.serviceName": "druid/overlord",
+            "druid.storage.type": "s3"
+          }
+        }
+      },
+      {
+        "druid-overlord": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.indexer.storage.type": "metadata",
+            "druid.indexer.runner.type": "remote",
+            "druid.service": "druid/overlord",
+            "druid.port": "8090"
+          }
+        }
+      },
+      {
+        "druid-middlemanager": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.server.http.numThreads": "50",
+            "druid.worker.capacity": "3",
+            "druid.processing.numThreads": "2",
+            "druid.indexer.runner.javaOpts": "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
+            "druid.service": "druid/middlemanager",
+            "druid.port": "8091"
+          }
+        }
+      },
+      {
+        "druid-coordinator": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.coordinator.merge.on": "false",
+            "druid.port": "8081"
+          }
+        }
+      },
+      {
+        "druid-historical": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.server.http.numThreads": "50",
+            "druid.processing.numThreads": "10",
+            "druid.service": "druid/historical",
+            "druid.port": "8083",
+            "druid.server.maxSize": "300000000000"
+          }
+        }
+      },
+      {
+        "druid-broker": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.cache.type": "local",
+            "druid.server.http.numThreads": "50",
+            "druid.broker.http.numConnections": "5",
+            "druid.processing.numThreads": "2",
+            "druid.service": "druid/broker",
+            "druid.port": "8082"
+          }
+        }
+      },
+      {
+        "druid-router": {
+          "properties_attributes": {},
+          "properties": {
+          }
+        }
+      },
+      {
+        "druid-superset": {
+          "properties_attributes": {},
+          "properties": {
+            "SECRET_KEY" : "123admin123"
+          }
+        }
+      }
+    ],
+    "host_groups": [
+      {
+        "name": "master",
+        "configurations": [],
+        "components": [
+          {
+            "name": "APP_TIMELINE_SERVER"
+          },
+          {
+            "name": "MAPREDUCE2_CLIENT"
+          },
+          {
+            "name": "METRICS_COLLECTOR"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NAMENODE"
+          },
+          {
+            "name": "RESOURCEMANAGER"
+          },
+          {
+            "name": "SECONDARY_NAMENODE"
+          },
+          {
+            "name": "TEZ_CLIENT"
+          },
+          {
+            "name": "YARN_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "DRUID_OVERLORD"
+          },
+          {
+            "name": "DRUID_COORDINATOR"
+          },
+          {
+            "name": "DRUID_ROUTER"
+          },
+          {
+            "name": "DRUID_BROKER"
+          },
+          {
+            "name": "DRUID_SUPERSET"
+          },
+          {
+            "name": "HDFS_CLIENT"
+          }
+        ],
+        "cardinality": "1"
+      },
+      {
+        "name": "worker",
+        "configurations": [],
+        "components": [
+          {
+            "name": "DATANODE"
+          },
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          },
+          {
+            "name": "DRUID_HISTORICAL"
+          }
+        ],
+        "cardinality": "1+"
+      },
+      {
+        "name": "compute",
+        "configurations": [],
+        "components": [
+          {
+            "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "NODEMANAGER"
+          },
+          {
+            "name": "DRUID_MIDDLEMANAGER"
+          }
+        ],
+        "cardinality": "1+"
+      }
+    ]
+  }
+}

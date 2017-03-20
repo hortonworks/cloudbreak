@@ -31,7 +31,7 @@ public class ImageNameUtil {
             if (specificImage != null) {
                 image = specificImage;
             } else {
-                LOGGER.info("The specified ambari-hdp version image not found: ambari: {} hdp: ", ambariVersion, hdpVersion);
+                LOGGER.info("The specified ambari-hdp version image not found: ambari: {} hdp: {}", ambariVersion, hdpVersion);
             }
         }
         LOGGER.info("Selected VM image for CloudPlatform '{}' is: {}", platform, image);
