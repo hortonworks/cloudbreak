@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 
 @Component("StackTerminationAction")
@@ -37,12 +38,17 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
     @Inject
     private TerminationService terminationService;
 
+    @Inject
+    private ProxyRegistrator proxyRegistrator;
+
     public StackTerminationAction() {
         super(TerminationEvent.class);
     }
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
+        String name = context.getStack().getName();
+        proxyRegistrator.remove(name);
         variables.put("DELETEDEPENDENCIES", payload.getDeleteDependencies());
         doExecute(context);
     }
