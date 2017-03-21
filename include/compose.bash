@@ -490,6 +490,7 @@ uluwatu:
         - SERVICE_NAME=uluwatu
           #- SERVICE_CHECK_HTTP=/
         - ULU_OAUTH_REDIRECT_URI
+        - ULU_DEFAULT_SSH_KEY
         - ULU_SULTANS_ADDRESS
         - ULU_OAUTH_CLIENT_ID=$UAA_ULUWATU_ID
         - 'ULU_OAUTH_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_ULUWATU_SECRET \')'
