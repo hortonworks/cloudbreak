@@ -73,7 +73,7 @@ public interface RdsConfigEndpoint {
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
-            nickname = "potPublicRds")
+            nickname = "postPublicRds")
     RDSConfigResponse postPublic(@Valid RDSConfigJson rdsConfigJson);
 
     @GET
