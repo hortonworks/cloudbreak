@@ -23,52 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteLdapAccountName deletes public owned or private l d a p config by name
+DeleteLdap deletes l d a p config by id
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
-func (a *Client) DeleteLdapAccountName(params *DeleteLdapAccountNameParams) error {
+func (a *Client) DeleteLdap(params *DeleteLdapParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteLdapAccountNameParams()
+		params = NewDeleteLdapParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteLdapAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/ldap/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteLdapAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteLdapID deletes l d a p config by id
-
-LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
-*/
-func (a *Client) DeleteLdapID(params *DeleteLdapIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteLdapIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteLdapID",
+		ID:                 "deleteLdap",
 		Method:             "DELETE",
 		PathPattern:        "/ldap/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteLdapIDReader{formats: a.formats},
+		Reader:             &DeleteLdapReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -77,25 +50,25 @@ func (a *Client) DeleteLdapID(params *DeleteLdapIDParams) error {
 }
 
 /*
-DeleteLdapUserName deletes private l d a p config by name
+DeletePrivateLdap deletes private l d a p config by name
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
-func (a *Client) DeleteLdapUserName(params *DeleteLdapUserNameParams) error {
+func (a *Client) DeletePrivateLdap(params *DeletePrivateLdapParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteLdapUserNameParams()
+		params = NewDeletePrivateLdapParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteLdapUserName",
+		ID:                 "deletePrivateLdap",
 		Method:             "DELETE",
 		PathPattern:        "/ldap/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteLdapUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateLdapReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +77,219 @@ func (a *Client) DeleteLdapUserName(params *DeleteLdapUserNameParams) error {
 }
 
 /*
-GetLdapAccount retrieves public and private owned l d a p configs
+DeletePublicLdap deletes public owned or private l d a p config by name
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
-func (a *Client) GetLdapAccount(params *GetLdapAccountParams) (*GetLdapAccountOK, error) {
+func (a *Client) DeletePublicLdap(params *DeletePublicLdapParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetLdapAccountParams()
+		params = NewDeletePublicLdapParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetLdapAccount",
-		Method:             "GET",
-		PathPattern:        "/ldap/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetLdapAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetLdapAccountOK), nil
-}
-
-/*
-GetLdapAccountName retrieves a public or private owned l d a p config by name
-
-LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
-*/
-func (a *Client) GetLdapAccountName(params *GetLdapAccountNameParams) (*GetLdapAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetLdapAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetLdapAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicLdap",
+		Method:             "DELETE",
 		PathPattern:        "/ldap/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetLdapAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicLdapReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetLdapAccountNameOK), nil
+	return nil
 }
 
 /*
-GetLdapID retrieves l d a p config by id
+GetLdap retrieves l d a p config by id
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
-func (a *Client) GetLdapID(params *GetLdapIDParams) (*GetLdapIDOK, error) {
+func (a *Client) GetLdap(params *GetLdapParams) (*GetLdapOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetLdapIDParams()
+		params = NewGetLdapParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetLdapID",
+		ID:                 "getLdap",
 		Method:             "GET",
 		PathPattern:        "/ldap/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetLdapIDReader{formats: a.formats},
+		Reader:             &GetLdapReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetLdapIDOK), nil
+	return result.(*GetLdapOK), nil
 }
 
 /*
-GetLdapUser retrieves private l d a p configs
+GetPrivateLdap retrieves a private l d a p config by name
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
-func (a *Client) GetLdapUser(params *GetLdapUserParams) (*GetLdapUserOK, error) {
+func (a *Client) GetPrivateLdap(params *GetPrivateLdapParams) (*GetPrivateLdapOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetLdapUserParams()
+		params = NewGetPrivateLdapParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetLdapUser",
-		Method:             "GET",
-		PathPattern:        "/ldap/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetLdapUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetLdapUserOK), nil
-}
-
-/*
-GetLdapUserName retrieves a private l d a p config by name
-
-LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
-*/
-func (a *Client) GetLdapUserName(params *GetLdapUserNameParams) (*GetLdapUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetLdapUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetLdapUserName",
+		ID:                 "getPrivateLdap",
 		Method:             "GET",
 		PathPattern:        "/ldap/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetLdapUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateLdapReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetLdapUserNameOK), nil
+	return result.(*GetPrivateLdapOK), nil
 }
 
 /*
-PostLdapAccount creates l d a p config as public resource
+GetPrivatesLdap retrieves private l d a p configs
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
-func (a *Client) PostLdapAccount(params *PostLdapAccountParams) (*PostLdapAccountOK, error) {
+func (a *Client) GetPrivatesLdap(params *GetPrivatesLdapParams) (*GetPrivatesLdapOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostLdapAccountParams()
+		params = NewGetPrivatesLdapParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostLdapAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesLdap",
+		Method:             "GET",
+		PathPattern:        "/ldap/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesLdapReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesLdapOK), nil
+}
+
+/*
+GetPublicLdap retrieves a public or private owned l d a p config by name
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) GetPublicLdap(params *GetPublicLdapParams) (*GetPublicLdapOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicLdapParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicLdap",
+		Method:             "GET",
+		PathPattern:        "/ldap/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicLdapReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicLdapOK), nil
+}
+
+/*
+GetPublicsLdap retrieves public and private owned l d a p configs
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) GetPublicsLdap(params *GetPublicsLdapParams) (*GetPublicsLdapOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsLdapParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsLdap",
+		Method:             "GET",
 		PathPattern:        "/ldap/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostLdapAccountReader{formats: a.formats},
+		Reader:             &GetPublicsLdapReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostLdapAccountOK), nil
+	return result.(*GetPublicsLdapOK), nil
 }
 
 /*
-PostLdapUser creates l d a p config as private resource
+PostPrivateLdap creates l d a p config as private resource
 
 LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
 */
-func (a *Client) PostLdapUser(params *PostLdapUserParams) (*PostLdapUserOK, error) {
+func (a *Client) PostPrivateLdap(params *PostPrivateLdapParams) (*PostPrivateLdapOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostLdapUserParams()
+		params = NewPostPrivateLdapParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostLdapUser",
+		ID:                 "postPrivateLdap",
 		Method:             "POST",
 		PathPattern:        "/ldap/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostLdapUserReader{formats: a.formats},
+		Reader:             &PostPrivateLdapReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostLdapUserOK), nil
+	return result.(*PostPrivateLdapOK), nil
+}
+
+/*
+PostPublicLdap creates l d a p config as public resource
+
+LDAP server integration enables the user to provide a central place to store usernames and passwords for the users of his/her clusters.
+*/
+func (a *Client) PostPublicLdap(params *PostPublicLdapParams) (*PostPublicLdapOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicLdapParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicLdap",
+		Method:             "POST",
+		PathPattern:        "/ldap/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicLdapReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicLdapOK), nil
 }
 
 // SetTransport changes the transport on the client

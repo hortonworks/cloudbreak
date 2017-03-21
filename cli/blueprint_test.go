@@ -59,7 +59,7 @@ func TestCreateBlueprintImplDefaultBlueprint(t *testing.T) {
 		ID:              &id,
 		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{},
 	}
-	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
+	resolver := func(params *blueprints.PostPublicBlueprintParams) (*blueprints.PostPublicBlueprintOK, error) {
 		return nil, nil
 	}
 
@@ -84,8 +84,8 @@ func TestCreateBlueprintImplNonDefaultBlueprint(t *testing.T) {
 		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{},
 	}
 	expected := int64(321)
-	resolver := func(params *blueprints.PostPublicParams) (*blueprints.PostPublicOK, error) {
-		return &blueprints.PostPublicOK{Payload: &models_cloudbreak.BlueprintResponse{ID: &expected}}, nil
+	resolver := func(params *blueprints.PostPublicBlueprintParams) (*blueprints.PostPublicBlueprintOK, error) {
+		return &blueprints.PostPublicBlueprintOK{Payload: &models_cloudbreak.BlueprintResponse{ID: &expected}}, nil
 	}
 
 	createBlueprintImpl(skeleton, &blueprint, blueprintId, resolver)

@@ -27,8 +27,8 @@ type GetOchestratorsByTypeParams struct {
 }
 
 // WithType adds the type to the get ochestrators by type params
-func (o *GetOchestratorsByTypeParams) WithType(typee string) *GetOchestratorsByTypeParams {
-	o.Type = typee
+func (o *GetOchestratorsByTypeParams) WithType(types string) *GetOchestratorsByTypeParams {
+	o.Type = types
 	return o
 }
 

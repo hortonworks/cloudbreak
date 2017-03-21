@@ -27,8 +27,8 @@ type GetRegionRByTypeParams struct {
 }
 
 // WithType adds the type to the get region r by type params
-func (o *GetRegionRByTypeParams) WithType(typee string) *GetRegionRByTypeParams {
-	o.Type = typee
+func (o *GetRegionRByTypeParams) WithType(types string) *GetRegionRByTypeParams {
+	o.Type = types
 	return o
 }
 

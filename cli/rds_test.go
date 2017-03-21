@@ -21,8 +21,8 @@ func TestListRDSConfigsImpl(t *testing.T) {
 			Type:          &(&stringWrapper{HIVE_RDS}).s,
 		})
 	}
-	getConfigs := func(params *rdsconfigs.GetRdsconfigsAccountParams) (*rdsconfigs.GetRdsconfigsAccountOK, error) {
-		return &rdsconfigs.GetRdsconfigsAccountOK{
+	getConfigs := func(params *rdsconfigs.GetPublicsRdsParams) (*rdsconfigs.GetPublicsRdsOK, error) {
+		return &rdsconfigs.GetPublicsRdsOK{
 			Payload: configs,
 		}, nil
 	}
@@ -64,9 +64,9 @@ func TestCreateRDSConfigImpl(t *testing.T) {
 	}
 	expectedId := int64(1)
 	var actual *models_cloudbreak.RDSConfig
-	postConfig := func(params *rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error) {
+	postConfig := func(params *rdsconfigs.PotPublicRdsParams) (*rdsconfigs.PotPublicRdsOK, error) {
 		actual = params.Body
-		return &rdsconfigs.PostRdsconfigsAccountOK{Payload: &models_cloudbreak.RDSConfigResponse{ID: &expectedId}}, nil
+		return &rdsconfigs.PotPublicRdsOK{Payload: &models_cloudbreak.RDSConfigResponse{ID: &expectedId}}, nil
 	}
 
 	createRDSConfigImpl(HIVE_RDS, finder, postConfig)

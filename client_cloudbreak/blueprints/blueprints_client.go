@@ -23,52 +23,25 @@ type Client struct {
 }
 
 /*
-GetBlueprintsID retrieves blueprint by id
+DeleteBlueprint deletes blueprint by id
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) GetBlueprintsID(params *GetBlueprintsIDParams) (*GetBlueprintsIDOK, error) {
+func (a *Client) DeleteBlueprint(params *DeleteBlueprintParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetBlueprintsIDParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetBlueprintsID",
-		Method:             "GET",
-		PathPattern:        "/blueprints/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetBlueprintsIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetBlueprintsIDOK), nil
-}
-
-/*
-Delete deletes blueprint by id
-
-Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
-*/
-func (a *Client) Delete(params *DeleteParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteParams()
+		params = NewDeleteBlueprintParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "delete",
+		ID:                 "deleteBlueprint",
 		Method:             "DELETE",
 		PathPattern:        "/blueprints/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteReader{formats: a.formats},
+		Reader:             &DeleteBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -77,25 +50,25 @@ func (a *Client) Delete(params *DeleteParams) error {
 }
 
 /*
-DeletePrivate deletes private blueprint by name
+DeletePrivateBlueprint deletes private blueprint by name
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) DeletePrivate(params *DeletePrivateParams) error {
+func (a *Client) DeletePrivateBlueprint(params *DeletePrivateBlueprintParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeletePrivateParams()
+		params = NewDeletePrivateBlueprintParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "deletePrivate",
+		ID:                 "deletePrivateBlueprint",
 		Method:             "DELETE",
 		PathPattern:        "/blueprints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeletePrivateReader{formats: a.formats},
+		Reader:             &DeletePrivateBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,25 +77,25 @@ func (a *Client) DeletePrivate(params *DeletePrivateParams) error {
 }
 
 /*
-DeletePublic deletes public owned or private blueprint by name
+DeletePublicBlueprint deletes public owned or private blueprint by name
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) DeletePublic(params *DeletePublicParams) error {
+func (a *Client) DeletePublicBlueprint(params *DeletePublicBlueprintParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeletePublicParams()
+		params = NewDeletePublicBlueprintParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "deletePublic",
+		ID:                 "deletePublicBlueprint",
 		Method:             "DELETE",
 		PathPattern:        "/blueprints/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeletePublicReader{formats: a.formats},
+		Reader:             &DeletePublicBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -131,165 +104,192 @@ func (a *Client) DeletePublic(params *DeletePublicParams) error {
 }
 
 /*
-GetPrivate retrieves a private blueprint by name
+GetBlueprint retrieves blueprint by id
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) GetPrivate(params *GetPrivateParams) (*GetPrivateOK, error) {
+func (a *Client) GetBlueprint(params *GetBlueprintParams) (*GetBlueprintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPrivateParams()
+		params = NewGetBlueprintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getPrivate",
+		ID:                 "getBlueprint",
+		Method:             "GET",
+		PathPattern:        "/blueprints/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetBlueprintReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetBlueprintOK), nil
+}
+
+/*
+GetPrivateBlueprint retrieves a private blueprint by name
+
+Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
+*/
+func (a *Client) GetPrivateBlueprint(params *GetPrivateBlueprintParams) (*GetPrivateBlueprintOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPrivateBlueprintParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPrivateBlueprint",
 		Method:             "GET",
 		PathPattern:        "/blueprints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPrivateReader{formats: a.formats},
+		Reader:             &GetPrivateBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPrivateOK), nil
+	return result.(*GetPrivateBlueprintOK), nil
 }
 
 /*
-GetPrivates retrieves private blueprints
+GetPrivatesBlueprint retrieves private blueprints
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) GetPrivates(params *GetPrivatesParams) (*GetPrivatesOK, error) {
+func (a *Client) GetPrivatesBlueprint(params *GetPrivatesBlueprintParams) (*GetPrivatesBlueprintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPrivatesParams()
+		params = NewGetPrivatesBlueprintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getPrivates",
+		ID:                 "getPrivatesBlueprint",
 		Method:             "GET",
 		PathPattern:        "/blueprints/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPrivatesReader{formats: a.formats},
+		Reader:             &GetPrivatesBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPrivatesOK), nil
+	return result.(*GetPrivatesBlueprintOK), nil
 }
 
 /*
-GetPublic retrieves a public or private owned blueprint by name
+GetPublicBlueprint retrieves a public or private owned blueprint by name
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) GetPublic(params *GetPublicParams) (*GetPublicOK, error) {
+func (a *Client) GetPublicBlueprint(params *GetPublicBlueprintParams) (*GetPublicBlueprintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPublicParams()
+		params = NewGetPublicBlueprintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getPublic",
+		ID:                 "getPublicBlueprint",
 		Method:             "GET",
 		PathPattern:        "/blueprints/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPublicReader{formats: a.formats},
+		Reader:             &GetPublicBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPublicOK), nil
+	return result.(*GetPublicBlueprintOK), nil
 }
 
 /*
-GetPublics retrieves public and private owned blueprints
+GetPublicsBlueprint retrieves public and private owned blueprints
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) GetPublics(params *GetPublicsParams) (*GetPublicsOK, error) {
+func (a *Client) GetPublicsBlueprint(params *GetPublicsBlueprintParams) (*GetPublicsBlueprintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetPublicsParams()
+		params = NewGetPublicsBlueprintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getPublics",
+		ID:                 "getPublicsBlueprint",
 		Method:             "GET",
 		PathPattern:        "/blueprints/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetPublicsReader{formats: a.formats},
+		Reader:             &GetPublicsBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetPublicsOK), nil
+	return result.(*GetPublicsBlueprintOK), nil
 }
 
 /*
-PostPrivate creates blueprint as private resource
+PostPrivateBlueprint creates blueprint as private resource
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) PostPrivate(params *PostPrivateParams) (*PostPrivateOK, error) {
+func (a *Client) PostPrivateBlueprint(params *PostPrivateBlueprintParams) (*PostPrivateBlueprintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostPrivateParams()
+		params = NewPostPrivateBlueprintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "postPrivate",
+		ID:                 "postPrivateBlueprint",
 		Method:             "POST",
 		PathPattern:        "/blueprints/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostPrivateReader{formats: a.formats},
+		Reader:             &PostPrivateBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostPrivateOK), nil
+	return result.(*PostPrivateBlueprintOK), nil
 }
 
 /*
-PostPublic creates blueprint as public resource
+PostPublicBlueprint creates blueprint as public resource
 
 Ambari Blueprints are a declarative definition of a Hadoop cluster. With a Blueprint, you specify a stack, the component layout and the configurations to materialize a Hadoop cluster instance. Hostgroups defined in blueprints can be associated to different templates, thus you can spin up a highly available cluster running on different instance types. This will give you the option to group your Hadoop services based on resource needs (e.g. high I/O, CPU or memory) and create an infrastructure which fits your workload best.
 */
-func (a *Client) PostPublic(params *PostPublicParams) (*PostPublicOK, error) {
+func (a *Client) PostPublicBlueprint(params *PostPublicBlueprintParams) (*PostPublicBlueprintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostPublicParams()
+		params = NewPostPublicBlueprintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "postPublic",
+		ID:                 "postPublicBlueprint",
 		Method:             "POST",
 		PathPattern:        "/blueprints/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostPublicReader{formats: a.formats},
+		Reader:             &PostPublicBlueprintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostPublicOK), nil
+	return result.(*PostPublicBlueprintOK), nil
 }
 
 // SetTransport changes the transport on the client

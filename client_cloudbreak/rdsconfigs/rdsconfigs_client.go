@@ -23,79 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteRdsconfigsAccountName deletes public owned or private r d s configuration by name
+DeletePrivateRds deletes private r d s configuration by name
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
-func (a *Client) DeleteRdsconfigsAccountName(params *DeleteRdsconfigsAccountNameParams) error {
+func (a *Client) DeletePrivateRds(params *DeletePrivateRdsParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteRdsconfigsAccountNameParams()
+		params = NewDeletePrivateRdsParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteRdsconfigsAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/rdsconfigs/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteRdsconfigsAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteRdsconfigsID deletes r d s configuration by id
-
-An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
-*/
-func (a *Client) DeleteRdsconfigsID(params *DeleteRdsconfigsIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteRdsconfigsIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteRdsconfigsID",
-		Method:             "DELETE",
-		PathPattern:        "/rdsconfigs/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteRdsconfigsIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteRdsconfigsUserName deletes private r d s configuration by name
-
-An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
-*/
-func (a *Client) DeleteRdsconfigsUserName(params *DeleteRdsconfigsUserNameParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteRdsconfigsUserNameParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteRdsconfigsUserName",
+		ID:                 "deletePrivateRds",
 		Method:             "DELETE",
 		PathPattern:        "/rdsconfigs/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteRdsconfigsUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateRdsReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +50,246 @@ func (a *Client) DeleteRdsconfigsUserName(params *DeleteRdsconfigsUserNameParams
 }
 
 /*
-GetRdsconfigsAccount retrieves public and private owned r d s configurations
+DeletePublicRds deletes public owned or private r d s configuration by name
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
-func (a *Client) GetRdsconfigsAccount(params *GetRdsconfigsAccountParams) (*GetRdsconfigsAccountOK, error) {
+func (a *Client) DeletePublicRds(params *DeletePublicRdsParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRdsconfigsAccountParams()
+		params = NewDeletePublicRdsParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRdsconfigsAccount",
-		Method:             "GET",
-		PathPattern:        "/rdsconfigs/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetRdsconfigsAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetRdsconfigsAccountOK), nil
-}
-
-/*
-GetRdsconfigsAccountName retrieves a public or private owned r d s configuration by name
-
-An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
-*/
-func (a *Client) GetRdsconfigsAccountName(params *GetRdsconfigsAccountNameParams) (*GetRdsconfigsAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetRdsconfigsAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRdsconfigsAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicRds",
+		Method:             "DELETE",
 		PathPattern:        "/rdsconfigs/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetRdsconfigsAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicRdsReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetRdsconfigsAccountNameOK), nil
+	return nil
 }
 
 /*
-GetRdsconfigsID retrieves r d s configuration by id
+DeleteRds deletes r d s configuration by id
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
-func (a *Client) GetRdsconfigsID(params *GetRdsconfigsIDParams) (*GetRdsconfigsIDOK, error) {
+func (a *Client) DeleteRds(params *DeleteRdsParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRdsconfigsIDParams()
+		params = NewDeleteRdsParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRdsconfigsID",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deleteRds",
+		Method:             "DELETE",
 		PathPattern:        "/rdsconfigs/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetRdsconfigsIDReader{formats: a.formats},
+		Reader:             &DeleteRdsReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetRdsconfigsIDOK), nil
+	return nil
 }
 
 /*
-GetRdsconfigsUser retrieves private r d s configurations
+GetPrivateRds retrieves a private r d s configuration by name
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
-func (a *Client) GetRdsconfigsUser(params *GetRdsconfigsUserParams) (*GetRdsconfigsUserOK, error) {
+func (a *Client) GetPrivateRds(params *GetPrivateRdsParams) (*GetPrivateRdsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRdsconfigsUserParams()
+		params = NewGetPrivateRdsParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRdsconfigsUser",
-		Method:             "GET",
-		PathPattern:        "/rdsconfigs/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetRdsconfigsUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetRdsconfigsUserOK), nil
-}
-
-/*
-GetRdsconfigsUserName retrieves a private r d s configuration by name
-
-An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
-*/
-func (a *Client) GetRdsconfigsUserName(params *GetRdsconfigsUserNameParams) (*GetRdsconfigsUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetRdsconfigsUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRdsconfigsUserName",
+		ID:                 "getPrivateRds",
 		Method:             "GET",
 		PathPattern:        "/rdsconfigs/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetRdsconfigsUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateRdsReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetRdsconfigsUserNameOK), nil
+	return result.(*GetPrivateRdsOK), nil
 }
 
 /*
-PostRdsconfigsAccount creates r d s configuration as public resource
+GetPrivatesRds retrieves private r d s configurations
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
-func (a *Client) PostRdsconfigsAccount(params *PostRdsconfigsAccountParams) (*PostRdsconfigsAccountOK, error) {
+func (a *Client) GetPrivatesRds(params *GetPrivatesRdsParams) (*GetPrivatesRdsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostRdsconfigsAccountParams()
+		params = NewGetPrivatesRdsParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostRdsconfigsAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesRds",
+		Method:             "GET",
+		PathPattern:        "/rdsconfigs/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesRdsReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesRdsOK), nil
+}
+
+/*
+GetPublicRds retrieves a public or private owned r d s configuration by name
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) GetPublicRds(params *GetPublicRdsParams) (*GetPublicRdsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicRdsParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicRds",
+		Method:             "GET",
+		PathPattern:        "/rdsconfigs/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicRdsReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicRdsOK), nil
+}
+
+/*
+GetPublicsRds retrieves public and private owned r d s configurations
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) GetPublicsRds(params *GetPublicsRdsParams) (*GetPublicsRdsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsRdsParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsRds",
+		Method:             "GET",
 		PathPattern:        "/rdsconfigs/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostRdsconfigsAccountReader{formats: a.formats},
+		Reader:             &GetPublicsRdsReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostRdsconfigsAccountOK), nil
+	return result.(*GetPublicsRdsOK), nil
 }
 
 /*
-PostRdsconfigsUser creates r d s configuration as private resource
+GetRds retrieves r d s configuration by id
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
-func (a *Client) PostRdsconfigsUser(params *PostRdsconfigsUserParams) (*PostRdsconfigsUserOK, error) {
+func (a *Client) GetRds(params *GetRdsParams) (*GetRdsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostRdsconfigsUserParams()
+		params = NewGetRdsParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostRdsconfigsUser",
+		ID:                 "getRds",
+		Method:             "GET",
+		PathPattern:        "/rdsconfigs/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetRdsReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetRdsOK), nil
+}
+
+/*
+PostPrivateRds creates r d s configuration as private resource
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) PostPrivateRds(params *PostPrivateRdsParams) (*PostPrivateRdsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPrivateRdsParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPrivateRds",
 		Method:             "POST",
 		PathPattern:        "/rdsconfigs/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostRdsconfigsUserReader{formats: a.formats},
+		Reader:             &PostPrivateRdsReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostRdsconfigsUserOK), nil
+	return result.(*PostPrivateRdsOK), nil
+}
+
+/*
+PotPublicRds creates r d s configuration as public resource
+
+An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
+*/
+func (a *Client) PotPublicRds(params *PotPublicRdsParams) (*PotPublicRdsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPotPublicRdsParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "potPublicRds",
+		Method:             "POST",
+		PathPattern:        "/rdsconfigs/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PotPublicRdsReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PotPublicRdsOK), nil
 }
 
 // SetTransport changes the transport on the client

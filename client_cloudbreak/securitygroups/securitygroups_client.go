@@ -23,79 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteSecuritygroupsAccountName deletes public owned or private security group by name
+DeletePrivateSecurityGroup deletes private security group by name
 
 Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
 */
-func (a *Client) DeleteSecuritygroupsAccountName(params *DeleteSecuritygroupsAccountNameParams) error {
+func (a *Client) DeletePrivateSecurityGroup(params *DeletePrivateSecurityGroupParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteSecuritygroupsAccountNameParams()
+		params = NewDeletePrivateSecurityGroupParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSecuritygroupsAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/securitygroups/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteSecuritygroupsAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteSecuritygroupsID deletes security group by id
-
-Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
-*/
-func (a *Client) DeleteSecuritygroupsID(params *DeleteSecuritygroupsIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteSecuritygroupsIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSecuritygroupsID",
-		Method:             "DELETE",
-		PathPattern:        "/securitygroups/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteSecuritygroupsIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteSecuritygroupsUserName deletes private security group by name
-
-Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
-*/
-func (a *Client) DeleteSecuritygroupsUserName(params *DeleteSecuritygroupsUserNameParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteSecuritygroupsUserNameParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSecuritygroupsUserName",
+		ID:                 "deletePrivateSecurityGroup",
 		Method:             "DELETE",
 		PathPattern:        "/securitygroups/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteSecuritygroupsUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateSecurityGroupReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +50,246 @@ func (a *Client) DeleteSecuritygroupsUserName(params *DeleteSecuritygroupsUserNa
 }
 
 /*
-GetSecuritygroupsAccount retrieves public and private owned security groups
+DeletePublicSecurityGroup deletes public owned or private security group by name
 
 Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
 */
-func (a *Client) GetSecuritygroupsAccount(params *GetSecuritygroupsAccountParams) (*GetSecuritygroupsAccountOK, error) {
+func (a *Client) DeletePublicSecurityGroup(params *DeletePublicSecurityGroupParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSecuritygroupsAccountParams()
+		params = NewDeletePublicSecurityGroupParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSecuritygroupsAccount",
-		Method:             "GET",
-		PathPattern:        "/securitygroups/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetSecuritygroupsAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetSecuritygroupsAccountOK), nil
-}
-
-/*
-GetSecuritygroupsAccountName retrieves a public or private owned security group by name
-
-Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
-*/
-func (a *Client) GetSecuritygroupsAccountName(params *GetSecuritygroupsAccountNameParams) (*GetSecuritygroupsAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetSecuritygroupsAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSecuritygroupsAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicSecurityGroup",
+		Method:             "DELETE",
 		PathPattern:        "/securitygroups/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSecuritygroupsAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicSecurityGroupReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetSecuritygroupsAccountNameOK), nil
+	return nil
 }
 
 /*
-GetSecuritygroupsID retrieves security group by id
+DeleteSecurityGroup deletes security group by id
 
 Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
 */
-func (a *Client) GetSecuritygroupsID(params *GetSecuritygroupsIDParams) (*GetSecuritygroupsIDOK, error) {
+func (a *Client) DeleteSecurityGroup(params *DeleteSecurityGroupParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSecuritygroupsIDParams()
+		params = NewDeleteSecurityGroupParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSecuritygroupsID",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deleteSecurityGroup",
+		Method:             "DELETE",
 		PathPattern:        "/securitygroups/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSecuritygroupsIDReader{formats: a.formats},
+		Reader:             &DeleteSecurityGroupReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetSecuritygroupsIDOK), nil
+	return nil
 }
 
 /*
-GetSecuritygroupsUser retrieves private security groups
+GetPrivateSecurityGroup retrieves a private security group by name
 
 Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
 */
-func (a *Client) GetSecuritygroupsUser(params *GetSecuritygroupsUserParams) (*GetSecuritygroupsUserOK, error) {
+func (a *Client) GetPrivateSecurityGroup(params *GetPrivateSecurityGroupParams) (*GetPrivateSecurityGroupOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSecuritygroupsUserParams()
+		params = NewGetPrivateSecurityGroupParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSecuritygroupsUser",
-		Method:             "GET",
-		PathPattern:        "/securitygroups/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetSecuritygroupsUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetSecuritygroupsUserOK), nil
-}
-
-/*
-GetSecuritygroupsUserName retrieves a private security group by name
-
-Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
-*/
-func (a *Client) GetSecuritygroupsUserName(params *GetSecuritygroupsUserNameParams) (*GetSecuritygroupsUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetSecuritygroupsUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSecuritygroupsUserName",
+		ID:                 "getPrivateSecurityGroup",
 		Method:             "GET",
 		PathPattern:        "/securitygroups/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSecuritygroupsUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateSecurityGroupReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSecuritygroupsUserNameOK), nil
+	return result.(*GetPrivateSecurityGroupOK), nil
 }
 
 /*
-PostSecuritygroupsAccount creates security group as public resource
+GetPrivatesSecurityGroup retrieves private security groups
 
 Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
 */
-func (a *Client) PostSecuritygroupsAccount(params *PostSecuritygroupsAccountParams) (*PostSecuritygroupsAccountOK, error) {
+func (a *Client) GetPrivatesSecurityGroup(params *GetPrivatesSecurityGroupParams) (*GetPrivatesSecurityGroupOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostSecuritygroupsAccountParams()
+		params = NewGetPrivatesSecurityGroupParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostSecuritygroupsAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesSecurityGroup",
+		Method:             "GET",
+		PathPattern:        "/securitygroups/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesSecurityGroupReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesSecurityGroupOK), nil
+}
+
+/*
+GetPublicSecurityGroup retrieves a public or private owned security group by name
+
+Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
+*/
+func (a *Client) GetPublicSecurityGroup(params *GetPublicSecurityGroupParams) (*GetPublicSecurityGroupOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicSecurityGroupParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicSecurityGroup",
+		Method:             "GET",
+		PathPattern:        "/securitygroups/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicSecurityGroupReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicSecurityGroupOK), nil
+}
+
+/*
+GetPublicsSecurityGroup retrieves public and private owned security groups
+
+Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
+*/
+func (a *Client) GetPublicsSecurityGroup(params *GetPublicsSecurityGroupParams) (*GetPublicsSecurityGroupOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsSecurityGroupParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsSecurityGroup",
+		Method:             "GET",
 		PathPattern:        "/securitygroups/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostSecuritygroupsAccountReader{formats: a.formats},
+		Reader:             &GetPublicsSecurityGroupReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostSecuritygroupsAccountOK), nil
+	return result.(*GetPublicsSecurityGroupOK), nil
 }
 
 /*
-PostSecuritygroupsUser creates security group as private resource
+GetSecurityGroup retrieves security group by id
 
 Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
 */
-func (a *Client) PostSecuritygroupsUser(params *PostSecuritygroupsUserParams) (*PostSecuritygroupsUserOK, error) {
+func (a *Client) GetSecurityGroup(params *GetSecurityGroupParams) (*GetSecurityGroupOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostSecuritygroupsUserParams()
+		params = NewGetSecurityGroupParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostSecuritygroupsUser",
+		ID:                 "getSecurityGroup",
+		Method:             "GET",
+		PathPattern:        "/securitygroups/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSecurityGroupReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSecurityGroupOK), nil
+}
+
+/*
+PostPrivateSecurityGroup creates security group as private resource
+
+Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
+*/
+func (a *Client) PostPrivateSecurityGroup(params *PostPrivateSecurityGroupParams) (*PostPrivateSecurityGroupOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPrivateSecurityGroupParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPrivateSecurityGroup",
 		Method:             "POST",
 		PathPattern:        "/securitygroups/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostSecuritygroupsUserReader{formats: a.formats},
+		Reader:             &PostPrivateSecurityGroupReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostSecuritygroupsUserOK), nil
+	return result.(*PostPrivateSecurityGroupOK), nil
+}
+
+/*
+PostPublicSecurityGroup creates security group as public resource
+
+Different inbound security rules(group) could be configured by using SecurityGroup resources and a group could be assigned to any Stack(cluster).
+*/
+func (a *Client) PostPublicSecurityGroup(params *PostPublicSecurityGroupParams) (*PostPublicSecurityGroupOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicSecurityGroupParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicSecurityGroup",
+		Method:             "POST",
+		PathPattern:        "/securitygroups/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicSecurityGroupReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicSecurityGroupOK), nil
 }
 
 // SetTransport changes the transport on the client

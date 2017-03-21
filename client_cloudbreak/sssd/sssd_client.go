@@ -23,79 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteSssdAccountName deletes public owned or private s s s d config by name
+DeletePrivateSssd deletes private s s s d config by name
 
 SSSD configs are defining external user database configuration for provisioned clusters.
 */
-func (a *Client) DeleteSssdAccountName(params *DeleteSssdAccountNameParams) error {
+func (a *Client) DeletePrivateSssd(params *DeletePrivateSssdParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteSssdAccountNameParams()
+		params = NewDeletePrivateSssdParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSssdAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/sssd/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteSssdAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteSssdID deletes s s s d config by id
-
-SSSD configs are defining external user database configuration for provisioned clusters.
-*/
-func (a *Client) DeleteSssdID(params *DeleteSssdIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteSssdIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSssdID",
-		Method:             "DELETE",
-		PathPattern:        "/sssd/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteSssdIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteSssdUserName deletes private s s s d config by name
-
-SSSD configs are defining external user database configuration for provisioned clusters.
-*/
-func (a *Client) DeleteSssdUserName(params *DeleteSssdUserNameParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteSssdUserNameParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSssdUserName",
+		ID:                 "deletePrivateSssd",
 		Method:             "DELETE",
 		PathPattern:        "/sssd/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteSssdUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateSssdReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +50,246 @@ func (a *Client) DeleteSssdUserName(params *DeleteSssdUserNameParams) error {
 }
 
 /*
-GetSssdAccount retrieves public and private owned s s s d configs
+DeletePublicSssd deletes public owned or private s s s d config by name
 
 SSSD configs are defining external user database configuration for provisioned clusters.
 */
-func (a *Client) GetSssdAccount(params *GetSssdAccountParams) (*GetSssdAccountOK, error) {
+func (a *Client) DeletePublicSssd(params *DeletePublicSssdParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSssdAccountParams()
+		params = NewDeletePublicSssdParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSssdAccount",
-		Method:             "GET",
-		PathPattern:        "/sssd/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetSssdAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetSssdAccountOK), nil
-}
-
-/*
-GetSssdAccountName retrieves a public or private owned s s s d config by name
-
-SSSD configs are defining external user database configuration for provisioned clusters.
-*/
-func (a *Client) GetSssdAccountName(params *GetSssdAccountNameParams) (*GetSssdAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetSssdAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSssdAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicSssd",
+		Method:             "DELETE",
 		PathPattern:        "/sssd/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSssdAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicSssdReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetSssdAccountNameOK), nil
+	return nil
 }
 
 /*
-GetSssdID retrieves s s s d config by id
+DeleteSssd deletes s s s d config by id
 
 SSSD configs are defining external user database configuration for provisioned clusters.
 */
-func (a *Client) GetSssdID(params *GetSssdIDParams) (*GetSssdIDOK, error) {
+func (a *Client) DeleteSssd(params *DeleteSssdParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSssdIDParams()
+		params = NewDeleteSssdParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSssdID",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deleteSssd",
+		Method:             "DELETE",
 		PathPattern:        "/sssd/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSssdIDReader{formats: a.formats},
+		Reader:             &DeleteSssdReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetSssdIDOK), nil
+	return nil
 }
 
 /*
-GetSssdUser retrieves private s s s d configs
+GetPrivateSssd retrieves a private s s s d config by name
 
 SSSD configs are defining external user database configuration for provisioned clusters.
 */
-func (a *Client) GetSssdUser(params *GetSssdUserParams) (*GetSssdUserOK, error) {
+func (a *Client) GetPrivateSssd(params *GetPrivateSssdParams) (*GetPrivateSssdOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetSssdUserParams()
+		params = NewGetPrivateSssdParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSssdUser",
-		Method:             "GET",
-		PathPattern:        "/sssd/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetSssdUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetSssdUserOK), nil
-}
-
-/*
-GetSssdUserName retrieves a private s s s d config by name
-
-SSSD configs are defining external user database configuration for provisioned clusters.
-*/
-func (a *Client) GetSssdUserName(params *GetSssdUserNameParams) (*GetSssdUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetSssdUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetSssdUserName",
+		ID:                 "getPrivateSssd",
 		Method:             "GET",
 		PathPattern:        "/sssd/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetSssdUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateSssdReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetSssdUserNameOK), nil
+	return result.(*GetPrivateSssdOK), nil
 }
 
 /*
-PostSssdAccount creates s s s d config as public resource
+GetPrivatesSssd retrieves private s s s d configs
 
 SSSD configs are defining external user database configuration for provisioned clusters.
 */
-func (a *Client) PostSssdAccount(params *PostSssdAccountParams) (*PostSssdAccountOK, error) {
+func (a *Client) GetPrivatesSssd(params *GetPrivatesSssdParams) (*GetPrivatesSssdOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostSssdAccountParams()
+		params = NewGetPrivatesSssdParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostSssdAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesSssd",
+		Method:             "GET",
+		PathPattern:        "/sssd/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesSssdReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesSssdOK), nil
+}
+
+/*
+GetPublicSssd retrieves a public or private owned s s s d config by name
+
+SSSD configs are defining external user database configuration for provisioned clusters.
+*/
+func (a *Client) GetPublicSssd(params *GetPublicSssdParams) (*GetPublicSssdOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicSssdParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicSssd",
+		Method:             "GET",
+		PathPattern:        "/sssd/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicSssdReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicSssdOK), nil
+}
+
+/*
+GetPublicsSssd retrieves public and private owned s s s d configs
+
+SSSD configs are defining external user database configuration for provisioned clusters.
+*/
+func (a *Client) GetPublicsSssd(params *GetPublicsSssdParams) (*GetPublicsSssdOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsSssdParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsSssd",
+		Method:             "GET",
 		PathPattern:        "/sssd/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostSssdAccountReader{formats: a.formats},
+		Reader:             &GetPublicsSssdReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostSssdAccountOK), nil
+	return result.(*GetPublicsSssdOK), nil
 }
 
 /*
-PostSssdUser creates s s s d config as private resource
+GetSssd retrieves s s s d config by id
 
 SSSD configs are defining external user database configuration for provisioned clusters.
 */
-func (a *Client) PostSssdUser(params *PostSssdUserParams) (*PostSssdUserOK, error) {
+func (a *Client) GetSssd(params *GetSssdParams) (*GetSssdOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostSssdUserParams()
+		params = NewGetSssdParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostSssdUser",
+		ID:                 "getSssd",
+		Method:             "GET",
+		PathPattern:        "/sssd/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSssdReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSssdOK), nil
+}
+
+/*
+PostPrivateSssd creates s s s d config as private resource
+
+SSSD configs are defining external user database configuration for provisioned clusters.
+*/
+func (a *Client) PostPrivateSssd(params *PostPrivateSssdParams) (*PostPrivateSssdOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPrivateSssdParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPrivateSssd",
 		Method:             "POST",
 		PathPattern:        "/sssd/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostSssdUserReader{formats: a.formats},
+		Reader:             &PostPrivateSssdReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostSssdUserOK), nil
+	return result.(*PostPrivateSssdOK), nil
+}
+
+/*
+PostPublicSssd creates s s s d config as public resource
+
+SSSD configs are defining external user database configuration for provisioned clusters.
+*/
+func (a *Client) PostPublicSssd(params *PostPublicSssdParams) (*PostPublicSssdOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicSssdParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicSssd",
+		Method:             "POST",
+		PathPattern:        "/sssd/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicSssdReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicSssdOK), nil
 }
 
 // SetTransport changes the transport on the client

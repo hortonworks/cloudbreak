@@ -23,79 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteTemplatesAccountName deletes public owned or private template by name
+DeletePrivateTemplate deletes private template by name
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) DeleteTemplatesAccountName(params *DeleteTemplatesAccountNameParams) error {
+func (a *Client) DeletePrivateTemplate(params *DeletePrivateTemplateParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteTemplatesAccountNameParams()
+		params = NewDeletePrivateTemplateParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteTemplatesAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/templates/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteTemplatesAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteTemplatesID deletes template by id
-
-A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
-*/
-func (a *Client) DeleteTemplatesID(params *DeleteTemplatesIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteTemplatesIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteTemplatesID",
-		Method:             "DELETE",
-		PathPattern:        "/templates/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteTemplatesIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteTemplatesUserName deletes private template by name
-
-A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
-*/
-func (a *Client) DeleteTemplatesUserName(params *DeleteTemplatesUserNameParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteTemplatesUserNameParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteTemplatesUserName",
+		ID:                 "deletePrivateTemplate",
 		Method:             "DELETE",
 		PathPattern:        "/templates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteTemplatesUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +50,246 @@ func (a *Client) DeleteTemplatesUserName(params *DeleteTemplatesUserNameParams) 
 }
 
 /*
-GetTemplatesAccount retrieves public and private owned templates
+DeletePublicTemplate deletes public owned or private template by name
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) GetTemplatesAccount(params *GetTemplatesAccountParams) (*GetTemplatesAccountOK, error) {
+func (a *Client) DeletePublicTemplate(params *DeletePublicTemplateParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetTemplatesAccountParams()
+		params = NewDeletePublicTemplateParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetTemplatesAccount",
-		Method:             "GET",
-		PathPattern:        "/templates/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetTemplatesAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetTemplatesAccountOK), nil
-}
-
-/*
-GetTemplatesAccountName retrieves a public or private owned template by name
-
-A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
-*/
-func (a *Client) GetTemplatesAccountName(params *GetTemplatesAccountNameParams) (*GetTemplatesAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetTemplatesAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetTemplatesAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicTemplate",
+		Method:             "DELETE",
 		PathPattern:        "/templates/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetTemplatesAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicTemplateReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetTemplatesAccountNameOK), nil
+	return nil
 }
 
 /*
-GetTemplatesID retrieves template by id
+DeleteTemplate deletes template by id
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) GetTemplatesID(params *GetTemplatesIDParams) (*GetTemplatesIDOK, error) {
+func (a *Client) DeleteTemplate(params *DeleteTemplateParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetTemplatesIDParams()
+		params = NewDeleteTemplateParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetTemplatesID",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deleteTemplate",
+		Method:             "DELETE",
 		PathPattern:        "/templates/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetTemplatesIDReader{formats: a.formats},
+		Reader:             &DeleteTemplateReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetTemplatesIDOK), nil
+	return nil
 }
 
 /*
-GetTemplatesUser retrieves private templates
+GetPrivateTemplate retrieves a private template by name
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) GetTemplatesUser(params *GetTemplatesUserParams) (*GetTemplatesUserOK, error) {
+func (a *Client) GetPrivateTemplate(params *GetPrivateTemplateParams) (*GetPrivateTemplateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetTemplatesUserParams()
+		params = NewGetPrivateTemplateParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetTemplatesUser",
-		Method:             "GET",
-		PathPattern:        "/templates/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetTemplatesUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetTemplatesUserOK), nil
-}
-
-/*
-GetTemplatesUserName retrieves a private template by name
-
-A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
-*/
-func (a *Client) GetTemplatesUserName(params *GetTemplatesUserNameParams) (*GetTemplatesUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetTemplatesUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetTemplatesUserName",
+		ID:                 "getPrivateTemplate",
 		Method:             "GET",
 		PathPattern:        "/templates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetTemplatesUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetTemplatesUserNameOK), nil
+	return result.(*GetPrivateTemplateOK), nil
 }
 
 /*
-PostTemplatesAccount creates template as public resource
+GetPrivatesTemplate retrieves private templates
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) PostTemplatesAccount(params *PostTemplatesAccountParams) (*PostTemplatesAccountOK, error) {
+func (a *Client) GetPrivatesTemplate(params *GetPrivatesTemplateParams) (*GetPrivatesTemplateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostTemplatesAccountParams()
+		params = NewGetPrivatesTemplateParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostTemplatesAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesTemplate",
+		Method:             "GET",
+		PathPattern:        "/templates/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesTemplateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesTemplateOK), nil
+}
+
+/*
+GetPublicTemplate retrieves a public or private owned template by name
+
+A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
+*/
+func (a *Client) GetPublicTemplate(params *GetPublicTemplateParams) (*GetPublicTemplateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicTemplateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicTemplate",
+		Method:             "GET",
+		PathPattern:        "/templates/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicTemplateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicTemplateOK), nil
+}
+
+/*
+GetPublicsTemplate retrieves public and private owned templates
+
+A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
+*/
+func (a *Client) GetPublicsTemplate(params *GetPublicsTemplateParams) (*GetPublicsTemplateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsTemplateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsTemplate",
+		Method:             "GET",
 		PathPattern:        "/templates/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostTemplatesAccountReader{formats: a.formats},
+		Reader:             &GetPublicsTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostTemplatesAccountOK), nil
+	return result.(*GetPublicsTemplateOK), nil
 }
 
 /*
-PostTemplatesUser creates template as private resource
+GetTemplate retrieves template by id
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) PostTemplatesUser(params *PostTemplatesUserParams) (*PostTemplatesUserOK, error) {
+func (a *Client) GetTemplate(params *GetTemplateParams) (*GetTemplateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostTemplatesUserParams()
+		params = NewGetTemplateParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostTemplatesUser",
+		ID:                 "getTemplate",
+		Method:             "GET",
+		PathPattern:        "/templates/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetTemplateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetTemplateOK), nil
+}
+
+/*
+PostPrivateTemplate creates template as private resource
+
+A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
+*/
+func (a *Client) PostPrivateTemplate(params *PostPrivateTemplateParams) (*PostPrivateTemplateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPrivateTemplateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPrivateTemplate",
 		Method:             "POST",
 		PathPattern:        "/templates/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostTemplatesUserReader{formats: a.formats},
+		Reader:             &PostPrivateTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostTemplatesUserOK), nil
+	return result.(*PostPrivateTemplateOK), nil
+}
+
+/*
+PostPublicTemplate creates template as public resource
+
+A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
+*/
+func (a *Client) PostPublicTemplate(params *PostPublicTemplateParams) (*PostPublicTemplateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicTemplateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicTemplate",
+		Method:             "POST",
+		PathPattern:        "/templates/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicTemplateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicTemplateOK), nil
 }
 
 // SetTransport changes the transport on the client

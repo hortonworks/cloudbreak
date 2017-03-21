@@ -19,6 +19,7 @@ import (
 swagger:model RDSConfigResponse
 */
 type RDSConfigResponse struct {
+
 	/* list of clusters which use config
 
 	Unique: true
@@ -145,8 +146,7 @@ func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {
 
 func (m *RDSConfigResponse) validateClusterNames(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.ClusterNames) {
-		// not required
+	if swag.IsZero(m.ClusterNames) { // not required
 		return nil
 	}
 
@@ -247,8 +247,7 @@ func (m *RDSConfigResponse) validateName(formats strfmt.Registry) error {
 
 func (m *RDSConfigResponse) validateProperties(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Properties) {
-		// not required
+	if swag.IsZero(m.Properties) { // not required
 		return nil
 	}
 
@@ -275,7 +274,7 @@ var rDSConfigResponseTypeTypePropEnum []interface{}
 func (m *RDSConfigResponse) validateTypeEnum(path, location string, value string) error {
 	if rDSConfigResponseTypeTypePropEnum == nil {
 		var res []string
-		if err := json.Unmarshal([]byte(`["HIVE","RANGER"]`), &res); err != nil {
+		if err := json.Unmarshal([]byte(`["HIVE","RANGER","DRUID"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {
@@ -290,8 +289,7 @@ func (m *RDSConfigResponse) validateTypeEnum(path, location string, value string
 
 func (m *RDSConfigResponse) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Type) {
-		// not required
+	if swag.IsZero(m.Type) { // not required
 		return nil
 	}
 

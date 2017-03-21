@@ -76,14 +76,14 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		return models_cloudbreak.RDSConfigResponse{ID: &id}
 	}
 	stackId := int64(20)
-	postStack := func(params *stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error) {
+	postStack := func(params *stacks.PostPrivateStackParams) (*stacks.PostPrivateStackOK, error) {
 		actualStack = params.Body
-		return &stacks.PostStacksUserOK{Payload: &models_cloudbreak.StackResponse{ID: &stackId}}, nil
+		return &stacks.PostPrivateStackOK{Payload: &models_cloudbreak.StackResponse{ID: &stackId}}, nil
 	}
 	clusterId := int64(30)
-	postCluster := func(params *cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error) {
+	postCluster := func(params *cluster.PostClusterParams) (*cluster.PostClusterOK, error) {
 		actualCluster = params.Body
-		return &cluster.PostStacksIDClusterOK{Payload: &models_cloudbreak.ClusterResponse{ID: &clusterId}}, nil
+		return &cluster.PostClusterOK{Payload: &models_cloudbreak.ClusterResponse{ID: &clusterId}}, nil
 	}
 
 	createFuncs := []func(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest{}
@@ -97,7 +97,7 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		return &models_cloudbreak.SecurityGroupRequest{CloudPlatform: "AWS", Name: "secg", SecurityRules: make([]*models_cloudbreak.SecurityRuleRequest, 0)}
 	}
 	createCredentialRequest := func(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string) *models_cloudbreak.CredentialRequest {
-		return &models_cloudbreak.CredentialRequest{Name: "cred", CloudPlatform: "AWS", PublicKey: "key"}
+		return &models_cloudbreak.CredentialRequest{Name: "cred", CloudPlatform: "AWS", PublicKey: &(&stringWrapper{"key"}).s}
 	}
 	createNetworkRequest := func(skeleton ClusterSkeleton, getNetwork func(string) models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkRequest {
 		return &models_cloudbreak.NetworkRequest{Name: "net", CloudPlatform: "AWS"}
@@ -145,7 +145,7 @@ func TestResizeClusterImplStack(t *testing.T) {
 	}
 	var actualId int64
 	var actualUpdate models_cloudbreak.UpdateStack
-	putStack := func(params *stacks.PutStacksIDParams) error {
+	putStack := func(params *stacks.PutStackParams) error {
 		actualId = params.ID
 		actualUpdate = *params.Body
 		return nil
@@ -175,7 +175,7 @@ func TestResizeClusterImplCluster(t *testing.T) {
 	}
 	var actualId int64
 	var actualUpdate models_cloudbreak.UpdateCluster
-	putCluster := func(params *cluster.PutStacksIDClusterParams) error {
+	putCluster := func(params *cluster.PutClusterParams) error {
 		actualId = params.ID
 		actualUpdate = *params.Body
 		return nil
@@ -208,7 +208,7 @@ func TestResizeClusterInvalidWorkerCount(t *testing.T) {
 		ig := []*models_cloudbreak.InstanceGroupResponse{{Group: WORKER, Metadata: instances}}
 		return &models_cloudbreak.StackResponse{ID: &expectedId, InstanceGroups: ig}
 	}
-	putCluster := func(params *cluster.PutStacksIDClusterParams) error {
+	putCluster := func(params *cluster.PutClusterParams) error {
 		return nil
 	}
 	expectedAdjustment := int32(-1)
@@ -246,7 +246,7 @@ func TestResizeClusterInvalidComputeCount(t *testing.T) {
 		ig := []*models_cloudbreak.InstanceGroupResponse{{Group: COMPUTE, Metadata: instances}}
 		return &models_cloudbreak.StackResponse{ID: &expectedId, InstanceGroups: ig}
 	}
-	putCluster := func(params *cluster.PutStacksIDClusterParams) error {
+	putCluster := func(params *cluster.PutClusterParams) error {
 		return nil
 	}
 	expectedAdjustment := int32(-2)

@@ -23,349 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteStacksAccountName deletes public owned or private stack by name
+DeleteInstanceStack deletes instance resource from stack
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
-func (a *Client) DeleteStacksAccountName(params *DeleteStacksAccountNameParams) error {
+func (a *Client) DeleteInstanceStack(params *DeleteInstanceStackParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteStacksAccountNameParams()
+		params = NewDeleteInstanceStackParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteStacksAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/stacks/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteStacksAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteStacksID deletes stack by id
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) DeleteStacksID(params *DeleteStacksIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteStacksIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteStacksID",
-		Method:             "DELETE",
-		PathPattern:        "/stacks/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteStacksIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteStacksUserName deletes private stack by name
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) DeleteStacksUserName(params *DeleteStacksUserNameParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteStacksUserNameParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteStacksUserName",
-		Method:             "DELETE",
-		PathPattern:        "/stacks/user/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteStacksUserNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-GetStacksAccount retrieves public and private owned stacks
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetStacksAccount(params *GetStacksAccountParams) (*GetStacksAccountOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksAccountParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksAccount",
-		Method:             "GET",
-		PathPattern:        "/stacks/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksAccountOK), nil
-}
-
-/*
-GetStacksAccountName retrieves a public or private owned stack by name
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetStacksAccountName(params *GetStacksAccountNameParams) (*GetStacksAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksAccountName",
-		Method:             "GET",
-		PathPattern:        "/stacks/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksAccountNameOK), nil
-}
-
-/*
-GetStacksID retrieves stack by id
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetStacksID(params *GetStacksIDParams) (*GetStacksIDOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksIDParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksID",
-		Method:             "GET",
-		PathPattern:        "/stacks/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksIDOK), nil
-}
-
-/*
-GetStacksUser retrieves private stack
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetStacksUser(params *GetStacksUserParams) (*GetStacksUserOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksUserParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksUser",
-		Method:             "GET",
-		PathPattern:        "/stacks/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksUserOK), nil
-}
-
-/*
-GetStacksUserName retrieves a private stack by name
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) GetStacksUserName(params *GetStacksUserNameParams) (*GetStacksUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksUserName",
-		Method:             "GET",
-		PathPattern:        "/stacks/user/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksUserNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksUserNameOK), nil
-}
-
-/*
-PostStacksAccount creates stack as public resource
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) PostStacksAccount(params *PostStacksAccountParams) (*PostStacksAccountOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostStacksAccountParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostStacksAccount",
-		Method:             "POST",
-		PathPattern:        "/stacks/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PostStacksAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*PostStacksAccountOK), nil
-}
-
-/*
-PostStacksUser creates stack as private resource
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) PostStacksUser(params *PostStacksUserParams) (*PostStacksUserOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostStacksUserParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostStacksUser",
-		Method:             "POST",
-		PathPattern:        "/stacks/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PostStacksUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*PostStacksUserOK), nil
-}
-
-/*
-PostStacksValidate validates stack
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) PostStacksValidate(params *PostStacksValidateParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostStacksValidateParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostStacksValidate",
-		Method:             "POST",
-		PathPattern:        "/stacks/validate",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PostStacksValidateReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-PutStacksID updates stack by id
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) PutStacksID(params *PutStacksIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPutStacksIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "PutStacksID",
-		Method:             "PUT",
-		PathPattern:        "/stacks/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PutStacksIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteInstance deletes instance resource from stack
-
-Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
-*/
-func (a *Client) DeleteInstance(params *DeleteInstanceParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteInstanceParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "deleteInstance",
+		ID:                 "deleteInstanceStack",
 		Method:             "DELETE",
 		PathPattern:        "/stacks/{stackId}/{instanceId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteInstanceReader{formats: a.formats},
+		Reader:             &DeleteInstanceStackReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -374,57 +50,273 @@ func (a *Client) DeleteInstance(params *DeleteInstanceParams) error {
 }
 
 /*
-GetAll retrieves all stacks
+DeletePrivateStack deletes private stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
-func (a *Client) GetAll(params *GetAllParams) (*GetAllOK, error) {
+func (a *Client) DeletePrivateStack(params *DeletePrivateStackParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetAllParams()
+		params = NewDeletePrivateStackParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePrivateStack",
+		Method:             "DELETE",
+		PathPattern:        "/stacks/user/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeletePrivateStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+DeletePublicStack deletes public owned or private stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) DeletePublicStack(params *DeletePublicStackParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeletePublicStackParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicStack",
+		Method:             "DELETE",
+		PathPattern:        "/stacks/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeletePublicStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+DeleteStack deletes stack by id
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) DeleteStack(params *DeleteStackParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteStackParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deleteStack",
+		Method:             "DELETE",
+		PathPattern:        "/stacks/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+GetAllStack retrieves all stacks
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetAllStack(params *GetAllStackParams) (*GetAllStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetAllStackParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getAll",
+		ID:                 "getAllStack",
 		Method:             "GET",
 		PathPattern:        "/stacks/all",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetAllReader{formats: a.formats},
+		Reader:             &GetAllStackReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetAllOK), nil
+	return result.(*GetAllStackOK), nil
 }
 
 /*
-GetCertificate retrieves the TLS certificate used by the gateway
+GetCertificateStack retrieves the TLS certificate used by the gateway
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
-func (a *Client) GetCertificate(params *GetCertificateParams) (*GetCertificateOK, error) {
+func (a *Client) GetCertificateStack(params *GetCertificateStackParams) (*GetCertificateStackOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetCertificateParams()
+		params = NewGetCertificateStackParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getCertificate",
+		ID:                 "getCertificateStack",
 		Method:             "GET",
 		PathPattern:        "/stacks/{id}/certificate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetCertificateReader{formats: a.formats},
+		Reader:             &GetCertificateStackReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetCertificateOK), nil
+	return result.(*GetCertificateStackOK), nil
+}
+
+/*
+GetPrivateStack retrieves a private stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetPrivateStack(params *GetPrivateStackParams) (*GetPrivateStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPrivateStackParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPrivateStack",
+		Method:             "GET",
+		PathPattern:        "/stacks/user/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivateStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivateStackOK), nil
+}
+
+/*
+GetPrivatesStack retrieves private stack
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetPrivatesStack(params *GetPrivatesStackParams) (*GetPrivatesStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPrivatesStackParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPrivatesStack",
+		Method:             "GET",
+		PathPattern:        "/stacks/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesStackOK), nil
+}
+
+/*
+GetPublicStack retrieves a public or private owned stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetPublicStack(params *GetPublicStackParams) (*GetPublicStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicStackParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicStack",
+		Method:             "GET",
+		PathPattern:        "/stacks/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicStackOK), nil
+}
+
+/*
+GetPublicsStack retrieves public and private owned stacks
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetPublicsStack(params *GetPublicsStackParams) (*GetPublicsStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsStackParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsStack",
+		Method:             "GET",
+		PathPattern:        "/stacks/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicsStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicsStackOK), nil
+}
+
+/*
+GetStack retrieves stack by id
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) GetStack(params *GetStackParams) (*GetStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetStackParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getStack",
+		Method:             "GET",
+		PathPattern:        "/stacks/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetStackOK), nil
 }
 
 /*
@@ -455,57 +347,165 @@ func (a *Client) GetStackForAmbari(params *GetStackForAmbariParams) (*GetStackFo
 }
 
 /*
-Status retrieves stack status by stack id
+PostPrivateStack creates stack as private resource
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
-func (a *Client) Status(params *StatusParams) (*StatusOK, error) {
+func (a *Client) PostPrivateStack(params *PostPrivateStackParams) (*PostPrivateStackOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewStatusParams()
+		params = NewPostPrivateStackParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "status",
+		ID:                 "postPrivateStack",
+		Method:             "POST",
+		PathPattern:        "/stacks/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPrivateStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPrivateStackOK), nil
+}
+
+/*
+PostPublicStack creates stack as public resource
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PostPublicStack(params *PostPublicStackParams) (*PostPublicStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicStackParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicStack",
+		Method:             "POST",
+		PathPattern:        "/stacks/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicStackOK), nil
+}
+
+/*
+PutStack updates stack by id
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PutStack(params *PutStackParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutStackParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "putStack",
+		Method:             "PUT",
+		PathPattern:        "/stacks/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+StatusStack retrieves stack status by stack id
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) StatusStack(params *StatusStackParams) (*StatusStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewStatusStackParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "statusStack",
 		Method:             "GET",
 		PathPattern:        "/stacks/{id}/status",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &StatusReader{formats: a.formats},
+		Reader:             &StatusStackReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*StatusOK), nil
+	return result.(*StatusStackOK), nil
 }
 
 /*
-Variants retrieves available platform variants
+ValidateStack validates stack
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
-func (a *Client) Variants(params *VariantsParams) (*VariantsOK, error) {
+func (a *Client) ValidateStack(params *ValidateStackParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewVariantsParams()
+		params = NewValidateStackParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "validateStack",
+		Method:             "POST",
+		PathPattern:        "/stacks/validate",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &ValidateStackReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+VariantsStack retrieves available platform variants
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) VariantsStack(params *VariantsStackParams) (*VariantsStackOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewVariantsStackParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "variants",
+		ID:                 "variantsStack",
 		Method:             "GET",
 		PathPattern:        "/stacks/platformVariants",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &VariantsReader{formats: a.formats},
+		Reader:             &VariantsStackReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*VariantsOK), nil
+	return result.(*VariantsStackOK), nil
 }
 
 // SetTransport changes the transport on the client

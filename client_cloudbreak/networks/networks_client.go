@@ -23,52 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteNetworksAccountName deletes public owned or private network by name
+DeleteNetwork deletes network by id
 
 Provider specific network settings could be configured by using Network resources.
 */
-func (a *Client) DeleteNetworksAccountName(params *DeleteNetworksAccountNameParams) error {
+func (a *Client) DeleteNetwork(params *DeleteNetworkParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteNetworksAccountNameParams()
+		params = NewDeleteNetworkParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteNetworksAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/networks/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteNetworksAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteNetworksID deletes network by id
-
-Provider specific network settings could be configured by using Network resources.
-*/
-func (a *Client) DeleteNetworksID(params *DeleteNetworksIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteNetworksIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteNetworksID",
+		ID:                 "deleteNetwork",
 		Method:             "DELETE",
 		PathPattern:        "/networks/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteNetworksIDReader{formats: a.formats},
+		Reader:             &DeleteNetworkReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -77,25 +50,25 @@ func (a *Client) DeleteNetworksID(params *DeleteNetworksIDParams) error {
 }
 
 /*
-DeleteNetworksUserName deletes private network by name
+DeletePrivateNetwork deletes private network by name
 
 Provider specific network settings could be configured by using Network resources.
 */
-func (a *Client) DeleteNetworksUserName(params *DeleteNetworksUserNameParams) error {
+func (a *Client) DeletePrivateNetwork(params *DeletePrivateNetworkParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteNetworksUserNameParams()
+		params = NewDeletePrivateNetworkParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteNetworksUserName",
+		ID:                 "deletePrivateNetwork",
 		Method:             "DELETE",
 		PathPattern:        "/networks/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteNetworksUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateNetworkReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +77,219 @@ func (a *Client) DeleteNetworksUserName(params *DeleteNetworksUserNameParams) er
 }
 
 /*
-GetNetworksAccount retrieves public and private owned networks
+DeletePublicNetwork deletes public owned or private network by name
 
 Provider specific network settings could be configured by using Network resources.
 */
-func (a *Client) GetNetworksAccount(params *GetNetworksAccountParams) (*GetNetworksAccountOK, error) {
+func (a *Client) DeletePublicNetwork(params *DeletePublicNetworkParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetNetworksAccountParams()
+		params = NewDeletePublicNetworkParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetNetworksAccount",
-		Method:             "GET",
-		PathPattern:        "/networks/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetNetworksAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetNetworksAccountOK), nil
-}
-
-/*
-GetNetworksAccountName retrieves a public or private owned network by name
-
-Provider specific network settings could be configured by using Network resources.
-*/
-func (a *Client) GetNetworksAccountName(params *GetNetworksAccountNameParams) (*GetNetworksAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetNetworksAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetNetworksAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicNetwork",
+		Method:             "DELETE",
 		PathPattern:        "/networks/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetNetworksAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicNetworkReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetNetworksAccountNameOK), nil
+	return nil
 }
 
 /*
-GetNetworksID retrieves network by id
+GetNetwork retrieves network by id
 
 Provider specific network settings could be configured by using Network resources.
 */
-func (a *Client) GetNetworksID(params *GetNetworksIDParams) (*GetNetworksIDOK, error) {
+func (a *Client) GetNetwork(params *GetNetworkParams) (*GetNetworkOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetNetworksIDParams()
+		params = NewGetNetworkParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetNetworksID",
+		ID:                 "getNetwork",
 		Method:             "GET",
 		PathPattern:        "/networks/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetNetworksIDReader{formats: a.formats},
+		Reader:             &GetNetworkReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetNetworksIDOK), nil
+	return result.(*GetNetworkOK), nil
 }
 
 /*
-GetNetworksUser retrieves private networks
+GetPrivateNetwork retrieves a private network by name
 
 Provider specific network settings could be configured by using Network resources.
 */
-func (a *Client) GetNetworksUser(params *GetNetworksUserParams) (*GetNetworksUserOK, error) {
+func (a *Client) GetPrivateNetwork(params *GetPrivateNetworkParams) (*GetPrivateNetworkOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetNetworksUserParams()
+		params = NewGetPrivateNetworkParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetNetworksUser",
-		Method:             "GET",
-		PathPattern:        "/networks/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetNetworksUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetNetworksUserOK), nil
-}
-
-/*
-GetNetworksUserName retrieves a private network by name
-
-Provider specific network settings could be configured by using Network resources.
-*/
-func (a *Client) GetNetworksUserName(params *GetNetworksUserNameParams) (*GetNetworksUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetNetworksUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetNetworksUserName",
+		ID:                 "getPrivateNetwork",
 		Method:             "GET",
 		PathPattern:        "/networks/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetNetworksUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateNetworkReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetNetworksUserNameOK), nil
+	return result.(*GetPrivateNetworkOK), nil
 }
 
 /*
-PostNetworksAccount creates network as public resource
+GetPrivatesNetwork retrieves private networks
 
 Provider specific network settings could be configured by using Network resources.
 */
-func (a *Client) PostNetworksAccount(params *PostNetworksAccountParams) (*PostNetworksAccountOK, error) {
+func (a *Client) GetPrivatesNetwork(params *GetPrivatesNetworkParams) (*GetPrivatesNetworkOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostNetworksAccountParams()
+		params = NewGetPrivatesNetworkParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostNetworksAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesNetwork",
+		Method:             "GET",
+		PathPattern:        "/networks/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesNetworkReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesNetworkOK), nil
+}
+
+/*
+GetPublicNetwork retrieves a public or private owned network by name
+
+Provider specific network settings could be configured by using Network resources.
+*/
+func (a *Client) GetPublicNetwork(params *GetPublicNetworkParams) (*GetPublicNetworkOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicNetworkParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicNetwork",
+		Method:             "GET",
+		PathPattern:        "/networks/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicNetworkReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicNetworkOK), nil
+}
+
+/*
+GetPublicsNetwork retrieves public and private owned networks
+
+Provider specific network settings could be configured by using Network resources.
+*/
+func (a *Client) GetPublicsNetwork(params *GetPublicsNetworkParams) (*GetPublicsNetworkOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsNetworkParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsNetwork",
+		Method:             "GET",
 		PathPattern:        "/networks/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostNetworksAccountReader{formats: a.formats},
+		Reader:             &GetPublicsNetworkReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostNetworksAccountOK), nil
+	return result.(*GetPublicsNetworkOK), nil
 }
 
 /*
-PostNetworksUser creates network as private resource
+PostPrivateNetwork creates network as private resource
 
 Provider specific network settings could be configured by using Network resources.
 */
-func (a *Client) PostNetworksUser(params *PostNetworksUserParams) (*PostNetworksUserOK, error) {
+func (a *Client) PostPrivateNetwork(params *PostPrivateNetworkParams) (*PostPrivateNetworkOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostNetworksUserParams()
+		params = NewPostPrivateNetworkParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostNetworksUser",
+		ID:                 "postPrivateNetwork",
 		Method:             "POST",
 		PathPattern:        "/networks/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostNetworksUserReader{formats: a.formats},
+		Reader:             &PostPrivateNetworkReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostNetworksUserOK), nil
+	return result.(*PostPrivateNetworkOK), nil
+}
+
+/*
+PostPublicNetwork creates network as public resource
+
+Provider specific network settings could be configured by using Network resources.
+*/
+func (a *Client) PostPublicNetwork(params *PostPublicNetworkParams) (*PostPublicNetworkOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicNetworkParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicNetwork",
+		Method:             "POST",
+		PathPattern:        "/networks/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicNetworkReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicNetworkOK), nil
 }
 
 // SetTransport changes the transport on the client

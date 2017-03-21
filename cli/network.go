@@ -26,17 +26,17 @@ func (c *Cloudbreak) CreateNetwork(skeleton ClusterSkeleton, channel chan int64,
 	defer timeTrack(time.Now(), "create network")
 	defer wg.Done()
 
-	createNetworkImpl(skeleton, channel, c.Cloudbreak.Networks.PostNetworksAccount, c.GetNetwork)
+	createNetworkImpl(skeleton, channel, c.Cloudbreak.Networks.PostPublicNetwork, c.GetNetwork)
 }
 
 func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
-	postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error),
+	postNetwork func(*networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error),
 	getNetwork func(string) models_cloudbreak.NetworkResponse) {
 
 	network := createNetworkRequest(skeleton, getNetwork)
 
 	log.Infof("[CreateNetwork] sending network create request with name: %s", network.Name)
-	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: network})
+	resp, err := postNetwork(&networks.PostPublicNetworkParams{Body: network})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -75,10 +75,10 @@ func CreateNetworkCommand(c *cli.Context) error {
 
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	return createNetworkCommandImpl(c.String, oAuth2Client.Cloudbreak.Networks.PostNetworksAccount)
+	return createNetworkCommandImpl(c.String, oAuth2Client.Cloudbreak.Networks.PostPublicNetwork)
 }
 
-func createNetworkCommandImpl(finder func(string) string, postNetwork func(*networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error)) error {
+func createNetworkCommandImpl(finder func(string) string, postNetwork func(*networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error)) error {
 	networkName := finder(FlNetworkName.Name)
 	log.Infof("[CreateNetworkCommand] create network with name: %s", networkName)
 
@@ -94,7 +94,7 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 		SubnetCIDR:    &subnet,
 	}
 
-	resp, err := postNetwork(&networks.PostNetworksAccountParams{Body: &network})
+	resp, err := postNetwork(&networks.PostPublicNetworkParams{Body: &network})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -106,7 +106,7 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 
 func (c *Cloudbreak) GetNetwork(name string) models_cloudbreak.NetworkResponse {
 	log.Infof("[GetNetwork] sending get request to find network with name: %s", name)
-	resp, err := c.Cloudbreak.Networks.GetNetworksAccountName(&networks.GetNetworksAccountNameParams{Name: name})
+	resp, err := c.Cloudbreak.Networks.GetPublicNetwork(&networks.GetPublicNetworkParams{Name: name})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -119,7 +119,7 @@ func (c *Cloudbreak) GetNetwork(name string) models_cloudbreak.NetworkResponse {
 
 func (c *Cloudbreak) GetNetworkById(id int64) *models_cloudbreak.NetworkResponse {
 	log.Infof("[GetNetwork] sending get request to find network with id: %d", id)
-	resp, err := c.Cloudbreak.Networks.GetNetworksID(&networks.GetNetworksIDParams{ID: id})
+	resp, err := c.Cloudbreak.Networks.GetNetwork(&networks.GetNetworkParams{ID: id})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -141,7 +141,7 @@ func DeleteNetwork(c *cli.Context) error {
 
 func (c *Cloudbreak) GetPublicNetworks() []*models_cloudbreak.NetworkResponse {
 	defer timeTrack(time.Now(), "get public networks")
-	resp, err := c.Cloudbreak.Networks.GetNetworksAccount(&networks.GetNetworksAccountParams{})
+	resp, err := c.Cloudbreak.Networks.GetPublicsNetwork(&networks.GetPublicsNetworkParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -151,7 +151,7 @@ func (c *Cloudbreak) GetPublicNetworks() []*models_cloudbreak.NetworkResponse {
 func (c *Cloudbreak) DeleteNetwork(name string) error {
 	defer timeTrack(time.Now(), "delete network")
 	log.Infof("[DeleteNetwork] delete network: %s", name)
-	return c.Cloudbreak.Networks.DeleteNetworksAccountName(&networks.DeleteNetworksAccountNameParams{Name: name})
+	return c.Cloudbreak.Networks.DeletePublicNetwork(&networks.DeletePublicNetworkParams{Name: name})
 }
 
 func ListPrivateNetworks(c *cli.Context) error {
@@ -179,7 +179,7 @@ func listPrivateNetworksImpl(getNetworks func() []*models_cloudbreak.NetworkResp
 
 func (c *Cloudbreak) GetPrivateNetworks() []*models_cloudbreak.NetworkResponse {
 	defer timeTrack(time.Now(), "get private networks")
-	resp, err := c.Cloudbreak.Networks.GetNetworksUser(&networks.GetNetworksUserParams{})
+	resp, err := c.Cloudbreak.Networks.GetPrivatesNetwork(&networks.GetPrivatesNetworkParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}

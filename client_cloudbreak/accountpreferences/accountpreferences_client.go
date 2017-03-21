@@ -23,30 +23,30 @@ type Client struct {
 }
 
 /*
-Get retrieves account preferences for admin user
+GetAccountPreferencesEndpoint retrieves account preferences for admin user
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
 */
-func (a *Client) Get(params *GetParams) (*GetOK, error) {
+func (a *Client) GetAccountPreferencesEndpoint(params *GetAccountPreferencesEndpointParams) (*GetAccountPreferencesEndpointOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetParams()
+		params = NewGetAccountPreferencesEndpointParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "get",
+		ID:                 "getAccountPreferencesEndpoint",
 		Method:             "GET",
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetReader{formats: a.formats},
+		Reader:             &GetAccountPreferencesEndpointReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetOK), nil
+	return result.(*GetAccountPreferencesEndpointOK), nil
 }
 
 /*
@@ -77,79 +77,79 @@ func (a *Client) IsPlatformSelectionDisabled(params *IsPlatformSelectionDisabled
 }
 
 /*
-Post posts account preferences of admin user
+PostAccountPreferencesEndpoint posts account preferences of admin user
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
 */
-func (a *Client) Post(params *PostParams) (*PostOK, error) {
+func (a *Client) PostAccountPreferencesEndpoint(params *PostAccountPreferencesEndpointParams) (*PostAccountPreferencesEndpointOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostParams()
+		params = NewPostAccountPreferencesEndpointParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "post",
+		ID:                 "postAccountPreferencesEndpoint",
 		Method:             "POST",
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostReader{formats: a.formats},
+		Reader:             &PostAccountPreferencesEndpointReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostOK), nil
+	return result.(*PostAccountPreferencesEndpointOK), nil
 }
 
 /*
-Put updates account preferences of admin user
+PutAccountPreferencesEndpoint updates account preferences of admin user
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
 */
-func (a *Client) Put(params *PutParams) (*PutOK, error) {
+func (a *Client) PutAccountPreferencesEndpoint(params *PutAccountPreferencesEndpointParams) (*PutAccountPreferencesEndpointOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPutParams()
+		params = NewPutAccountPreferencesEndpointParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "put",
+		ID:                 "putAccountPreferencesEndpoint",
 		Method:             "PUT",
 		PathPattern:        "/accountpreferences",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PutReader{formats: a.formats},
+		Reader:             &PutAccountPreferencesEndpointReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PutOK), nil
+	return result.(*PutAccountPreferencesEndpointOK), nil
 }
 
 /*
-Validate validates account preferences of all stacks
+ValidateAccountPreferencesEndpoint validates account preferences of all stacks
 
 Account related preferences that could be managed by the account admins and different restrictions could be added to Cloudbreak resources.
 */
-func (a *Client) Validate(params *ValidateParams) error {
+func (a *Client) ValidateAccountPreferencesEndpoint(params *ValidateAccountPreferencesEndpointParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewValidateParams()
+		params = NewValidateAccountPreferencesEndpointParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "validate",
+		ID:                 "validateAccountPreferencesEndpoint",
 		Method:             "GET",
 		PathPattern:        "/accountpreferences/validate",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &ValidateReader{formats: a.formats},
+		Reader:             &ValidateAccountPreferencesEndpointReader{formats: a.formats},
 	})
 	if err != nil {
 		return err

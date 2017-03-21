@@ -18,6 +18,7 @@ import (
 swagger:model RDSConfig
 */
 type RDSConfig struct {
+
 	/* Password to use for the jdbc connection
 
 	Required: true
@@ -201,8 +202,7 @@ func (m *RDSConfig) validateName(formats strfmt.Registry) error {
 
 func (m *RDSConfig) validateProperties(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Properties) {
-		// not required
+	if swag.IsZero(m.Properties) { // not required
 		return nil
 	}
 
@@ -229,7 +229,7 @@ var rDSConfigTypeTypePropEnum []interface{}
 func (m *RDSConfig) validateTypeEnum(path, location string, value string) error {
 	if rDSConfigTypeTypePropEnum == nil {
 		var res []string
-		if err := json.Unmarshal([]byte(`["HIVE","RANGER"]`), &res); err != nil {
+		if err := json.Unmarshal([]byte(`["HIVE","RANGER","DRUID"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {
@@ -244,8 +244,7 @@ func (m *RDSConfig) validateTypeEnum(path, location string, value string) error 
 
 func (m *RDSConfig) validateType(formats strfmt.Registry) error {
 
-	if swag.IsZero(m.Type) {
-		// not required
+	if swag.IsZero(m.Type) { // not required
 		return nil
 	}
 

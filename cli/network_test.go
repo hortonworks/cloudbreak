@@ -23,9 +23,9 @@ func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 	c := make(chan int64, 1)
 	expectedId := int64(1)
 	var actual *models_cloudbreak.NetworkRequest
-	postNetwork := func(params *networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error) {
+	postNetwork := func(params *networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error) {
 		actual = params.Body
-		return &networks.PostNetworksAccountOK{Payload: &models_cloudbreak.NetworkResponse{ID: &expectedId}}, nil
+		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: &expectedId}}, nil
 	}
 
 	createNetworkImpl(skeleton, c, postNetwork, nil)
@@ -52,10 +52,10 @@ func TestCreateNetworkImplDefaultNetwork(t *testing.T) {
 	skeleton := ClusterSkeleton{}
 	c := make(chan int64, 1)
 	var actual *models_cloudbreak.NetworkRequest
-	postNetwork := func(params *networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error) {
+	postNetwork := func(params *networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error) {
 		actual = params.Body
 		id := int64(1)
-		return &networks.PostNetworksAccountOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
+		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
 	}
 	expectedParams := make(map[string]interface{})
 	expectedParams["vpcId"] = "vpcid"
@@ -93,10 +93,10 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 		}
 	}
 	var actual *models_cloudbreak.NetworkRequest
-	postNetwork := func(params *networks.PostNetworksAccountParams) (*networks.PostNetworksAccountOK, error) {
+	postNetwork := func(params *networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error) {
 		actual = params.Body
 		id := int64(1)
-		return &networks.PostNetworksAccountOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
+		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
 	}
 
 	createNetworkCommandImpl(finder, postNetwork)

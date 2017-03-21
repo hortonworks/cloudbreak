@@ -23,52 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteCredentialsAccountName deletes public owned or private credential by name
+DeleteCredential deletes credential by id
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) DeleteCredentialsAccountName(params *DeleteCredentialsAccountNameParams) error {
+func (a *Client) DeleteCredential(params *DeleteCredentialParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteCredentialsAccountNameParams()
+		params = NewDeleteCredentialParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteCredentialsAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/credentials/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteCredentialsAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteCredentialsID deletes credential by id
-
-Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
-*/
-func (a *Client) DeleteCredentialsID(params *DeleteCredentialsIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteCredentialsIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteCredentialsID",
+		ID:                 "deleteCredential",
 		Method:             "DELETE",
 		PathPattern:        "/credentials/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteCredentialsIDReader{formats: a.formats},
+		Reader:             &DeleteCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -77,25 +50,25 @@ func (a *Client) DeleteCredentialsID(params *DeleteCredentialsIDParams) error {
 }
 
 /*
-DeleteCredentialsUserName deletes private credential by name
+DeletePrivateCredential deletes private credential by name
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) DeleteCredentialsUserName(params *DeleteCredentialsUserNameParams) error {
+func (a *Client) DeletePrivateCredential(params *DeletePrivateCredentialParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteCredentialsUserNameParams()
+		params = NewDeletePrivateCredentialParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteCredentialsUserName",
+		ID:                 "deletePrivateCredential",
 		Method:             "DELETE",
 		PathPattern:        "/credentials/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteCredentialsUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,246 +77,273 @@ func (a *Client) DeleteCredentialsUserName(params *DeleteCredentialsUserNamePara
 }
 
 /*
-GetCredentialsAccount retrieves public and private owned credentials
+DeletePublicCredential deletes public owned or private credential by name
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) GetCredentialsAccount(params *GetCredentialsAccountParams) (*GetCredentialsAccountOK, error) {
+func (a *Client) DeletePublicCredential(params *DeletePublicCredentialParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetCredentialsAccountParams()
+		params = NewDeletePublicCredentialParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetCredentialsAccount",
-		Method:             "GET",
-		PathPattern:        "/credentials/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetCredentialsAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetCredentialsAccountOK), nil
-}
-
-/*
-GetCredentialsAccountName retrieves a public or private owned credential by name
-
-Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
-*/
-func (a *Client) GetCredentialsAccountName(params *GetCredentialsAccountNameParams) (*GetCredentialsAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetCredentialsAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetCredentialsAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicCredential",
+		Method:             "DELETE",
 		PathPattern:        "/credentials/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetCredentialsAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicCredentialReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetCredentialsAccountNameOK), nil
+	return nil
 }
 
 /*
-GetCredentialsID retrieves credential by id
+GetCredential retrieves credential by id
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) GetCredentialsID(params *GetCredentialsIDParams) (*GetCredentialsIDOK, error) {
+func (a *Client) GetCredential(params *GetCredentialParams) (*GetCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetCredentialsIDParams()
+		params = NewGetCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetCredentialsID",
+		ID:                 "getCredential",
 		Method:             "GET",
 		PathPattern:        "/credentials/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetCredentialsIDReader{formats: a.formats},
+		Reader:             &GetCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetCredentialsIDOK), nil
+	return result.(*GetCredentialOK), nil
 }
 
 /*
-GetCredentialsUser retrieves private credentials
+GetPrivateCredential retrieves a private credential by name
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) GetCredentialsUser(params *GetCredentialsUserParams) (*GetCredentialsUserOK, error) {
+func (a *Client) GetPrivateCredential(params *GetPrivateCredentialParams) (*GetPrivateCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetCredentialsUserParams()
+		params = NewGetPrivateCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetCredentialsUser",
-		Method:             "GET",
-		PathPattern:        "/credentials/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetCredentialsUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetCredentialsUserOK), nil
-}
-
-/*
-GetCredentialsUserName retrieves a private credential by name
-
-Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
-*/
-func (a *Client) GetCredentialsUserName(params *GetCredentialsUserNameParams) (*GetCredentialsUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetCredentialsUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetCredentialsUserName",
+		ID:                 "getPrivateCredential",
 		Method:             "GET",
 		PathPattern:        "/credentials/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetCredentialsUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetCredentialsUserNameOK), nil
+	return result.(*GetPrivateCredentialOK), nil
 }
 
 /*
-PostCredentialsAccount creates credential as public resource
+GetPrivatesCredential retrieves private credentials
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) PostCredentialsAccount(params *PostCredentialsAccountParams) (*PostCredentialsAccountOK, error) {
+func (a *Client) GetPrivatesCredential(params *GetPrivatesCredentialParams) (*GetPrivatesCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostCredentialsAccountParams()
+		params = NewGetPrivatesCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostCredentialsAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesCredential",
+		Method:             "GET",
+		PathPattern:        "/credentials/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesCredentialReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesCredentialOK), nil
+}
+
+/*
+GetPublicCredential retrieves a public or private owned credential by name
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) GetPublicCredential(params *GetPublicCredentialParams) (*GetPublicCredentialOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicCredentialParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicCredential",
+		Method:             "GET",
+		PathPattern:        "/credentials/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicCredentialReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicCredentialOK), nil
+}
+
+/*
+GetPublicsCredential retrieves public and private owned credentials
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) GetPublicsCredential(params *GetPublicsCredentialParams) (*GetPublicsCredentialOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsCredentialParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsCredential",
+		Method:             "GET",
 		PathPattern:        "/credentials/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostCredentialsAccountReader{formats: a.formats},
+		Reader:             &GetPublicsCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostCredentialsAccountOK), nil
+	return result.(*GetPublicsCredentialOK), nil
 }
 
 /*
-PostCredentialsUser creates credential as private resource
+PostPrivateCredential creates credential as private resource
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) PostCredentialsUser(params *PostCredentialsUserParams) (*PostCredentialsUserOK, error) {
+func (a *Client) PostPrivateCredential(params *PostPrivateCredentialParams) (*PostPrivateCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostCredentialsUserParams()
+		params = NewPostPrivateCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostCredentialsUser",
+		ID:                 "postPrivateCredential",
 		Method:             "POST",
 		PathPattern:        "/credentials/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostCredentialsUserReader{formats: a.formats},
+		Reader:             &PostPrivateCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostCredentialsUserOK), nil
+	return result.(*PostPrivateCredentialOK), nil
 }
 
 /*
-PrivateInteractiveLogin interactives login
+PostPublicCredential creates credential as public resource
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) PrivateInteractiveLogin(params *PrivateInteractiveLoginParams) (*PrivateInteractiveLoginOK, error) {
+func (a *Client) PostPublicCredential(params *PostPublicCredentialParams) (*PostPublicCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPrivateInteractiveLoginParams()
+		params = NewPostPublicCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "privateInteractiveLogin",
+		ID:                 "postPublicCredential",
+		Method:             "POST",
+		PathPattern:        "/credentials/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicCredentialReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicCredentialOK), nil
+}
+
+/*
+PrivateInteractiveLoginCredential interactives login
+
+Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
+*/
+func (a *Client) PrivateInteractiveLoginCredential(params *PrivateInteractiveLoginCredentialParams) (*PrivateInteractiveLoginCredentialOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPrivateInteractiveLoginCredentialParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "privateInteractiveLoginCredential",
 		Method:             "POST",
 		PathPattern:        "/credentials/userinteractivelogin",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PrivateInteractiveLoginReader{formats: a.formats},
+		Reader:             &PrivateInteractiveLoginCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PrivateInteractiveLoginOK), nil
+	return result.(*PrivateInteractiveLoginCredentialOK), nil
 }
 
 /*
-PublicInteractiveLogin interactives login
+PublicInteractiveLoginCredential interactives login
 
 Cloudbreak is launching Hadoop clusters on the user's behalf - on different cloud providers. One key point is that Cloudbreak does not store your Cloud provider account details (such as username, password, keys, private SSL certificates, etc). We work around the concept that Identity and Access Management is fully controlled by you - the end user. The Cloudbreak deployer is purely acting on behalf of the end user - without having access to the user's account.
 */
-func (a *Client) PublicInteractiveLogin(params *PublicInteractiveLoginParams) (*PublicInteractiveLoginOK, error) {
+func (a *Client) PublicInteractiveLoginCredential(params *PublicInteractiveLoginCredentialParams) (*PublicInteractiveLoginCredentialOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPublicInteractiveLoginParams()
+		params = NewPublicInteractiveLoginCredentialParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "publicInteractiveLogin",
+		ID:                 "publicInteractiveLoginCredential",
 		Method:             "POST",
 		PathPattern:        "/credentials/accountinteractivelogin",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PublicInteractiveLoginReader{formats: a.formats},
+		Reader:             &PublicInteractiveLoginCredentialReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PublicInteractiveLoginOK), nil
+	return result.(*PublicInteractiveLoginCredentialOK), nil
 }
 
 // SetTransport changes the transport on the client

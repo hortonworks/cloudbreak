@@ -55,6 +55,10 @@ type ClusterRequest struct {
 	 */
 	ConfigStrategy *string `json:"configStrategy,omitempty"`
 
+	/* custom containers
+	 */
+	CustomContainer *CustomContainerRequest `json:"customContainer,omitempty"`
+
 	/* description of the resource
 
 	Max Length: 1000

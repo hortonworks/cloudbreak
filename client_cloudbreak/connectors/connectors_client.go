@@ -77,6 +77,60 @@ func (a *Client) GetDisktypes(params *GetDisktypesParams) (*GetDisktypesOK, erro
 }
 
 /*
+GetImages retrives available images
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetImages(params *GetImagesParams) (*GetImagesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetImagesParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getImages",
+		Method:             "GET",
+		PathPattern:        "/connectors/images",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetImagesReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetImagesOK), nil
+}
+
+/*
+GetImagesByType retrives images by type
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetImagesByType(params *GetImagesByTypeParams) (*GetImagesByTypeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetImagesByTypeParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getImagesByType",
+		Method:             "GET",
+		PathPattern:        "/connectors/images/{type}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetImagesByTypeReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetImagesByTypeOK), nil
+}
+
+/*
 GetOchestratorsByType retrives orchestrators by type
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
@@ -290,6 +344,33 @@ func (a *Client) GetRegions(params *GetRegionsParams) (*GetRegionsOK, error) {
 		return nil, err
 	}
 	return result.(*GetRegionsOK), nil
+}
+
+/*
+GetSpecialProperties retrives special properties
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetSpecialProperties(params *GetSpecialPropertiesParams) (*GetSpecialPropertiesOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSpecialPropertiesParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getSpecialProperties",
+		Method:             "GET",
+		PathPattern:        "/connectors/custom",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSpecialPropertiesReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSpecialPropertiesOK), nil
 }
 
 /*

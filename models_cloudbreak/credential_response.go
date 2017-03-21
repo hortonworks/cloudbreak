@@ -56,10 +56,8 @@ type CredentialResponse struct {
 	Public *bool `json:"public,omitempty"`
 
 	/* public key for accessing instances
-
-	Required: true
-	*/
-	PublicKey string `json:"publicKey"`
+	 */
+	PublicKey *string `json:"publicKey,omitempty"`
 
 	/* id of the topology the resource belongs to
 	 */
@@ -81,11 +79,6 @@ func (m *CredentialResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateName(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validatePublicKey(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -137,15 +130,6 @@ func (m *CredentialResponse) validateName(formats strfmt.Registry) error {
 	}
 
 	if err := validate.Pattern("name", "body", string(m.Name), `([a-z][-a-z0-9]*[a-z0-9])`); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *CredentialResponse) validatePublicKey(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("publicKey", "body", string(m.PublicKey)); err != nil {
 		return err
 	}
 

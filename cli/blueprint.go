@@ -76,7 +76,7 @@ func listBlueprintsImpl(getPublicBlueprints func() []*models_cloudbreak.Blueprin
 
 func (c *Cloudbreak) GetPublicBlueprints() []*models_cloudbreak.BlueprintResponse {
 	defer timeTrack(time.Now(), "get public blueprints")
-	resp, err := c.Cloudbreak.Blueprints.GetPublics(&blueprints.GetPublicsParams{})
+	resp, err := c.Cloudbreak.Blueprints.GetPublicsBlueprint(&blueprints.GetPublicsBlueprintParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -86,14 +86,14 @@ func (c *Cloudbreak) GetPublicBlueprints() []*models_cloudbreak.BlueprintRespons
 func (c *Cloudbreak) DeleteBlueprint(name string) error {
 	defer timeTrack(time.Now(), "delete blueprint")
 	log.Infof("[DeleteBlueprint] delete blueprint: %s", name)
-	return c.Cloudbreak.Blueprints.DeletePublic(&blueprints.DeletePublicParams{Name: name})
+	return c.Cloudbreak.Blueprints.DeletePublicBlueprint(&blueprints.DeletePublicBlueprintParams{Name: name})
 }
 
 func (c *Cloudbreak) GetBlueprintByName(name string) *models_cloudbreak.BlueprintResponse {
 	defer timeTrack(time.Now(), "get blueprint by name")
 	log.Infof("[GetBlueprintByName] get blueprint by name: %s", name)
 
-	resp, err := c.Cloudbreak.Blueprints.GetPublic(&blueprints.GetPublicParams{Name: getRealBlueprintName(name)})
+	resp, err := c.Cloudbreak.Blueprints.GetPublicBlueprint(&blueprints.GetPublicBlueprintParams{Name: getRealBlueprintName(name)})
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -105,10 +105,11 @@ func (c *Cloudbreak) GetBlueprintByName(name string) *models_cloudbreak.Blueprin
 
 func (c *Cloudbreak) CreateBlueprint(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse, channel chan int64, wg *sync.WaitGroup) {
 	defer wg.Done()
-	createBlueprintImpl(skeleton, blueprint, channel, c.Cloudbreak.Blueprints.PostPublic)
+	createBlueprintImpl(skeleton, blueprint, channel, c.Cloudbreak.Blueprints.PostPublicBlueprint)
 }
 
-func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse, channel chan int64, postPublicBlueprint func(*blueprints.PostPublicParams) (*blueprints.PostPublicOK, error)) {
+func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse, channel chan int64,
+	postPublicBlueprint func(*blueprints.PostPublicBlueprintParams) (*blueprints.PostPublicBlueprintOK, error)) {
 	if len(skeleton.Configurations) == 0 {
 		log.Info("[CreateBlueprint] there are no custom configurations, use the default blueprint")
 		channel <- *blueprint.ID
@@ -119,7 +120,7 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models_cloudbreak.
 
 	bpRequest := createBlueprintRequest(skeleton, blueprint)
 
-	resp, err := postPublicBlueprint(&blueprints.PostPublicParams{Body: bpRequest})
+	resp, err := postPublicBlueprint(&blueprints.PostPublicBlueprintParams{Body: bpRequest})
 
 	if err != nil {
 		logErrorAndExit(err)

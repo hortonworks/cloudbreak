@@ -46,13 +46,13 @@ func ListClusters(c *cli.Context) error {
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := Output{Format: c.String(FlOutput.Name)}
 
-	return listClustersImpl(oAuth2Client.Cloudbreak.Stacks.GetStacksUser, oAuth2Client.FetchCluster, output.WriteList)
+	return listClustersImpl(oAuth2Client.Cloudbreak.Stacks.GetPrivatesStack, oAuth2Client.FetchCluster, output.WriteList)
 }
 
-func listClustersImpl(getStacks func(*stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error),
+func listClustersImpl(getStacks func(*stacks.GetPrivatesStackParams) (*stacks.GetPrivatesStackOK, error),
 	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
 
-	respStacks, err := getStacks(&stacks.GetStacksUserParams{})
+	respStacks, err := getStacks(&stacks.GetPrivatesStackParams{})
 	if err != nil {
 		log.Error(err)
 		return err
@@ -100,13 +100,13 @@ func ListClusterNodes(c *cli.Context) error {
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := Output{Format: c.String(FlOutput.Name)}
 
-	listClusterNodesImpl(clusterName, oAuth2Client.Cloudbreak.Stacks.GetStacksUserName, output.WriteList)
+	listClusterNodesImpl(clusterName, oAuth2Client.Cloudbreak.Stacks.GetPrivateStack, output.WriteList)
 
 	return nil
 }
 
-func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error), writer func([]string, []Row)) {
-	respStack, err := getStack(&stacks.GetStacksUserNameParams{Name: clusterName})
+func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error), writer func([]string, []Row)) {
+	respStack, err := getStack(&stacks.GetPrivateStackParams{Name: clusterName})
 	if err != nil {
 		logErrorAndExit(err)
 	}

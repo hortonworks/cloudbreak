@@ -36,8 +36,8 @@ func (o *GetVMTypeByTypeParams) WithExtended(extended *bool) *GetVMTypeByTypePar
 }
 
 // WithType adds the type to the get vm type by type params
-func (o *GetVMTypeByTypeParams) WithType(typee string) *GetVMTypeByTypeParams {
-	o.Type = typee
+func (o *GetVMTypeByTypeParams) WithType(types string) *GetVMTypeByTypeParams {
+	o.Type = types
 	return o
 }
 

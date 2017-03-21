@@ -280,13 +280,13 @@ func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context)
 		defer timeTrack(time.Now(), "cluster installation/update")
 
 		log.Infof("[WaitForClusterToFinish] wait for cluster to finish")
-		waitForClusterToFinishImpl(stackId, c.Cloudbreak.Stacks.GetStacksID)
+		waitForClusterToFinishImpl(stackId, c.Cloudbreak.Stacks.GetStack)
 	}
 }
 
-func waitForClusterToFinishImpl(stackId int64, getStack func(params *stacks.GetStacksIDParams) (*stacks.GetStacksIDOK, error)) {
+func waitForClusterToFinishImpl(stackId int64, getStack func(params *stacks.GetStackParams) (*stacks.GetStackOK, error)) {
 	for {
-		resp, err := getStack(&stacks.GetStacksIDParams{ID: stackId})
+		resp, err := getStack(&stacks.GetStackParams{ID: stackId})
 
 		if err != nil {
 			logErrorAndExit(err)
@@ -315,13 +315,13 @@ func (c *Cloudbreak) waitForClusterToTerminate(clusterName string, context *cli.
 		defer timeTrack(time.Now(), "cluster termination")
 
 		log.Infof("[waitForClusterToTerminate] wait for cluster to terminate")
-		waitForClusterToTerminateImpl(clusterName, c.Cloudbreak.Stacks.GetStacksUserName)
+		waitForClusterToTerminateImpl(clusterName, c.Cloudbreak.Stacks.GetPrivateStack)
 	}
 }
 
-func waitForClusterToTerminateImpl(clusterName string, getStack func(*stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error)) {
+func waitForClusterToTerminateImpl(clusterName string, getStack func(*stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error)) {
 	for {
-		resp, err := getStack(&stacks.GetStacksUserNameParams{Name: clusterName})
+		resp, err := getStack(&stacks.GetPrivateStackParams{Name: clusterName})
 
 		if err != nil {
 			errorMessage := err.Error()

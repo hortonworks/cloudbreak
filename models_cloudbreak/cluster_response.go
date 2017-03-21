@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"strconv"
 
-	"github.com/go-swagger/go-swagger/strfmt"
+	strfmt "github.com/go-swagger/go-swagger/strfmt"
 	"github.com/go-swagger/go-swagger/swag"
 
 	"github.com/go-swagger/go-swagger/errors"
@@ -20,6 +20,14 @@ swagger:model ClusterResponse
 */
 type ClusterResponse struct {
 
+	/* details of the external Ambari database
+	 */
+	AmbariDatabaseDetails *AmbariDatabaseDetails `json:"ambariDatabaseDetails,omitempty"`
+
+	/* details of the Ambari package repository
+	 */
+	AmbariRepoDetailsJSON *AmbariRepoDetails `json:"ambariRepoDetailsJson,omitempty"`
+
 	/* public ambari ip of the stack
 	 */
 	AmbariServerIP *string `json:"ambariServerIp,omitempty"`
@@ -27,6 +35,10 @@ type ClusterResponse struct {
 	/* public ambari url
 	 */
 	AmbariServerURL *string `json:"ambariServerUrl,omitempty"`
+
+	/* details of the Ambari stack
+	 */
+	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
 
 	/* Additional information for ambari cluster
 	 */
@@ -58,6 +70,10 @@ type ClusterResponse struct {
 	/* config recommendation strategy
 	 */
 	ConfigStrategy *string `json:"configStrategy,omitempty"`
+
+	/* custom containers
+	 */
+	CustomContainers *CustomContainerResponse `json:"customContainers,omitempty"`
 
 	/* description of the resource
 	 */

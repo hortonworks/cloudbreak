@@ -34,7 +34,7 @@ func (a *Client) GetEvents(params *GetEventsParams) (*GetEventsOK, error) {
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetEvents",
+		ID:                 "getEvents",
 		Method:             "GET",
 		PathPattern:        "/events",
 		ProducesMediaTypes: []string{"application/json"},

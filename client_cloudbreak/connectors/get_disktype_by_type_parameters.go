@@ -27,8 +27,8 @@ type GetDisktypeByTypeParams struct {
 }
 
 // WithType adds the type to the get disktype by type params
-func (o *GetDisktypeByTypeParams) WithType(typee string) *GetDisktypeByTypeParams {
-	o.Type = typee
+func (o *GetDisktypeByTypeParams) WithType(types string) *GetDisktypeByTypeParams {
+	o.Type = types
 	return o
 }
 

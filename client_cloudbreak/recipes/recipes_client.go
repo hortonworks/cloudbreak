@@ -23,79 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteRecipesAccountName deletes public owned or private recipe by name
+DeletePrivateRecipe deletes private recipe by name
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
 */
-func (a *Client) DeleteRecipesAccountName(params *DeleteRecipesAccountNameParams) error {
+func (a *Client) DeletePrivateRecipe(params *DeletePrivateRecipeParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteRecipesAccountNameParams()
+		params = NewDeletePrivateRecipeParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteRecipesAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/recipes/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteRecipesAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteRecipesID deletes recipe by id
-
-Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
-*/
-func (a *Client) DeleteRecipesID(params *DeleteRecipesIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteRecipesIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteRecipesID",
-		Method:             "DELETE",
-		PathPattern:        "/recipes/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteRecipesIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteRecipesUserName deletes private recipe by name
-
-Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
-*/
-func (a *Client) DeleteRecipesUserName(params *DeleteRecipesUserNameParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteRecipesUserNameParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteRecipesUserName",
+		ID:                 "deletePrivateRecipe",
 		Method:             "DELETE",
 		PathPattern:        "/recipes/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteRecipesUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateRecipeReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +50,246 @@ func (a *Client) DeleteRecipesUserName(params *DeleteRecipesUserNameParams) erro
 }
 
 /*
-GetRecipesAccount retrieves public and private owned recipes
+DeletePublicRecipe deletes public owned or private recipe by name
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
 */
-func (a *Client) GetRecipesAccount(params *GetRecipesAccountParams) (*GetRecipesAccountOK, error) {
+func (a *Client) DeletePublicRecipe(params *DeletePublicRecipeParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRecipesAccountParams()
+		params = NewDeletePublicRecipeParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRecipesAccount",
-		Method:             "GET",
-		PathPattern:        "/recipes/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetRecipesAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetRecipesAccountOK), nil
-}
-
-/*
-GetRecipesAccountName retrieves a public or private owned recipe by name
-
-Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
-*/
-func (a *Client) GetRecipesAccountName(params *GetRecipesAccountNameParams) (*GetRecipesAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetRecipesAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRecipesAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicRecipe",
+		Method:             "DELETE",
 		PathPattern:        "/recipes/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetRecipesAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicRecipeReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetRecipesAccountNameOK), nil
+	return nil
 }
 
 /*
-GetRecipesID retrieves recipe by id
+DeleteRecipe deletes recipe by id
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
 */
-func (a *Client) GetRecipesID(params *GetRecipesIDParams) (*GetRecipesIDOK, error) {
+func (a *Client) DeleteRecipe(params *DeleteRecipeParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRecipesIDParams()
+		params = NewDeleteRecipeParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRecipesID",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deleteRecipe",
+		Method:             "DELETE",
 		PathPattern:        "/recipes/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetRecipesIDReader{formats: a.formats},
+		Reader:             &DeleteRecipeReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetRecipesIDOK), nil
+	return nil
 }
 
 /*
-GetRecipesUser retrieves private recipes
+GetPrivateRecipe retrieves a private recipe by name
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
 */
-func (a *Client) GetRecipesUser(params *GetRecipesUserParams) (*GetRecipesUserOK, error) {
+func (a *Client) GetPrivateRecipe(params *GetPrivateRecipeParams) (*GetPrivateRecipeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetRecipesUserParams()
+		params = NewGetPrivateRecipeParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRecipesUser",
-		Method:             "GET",
-		PathPattern:        "/recipes/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetRecipesUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetRecipesUserOK), nil
-}
-
-/*
-GetRecipesUserName retrieves a private recipe by name
-
-Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
-*/
-func (a *Client) GetRecipesUserName(params *GetRecipesUserNameParams) (*GetRecipesUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetRecipesUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetRecipesUserName",
+		ID:                 "getPrivateRecipe",
 		Method:             "GET",
 		PathPattern:        "/recipes/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetRecipesUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateRecipeReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetRecipesUserNameOK), nil
+	return result.(*GetPrivateRecipeOK), nil
 }
 
 /*
-PostRecipesAccount creates recipe as public resource
+GetPrivatesRecipe retrieves private recipes
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
 */
-func (a *Client) PostRecipesAccount(params *PostRecipesAccountParams) (*PostRecipesAccountOK, error) {
+func (a *Client) GetPrivatesRecipe(params *GetPrivatesRecipeParams) (*GetPrivatesRecipeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostRecipesAccountParams()
+		params = NewGetPrivatesRecipeParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostRecipesAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesRecipe",
+		Method:             "GET",
+		PathPattern:        "/recipes/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesRecipeReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesRecipeOK), nil
+}
+
+/*
+GetPublicRecipe retrieves a public or private owned recipe by name
+
+Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
+*/
+func (a *Client) GetPublicRecipe(params *GetPublicRecipeParams) (*GetPublicRecipeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicRecipeParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicRecipe",
+		Method:             "GET",
+		PathPattern:        "/recipes/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicRecipeReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicRecipeOK), nil
+}
+
+/*
+GetPublicsRecipe retrieves public and private owned recipes
+
+Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
+*/
+func (a *Client) GetPublicsRecipe(params *GetPublicsRecipeParams) (*GetPublicsRecipeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsRecipeParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsRecipe",
+		Method:             "GET",
 		PathPattern:        "/recipes/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostRecipesAccountReader{formats: a.formats},
+		Reader:             &GetPublicsRecipeReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostRecipesAccountOK), nil
+	return result.(*GetPublicsRecipeOK), nil
 }
 
 /*
-PostRecipesUser creates recipe as private resource
+GetRecipe retrieves recipe by id
 
 Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
 */
-func (a *Client) PostRecipesUser(params *PostRecipesUserParams) (*PostRecipesUserOK, error) {
+func (a *Client) GetRecipe(params *GetRecipeParams) (*GetRecipeOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostRecipesUserParams()
+		params = NewGetRecipeParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostRecipesUser",
+		ID:                 "getRecipe",
+		Method:             "GET",
+		PathPattern:        "/recipes/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetRecipeReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetRecipeOK), nil
+}
+
+/*
+PostPrivateRecipe creates recipe as private resource
+
+Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
+*/
+func (a *Client) PostPrivateRecipe(params *PostPrivateRecipeParams) (*PostPrivateRecipeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPrivateRecipeParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPrivateRecipe",
 		Method:             "POST",
 		PathPattern:        "/recipes/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostRecipesUserReader{formats: a.formats},
+		Reader:             &PostPrivateRecipeReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostRecipesUserOK), nil
+	return result.(*PostPrivateRecipeOK), nil
+}
+
+/*
+PostPublicRecipe creates recipe as public resource
+
+Recipes are basically script extensions to a cluster that run on a set of nodes before or after the Ambari cluster installation.
+*/
+func (a *Client) PostPublicRecipe(params *PostPublicRecipeParams) (*PostPublicRecipeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicRecipeParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicRecipe",
+		Method:             "POST",
+		PathPattern:        "/recipes/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicRecipeReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicRecipeOK), nil
 }
 
 // SetTransport changes the transport on the client

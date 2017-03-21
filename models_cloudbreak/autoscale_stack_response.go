@@ -27,6 +27,10 @@ type AutoscaleStackResponse struct {
 	 */
 	AmbariServerIP *string `json:"ambariServerIp,omitempty"`
 
+	/* status of the cluster
+	 */
+	ClusterStatus *string `json:"clusterStatus,omitempty"`
+
 	/* creation time of the stack in long
 	 */
 	Created *int64 `json:"created,omitempty"`
@@ -69,6 +73,11 @@ type AutoscaleStackResponse struct {
 func (m *AutoscaleStackResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
+	if err := m.validateClusterStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateName(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -82,6 +91,37 @@ func (m *AutoscaleStackResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+var autoscaleStackResponseTypeClusterStatusPropEnum []interface{}
+
+func (m *AutoscaleStackResponse) validateClusterStatusEnum(path, location string, value string) error {
+	if autoscaleStackResponseTypeClusterStatusPropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			autoscaleStackResponseTypeClusterStatusPropEnum = append(autoscaleStackResponseTypeClusterStatusPropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, autoscaleStackResponseTypeClusterStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AutoscaleStackResponse) validateClusterStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ClusterStatus) { // not required
+		return nil
+	}
+
+	if err := m.validateClusterStatusEnum("clusterStatus", "body", *m.ClusterStatus); err != nil {
+		return err
+	}
+
 	return nil
 }
 

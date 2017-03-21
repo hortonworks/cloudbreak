@@ -50,30 +50,30 @@ func (a *Client) EvictUserDetails(params *EvictUserDetailsParams) (*EvictUserDet
 }
 
 /*
-HasResources checks that account user has any resources
+HasResourcesUser checks that account user has any resources
 
 Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users
 */
-func (a *Client) HasResources(params *HasResourcesParams) (*HasResourcesOK, error) {
+func (a *Client) HasResourcesUser(params *HasResourcesUserParams) (*HasResourcesUserOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewHasResourcesParams()
+		params = NewHasResourcesUserParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "hasResources",
+		ID:                 "hasResourcesUser",
 		Method:             "GET",
 		PathPattern:        "/users/{id}/resources",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &HasResourcesReader{formats: a.formats},
+		Reader:             &HasResourcesUserReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*HasResourcesOK), nil
+	return result.(*HasResourcesUserOK), nil
 }
 
 // SetTransport changes the transport on the client

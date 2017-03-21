@@ -11,11 +11,11 @@ import (
 
 func (c *Cloudbreak) CreateRecipe(skeleton ClusterSkeleton, masterRecipes chan int64, workerRecipes chan int64, computeRecipes chan int64, wg *sync.WaitGroup) {
 	defer wg.Done()
-	createRecipeImpl(skeleton, masterRecipes, workerRecipes, computeRecipes, c.Cloudbreak.Recipes.PostRecipesAccount)
+	createRecipeImpl(skeleton, masterRecipes, workerRecipes, computeRecipes, c.Cloudbreak.Recipes.PostPublicRecipe)
 }
 
 func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, workerRecipes chan int64, computeRecipes chan int64,
-	postPublicRecipe func(params *recipes.PostRecipesAccountParams) (*recipes.PostRecipesAccountOK, error)) {
+	postPublicRecipe func(params *recipes.PostPublicRecipeParams) (*recipes.PostPublicRecipeOK, error)) {
 
 	defer timeTrack(time.Now(), "create recipe")
 
@@ -52,11 +52,11 @@ func createRecipeImpl(skeleton ClusterSkeleton, masterRecipes chan int64, worker
 	wgr.Wait()
 }
 
-func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostRecipesAccountParams) (*recipes.PostRecipesAccountOK, error)) int64 {
+func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostPublicRecipeParams) (*recipes.PostPublicRecipeOK, error)) int64 {
 	recipeRequest := createRecipeRequest(recipe)
 
 	log.Infof("[createRecipe] creating recipe with URI: %s", recipe.URI)
-	resp, err := postPublicRecipe(&recipes.PostRecipesAccountParams{Body: recipeRequest})
+	resp, err := postPublicRecipe(&recipes.PostPublicRecipeParams{Body: recipeRequest})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -87,7 +87,7 @@ func createRecipeRequest(recipe Recipe) *models_cloudbreak.RecipeRequest {
 
 func (c *Cloudbreak) GetPublicRecipes() []*models_cloudbreak.RecipeResponse {
 	defer timeTrack(time.Now(), "get public recipes")
-	resp, err := c.Cloudbreak.Recipes.GetRecipesAccount(&recipes.GetRecipesAccountParams{})
+	resp, err := c.Cloudbreak.Recipes.GetPublicsRecipe(&recipes.GetPublicsRecipeParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -97,5 +97,5 @@ func (c *Cloudbreak) GetPublicRecipes() []*models_cloudbreak.RecipeResponse {
 func (c *Cloudbreak) DeleteRecipe(name string) error {
 	defer timeTrack(time.Now(), "delete recipe")
 	log.Infof("[DeleteRecipe] delete recipe: %s", name)
-	return c.Cloudbreak.Recipes.DeleteRecipesAccountName(&recipes.DeleteRecipesAccountNameParams{Name: name})
+	return c.Cloudbreak.Recipes.DeletePublicRecipe(&recipes.DeletePublicRecipeParams{Name: name})
 }

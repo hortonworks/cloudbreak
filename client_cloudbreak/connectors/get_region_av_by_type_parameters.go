@@ -27,8 +27,8 @@ type GetRegionAvByTypeParams struct {
 }
 
 // WithType adds the type to the get region av by type params
-func (o *GetRegionAvByTypeParams) WithType(typee string) *GetRegionAvByTypeParams {
-	o.Type = typee
+func (o *GetRegionAvByTypeParams) WithType(types string) *GetRegionAvByTypeParams {
+	o.Type = types
 	return o
 }
 

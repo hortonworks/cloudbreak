@@ -23,25 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteTopologiesAccountID deletes topology by id
+DeleteTopology deletes topology by id
 
 A topology gives system administrators an easy way to associate compute nodes with data centers and racks.
 */
-func (a *Client) DeleteTopologiesAccountID(params *DeleteTopologiesAccountIDParams) error {
+func (a *Client) DeleteTopology(params *DeleteTopologyParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteTopologiesAccountIDParams()
+		params = NewDeleteTopologyParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteTopologiesAccountID",
+		ID:                 "deleteTopology",
 		Method:             "DELETE",
 		PathPattern:        "/topologies/account/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteTopologiesAccountIDReader{formats: a.formats},
+		Reader:             &DeleteTopologyReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -50,84 +50,84 @@ func (a *Client) DeleteTopologiesAccountID(params *DeleteTopologiesAccountIDPara
 }
 
 /*
-GetTopologiesAccount retrieves topoligies
+GetPublicsTopology retrieves topoligies
 
 A topology gives system administrators an easy way to associate compute nodes with data centers and racks.
 */
-func (a *Client) GetTopologiesAccount(params *GetTopologiesAccountParams) (*GetTopologiesAccountOK, error) {
+func (a *Client) GetPublicsTopology(params *GetPublicsTopologyParams) (*GetPublicsTopologyOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetTopologiesAccountParams()
+		params = NewGetPublicsTopologyParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetTopologiesAccount",
+		ID:                 "getPublicsTopology",
 		Method:             "GET",
 		PathPattern:        "/topologies/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetTopologiesAccountReader{formats: a.formats},
+		Reader:             &GetPublicsTopologyReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetTopologiesAccountOK), nil
+	return result.(*GetPublicsTopologyOK), nil
 }
 
 /*
-GetTopologiesAccountID retrieves topology by id
+GetTopology retrieves topology by id
 
 A template gives developers and systems administrators an easy way to create and manage a collection of cloud infrastructure related resources, maintaining and updating them in an orderly and predictable fashion. Templates are cloud specific - and on top of the infrastructural setup they collect the information such as the used machine images, the datacenter location, instance types, and can capture and control region-specific infrastructure variations. We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.
 */
-func (a *Client) GetTopologiesAccountID(params *GetTopologiesAccountIDParams) (*GetTopologiesAccountIDOK, error) {
+func (a *Client) GetTopology(params *GetTopologyParams) (*GetTopologyOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetTopologiesAccountIDParams()
+		params = NewGetTopologyParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetTopologiesAccountID",
+		ID:                 "getTopology",
 		Method:             "GET",
 		PathPattern:        "/topologies/account/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetTopologiesAccountIDReader{formats: a.formats},
+		Reader:             &GetTopologyReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetTopologiesAccountIDOK), nil
+	return result.(*GetTopologyOK), nil
 }
 
 /*
-PostTopologiesAccount creates topology as public resource
+PostPublicTopology creates topology as public resource
 
 A topology gives system administrators an easy way to associate compute nodes with data centers and racks.
 */
-func (a *Client) PostTopologiesAccount(params *PostTopologiesAccountParams) (*PostTopologiesAccountOK, error) {
+func (a *Client) PostPublicTopology(params *PostPublicTopologyParams) (*PostPublicTopologyOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostTopologiesAccountParams()
+		params = NewPostPublicTopologyParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostTopologiesAccount",
+		ID:                 "postPublicTopology",
 		Method:             "POST",
 		PathPattern:        "/topologies/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostTopologiesAccountReader{formats: a.formats},
+		Reader:             &PostPublicTopologyReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostTopologiesAccountOK), nil
+	return result.(*PostPublicTopologyOK), nil
 }
 
 // SetTransport changes the transport on the client

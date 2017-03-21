@@ -23,84 +23,84 @@ type Client struct {
 }
 
 /*
-GetAccount retrieves public and private owned usages by filter parameters
+GetAccountUsage retrieves public and private owned usages by filter parameters
 
 Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)
 */
-func (a *Client) GetAccount(params *GetAccountParams) (*GetAccountOK, error) {
+func (a *Client) GetAccountUsage(params *GetAccountUsageParams) (*GetAccountUsageOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetAccountParams()
+		params = NewGetAccountUsageParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getAccount",
+		ID:                 "getAccountUsage",
 		Method:             "GET",
 		PathPattern:        "/usages/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetAccountReader{formats: a.formats},
+		Reader:             &GetAccountUsageReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetAccountOK), nil
+	return result.(*GetAccountUsageOK), nil
 }
 
 /*
-GetDeployer retrieves usages by filter parameters
+GetDeployerUsage retrieves usages by filter parameters
 
 Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)
 */
-func (a *Client) GetDeployer(params *GetDeployerParams) (*GetDeployerOK, error) {
+func (a *Client) GetDeployerUsage(params *GetDeployerUsageParams) (*GetDeployerUsageOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetDeployerParams()
+		params = NewGetDeployerUsageParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getDeployer",
+		ID:                 "getDeployerUsage",
 		Method:             "GET",
 		PathPattern:        "/usages",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetDeployerReader{formats: a.formats},
+		Reader:             &GetDeployerUsageReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetDeployerOK), nil
+	return result.(*GetDeployerUsageOK), nil
 }
 
 /*
-GetUser retrieves private usages by filter parameters
+GetUserUsage retrieves private usages by filter parameters
 
 Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)
 */
-func (a *Client) GetUser(params *GetUserParams) (*GetUserOK, error) {
+func (a *Client) GetUserUsage(params *GetUserUsageParams) (*GetUserUsageOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetUserParams()
+		params = NewGetUserUsageParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getUser",
+		ID:                 "getUserUsage",
 		Method:             "GET",
 		PathPattern:        "/usages/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetUserReader{formats: a.formats},
+		Reader:             &GetUserUsageReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetUserOK), nil
+	return result.(*GetUserUsageOK), nil
 }
 
 // SetTransport changes the transport on the client

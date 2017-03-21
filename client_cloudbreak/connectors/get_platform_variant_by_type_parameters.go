@@ -27,8 +27,8 @@ type GetPlatformVariantByTypeParams struct {
 }
 
 // WithType adds the type to the get platform variant by type params
-func (o *GetPlatformVariantByTypeParams) WithType(typee string) *GetPlatformVariantByTypeParams {
-	o.Type = typee
+func (o *GetPlatformVariantByTypeParams) WithType(types string) *GetPlatformVariantByTypeParams {
+	o.Type = types
 	return o
 }
 

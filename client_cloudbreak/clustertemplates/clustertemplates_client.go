@@ -23,52 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteClustertemplatesAccountName deletes public owned or private cluster template by name
+DeleteClusterTemplate deletes cluster template by id
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
 */
-func (a *Client) DeleteClustertemplatesAccountName(params *DeleteClustertemplatesAccountNameParams) error {
+func (a *Client) DeleteClusterTemplate(params *DeleteClusterTemplateParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteClustertemplatesAccountNameParams()
+		params = NewDeleteClusterTemplateParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteClustertemplatesAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/clustertemplates/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteClustertemplatesAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteClustertemplatesID deletes cluster template by id
-
-Cluster templates are stored cluster configurations, which configurations are reusable any time
-*/
-func (a *Client) DeleteClustertemplatesID(params *DeleteClustertemplatesIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteClustertemplatesIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteClustertemplatesID",
+		ID:                 "deleteClusterTemplate",
 		Method:             "DELETE",
 		PathPattern:        "/clustertemplates/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteClustertemplatesIDReader{formats: a.formats},
+		Reader:             &DeleteClusterTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -77,25 +50,25 @@ func (a *Client) DeleteClustertemplatesID(params *DeleteClustertemplatesIDParams
 }
 
 /*
-DeleteClustertemplatesUserName deletes private cluster template by name
+DeletePrivateClusterTemplate deletes private cluster template by name
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
 */
-func (a *Client) DeleteClustertemplatesUserName(params *DeleteClustertemplatesUserNameParams) error {
+func (a *Client) DeletePrivateClusterTemplate(params *DeletePrivateClusterTemplateParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteClustertemplatesUserNameParams()
+		params = NewDeletePrivateClusterTemplateParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteClustertemplatesUserName",
+		ID:                 "deletePrivateClusterTemplate",
 		Method:             "DELETE",
 		PathPattern:        "/clustertemplates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteClustertemplatesUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateClusterTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +77,219 @@ func (a *Client) DeleteClustertemplatesUserName(params *DeleteClustertemplatesUs
 }
 
 /*
-GetClustertemplatesAccount retrieves public and private owned cluster template
+DeletePublicClusterTemplate deletes public owned or private cluster template by name
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
 */
-func (a *Client) GetClustertemplatesAccount(params *GetClustertemplatesAccountParams) (*GetClustertemplatesAccountOK, error) {
+func (a *Client) DeletePublicClusterTemplate(params *DeletePublicClusterTemplateParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetClustertemplatesAccountParams()
+		params = NewDeletePublicClusterTemplateParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetClustertemplatesAccount",
-		Method:             "GET",
-		PathPattern:        "/clustertemplates/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetClustertemplatesAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetClustertemplatesAccountOK), nil
-}
-
-/*
-GetClustertemplatesAccountName retrieves a public or private owned cluster template by name
-
-Cluster templates are stored cluster configurations, which configurations are reusable any time
-*/
-func (a *Client) GetClustertemplatesAccountName(params *GetClustertemplatesAccountNameParams) (*GetClustertemplatesAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetClustertemplatesAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetClustertemplatesAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicClusterTemplate",
+		Method:             "DELETE",
 		PathPattern:        "/clustertemplates/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetClustertemplatesAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicClusterTemplateReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetClustertemplatesAccountNameOK), nil
+	return nil
 }
 
 /*
-GetClustertemplatesID retrieves cluster template by id
+GetClusterTemplate retrieves cluster template by id
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
 */
-func (a *Client) GetClustertemplatesID(params *GetClustertemplatesIDParams) (*GetClustertemplatesIDOK, error) {
+func (a *Client) GetClusterTemplate(params *GetClusterTemplateParams) (*GetClusterTemplateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetClustertemplatesIDParams()
+		params = NewGetClusterTemplateParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetClustertemplatesID",
+		ID:                 "getClusterTemplate",
 		Method:             "GET",
 		PathPattern:        "/clustertemplates/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetClustertemplatesIDReader{formats: a.formats},
+		Reader:             &GetClusterTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetClustertemplatesIDOK), nil
+	return result.(*GetClusterTemplateOK), nil
 }
 
 /*
-GetClustertemplatesUser retrieves private cluster templates
+GetPrivateClusterTemplate retrieves a private cluster template by name
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
 */
-func (a *Client) GetClustertemplatesUser(params *GetClustertemplatesUserParams) (*GetClustertemplatesUserOK, error) {
+func (a *Client) GetPrivateClusterTemplate(params *GetPrivateClusterTemplateParams) (*GetPrivateClusterTemplateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetClustertemplatesUserParams()
+		params = NewGetPrivateClusterTemplateParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetClustertemplatesUser",
-		Method:             "GET",
-		PathPattern:        "/clustertemplates/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetClustertemplatesUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetClustertemplatesUserOK), nil
-}
-
-/*
-GetClustertemplatesUserName retrieves a private cluster template by name
-
-Cluster templates are stored cluster configurations, which configurations are reusable any time
-*/
-func (a *Client) GetClustertemplatesUserName(params *GetClustertemplatesUserNameParams) (*GetClustertemplatesUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetClustertemplatesUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetClustertemplatesUserName",
+		ID:                 "getPrivateClusterTemplate",
 		Method:             "GET",
 		PathPattern:        "/clustertemplates/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetClustertemplatesUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateClusterTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetClustertemplatesUserNameOK), nil
+	return result.(*GetPrivateClusterTemplateOK), nil
 }
 
 /*
-PostClustertemplatesAccount creates cluster template as public resource
+GetPrivatesClusterTemplate retrieves private cluster templates
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
 */
-func (a *Client) PostClustertemplatesAccount(params *PostClustertemplatesAccountParams) (*PostClustertemplatesAccountOK, error) {
+func (a *Client) GetPrivatesClusterTemplate(params *GetPrivatesClusterTemplateParams) (*GetPrivatesClusterTemplateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostClustertemplatesAccountParams()
+		params = NewGetPrivatesClusterTemplateParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostClustertemplatesAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesClusterTemplate",
+		Method:             "GET",
+		PathPattern:        "/clustertemplates/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesClusterTemplateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesClusterTemplateOK), nil
+}
+
+/*
+GetPublicClusterTemplate retrieves a public or private owned cluster template by name
+
+Cluster templates are stored cluster configurations, which configurations are reusable any time
+*/
+func (a *Client) GetPublicClusterTemplate(params *GetPublicClusterTemplateParams) (*GetPublicClusterTemplateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicClusterTemplateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicClusterTemplate",
+		Method:             "GET",
+		PathPattern:        "/clustertemplates/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicClusterTemplateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicClusterTemplateOK), nil
+}
+
+/*
+GetPublicsClusterTemplate retrieves public and private owned cluster template
+
+Cluster templates are stored cluster configurations, which configurations are reusable any time
+*/
+func (a *Client) GetPublicsClusterTemplate(params *GetPublicsClusterTemplateParams) (*GetPublicsClusterTemplateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsClusterTemplateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsClusterTemplate",
+		Method:             "GET",
 		PathPattern:        "/clustertemplates/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostClustertemplatesAccountReader{formats: a.formats},
+		Reader:             &GetPublicsClusterTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostClustertemplatesAccountOK), nil
+	return result.(*GetPublicsClusterTemplateOK), nil
 }
 
 /*
-PostClustertemplatesUser creates cluster template as private resource
+PostPrivateClusterTemplate creates cluster template as private resource
 
 Cluster templates are stored cluster configurations, which configurations are reusable any time
 */
-func (a *Client) PostClustertemplatesUser(params *PostClustertemplatesUserParams) (*PostClustertemplatesUserOK, error) {
+func (a *Client) PostPrivateClusterTemplate(params *PostPrivateClusterTemplateParams) (*PostPrivateClusterTemplateOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostClustertemplatesUserParams()
+		params = NewPostPrivateClusterTemplateParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostClustertemplatesUser",
+		ID:                 "postPrivateClusterTemplate",
 		Method:             "POST",
 		PathPattern:        "/clustertemplates/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostClustertemplatesUserReader{formats: a.formats},
+		Reader:             &PostPrivateClusterTemplateReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostClustertemplatesUserOK), nil
+	return result.(*PostPrivateClusterTemplateOK), nil
+}
+
+/*
+PostPublicClusterTemplate creates cluster template as public resource
+
+Cluster templates are stored cluster configurations, which configurations are reusable any time
+*/
+func (a *Client) PostPublicClusterTemplate(params *PostPublicClusterTemplateParams) (*PostPublicClusterTemplateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicClusterTemplateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicClusterTemplate",
+		Method:             "POST",
+		PathPattern:        "/clustertemplates/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicClusterTemplateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicClusterTemplateOK), nil
 }
 
 // SetTransport changes the transport on the client

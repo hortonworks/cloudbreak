@@ -22,7 +22,7 @@ var CLUSTER_MANAGER_EXPOSED_SERVICES = []string{"HDFSUI", "YARNUI", "JOBHISTORYU
 func (c *Cloudbreak) GetClusterByName(name string) *models_cloudbreak.StackResponse {
 	defer timeTrack(time.Now(), "get cluster by name")
 
-	stack, err := c.Cloudbreak.Stacks.GetStacksUserName(&stacks.GetStacksUserNameParams{Name: name})
+	stack, err := c.Cloudbreak.Stacks.GetPrivateStack(&stacks.GetPrivateStackParams{Name: name})
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -121,7 +121,7 @@ func TerminateCluster(c *cli.Context) error {
 	asClient.deleteCluster(clusterName, cbClient.GetClusterByName)
 
 	deleteDependencies := true
-	err := cbClient.Cloudbreak.Stacks.DeleteStacksUserName(&stacks.DeleteStacksUserNameParams{Name: clusterName, DeleteDependencies: &deleteDependencies})
+	err := cbClient.Cloudbreak.Stacks.DeletePrivateStack(&stacks.DeletePrivateStackParams{Name: clusterName, DeleteDependencies: &deleteDependencies})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -154,9 +154,9 @@ func CreateCluster(c *cli.Context) error {
 		cbClient.GetBlueprintByName,
 		cbClient.GetCredential,
 		cbClient.GetNetwork,
-		cbClient.Cloudbreak.Stacks.PostStacksUser,
+		cbClient.Cloudbreak.Stacks.PostPrivateStack,
 		cbClient.GetRDSConfigByName,
-		cbClient.Cloudbreak.Cluster.PostStacksIDCluster,
+		cbClient.Cloudbreak.Cluster.PostCluster,
 		asClient.createBaseAutoscalingCluster,
 		asClient.setConfiguration,
 		asClient.addPrometheusAlert,
@@ -179,9 +179,9 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	getBlueprint func(string) *models_cloudbreak.BlueprintResponse,
 	getCredential func(string) models_cloudbreak.CredentialResponse,
 	getNetwork func(name string) models_cloudbreak.NetworkResponse,
-	postStack func(*stacks.PostStacksUserParams) (*stacks.PostStacksUserOK, error),
+	postStack func(*stacks.PostPrivateStackParams) (*stacks.PostPrivateStackOK, error),
 	getRdsConfig func(string) models_cloudbreak.RDSConfigResponse,
-	postCluster func(*cluster.PostStacksIDClusterParams) (*cluster.PostStacksIDClusterOK, error),
+	postCluster func(*cluster.PostClusterParams) (*cluster.PostClusterOK, error),
 	createBaseAutoscalingCluster func(stackId int64) int64,
 	setScalingConfigurations func(int64, AutoscalingConfiguration),
 	addPrometheusAlert func(int64, AutoscalingPolicy) int64,
@@ -268,7 +268,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
-		resp, err := postStack(&stacks.PostStacksUserParams{Body: &stackReq})
+		resp, err := postStack(&stacks.PostPrivateStackParams{Body: &stackReq})
 
 		if err != nil {
 			logErrorAndExit(err)
@@ -282,17 +282,17 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 	func() {
 		masterConstraint := models_cloudbreak.Constraint{
-			InstanceGroupName: MASTER,
+			InstanceGroupName: &MASTER,
 			HostCount:         int32(1),
 		}
 
 		workerConstraint := models_cloudbreak.Constraint{
-			InstanceGroupName: WORKER,
+			InstanceGroupName: &WORKER,
 			HostCount:         int32(skeleton.Worker.InstanceCount),
 		}
 
 		computeConstraint := models_cloudbreak.Constraint{
-			InstanceGroupName: COMPUTE,
+			InstanceGroupName: &COMPUTE,
 			HostCount:         int32(skeleton.Compute.InstanceCount),
 		}
 
@@ -396,7 +396,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			},
 		}
 
-		resp, err := postCluster(&cluster.PostStacksIDClusterParams{ID: stackId, Body: &clusterReq})
+		resp, err := postCluster(&cluster.PostClusterParams{ID: stackId, Body: &clusterReq})
 
 		if err != nil {
 			logErrorAndExit(err)
@@ -480,8 +480,8 @@ func ResizeCluster(c *cli.Context) error {
 	clusterName := c.String(FlClusterName.Name)
 	stack := resizeClusterImpl(clusterName, nodeType, adjustment,
 		oAuth2Client.GetClusterByName,
-		oAuth2Client.Cloudbreak.Stacks.PutStacksID,
-		oAuth2Client.Cloudbreak.Cluster.PutStacksIDCluster)
+		oAuth2Client.Cloudbreak.Stacks.PutStack,
+		oAuth2Client.Cloudbreak.Cluster.PutCluster)
 
 	oAuth2Client.waitForClusterToFinish(*stack.ID, c)
 
@@ -490,8 +490,8 @@ func ResizeCluster(c *cli.Context) error {
 
 func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 	getStack func(string) *models_cloudbreak.StackResponse,
-	putStack func(*stacks.PutStacksIDParams) error,
-	putCluster func(*cluster.PutStacksIDClusterParams) error) *models_cloudbreak.StackResponse {
+	putStack func(*stacks.PutStackParams) error,
+	putCluster func(*cluster.PutClusterParams) error) *models_cloudbreak.StackResponse {
 
 	stack := getStack(clusterName)
 
@@ -504,7 +504,7 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 				WithClusterEvent:  &withClusterScale,
 			},
 		}
-		if err := putStack(&stacks.PutStacksIDParams{ID: *stack.ID, Body: update}); err != nil {
+		if err := putStack(&stacks.PutStackParams{ID: *stack.ID, Body: update}); err != nil {
 			logErrorAndExit(err)
 		}
 	} else {
@@ -532,7 +532,7 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 				ValidateNodeCount: &validateNodeCount,
 			},
 		}
-		if err := putCluster(&cluster.PutStacksIDClusterParams{ID: *stack.ID, Body: update}); err != nil {
+		if err := putCluster(&cluster.PutClusterParams{ID: *stack.ID, Body: update}); err != nil {
 			logErrorAndExit(err)
 		}
 	}

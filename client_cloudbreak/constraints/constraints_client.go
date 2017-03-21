@@ -23,52 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteConstraintsAccountName deletes public owned or private constraint template by name
+DeleteConstraint deletes constraint template by id
 
 A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
 */
-func (a *Client) DeleteConstraintsAccountName(params *DeleteConstraintsAccountNameParams) error {
+func (a *Client) DeleteConstraint(params *DeleteConstraintParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteConstraintsAccountNameParams()
+		params = NewDeleteConstraintParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteConstraintsAccountName",
-		Method:             "DELETE",
-		PathPattern:        "/constraints/account/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteConstraintsAccountNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteConstraintsID deletes constraint template by id
-
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
-*/
-func (a *Client) DeleteConstraintsID(params *DeleteConstraintsIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteConstraintsIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteConstraintsID",
+		ID:                 "deleteConstraint",
 		Method:             "DELETE",
 		PathPattern:        "/constraints/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteConstraintsIDReader{formats: a.formats},
+		Reader:             &DeleteConstraintReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -77,25 +50,25 @@ func (a *Client) DeleteConstraintsID(params *DeleteConstraintsIDParams) error {
 }
 
 /*
-DeleteConstraintsUserName deletes private constraint template by name
+DeletePrivateConstraint deletes private constraint template by name
 
 A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
 */
-func (a *Client) DeleteConstraintsUserName(params *DeleteConstraintsUserNameParams) error {
+func (a *Client) DeletePrivateConstraint(params *DeletePrivateConstraintParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteConstraintsUserNameParams()
+		params = NewDeletePrivateConstraintParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteConstraintsUserName",
+		ID:                 "deletePrivateConstraint",
 		Method:             "DELETE",
 		PathPattern:        "/constraints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteConstraintsUserNameReader{formats: a.formats},
+		Reader:             &DeletePrivateConstraintReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -104,192 +77,219 @@ func (a *Client) DeleteConstraintsUserName(params *DeleteConstraintsUserNamePara
 }
 
 /*
-GetConstraintsAccount retrieves public and private owned constraint templates
+DeletePublicConstraint deletes public owned or private constraint template by name
 
 A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
 */
-func (a *Client) GetConstraintsAccount(params *GetConstraintsAccountParams) (*GetConstraintsAccountOK, error) {
+func (a *Client) DeletePublicConstraint(params *DeletePublicConstraintParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetConstraintsAccountParams()
+		params = NewDeletePublicConstraintParams()
 	}
 
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetConstraintsAccount",
-		Method:             "GET",
-		PathPattern:        "/constraints/account",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetConstraintsAccountReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetConstraintsAccountOK), nil
-}
-
-/*
-GetConstraintsAccountName retrieves a public or private owned constraint template by name
-
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
-*/
-func (a *Client) GetConstraintsAccountName(params *GetConstraintsAccountNameParams) (*GetConstraintsAccountNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetConstraintsAccountNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetConstraintsAccountName",
-		Method:             "GET",
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicConstraint",
+		Method:             "DELETE",
 		PathPattern:        "/constraints/account/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetConstraintsAccountNameReader{formats: a.formats},
+		Reader:             &DeletePublicConstraintReader{formats: a.formats},
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return result.(*GetConstraintsAccountNameOK), nil
+	return nil
 }
 
 /*
-GetConstraintsID retrieves constraint template by id
+GetConstraint retrieves constraint template by id
 
 A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
 */
-func (a *Client) GetConstraintsID(params *GetConstraintsIDParams) (*GetConstraintsIDOK, error) {
+func (a *Client) GetConstraint(params *GetConstraintParams) (*GetConstraintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetConstraintsIDParams()
+		params = NewGetConstraintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetConstraintsID",
+		ID:                 "getConstraint",
 		Method:             "GET",
 		PathPattern:        "/constraints/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetConstraintsIDReader{formats: a.formats},
+		Reader:             &GetConstraintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetConstraintsIDOK), nil
+	return result.(*GetConstraintOK), nil
 }
 
 /*
-GetConstraintsUser retrieves private constraint templates
+GetPrivateConstraint retrieves a private constraint template by name
 
 A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
 */
-func (a *Client) GetConstraintsUser(params *GetConstraintsUserParams) (*GetConstraintsUserOK, error) {
+func (a *Client) GetPrivateConstraint(params *GetPrivateConstraintParams) (*GetPrivateConstraintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetConstraintsUserParams()
+		params = NewGetPrivateConstraintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetConstraintsUser",
-		Method:             "GET",
-		PathPattern:        "/constraints/user",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetConstraintsUserReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetConstraintsUserOK), nil
-}
-
-/*
-GetConstraintsUserName retrieves a private constraint template by name
-
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
-*/
-func (a *Client) GetConstraintsUserName(params *GetConstraintsUserNameParams) (*GetConstraintsUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetConstraintsUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetConstraintsUserName",
+		ID:                 "getPrivateConstraint",
 		Method:             "GET",
 		PathPattern:        "/constraints/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetConstraintsUserNameReader{formats: a.formats},
+		Reader:             &GetPrivateConstraintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetConstraintsUserNameOK), nil
+	return result.(*GetPrivateConstraintOK), nil
 }
 
 /*
-PostConstraintsAccount creates constraint template as public resource
+GetPrivatesConstraint retrieves private constraint templates
 
 A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
 */
-func (a *Client) PostConstraintsAccount(params *PostConstraintsAccountParams) (*PostConstraintsAccountOK, error) {
+func (a *Client) GetPrivatesConstraint(params *GetPrivatesConstraintParams) (*GetPrivatesConstraintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostConstraintsAccountParams()
+		params = NewGetPrivatesConstraintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostConstraintsAccount",
-		Method:             "POST",
+		ID:                 "getPrivatesConstraint",
+		Method:             "GET",
+		PathPattern:        "/constraints/user",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivatesConstraintReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivatesConstraintOK), nil
+}
+
+/*
+GetPublicConstraint retrieves a public or private owned constraint template by name
+
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+*/
+func (a *Client) GetPublicConstraint(params *GetPublicConstraintParams) (*GetPublicConstraintOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicConstraintParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicConstraint",
+		Method:             "GET",
+		PathPattern:        "/constraints/account/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicConstraintReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicConstraintOK), nil
+}
+
+/*
+GetPublicsConstraint retrieves public and private owned constraint templates
+
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+*/
+func (a *Client) GetPublicsConstraint(params *GetPublicsConstraintParams) (*GetPublicsConstraintOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicsConstraintParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicsConstraint",
+		Method:             "GET",
 		PathPattern:        "/constraints/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostConstraintsAccountReader{formats: a.formats},
+		Reader:             &GetPublicsConstraintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostConstraintsAccountOK), nil
+	return result.(*GetPublicsConstraintOK), nil
 }
 
 /*
-PostConstraintsUser creates constraint template as private resource
+PostPrivateConstraint creates constraint template as private resource
 
 A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
 */
-func (a *Client) PostConstraintsUser(params *PostConstraintsUserParams) (*PostConstraintsUserOK, error) {
+func (a *Client) PostPrivateConstraint(params *PostPrivateConstraintParams) (*PostPrivateConstraintOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostConstraintsUserParams()
+		params = NewPostPrivateConstraintParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostConstraintsUser",
+		ID:                 "postPrivateConstraint",
 		Method:             "POST",
 		PathPattern:        "/constraints/user",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PostConstraintsUserReader{formats: a.formats},
+		Reader:             &PostPrivateConstraintReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PostConstraintsUserOK), nil
+	return result.(*PostPrivateConstraintOK), nil
+}
+
+/*
+PostPublicConstraint creates constraint template as public resource
+
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+*/
+func (a *Client) PostPublicConstraint(params *PostPublicConstraintParams) (*PostPublicConstraintOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostPublicConstraintParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postPublicConstraint",
+		Method:             "POST",
+		PathPattern:        "/constraints/account",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostPublicConstraintReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostPublicConstraintOK), nil
 }
 
 // SetTransport changes the transport on the client

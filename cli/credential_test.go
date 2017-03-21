@@ -61,7 +61,7 @@ func TestCreateCredential(t *testing.T) {
 	if !reflect.DeepEqual(actualCredential.Parameters, expectedParams) {
 		t.Errorf("params not match %s == %s", expectedParams, actualCredential.Parameters)
 	}
-	if actualCredential.PublicKey != expectedSshKey {
+	if *actualCredential.PublicKey != expectedSshKey {
 		t.Errorf("ssh key not match %s == %s", expectedSshKey, actualCredential.PublicKey)
 	}
 	if actualExistingKey != finder(FlSSHKeyPair.Name) {
@@ -109,15 +109,15 @@ func TestCopyDefaultCredentialImpl(t *testing.T) {
 func TestCreateCredentialImplPublic(t *testing.T) {
 	expectedId := int64(1)
 	var actualCredential *models_cloudbreak.CredentialRequest
-	postAccountCredentail := func(params *credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error) {
+	postAccountCredentail := func(params *credentials.PostPublicCredentialParams) (*credentials.PostPublicCredentialOK, error) {
 		actualCredential = params.Body
-		return &credentials.PostCredentialsAccountOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
+		return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
 	}
 	defaultParams := make(map[string]interface{})
 	defaultParams["roleArn"] = "role"
 	defaultCredential := models_cloudbreak.CredentialResponse{
 		Parameters: defaultParams,
-		PublicKey:  "pub-key",
+		PublicKey:  &(&stringWrapper{"pub-key"}).s,
 	}
 
 	actualId := createCredentialImpl("name", defaultCredential, "ssh-key", true, postAccountCredentail, nil)
@@ -145,8 +145,8 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 
 func TestCreateCredentialImplPrivate(t *testing.T) {
 	expectedId := int64(1)
-	postUserCredential := func(params *credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error) {
-		return &credentials.PostCredentialsUserOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
+	postUserCredential := func(params *credentials.PostPrivateCredentialParams) (*credentials.PostPrivateCredentialOK, error) {
+		return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
 	}
 
 	actualId := createCredentialImpl("name", models_cloudbreak.CredentialResponse{}, "ssh-key", false, nil, postUserCredential)

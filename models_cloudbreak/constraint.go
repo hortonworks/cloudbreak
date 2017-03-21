@@ -27,10 +27,8 @@ type Constraint struct {
 	HostCount int32 `json:"hostCount"`
 
 	/* name of an instance group where the hostgroup will be deployed
-
-	Required: true
-	*/
-	InstanceGroupName string `json:"instanceGroupName"`
+	 */
+	InstanceGroupName *string `json:"instanceGroupName,omitempty"`
 }
 
 // Validate validates this constraint
@@ -38,11 +36,6 @@ func (m *Constraint) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateHostCount(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
-	if err := m.validateInstanceGroupName(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -56,15 +49,6 @@ func (m *Constraint) Validate(formats strfmt.Registry) error {
 func (m *Constraint) validateHostCount(formats strfmt.Registry) error {
 
 	if err := validate.Required("hostCount", "body", int32(m.HostCount)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (m *Constraint) validateInstanceGroupName(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("instanceGroupName", "body", string(m.InstanceGroupName)); err != nil {
 		return err
 	}
 

@@ -42,7 +42,7 @@ func TestCreateTemplateImpl(t *testing.T) {
 	var actualWorkerTemplate *models_cloudbreak.TemplateRequest
 	var actualComputeTemplate *models_cloudbreak.TemplateRequest
 
-	postTemplate := func(params *templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error) {
+	postTemplate := func(params *templates.PostPublicTemplateParams) (*templates.PostPublicTemplateOK, error) {
 		var id int64
 		if strings.Contains(params.Body.Name, "mtempl") {
 			id = expectedMasterId
@@ -54,7 +54,7 @@ func TestCreateTemplateImpl(t *testing.T) {
 			id = expectedComputeId
 			actualComputeTemplate = params.Body
 		}
-		resp := templates.PostTemplatesAccountOK{
+		resp := templates.PostPublicTemplateOK{
 			Payload: &models_cloudbreak.TemplateResponse{ID: &id},
 		}
 		return &resp, nil

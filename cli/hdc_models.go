@@ -2,7 +2,7 @@ package cli
 
 import "github.com/hortonworks/hdc-cli/models_cloudbreak"
 
-const (
+var (
 	MASTER    = "master"
 	WORKER    = "worker"
 	COMPUTE   = "compute"

@@ -23,30 +23,30 @@ type Client struct {
 }
 
 /*
-Subscribe retrives subscribe identifier
+SubscribeSubscription retrives subscribe identifier
 
 Accepting client subscriptions to notification events.
 */
-func (a *Client) Subscribe(params *SubscribeParams) (*SubscribeOK, error) {
+func (a *Client) SubscribeSubscription(params *SubscribeSubscriptionParams) (*SubscribeSubscriptionOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewSubscribeParams()
+		params = NewSubscribeSubscriptionParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "subscribe",
+		ID:                 "subscribeSubscription",
 		Method:             "POST",
 		PathPattern:        "/subscriptions",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &SubscribeReader{formats: a.formats},
+		Reader:             &SubscribeSubscriptionReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*SubscribeOK), nil
+	return result.(*SubscribeSubscriptionOK), nil
 }
 
 // SetTransport changes the transport on the client

@@ -41,6 +41,10 @@ type StackRequest struct {
 	 */
 	CredentialID *int64 `json:"credentialId,omitempty"`
 
+	/* custom image for the cluster
+	 */
+	CustomImage *string `json:"customImage,omitempty"`
+
 	/* failure policy in case of failures
 	 */
 	FailurePolicy *FailurePolicyRequest `json:"failurePolicy,omitempty"`

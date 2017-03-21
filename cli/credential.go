@@ -42,13 +42,14 @@ func createCredential(finder func(string) string, getResponse func(string) (*htt
 		logErrorAndExit(err)
 	}
 	sshKey, _ := ioutil.ReadAll(resp.Body)
-	log.Infof("[CreateCredential] SSH key recieved: %s", sshKey)
+	sshKeyString := string(sshKey)
+	log.Infof("[CreateCredential] SSH key recieved: %s", sshKeyString)
 
 	var credentialMap = make(map[string]interface{})
 	credentialMap["roleArn"] = finder(FlRoleARN.Name)
 	defaultCredential := models_cloudbreak.CredentialResponse{
 		Parameters: credentialMap,
-		PublicKey:  string(sshKey),
+		PublicKey:  &sshKeyString,
 	}
 
 	return createCredential(finder(FlCredentialName.Name), defaultCredential, finder(FlSSHKeyPair.Name), true)
@@ -78,25 +79,25 @@ func copyDefaultCredentialImpl(skeleton ClusterSkeleton, channel chan int64, get
 func (c *Cloudbreak) CreateCredential(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string, public bool) int64 {
 	defer timeTrack(time.Now(), "create credential")
 
-	return createCredentialImpl(name, defaultCredential, existingKey, public, c.Cloudbreak.Credentials.PostCredentialsAccount, c.Cloudbreak.Credentials.PostCredentialsUser)
+	return createCredentialImpl(name, defaultCredential, existingKey, public, c.Cloudbreak.Credentials.PostPublicCredential, c.Cloudbreak.Credentials.PostPrivateCredential)
 }
 
 func createCredentialImpl(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string, public bool,
-	postAccountCredential func(*credentials.PostCredentialsAccountParams) (*credentials.PostCredentialsAccountOK, error),
-	postUserCredential func(*credentials.PostCredentialsUserParams) (*credentials.PostCredentialsUserOK, error)) int64 {
+	postAccountCredential func(*credentials.PostPublicCredentialParams) (*credentials.PostPublicCredentialOK, error),
+	postUserCredential func(*credentials.PostPrivateCredentialParams) (*credentials.PostPrivateCredentialOK, error)) int64 {
 
 	credReq := createCredentialRequest(name, defaultCredential, existingKey)
 
 	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
 	var id int64
 	if public {
-		resp, err := postAccountCredential(&credentials.PostCredentialsAccountParams{Body: credReq})
+		resp, err := postAccountCredential(&credentials.PostPublicCredentialParams{Body: credReq})
 		if err != nil {
 			logErrorAndExit(err)
 		}
 		id = *resp.Payload.ID
 	} else {
-		resp, err := postUserCredential(&credentials.PostCredentialsUserParams{Body: credReq})
+		resp, err := postUserCredential(&credentials.PostPrivateCredentialParams{Body: credReq})
 		if err != nil {
 			logErrorAndExit(err)
 		}
@@ -125,7 +126,7 @@ func createCredentialRequest(name string, defaultCredential models_cloudbreak.Cr
 
 func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models_cloudbreak.CredentialResponse, error) {
 	defer timeTrack(time.Now(), "get credential by id")
-	respCredential, err := c.Cloudbreak.Credentials.GetCredentialsID(&credentials.GetCredentialsIDParams{ID: credentialID})
+	respCredential, err := c.Cloudbreak.Credentials.GetCredential(&credentials.GetCredentialParams{ID: credentialID})
 	var credential *models_cloudbreak.CredentialResponse
 	if respCredential != nil {
 		credential = respCredential.Payload
@@ -136,7 +137,7 @@ func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models_cloudbreak.C
 func (c *Cloudbreak) GetCredential(name string) models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get credential by name")
 	log.Infof("[GetCredential] sending get request to find credential with name: %s", name)
-	resp, err := c.Cloudbreak.Credentials.GetCredentialsUserName(&credentials.GetCredentialsUserNameParams{Name: name})
+	resp, err := c.Cloudbreak.Credentials.GetPrivateCredential(&credentials.GetPrivateCredentialParams{Name: name})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -149,7 +150,7 @@ func (c *Cloudbreak) GetCredential(name string) models_cloudbreak.CredentialResp
 
 func (c *Cloudbreak) GetPublicCredentials() []*models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get public credentials")
-	resp, err := c.Cloudbreak.Credentials.GetCredentialsAccount(&credentials.GetCredentialsAccountParams{})
+	resp, err := c.Cloudbreak.Credentials.GetPublicsCredential(&credentials.GetPublicsCredentialParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -159,7 +160,7 @@ func (c *Cloudbreak) GetPublicCredentials() []*models_cloudbreak.CredentialRespo
 func (c *Cloudbreak) DeleteCredential(name string) error {
 	defer timeTrack(time.Now(), "delete credential")
 	log.Infof("[DeleteCredential] delete credential: %s", name)
-	return c.Cloudbreak.Credentials.DeleteCredentialsAccountName(&credentials.DeleteCredentialsAccountNameParams{Name: name})
+	return c.Cloudbreak.Credentials.DeletePublicCredential(&credentials.DeletePublicCredentialParams{Name: name})
 }
 
 func ListPrivateCredentials(c *cli.Context) error {
@@ -187,7 +188,7 @@ func listPrivateCredentialsImpl(getPrivateCredentials func() []*models_cloudbrea
 
 func (c *Cloudbreak) GetPrivateCredentials() []*models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get private credentials")
-	resp, err := c.Cloudbreak.Credentials.GetCredentialsUser(&credentials.GetCredentialsUserParams{})
+	resp, err := c.Cloudbreak.Credentials.GetPrivatesCredential(&credentials.GetPrivatesCredentialParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}

@@ -16,8 +16,8 @@ func TestListClustersImpl(t *testing.T) {
 		id := int64(i)
 		resps = append(resps, &models_cloudbreak.StackResponse{ID: &id})
 	}
-	getStacks := func(params *stacks.GetStacksUserParams) (*stacks.GetStacksUserOK, error) {
-		return &stacks.GetStacksUserOK{Payload: resps}, nil
+	getStacks := func(params *stacks.GetPrivatesStackParams) (*stacks.GetPrivatesStackOK, error) {
+		return &stacks.GetPrivatesStackOK{Payload: resps}, nil
 	}
 	mtx := sync.Mutex{}
 	expected := make([]ClusterSkeletonResult, 0)
@@ -60,8 +60,8 @@ func TestListClusterNodesImplWithoutDiscoveryFQDN(t *testing.T) {
 	for i := 0; i <= 3; i++ {
 		groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Metadata: []*models_cloudbreak.InstanceMetaData{{}}})
 	}
-	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
-		return &stacks.GetStacksUserNameOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
+	getStack := func(params *stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error) {
+		return &stacks.GetPrivateStackOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
 	}
 	var rows []Row
 
@@ -90,8 +90,8 @@ func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 		}
 		groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Metadata: metas})
 	}
-	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
-		return &stacks.GetStacksUserNameOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
+	getStack := func(params *stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error) {
+		return &stacks.GetPrivateStackOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
 	}
 	var rows []Row
 
@@ -117,8 +117,8 @@ func TestListClusterNodesImplWithMaster(t *testing.T) {
 			DiscoveryFQDN: &(&stringWrapper{"fqdn"}).s,
 		}},
 	}}
-	getStack := func(params *stacks.GetStacksUserNameParams) (*stacks.GetStacksUserNameOK, error) {
-		return &stacks.GetStacksUserNameOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
+	getStack := func(params *stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error) {
+		return &stacks.GetPrivateStackOK{Payload: &models_cloudbreak.StackResponse{InstanceGroups: groups}}, nil
 	}
 	var rows []Row
 

@@ -27,7 +27,7 @@ func (c *Cloudbreak) GetRDSConfigByName(name string) models_cloudbreak.RDSConfig
 	defer timeTrack(time.Now(), "get rds config by name")
 	log.Infof("[GetRDSConfigByName] get rds config by name: %s", name)
 
-	resp, err := c.Cloudbreak.Rdsconfigs.GetRdsconfigsAccountName(&rdsconfigs.GetRdsconfigsAccountNameParams{Name: name})
+	resp, err := c.Cloudbreak.Rdsconfigs.GetPublicRds(&rdsconfigs.GetPublicRdsParams{Name: name})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -42,7 +42,7 @@ func (c *Cloudbreak) GetRDSConfigById(id int64) *models_cloudbreak.RDSConfigResp
 	defer timeTrack(time.Now(), "get rds config by id")
 	log.Infof("[GetRDSConfigById] get rds config by id: %d", id)
 
-	resp, err := c.Cloudbreak.Rdsconfigs.GetRdsconfigsID(&rdsconfigs.GetRdsconfigsIDParams{ID: id})
+	resp, err := c.Cloudbreak.Rdsconfigs.GetRds(&rdsconfigs.GetRdsParams{ID: id})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -59,11 +59,11 @@ func ListRDSConfigs(c *cli.Context) error {
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	output := Output{Format: c.String(FlOutput.Name)}
-	return listRDSConfigsImpl(oAuth2Client.Cloudbreak.Rdsconfigs.GetRdsconfigsAccount, output.WriteList)
+	return listRDSConfigsImpl(oAuth2Client.Cloudbreak.Rdsconfigs.GetPublicsRds, output.WriteList)
 }
 
-func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetRdsconfigsAccountParams) (*rdsconfigs.GetRdsconfigsAccountOK, error), writer func([]string, []Row)) error {
-	resp, err := getConfigs(&rdsconfigs.GetRdsconfigsAccountParams{})
+func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetPublicsRdsParams) (*rdsconfigs.GetPublicsRdsOK, error), writer func([]string, []Row)) error {
+	resp, err := getConfigs(&rdsconfigs.GetPublicsRdsParams{})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -109,10 +109,10 @@ func CreateRDSConfig(c *cli.Context) error {
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	return createRDSConfigImpl(rdsType, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostRdsconfigsAccount)
+	return createRDSConfigImpl(rdsType, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PotPublicRds)
 }
 
-func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PostRdsconfigsAccountParams) (*rdsconfigs.PostRdsconfigsAccountOK, error)) error {
+func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PotPublicRdsParams) (*rdsconfigs.PotPublicRdsOK, error)) error {
 	validate := false
 	rdsConfig := models_cloudbreak.RDSConfig{
 		Name:               finder(FlRdsName.Name),
@@ -125,7 +125,7 @@ func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig 
 		Type:               &rdsType,
 	}
 
-	resp, err := postConfig(&rdsconfigs.PostRdsconfigsAccountParams{Body: &rdsConfig})
+	resp, err := postConfig(&rdsconfigs.PotPublicRdsParams{Body: &rdsConfig})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -142,14 +142,14 @@ func DeleteRDSConfig(c *cli.Context) error {
 	log.Infof("[DeleteRDSConfig] delete RDS config by name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	deleteRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.DeleteRdsconfigsAccountName)
+	deleteRDSConfigImpl(c.String, oAuth2Client.Cloudbreak.Rdsconfigs.DeletePublicRds)
 	return nil
 }
 
-func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params *rdsconfigs.DeleteRdsconfigsAccountNameParams) error) {
+func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params *rdsconfigs.DeletePublicRdsParams) error) {
 	rdsName := finder(FlRdsName.Name)
 
-	if err := deleteRDSConfig(&rdsconfigs.DeleteRdsconfigsAccountNameParams{Name: rdsName}); err != nil {
+	if err := deleteRDSConfig(&rdsconfigs.DeletePublicRdsParams{Name: rdsName}); err != nil {
 		logErrorAndExit(err)
 	}
 	log.Infof("[DeleteRDSConfig] RDS config deleted: %s", rdsName)

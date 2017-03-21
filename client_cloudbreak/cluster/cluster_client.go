@@ -23,25 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteStacksIDCluster deletes cluster on a specific stack
+DeleteCluster deletes cluster on a specific stack
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 */
-func (a *Client) DeleteStacksIDCluster(params *DeleteStacksIDClusterParams) error {
+func (a *Client) DeleteCluster(params *DeleteClusterParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteStacksIDClusterParams()
+		params = NewDeleteClusterParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteStacksIDCluster",
+		ID:                 "deleteCluster",
 		Method:             "DELETE",
 		PathPattern:        "/stacks/{id}/cluster",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteStacksIDClusterReader{formats: a.formats},
+		Reader:             &DeleteClusterReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -50,160 +50,25 @@ func (a *Client) DeleteStacksIDCluster(params *DeleteStacksIDClusterParams) erro
 }
 
 /*
-GetStacksAccountNameCluster retrieves cluster by stack name public
-
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
-*/
-func (a *Client) GetStacksAccountNameCluster(params *GetStacksAccountNameClusterParams) (*GetStacksAccountNameClusterOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksAccountNameClusterParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksAccountNameCluster",
-		Method:             "GET",
-		PathPattern:        "/stacks/account/{name}/cluster",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksAccountNameClusterReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksAccountNameClusterOK), nil
-}
-
-/*
-GetStacksIDCluster retrieves cluster by stack id
-
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
-*/
-func (a *Client) GetStacksIDCluster(params *GetStacksIDClusterParams) (*GetStacksIDClusterOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksIDClusterParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksIDCluster",
-		Method:             "GET",
-		PathPattern:        "/stacks/{id}/cluster",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksIDClusterReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksIDClusterOK), nil
-}
-
-/*
-GetStacksUserNameCluster retrieves cluster by stack name private
-
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
-*/
-func (a *Client) GetStacksUserNameCluster(params *GetStacksUserNameClusterParams) (*GetStacksUserNameClusterOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetStacksUserNameClusterParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetStacksUserNameCluster",
-		Method:             "GET",
-		PathPattern:        "/stacks/user/{name}/cluster",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetStacksUserNameClusterReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetStacksUserNameClusterOK), nil
-}
-
-/*
-PostStacksIDCluster creates cluster for stack
-
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
-*/
-func (a *Client) PostStacksIDCluster(params *PostStacksIDClusterParams) (*PostStacksIDClusterOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPostStacksIDClusterParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "PostStacksIDCluster",
-		Method:             "POST",
-		PathPattern:        "/stacks/{id}/cluster",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PostStacksIDClusterReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*PostStacksIDClusterOK), nil
-}
-
-/*
-PutStacksIDCluster updates cluster by stack id
-
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
-*/
-func (a *Client) PutStacksIDCluster(params *PutStacksIDClusterParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPutStacksIDClusterParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "PutStacksIDCluster",
-		Method:             "PUT",
-		PathPattern:        "/stacks/{id}/cluster",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PutStacksIDClusterReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-FailureReport failures report
+FailureReportCluster failures report
 
 Endpoint to report the failed nodes in the given cluster. If recovery mode for the node's hostgroup is AUTO then autorecovery would be started. If recovery mode for the node's hostgroup is MANUAL, the nodes will be marked as unhealthy.
 */
-func (a *Client) FailureReport(params *FailureReportParams) error {
+func (a *Client) FailureReportCluster(params *FailureReportClusterParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewFailureReportParams()
+		params = NewFailureReportClusterParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "failureReport",
+		ID:                 "failureReportCluster",
 		Method:             "POST",
 		PathPattern:        "/stacks/{id}/cluster/failurereport",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &FailureReportReader{formats: a.formats},
+		Reader:             &FailureReportClusterReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -212,30 +77,165 @@ func (a *Client) FailureReport(params *FailureReportParams) error {
 }
 
 /*
-GetConfigs gets cluster properties with blueprint outputs
+GetCluster retrieves cluster by stack id
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
 */
-func (a *Client) GetConfigs(params *GetConfigsParams) (*GetConfigsOK, error) {
+func (a *Client) GetCluster(params *GetClusterParams) (*GetClusterOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewGetConfigsParams()
+		params = NewGetClusterParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "getConfigs",
+		ID:                 "getCluster",
+		Method:             "GET",
+		PathPattern:        "/stacks/{id}/cluster",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetClusterOK), nil
+}
+
+/*
+GetConfigsCluster gets cluster properties with blueprint outputs
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) GetConfigsCluster(params *GetConfigsClusterParams) (*GetConfigsClusterOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetConfigsClusterParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getConfigsCluster",
 		Method:             "POST",
 		PathPattern:        "/stacks/{id}/cluster/config",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &GetConfigsReader{formats: a.formats},
+		Reader:             &GetConfigsClusterReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*GetConfigsOK), nil
+	return result.(*GetConfigsClusterOK), nil
+}
+
+/*
+GetPrivateCluster retrieves cluster by stack name private
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) GetPrivateCluster(params *GetPrivateClusterParams) (*GetPrivateClusterOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPrivateClusterParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPrivateCluster",
+		Method:             "GET",
+		PathPattern:        "/stacks/user/{name}/cluster",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPrivateClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPrivateClusterOK), nil
+}
+
+/*
+GetPublicCluster retrieves cluster by stack name public
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) GetPublicCluster(params *GetPublicClusterParams) (*GetPublicClusterOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetPublicClusterParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getPublicCluster",
+		Method:             "GET",
+		PathPattern:        "/stacks/account/{name}/cluster",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetPublicClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetPublicClusterOK), nil
+}
+
+/*
+PostCluster creates cluster for stack
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) PostCluster(params *PostClusterParams) (*PostClusterOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPostClusterParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "postCluster",
+		Method:             "POST",
+		PathPattern:        "/stacks/{id}/cluster",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PostClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*PostClusterOK), nil
+}
+
+/*
+PutCluster updates cluster by stack id
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) PutCluster(params *PutClusterParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutClusterParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "putCluster",
+		Method:             "PUT",
+		PathPattern:        "/stacks/{id}/cluster",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 /*

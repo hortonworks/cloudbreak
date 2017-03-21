@@ -19,9 +19,9 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 	c := make(chan int64, 1)
 	expectedId := int64(1)
 	var actualGroup *models_cloudbreak.SecurityGroupRequest
-	postSecGroup := func(params *securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error) {
+	postSecGroup := func(params *securitygroups.PostPublicSecurityGroupParams) (*securitygroups.PostPublicSecurityGroupOK, error) {
 		actualGroup = params.Body
-		resp := securitygroups.PostSecuritygroupsAccountOK{
+		resp := securitygroups.PostPublicSecurityGroupOK{
 			Payload: &models_cloudbreak.SecurityGroupResponse{ID: &expectedId},
 		}
 		return &resp, nil
@@ -59,10 +59,10 @@ func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
 	skeleton := ClusterSkeleton{ClusterSkeletonBase: ClusterSkeletonBase{WebAccess: true}}
 	c := make(chan int64, 1)
 	var actualGroup *models_cloudbreak.SecurityGroupRequest
-	postSecGroup := func(params *securitygroups.PostSecuritygroupsAccountParams) (*securitygroups.PostSecuritygroupsAccountOK, error) {
+	postSecGroup := func(params *securitygroups.PostPublicSecurityGroupParams) (*securitygroups.PostPublicSecurityGroupOK, error) {
 		actualGroup = params.Body
 		id := int64(1)
-		resp := securitygroups.PostSecuritygroupsAccountOK{
+		resp := securitygroups.PostPublicSecurityGroupOK{
 			Payload: &models_cloudbreak.SecurityGroupResponse{ID: &id},
 		}
 		return &resp, nil
@@ -93,8 +93,8 @@ func TestGetSecurityDetailsImpl(t *testing.T) {
 	rules := make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	rules["subnet1"] = []*models_cloudbreak.SecurityRuleResponse{{Subnet: "first"}, {Subnet: "sec"}}
 	rules["subnet2"] = []*models_cloudbreak.SecurityRuleResponse{{Subnet: "subnet"}}
-	getIds := func(params *securitygroups.GetSecuritygroupsIDParams) (*securitygroups.GetSecuritygroupsIDOK, error) {
-		return &securitygroups.GetSecuritygroupsIDOK{Payload: &models_cloudbreak.SecurityGroupResponse{
+	getIds := func(params *securitygroups.GetSecurityGroupParams) (*securitygroups.GetSecurityGroupOK, error) {
+		return &securitygroups.GetSecurityGroupOK{Payload: &models_cloudbreak.SecurityGroupResponse{
 			SecurityRules: rules["subnet"+strconv.FormatInt(params.ID, 10)],
 		}}, nil
 	}

@@ -14,16 +14,17 @@ func (c *Cloudbreak) CreateTemplate(skeleton ClusterSkeleton, channel chan int64
 	defer timeTrack(time.Now(), "create template")
 	defer wg.Done()
 
-	createTemplateImpl(skeleton, channel, c.Cloudbreak.Templates.PostTemplatesAccount)
+	createTemplateImpl(skeleton, channel, c.Cloudbreak.Templates.PostPublicTemplate)
 }
 
-func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTemplate func(*templates.PostTemplatesAccountParams) (*templates.PostTemplatesAccountOK, error)) {
+func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
+	postTemplate func(*templates.PostPublicTemplateParams) (*templates.PostPublicTemplateOK, error)) {
 	masterTemplateReqBody := createMasterTemplateRequest(skeleton)
 	workerTemplateReqBody := createWorkerTemplateRequest(skeleton)
 	computeTemplateReqBody := createComputeTemplateRequest(skeleton)
 
 	log.Infof("[CreateTemplate] sending master template create request with name: %s", masterTemplateReqBody.Name)
-	resp, err := postTemplate(&templates.PostTemplatesAccountParams{Body: masterTemplateReqBody})
+	resp, err := postTemplate(&templates.PostPublicTemplateParams{Body: masterTemplateReqBody})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -33,7 +34,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	channel <- *resp.Payload.ID
 
 	log.Infof("[CreateTemplate] sending worker template create request with name: %s", workerTemplateReqBody.Name)
-	resp, err = postTemplate(&templates.PostTemplatesAccountParams{Body: workerTemplateReqBody})
+	resp, err = postTemplate(&templates.PostPublicTemplateParams{Body: workerTemplateReqBody})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -43,7 +44,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64, postTempla
 	channel <- *resp.Payload.ID
 
 	log.Infof("[CreateTemplate] sending compute template create request with name: %s", computeTemplateReqBody.Name)
-	resp, err = postTemplate(&templates.PostTemplatesAccountParams{Body: computeTemplateReqBody})
+	resp, err = postTemplate(&templates.PostPublicTemplateParams{Body: computeTemplateReqBody})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -109,7 +110,7 @@ func createComputeTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.T
 
 func (c *Cloudbreak) GetPublicTemplates() []*models_cloudbreak.TemplateResponse {
 	defer timeTrack(time.Now(), "get public templates")
-	resp, err := c.Cloudbreak.Templates.GetTemplatesAccount(&templates.GetTemplatesAccountParams{})
+	resp, err := c.Cloudbreak.Templates.GetPublicsTemplate(&templates.GetPublicsTemplateParams{})
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -119,5 +120,5 @@ func (c *Cloudbreak) GetPublicTemplates() []*models_cloudbreak.TemplateResponse 
 func (c *Cloudbreak) DeleteTemplate(name string) error {
 	defer timeTrack(time.Now(), "delete template")
 	log.Infof("[DeleteTemplate] delete template: %s", name)
-	return c.Cloudbreak.Templates.DeleteTemplatesAccountName(&templates.DeleteTemplatesAccountNameParams{Name: name})
+	return c.Cloudbreak.Templates.DeletePublicTemplate(&templates.DeletePublicTemplateParams{Name: name})
 }

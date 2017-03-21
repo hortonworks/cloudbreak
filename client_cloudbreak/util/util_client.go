@@ -23,53 +23,78 @@ type Client struct {
 }
 
 /*
-TestAmbariDatabase tests a database connection parameters
+TestAmbariDatabaseUtil tests a database connection parameters
 */
-func (a *Client) TestAmbariDatabase(params *TestAmbariDatabaseParams) (*TestAmbariDatabaseOK, error) {
+func (a *Client) TestAmbariDatabaseUtil(params *TestAmbariDatabaseUtilParams) (*TestAmbariDatabaseUtilOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewTestAmbariDatabaseParams()
+		params = NewTestAmbariDatabaseUtilParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "testAmbariDatabase",
+		ID:                 "testAmbariDatabaseUtil",
 		Method:             "POST",
 		PathPattern:        "/util/ambari-database",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &TestAmbariDatabaseReader{formats: a.formats},
+		Reader:             &TestAmbariDatabaseUtilReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*TestAmbariDatabaseOK), nil
+	return result.(*TestAmbariDatabaseUtilOK), nil
 }
 
 /*
-TestRdsConnection tests a r d s connection
+TestLdapConnectionUtil tests an l d a p connection
 */
-func (a *Client) TestRdsConnection(params *TestRdsConnectionParams) (*TestRdsConnectionOK, error) {
+func (a *Client) TestLdapConnectionUtil(params *TestLdapConnectionUtilParams) (*TestLdapConnectionUtilOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewTestRdsConnectionParams()
+		params = NewTestLdapConnectionUtilParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "testRdsConnection",
+		ID:                 "testLdapConnectionUtil",
+		Method:             "POST",
+		PathPattern:        "/util/ldap",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &TestLdapConnectionUtilReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*TestLdapConnectionUtilOK), nil
+}
+
+/*
+TestRdsConnectionUtil tests an r d s connection
+*/
+func (a *Client) TestRdsConnectionUtil(params *TestRdsConnectionUtilParams) (*TestRdsConnectionUtilOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewTestRdsConnectionUtilParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "testRdsConnectionUtil",
 		Method:             "POST",
 		PathPattern:        "/util/rds",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &TestRdsConnectionReader{formats: a.formats},
+		Reader:             &TestRdsConnectionUtilReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*TestRdsConnectionOK), nil
+	return result.(*TestRdsConnectionUtilOK), nil
 }
 
 // SetTransport changes the transport on the client
