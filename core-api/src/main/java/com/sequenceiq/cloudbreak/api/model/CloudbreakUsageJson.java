@@ -57,6 +57,18 @@ public class CloudbreakUsageJson implements JsonEntity {
     @ApiModelProperty(UsageModelDescription.DURATION)
     private String duration;
 
+    @ApiModelProperty(UsageModelDescription.INSTANCE_NUMBER)
+    private Integer instanceNum;
+
+    @ApiModelProperty(UsageModelDescription.PEAK)
+    private Integer peak;
+
+    @ApiModelProperty(UsageModelDescription.FLEX_ID)
+    private String flexId;
+
+    @ApiModelProperty(UsageModelDescription.STACK_UUID)
+    private String stackUuid;
+
     public String getOwner() {
         return owner;
     }
@@ -183,5 +195,37 @@ public class CloudbreakUsageJson implements JsonEntity {
 
     public void setDuration(String duration) {
         this.duration = duration;
+    }
+
+    public Integer getInstanceNum() {
+        return instanceNum;
+    }
+
+    public void setInstanceNum(Integer instanceNum) {
+        this.instanceNum = instanceNum;
+    }
+
+    public Integer getPeak() {
+        return peak;
+    }
+
+    public void setPeak(Integer peak) {
+        this.peak = peak;
+    }
+
+    public String getFlexId() {
+        return flexId;
+    }
+
+    public void setFlexId(String flexId) {
+        this.flexId = flexId;
+    }
+
+    public String getStackUuid() {
+        return stackUuid;
+    }
+
+    public void setStackUuid(String stackUuid) {
+        this.stackUuid = stackUuid;
     }
 }

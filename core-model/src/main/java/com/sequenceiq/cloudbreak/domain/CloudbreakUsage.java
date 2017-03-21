@@ -89,6 +89,15 @@ public class CloudbreakUsage implements ProvisionEntity {
     @Column
     private String duration;
 
+    @Column
+    private Integer peak;
+
+    @Column
+    private String flexId;
+
+    @Column
+    private String stackUuid;
+
     @Enumerated(EnumType.STRING)
     private UsageStatus status;
 
@@ -241,6 +250,30 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setInstanceNum(Integer instanceNum) {
         this.instanceNum = instanceNum;
+    }
+
+    public Integer getPeak() {
+        return peak;
+    }
+
+    public void setPeak(Integer peak) {
+        this.peak = peak;
+    }
+
+    public String getFlexId() {
+        return flexId;
+    }
+
+    public void setFlexId(String flexId) {
+        this.flexId = flexId;
+    }
+
+    public String getStackUuid() {
+        return stackUuid;
+    }
+
+    public void setStackUuid(String stackUuid) {
+        this.stackUuid = stackUuid;
     }
 
     @Override
