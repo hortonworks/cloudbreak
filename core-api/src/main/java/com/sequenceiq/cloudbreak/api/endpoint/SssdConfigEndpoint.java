@@ -30,60 +30,70 @@ public interface SssdConfigEndpoint {
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "postPrivateSssd")
     SssdConfigResponse postPrivate(@Valid SssdConfigRequest sssdConfigRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "postPublicSssd")
     SssdConfigResponse postPublic(@Valid SssdConfigRequest sssdConfigRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "getPrivatesSssd")
     Set<SssdConfigResponse> getPrivates();
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "getPublicsSssd")
     Set<SssdConfigResponse> getPublics();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "getPrivateSssd")
     SssdConfigResponse getPrivate(@PathParam(value = "name") String name);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "getPublicSssd")
     SssdConfigResponse getPublic(@PathParam(value = "name") String name);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "getSssd")
     SssdConfigResponse get(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "deleteSssd")
     void delete(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "deletePublicSssd")
     void deletePublic(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.SssdConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SSSDCONFIG_NOTES,
+            nickname = "deletePrivateSssd")
     void deletePrivate(@PathParam(value = "name") String name);
 }

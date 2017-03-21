@@ -29,65 +29,71 @@ public interface ClusterTemplateEndpoint {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
+    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
+            nickname = "getClusterTemplate")
     ClusterTemplateResponse get(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
+    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
+            nickname = "deleteClusterTemplate")
     void delete(@PathParam(value = "id") Long id);
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
+    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
+            nickname = "postPrivateClusterTemplate")
     ClusterTemplateResponse postPrivate(ClusterTemplateRequest clusterTemplateRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
+    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
+            nickname = "getPrivatesClusterTemplate")
     Set<ClusterTemplateResponse> getPrivates();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON,
-            notes = Notes.CLUSTER_TEMPLATE_NOTES)
+            notes = Notes.CLUSTER_TEMPLATE_NOTES, nickname = "getPrivateClusterTemplate")
     ClusterTemplateResponse getPrivate(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON,
-            notes = Notes.CLUSTER_TEMPLATE_NOTES)
+            notes = Notes.CLUSTER_TEMPLATE_NOTES, nickname = "deletePrivateClusterTemplate")
     void deletePrivate(@PathParam(value = "name") String name);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
+    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
+            nickname = "postPublicClusterTemplate")
     ClusterTemplateResponse postPublic(ClusterTemplateRequest clusterTemplateRequest);
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES)
+    @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.CLUSTER_TEMPLATE_NOTES,
+            nickname = "getPublicsClusterTemplate")
     Set<ClusterTemplateResponse> getPublics();
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON,
-            notes = Notes.CLUSTER_TEMPLATE_NOTES)
+            notes = Notes.CLUSTER_TEMPLATE_NOTES, nickname = "getPublicClusterTemplate")
     ClusterTemplateResponse getPublic(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterTemplateOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON,
-            notes = Notes.CLUSTER_TEMPLATE_NOTES)
+            notes = Notes.CLUSTER_TEMPLATE_NOTES, nickname = "deletePublicClusterTemplate")
     void deletePublic(@PathParam(value = "name") String name);
 
 }

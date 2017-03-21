@@ -24,7 +24,8 @@ public interface SubscriptionEndpoint {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SubscriptionOpDescription.SUBSCRIBE, produces = ContentType.JSON, notes = Notes.SUBSCRIPTION_NOTES)
+    @ApiOperation(value = OperationDescriptions.SubscriptionOpDescription.SUBSCRIBE, produces = ContentType.JSON, notes = Notes.SUBSCRIPTION_NOTES,
+            nickname = "subscribeSubscription")
     IdJson subscribe(@Valid SubscriptionRequest subscriptionRequest);
 
 }

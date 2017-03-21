@@ -30,60 +30,70 @@ public interface LdapConfigEndpoint {
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+        nickname = "postPrivateLdap")
     LdapConfigResponse postPrivate(@Valid LdapConfigRequest ldapConfigRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "postPublicLdap")
     LdapConfigResponse postPublic(@Valid LdapConfigRequest ldapConfigRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "getPrivatesLdap")
     Set<LdapConfigResponse> getPrivates();
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+        nickname = "getPublicsLdap")
     Set<LdapConfigResponse> getPublics();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "getPrivateLdap")
     LdapConfigResponse getPrivate(@PathParam(value = "name") String name);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "getPublicLdap")
     LdapConfigResponse getPublic(@PathParam(value = "name") String name);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "getLdap")
     LdapConfigResponse get(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "deleteLdap")
     void delete(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "deletePublicLdap")
     void deletePublic(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES)
+    @ApiOperation(value = OperationDescriptions.LdapConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.LDAP_CONFIG_NOTES,
+            nickname = "deletePrivateLdap")
     void deletePrivate(@PathParam(value = "name") String name);
 }

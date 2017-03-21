@@ -25,7 +25,8 @@ public interface UsageEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
+    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+            nickname = "getDeployerUsage")
     List<CloudbreakUsageJson> getDeployer(
             @QueryParam("since") Long since,
             @QueryParam("filterenddate") Long filterEndDate,
@@ -37,7 +38,8 @@ public interface UsageEndpoint {
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
+    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+            nickname = "getAccountUsage")
     List<CloudbreakUsageJson> getAccount(
             @QueryParam("since") Long since,
             @QueryParam("filterenddate") Long filterEndDate,
@@ -48,7 +50,8 @@ public interface UsageEndpoint {
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.USAGE_NOTES)
+    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+            nickname = "getUserUsage")
     List<CloudbreakUsageJson> getUser(
             @QueryParam("since") Long since,
             @QueryParam("filterenddate") Long filterEndDate,

@@ -28,19 +28,19 @@ public interface UtilEndpoint {
     @POST
     @Path("rds")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_RDS_CONNECTION, produces = ContentType.JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_RDS_CONNECTION, produces = ContentType.JSON, nickname = "testRdsConnectionUtil")
     RdsTestResult testRdsConnection(@Valid RDSConfigJson rdsConfigJson);
 
     @POST
     @Path("ldap")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON, nickname = "testLdapConnectionUtil")
     LdapTestResult testLdapConnection(@Valid LdapConfigRequest ldapConfigRequest);
 
     @POST
     @Path("ambari-database")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_DATABASE, produces = ContentType.JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_DATABASE, produces = ContentType.JSON, nickname = "testAmbariDatabaseUtil")
     AmbariDatabaseTestResult testAmbariDatabase(@Valid AmbariDatabaseDetailsJson ambariDatabaseDetailsJson);
 
 }

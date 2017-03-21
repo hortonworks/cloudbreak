@@ -26,12 +26,14 @@ public interface UserEndpoint {
     @PUT
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_DETAILS_EVICT, produces = ContentType.JSON, notes = Notes.USER_NOTES)
+    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_DETAILS_EVICT, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+            nickname = "evictUserDetails")
     String evictUserDetails(@PathParam(value = "id") String id, @Valid UserRequest userRequest);
 
     @GET
     @Path("{id}/resources")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_RESOURCE, produces = ContentType.JSON, notes = Notes.USER_NOTES)
+    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_RESOURCE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+            nickname = "hasResourcesUser")
     Boolean hasResources(@PathParam(value = "id") String id);
 }
