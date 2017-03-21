@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.List;
 
 import javax.inject.Inject;
-import javax.validation.Valid;
-import javax.ws.rs.PathParam;
 
 import org.springframework.stereotype.Controller;
 
@@ -33,19 +31,19 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     private FlexSubscriptionToJsonConverter toJsonConverter;
 
     @Override
-    public FlexSubscriptionResponse get(@PathParam("id") Long id) {
+    public FlexSubscriptionResponse get(Long id) {
         FlexSubscription flexSubscription = flexService.findOneById(id);
         return toJsonConverter.convert(flexSubscription);
     }
 
     @Override
-    public void delete(@PathParam(value = "id") Long id) {
+    public void delete(Long id) {
         CbUser cbUser = authenticatedUserService.getCbUser();
         flexService.delete(id, cbUser);
     }
 
     @Override
-    public FlexSubscriptionResponse postPublic(@Valid FlexSubscriptionRequest flexSubscription) {
+    public FlexSubscriptionResponse postPublic(FlexSubscriptionRequest flexSubscription) {
         return createFlexSubscription(flexSubscription, true);
     }
 
@@ -57,21 +55,21 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     }
 
     @Override
-    public FlexSubscriptionResponse getPublic(@PathParam(value = "name") String name) {
+    public FlexSubscriptionResponse getPublic(String name) {
         CbUser cbUser = authenticatedUserService.getCbUser();
         FlexSubscription subscription = flexService.findByNameInAccount(name, cbUser.getUserId(), cbUser.getAccount());
         return toJsonConverter.convert(subscription);
     }
 
     @Override
-    public void deletePublic(@PathParam(value = "name") String name) {
+    public void deletePublic(String name) {
         CbUser cbUser = authenticatedUserService.getCbUser();
         FlexSubscription subscription = flexService.findByNameInAccount(name, cbUser.getUserId(), cbUser.getAccount());
         flexService.delete(subscription, cbUser);
     }
 
     @Override
-    public FlexSubscriptionResponse postPrivate(@Valid FlexSubscriptionRequest flexSubscription) {
+    public FlexSubscriptionResponse postPrivate(FlexSubscriptionRequest flexSubscription) {
         return createFlexSubscription(flexSubscription, false);
     }
 
@@ -83,13 +81,13 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     }
 
     @Override
-    public FlexSubscriptionResponse getPrivate(@PathParam(value = "name") String name) {
+    public FlexSubscriptionResponse getPrivate(String name) {
         FlexSubscription subscription = flexService.findOneByName(name);
         return toJsonConverter.convert(subscription);
     }
 
     @Override
-    public void deletePrivate(@PathParam(value = "name") String name) {
+    public void deletePrivate(String name) {
         CbUser cbUser = authenticatedUserService.getCbUser();
         FlexSubscription subscription = flexService.findOneByName(name);
         flexService.delete(subscription, cbUser);

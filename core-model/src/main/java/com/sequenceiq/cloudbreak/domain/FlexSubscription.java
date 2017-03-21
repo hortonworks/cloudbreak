@@ -122,4 +122,15 @@ public class FlexSubscription {
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
     }
+
+    @Override
+    public String toString() {
+        return "FlexSubscription{" + "id=" + id
+                + ", name='" + name + '\''
+                + ", subscriptionId='" + subscriptionId + '\''
+                + ", smartSenseSubscription='" + smartSenseSubscription.toString() + '\''
+                + ", owner='" + owner + '\''
+                + ", account='" + account + '\''
+                + ", publicInAccount=" + publicInAccount + '}';
+    }
 }

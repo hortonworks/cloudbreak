@@ -19,7 +19,7 @@ public class DefaultExceptionMapper implements ExceptionMapper<Exception> {
     public Response toResponse(Exception exception) {
         MDCBuilder.buildMdcContext();
         LOGGER.error(exception.getMessage(), exception);
-        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ExceptionResult("Internal server error"))
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(new ExceptionResult("Internal server error: " + exception.getMessage()))
                 .build();
     }
 }

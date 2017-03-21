@@ -16,6 +16,8 @@ CREATE TABLE smartsensesubscription
    publicinaccount  boolean NOT NULL
 );
 
+ALTER TABLE ONLY smartsensesubscription ADD CONSTRAINT uk_smartsensesubscription_account_subscriptionid UNIQUE (account, subscriptionid);
+
 CREATE SEQUENCE flexsubscription_id_seq START WITH 1
   INCREMENT BY 1
   NO MINVALUE
@@ -37,6 +39,7 @@ ALTER TABLE flexsubscription
    ADD CONSTRAINT fk_flexsubscription_smartsensesubscription FOREIGN KEY (smartsensesubscription_id)
    REFERENCES smartsensesubscription (id);
 
+ALTER TABLE ONLY flexsubscription ADD CONSTRAINT uk_flexsubscription_account_name UNIQUE (account, name);
 
 ALTER TABLE stack ADD COLUMN flexsubscription_id bigint;
 
@@ -48,11 +51,12 @@ ALTER TABLE ONLY stack
 ALTER TABLE ONLY stack DROP CONSTRAINT IF EXISTS fk_flexsubscription_stack;
 ALTER TABLE stack DROP COLUMN IF EXISTS flexsubscription_id;
 
+ALTER TABLE ONLY flexsubscription DROP CONSTRAINT IF EXISTS uk_flexsubscription_account_name;
 ALTER TABLE ONLY flexsubscription DROP CONSTRAINT IF EXISTS fk_flexsubscription_smartsensesubscription;
 DROP TABLE IF EXISTS flexsubscription;
 DROP SEQUENCE IF EXISTS flexsubscription_id_seq;
 
-
+ALTER TABLE ONLY smartsensesubscription DROP CONSTRAINT IF EXISTS uk_smartsensesubscription_account_subscriptionid;
 DROP TABLE IF EXISTS smartsensesubscription;
 DROP SEQUENCE IF EXISTS smartsense_id_seq;
 

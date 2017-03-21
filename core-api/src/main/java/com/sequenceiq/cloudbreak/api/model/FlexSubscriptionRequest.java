@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
@@ -18,6 +19,7 @@ public class FlexSubscriptionRequest implements JsonEntity {
     private String name;
 
     @ApiModelProperty(value = FlexSubscriptionModelDescription.FLEX_SUBSCRIPTION_ID, readOnly = true)
+    @Pattern(regexp = "^(FLEX-[0-9]{10}$)", message = "The given Flex subscription id is not valid!")
     private String subscriptionId;
 
     @ApiModelProperty(value = FlexSubscriptionModelDescription.SMARTSENSE_SUBSCRIPTION_ID, readOnly = true)

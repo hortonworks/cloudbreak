@@ -4,6 +4,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
@@ -15,11 +18,20 @@ import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 @Service
 public class FlexSubscriptionService {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlexSubscriptionService.class);
+
     @Inject
     private FlexSubscriptionRepository flexRepo;
 
     public FlexSubscription create(FlexSubscription subscription) {
-        return flexRepo.save(subscription);
+        try {
+            subscription = flexRepo.save(subscription);
+            LOGGER.info("Flex subscription has been created: {}", subscription);
+            return subscription;
+        } catch (DataIntegrityViolationException dex) {
+            String msg = String.format("The name: '%s' has already taken by an other FlexSubscription.", subscription.getName());
+            throw new CloudbreakServiceException(msg, dex);
+        }
     }
 
     public void delete(FlexSubscription subscription, CbUser user) {
@@ -28,6 +40,7 @@ public class FlexSubscriptionService {
             boolean adminInTheAccount = user.getRoles().contains(CbUserRole.ADMIN) && subscription.getAccount().equals(user.getAccount());
             if (owner || adminInTheAccount) {
                 flexRepo.delete(subscription);
+                LOGGER.info("Flex subscription has been deleted: {}", subscription);
             } else {
                 String msg = "Only the owner or the account admin has access to delete Flex subscription with id: %s";
                 throw new CloudbreakServiceException(String.format(msg, subscription.getId()));
@@ -43,26 +56,32 @@ public class FlexSubscriptionService {
     }
 
     public FlexSubscription findById(Long id) {
+        LOGGER.info("Looking for Flex subscription with id: {}", id);
         return flexRepo.findOne(id);
     }
 
     public FlexSubscription findOneById(Long id) {
+        LOGGER.info("Looking for one Flex subscription with id: {}", id);
         return flexRepo.findOneById(id);
     }
 
     public List<FlexSubscription> findByOwner(String owner) {
+        LOGGER.info("Looking for Flex subscriptions for owner: {}", owner);
         return flexRepo.findByOwner(owner);
     }
 
     public FlexSubscription findOneByName(String name) {
+        LOGGER.info("Looking for Flex subscription name id: {}", name);
         return flexRepo.findOneByName(name);
     }
 
     public FlexSubscription findByNameInAccount(String name, String owner, String account) {
+        LOGGER.info("Looking for Flex subscription with name: {}, in account: {}", name, account);
         return flexRepo.findOneByNameInAccount(name, owner, account);
     }
 
     public List<FlexSubscription> findPublicInAccountForUser(CbUser user) {
+        LOGGER.info("Looking for public Flex subscriptions for user: {}", user.getUsername());
         if (user.getRoles().contains(CbUserRole.ADMIN)) {
             return flexRepo.findAllInAccount(user.getAccount());
         } else {

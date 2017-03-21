@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import javax.validation.constraints.Pattern;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -14,6 +16,7 @@ public class SmartSenseSubscriptionJson implements JsonEntity {
     private Long id;
 
     @ApiModelProperty(value = ModelDescriptions.SmartSenseSubscriptionModelDescription.SUBSCRIPTION_ID, required = true)
+    @Pattern(regexp = "^([A-Z]{1}-[0-9]{8}-[A-Z]{1}-[0-9]{8}$)", message = "The given SmartSense subscription id is not valid!")
     private String subscriptionId;
 
     @ApiModelProperty(value = ModelDescriptions.OWNER, readOnly = true)
