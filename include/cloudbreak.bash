@@ -255,6 +255,7 @@ cloudbreak-conf-ui() {
     env-import ULU_HWX_CLOUD_DEFAULT_CREDENTIAL ""
     env-import HWX_HCC_AVAILABLE "false"
     env-import ULU_HWX_CLOUD_DEFAULT_SSH_KEY ""
+    env-import ULU_DEFAULT_SSH_KEY ""
     env-import ULU_HWX_CLOUD_DEFAULT_REGION ""
     env-import ULU_HWX_CLOUD_DEFAULT_VPC_ID ""
     env-import ULU_HWX_CLOUD_DEFAULT_IGW_ID ""
