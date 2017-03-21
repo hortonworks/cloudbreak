@@ -138,6 +138,12 @@ uluwatuServices.factory('InteractiveLogin', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('DefaultSsh', ['$resource',
+    function ($resource) {
+        return $resource('credentials/defaultsshkey');
+    }
+]);
+
 uluwatuServices.factory('GlobalCredentialCertificate', ['$resource',
     function($resource) {
         return $resource('credentials/certificate/:id', {}, {
