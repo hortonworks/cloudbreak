@@ -67,8 +67,8 @@ cbd-version() {
         echo "  cbd update" | blue
     fi
 
-    echo "docker images:"
     if [ -e docker-compose.yml ]; then
+        echo "docker images:"
         sed -n "s/.*image://p" docker-compose.yml | grep "sequenceiq\|hortonworks" |green
     fi
 
@@ -236,8 +236,12 @@ doctor() {
 
     docker-check-version
     network-doctor
-    compose-generate-check-diff verbose
-    generate_uaa_check_diff verbose
+    if [[ -e docker-compose.yml ]]; then
+        compose-generate-check-diff verbose
+    fi
+    if [[ -e uaa.yml ]]; then
+        generate_uaa_check_diff verbose
+    fi
 }
 
 network-doctor() {
