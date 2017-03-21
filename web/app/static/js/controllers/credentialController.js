@@ -3,21 +3,31 @@
 var log = log4javascript.getLogger("credentialController-logger");
 
 angular.module('uluwatuControllers').controller('credentialController', [
-    '$scope', '$rootScope', '$filter', '$base64', '$interpolate', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'InteractiveLogin', 'GlobalCredentialCertificate', 'AccountStack', 'UserStack', 'GlobalStack',
-    function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, InteractiveLogin ,GlobalCredentialCertificate, AccountStack, UserStack, GlobalStack) {
+    '$scope', '$rootScope', '$filter', '$base64', '$interpolate', 'UserCredential', 'AccountCredential', 'GlobalCredential', 'InteractiveLogin', 'GlobalCredentialCertificate', 'AccountStack', 'UserStack', 'GlobalStack', 'DefaultSsh',
+    function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, InteractiveLogin ,GlobalCredentialCertificate, AccountStack, UserStack, GlobalStack, DefaultSsh) {
         $rootScope.credentials = AccountCredential.query();
         $rootScope.importedStacks = AccountStack.query();
+        DefaultSsh.get(function (result) {
+            $scope.defaultSshKey = result.defaultSshKey;
+
+            $scope.credentialAws = {
+                parameters: {
+                    selector: 'role-based'
+                },
+                publicKey: $scope.defaultSshKey
+            };
+            $scope.credentialGcp = {
+                publicKey: $scope.defaultSshKey
+            };
+            $scope.credentialOpenstack = {
+                publicKey: $scope.defaultSshKey
+            };
+        });
+
+        $scope.credentialYarn = {};
         $scope.credentialInCreation = false;
-        $scope.credentialAws = {
-            parameters: {
-                selector: 'role-based'
-            }
-        };
-        $scope.credentialGcp = {};
-        $scope.credentialOpenstack = {};
         $scope.mesosStack = {};
         $scope.mesosStac = false;
-        $scope.credentialYarn = {};
         $scope.awsCredentialForm = {};
         $scope.gcpCredentialForm = {};
         $scope.openstackCredentialForm = {};
@@ -131,7 +141,8 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $scope.unShowErrorMessageAlert();
                 $scope.credentialAws = {
                     parameters: {
-                        selector: 'role-based'
+                        selector: 'role-based',
+                        publicKey: $scope.defaultSshKey
                     }
                 };
             }
@@ -158,7 +169,8 @@ angular.module('uluwatuControllers').controller('credentialController', [
                 $scope.credentialOpenstack = {
                     parameters: {
                         keystoneVersion: "cb-keystone-v2",
-                        facing: "public"
+                        facing: "public",
+                        publicKey: $scope.defaultSshKey
                     }
                 };
                 $scope.showSuccess($filter("format")($rootScope.msg.openstack_credential_success, String(result.name)));
@@ -177,7 +189,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
 
         $scope.createGcpCredential = function() {
             $scope.credentialGcp.cloudPlatform = "GCP";
-            $scope.credentialInCreation = true
+            $scope.credentialInCreation = true;
 
             var p12File = $scope.gcp.p12
             var reader = new FileReader();
@@ -209,7 +221,9 @@ angular.module('uluwatuControllers').controller('credentialController', [
             function handleGcpCredentialSuccess(result) {
                 $scope.credentialGcp.id = result.id;
                 $rootScope.credentials.push($scope.credentialGcp);
-                $scope.credentialGcp = {};
+                $scope.credentialGcp = {
+                    publicKey: $scope.defaultSshKey
+                };
                 $scope.showSuccess($filter("format")($rootScope.msg.gcp_credential_success, result.name));
                 $scope.credentialInCreation = false;
                 $scope.gcpCredentialForm.$setPristine();

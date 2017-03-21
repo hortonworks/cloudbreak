@@ -90,8 +90,9 @@ var config = {
     cloudbreakApiRootContext: '/cb/api/v1',
     periscopeApiRootContext: '/as/api/v1',
     azureTenantId: process.env.AZURE_TENANT_ID,
-    azureSubscriptionId: process.env.AZURE_SUBSCRIPTION_ID
-}
+    azureSubscriptionId: process.env.AZURE_SUBSCRIPTION_ID,
+    defaultSshKey: process.env.ULU_DEFAULT_SSH_KEY
+};
 
 if (config.addressResolvingRetryCount <= 0) {
     config.addressResolvingRetryCount = 1;
@@ -262,7 +263,7 @@ function continueInit() {
             });
             res.redirect(config.sultansRedirectAddress + '?logout=true&source=' + source)
         })
-    })
+    });
 
     app.get('/user', function(req, res) {
         retrieveUserByToken(req.session.token, function(data) {
@@ -275,7 +276,7 @@ function continueInit() {
             headers: {
                 "Authorization": "Bearer " + token
             }
-        }
+        };
         identityServerClient.get(config.identityServerAddress + "userinfo", requestArgs, function(data, response) {
             success(data);
         });
@@ -301,7 +302,7 @@ function continueInit() {
         }).on('error', function(err) {
             res.status(500).send("Uluwatu could not connect to Cloudbreak.");
         });
-    })
+    });
 
     app.post('/credentials/accountinteractivelogin', function(req, res) {
         console.log("interactive login");
@@ -317,6 +318,17 @@ function continueInit() {
                 res.status(500).send(null);
             }
         });
+    });
+
+    app.get("/credentials/defaultsshkey", function (req, res) {
+        if (req.session.token && config.defaultSshKey) {
+            responseObject = {
+                defaultSshKey: config.defaultSshKey
+            };
+            res.status(200).send(responseObject);
+        } else {
+            res.status(500).send(null);
+        }
     });
 
     function preventNoCachInResponse(res) {
