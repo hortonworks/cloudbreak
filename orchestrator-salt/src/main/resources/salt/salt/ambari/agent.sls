@@ -34,10 +34,12 @@ reduce_connect_retry_delay:
 
 {% endif %}
 
+{% if salt['pillar.get']('platform') == 'GCP' %}
 /etc/environment:
   file.append:
     - text: "SPARK_CLASSPATH=${SPARK_CLASSPATH}:/usr/lib/hadoop/lib/*"
     - unless: cat /etc/environment | grep SPARK_CLASSPATH
+{% endif %}
 
 /etc/ambari-agent/conf/internal_hostname.sh:
   file.managed:
