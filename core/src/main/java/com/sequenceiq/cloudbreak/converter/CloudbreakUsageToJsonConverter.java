@@ -55,6 +55,10 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
         json.setInstanceGroup(entity.getInstanceGroup());
         json.setBlueprintId(entity.getBlueprintId());
         json.setBlueprintName(entity.getBlueprintName());
+        json.setInstanceNum(entity.getInstanceNum());
+        json.setPeak(entity.getPeak());
+        json.setFlexId(entity.getFlexId());
+        json.setStackUuid(entity.getStackUuid());
         return json;
     }
 

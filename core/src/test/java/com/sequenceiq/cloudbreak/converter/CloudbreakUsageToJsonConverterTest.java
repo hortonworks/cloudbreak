@@ -92,4 +92,5 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
         return new CbUser("dummyUserId", "john.smith@example.com", "dummyAccount",
                 Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "John", "Smith", new Date());
     }
+
 }

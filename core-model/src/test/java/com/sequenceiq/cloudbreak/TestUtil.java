@@ -517,6 +517,10 @@ public class TestUtil {
         cloudbreakUsage.setStackId(1L);
         cloudbreakUsage.setBlueprintId(1L);
         cloudbreakUsage.setBlueprintName("blueprint");
+        cloudbreakUsage.setInstanceNum(6);
+        cloudbreakUsage.setPeak(10);
+        cloudbreakUsage.setFlexId("FLEX-1234567");
+        cloudbreakUsage.setStackUuid("23423-sdfasdf-23423-2345");
         return cloudbreakUsage;
     }
 

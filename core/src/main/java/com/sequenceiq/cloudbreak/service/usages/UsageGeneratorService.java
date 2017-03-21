@@ -44,6 +44,7 @@ public class UsageGeneratorService {
         newUsage.setStackName(usage.getStackName());
         newUsage.setInstanceType(usage.getInstanceType());
         newUsage.setInstanceNum(usage.getInstanceNum());
+        newUsage.setPeak(usage.getInstanceNum());
         newUsage.setInstanceGroup(usage.getInstanceGroup());
         newUsage.setBlueprintId(usage.getBlueprintId());
         newUsage.setBlueprintName(usage.getBlueprintName());
@@ -69,6 +70,7 @@ public class UsageGeneratorService {
         newUsage.setStackName(usage.getStackName());
         newUsage.setInstanceType(usage.getInstanceType());
         newUsage.setInstanceNum(usage.getInstanceNum());
+        newUsage.setPeak(usage.getInstanceNum());
         newUsage.setInstanceGroup(usage.getInstanceGroup());
         newUsage.setBlueprintId(usage.getBlueprintId());
         newUsage.setBlueprintName(usage.getBlueprintName());
@@ -92,6 +94,7 @@ public class UsageGeneratorService {
         usage.setStackName(stack.getName());
         usage.setInstanceType(instanceType);
         usage.setInstanceNum(instanceNum);
+        usage.setPeak(instanceNum);
         usage.setInstanceGroup(groupName);
         if (stack.getCluster() != null && stack.getCluster().getBlueprint() != null) {
             Blueprint bp = stack.getCluster().getBlueprint();

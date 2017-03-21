@@ -97,6 +97,9 @@ public class UsageService {
             usage.setInstanceHours(usageTimeService.convertToInstanceHours(newDuration));
             usage.setDuration(newDuration.toString());
             usage.setPeriodStarted(Date.from(ZonedDateTime.now().toInstant()));
+            if (usage.getPeak() < nodeCount) {
+                usage.setPeak(nodeCount);
+            }
             usage.setInstanceNum(nodeCount);
             usageRepository.save(usage);
         }

@@ -314,6 +314,10 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_ID = "id of the blueprint";
         public static final String BLUEPRINT_NAME = "name of the blueprint";
         public static final String DURATION = "time since the instances are running in millisec";
+        public static final String INSTANCE_NUMBER = "number of instances running";
+        public static final String PEAK = "maximum number of instances running";
+        public static final String FLEX_ID = "flex subscription id";
+        public static final String STACK_UUID = "unique id of the cluster";
     }
 
     public static class EventModelDescription {
