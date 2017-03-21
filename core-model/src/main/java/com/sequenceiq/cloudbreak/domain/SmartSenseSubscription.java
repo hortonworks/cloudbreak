@@ -87,4 +87,13 @@ public class SmartSenseSubscription {
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
     }
+
+    @Override
+    public String toString() {
+        return "SmartSenseSubscription{" + "id=" + id
+                + ", subscriptionId='" + subscriptionId + '\''
+                + ", owner='" + owner + '\''
+                + ", account='" + account + '\''
+                + ", publicInAccount=" + publicInAccount + '}';
+    }
 }

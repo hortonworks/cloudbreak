@@ -29,7 +29,7 @@ import io.swagger.annotations.ApiOperation;
 public interface FlexSubscriptionEndpoint {
 
     @GET
-    @Path("{id}")
+    @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "getFlexSubscriptionById")
