@@ -34,90 +34,105 @@ public interface ConnectorEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_PLATFORMS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_PLATFORMS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getPlatforms")
     Map<String, JsonEntity> getPlatforms(@QueryParam("extended") Boolean extended);
 
     @GET
     @Path("variants")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_PLATFORM_VARIANTS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_PLATFORM_VARIANTS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getPlatformVariants")
     PlatformVariantsJson getPlatformVariants();
 
     @GET
     @Path(value = "variants/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_PLATFORM_VARIANT_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_PLATFORM_VARIANT_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getPlatformVariantByType")
     Collection<String> getPlatformVariantByType(@PathParam(value = "type") String type);
 
     @GET
     @Path(value = "disktypes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_DISK_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_DISK_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getDisktypes")
     PlatformDisksJson getDisktypes();
 
     @GET
     @Path(value = "disktypes/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_DISK_TYPE_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_DISK_TYPE_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getDisktypeByType")
     Collection<String> getDisktypeByType(@PathParam(value = "type") String type);
 
     @GET
     @Path(value = "ochestrators")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_ORCHESTRATOR_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_ORCHESTRATOR_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getOrchestratortypes")
     PlatformOrchestratorsJson getOrchestratortypes();
 
     @GET
     @Path(value = "ochestrators/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_ORCHESTRATORS_BY_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_ORCHESTRATORS_BY_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getOchestratorsByType")
     Collection<String> getOchestratorsByType(@PathParam(value = "type") String type);
 
     @GET
     @Path(value = "connectors/vmtypes")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getVmTypes")
     PlatformVirtualMachinesJson getVmTypes(@QueryParam("extended") Boolean extended);
 
     @GET
     @Path(value = "vmtypes/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_VM_TYPE_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_VM_TYPE_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getVmTypeByType")
     Collection<VmTypeJson> getVmTypeByType(@PathParam(value = "type") String type, @QueryParam("extended") Boolean extended);
 
     @GET
     @Path(value = "connectors/regions")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_REGIONS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_REGIONS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getRegions")
     PlatformRegionsJson getRegions();
 
     @GET
     @Path(value = "regions/r/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_REGION_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_REGION_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getRegionRByType")
     Collection<String> getRegionRByType(@PathParam(value = "type") String type);
 
     @GET
     @Path(value = "regions/av/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_REGION_AV_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_REGION_AV_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getRegionAvByType")
     Map<String, Collection<String>> getRegionAvByType(@PathParam(value = "type") String type);
 
     @GET
     @Path(value = "images/{type}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_IMAGE_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_IMAGE_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getImagesByType")
     Map<String, String> getImagesByType(@PathParam(value = "type") String type);
 
     @GET
     @Path(value = "images")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_IMAGES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_IMAGES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getImages")
     PlatformImagesJson getImages();
 
     @GET
     @Path(value = "custom")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_SPECIALS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_SPECIALS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getSpecialProperties")
     Map<String, Boolean> getSpecialProperties();
 }

@@ -30,62 +30,70 @@ public interface SecurityGroupEndpoint {
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "postPrivateSecurityGroup")
     SecurityGroupResponse postPrivate(@Valid SecurityGroupRequest securityGroupRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "postPublicSecurityGroup")
     SecurityGroupResponse postPublic(@Valid SecurityGroupRequest securityGroupRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "getPrivatesSecurityGroup")
     Set<SecurityGroupResponse> getPrivates();
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "getPublicsSecurityGroup")
     Set<SecurityGroupResponse> getPublics();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "getPrivateSecurityGroup")
     SecurityGroupResponse getPrivate(@PathParam(value = "name") String name);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "getPublicSecurityGroup")
     SecurityGroupResponse getPublic(@PathParam(value = "name") String name);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "getSecurityGroup")
     SecurityGroupResponse get(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+    @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES,
+            nickname = "deleteSecurityGroup")
     void delete(@PathParam(value = "id") Long id);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.DELETE_PUBLIC_BY_NAME,
-            produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+            produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES, nickname = "deletePublicSecurityGroup")
     void deletePublic(@PathParam(value = "name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SecurityGroupOpDescription.DELETE_PRIVATE_BY_NAME,
-            produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES)
+            produces = ContentType.JSON, notes = Notes.SECURITY_GROUP_NOTES, nickname = "deletePrivateSecurityGroup")
     void deletePrivate(@PathParam(value = "name") String name);
 }
