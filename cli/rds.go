@@ -109,10 +109,10 @@ func CreateRDSConfig(c *cli.Context) error {
 	log.Infof("[CreateRDSConfig] create RDS config with name: %s", c.String(FlRdsName.Name))
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	return createRDSConfigImpl(rdsType, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PotPublicRds)
+	return createRDSConfigImpl(rdsType, c.String, oAuth2Client.Cloudbreak.Rdsconfigs.PostPublicRds)
 }
 
-func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PotPublicRdsParams) (*rdsconfigs.PotPublicRdsOK, error)) error {
+func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PostPublicRdsParams) (*rdsconfigs.PostPublicRdsOK, error)) error {
 	validate := false
 	rdsConfig := models_cloudbreak.RDSConfig{
 		Name:               finder(FlRdsName.Name),
@@ -125,7 +125,7 @@ func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig 
 		Type:               &rdsType,
 	}
 
-	resp, err := postConfig(&rdsconfigs.PotPublicRdsParams{Body: &rdsConfig})
+	resp, err := postConfig(&rdsconfigs.PostPublicRdsParams{Body: &rdsConfig})
 
 	if err != nil {
 		logErrorAndExit(err)

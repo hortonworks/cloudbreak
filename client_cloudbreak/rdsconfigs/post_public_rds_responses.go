@@ -15,17 +15,17 @@ import (
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
-// PotPublicRdsReader is a Reader for the PotPublicRds structure.
-type PotPublicRdsReader struct {
+// PostPublicRdsReader is a Reader for the PostPublicRds structure.
+type PostPublicRdsReader struct {
 	formats strfmt.Registry
 }
 
 // ReadResponse reads a server response into the recieved o.
-func (o *PotPublicRdsReader) ReadResponse(response client.Response, consumer httpkit.Consumer) (interface{}, error) {
+func (o *PostPublicRdsReader) ReadResponse(response client.Response, consumer httpkit.Consumer) (interface{}, error) {
 	switch response.Code() {
 
 	case 200:
-		result := NewPotPublicRdsOK()
+		result := NewPostPublicRdsOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
@@ -36,24 +36,24 @@ func (o *PotPublicRdsReader) ReadResponse(response client.Response, consumer htt
 	}
 }
 
-// NewPotPublicRdsOK creates a PotPublicRdsOK with default headers values
-func NewPotPublicRdsOK() *PotPublicRdsOK {
-	return &PotPublicRdsOK{}
+// NewPostPublicRdsOK creates a PostPublicRdsOK with default headers values
+func NewPostPublicRdsOK() *PostPublicRdsOK {
+	return &PostPublicRdsOK{}
 }
 
-/*PotPublicRdsOK handles this case with default header values.
+/*PostPublicRdsOK handles this case with default header values.
 
 successful operation
 */
-type PotPublicRdsOK struct {
+type PostPublicRdsOK struct {
 	Payload *models_cloudbreak.RDSConfigResponse
 }
 
-func (o *PotPublicRdsOK) Error() string {
-	return fmt.Sprintf("[POST /rdsconfigs/account][%d] potPublicRdsOK  %+v", 200, o.Payload)
+func (o *PostPublicRdsOK) Error() string {
+	return fmt.Sprintf("[POST /rdsconfigs/account][%d] postPublicRdsOK  %+v", 200, o.Payload)
 }
 
-func (o *PotPublicRdsOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
+func (o *PostPublicRdsOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
 	o.Payload = new(models_cloudbreak.RDSConfigResponse)
 

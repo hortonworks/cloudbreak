@@ -266,30 +266,30 @@ func (a *Client) PostPrivateRds(params *PostPrivateRdsParams) (*PostPrivateRdsOK
 }
 
 /*
-PotPublicRds creates r d s configuration as public resource
+PostPublicRds creates r d s configuration as public resource
 
 An RDS Configuration describe a connection to an external Relational Database Service that can be used as the Hive Metastore.
 */
-func (a *Client) PotPublicRds(params *PotPublicRdsParams) (*PotPublicRdsOK, error) {
+func (a *Client) PostPublicRds(params *PostPublicRdsParams) (*PostPublicRdsOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPotPublicRdsParams()
+		params = NewPostPublicRdsParams()
 	}
 
 	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "potPublicRds",
+		ID:                 "postPublicRds",
 		Method:             "POST",
 		PathPattern:        "/rdsconfigs/account",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PotPublicRdsReader{formats: a.formats},
+		Reader:             &PostPublicRdsReader{formats: a.formats},
 	})
 	if err != nil {
 		return nil, err
 	}
-	return result.(*PotPublicRdsOK), nil
+	return result.(*PostPublicRdsOK), nil
 }
 
 // SetTransport changes the transport on the client

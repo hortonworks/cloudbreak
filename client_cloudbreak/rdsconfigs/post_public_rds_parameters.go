@@ -12,30 +12,30 @@ import (
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
-// NewPotPublicRdsParams creates a new PotPublicRdsParams object
+// NewPostPublicRdsParams creates a new PostPublicRdsParams object
 // with the default values initialized.
-func NewPotPublicRdsParams() *PotPublicRdsParams {
+func NewPostPublicRdsParams() *PostPublicRdsParams {
 	var ()
-	return &PotPublicRdsParams{}
+	return &PostPublicRdsParams{}
 }
 
-/*PotPublicRdsParams contains all the parameters to send to the API endpoint
-for the pot public rds operation typically these are written to a http.Request
+/*PostPublicRdsParams contains all the parameters to send to the API endpoint
+for the post public rds operation typically these are written to a http.Request
 */
-type PotPublicRdsParams struct {
+type PostPublicRdsParams struct {
 
 	/*Body*/
 	Body *models_cloudbreak.RDSConfig
 }
 
-// WithBody adds the body to the pot public rds params
-func (o *PotPublicRdsParams) WithBody(body *models_cloudbreak.RDSConfig) *PotPublicRdsParams {
+// WithBody adds the body to the post public rds params
+func (o *PostPublicRdsParams) WithBody(body *models_cloudbreak.RDSConfig) *PostPublicRdsParams {
 	o.Body = body
 	return o
 }
 
 // WriteToRequest writes these params to a swagger request
-func (o *PotPublicRdsParams) WriteToRequest(r client.Request, reg strfmt.Registry) error {
+func (o *PostPublicRdsParams) WriteToRequest(r client.Request, reg strfmt.Registry) error {
 
 	var res []error
 
