@@ -62,7 +62,7 @@ func TestCreateCredential(t *testing.T) {
 		t.Errorf("params not match %s == %s", expectedParams, actualCredential.Parameters)
 	}
 	if *actualCredential.PublicKey != expectedSshKey {
-		t.Errorf("ssh key not match %s == %s", expectedSshKey, actualCredential.PublicKey)
+		t.Errorf("ssh key not match %s == %s", expectedSshKey, *actualCredential.PublicKey)
 	}
 	if actualExistingKey != finder(FlSSHKeyPair.Name) {
 		t.Errorf("key name name not match %s == %s", finder(FlSSHKeyPair.Name), actualExistingKey)
@@ -132,7 +132,7 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 		t.Errorf("cloud platform not match AWS == %s", actualCredential.CloudPlatform)
 	}
 	if actualCredential.PublicKey != defaultCredential.PublicKey {
-		t.Errorf("public key not match %s == %s", defaultCredential.PublicKey, actualCredential.PublicKey)
+		t.Errorf("public key not match %s == %s", *defaultCredential.PublicKey, *actualCredential.PublicKey)
 	}
 	var expectedParams = make(map[string]interface{})
 	expectedParams["selector"] = "role-based"

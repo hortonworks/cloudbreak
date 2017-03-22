@@ -88,8 +88,8 @@ type Network struct {
 
 type MetaStore struct {
 	Name         string `json:"Name" yaml:"Name"`
-	Username     string `json:"Username" yaml:"Username"`
-	Password     string `json:"Password" yaml:"Password"`
+	Username     string `json:"Username,omitempty" yaml:"Username,omitempty"`
+	Password     string `json:"Password,omitempty" yaml:"Password,omitempty"`
 	URL          string `json:"URL" yaml:"URL"`
 	DatabaseType string `json:"DatabaseType" yaml:"DatabaseType"`
 }
