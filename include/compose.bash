@@ -425,6 +425,7 @@ cloudbreak:
         - CB_AWS_VPC
         - CB_ENABLEDPLATFORMS
         - CB_ENABLE_CUSTOM_IMAGE
+        - CB_INSTANCE_UUID
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
