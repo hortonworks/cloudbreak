@@ -396,3 +396,8 @@ a.list-group-item, button.list-group-item {
 .azure-cred-padding-top {
     padding-top: 40px;
 }
+
+.wizard-number {
+    position: absolute;
+    left: 10px;
+}
