@@ -65,6 +65,8 @@ generate-swagger-autoscale-docker:
 release: build
 	rm -rf release
 	mkdir release
+	git tag v${VERSION}
+	git push origin v${VERSION}
 	tar -zcvf release/hdc-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin hdc
 	tar -zcvf release/hdc-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux hdc
 	tar -zcvf release/hdc-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows hdc.exe
