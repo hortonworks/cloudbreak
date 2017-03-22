@@ -149,7 +149,9 @@ public class ModelDescriptions {
 
     public static class GatewayModelDescription {
         public static final String ENABLE_KNOX_GATEWAY = "enable Knox gateway security";
-        public static final String KNOX_PATH = "enable Knox gateway security";
+        public static final String KNOX_PATH = "Knox gateway path";
+        public static final String KNOX_GATEWAY_TYPE = "Knox gateway type";
+        public static final String KNOX_SSO_TYPE = "Knox SSO type";
         public static final String KNOX_TOPOLOGY_NAME = "Knox topology name";
         public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
         public static final String KNOX_SSO_PROVIDER = "SSO provider cluster name";
