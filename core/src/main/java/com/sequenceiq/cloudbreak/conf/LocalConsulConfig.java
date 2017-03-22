@@ -11,10 +11,10 @@ public class LocalConsulConfig {
 
     private static final int DEFAULT_TIMEOUT_MS = 5000;
 
-    @Value("${cb.consul.host:consul.service.consul}")
+    @Value("${spring.cloud.consul.host:consul.service.consul}")
     private String consulHost;
 
-    @Value("${cb.consul.port:8500}")
+    @Value("${spring.cloud.consul.port:8500}")
     private int consulPort;
 
     @Bean
