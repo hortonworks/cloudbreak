@@ -94,8 +94,14 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(Boolean.FALSE);
         gateway.setTopologyName(source.getName());
-        ExposedServices exposedServices = new ExposedServices();
+        if (source.getGateway().getGatewayType() != null) {
+            gateway.setGatewayType(source.getGateway().getGatewayType());
+        }
+        if (source.getGateway().getSsoProvider() != null) {
+            gateway.setSsoProvider(source.getGateway().getSsoProvider());
+        }
 
+        ExposedServices exposedServices = new ExposedServices();
         if (gatewayJson != null && gatewayJson.getEnableGateway() != null) {
             gateway.setEnableGateway(gatewayJson.getEnableGateway());
             if (!Strings.isNullOrEmpty(gatewayJson.getTopologyName())) {

@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerResponse;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;
+import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
@@ -331,10 +332,15 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private void collectServicePort(Map<String, String> result, Port port, String serviceAddress, String ambariIp,
             StackServiceComponentDescriptor componentDescriptor, List<String> exposedServices, Gateway gateway) {
         if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
-            String url;
             if (gateway.getEnableGateway() && ambariIp != null) {
-                url = String.format("https://%s:8443/gateway/%s%s", ambariIp, gateway.getTopologyName(),
-                        port.getExposedService().getKnoxUrl());
+                String url;
+                if (GatewayType.CENTRAL == gateway.getGatewayType()) {
+                    url = String.format("/gateway/%s%s", gateway.getTopologyName(),
+                            port.getExposedService().getKnoxUrl());
+                } else {
+                    url = String.format("https://%s:8443/gateway/%s%s", ambariIp, gateway.getTopologyName(),
+                            port.getExposedService().getKnoxUrl());
+                }
                 // filter out what is not exposed
                 // filter out what is not expected to be exposed e.g Zeppelin WS since it does not have Knox Url
                 if (!Strings.isNullOrEmpty(port.getExposedService().getKnoxUrl())
@@ -342,7 +348,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                     result.put(port.getExposedService().getPortName(), url);
                 }
             } else if (serviceAddress != null) {
-                url = String.format("http://%s:%s%s", serviceAddress, port.getPort(), port.getExposedService().getPostFix());
+                String url = String.format("http://%s:%s%s", serviceAddress, port.getPort(), port.getExposedService().getPostFix());
                 result.put(port.getExposedService().getPortName(), url);
             }
         }
@@ -357,7 +363,11 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 url = String.format("http://%s:8080", ambariIp);
             } else {
                 if (gateway.getEnableGateway() != null && gateway.getEnableGateway()) {
-                    url = String.format("https://%s:8443/gateway/%s/ambari/", ambariIp, gateway.getTopologyName());
+                    if (GatewayType.CENTRAL == gateway.getGatewayType()) {
+                        url = String.format("/gateway/%s/ambari/", gateway.getTopologyName());
+                    } else {
+                        url = String.format("https://%s:8443/gateway/%s/ambari/", ambariIp, gateway.getTopologyName());
+                    }
                 } else {
                     url = String.format("https://%s/ambari/", ambariIp);
                 }
