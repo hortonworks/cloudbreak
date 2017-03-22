@@ -98,6 +98,9 @@ public class CloudbreakUsage implements ProvisionEntity {
     @Column
     private String stackUuid;
 
+    @Column
+    private String parentUuid;
+
     @Enumerated(EnumType.STRING)
     private UsageStatus status;
 
@@ -274,6 +277,14 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setStackUuid(String stackUuid) {
         this.stackUuid = stackUuid;
+    }
+
+    public String getParentUuid() {
+        return parentUuid;
+    }
+
+    public void setParentUuid(String parentUuid) {
+        this.parentUuid = parentUuid;
     }
 
     @Override

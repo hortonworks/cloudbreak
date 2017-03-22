@@ -23,7 +23,8 @@ public class JsonToCloudbreakUsageConverterTest extends AbstractJsonConverterTes
         // WHEN
         CloudbreakUsage result = underTest.convert(getRequest("usage/cloudbreak-usage.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("day", "costs", "periodStarted", "duration", "status", "flexId", "stackUuid", "instanceNum", "peak"));
+        assertAllFieldsNotNull(result,
+                Arrays.asList("day", "costs", "periodStarted", "duration", "status", "flexId", "stackUuid", "instanceNum", "peak", "parentUuid"));
     }
 
     @Override
