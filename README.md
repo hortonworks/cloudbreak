@@ -2,33 +2,13 @@
 
 ## Install
 
-### Private
-Since the repository is private you can only download it by going to the releases page and download the desired version
-or by creating a GitHub personal access token on your settings page and then:
+Each Git TAG (without the leading 'v') is built and uploaded to S3 where you can download from:
 ```
-export GITHUB_TOKEN=YOUR_TOKEN
 export VERSION=1.6.0
 
- curl -s -G \
-   -d access_token=$GITHUB_TOKEN \
-   https://api.github.com/repos/hortonworks/hdc-cli/releases/tags/v$VERSION \
-    | jq ".assets[]|[.name,.url][]" -r \
-    | xargs -t -n 2 -P 3 curl -sG -d access_token=$GITHUB_TOKEN -H "Accept: application/octet-stream" -Lo
-```
-
-### Public 
-This method only works if the GitHub repository is public which is not the case ATM so ignore it.
-
-#### OSX, Linux
-You can install directly the GitHub binary release:
-```
-curl -LsS https://github.com/hortonworks/hdc-cli/releases/download/v1.6.0/hdc-cli_1.6.0-rc.1_$(uname)_x86_64.tgz | sudo tar -zx -C /usr/local/bin
-```
-#### Windows
-The windows binary is in experimental phase, but you can download it from the GitHub release page.
-```
-﻿C:\Users\IEUser\Desktop>hdc.exe terminate-cluster --cluster-name my-cluster
-﻿ERROR: [TerminateCluster] (status 404): Stack 'my-cluster' not found
+curl -LO "https://s3-eu-west-1.amazonaws.com/hdc-cli/hdc-cli_${VERSION}_Darwin_x86_64.tgz"
+curl -LO "https://s3-eu-west-1.amazonaws.com/hdc-cli/hdc-cli_${VERSION}_Linux_x86_64.tgz"
+curl -LO "https://s3-eu-west-1.amazonaws.com/hdc-cli/hdc-cli_${VERSION}_Windows_x86_64.tgz"
 ```
 
 ## Usage
