@@ -310,6 +310,8 @@ public class Stack implements ProvisionEntity {
     @ManyToOne
     private FlexSubscription flexSubscription;
 
+    private String uuid;
+
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
     }
@@ -730,5 +732,13 @@ public class Stack implements ProvisionEntity {
 
     public void setFlexSubscription(FlexSubscription flexSubscription) {
         this.flexSubscription = flexSubscription;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

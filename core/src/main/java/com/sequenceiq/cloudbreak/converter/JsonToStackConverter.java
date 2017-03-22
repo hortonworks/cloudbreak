@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.inject.Inject;
 
@@ -75,6 +76,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         if (source.getNetwork() != null) {
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
         }
+        stack.setUuid(UUID.randomUUID().toString());
         validateCustomImage(source);
         return stack;
     }

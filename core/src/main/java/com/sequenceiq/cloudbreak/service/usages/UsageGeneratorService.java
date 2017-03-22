@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
@@ -31,8 +32,13 @@ public class UsageGeneratorService {
     @Inject
     private UsageTimeService usageTimeService;
 
+    @Value("${cb.instance.uuid:}")
+    private String parentUuid;
+
     public CloudbreakUsage createFullClosed(CloudbreakUsage usage, Date day) {
         CloudbreakUsage newUsage = new CloudbreakUsage();
+        newUsage.setStackUuid(usage.getStackUuid());
+        newUsage.setParentUuid(parentUuid);
         newUsage.setOwner(usage.getOwner());
         newUsage.setAccount(usage.getAccount());
         newUsage.setProvider(usage.getProvider());
@@ -57,6 +63,8 @@ public class UsageGeneratorService {
 
     public CloudbreakUsage createNewFromUsage(CloudbreakUsage usage) {
         CloudbreakUsage newUsage = new CloudbreakUsage();
+        newUsage.setStackUuid(usage.getStackUuid());
+        newUsage.setParentUuid(parentUuid);
         newUsage.setOwner(usage.getOwner());
         newUsage.setAccount(usage.getAccount());
         newUsage.setProvider(usage.getProvider());
@@ -81,6 +89,8 @@ public class UsageGeneratorService {
 
     public CloudbreakUsage openNewUsage(Stack stack, String instanceType, Integer instanceNum, String groupName, Temporal started) {
         CloudbreakUsage usage = new CloudbreakUsage();
+        usage.setStackUuid(stack.getUuid());
+        usage.setParentUuid(parentUuid);
         usage.setOwner(stack.getOwner());
         usage.setAccount(stack.getAccount());
         usage.setProvider(stack.cloudPlatform());
