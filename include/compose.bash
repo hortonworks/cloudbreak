@@ -218,21 +218,22 @@ traefik:
         - 80:80
         - 443:443
     links:
+        - consul
         - identity
-        - cloudbreak
-        - periscope
         - sultans
         - uluwatu
+    dns: $PRIVATE_IP
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./certs/:/certs/
     image: traefik:$DOCKER_TAG_TRAEFIK
-    command: --debug --web \
+    command: --debug --web --InsecureSkipVerify=true \
         --defaultEntryPoints=http,https \
         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
         --entryPoints='Name:https Address::443 TLS:$CBD_TRAEFIK_TLS' \
         --maxidleconnsperhost=$TRAEFIK_MAX_IDLE_CONNECTION \
-        --docker
+        --docker \
+        --consul --consul.endpoint=consul.service.consul:8500
 haveged:
     labels:
       - traefik.enable=false
