@@ -4,6 +4,7 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
 	"strconv"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
@@ -27,7 +28,11 @@ type GatewayJSON struct {
 	 */
 	ExposedServices []string `json:"exposedServices,omitempty"`
 
-	/* enable Knox gateway security
+	/* Knox gateway type
+	 */
+	GatewayType *string `json:"gatewayType,omitempty"`
+
+	/* Knox gateway path
 	 */
 	Path *string `json:"path,omitempty"`
 
@@ -39,6 +44,10 @@ type GatewayJSON struct {
 	 */
 	SsoProvider *string `json:"ssoProvider,omitempty"`
 
+	/* Knox SSO type
+	 */
+	SsoType *string `json:"ssoType,omitempty"`
+
 	/* Knox topology name
 	 */
 	TopologyName *string `json:"topologyName,omitempty"`
@@ -49,6 +58,16 @@ func (m *GatewayJSON) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateExposedServices(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateGatewayType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateSsoType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -71,6 +90,68 @@ func (m *GatewayJSON) validateExposedServices(formats strfmt.Registry) error {
 			return err
 		}
 
+	}
+
+	return nil
+}
+
+var gatewayJsonTypeGatewayTypePropEnum []interface{}
+
+func (m *GatewayJSON) validateGatewayTypeEnum(path, location string, value string) error {
+	if gatewayJsonTypeGatewayTypePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["CENTRAL","INDIVIDUAL"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			gatewayJsonTypeGatewayTypePropEnum = append(gatewayJsonTypeGatewayTypePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, gatewayJsonTypeGatewayTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GatewayJSON) validateGatewayType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.GatewayType) { // not required
+		return nil
+	}
+
+	if err := m.validateGatewayTypeEnum("gatewayType", "body", *m.GatewayType); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var gatewayJsonTypeSsoTypePropEnum []interface{}
+
+func (m *GatewayJSON) validateSsoTypeEnum(path, location string, value string) error {
+	if gatewayJsonTypeSsoTypePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["SSO_PROVIDER","SSO_CONSUMER","NONE"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			gatewayJsonTypeSsoTypePropEnum = append(gatewayJsonTypeSsoTypePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, gatewayJsonTypeSsoTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *GatewayJSON) validateSsoType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.SsoType) { // not required
+		return nil
+	}
+
+	if err := m.validateSsoTypeEnum("ssoType", "body", *m.SsoType); err != nil {
+		return err
 	}
 
 	return nil

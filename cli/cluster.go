@@ -378,7 +378,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		enableKnoxGateway := true
-		knoxTopologyName := "hdc"
+		gatewayType := "CENTRAL"
 		clusterReq := models_cloudbreak.ClusterRequest{
 			Name:                      skeleton.ClusterName,
 			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
@@ -391,8 +391,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			BlueprintCustomProperties: skeleton.Configurations,
 			Gateway: &models_cloudbreak.GatewayJSON{
 				EnableGateway:   &enableKnoxGateway,
-				TopologyName:    &knoxTopologyName,
 				ExposedServices: exposedServices,
+				GatewayType:     &gatewayType,
 			},
 		}
 
