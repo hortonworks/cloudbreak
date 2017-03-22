@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -15,9 +17,9 @@ import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
 public class CredentialToJsonConverter extends AbstractConversionServiceAwareConverter<Credential, CredentialResponse> {
-    private static final String PASSWORD_FIELD = "password";
+    private static final List<String> FIELDS_TO_COVER = Arrays.asList("password", "secretKey", "serviceAccountPrivateKey");
 
-    private static final String PASSWORD_PLACEHOLDER = "********";
+    private static final String PLACEHOLDER = "********";
 
     @Inject
     private CredentialDefinitionService credentialDefinitionService;
@@ -42,13 +44,15 @@ public class CredentialToJsonConverter extends AbstractConversionServiceAwareCon
         if (source.getTopology() != null) {
             credentialJson.setTopologyId(source.getTopology().getId());
         }
-        clearPasswordField(credentialJson);
+        coverSensitiveData(credentialJson);
         return credentialJson;
     }
 
-    private void clearPasswordField(CredentialResponse response) {
-        if (response.getParameters().get(PASSWORD_FIELD) != null) {
-            response.getParameters().put(PASSWORD_FIELD, PASSWORD_PLACEHOLDER);
+    private void coverSensitiveData(CredentialResponse response) {
+        for (String field : FIELDS_TO_COVER) {
+            if (response.getParameters().get(field) != null) {
+                response.getParameters().put(field, PLACEHOLDER);
+            }
         }
     }
 }
