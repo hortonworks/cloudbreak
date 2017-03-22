@@ -10,7 +10,6 @@ ifeq ($(CB_IP),)
 endif
 
 deps:
-	go get github.com/keyki/glu
 	go get github.com/tools/godep
 
 format:
@@ -61,7 +60,10 @@ generate-swagger-autoscale-docker:
 
 release: build
 	rm -rf release
-	glu release
+	mkdir release
+	tar -zcvf release/hdc-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin hdc
+	tar -zcvf release/hdc-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux hdc
+	tar -zcvf release/hdc-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows hdc.exe
 
 release-docker:
 	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} golang:1.8 bash -c "make deps && make release"
