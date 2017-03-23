@@ -68,10 +68,12 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
                 if (aPublic != null) {
                     templateId = aPublic.getId().toString();
                 } else {
-                    return String.format("Template not found by name: %s", instanceGroupTemplateName.getName());
+                    throw shellContext.exceptionTransformer().transformToRuntimeException(String.format("Template not found by name: %s",
+                            instanceGroupTemplateName.getName()));
                 }
             } else {
-                return "Template name or id is not defined for instanceGroup (use --templateName or --templateId)";
+                throw shellContext.exceptionTransformer().transformToRuntimeException(
+                        "Template name or id is not defined for instanceGroup (use --templateName or --templateId)");
             }
             String securityGroupId;
             if (instanceGroupSecurityGroupId != null) {
@@ -81,10 +83,12 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
                 if (aPublic != null) {
                     securityGroupId = aPublic.getId().toString();
                 } else {
-                    return String.format("SecurityGroup not found by name: %s", instanceGroupSecurityGroupName.getName());
+                    throw shellContext.exceptionTransformer().transformToRuntimeException(String.format("SecurityGroup not found by name: %s",
+                            instanceGroupSecurityGroupName.getName()));
                 }
             } else {
-                return "SecurityGroup name or id is not defined for instanceGroup (use --securityGroupName or --securityGroupId)";
+                throw shellContext.exceptionTransformer().transformToRuntimeException(
+                        "SecurityGroup name or id is not defined for instanceGroup (use --securityGroupName or --securityGroupId)");
             }
 
             Long parsedTemplateId = Longs.tryParse(templateId);
@@ -99,7 +103,7 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
                         }
                     }
                     if (nodeCount != 1) {
-                        return "Allowed node count for Ambari server: 1";
+                        throw shellContext.exceptionTransformer().transformToRuntimeException("Allowed node count for Ambari server: 1");
                     }
                     shellContext.putInstanceGroup(instanceGroup.getName(),
                             new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "GATEWAY", parameters));
@@ -116,7 +120,7 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
                 }
                 return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");
             } else {
-                return "TemplateId is not a number.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("TemplateId is not a number");
             }
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -126,7 +130,7 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
     @CliCommand(value = "instancegroup show", help = "Show the currently available instance groups")
     public String show() throws Exception {
         if (shellContext.getInstanceGroups().isEmpty()) {
-            return "List of instance groups is empty currently.";
+            return "List of instance groups is empty currently";
         } else {
             return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");
         }
@@ -135,7 +139,7 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
     @CliCommand(value = "instancegroup delete", help = "Delete a currently available instance group")
     public String delete(@CliOption(key = "name", help = "name of the instanceGroup", mandatory = true) String name) throws Exception {
         if (shellContext.getInstanceGroups().isEmpty()) {
-            return "List of instance groups is empty currently.";
+            return "List of instance groups is empty currently";
         } else {
             shellContext.getInstanceGroups().remove(name);
             return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");

@@ -8,11 +8,13 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.File;
 import java.io.IOException;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -64,6 +66,8 @@ public class SssdConfigCommandsTest {
 
     private File dummyFile;
 
+    private RuntimeException expectedException = new RuntimeException("something not found");
+
     @Before
     public void setUp() throws Exception {
         underTest = new SssdConfigCommands(mockContext);
@@ -85,7 +89,9 @@ public class SssdConfigCommandsTest {
         given(sssdConfigEndpoint.get(anyLong())).willReturn(dummyResult);
         given(sssdConfigEndpoint.getPublic(anyString())).willReturn(dummyResult);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
-        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(anyString())).willThrow(expectedException);
+        given(mockContext.exceptionTransformer()).willReturn(exceptionTransformer);
         given(mockContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
@@ -109,7 +115,13 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testSelectWithoutIdorName() throws Exception {
-        underTest.select(null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.select(null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(sssdConfigEndpoint, times(0)).get(anyLong());
         verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
         verify(mockContext, times(0)).addSssdConfig(anyString());
@@ -134,7 +146,13 @@ public class SssdConfigCommandsTest {
     @Test
     public void testUploadFileNotFound() {
         given(mockFile.exists()).willReturn(false);
-        underTest.upload("name", "desc", mockFile, true);
+        RuntimeException ext = null;
+        try {
+            underTest.upload("name", "desc", mockFile, true);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(mockFile, times(1)).exists();
         verify(sssdConfigEndpoint, times(0)).postPublic(any(SssdConfigRequest.class));
         verify(sssdConfigEndpoint, times(0)).postPrivate(any(SssdConfigRequest.class));
@@ -172,7 +190,13 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testShowSssdConfigWithoutIdAndName() throws Exception {
-        underTest.show(null, null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.show(null, null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(sssdConfigEndpoint, times(0)).get(anyLong());
         verify(sssdConfigEndpoint, times(0)).getPublic(anyString());
     }
@@ -201,7 +225,13 @@ public class SssdConfigCommandsTest {
 
     @Test
     public void testDeleteSssdConfigWithoutIdAndName() throws Exception {
-        underTest.delete(null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.delete(null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(sssdConfigEndpoint, times(0)).deletePublic(anyString());
         verify(sssdConfigEndpoint, times(0)).delete(anyLong());
     }

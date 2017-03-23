@@ -26,9 +26,9 @@ import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class BaseCredentialCommands implements BaseCommands, CredentialCommands {
 
-    private static final String FILE_NOT_FOUND = "File not found with ssh key.";
+    private static final String FILE_NOT_FOUND = "File not found with ssh key";
 
-    private static final String URL_NOT_FOUND = "Url not Available for ssh key.";
+    private static final String URL_NOT_FOUND = "Url not Available for ssh key";
 
     private static final String CREATE_SUCCESS_MESSAGE = "Credential created with id: '%d' and name: '%s'";
 
@@ -66,7 +66,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
                 shellContext.cloudbreakClient().credentialEndpoint().deletePublic(name);
                 return String.format("Credential deleted, name: %s", name);
             }
-            return "No credential specified (select a credential by --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No credential specified (select a credential by --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -93,7 +93,6 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     @Override
     public String select(Long id, String name) {
         try {
-
             if (id != null) {
                 if (shellContext.cloudbreakClient().credentialEndpoint().get(id) != null) {
                     shellContext.setCredential(id.toString());
@@ -106,7 +105,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
                 createOrSelectTemplateHint();
                 return "Credential selected, name: " + name;
             }
-            return "No credential specified (select a credential by --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No credential specified (select a credential by --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -166,7 +165,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
                             shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
                 }
             }
-            return "No credential specified (select a credential by --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No credential specified (select a credential by --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -181,7 +180,8 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     public String create(String name, File sshKeyPath, String sshKeyUrl, String sshKeyString, String description, boolean publicInAccount, Long platformId,
             Map<String, Object> parameters, String platform) {
         if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
-            return "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString";
+            throw shellContext.exceptionTransformer().transformToRuntimeException(
+                    "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString");
         }
         String sshKey;
         if (sshKeyPath != null) {

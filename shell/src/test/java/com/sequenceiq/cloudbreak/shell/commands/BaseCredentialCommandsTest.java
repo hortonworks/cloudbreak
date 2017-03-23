@@ -8,7 +8,9 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Answers;
@@ -50,6 +52,8 @@ public class BaseCredentialCommandsTest {
 
     private CredentialResponse dummyResult;
 
+    private RuntimeException expectedException = new RuntimeException("something not found");
+
     @Before
     public void setUp() throws Exception {
         underTest = new BaseCredentialCommands(context);
@@ -61,7 +65,9 @@ public class BaseCredentialCommandsTest {
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
         given(context.cloudbreakClient()).willReturn(cloudbreakClient);
-        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(anyString())).willThrow(expectedException);
+        given(context.exceptionTransformer()).willReturn(exceptionTransformer);
     }
 
     @Test
@@ -87,7 +93,13 @@ public class BaseCredentialCommandsTest {
 
     @Test
     public void testSelectCredentialWithoutIdAndName() throws Exception {
-        underTest.select(null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.select(null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(context, times(0)).setCredential(anyString());
     }
 
@@ -110,13 +122,25 @@ public class BaseCredentialCommandsTest {
     @Test
     public void testShowCredentialByNameNotFound() throws Exception {
         given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(null);
-        underTest.show(null, DUMMY_NAME, null);
+        RuntimeException ext = null;
+        try {
+            underTest.show(null, DUMMY_NAME, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(credentialEndpoint, times(1)).getPublic(anyString());
     }
 
     @Test
     public void testShowCredentialWithoutIdAndName() throws Exception {
-        underTest.show(null, null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.show(null, null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(credentialEndpoint, times(0)).get(anyLong());
     }
 
@@ -134,7 +158,13 @@ public class BaseCredentialCommandsTest {
 
     @Test
     public void testDeleteCredentialWithoutIdAndName() throws Exception {
-        underTest.delete(null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.delete(null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(credentialEndpoint, times(0)).delete(anyLong());
         verify(credentialEndpoint, times(0)).deletePublic(anyString());
     }

@@ -8,6 +8,7 @@ import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,6 +30,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseNetworkCommands;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
@@ -52,6 +54,11 @@ public class BaseNetworkCommandsTest {
     @Mock
     private OutputTransformer outputTransformer;
 
+    @Mock
+    private ExceptionTransformer exceptionTransformer;
+
+    private RuntimeException expectedException = new RuntimeException("something not found");
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -65,6 +72,9 @@ public class BaseNetworkCommandsTest {
         given(outputTransformer.render(any(OutPutType.class), anyObject(), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(anyString())).willThrow(expectedException);
+        given(shellContext.exceptionTransformer()).willReturn(exceptionTransformer);
     }
 
     @Test
@@ -80,9 +90,13 @@ public class BaseNetworkCommandsTest {
     public void selectNetworkByIdWhichIsNotExist() {
         given(shellContext.getNetworksByProvider()).willReturn(ImmutableMap.of(50L, "test1"));
 
-        String select = underTest.select(51L, null);
-
-        Assert.assertEquals(select, "Network not found.");
+        RuntimeException ext = null;
+        try {
+            underTest.select(51L, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
     }
 
     @Test

@@ -54,7 +54,7 @@ public class RecipeCommands implements BaseCommands {
 
     @Override
     public String select(Long id, String name) throws Exception {
-        throw new MethodNotSupportedException("Recipe select command not supported.");
+        throw new MethodNotSupportedException("Recipe select command not supported");
     }
 
     @Override
@@ -83,11 +83,11 @@ public class RecipeCommands implements BaseCommands {
                     help = "flags if the recipe is public in the account") Boolean publicInAccount) {
 
         if (scriptFile != null && !scriptFile.exists()) {
-            return "Pre install script file not exists.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Pre install script file not exists");
         } else if (scriptFile != null && url != null) {
-            return "Either the file or the url can be provided for recipe.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Either the file or the url can be provided for recipe");
         } else if (scriptFile == null && url == null) {
-            return "File or the url must be provided for recipe";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("File or the url must be provided for recipe");
         }
 
         try {
@@ -131,7 +131,7 @@ public class RecipeCommands implements BaseCommands {
             } else if (name != null) {
                 recipeMap = shellContext.cloudbreakClient().recipeEndpoint().getPublic(name);
             } else {
-                return "Recipe not specified.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("Recipe not specified");
             }
             Map<String, String> map = new HashMap<>();
             map.put("id", recipeMap.getId().toString());
@@ -176,7 +176,7 @@ public class RecipeCommands implements BaseCommands {
                 shellContext.cloudbreakClient().recipeEndpoint().deletePublic(name);
                 return String.format("Recipe deleted with %s name", name);
             }
-            return "Recipe not specified (select recipe by --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Recipe not specified (select recipe by --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

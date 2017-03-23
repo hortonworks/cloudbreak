@@ -58,7 +58,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
                 refreshNetworksInContext();
                 return String.format("Network deleted with %s name", networkName);
             }
-            return "No network specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No network specified");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -85,19 +85,18 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @Override
     public String select(Long idOfNetwork, String networkName) {
         try {
-            String msg = "Network not found.";
             if (idOfNetwork != null && shellContext.getNetworksByProvider().containsKey(idOfNetwork)) {
                 String provider = shellContext.getNetworksByProvider().get(idOfNetwork);
                 createHintAndAddNetworkToContext(idOfNetwork, provider);
-                msg = "Network is selected with id: " + idOfNetwork;
+                return "Network is selected with id: " + idOfNetwork;
             } else if (networkName != null) {
                 NetworkResponse aPublic = shellContext.cloudbreakClient().networkEndpoint().getPublic(networkName);
                 if (aPublic != null) {
                     createHintAndAddNetworkToContext(aPublic.getId(), aPublic.getCloudPlatform());
-                    msg = "Network is selected with name: " + networkName;
+                    return "Network is selected with name: " + networkName;
                 }
             }
-            return msg;
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Network not found");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -157,7 +156,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
                         .render(outPutType,
                                 shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
             }
-            return "Network could not be found!";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Network could not be found");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

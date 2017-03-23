@@ -96,7 +96,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                 CommandResult commandResult = shell.executeCommand(replacedCommand);
                 if (!commandResult.isSuccess()) {
                     String message =
-                            Optional.ofNullable(commandResult.getException()).map(Throwable::getMessage).orElse("Unknown error, maybe command not valid.");
+                            Optional.ofNullable(commandResult.getException()).map(Throwable::getMessage).orElse("Unknown error, maybe command not valid");
                     System.out.println(String.format("%s: [%s] [REASON: %s]", replacedCommand, FAILED, message));
                     break;
                 } else {
@@ -171,7 +171,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                     new SpringApplicationBuilder(CloudbreakShell.class).web(false).bannerMode(Banner.Mode.OFF).run(args);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    System.out.println("Cloudbreak shell cannot be started.");
+                    System.out.println("Cloudbreak shell cannot be started");
                 }
             }
         }

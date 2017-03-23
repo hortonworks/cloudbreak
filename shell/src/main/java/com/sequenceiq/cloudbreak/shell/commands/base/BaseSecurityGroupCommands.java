@@ -108,7 +108,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
                 refreshSecurityGroupsInContext();
                 return String.format("SecurityGroup deleted with %s name", name);
             }
-            return "No security group specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No security group specified");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -192,7 +192,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
                         shellContext.responseTransformer().transformObjectToStringMap(aPublic),
                         "FIELD", "VALUE");
             }
-            return "Security group could not be found!";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Security group could not be found");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

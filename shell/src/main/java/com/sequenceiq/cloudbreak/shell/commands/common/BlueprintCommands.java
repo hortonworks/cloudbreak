@@ -180,7 +180,7 @@ public class BlueprintCommands implements BaseCommands {
             } else if (name != null) {
                 blueprintResponse = shellContext.cloudbreakClient().blueprintEndpoint().getPublic(name);
             } else {
-                return "No blueprints specified.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("No blueprints specified");
             }
             return shellContext.outputTransformer().render(outPutType,
                     shellContext.responseTransformer().transformObjectToStringMap(blueprintResponse, "ambariBlueprint"), "FIELD", "INFO")
@@ -224,7 +224,7 @@ public class BlueprintCommands implements BaseCommands {
                 shellContext.cloudbreakClient().blueprintEndpoint().deletePublic(name);
                 return String.format("Blueprint deleted with %s name", name);
             } else {
-                return "No blueprint specified (select a blueprint by --id or --name)";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("No blueprint specified (select a blueprint by --id or --name)");
             }
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);

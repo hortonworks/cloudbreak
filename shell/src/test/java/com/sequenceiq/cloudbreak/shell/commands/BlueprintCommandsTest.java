@@ -4,8 +4,8 @@ import static org.mockito.BDDMockito.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.times;
 import static org.mockito.BDDMockito.verify;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 import org.junit.Before;
@@ -44,6 +44,8 @@ public class BlueprintCommandsTest {
 
     private BlueprintResponse dummyResult;
 
+    private RuntimeException expectedException = new RuntimeException("something not found");
+
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -56,7 +58,9 @@ public class BlueprintCommandsTest {
         given(mockContext.isYarnMode()).willReturn(false);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);
-        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(anyString())).willThrow(expectedException);
+        given(mockContext.exceptionTransformer()).willReturn(exceptionTransformer);
     }
 
     @Test

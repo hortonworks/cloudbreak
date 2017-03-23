@@ -71,7 +71,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
                                     shellContext.responseTransformer().transformObjectToStringMap(topologyResponse), "FIELD", "VALUE");
                 }
             }
-            return "No platform specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No platform specified");
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
@@ -132,7 +132,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
                     return String.format("Platform has been deleted, name: %s", name);
                 }
             }
-            return "No platform specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No platform specified");
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }

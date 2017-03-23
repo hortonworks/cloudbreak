@@ -78,7 +78,7 @@ public class SssdConfigCommands implements BaseCommands {
                     return String.format("SSSD config has been selected, name: %s", name);
                 }
             }
-            return "No SSSD config specified (select a config by --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No SSSD config specified (select a config by --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -137,7 +137,7 @@ public class SssdConfigCommands implements BaseCommands {
                     help = "flags if the config is public in the account") Boolean publicInAccount) {
         try {
             if (configFile != null && !configFile.exists()) {
-                return "Configuration file not exists.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("Configuration file not exists");
             }
             SssdConfigRequest request = new SssdConfigRequest();
             request.setName(name);
@@ -172,7 +172,7 @@ public class SssdConfigCommands implements BaseCommands {
             } else if (name != null) {
                 response = shellContext.cloudbreakClient().sssdConfigEndpoint().getPublic(name);
             } else {
-                return "SSSD config not specified.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("SSSD config not specified");
             }
             Map<String, String> map = new HashMap<>();
             map.put("id", response.getId().toString());
@@ -216,7 +216,7 @@ public class SssdConfigCommands implements BaseCommands {
                 shellContext.cloudbreakClient().sssdConfigEndpoint().deletePublic(name);
                 return String.format("SSSD config deleted with %s name", name);
             }
-            return "SSSD config not specified (select sssd by --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("SSSD config not specified (select sssd by --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

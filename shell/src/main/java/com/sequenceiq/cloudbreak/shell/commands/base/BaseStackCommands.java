@@ -104,7 +104,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 return shellContext.outputTransformer().render(outPutType, shellContext.responseTransformer()
                         .transformObjectToStringMap(stackResponse, "stackTemplate"), "FIELD", "VALUE");
             }
-            return "No stack specified (select a stack by --id or --name).";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No stack specified (select a stack by --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -181,7 +181,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                     return "Stack termination started with name: " + name;
                 }
             }
-            return "Stack not specified. (select by using --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Stack not specified. (select by using --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -229,7 +229,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                     return "Stack selected, name: " + name;
                 }
             }
-            return "No stack specified. (select by using --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No stack specified. (select by using --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -381,7 +381,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                     return stop(stack);
                 }
             }
-            return "Stack was not specified";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Stack was not specified");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -420,7 +420,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                     return start(stack);
                 }
             }
-            return "Stack was not specified";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Stack was not specified");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -447,7 +447,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment < 1) {
-                return "The adjustment value in case of node addition should be at least 1.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node addition should be at least 1");
             }
             UpdateStackJson updateStackJson = new UpdateStackJson();
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
@@ -483,7 +483,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment > -1) {
-                return "The adjustment value in case of node removal should be negative.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node removal should be negative");
             }
             UpdateStackJson updateStackJson = new UpdateStackJson();
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
@@ -523,7 +523,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                         stackResponse.getInstanceGroups() == null ? new ArrayList<>() : stackResponse.getInstanceGroups(), group);
                 return shellContext.outputTransformer().render(outPutType, stringListMap, "FIELD", "VALUE");
             }
-            return "No stack specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No stack specified");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -622,7 +622,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 String instanceType = template.getInstanceType();
                 if (!vmTypes.stream().anyMatch(vm -> vm.getValue().equals(instanceType))) {
                     throw new ValidationException("The " + instanceType + " instencetype is not supported for the " + ig.getKey() + " instancegroup which using "
-                            + template.getName() + " template in [" + region + "] region and [" + availabilityZone + "] availabilty zone."
+                            + template.getName() + " template in [" + region + "] region and [" + availabilityZone + "] availabilty zone"
                             + " Supported instancetypes in this region / availability zone: "
                             + vmTypes.stream().map(vm -> vm.getValue()).collect(Collectors.toList()));
                 }
