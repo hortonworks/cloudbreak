@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.shell.commands.common;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -9,7 +11,6 @@ import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
 import com.google.common.base.Splitter;
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
@@ -51,6 +52,9 @@ public class HostGroupCommands implements CommandMarker {
             if (recipeNames != null) {
                 recipeIdSet.addAll(getRecipeIds(recipeNames, RecipeParameterType.NAME));
             }
+            if (shellContext.getInstanceGroups().get(hostgroup.getName()) == null) {
+                throw shellContext.exceptionTransformer().transformToRuntimeException(String.format("Instancegroup named %s is missing", hostgroup.getName()));
+            }
             shellContext.putHostGroup(hostgroup.getName(),
                     new HostgroupEntry(shellContext.getInstanceGroups().get(hostgroup.getName()).getNodeCount(), recipeIdSet, recoverMode));
             if (shellContext.getHostGroups().entrySet().size() == shellContext.getInstanceGroups().entrySet().size()) {
@@ -74,7 +78,7 @@ public class HostGroupCommands implements CommandMarker {
     }
 
     private Set<Long> getRecipeIds(String inputs, final RecipeParameterType type) {
-        return FluentIterable.from(Splitter.on(",").omitEmptyStrings().trimResults().split(inputs)).transform(input -> {
+        return StreamSupport.stream(Splitter.on(",").omitEmptyStrings().trimResults().split(inputs).spliterator(), false).map(input -> {
             try {
                 RecipeResponse resp = null;
                 switch (type) {
@@ -91,6 +95,6 @@ public class HostGroupCommands implements CommandMarker {
             } catch (Exception e) {
                 throw new RuntimeException(e.getMessage());
             }
-        }).toSet();
+        }).collect(Collectors.toSet());
     }
 }
