@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.shell.commands.common.BlueprintCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.ClusterCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.DatabaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.HostGroupCommands;
-import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseInstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.LdapConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
@@ -105,8 +105,8 @@ public class CommandDefinition {
     }
 
     @Bean
-    InstanceGroupCommands instanceGroupCommands() {
-        return new InstanceGroupCommands(shellContext);
+    BaseInstanceGroupCommands instanceGroupCommands() {
+        return new BaseInstanceGroupCommands(shellContext);
     }
 
     @Bean
@@ -122,7 +122,7 @@ public class CommandDefinition {
     @Bean
     public AwsCommands awsCredentialCommands() {
         return new AwsCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
-                baseTemplateCommands(), basePlatformCommands(), stackCommands());
+                baseTemplateCommands(), basePlatformCommands(), stackCommands(), instanceGroupCommands());
     }
 
     @Bean
@@ -134,13 +134,13 @@ public class CommandDefinition {
     @Bean
     public GcpCommands gcpCredentialCommands() {
         return new GcpCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
-                baseTemplateCommands(), basePlatformCommands(), stackCommands());
+                baseTemplateCommands(), basePlatformCommands(), stackCommands(), instanceGroupCommands());
     }
 
     @Bean
     public OpenStackCommands openStackCredentialCommands() {
         return new OpenStackCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
-                baseTemplateCommands(), basePlatformCommands(), stackCommands());
+                baseTemplateCommands(), basePlatformCommands(), stackCommands(), instanceGroupCommands());
     }
 
     @Bean
