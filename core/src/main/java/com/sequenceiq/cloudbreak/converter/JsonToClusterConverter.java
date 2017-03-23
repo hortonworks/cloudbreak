@@ -94,27 +94,32 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(Boolean.FALSE);
         gateway.setTopologyName(source.getName());
-        if (source.getGateway().getGatewayType() != null) {
-            gateway.setGatewayType(source.getGateway().getGatewayType());
-        }
-        if (source.getGateway().getSsoProvider() != null) {
-            gateway.setSsoProvider(source.getGateway().getSsoProvider());
-        }
-
+        gateway.setPath("gateway");
         ExposedServices exposedServices = new ExposedServices();
-        if (gatewayJson != null && gatewayJson.getEnableGateway() != null) {
-            gateway.setEnableGateway(gatewayJson.getEnableGateway());
-            if (!Strings.isNullOrEmpty(gatewayJson.getTopologyName())) {
-                gateway.setTopologyName(gatewayJson.getTopologyName());
+
+        if (gatewayJson != null) {
+            if (gatewayJson.getGatewayType() != null) {
+                gateway.setGatewayType(gatewayJson.getGatewayType());
             }
-            if (gatewayJson.getExposedServices() != null) {
-                if (gatewayJson.getExposedServices().contains(ExposedService.ALL.name())) {
-                    exposedServices.setServices(ExposedService.getAllKnoxExposed());
-                } else {
-                    exposedServices.setServices(gatewayJson.getExposedServices());
+            if (gatewayJson.getSsoProvider() != null) {
+                gateway.setSsoProvider(gatewayJson.getSsoProvider());
+            }
+
+            if (gatewayJson.getEnableGateway() != null) {
+                gateway.setEnableGateway(gatewayJson.getEnableGateway());
+                if (!Strings.isNullOrEmpty(gatewayJson.getTopologyName())) {
+                    gateway.setTopologyName(gatewayJson.getTopologyName());
+                }
+                if (gatewayJson.getExposedServices() != null) {
+                    if (gatewayJson.getExposedServices().contains(ExposedService.ALL.name())) {
+                        exposedServices.setServices(ExposedService.getAllKnoxExposed());
+                    } else {
+                        exposedServices.setServices(gatewayJson.getExposedServices());
+                    }
                 }
             }
         }
+
         try {
             gateway.setExposedServices(new Json(exposedServices));
         } catch (JsonProcessingException e) {
@@ -122,7 +127,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             throw new CloudbreakApiException("Failed to store exposedServices", e);
         }
 
-        gateway.setPath("gateway");
         cluster.setGateway(gateway);
         gateway.setCluster(cluster);
     }
