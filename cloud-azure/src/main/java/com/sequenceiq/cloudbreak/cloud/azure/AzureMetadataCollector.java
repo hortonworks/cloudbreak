@@ -55,7 +55,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                 Integer faultDomainCount = azureClient.getFaultDomainNumber(resourceName, vm.name());
                 String platform = authenticatedContext.getCloudContext().getPlatform().value();
                 String location = authenticatedContext.getCloudContext().getLocation().getRegion().value();
-                String hostgroupNm = AzureUtils.getGroupName(instance.getValue().getGroupName());
+                String hostgroupNm = instance.getValue().getGroupName();
                 StringBuilder localityIndicatorBuilder = new StringBuilder();
                 localityIndicatorBuilder.append(LOCALITY_SEPARATOR)
                         .append(platform)

@@ -187,8 +187,8 @@
 </div>
 
 <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.azureAvailabilitySets.$dirty && clusterCreationForm.azureAvailabilitySets.$invalid }">
-    <label class="col-sm-3 control-label" ng-show="cluster.parameters.azureAvailabilitySetsEnabled" for="azureAvailabilitySets">{{msg.cluster_form_availabilitysets_label}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.cluster_form_availabilitysets_uniqeness}} popover-trigger="mouseenter"></i></label>
-    <div class="col-sm-8" name="azureAvailabilitySets" id="azureAvailabilitySets" ng-show="cluster.parameters.azureAvailabilitySetsEnabled">
+    <label class="col-sm-3 control-label" ng-show="cluster.parameters.azureAvailabilitySetsEnabled && showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'" for="azureAvailabilitySets">{{msg.cluster_form_availabilitysets_label}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.cluster_form_availabilitysets_uniqeness}} popover-trigger="mouseenter"></i></label>
+    <div class="col-sm-8" name="azureAvailabilitySets" id="azureAvailabilitySets" ng-show="cluster.parameters.azureAvailabilitySetsEnabled && showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
         <div class="col-sm-12" ng-repeat="as in cluster.azureAvailabilitySets track by $index" style="padding-bottom: 15px;    padding-left: 0px;" ng-class="{ 'has-error': (clusterCreationForm.asname{{$index}}.$dirty && clusterCreationForm.asname{{$index}}.$invalid) || (clusterCreationForm.asfaultdomainnumber{{$index}}.$dirty && clusterCreationForm.asfaultdomainnumber{{$index}}.$invalid) }">
             <div>
                 <div class="form-inline">
