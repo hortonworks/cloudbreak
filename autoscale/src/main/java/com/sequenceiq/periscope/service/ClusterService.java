@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service;
 
+import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -71,7 +73,9 @@ public class ClusterService {
                 cluster.setSecurityConfig(sc);
             }
         }
-        return save(cluster);
+        cluster = save(cluster);
+        addPrometheusAlertsToConsul(cluster);
+        return cluster;
     }
 
     public List<Cluster> findAllByUser(PeriscopeUser user) {
@@ -120,6 +124,7 @@ public class ClusterService {
     public Cluster setState(long clusterId, ClusterState state) {
         Cluster cluster = findOneById(clusterId);
         cluster.setState(state);
+        addPrometheusAlertsToConsul(cluster);
         return clusterRepository.save(cluster);
     }
 
@@ -139,4 +144,9 @@ public class ClusterService {
         return periscopeUser;
     }
 
+    private void addPrometheusAlertsToConsul(Cluster cluster) {
+        if (RUNNING.equals(cluster.getState())) {
+            alertService.addPrometheusAlertsToConsul(cluster);
+        }
+    }
 }
