@@ -11,7 +11,7 @@ import (
 	"github.com/urfave/cli"
 )
 
-var RdsHeader []string = []string{"Name", "Username", "URL", "DatabaseType", "HDP Version", "Type"}
+var RdsHeader []string = []string{"Name", "URL", "DatabaseType", "HDP Version", "Type"}
 
 type RdsConfig struct {
 	MetaStore
@@ -20,7 +20,7 @@ type RdsConfig struct {
 }
 
 func (r *RdsConfig) DataAsStringArray() []string {
-	return []string{r.Name, r.Username, r.URL, r.DatabaseType, r.HDPVersion, r.Type}
+	return []string{r.Name, r.URL, r.DatabaseType, r.HDPVersion, r.Type}
 }
 
 func (c *Cloudbreak) GetRDSConfigByName(name string) models_cloudbreak.RDSConfigResponse {
