@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class WasbFileSystemConfiguration extends FileSystemConfiguration {
     @NotNull
     @Pattern(regexp = "^[a-z0-9]{3,24}$",
