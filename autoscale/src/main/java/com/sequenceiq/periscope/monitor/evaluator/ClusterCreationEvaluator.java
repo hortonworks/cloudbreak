@@ -26,7 +26,6 @@ import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.model.ClusterCreationEvaluatorContext;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
-import com.sequenceiq.periscope.service.AlertService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
 import com.sequenceiq.periscope.service.security.TlsConfigurationException;
@@ -46,9 +45,6 @@ public class ClusterCreationEvaluator implements Runnable {
 
     @Inject
     private TlsSecurityService tlsSecurityService;
-
-    @Inject
-    private AlertService alertService;
 
     @Inject
     private HistoryService historyService;
@@ -86,8 +82,7 @@ public class ClusterCreationEvaluator implements Runnable {
                 ambariHealthCheck(cluster.getUser(), resolvedAmbari);
                 LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
                 cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
-                alertService.addPrometheusAlertsToConsul(cluster);
-                History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0,  cluster);
+                History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
                 notificationSender.send(history);
             }
         } else {
