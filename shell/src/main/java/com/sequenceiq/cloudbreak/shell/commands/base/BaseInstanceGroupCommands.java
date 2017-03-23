@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.shell.commands.common;
+package com.sequenceiq.cloudbreak.shell.commands.base;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -12,6 +12,7 @@ import com.google.common.primitives.Longs;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
+import com.sequenceiq.cloudbreak.shell.commands.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
@@ -22,11 +23,11 @@ import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
-public class InstanceGroupCommands implements CommandMarker {
+public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCommands {
 
     private ShellContext shellContext;
 
-    public InstanceGroupCommands(ShellContext shellContext) {
+    public BaseInstanceGroupCommands(ShellContext shellContext) {
         this.shellContext = shellContext;
     }
 
@@ -49,17 +50,15 @@ public class InstanceGroupCommands implements CommandMarker {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
-    @CliCommand(value = { "instancegroup configure --AWS", "instancegroup configure --GCP", "instancegroup configure --OPENSTACK"},
-            help = "Configure instance groups")
-    public String create(
-            @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
-            @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
-            @CliOption(key = "ambariServer", mandatory = true, help = "Ambari server will be installed here if true") boolean ambariServer,
-            @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
-            @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
-            @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
-            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName,
-            Map<String, Object> parameters) throws Exception {
+    @Override
+    public boolean createInstanceGroupAvailable(String platform) {
+        return shellContext.isCredentialAvailable() && shellContext.getActiveCloudPlatform().equals(platform);
+    }
+
+    @Override
+    public String create(InstanceGroup instanceGroup, Integer nodeCount, boolean ambariServer, InstanceGroupTemplateId instanceGroupTemplateId,
+            InstanceGroupTemplateName instanceGroupTemplateName, SecurityGroupId instanceGroupSecurityGroupId,
+            SecurityGroupName instanceGroupSecurityGroupName, Map<String, Object> parameters) {
         try {
             String templateId;
             if (instanceGroupTemplateId != null) {
@@ -142,5 +141,4 @@ public class InstanceGroupCommands implements CommandMarker {
             return shellContext.outputTransformer().render(shellContext.getInstanceGroups(), "instanceGroup");
         }
     }
-
 }

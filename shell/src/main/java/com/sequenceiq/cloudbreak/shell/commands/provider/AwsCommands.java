@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
+import com.sequenceiq.cloudbreak.shell.commands.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
 import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
 import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
@@ -24,7 +25,12 @@ import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
 import com.sequenceiq.cloudbreak.shell.completion.AwsInstanceType;
 import com.sequenceiq.cloudbreak.shell.completion.AwsOrchestratorType;
 import com.sequenceiq.cloudbreak.shell.completion.AwsVolumeType;
+import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
+import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
+import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
 import com.sequenceiq.cloudbreak.shell.completion.PlatformVariant;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupId;
+import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupName;
 import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
@@ -49,13 +55,16 @@ public class AwsCommands implements CommandMarker {
 
     private StackCommands stackCommands;
 
+    private InstanceGroupCommands baseInstanceGroupCommands;
+
     public AwsCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
             NetworkCommands baseNetworkCommands,
             SecurityGroupCommands baseSecurityGroupCommands,
             TemplateCommands baseTemplateCommands,
             PlatformCommands basePlatformCommands,
-            StackCommands stackCommands) {
+            StackCommands stackCommands,
+            InstanceGroupCommands baseInstanceGroupCommands) {
         this.baseCredentialCommands = baseCredentialCommands;
         this.baseNetworkCommands = baseNetworkCommands;
         this.baseSecurityGroupCommands = baseSecurityGroupCommands;
@@ -63,6 +72,7 @@ public class AwsCommands implements CommandMarker {
         this.baseTemplateCommands = baseTemplateCommands;
         this.basePlatformCommands = basePlatformCommands;
         this.stackCommands = stackCommands;
+        this.baseInstanceGroupCommands = baseInstanceGroupCommands;
     }
 
     @CliAvailabilityIndicator(value = "stack create --AWS")
@@ -93,6 +103,11 @@ public class AwsCommands implements CommandMarker {
     @CliAvailabilityIndicator(value = {"credential create --AWS", "template create --EC2"})
     public boolean createCredentialAvailable() {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
+    }
+
+    @CliAvailabilityIndicator(value = "instancegroup configure --AWS")
+    public boolean configureInstanceGroupAvailable() {
+        return baseInstanceGroupCommands.createInstanceGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
     @CliCommand(value = "credential create --AWS", help = "Create a new AWS credential")
@@ -249,6 +264,23 @@ public class AwsCommands implements CommandMarker {
         }
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volType,
                 publicInAccount, description, params, platformId, PLATFORM);
+    }
+
+    @CliCommand(value = "instancegroup configure --AWS", help = "Configure instance groups")
+    public String createInstanceGroup(
+            @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
+            @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
+            @CliOption(key = "ambariServer", mandatory = true, help = "Ambari server will be installed here if true") boolean ambariServer,
+            @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
+            @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
+            @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
+            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName)
+            throws Exception {
+
+        Map<String, Object> parameters = new HashMap<>();
+
+        return baseInstanceGroupCommands.create(instanceGroup, nodeCount, ambariServer, instanceGroupTemplateId, instanceGroupTemplateName,
+                instanceGroupSecurityGroupId, instanceGroupSecurityGroupName, parameters);
     }
 
     @CliCommand(value = "platform create --AWS", help = "Create a new AWS platform configuration")

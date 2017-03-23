@@ -20,7 +20,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseInstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroup;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateId;
 import com.sequenceiq.cloudbreak.shell.completion.InstanceGroupTemplateName;
@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
-public class InstanceGroupCommandsTest {
+public class BaseInstanceGroupCommandsTest {
 
     private static final Integer DUMMY_NODE_COUNT = 1;
 
@@ -49,7 +49,7 @@ public class InstanceGroupCommandsTest {
     private Map<String, Object> params = new HashMap<>();
 
     @InjectMocks
-    private InstanceGroupCommands underTest;
+    private BaseInstanceGroupCommands underTest;
 
     @Mock
     private CloudbreakClient cloudbreakClient;
@@ -67,7 +67,7 @@ public class InstanceGroupCommandsTest {
 
     @Before
     public void setUp() throws Exception {
-        underTest = new InstanceGroupCommands(mockContext);
+        underTest = new BaseInstanceGroupCommands(mockContext);
         hostGroup = new InstanceGroup("master");
         MockitoAnnotations.initMocks(this);
         dummyResult = new TemplateResponse();

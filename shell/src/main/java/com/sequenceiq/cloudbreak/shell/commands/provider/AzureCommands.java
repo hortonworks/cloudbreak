@@ -16,12 +16,12 @@ import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
+import com.sequenceiq.cloudbreak.shell.commands.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
 import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
 import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
-import com.sequenceiq.cloudbreak.shell.commands.common.InstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.completion.ArmOrchestratorType;
 import com.sequenceiq.cloudbreak.shell.completion.AvailabilitySetName;
 import com.sequenceiq.cloudbreak.shell.completion.AzureInstanceType;
@@ -61,7 +61,7 @@ public class AzureCommands implements CommandMarker {
 
     private StackCommands stackCommands;
 
-    private InstanceGroupCommands instanceGroupCommands;
+    private InstanceGroupCommands baseInstanceGroupCommands;
 
     public AzureCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
@@ -70,7 +70,7 @@ public class AzureCommands implements CommandMarker {
             TemplateCommands baseTemplateCommands,
             PlatformCommands basePlatformCommands,
             StackCommands stackCommands,
-            InstanceGroupCommands instanceGroupCommands) {
+            InstanceGroupCommands baseInstanceGroupCommands) {
         this.baseCredentialCommands = baseCredentialCommands;
         this.baseNetworkCommands = baseNetworkCommands;
         this.baseSecurityGroupCommands = baseSecurityGroupCommands;
@@ -78,7 +78,7 @@ public class AzureCommands implements CommandMarker {
         this.baseTemplateCommands = baseTemplateCommands;
         this.basePlatformCommands = basePlatformCommands;
         this.stackCommands = stackCommands;
-        this.instanceGroupCommands = instanceGroupCommands;
+        this.baseInstanceGroupCommands = baseInstanceGroupCommands;
     }
 
     @CliAvailabilityIndicator(value = "stack create --AZURE")
@@ -113,7 +113,17 @@ public class AzureCommands implements CommandMarker {
 
     @CliAvailabilityIndicator(value = "instancegroup configure --AZURE")
     public boolean configureInstanceGroupAvailable() {
-        return instanceGroupCommands.createAvailable() && shellContext.isPlatformAvailable(PLATFORM);
+        return baseInstanceGroupCommands.createInstanceGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
+    }
+
+    @CliAvailabilityIndicator(value = {"availabilityset list", "availabilityset create"})
+    public boolean configureAvailabilitySetAvailable() {
+        return shellContext.isCredentialAvailable() && shellContext.isPlatformAvailable(PLATFORM) && shellContext.getActiveCloudPlatform().equals(PLATFORM);
+    }
+
+    @CliAvailabilityIndicator(value = {"availabilityset delete"})
+    public boolean configureAvailabilitySetModificationAvailable() {
+        return !shellContext.getAzureAvailabilitySets().isEmpty();
     }
 
     @CliCommand(value = "credential create --AZURE", help = "Create a new Azure credential")
@@ -267,7 +277,7 @@ public class AzureCommands implements CommandMarker {
         }
     }
 
-    @CliCommand(value = "availabilityset", help = "Create an Azure availability set configuration")
+    @CliCommand(value = "availabilityset create", help = "Create an Azure availability set configuration")
     public String createAvailabilitySet(
             @CliOption(key = "name", mandatory = true, help = "Name of the availability set") String name,
             @CliOption(key = "platformFaultDomainCount", mandatory = true, help = "Number of fault domains")
@@ -289,8 +299,33 @@ public class AzureCommands implements CommandMarker {
         }
     }
 
+    @CliCommand(value = "availabilityset list", help = "List the Azure availability sets configured")
+    public String listAvailabilitySet() {
+        try {
+            return shellContext.outputTransformer().render(shellContext.getAzureAvailabilitySets(), "Availability sets");
+        } catch (Exception e) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(e);
+        }
+    }
+
+    @CliCommand(value = "availabilityset delete", help = "Create an Azure availability set configuration")
+    public String deleteAvailabilitySet(
+            @CliOption(key = "name", mandatory = true, help = "Name of the availability set") String name) {
+        try {
+            AvailabilitySetEntry as = shellContext.getAzureAvailabilitySets().get(name);
+            if (as != null) {
+                shellContext.getAzureAvailabilitySets().remove(name);
+                return String.format("Azure availability set deleted with %s name", name);
+            } else {
+                return String.format("No availability set found with %s name", name);
+            }
+        } catch (Exception e) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(e);
+        }
+    }
+
     @CliCommand(value = "instancegroup configure --AZURE", help = "Configure instance groups")
-    public String create(
+    public String createInstanceGroup(
             @CliOption(key = "instanceGroup", mandatory = true, help = "Name of the instanceGroup") InstanceGroup instanceGroup,
             @CliOption(key = "nodecount", mandatory = true, help = "Nodecount for instanceGroup") Integer nodeCount,
             @CliOption(key = "ambariServer", mandatory = true, help = "Ambari server will be installed here if true") boolean ambariServer,
@@ -323,12 +358,16 @@ public class AzureCommands implements CommandMarker {
             }
 
             AvailabilitySetEntry as = shellContext.getAzureAvailabilitySets().get(availabilitySetName.getName());
+            if (as == null) {
+                throw shellContext.exceptionTransformer()
+                        .transformToRuntimeException("There is no availability set defined with the name " + availabilitySetName.getName());
+            }
             Map<String, Object> map = new HashMap<String, Object>();
             map.put("name", as.getName());
             map.put("faultDomainCount", as.getFaultDomainCount().number());
             parameters.put("availabilitySet", map);
         }
-        return instanceGroupCommands.create(instanceGroup, nodeCount, ambariServer, instanceGroupTemplateId, instanceGroupTemplateName,
+        return baseInstanceGroupCommands.create(instanceGroup, nodeCount, ambariServer, instanceGroupTemplateId, instanceGroupTemplateName,
                 instanceGroupSecurityGroupId, instanceGroupSecurityGroupName, parameters);
     }
 
