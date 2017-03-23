@@ -153,20 +153,20 @@ public class AlertService {
         try {
             return findMetricAlertByCluster(clusterId, alertId);
         } catch (Exception e) {
-            LOGGER.info("Could not found Metric alert with id: '{}', for cluster: '{}'!", clusterId, alertId);
+            LOGGER.info("Could not found Metric alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
         try {
             return findTimeAlertByCluster(clusterId, alertId);
         } catch (Exception e) {
-            LOGGER.info("Could not found Time alert with id: '{}', for cluster: '{}'!", clusterId, alertId);
+            LOGGER.info("Could not found Time alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
         try {
             return findPrometheusAlertByCluster(clusterId, alertId);
         } catch (Exception e) {
-            LOGGER.info("Could not found Prometheus alert with id: '{}', for cluster: '{}'!", clusterId, alertId);
+            LOGGER.info("Could not found Prometheus alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
 
-        throw new NotFoundException(String.format("Could not found alert with id: '%s', for cluster: '%s'!", clusterId, alertId));
+        throw new NotFoundException(String.format("Could not found alert with id: '%s', for cluster: '%s'!", alertId, clusterId));
     }
 
     public void save(BaseAlert alert) {
