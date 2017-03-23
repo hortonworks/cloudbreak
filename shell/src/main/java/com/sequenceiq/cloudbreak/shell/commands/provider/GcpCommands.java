@@ -315,10 +315,13 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         Map<String, String> params = new HashMap<>();
         if (availabilityZone == null) {
             Collection<String> availabilityZonesByRegion = shellContext.getAvailabilityZonesByRegion(shellContext.getActiveCloudPlatform(), region.getName());
+            if (availabilityZonesByRegion == null || availabilityZonesByRegion.isEmpty()) {
+                throw shellContext.exceptionTransformer().transformToRuntimeException(String.format("Availability zone for %s not found", region.getName()));
+            }
             availabilityZone = new StackAvailabilityZone(availabilityZonesByRegion.iterator().next());
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
