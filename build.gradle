@@ -234,7 +234,7 @@ subprojects {
   }
 
   checkstyle {
-    toolVersion = "6.0"
+    toolVersion = "7.6"
   }
 
   checkstyleMain {

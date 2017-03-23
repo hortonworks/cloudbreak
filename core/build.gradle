@@ -20,7 +20,7 @@ plugins {
   id "com.github.jk1.dependency-license-report" version "0.3.4"
 }
 
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
