@@ -17,6 +17,7 @@ import (
 
 var BASE_EXPOSED_SERVICES = []string{"AMBARI", "AMBARIUI", "ZEPPELINWS", "ZEPPELINUI"}
 var HIVE_EXPOSED_SERVICES = []string{"HIVE"}
+var RANGER_EXPOSED_SERVICES = []string{"RANGER", "RANGERUI"}
 var CLUSTER_MANAGER_EXPOSED_SERVICES = []string{"HDFSUI", "YARNUI", "JOBHISTORYUI", "SPARKHISTORYUI"}
 
 func (c *Cloudbreak) GetClusterByName(name string) *models_cloudbreak.StackResponse {
@@ -188,6 +189,15 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
+	dataLake := false
+	if blueprint.BlueprintName != nil && *blueprint.BlueprintName == "hdp26-shared-services" {
+		dataLake = true
+		if skeleton.Tags == nil {
+			skeleton.Tags = map[string]string{"type": "datalake"}
+		} else {
+			skeleton.Tags["type"] = "datalake"
+		}
+	}
 
 	// create stack
 
@@ -375,6 +385,10 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		if skeleton.ClusterComponentAccess {
 			exposedServices = append(exposedServices, CLUSTER_MANAGER_EXPOSED_SERVICES...)
+		}
+
+		if dataLake {
+			exposedServices = append(exposedServices, RANGER_EXPOSED_SERVICES...)
 		}
 
 		enableKnoxGateway := true
