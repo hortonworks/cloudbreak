@@ -42,10 +42,6 @@ base:
     - match: grain
     - pre-recipes
 
-  'G@recipes:post and G@roles:knox_gateway':
-    - match: compound
-    - ldap
-
   'recipes:post':
     - match: grain
     - post-recipes
