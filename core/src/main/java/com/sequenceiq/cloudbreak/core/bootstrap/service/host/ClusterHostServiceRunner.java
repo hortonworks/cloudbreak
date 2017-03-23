@@ -124,10 +124,7 @@ public class ClusterHostServiceRunner {
             }
             AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
             servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
-            LdapConfig ldapConfig = cluster.getLdapConfig();
-            if (ldapConfig != null && blueprintUtils.containsComponent(cluster.getBlueprint(), "KNOX_GATEWAY")) {
-                servicePillar.put("ldap", new SaltPillarProperties("/ldap/init.sls", singletonMap("ldap", ldapConfig)));
-            }
+            saveLdapPillar(cluster.getLdapConfig(), servicePillar);
             saveHDPPillar(cluster.getId(), servicePillar);
             Map<String, Object> credentials = new HashMap<>();
             credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
@@ -165,6 +162,12 @@ public class ClusterHostServiceRunner {
         Map<String, List<String>> serviceLocation = componentLocator.getComponentLocation(cluster, new HashSet<>(ExposedService.getAllServiceName()));
         gateway.put("location", serviceLocation);
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) throws IOException {
+        if (ldapConfig != null) {
+            servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapConfig)));
+        }
     }
 
     private void saveHDPPillar(Long clusterId, Map<String, SaltPillarProperties> servicePillar) {

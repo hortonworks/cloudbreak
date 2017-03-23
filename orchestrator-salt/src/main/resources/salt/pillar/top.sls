@@ -11,6 +11,7 @@ base:
   'roles:gateway':
     - match: grain
     - gateway.init
+    - gateway.ldap
 
   'roles:kerberos_server':
     - match: grain

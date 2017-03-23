@@ -52,6 +52,8 @@ knox-create-cert:
 
 {% if gateway.is_systemd %}
 
+{% if gateway.is_local_ldap %}
+
 /etc/systemd/system/knox-ldap.service:
   file.managed:
     - source: salt://gateway/systemd/knox-ldap.service
@@ -67,6 +69,7 @@ start-knox-ldap:
     - watch:
        - file: /etc/systemd/system/knox-ldap.service
 
+{% endif %}
 
 /etc/systemd/system/knox-gateway.service:
   file.managed:
@@ -87,6 +90,7 @@ start-knox-gateway:
 {% else %}
 
 # Upstart case
+{% if gateway.is_local_ldap %}
 
 /usr/hdp/current/knox-server/bin/ldap.sh:
   file.managed:
@@ -101,6 +105,8 @@ start-knox-ldap:
   service.running:
     - enable: True
     - name: knox-ldap
+
+{% endif %}
 
 /usr/hdp/current/knox-server/bin/gateway.sh:
   file.managed:
