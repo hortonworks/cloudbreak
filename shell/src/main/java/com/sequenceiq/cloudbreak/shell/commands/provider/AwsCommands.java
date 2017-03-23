@@ -134,7 +134,7 @@ public class AwsCommands implements CommandMarker {
             parameters.put("accessKey", accessKey);
             parameters.put("secretKey", secretKey);
         } else {
-            return "Please specify the roleArn or both the access and secret key";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Please specify the roleArn or both the access and secret key");
         }
         if (!StringUtils.isEmpty(keyPairName)) {
             parameters.put("existingKeyPairName", keyPairName);
@@ -252,7 +252,7 @@ public class AwsCommands implements CommandMarker {
                 joiner.add("--volumeSize");
             }
 
-            return "You should specify option (" + joiner.toString() + ")";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("You should specify option (" + joiner.toString() + ")");
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -330,7 +330,8 @@ public class AwsCommands implements CommandMarker {
             params.put("instanceProfile", instanceProfile);
         }
         if (instanceProfile != null && !InstanceProfileStrategy.USE_EXISTING.equals(instanceProfileStrategy)) {
-            return "Please specify the role for instanceProfile if you are using 'USE_EXISTING' profile type.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException(
+                    "Please specify the role for instanceProfile if you are using 'USE_EXISTING' profile type");
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,

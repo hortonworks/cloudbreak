@@ -317,7 +317,7 @@ public class AzureCommands implements CommandMarker {
                 shellContext.getAzureAvailabilitySets().remove(name);
                 return String.format("Azure availability set deleted with %s name", name);
             } else {
-                return String.format("No availability set found with %s name", name);
+                throw shellContext.exceptionTransformer().transformToRuntimeException(String.format("No availability set found with %s name", name));
             }
         } catch (Exception e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);

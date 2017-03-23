@@ -129,7 +129,7 @@ public class LdapConfigCommands implements BaseCommands {
             } else if (name != null) {
                 response = shellContext.cloudbreakClient().ldapConfigEndpoint().getPublic(name);
             } else {
-                return "Ldap config not specified.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("Ldap config not specified");
             }
 
             Map<String, String> map = new HashMap<>();
@@ -181,7 +181,7 @@ public class LdapConfigCommands implements BaseCommands {
                 shellContext.cloudbreakClient().ldapConfigEndpoint().deletePublic(name);
                 return String.format("Ldap config deleted with %s name", name);
             }
-            return "Ldap config not specified (select Ldap config with --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Ldap config not specified (select Ldap config with --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

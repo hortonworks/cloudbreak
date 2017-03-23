@@ -15,7 +15,7 @@ public class TopologyUtil {
                     if (t.getCloudPlatform().equals(platform)) {
                         return;
                     } else {
-                        throw new RuntimeException("The selected platform belongs to a different cloudplatform.");
+                        throw new RuntimeException("The selected platform belongs to a different cloudplatform");
                     }
                 }
             }

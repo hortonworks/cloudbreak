@@ -7,10 +7,12 @@ import static org.mockito.BDDMockito.verify;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.eq;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -28,6 +30,7 @@ import com.sequenceiq.cloudbreak.shell.completion.SecurityGroupId;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class BaseInstanceGroupCommandsTest {
@@ -63,7 +66,12 @@ public class BaseInstanceGroupCommandsTest {
     @Mock
     private OutputTransformer outputTransformer;
 
+    @Mock
+    private ExceptionTransformer exceptionTransformer;
+
     private TemplateResponse dummyResult;
+
+    private RuntimeException expectedException = new RuntimeException("something not found");
 
     @Before
     public void setUp() throws Exception {
@@ -77,6 +85,9 @@ public class BaseInstanceGroupCommandsTest {
         given(mockContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(anyString())).willThrow(expectedException);
+        given(mockContext.exceptionTransformer()).willReturn(exceptionTransformer);
     }
 
     @Test
@@ -103,7 +114,13 @@ public class BaseInstanceGroupCommandsTest {
     @Test
     public void testConfigureByTemplateNameWhenTemplateNotFound() throws Exception {
         given(mockClient.getPublic(DUMMY_TEMPLATE)).willReturn(null);
-        underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null, params);
+        RuntimeException ext = null;
+        try {
+            underTest.create(hostGroup, DUMMY_NODE_COUNT, false, null, dummyTemplateName, dummySecurityGroupId, null, params);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(mockClient, times(1)).getPublic(anyString());
         verify(mockContext, times(0)).putInstanceGroup(anyString(), any(InstanceGroupEntry.class));
     }

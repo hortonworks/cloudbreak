@@ -65,7 +65,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
                             .render(outPutType, shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
                 }
             }
-            return "No template specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No template specified");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -123,7 +123,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
                 shellContext.cloudbreakClient().templateEndpoint().deletePublic(name);
                 return String.format("Template has been deleted, name: %s", name);
             }
-            return "No template specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No template specified");
         } catch (Exception ex) {
             return ex.toString();
         }

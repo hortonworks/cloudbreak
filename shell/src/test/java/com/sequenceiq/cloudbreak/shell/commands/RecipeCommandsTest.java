@@ -8,10 +8,12 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 
 import java.io.File;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -58,6 +60,8 @@ public class RecipeCommandsTest {
 
     private RecipeResponse dummyResult;
 
+    private RuntimeException expectedException = new RuntimeException("something not found");
+
     @Before
     public void setUp() throws Exception {
         underTest = new RecipeCommands(mockContext);
@@ -72,7 +76,9 @@ public class RecipeCommandsTest {
         given(recipeEndpoint.get(RECIPE_ID)).willReturn(dummyResult);
         given(recipeEndpoint.getPublic(RECIPE_NAME)).willReturn(dummyResult);
         given(mockContext.cloudbreakClient()).willReturn(cloudbreakClient);
-        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willThrow(new RuntimeException());
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(anyString())).willThrow(expectedException);
+        given(mockContext.exceptionTransformer()).willReturn(exceptionTransformer);
         given(mockContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
@@ -94,7 +100,13 @@ public class RecipeCommandsTest {
 
     @Test
     public void testShowRecipeWithoutIdAndName() throws Exception {
-        underTest.show(null, null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.show(null, null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(recipeEndpoint, times(0)).get(anyLong());
     }
 
@@ -122,7 +134,13 @@ public class RecipeCommandsTest {
 
     @Test
     public void testDeleteRecipeWithoutIdAndName() throws Exception {
-        underTest.delete(null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.delete(null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(recipeEndpoint, times(0)).deletePublic(anyString());
         verify(recipeEndpoint, times(0)).delete(anyLong());
     }
@@ -145,19 +163,37 @@ public class RecipeCommandsTest {
 
     @Test
     public void testStoreRecipeMissingScriptFiles() throws Exception {
-        underTest.createRecipe("name", RecipeType.PRE, null, null, null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.createRecipe("name", RecipeType.PRE, null, null, null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPreScriptFile() throws Exception {
-        underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 
     @Test
     public void testStoreRecipeNotExistsPostScriptFile() throws Exception {
-        underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
+        RuntimeException ext = null;
+        try {
+            underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
+        } catch (RuntimeException e) {
+            ext = e;
+        }
+        Assert.assertEquals("Wrong error occurred", expectedException, ext);
         verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
     }
 }

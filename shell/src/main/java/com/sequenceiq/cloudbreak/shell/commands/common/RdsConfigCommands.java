@@ -116,7 +116,7 @@ public class RdsConfigCommands implements BaseCommands {
             } else if (name != null) {
                 response = shellContext.cloudbreakClient().rdsConfigEndpoint().getPublic(name);
             } else {
-                return "RDS config not specified.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("RDS config not specified");
             }
             Map<String, String> map = new HashMap<>();
             map.put("id", response.getId().toString());
@@ -162,7 +162,7 @@ public class RdsConfigCommands implements BaseCommands {
                 shellContext.cloudbreakClient().rdsConfigEndpoint().deletePublic(name);
                 return String.format("RDS config deleted with %s name", name);
             }
-            return "RDS config not specified (select RDS config with --id or --name)";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("RDS config not specified (select RDS config with --id or --name)");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

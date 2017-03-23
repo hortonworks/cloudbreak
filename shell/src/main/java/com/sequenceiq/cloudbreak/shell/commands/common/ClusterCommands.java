@@ -250,8 +250,9 @@ public class ClusterCommands implements BaseCommands {
             }
             if (shellContext.getRdsConfigId() != null) {
                 if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
-                    return "--connectionURL, --databaseType, --connectionUserName, --connectionPassword switches "
-                            + "cannot be used if an RDS config is already selected with 'rdsconfig select'";
+                    throw shellContext.exceptionTransformer().transformToRuntimeException(
+                            "--connectionURL, --databaseType, --connectionUserName, --connectionPassword switches "
+                            + "cannot be used if an RDS config is already selected with 'rdsconfig select'");
                 }
                 Set<Long> rdsConfigs = new HashSet<>();
                 rdsConfigs.add(Long.valueOf(shellContext.getRdsConfigId()));
@@ -265,7 +266,7 @@ public class ClusterCommands implements BaseCommands {
 
             if (ambariVersion != null || ambariRepoBaseURL != null || ambariRepoGpgKey != null) {
                 if (ambariVersion == null || ambariRepoBaseURL == null || ambariRepoGpgKey == null) {
-                    return "ambariVersion, ambariRepoBaseURL and ambariRepoGpgKey must be set.";
+                    throw shellContext.exceptionTransformer().transformToRuntimeException("ambariVersion, ambariRepoBaseURL and ambariRepoGpgKey must be set");
                 }
                 AmbariRepoDetailsJson ambariRepoDetailsJson = new AmbariRepoDetailsJson();
                 ambariRepoDetailsJson.setVersion(ambariVersion);
@@ -307,7 +308,8 @@ public class ClusterCommands implements BaseCommands {
                 rdsConfigJsons.add(rdsConfigRequest);
                 clusterRequest.setRdsConfigJsons(rdsConfigJsons);
             } else if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
-                return "connectionURL, databaseType, connectionUserName, connectionPassword and hdpVersion must be all set.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException(
+                        "connectionURL, databaseType, connectionUserName, connectionPassword and hdpVersion must be all set");
             }
 
             String stackId;
@@ -478,7 +480,7 @@ public class ClusterCommands implements BaseCommands {
             return shellContext.outputTransformer().render(outPutType,
                     shellContext.responseTransformer().transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
         } catch (IndexOutOfBoundsException ex) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException("There was no cluster for this account.");
+            throw shellContext.exceptionTransformer().transformToRuntimeException("There was no cluster for this account");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -519,7 +521,7 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment < 1) {
-                return "The adjustment value in case of node addition should be at least 1.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node addition should be at least 1");
             }
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -558,7 +560,7 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
             if (adjustment > -1) {
-                return "The adjustment value in case of node removal should be negative.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node removal should be negative");
             }
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
@@ -627,7 +629,7 @@ public class ClusterCommands implements BaseCommands {
         request.setGpgKeyUrl(gpgKeyUrl);
         String stackId = shellContext.getStackId();
         if (stackId == null) {
-            return "No stack selected";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No stack selected");
         }
         cloudbreakShellUtil.checkResponse("ambariUpgrade", shellContext.cloudbreakClient().clusterEndpoint().upgradeCluster(Long.valueOf(stackId), request));
         return "Upgrade request successfully sent";

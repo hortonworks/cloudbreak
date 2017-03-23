@@ -25,7 +25,7 @@ public class VersionedApplication {
                     System.out.println(readVersionFromClasspath("application.properties", true));
                 }
             } catch (IOException ex) {
-                System.out.println("The application.properties file not found version is undefined.");
+                System.out.println("The application.properties file not found version is undefined");
             }
             return true;
         }

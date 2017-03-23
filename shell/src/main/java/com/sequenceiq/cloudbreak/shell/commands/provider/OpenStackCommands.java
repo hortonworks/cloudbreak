@@ -147,7 +147,7 @@ public class OpenStackCommands implements CommandMarker {
             keyStoneVersion = "cb-keystone-v3";
         }
         if (selector == null || keyStoneVersion == null) {
-            return "Selector not found for specified parameters.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Selector not found for specified parameters");
         }
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userName", userName);
@@ -258,14 +258,14 @@ public class OpenStackCommands implements CommandMarker {
         }
 
         if (volumeCount < 0) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException("Count of volumes could not be smaller than 0.");
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Count of volumes could not be smaller than 0");
         }
 
         if (volumeCount > 0) {
             if (volumeSize == null) {
                 throw shellContext.exceptionTransformer().transformToRuntimeException("volumeSize parameter must be specified");
             } else if (volumeSize < TEN) {
-                throw shellContext.exceptionTransformer().transformToRuntimeException("Size of volumes could not be smaller than 10 Gb.");
+                throw shellContext.exceptionTransformer().transformToRuntimeException("Size of volumes could not be smaller than 10 Gb");
             }
         }
         return baseTemplateCommands.create(name, instanceType, volumeCount, volumeSize, "HDD", publicInAccount, description, parameters, platformId, PLATFORM);

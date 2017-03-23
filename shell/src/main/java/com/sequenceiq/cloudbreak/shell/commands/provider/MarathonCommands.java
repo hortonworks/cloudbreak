@@ -178,7 +178,7 @@ public class MarathonCommands implements CommandMarker {
                 shellContext.setConstraints(shellContext.cloudbreakClient().constraintTemplateEndpoint().getPublics());
                 return String.format("Marathon constraint has been deleted, name: %s", name);
             }
-            return "No constraint specified.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No constraint specified");
         } catch (Exception ex) {
             return ex.toString();
         }
@@ -193,7 +193,7 @@ public class MarathonCommands implements CommandMarker {
             if (aPublic != null) {
                 return shellContext.outputTransformer().render(shellContext.responseTransformer().transformObjectToStringMap(aPublic), "FIELD", "VALUE");
             }
-            return "No constraint was found.";
+            throw shellContext.exceptionTransformer().transformToRuntimeException("No constraint was found");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
@@ -232,7 +232,7 @@ public class MarathonCommands implements CommandMarker {
                 }
                 return shellContext.outputTransformer().render(shellContext.getMarathonHostGroups(), "hostgroup");
             } else {
-                return "Constraint was not found.";
+                throw shellContext.exceptionTransformer().transformToRuntimeException("Constraint was not found");
             }
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
