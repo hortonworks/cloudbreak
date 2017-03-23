@@ -63,12 +63,7 @@
                         <label for="cloudProvider">{{msg.usage_events_form_provider_label}}</label>
 
                         <div>
-                            <select class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.provider" ng-change="selectRegionsByProvider()">
-                                <option>{{msg.usage_events_form_all_label}}</option>
-                                <option value="AWS">{{msg.usage_events_form_provider_amazon_label}}</option>
-                                <option value="AZURE">{{msg.usage_events_form_provider_microsoft_label}}</option>
-                                <option value="GCP">{{msg.usage_events_form_provider_google_label}}</option>
-                                <option value="OPENSTACK">{{msg.usage_events_form_provider_openstack_label}}</option>
+                            <select ng-options="provider.name as provider.value for provider in filteredProviders" class="form-control input-sm" id="cloudProvider" ng-model="usageFilter.provider" ng-change="selectRegionsByProvider()">
                             </select>
                         </div>
                     </div>

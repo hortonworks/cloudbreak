@@ -5,10 +5,27 @@ var log = log4javascript.getLogger("usageController-logger");
 angular.module('uluwatuControllers').controller('usageController', ['$scope', '$rootScope', '$filter', 'UserUsages', 'AccountUsages',
     function($scope, $rootScope, $filter, UserUsages, AccountUsages) {
         $scope.regions = [];
+        var providers = [ { name: "AWS", value: $rootScope.msg.usage_events_form_provider_amazon_label },
+                          { name: "AZURE", value: $rootScope.msg.usage_events_form_provider_microsoft_label },
+                          { name: "GCP", value: $rootScope.msg.usage_events_form_provider_google_label },
+                          { name: "OPENSTACK", value: $rootScope.msg.usage_events_form_provider_openstack_label } ];
+
+        function isAllProviderVisible() {
+            return $scope.isVisible("AWS") && $scope.isVisible("AZURE") && $scope.isVisible("GCP") && $scope.isVisible("OPENSTACK");
+        }
+
+        if (isAllProviderVisible()) {
+            $scope.filteredProviders = providers;
+            $scope.filteredProviders.unshift({name: "all", value: $rootScope.msg.usage_events_form_all_label});
+        } else {
+            $scope.filteredProviders = providers.filter(function(provider) {
+                return $scope.isVisible(provider.name);
+            });
+        }
 
         $scope.clearFilter = function() {
             initFilter();
-        }
+        };
 
         $scope.loadUsages = function() {
             initSums();
@@ -242,7 +259,7 @@ angular.module('uluwatuControllers').controller('usageController', ['$scope', '$
                 startDate: floorToDay(startDate),
                 endDate: floorToDay(endDate),
                 user: "all",
-                provider: "all",
+                provider: $scope.filteredProviders[0].name,
                 region: "all"
             };
             $scope.selectRegionsByProvider();
