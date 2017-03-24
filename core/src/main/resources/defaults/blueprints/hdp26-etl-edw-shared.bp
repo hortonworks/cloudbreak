@@ -1,52 +1,56 @@
 {
   "inputs": [
     {
-      "name":"LDAP_URL",
-      "referenceConfiguration":"hive.server2.authentication.ldap.url"
+      "name": "LDAP_URL",
+      "referenceConfiguration": "hive.server2.authentication.ldap.url"
     },
     {
-      "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
+      "name": "LDAP_DOMAIN",
+      "referenceConfiguration": "hive.server2.authentication.ldap.Domain"
     },
     {
-      "name":"LDAP_BIND_DN",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
+      "name": "LDAP_BIND_DN",
+      "referenceConfiguration": "hadoop.security.group.mapping.ldap.bind.user"
     },
     {
-      "name":"LDAP_BIND_PASSWORD",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
+      "name": "LDAP_BIND_PASSWORD",
+      "referenceConfiguration": "hadoop.security.group.mapping.ldap.bind.password"
     },
     {
-      "name":"LDAP_GROUP_SEARCH_BASE",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
+      "name": "LDAP_SYNC_SEARCH_BASE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
     },
     {
-      "name":"RANGER_REST_ADDRESS",
-      "referenceConfiguration":"policymgr_external_url"
+      "name": "LDAP_GROUP_SEARCH_BASE",
+      "referenceConfiguration": "hadoop.security.group.mapping.ldap.base"
     },
     {
-      "name":"REMOTE_CLUSTER_NAME",
-      "referenceConfiguration":"cluster_name"
+      "name": "RANGER_REST_ADDRESS",
+      "referenceConfiguration": "policymgr_external_url"
     },
     {
-      "name":"SOLR_ZOOKEPERS_URL",
-      "referenceConfiguration":"ranger.audit.solr.zookeepers"
+      "name": "REMOTE_CLUSTER_NAME",
+      "referenceConfiguration": "cluster_name"
     },
     {
-      "name":"ADMIN_USERNAME",
-      "referenceConfiguration":"admin_username"
+      "name": "SOLR_ZOOKEPERS_URL",
+      "referenceConfiguration": "ranger.audit.solr.zookeepers"
     },
     {
-      "name":"RANGER_ADMIN_USERNAME",
-      "referenceConfiguration":"ranger_admin_username"
+      "name": "ADMIN_USERNAME",
+      "referenceConfiguration": "admin_username"
     },
     {
-      "name":"RANGER_ADMIN_PASSWORD",
-      "referenceConfiguration":"ranger_admin_password"
+      "name": "RANGER_ADMIN_USERNAME",
+      "referenceConfiguration": "ranger_admin_username"
     },
     {
-      "name":"S3_BUCKET",
-      "referenceConfiguration":"s3.bucket"
+      "name": "RANGER_ADMIN_PASSWORD",
+      "referenceConfiguration": "ranger_admin_password"
+    },
+    {
+      "name": "S3_BUCKET",
+      "referenceConfiguration": "s3.bucket"
     }
   ],
   "blueprint": {
@@ -59,11 +63,11 @@
       {
         "core-site": {
           "fs.trash.interval": "4320",
-          "hadoop.security.group.mapping":"org.apache.hadoop.security.LdapGroupsMapping",
-          "hadoop.security.group.mapping.ldap.url":"{{ LDAP_URL }}",
-          "hadoop.security.group.mapping.ldap.bind.user":"{{ LDAP_BIND_DN }}",
-          "hadoop.security.group.mapping.ldap.bind.password":"{{ LDAP_BIND_PASSWORD }}",
-          "hadoop.security.group.mapping.ldap.base":"{{ LDAP_GROUP_SEARCH_BASE }}"
+          "hadoop.security.group.mapping": "org.apache.hadoop.security.LdapGroupsMapping",
+          "hadoop.security.group.mapping.ldap.url": "{{ LDAP_URL }}",
+          "hadoop.security.group.mapping.ldap.bind.user": "{{ LDAP_BIND_DN }}",
+          "hadoop.security.group.mapping.ldap.bind.password": "{{ LDAP_BIND_PASSWORD }}",
+          "hadoop.security.group.mapping.ldap.base": "{{ LDAP_GROUP_SEARCH_BASE }}"
         }
       },
       {
@@ -84,10 +88,11 @@
           "hive.merge.mapfiles": "true",
           "hive.server2.tez.initialize.default.sessions": "true",
           "hive.server2.transport.mode": "http",
-          "hive.server2.authentication.ldap.url":"{{ LDAP_URL }}",
-          "hive.server2.authentication.ldap.Domain":"{{ LDAP_DOMAIN }}",
-          "hive.server2.authentication":"LDAP",
-          "hive.metastore.warehouse.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
+          "hive.server2.authentication.ldap.url": "{{ LDAP_URL }}",
+          "hive.server2.authentication.ldap.Domain": "{{ LDAP_DOMAIN }}",
+          "hive.server2.authentication.ldap.baseDN": "{{ LDAP_SYNC_SEARCH_BASE }}",
+          "hive.server2.authentication": "LDAP",
+          "hive.metastore.warehouse.dir": "s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
         }
       },
       {
@@ -114,35 +119,42 @@
         }
       },
       {
-        "druid-common": {
-          "properties_attributes": {},
-          "properties": {
-            "druid.metadata.storage.type": "derby",
-            "druid.metadata.storage.connector.connectURI": "jdbc:derby://localhost:1527/druid;create=true"
-          }
-        }
-      },
-      {
         "druid-superset": {
           "properties_attributes": {},
           "properties": {
-            "SECRET_KEY" : "123admin123",
-            "SUPERSET_DATABASE_TYPE" : "sqlite"
+            "SECRET_KEY": "123admin123",
+            "SUPERSET_DATABASE_TYPE": "sqlite"
           }
         }
       },
       {
-      "druid-middlemanager" : {
-        "properties_attributes" : { },
-        "properties" : {
-          "druid.indexer.runner.javaOpts" : "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
-          "druid.indexer.task.baseTaskDir" : "/tmp/persistent/tasks",
-          "druid.processing.buffer.sizeBytes" : "256000000",
-          "druid.service" : "druid/middlemanager",
-          "druid.port" : "8091"
+        "druid-overlord": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.indexer.storage.type": "metadata",
+            "druid.indexer.runner.type": "remote",
+            "druid.service": "druid/overlord",
+            "druid.port": "8090"
+          }
         }
-      }
-    },
+      },
+      {
+        "druid-middlemanager": {
+          "properties_attributes": {},
+          "properties": {
+            "druid.indexer.task.hadoopWorkingPath": "/tmp/druid-indexing",
+            "druid.server.http.numThreads": "50",
+            "druid.indexer.runner.startPort": "8100",
+            "druid.worker.capacity": "3",
+            "druid.processing.numThreads": "2",
+            "druid.indexer.runner.javaOpts": "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
+            "druid.indexer.task.baseTaskDir": "/tmp/persistent/tasks",
+            "druid.processing.buffer.sizeBytes": "256000000",
+            "druid.service": "druid/middlemanager",
+            "druid.port": "8091"
+          }
+        }
+      },
       {
         "ranger-hive-plugin-properties": {
           "properties": {
@@ -154,18 +166,28 @@
         }
       },
       {
-        "ranger-hive-security":{
+        "ranger-hive-security": {
           "ranger.plugin.hive.policy.rest.url": "{{ RANGER_REST_ADDRESS }}",
-          "ranger.plugin.hive.service.name":"{{ REMOTE_CLUSTER_NAME }}_hive"
+          "ranger.plugin.hive.service.name": "{{ REMOTE_CLUSTER_NAME }}_hive"
         }
       },
       {
         "ranger-hive-audit": {
           "xasecure.audit.is.enabled": "true",
           "xasecure.audit.destination.hdfs": "true",
-          "xasecure.audit.destination.hdfs.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/ranger/audit/{{cluster_name}}",
+          "xasecure.audit.destination.hdfs.dir": "s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/ranger/audit/{{cluster_name}}",
           "xasecure.audit.destination.solr": "true",
           "xasecure.audit.destination.solr.zookeepers": "{{ SOLR_ZOOKEPERS_URL }}"
+        }
+      },
+      {
+        "zeppelin-config": {
+          "zeppelin.interpreters": "org.apache.zeppelin.jdbc.JDBCInterpreter"
+        }
+      },
+      {
+        "zeppelin-shiro-ini": {
+          "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nactiveDirectoryRealm = org.apache.zeppelin.realm.ActiveDirectoryGroupRealm\nactiveDirectoryRealm.systemUsername = {{ LDAP_BIND_DN }}\nactiveDirectoryRealm.systemPassword = {{ LDAP_BIND_PASSWORD }}\nactiveDirectoryRealm.searchBase = {{ LDAP_SYNC_SEARCH_BASE }}\nactiveDirectoryRealm.url = {{ LDAP_URL }}\nactiveDirectoryRealm.principalSuffix = @{{ LDAP_DOMAIN }}\nactiveDirectoryRealm.authorizationCachingEnabled = false\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
         }
       }
     ],
@@ -250,19 +272,23 @@
             "name": "ZOOKEEPER_SERVER"
           },
           {
-            "name" : "DRUID_OVERLORD",
+            "name": "DRUID_OVERLORD",
             "provision_action": "INSTALL_ONLY"
           },
           {
-            "name" : "DRUID_COORDINATOR",
+            "name": "DRUID_COORDINATOR",
             "provision_action": "INSTALL_ONLY"
           },
           {
-            "name" : "DRUID_ROUTER",
+            "name": "DRUID_ROUTER",
             "provision_action": "INSTALL_ONLY"
           },
           {
-            "name" : "DRUID_BROKER",
+            "name": "DRUID_BROKER",
+            "provision_action": "INSTALL_ONLY"
+          },
+          {
+            "name": "DRUID_SUPERSET",
             "provision_action": "INSTALL_ONLY"
           }
         ],
@@ -291,11 +317,11 @@
             "name": "NODEMANAGER"
           },
           {
-            "name" : "DRUID_MIDDLEMANAGER",
+            "name": "DRUID_MIDDLEMANAGER",
             "provision_action": "INSTALL_ONLY"
           },
           {
-            "name" : "DRUID_HISTORICAL",
+            "name": "DRUID_HISTORICAL",
             "provision_action": "INSTALL_ONLY"
           }
         ],

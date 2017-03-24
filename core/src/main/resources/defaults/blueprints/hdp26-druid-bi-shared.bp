@@ -17,6 +17,10 @@
       "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
     },
     {
+      "name": "LDAP_SYNC_SEARCH_BASE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
+    },
+    {
       "name":"LDAP_GROUP_SEARCH_BASE",
       "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
     },
@@ -159,7 +163,8 @@
         "druid-superset": {
           "properties_attributes": {},
           "properties": {
-            "SECRET_KEY" : "123admin123"
+            "SECRET_KEY" : "123admin123",
+            "SUPERSET_DATABASE_TYPE" : "sqlite"
           }
         }
       }
@@ -180,6 +185,9 @@
           },
           {
             "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "HISTORYSERVER"
           },
           {
             "name": "NAMENODE"

@@ -17,6 +17,10 @@
       "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
     },
     {
+      "name": "LDAP_SYNC_SEARCH_BASE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
+    },
+    {
       "name":"LDAP_GROUP_SEARCH_BASE",
       "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
     },
@@ -86,6 +90,7 @@
           "hive.server2.transport.mode": "http",
           "hive.server2.authentication.ldap.url":"{{ LDAP_URL }}",
           "hive.server2.authentication.ldap.Domain":"{{ LDAP_DOMAIN }}",
+          "hive.server2.authentication.ldap.baseDN": "{{ LDAP_SYNC_SEARCH_BASE }}",
           "hive.server2.authentication":"LDAP",
           "hive.metastore.warehouse.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
         }
@@ -125,6 +130,16 @@
       {
         "yarn-site": {
           "yarn.acl.enable": "true"
+        }
+      },
+      {
+        "zeppelin-config": {
+          "zeppelin.interpreters": "org.apache.zeppelin.jdbc.JDBCInterpreter"
+        }
+      },
+      {
+        "zeppelin-shiro-ini": {
+          "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nactiveDirectoryRealm = org.apache.zeppelin.realm.ActiveDirectoryGroupRealm\nactiveDirectoryRealm.systemUsername = {{ LDAP_BIND_DN }}\nactiveDirectoryRealm.systemPassword = {{ LDAP_BIND_PASSWORD }}\nactiveDirectoryRealm.searchBase = {{ LDAP_SYNC_SEARCH_BASE }}\nactiveDirectoryRealm.url = {{ LDAP_URL }}\nactiveDirectoryRealm.principalSuffix = @{{ LDAP_DOMAIN }}\nactiveDirectoryRealm.authorizationCachingEnabled = false\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
         }
       }
     ],
