@@ -138,11 +138,11 @@ public class ClusterDecorator implements Decorator<Cluster> {
     private void prepareLdap(Cluster subject, CbUser user, Long ldapConfigId, LdapConfigRequest ldapConfigRequest, Stack stack) {
         if (ldapConfigId != null) {
             LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId);
-            ldapConfigValidator.validateLdapConnection(ldapConfig);
             subject.setLdapConfig(ldapConfig);
         } else if (ldapConfigRequest != null) {
             LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest, LdapConfig.class);
             ldapConfig.setPublicInAccount(stack.isPublicInAccount());
+            ldapConfigValidator.validateLdapConnection(ldapConfig);
             ldapConfig = ldapConfigService.create(user, ldapConfig);
             subject.setLdapConfig(ldapConfig);
         }
