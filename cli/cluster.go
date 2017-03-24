@@ -375,8 +375,10 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			newValue := value
 			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
 		}
+		var ldapConfigId *int64 = nil
 		if skeleton.Ldap != nil && len(*skeleton.Ldap) > 0 {
 			ldap := getLdapConfig(*skeleton.Ldap)
+			ldapConfigId = ldap.ID
 			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_BIND_DN"}).s, PropertyValue: &ldap.BindDn})
 			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_BIND_PASSWORD"}).s, PropertyValue: &ldap.BindPassword})
 			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_DOMAIN"}).s, PropertyValue: ldap.Domain})
@@ -415,6 +417,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			RdsConfigJsons:            rdsConfigs,
 			RdsConfigIds:              rdsConfigIds,
 			BlueprintInputs:           inputs,
+			LdapConfigID:              ldapConfigId,
 			BlueprintCustomProperties: skeleton.Configurations,
 			Gateway: &models_cloudbreak.GatewayJSON{
 				EnableGateway:   &enableKnoxGateway,
