@@ -13,6 +13,7 @@ import (
 
 	"errors"
 	"strconv"
+	"strings"
 )
 
 var BASE_EXPOSED_SERVICES = []string{"AMBARI", "AMBARIUI", "ZEPPELINWS", "ZEPPELINUI"}
@@ -161,7 +162,8 @@ func CreateCluster(c *cli.Context) error {
 		asClient.createBaseAutoscalingCluster,
 		asClient.setConfiguration,
 		asClient.addPrometheusAlert,
-		asClient.addScalingPolicy)
+		asClient.addScalingPolicy,
+		cbClient.GetLdapByName)
 
 	cbClient.waitForClusterToFinish(stackId, c)
 	return nil
@@ -186,7 +188,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	createBaseAutoscalingCluster func(stackId int64) int64,
 	setScalingConfigurations func(int64, AutoscalingConfiguration),
 	addPrometheusAlert func(int64, AutoscalingPolicy) int64,
-	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64) int64 {
+	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64,
+	getLdapConfig func(string) *models_cloudbreak.LdapConfigResponse) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 	dataLake := false
@@ -371,6 +374,16 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			newKey := key
 			newValue := value
 			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
+		}
+		if skeleton.Ldap != nil && len(*skeleton.Ldap) > 0 {
+			ldap := getLdapConfig(*skeleton.Ldap)
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_BIND_DN"}).s, PropertyValue: &ldap.BindDn})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_BIND_PASSWORD"}).s, PropertyValue: &ldap.BindPassword})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_DOMAIN"}).s, PropertyValue: ldap.Domain})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_GROUP_SEARCH_BASE"}).s, PropertyValue: ldap.GroupSearchBase})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_URL"}).s, PropertyValue: &(&stringWrapper{fmt.Sprintf("%s://%s:%d", *ldap.Protocol, ldap.ServerHost, ldap.ServerPort)}).s})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_NAME_ATTRIBUTE"}).s, PropertyValue: ldap.UserSearchAttribute})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_SYNC_SEARCH_BASE"}).s, PropertyValue: &ldap.UserSearchBase})
 		}
 
 		exposedServices := []string{}
@@ -587,9 +600,12 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 
 	skeleton.ClusterType = clusterType
 	skeleton.HDPVersion = ambariBp.Blueprint.StackVersion
+	skeleton.Ldap = &(&stringWrapper{" "}).s
 	var inputs = make(map[string]string)
 	for _, input := range ambariBp.Inputs {
-		inputs[*input.Name] = ""
+		if !strings.Contains(*input.Name, "LDAP") {
+			inputs[*input.Name] = ""
+		}
 	}
 	skeleton.ClusterInputs = inputs
 	log.Infof("[GenerateCreateSharedClusterSkeleton] inputs for cluster type: %+v", inputs)
@@ -611,6 +627,10 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 				inputs[*input.Name] = *input.PropertyValue
 			}
 		}()
+
+		if stack.Cluster != nil && stack.Cluster.LdapConfig != nil {
+			skeleton.Ldap = &stack.Cluster.LdapConfig.Name
+		}
 
 		network := stack.Network
 		if network != nil && network.Parameters["internetGatewayId"] == nil {

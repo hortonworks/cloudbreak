@@ -73,6 +73,31 @@ func (a *Client) TestLdapConnectionUtil(params *TestLdapConnectionUtilParams) (*
 }
 
 /*
+TestRdsConnectionByIDUtil tests an already exists r d s connection
+*/
+func (a *Client) TestRdsConnectionByIDUtil(params *TestRdsConnectionByIDUtilParams) (*TestRdsConnectionByIDUtilOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewTestRdsConnectionByIDUtilParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "testRdsConnectionByIdUtil",
+		Method:             "GET",
+		PathPattern:        "/util/rds/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &TestRdsConnectionByIDUtilReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*TestRdsConnectionByIDUtilOK), nil
+}
+
+/*
 TestRdsConnectionUtil tests an r d s connection
 */
 func (a *Client) TestRdsConnectionUtil(params *TestRdsConnectionUtilParams) (*TestRdsConnectionUtilOK, error) {

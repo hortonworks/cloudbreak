@@ -23,6 +23,12 @@ type LdapConfigResponse struct {
 	*/
 	BindDn string `json:"bindDn"`
 
+	/* password for the provided bind DN
+
+	Required: true
+	*/
+	BindPassword string `json:"bindPassword"`
+
 	/* description of the resource
 
 	Max Length: 1000
@@ -58,6 +64,10 @@ type LdapConfigResponse struct {
 	 */
 	PrincipalRegex *string `json:"principalRegex,omitempty"`
 
+	/* determines the protocol (LDAP or LDAP over SSL)
+	 */
+	Protocol *string `json:"protocol,omitempty"`
+
 	/* resource is visible in account
 	 */
 	Public *bool `json:"public,omitempty"`
@@ -75,10 +85,6 @@ type LdapConfigResponse struct {
 	Minimum: 1
 	*/
 	ServerPort int32 `json:"serverPort"`
-
-	/* determines if LDAP or LDAP over SSL is to be used
-	 */
-	ServerSSL *bool `json:"serverSSL,omitempty"`
 
 	/* attribute name for simplified search filter (e.g. sAMAccountName).
 	 */
@@ -100,6 +106,11 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateBindDn(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateBindPassword(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -138,6 +149,15 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 func (m *LdapConfigResponse) validateBindDn(formats strfmt.Registry) error {
 
 	if err := validate.RequiredString("bindDn", "body", string(m.BindDn)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *LdapConfigResponse) validateBindPassword(formats strfmt.Registry) error {
+
+	if err := validate.RequiredString("bindPassword", "body", string(m.BindPassword)); err != nil {
 		return err
 	}
 

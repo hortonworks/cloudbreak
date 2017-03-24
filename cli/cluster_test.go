@@ -119,11 +119,14 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	addScalingPolicy := func(int64, AutoscalingPolicy, int64) int64 {
 		return stackId
 	}
+	getLdapConfig := func(string) *models_cloudbreak.LdapConfigResponse {
+		return nil
+	}
 
 	actualId = createClusterImpl(*skeleton, createFuncs[0], createFuncs[1], createFuncs[2],
 		createSecurityGroupRequest, createCredentialRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest, createRDSRequest,
 		getBlueprint, getCredential, getNetwork, postStack, getRdsConfig, postCluster, addAutoscalingCluster, setScalingConfigurations, addPrometheusAlert,
-		addScalingPolicy)
+		addScalingPolicy, getLdapConfig)
 
 	return
 }

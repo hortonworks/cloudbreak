@@ -131,6 +131,33 @@ func (a *Client) GetConfigsCluster(params *GetConfigsClusterParams) (*GetConfigs
 }
 
 /*
+GetFullCluster retrieves cluster by stack id
+
+Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
+*/
+func (a *Client) GetFullCluster(params *GetFullClusterParams) (*GetFullClusterOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetFullClusterParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getFullCluster",
+		Method:             "GET",
+		PathPattern:        "/stacks/{id}/cluster/full",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetFullClusterReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetFullClusterOK), nil
+}
+
+/*
 GetPrivateCluster retrieves cluster by stack name private
 
 Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.

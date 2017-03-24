@@ -46,6 +46,10 @@ type InstanceGroupResponse struct {
 	*/
 	NodeCount int32 `json:"nodeCount"`
 
+	/* cloud specific parameters for instance group
+	 */
+	Parameters map[string]interface{} `json:"parameters,omitempty"`
+
 	/* instancegroup related securitygroup
 	 */
 	SecurityGroup *SecurityGroupResponse `json:"securityGroup,omitempty"`

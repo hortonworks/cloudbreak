@@ -17,12 +17,14 @@ import (
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/constraints"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/credentials"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/events"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/flexsubscriptions"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/ldap"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/networks"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/rdsconfigs"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/recipes"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/securitygroups"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/settings"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/smartsensesubscriptions"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/sssd"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/subscriptions"
@@ -41,7 +43,7 @@ func NewHTTPClient(formats strfmt.Registry) *Cloudbreak {
 	if formats == nil {
 		formats = strfmt.Default
 	}
-	transport := httptransport.New("localhost", "/", []string{"http", "https"})
+	transport := httptransport.New("localhost", "/", []string{"https", "http"})
 	return New(transport, formats)
 }
 
@@ -66,6 +68,8 @@ func New(transport client.Transport, formats strfmt.Registry) *Cloudbreak {
 
 	cli.Events = events.New(transport, formats)
 
+	cli.Flexsubscriptions = flexsubscriptions.New(transport, formats)
+
 	cli.Ldap = ldap.New(transport, formats)
 
 	cli.Networks = networks.New(transport, formats)
@@ -77,6 +81,8 @@ func New(transport client.Transport, formats strfmt.Registry) *Cloudbreak {
 	cli.Securitygroups = securitygroups.New(transport, formats)
 
 	cli.Settings = settings.New(transport, formats)
+
+	cli.Smartsensesubscriptions = smartsensesubscriptions.New(transport, formats)
 
 	cli.Sssd = sssd.New(transport, formats)
 
@@ -115,6 +121,8 @@ type Cloudbreak struct {
 
 	Events *events.Client
 
+	Flexsubscriptions *flexsubscriptions.Client
+
 	Ldap *ldap.Client
 
 	Networks *networks.Client
@@ -126,6 +134,8 @@ type Cloudbreak struct {
 	Securitygroups *securitygroups.Client
 
 	Settings *settings.Client
+
+	Smartsensesubscriptions *smartsensesubscriptions.Client
 
 	Sssd *sssd.Client
 
@@ -166,6 +176,8 @@ func (c *Cloudbreak) SetTransport(transport client.Transport) {
 
 	c.Events.SetTransport(transport)
 
+	c.Flexsubscriptions.SetTransport(transport)
+
 	c.Ldap.SetTransport(transport)
 
 	c.Networks.SetTransport(transport)
@@ -177,6 +189,8 @@ func (c *Cloudbreak) SetTransport(transport client.Transport) {
 	c.Securitygroups.SetTransport(transport)
 
 	c.Settings.SetTransport(transport)
+
+	c.Smartsensesubscriptions.SetTransport(transport)
 
 	c.Sssd.SetTransport(transport)
 

@@ -40,6 +40,7 @@ type ClusterSkeletonBase struct {
 	Network                  *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
 	ClusterInputs            map[string]string  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
 	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
+	Ldap                     *string            `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
 }
 
 type ClusterSkeleton struct {

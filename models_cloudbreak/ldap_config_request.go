@@ -60,6 +60,10 @@ type LdapConfigRequest struct {
 	 */
 	PrincipalRegex *string `json:"principalRegex,omitempty"`
 
+	/* determines the protocol (LDAP or LDAP over SSL)
+	 */
+	Protocol *string `json:"protocol,omitempty"`
+
 	/* public host or IP address of LDAP server
 
 	Required: true
@@ -73,10 +77,6 @@ type LdapConfigRequest struct {
 	Minimum: 1
 	*/
 	ServerPort int32 `json:"serverPort"`
-
-	/* determines if LDAP or LDAP over SSL is to be used
-	 */
-	ServerSSL *bool `json:"serverSSL,omitempty"`
 
 	/* attribute name for simplified search filter (e.g. sAMAccountName).
 	 */

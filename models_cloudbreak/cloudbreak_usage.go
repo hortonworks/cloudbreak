@@ -39,6 +39,10 @@ type CloudbreakUsage struct {
 	 */
 	Duration *string `json:"duration,omitempty"`
 
+	/* flex subscription id
+	 */
+	FlexID *string `json:"flexId,omitempty"`
+
 	/* group name of instance
 	 */
 	InstanceGroup *string `json:"instanceGroup,omitempty"`
@@ -47,6 +51,10 @@ type CloudbreakUsage struct {
 	 */
 	InstanceHours *int64 `json:"instanceHours,omitempty"`
 
+	/* number of instances running
+	 */
+	InstanceNum *int32 `json:"instanceNum,omitempty"`
+
 	/* type of instance
 	 */
 	InstanceType *string `json:"instanceType,omitempty"`
@@ -54,6 +62,10 @@ type CloudbreakUsage struct {
 	/* id of the resource owner that is provided by OAuth provider
 	 */
 	Owner *string `json:"owner,omitempty"`
+
+	/* maximum number of instances running
+	 */
+	Peak *int32 `json:"peak,omitempty"`
 
 	/* cloud provider of the stack
 	 */
@@ -70,6 +82,10 @@ type CloudbreakUsage struct {
 	/* name of the stack
 	 */
 	StackName *string `json:"stackName,omitempty"`
+
+	/* unique id of the cluster
+	 */
+	StackUUID *string `json:"stackUuid,omitempty"`
 
 	/* ambari username
 	 */
