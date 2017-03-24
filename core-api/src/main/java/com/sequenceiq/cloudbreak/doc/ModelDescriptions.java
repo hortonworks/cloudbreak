@@ -319,7 +319,9 @@ public class ModelDescriptions {
         public static final String INSTANCE_NUMBER = "number of instances running";
         public static final String PEAK = "maximum number of instances running";
         public static final String FLEX_ID = "flex subscription id";
+        public static final String SMARTSENSE_ID = "Smartsense subscription id";
         public static final String STACK_UUID = "unique id of the cluster";
+        public static final String PARENT_UUID = "unique id of the controller instance";
     }
 
     public static class EventModelDescription {

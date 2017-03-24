@@ -9,6 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
+import com.sequenceiq.cloudbreak.api.model.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -58,4 +59,10 @@ public interface UsageEndpoint {
             @QueryParam("cloud") String cloud,
             @QueryParam("zone") String zone);
 
+    @GET
+    @Path("flex/daily")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_FLEX, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+            nickname = "getDailyFlexUsage")
+    List<CloudbreakFlexUsageJson> getDailyFlexUsages();
 }
