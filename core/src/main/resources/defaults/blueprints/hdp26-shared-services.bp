@@ -1,172 +1,236 @@
 {
-  "inputs":[
+  "inputs": [
     {
-      "name":"RANGER_DB_USER",
-      "referenceConfiguration":"db_user"
+      "name": "RANGER_DB_USER",
+      "referenceConfiguration": "db_user"
     },
     {
-      "name":"RANGER_DB_PASSWORD",
-      "referenceConfiguration":"db_password"
+      "name": "RANGER_DB_PASSWORD",
+      "referenceConfiguration": "db_password"
     },
     {
-      "name":"RANGER_DB_NAME",
-      "referenceConfiguration":"db_name"
+      "name": "RANGER_DB_NAME",
+      "referenceConfiguration": "db_name"
     },
     {
-      "name":"RANGER_DB_HOST",
-      "referenceConfiguration":"db_host"
+      "name": "RANGER_DB_HOST",
+      "referenceConfiguration": "db_host"
     },
     {
-      "name":"RANGER_ADMIN_PASSWORD",
-      "referenceConfiguration":"ranger_admin_password"
+      "name": "RANGER_ADMIN_PASSWORD",
+      "referenceConfiguration": "ranger_admin_password"
     },
     {
-      "name":"LDAP_URL",
-      "referenceConfiguration":"hive.server2.authentication.ldap.url"
+      "name": "LDAP_URL",
+      "referenceConfiguration": "hive.server2.authentication.ldap.url"
     },
     {
-      "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
+      "name": "LDAP_DOMAIN",
+      "referenceConfiguration": "hive.server2.authentication.ldap.Domain"
     },
     {
-      "name":"LDAP_BIND_DN",
-      "referenceConfiguration":"ranger.usersync.ldap.binddn"
+      "name": "LDAP_BIND_DN",
+      "referenceConfiguration": "ranger.usersync.ldap.binddn"
     },
     {
-      "name":"LDAP_BIND_PASSWORD",
-      "referenceConfiguration":"ranger.usersync.ldap.ldapbindpassword"
+      "name": "LDAP_BIND_PASSWORD",
+      "referenceConfiguration": "ranger.usersync.ldap.ldapbindpassword"
     },
     {
-      "name":"LDAP_NAME_ATTRIBUTE",
-      "referenceConfiguration":"ranger.usersync.ldap.user.nameattribute"
+      "name": "LDAP_NAME_ATTRIBUTE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.nameattribute"
     },
     {
-      "name":"LDAP_SYNC_SEARCH_BASE",
-      "referenceConfiguration":"ranger.usersync.ldap.user.searchbase"
+      "name": "LDAP_SYNC_SEARCH_BASE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
     },
     {
-      "name":"LDAP_GROUP_SEARCH_BASE",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
+      "name": "LDAP_GROUP_SEARCH_BASE",
+      "referenceConfiguration": "hadoop.security.group.mapping.ldap.base"
     },
     {
-      "name":"S3_BUCKET",
-      "referenceConfiguration":"s3.bucket"
+      "name": "S3_BUCKET",
+      "referenceConfiguration": "s3.bucket"
     }
   ],
-  "blueprint":{
-    "Blueprints":{
-      "blueprint_name":"hdp26-shared-services",
-      "stack_name":"HDP",
-      "stack_version":"2.6"
+  "blueprint": {
+    "Blueprints": {
+      "blueprint_name": "hdp26-shared-services",
+      "stack_name": "HDP",
+      "stack_version": "2.6"
     },
-    "configurations":[
+    "configurations": [
       {
-        "admin-properties":{
-          "properties":{
-            "db_user":"{{ RANGER_DB_USER }}",
-            "db_password":"{{ RANGER_DB_PASSWORD }}",
-            "db_name":"{{ RANGER_DB_NAME }}",
-            "db_host":"{{ RANGER_DB_HOST }}",
-            "DB_FLAVOR":"POSTGRES"
+        "admin-properties": {
+          "properties": {
+            "db_user": "{{ RANGER_DB_USER }}",
+            "db_password": "{{ RANGER_DB_PASSWORD }}",
+            "db_name": "{{ RANGER_DB_NAME }}",
+            "db_host": "{{ RANGER_DB_HOST }}",
+            "DB_FLAVOR": "POSTGRES"
           }
         }
       },
       {
-        "ranger-env":{
-          "properties":{
-            "admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
-            "ranger_admin_password":"{{ RANGER_ADMIN_PASSWORD }}",
-            "is_solrCloud_enabled":"true",
-            "ranger-hdfs-plugin-enabled":"No",
-            "ranger-hive-plugin-enabled":"No",
-            "ranger-yarn-plugin-enabled":"No",
-            "ranger_privelege_user_jdbc_url":"jdbc:postgresql://{{ RANGER_DB_HOST }}",
-            "ranger-atlas-plugin-enabled":"No",
-            "create_db_dbuser":"false"
+        "ranger-env": {
+          "properties": {
+            "admin_password": "{{ RANGER_ADMIN_PASSWORD }}",
+            "ranger_admin_password": "{{ RANGER_ADMIN_PASSWORD }}",
+            "is_solrCloud_enabled": "true",
+            "ranger-hdfs-plugin-enabled": "No",
+            "ranger-hive-plugin-enabled": "No",
+            "ranger-yarn-plugin-enabled": "No",
+            "ranger_privelege_user_jdbc_url": "jdbc:postgresql://{{ RANGER_DB_HOST }}",
+            "ranger-atlas-plugin-enabled": "Yes",
+            "create_db_dbuser": "false"
           }
         }
       },
       {
-        "ranger-ugsync-site":{
-          "ranger.usersync.enabled":"true",
-          "ranger.usersync.source.impl.class":"org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
-          "ranger.usersync.ldap.url":"{{ LDAP_URL }}",
-          "ranger.usersync.ldap.binddn":"{{ LDAP_BIND_DN }}",
-          "ranger.usersync.ldap.ldapbindpassword":"{{ LDAP_BIND_PASSWORD }}",
-          "ranger.usersync.ldap.user.nameattribute":"{{ LDAP_NAME_ATTRIBUTE }}",
-          "ranger.usersync.ldap.user.searchbase":"{{ LDAP_SYNC_SEARCH_BASE }}"
+        "ranger-ugsync-site": {
+          "ranger.usersync.enabled": "true",
+          "ranger.usersync.source.impl.class": "org.apache.ranger.ldapusersync.process.LdapUserGroupBuilder",
+          "ranger.usersync.ldap.url": "{{ LDAP_URL }}",
+          "ranger.usersync.ldap.binddn": "{{ LDAP_BIND_DN }}",
+          "ranger.usersync.ldap.ldapbindpassword": "{{ LDAP_BIND_PASSWORD }}",
+          "ranger.usersync.ldap.user.nameattribute": "{{ LDAP_NAME_ATTRIBUTE }}",
+          "ranger.usersync.ldap.user.searchbase": "{{ LDAP_SYNC_SEARCH_BASE }}",
+          "ranger.usersync.group.searchenabled": "false"
         }
       },
       {
-        "ranger-admin-site":{
-          "properties":{
-            "ranger.jpa.jdbc.driver":"org.postgresql.Driver",
-            "ranger.jpa.jdbc.url":"jdbc:postgresql://{{ RANGER_DB_HOST }}/{{ RANGER_DB_NAME }}",
-            "ranger.audit.source.type":"solr",
-            "ranger.authentication.method":"ACTIVE_DIRECTORY",
-            "ranger.ldap.ad.domain":"{{ LDAP_DOMAIN }}",
-            "ranger.ldap.ad.base.dn":"{{ LDAP_SYNC_SEARCH_BASE }}"
+        "ranger-admin-site": {
+          "properties": {
+            "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
+            "ranger.jpa.jdbc.url": "jdbc:postgresql://{{ RANGER_DB_HOST }}/{{ RANGER_DB_NAME }}",
+            "ranger.audit.source.type": "solr",
+            "ranger.authentication.method": "ACTIVE_DIRECTORY",
+            "ranger.ldap.ad.domain": "{{ LDAP_DOMAIN }}",
+            "ranger.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}"
           }
+        }
+      },
+      {
+        "ams-hbase-env": {
+          "properties": {
+            "hbase_classpath_additional": "/usr/hdp/current/hadoop-client:/usr/hdp/current/hadoop-client/lib"
+          }
+        }
+      },
+      {
+        "ams-hbase-site": {
+          "properties": {
+            "hbase.cluster.distributed": "true",
+            "hbase.rootdir": "file:///var/lib/ambari-metrics-collector/hbase/data",
+            "hbase.wal.dir": "file:///var/lib/ambari-metrics-collector/hbase/wal"
+          }
+        }
+      },
+      {
+        "atlas-env": {
+          "properties": {
+            "hbase_conf_dir": "/etc/ams-hbase/conf"
+          }
+        }
+      },
+      {
+        "application-properties": {
+          "atlas.authentication.method.ldap.ad.bind.dn": "{{ LDAP_BIND_DN }}",
+          "atlas.authentication.method.ldap.type": "ad",
+          "atlas.authentication.method.ldap": "true",
+          "atlas.authentication.method.ldap.ad.url": "{{ LDAP_URL }}",
+          "atlas.authentication.method.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}",
+          "atlas.authentication.method.ldap.ad.domain": "{{ LDAP_DOMAIN }}",
+          "atlas.authentication.method.ldap.ad.bind.password": "{{ LDAP_BIND_PASSWORD }}",
+          "atlas.authentication.method.ldap.ugi-groups": "false",
+          "atlas.authorizer.impl": "ranger",
+          "atlas.audit.hbase.zookeeper.quorum": "{{zookeeper_quorum}}",
+          "atlas.audit.zookeeper.znode.parent": "/ams-hbase-unsecure",
+          "atlas.graph.storage.hostname": "{{zookeeper_quorum}}"
+        }
+      },
+      {
+        "ranger-atlas-plugin-properties": {
+          "ranger-atlas-plugin-enabled": "Yes"
+        }
+      },
+      {
+        "ranger-atlas-audit": {
+          "xasecure.audit.is.enabled": "true",
+          "xasecure.audit.destination.hdfs": "true",
+          "xasecure.audit.destination.hdfs.dir": "s3a://{{ S3_BUCKET }}/{{cluster_name}}/apps/ranger/audit/{{cluster_name}}",
+          "xasecure.audit.destination.solr": "true",
+          "xasecure.audit.destination.solr.zookeepers": "{{zookeeper_quorum}}"
         }
       }
     ],
-    "host_groups":[
+    "host_groups": [
       {
-        "name":"master",
-        "configurations":[
-
+        "name": "master",
+        "configurations": [
         ],
-        "components":[
+        "components": [
           {
-            "name":"METRICS_COLLECTOR"
+            "name": "METRICS_COLLECTOR"
           },
           {
-            "name":"METRICS_MONITOR"
+            "name": "METRICS_MONITOR"
           },
           {
-            "name":"ZOOKEEPER_CLIENT"
+            "name": "ZOOKEEPER_CLIENT"
           },
           {
-            "name":"ZOOKEEPER_SERVER"
+            "name": "ZOOKEEPER_SERVER"
           },
           {
-            "name":"INFRA_SOLR_CLIENT"
+            "name": "INFRA_SOLR_CLIENT"
           },
           {
-            "name":"RANGER_TAGSYNC"
+            "name": "RANGER_TAGSYNC"
           },
           {
-            "name":"RANGER_USERSYNC"
+            "name": "RANGER_USERSYNC"
           },
           {
-            "name":"RANGER_ADMIN"
+            "name": "RANGER_ADMIN"
           },
           {
-            "name":"INFRA_SOLR"
+            "name": "INFRA_SOLR"
+          },
+          {
+            "name": "KAFKA_BROKER"
+          },
+          {
+            "name": "ATLAS_SERVER"
+          },
+          {
+            "name": "ATLAS_CLIENT"
           }
         ],
-        "cardinality":"1"
+        "cardinality": "1"
       },
       {
-        "name":"worker",
-        "configurations":[
-
+        "name": "worker",
+        "configurations": [
         ],
-        "components":[
+        "components": [
           {
-            "name":"METRICS_MONITOR"
+            "name": "METRICS_MONITOR"
           },
           {
-            "name":"ZOOKEEPER_SERVER"
+            "name": "ZOOKEEPER_SERVER"
           },
           {
-            "name":"INFRA_SOLR"
+            "name": "INFRA_SOLR"
           },
           {
-            "name":"INFRA_SOLR_CLIENT"
+            "name": "INFRA_SOLR_CLIENT"
+          },
+          {
+            "name": "KAFKA_BROKER"
           }
         ],
-        "cardinality":"1+"
+        "cardinality": "1+"
       },
       {
         "name": "compute",
