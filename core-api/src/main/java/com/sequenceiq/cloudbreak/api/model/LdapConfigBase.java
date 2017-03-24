@@ -32,8 +32,8 @@ public abstract class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.SERVER_PORT, required = true)
     private Integer serverPort;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.IS_SERVER_SSL)
-    private Boolean serverSSL = Boolean.FALSE;
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.PROTOCOL)
+    private String protocol = "ldap";
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_DN, required = true)
@@ -105,12 +105,12 @@ public abstract class LdapConfigBase implements JsonEntity {
         this.serverPort = serverPort;
     }
 
-    public Boolean getServerSSL() {
-        return serverSSL;
+    public String getProtocol() {
+        return protocol;
     }
 
-    public void setServerSSL(Boolean serverSSL) {
-        this.serverSSL = serverSSL;
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public String getBindDn() {

@@ -16,7 +16,7 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "ldapconfig", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
+        @UniqueConstraint(columnNames = {"account", "name"})
 })
 @NamedQueries({
         @NamedQuery(
@@ -69,7 +69,7 @@ public class LdapConfig implements ProvisionEntity {
     private Integer serverPort;
 
     @Column(nullable = false)
-    private Boolean serverSSL;
+    private String protocol;
 
     @Column(nullable = false)
     private String bindDn;
@@ -157,12 +157,12 @@ public class LdapConfig implements ProvisionEntity {
         this.serverPort = serverPort;
     }
 
-    public Boolean getServerSSL() {
-        return serverSSL;
+    public String getProtocol() {
+        return protocol;
     }
 
-    public void setServerSSL(Boolean serverSSL) {
-        this.serverSSL = serverSSL;
+    public void setProtocol(String protocol) {
+        this.protocol = protocol;
     }
 
     public String getBindDn() {

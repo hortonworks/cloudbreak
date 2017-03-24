@@ -33,8 +33,8 @@ public class LdapConfigCommands implements BaseCommands {
             @CliOption(key = "description", help = "Description of the config") String description,
             @CliOption(key = "serverHost", mandatory = true, help = "Public host or IP address of LDAP server") String serverHost,
             @CliOption(key = "serverPort", mandatory = true, help = "Port of LDAP server (typically: 389 or 636 for LDAPS)") Integer serverPort,
-            @CliOption(key = "serverSSL", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
-                    help = "Determines if LDAP or LDAP over SSL is to be used") Boolean serverSSL,
+            @CliOption(key = "protocol", unspecifiedDefaultValue = "ldap",
+                    help = "Determines if LDAP or LDAP over SSL is to be used") String protocol,
             @CliOption(key = "bindDn", mandatory = true,
                     help = "Bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)") String bindDn,
             @CliOption(key = "bindPassword", mandatory = true, help = "password for the provided bind DN") String bindPassword,
@@ -57,7 +57,7 @@ public class LdapConfigCommands implements BaseCommands {
             config.setBindPassword(bindPassword);
             config.setServerHost(serverHost);
             config.setServerPort(serverPort);
-            config.setServerSSL(serverSSL);
+            config.setProtocol(protocol);
             config.setGroupSearchBase(groupSearchBase);
             config.setGroupSearchFilter(groupSearchFilter);
             config.setUserSearchBase(userSearchBase);
@@ -137,7 +137,7 @@ public class LdapConfigCommands implements BaseCommands {
             map.put("name", response.getName());
             map.put("serverHost", response.getServerHost());
             map.put("serverPort", response.getServerPort().toString());
-            map.put("serverSSL", response.getServerSSL().toString());
+            map.put("protocol", response.getProtocol());
             map.put("bindDn", response.getBindDn());
             map.put("userSearchBase", response.getUserSearchBase());
             map.put("userSearchFilter", response.getUserSearchFilter());

@@ -356,7 +356,7 @@ public class ModelDescriptions {
     public static class LdapConfigModelDescription {
         public static final String SERVER_HOST = "public host or IP address of LDAP server";
         public static final String SERVER_PORT = "port of LDAP server (typically: 389 or 636 for LDAPS)";
-        public static final String IS_SERVER_SSL = "determines if LDAP or LDAP over SSL is to be used";
+        public static final String PROTOCOL = "determines the protocol (LDAP or LDAP over SSL)";
         public static final String BIND_DN = "bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)";
         public static final String BIND_PASSWORD = "password for the provided bind DN";
         public static final String USER_SEARCH_BASE = "template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)";

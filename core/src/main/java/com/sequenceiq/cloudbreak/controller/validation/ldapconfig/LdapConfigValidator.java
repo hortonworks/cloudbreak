@@ -18,7 +18,7 @@ public class LdapConfigValidator {
 
     public void validateLdapConnection(LdapConfig ldapConfig) {
         if (ldapConfig != null) {
-            validateLdapConnection(ldapConfig.getServerSSL(),
+            validateLdapConnection(ldapConfig.getProtocol(),
                     ldapConfig.getServerHost(),
                     ldapConfig.getServerPort(),
                     ldapConfig.getBindDn(),
@@ -28,7 +28,7 @@ public class LdapConfigValidator {
 
     public void validateLdapConnection(LdapConfigRequest request) {
         if (request != null) {
-            validateLdapConnection(request.getServerSSL(),
+            validateLdapConnection(request.getProtocol(),
                     request.getServerHost(),
                     request.getServerPort(),
                     request.getBindDn(),
@@ -36,14 +36,15 @@ public class LdapConfigValidator {
         }
     }
 
-    private void validateLdapConnection(Boolean serverSsl, String serverHost, Integer serverPort, String bindDn, String bindPassword) {
+    private void validateLdapConnection(String protocol, String serverHost, Integer serverPort, String bindDn, String bindPassword) {
         try {
             //BEGIN GENERATED CODE
             Hashtable<String, String> env = new Hashtable<String, String>();
             //END GENERATED CODE
             env.put("com.sun.jndi.ldap.read.timeout", "1000");
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-            String url = new StringBuilder(serverSsl ? "ldaps://" : "ldap://").
+            String url = new StringBuilder(protocol).
+                    append("://").
                     append(serverHost).
                     append(":").
                     append(serverPort).toString();
