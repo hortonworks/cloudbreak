@@ -285,6 +285,69 @@ var (
 			Usage: "maximum size of the cluster",
 		},
 	}
+	FlLdapName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-name",
+			Usage: "name of the ldap to create",
+		},
+	}
+	FlLdapServer = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-server",
+			Usage: "address of the ldap server (e.g: ldap://10.0.0.1:384)",
+		},
+	}
+	FlLdapDomain = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-domain",
+			Usage: "ldap domain (e.g: ad.hdc.com)",
+		},
+	}
+	FlLdapBindDN = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-bind-dn",
+			Usage: "ldap bind dn (e.g: CN=Administrator,CN=Users,DC=ad,DC=hdc,DC=com)",
+		},
+	}
+	FlLdapBindPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-bind-password",
+			Usage: "ldap bind password",
+		},
+	}
+	FlLdapUserSearchBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-search-base",
+			Usage: "ldap user search base (e.g: CN=Users,DC=ad,DC=hdc,DC=com)",
+		},
+	}
+	FlLdapUserSearchFilter = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-search-filter",
+			Usage: "ldap user search filter (e.g: CN)",
+		},
+	}
+	FlLdapUserSearchAttribute = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-search-attribute",
+			Usage: "ldap user search attribute",
+		},
+	}
+	FlLdapGroupSearchBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-search-base",
+			Usage: "ldap group search base (e.g: OU=scopes,DC=ad,DC=hdc,DC=com)",
+		},
+	}
 )
 
 type RequiredFlag struct {
