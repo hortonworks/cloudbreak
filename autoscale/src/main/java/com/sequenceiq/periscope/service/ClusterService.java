@@ -3,8 +3,10 @@ package com.sequenceiq.periscope.service;
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 
 import java.util.List;
+import java.util.stream.StreamSupport;
 
 import javax.inject.Inject;
+import javax.ws.rs.BadRequestException;
 
 import org.springframework.stereotype.Service;
 
@@ -36,6 +38,7 @@ public class ClusterService {
 
     public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
+        validateClusterUniqueness(stack);
         Cluster cluster = new Cluster(periscopeUser, stack);
         if (clusterState != null) {
             cluster.setState(clusterState);
@@ -149,4 +152,14 @@ public class ClusterService {
             alertService.addPrometheusAlertsToConsul(cluster);
         }
     }
+
+    private void validateClusterUniqueness(AmbariStack stack) {
+        Iterable<Cluster> clusters = clusterRepository.findAll();
+        boolean clusterForTheSameStackAndAmbari = StreamSupport.stream(clusters.spliterator(), false)
+                .anyMatch(cluster -> cluster.getStackId().equals(stack.getStackId()) && cluster.getAmbari().getHost().equals(stack.getAmbari().getHost()));
+        if (clusterForTheSameStackAndAmbari) {
+            throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
+        }
+    }
+
 }
