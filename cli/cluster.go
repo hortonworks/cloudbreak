@@ -627,7 +627,9 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 			defer wg.Done()
 			configs := getClusterConfig(*stack.ID, ambariBp.Inputs)
 			for _, input := range configs {
-				inputs[*input.Name] = *input.PropertyValue
+				if !strings.Contains(*input.Name, "LDAP") {
+					inputs[*input.Name] = *input.PropertyValue
+				}
 			}
 		}()
 
