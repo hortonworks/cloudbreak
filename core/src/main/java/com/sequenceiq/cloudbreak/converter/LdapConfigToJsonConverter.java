@@ -18,7 +18,7 @@ public class LdapConfigToJsonConverter extends AbstractConversionServiceAwareCon
         json.setBindDn(config.getBindDn());
         json.setServerHost(config.getServerHost());
         json.setServerPort(config.getServerPort());
-        json.setServerSSL(config.getServerSSL());
+        json.setProtocol(config.getProtocol());
         json.setGroupSearchBase(config.getGroupSearchBase());
         json.setGroupSearchFilter(config.getGroupSearchFilter());
         json.setUserSearchBase(config.getUserSearchBase());

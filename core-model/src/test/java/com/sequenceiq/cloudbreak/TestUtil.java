@@ -475,7 +475,7 @@ public class TestUtil {
         config.setUserSearchAttribute("cn=admin,dc=example,dc=org");
         config.setDomain("ad.hdc.com");
         config.setServerPort(389);
-        config.setServerSSL(false);
+        config.setProtocol("ldap://");
         return config;
     }
 
