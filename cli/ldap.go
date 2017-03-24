@@ -12,6 +12,27 @@ import (
 	"strings"
 )
 
+var LdapHeader []string = []string{"Name", "ServerHost", "ServerPort", "ServerSSL", "Domain", "BindDn", "UserSearchBase",
+	"UserSearchFilter", "UserSearchAttribute", "GroupSearchBase"}
+
+type Ldap struct {
+	Name                string `json:"Name" yaml:"Name"`
+	ServerHost          string `json:"ServerHost" yaml:"ServerHost"`
+	ServerPort          string `json:"ServerPort" yaml:"ServerPort"`
+	ServerSSL           string `json:"ServerSSL,omitempty" yaml:"ServerSSL,omitempty"`
+	Domain              string `json:"Domain,omitempty" yaml:"Domain,omitempty"`
+	BindDn              string `json:"BindDn" yaml:"BindDn"`
+	UserSearchBase      string `json:"UserSearchBase" yaml:"UserSearchBase"`
+	UserSearchFilter    string `json:"UserSearchFilter,omitempty" yaml:"UserSearchFilter,omitempty"`
+	UserSearchAttribute string `json:"UserSearchAttribute,omitempty" yaml:"UserSearchAttribute,omitempty"`
+	GroupSearchBase     string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
+}
+
+func (l *Ldap) DataAsStringArray() []string {
+	return []string{l.Name, l.ServerHost, l.ServerPort, l.ServerSSL, l.Domain, l.BindDn, l.UserSearchBase, l.UserSearchFilter,
+		l.UserSearchAttribute, l.GroupSearchBase}
+}
+
 func CreateLDAP(c *cli.Context) error {
 	defer timeTrack(time.Now(), "create LDAP")
 	checkRequiredFlags(c)
@@ -66,5 +87,42 @@ func createLDAPImpl(createLDAP func(*ldap.PostPublicLdapParams) (*ldap.PostPubli
 	}
 
 	log.Infof("[createLDAPImpl] LDAP created with name: %s, id: %d", name, *resp.Payload.ID)
+	return nil
+}
+
+func ListLdaps(c *cli.Context) error {
+	defer timeTrack(time.Now(), "list LDAPS")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	output := Output{Format: c.String(FlOutput.Name)}
+	return ListLdapsImpl(cbClient.Cloudbreak.Ldap.GetPublicsLdap, output.WriteList)
+}
+
+func ListLdapsImpl(getLdaps func(*ldap.GetPublicsLdapParams) (*ldap.GetPublicsLdapOK, error), writer func([]string, []Row)) error {
+	resp, err := getLdaps(&ldap.GetPublicsLdapParams{})
+
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	var tableRows []Row
+	for _, l := range resp.Payload {
+		row := &Ldap{
+			Name:                l.Name,
+			ServerHost:          l.ServerHost,
+			ServerPort:          strconv.Itoa(int(l.ServerPort)),
+			ServerSSL:           strconv.FormatBool(*l.ServerSSL),
+			Domain:              *l.Domain,
+			BindDn:              l.BindDn,
+			UserSearchBase:      l.UserSearchBase,
+			UserSearchFilter:    *l.UserSearchFilter,
+			UserSearchAttribute: *l.UserSearchAttribute,
+			GroupSearchBase:     *l.GroupSearchBase,
+		}
+		tableRows = append(tableRows, row)
+	}
+
+	writer(LdapHeader, tableRows)
 	return nil
 }

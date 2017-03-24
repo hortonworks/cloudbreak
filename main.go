@@ -267,6 +267,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "list-ldaps",
+			Usage:  "list the available ldaps",
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.ListLdaps,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-metastores",
 			Usage:  "list the available metastores",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
