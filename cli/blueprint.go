@@ -24,7 +24,7 @@ func init() {
 	BlueprintMap["hdp-etl-edw-spark2"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
 	BlueprintMap["hdp-edw-analytics"] = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.6.0"
 	BlueprintMap["hdp26-edw-analytics"] = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0"
-	BlueprintMap["shared-services"] = "Enterprise Services: Apache Atlas, Apache Ranger"
+	BlueprintMap["hdp26-shared-services"] = "Enterprise Services: Apache Atlas, Apache Ranger"
 	BlueprintMap["hdp25-etl-edw-shared"] = "Enterprise ETL-EDW: Apache Hive 1.2.1"
 	BlueprintMap["hdp-etl-edw-tp"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
 	BlueprintMap["hdp26-etl-edw-spark2"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1"
