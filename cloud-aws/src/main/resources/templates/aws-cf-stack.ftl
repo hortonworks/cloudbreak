@@ -425,6 +425,16 @@
         "Value" : {"Fn::GetAtt" : ["S3AccessRole", "Arn"] }
     }
   </#if>
+  <#if !existingVPC>
+    ,"CreatedVpc": {
+        "Value" : { "Ref" : "VPC" }
+    }
+  </#if>
+  <#if !existingSubnet>
+    ,"CreatedSubnet": {
+        "Value" :  { "Ref" : "PublicSubnet" }
+    }
+  </#if>
   }
   </#if>
 }

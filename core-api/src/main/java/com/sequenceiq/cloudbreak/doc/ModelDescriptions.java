@@ -98,6 +98,8 @@ public class ModelDescriptions {
         public static final String IMAGE_CATALOG = "custom image catalog URL";
         public static final String CLOUDBREAK_DETAILS = "details of the Cloudbreak that provisioned the stack";
         public static final String S3_ACCESS_ROLE_ARN = "S3 access role arn";
+        public static final String VPC_ID = "cluster vpc id";
+        public static final String SUBNET_ID = "cluster subnet id";
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
         public static final String CUSTOM_IMAGE = "custom image for the cluster";
