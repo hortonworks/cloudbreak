@@ -18,18 +18,25 @@ var BlueprintMap map[string]string
 
 func init() {
 	BlueprintMap = make(map[string]string)
-	BlueprintMap["hdp-data-science"] = "Data Science: Apache Spark 1.6, Apache Zeppelin 0.6.0"
-	BlueprintMap["hdp26-data-science"] = "Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0"
-	BlueprintMap["hdp-etl-edw"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
-	BlueprintMap["hdp-etl-edw-spark2"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
-	BlueprintMap["hdp-edw-analytics"] = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.6.0"
-	BlueprintMap["hdp26-edw-analytics"] = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0"
-	BlueprintMap["hdp26-shared-services"] = "Enterprise Services: Apache Atlas, Apache Ranger"
+	BlueprintMap["hdp25-data-science"] = "Data Science: Apache Spark 1.6, Apache Zeppelin 0.6.0"
+	BlueprintMap["hdp25-etl-edw"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+	BlueprintMap["hdp25-etl-edw-spark2"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
+	BlueprintMap["hdp25-edw-analytics"] = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.6.0"
 	BlueprintMap["hdp25-etl-edw-shared"] = "Enterprise ETL-EDW: Apache Hive 1.2.1"
-	BlueprintMap["hdp-etl-edw-tp"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0"
+
+	BlueprintMap["hdp26-etl-edw"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+	BlueprintMap["hdp26-data-science"] = "Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0"
+	BlueprintMap["hdp26-edw-analytics"] = "EDW-Analytics: Apache Hive 2 LLAP, Apache Zeppelin 0.7.0"
+	BlueprintMap["hdp26-druid-bi"] = "BI: Druid 0.9.2 (Technical Preview)"
+	BlueprintMap["hdp26-data-science-spark2"] = "Data Science: Apache Spark 2.1, Apache Zeppelin 0.7.0"
 	BlueprintMap["hdp26-etl-edw-spark2"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1"
-	BlueprintMap["hdp-druid-bi"] = "BI: Druid 0.9.2 (Technical Preview)"
-	BlueprintMap["hdp-data-science-spark2"] = "Data Science: Apache Spark 2.1, Apache Zeppelin 0.7.0"
+
+	BlueprintMap["hdp26-shared-services"] = "Enterprise Services: Apache Atlas, Apache Ranger"
+	BlueprintMap["hdp26-data-science-spark2-shared"] = "Data Science: Apache Spark 2.1, Apache Zeppelin 0.7.0 Shared"
+	BlueprintMap["hdp26-etl-edw-spark2-shared"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1 Shared"
+	BlueprintMap["hdp26-etl-edw-shared"] = "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6 Shared"
+	BlueprintMap["hdp26-data-science-shared"] = "Data Science: Apache Spark 1.6, Apache Zeppelin 0.7.0 Shared"
+	BlueprintMap["hdp26-druid-bi-shared"] = "BI: Druid 0.9.2 (Technical Preview) Shared"
 }
 
 func getDefaultClusterType() string {
