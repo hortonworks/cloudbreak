@@ -70,6 +70,9 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.S3_ACCESS_ROLE_ARN)
     private String s3AccessRoleArn;
 
+    @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
+    private FlexSubscriptionResponse flexSubscription;
+
     public String getAccount() {
         return account;
     }
@@ -215,4 +218,11 @@ public class StackResponse extends StackBase {
         this.network = network;
     }
 
+    public FlexSubscriptionResponse getFlexSubscription() {
+        return flexSubscription;
+    }
+
+    public void setFlexSubscription(FlexSubscriptionResponse flexSubscription) {
+        this.flexSubscription = flexSubscription;
+    }
 }

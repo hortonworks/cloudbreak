@@ -19,12 +19,14 @@ import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidato
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
@@ -67,10 +69,14 @@ public class StackDecorator implements Decorator<Stack> {
     @Inject
     private CloudParameterService cloudParameterService;
 
+    @Inject
+    private FlexSubscriptionService flexSubscriptionService;
+
     private enum DecorationData {
         CREDENTIAL_ID,
         NETWORK_ID,
-        USER
+        USER,
+        FLEX_ID
     }
 
     @Override
@@ -92,6 +98,7 @@ public class StackDecorator implements Decorator<Stack> {
                 validatFailurePolicy(subject, subject.getFailurePolicy());
             }
             prepareInstanceGroups(subject, data);
+            prepareFlexSubscription(subject, data);
             validate(subject);
         }
         return subject;
@@ -196,6 +203,14 @@ public class StackDecorator implements Decorator<Stack> {
     private void validateExactCount(Stack stack, FailurePolicy failurePolicy) {
         if (failurePolicy.getThreshold() > stack.getFullNodeCount()) {
             throw new BadRequestException("Threshold can not be higher than the node count of the stack.");
+        }
+    }
+
+    private void prepareFlexSubscription(Stack subject, Object[] data) {
+        Long flexId = (Long) data[DecorationData.FLEX_ID.ordinal()];
+        if (flexId != null) {
+            FlexSubscription flexSubscription = flexSubscriptionService.findOneById(flexId);
+            subject.setFlexSubscription(flexSubscription);
         }
     }
 

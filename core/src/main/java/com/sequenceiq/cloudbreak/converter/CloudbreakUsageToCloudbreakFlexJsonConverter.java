@@ -36,7 +36,7 @@ public class CloudbreakUsageToCloudbreakFlexJsonConverter extends AbstractConver
         json.setInstanceNum(source.getInstanceNum());
         json.setPeak(source.getPeak());
         json.setFlexId(source.getFlexId());
-//        json.setSmartSenseId(source.getSmartSenseId());
+        json.setSmartSenseId(source.getSmartSenseId());
         json.setDay(getDayAsString(source.getDay()));
         json.setUsername(getUserEmail(source));
         return json;

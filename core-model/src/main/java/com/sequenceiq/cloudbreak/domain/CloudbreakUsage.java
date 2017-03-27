@@ -96,6 +96,9 @@ public class CloudbreakUsage implements ProvisionEntity {
     private String flexId;
 
     @Column
+    private String smartSenseId;
+
+    @Column
     private String stackUuid;
 
     @Column
@@ -285,6 +288,14 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     public void setParentUuid(String parentUuid) {
         this.parentUuid = parentUuid;
+    }
+
+    public String getSmartSenseId() {
+        return smartSenseId;
+    }
+
+    public void setSmartSenseId(String smartSenseId) {
+        this.smartSenseId = smartSenseId;
     }
 
     @Override

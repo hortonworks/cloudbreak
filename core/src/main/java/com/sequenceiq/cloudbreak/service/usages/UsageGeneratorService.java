@@ -19,6 +19,7 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @Service
@@ -58,6 +59,8 @@ public class UsageGeneratorService {
         newUsage.setDuration(Duration.of(HOURS_IN_DAY, ChronoUnit.HOURS).multipliedBy(usage.getInstanceNum()).toString());
         newUsage.setStatus(UsageStatus.CLOSED);
         newUsage.setCosts(usagePriceService.calculateCostOfUsage(newUsage));
+        newUsage.setFlexId(usage.getFlexId());
+        newUsage.setSmartSenseId(usage.getSmartSenseId());
         return newUsage;
     }
 
@@ -84,6 +87,8 @@ public class UsageGeneratorService {
         newUsage.setBlueprintName(usage.getBlueprintName());
         newUsage.setPeriodStarted(day);
         newUsage.setStatus(usage.getStatus());
+        newUsage.setFlexId(usage.getFlexId());
+        newUsage.setSmartSenseId(usage.getSmartSenseId());
         return newUsage;
     }
 
@@ -113,6 +118,11 @@ public class UsageGeneratorService {
         }
         usage.setPeriodStarted(Date.from(LocalDateTime.from(started).atZone(ZoneId.systemDefault()).toInstant()));
         usage.setStatus(UsageStatus.OPEN);
+        FlexSubscription flexSubscription = stack.getFlexSubscription();
+        if (flexSubscription != null && flexSubscription.getSmartSenseSubscription() != null) {
+            usage.setFlexId(flexSubscription.getSubscriptionId());
+            usage.setSmartSenseId(flexSubscription.getSmartSenseSubscription().getSubscriptionId());
+        }
         return usage;
     }
 
