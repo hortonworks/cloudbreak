@@ -35,4 +35,6 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup, InstanceStatus status);
 
+    String getServerCertByStackId(@Param("stackId") Long stackId);
+
 }

@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -63,6 +64,9 @@ public class TlsSecurityService {
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
     public SecurityConfig storeSSHKeys(Long stackId) throws CloudbreakSecuritySetupException {
         try {
             generateTempSshKeypair(stackId);
@@ -71,40 +75,65 @@ public class TlsSecurityService {
             securityConfig.setClientCert(BaseEncoding.base64().encode(readClientCert(stackId).getBytes()));
             securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(readPrivateSshKey(stackId).getBytes()));
             securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(readPublicSshKey(stackId).getBytes()));
-
             return securityConfig;
         } catch (IOException | JSchException e) {
             throw new CloudbreakSecuritySetupException("Failed to generate temporary SSH key pair.", e);
         }
     }
 
+    public String createServerCertDir(Long stackId, InstanceMetaData gatewayInstance) throws CloudbreakSecuritySetupException {
+        String serverCertDir = getCertDir(stackId, gatewayInstance);
+        Path serverCertPath = Paths.get(serverCertDir);
+        if (!Files.exists(serverCertPath)) {
+            try {
+                Files.createDirectories(serverCertPath);
+            } catch (IOException | SecurityException se) {
+                throw new CloudbreakSecuritySetupException("Failed to create directory: " + serverCertPath.toString());
+            }
+        }
+        return serverCertDir;
+    }
+
     public String getCertDir(Long stackId) {
+        return getCertDir(stackId, null);
+    }
+
+    public String getCertDir(Long stackId, InstanceMetaData gatewayInstance) {
+        if (gatewayInstance != null) {
+            return Paths.get(certDir + "/stack-" + stackId + "/gw-" + gatewayInstance.getId()).toString();
+        }
         return Paths.get(certDir + "/stack-" + stackId).toString();
     }
 
     public String prepareCertDir(Long stackId) throws CloudbreakSecuritySetupException {
-        Path stackCertDir = Paths.get(getCertDir(stackId));
+        return prepareCertDir(stackId, null);
+    }
+
+    private String prepareCertDir(Long stackId, InstanceMetaData gatewayInstance) throws CloudbreakSecuritySetupException {
+        Path stackCertDir = Paths.get(getCertDir(stackId, gatewayInstance));
         if (!Files.exists(stackCertDir)) {
             try {
                 LOGGER.info("Creating directory for the keys and certificates under {}", certDir);
                 Files.createDirectories(stackCertDir);
-                prepareFiles(stackId);
+                prepareFiles(stackId, gatewayInstance);
             } catch (IOException | SecurityException se) {
                 throw new CloudbreakSecuritySetupException("Failed to create directory: " + stackCertDir);
             }
         } else {
-            prepareFiles(stackId);
+            prepareFiles(stackId, gatewayInstance);
         }
         return stackCertDir.toString();
     }
 
-    private void prepareFiles(Long stackId) throws CloudbreakSecuritySetupException {
+    private void prepareFiles(Long stackId, InstanceMetaData gatewayInstance) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
         if (stack != null && stack.getSecurityConfig() != null) {
             Long id = stack.getId();
             // In case of byos there is no server machine
             if (!BYOS.equals(stack.getCredential().cloudPlatform())) {
-                readServerCert(id);
+                if (gatewayInstance != null) {
+                    readServerCert(id, gatewayInstance);
+                }
             }
             readClientCert(id);
             readClientKey(id);
@@ -118,19 +147,27 @@ public class TlsSecurityService {
     }
 
     private String readSecurityFile(Long stackId, String fileName) throws CloudbreakSecuritySetupException {
+        return readSecurityFile(stackId, null, fileName);
+    }
+
+    private String readSecurityFile(Long stackId, InstanceMetaData gatewayInstance, String fileName) throws CloudbreakSecuritySetupException {
         try {
-            return FileReaderUtils.readFileFromPath(Paths.get(getCertDir(stackId) + "/" + fileName));
+            return FileReaderUtils.readFileFromPath(Paths.get(getCertDir(stackId, gatewayInstance) + "/" + fileName));
         } catch (IOException | SecurityException se) {
-            throw new CloudbreakSecuritySetupException("Failed to read file: " + getCertDir(stackId) + "/" + fileName);
+            throw new CloudbreakSecuritySetupException("Failed to read file: " + getCertDir(stackId, gatewayInstance) + "/" + fileName);
         }
     }
 
     private void writeSecurityFile(Long stackId, String content, String fileName) throws CloudbreakSecuritySetupException {
+        writeSecurityFile(stackId, null, content, fileName);
+    }
+
+    private void writeSecurityFile(Long stackId, InstanceMetaData gatewayInstance, String content, String fileName) throws CloudbreakSecuritySetupException {
         try {
-            String path = Paths.get(getCertDir(stackId) + "/" + fileName).toString();
-            File directory = new File(getCertDir(stackId));
+            String path = Paths.get(getCertDir(stackId, gatewayInstance) + "/" + fileName).toString();
+            File directory = new File(getCertDir(stackId, gatewayInstance));
             if (!directory.exists()) {
-                Files.createDirectories(Paths.get(getCertDir(stackId)));
+                Files.createDirectories(Paths.get(getCertDir(stackId, gatewayInstance)));
             }
             File file = new File(path);
             if (!file.exists()) {
@@ -141,14 +178,18 @@ public class TlsSecurityService {
                 }
             }
         } catch (IOException | SecurityException se) {
-            throw new CloudbreakSecuritySetupException("Failed to write file: " + getCertDir(stackId) + "/" + fileName);
+            throw new CloudbreakSecuritySetupException("Failed to write file: " + getCertDir(stackId, gatewayInstance) + "/" + fileName);
         }
     }
 
     private boolean checkSecurityFileExist(Long stackId, String fileName) throws CloudbreakSecuritySetupException {
+        return checkSecurityFileExist(stackId, null, fileName);
+    }
+
+    private boolean checkSecurityFileExist(Long stackId, InstanceMetaData gatewayInstance, String fileName) throws CloudbreakSecuritySetupException {
         try {
-            String path = Paths.get(getCertDir(stackId) + "/" + fileName).toString();
-            File directory = new File(getCertDir(stackId));
+            String path = Paths.get(getCertDir(stackId, gatewayInstance) + "/" + fileName).toString();
+            File directory = new File(getCertDir(stackId, gatewayInstance));
             if (!directory.exists()) {
                 return false;
             }
@@ -157,7 +198,7 @@ public class TlsSecurityService {
                 return false;
             }
         } catch (SecurityException se) {
-            throw new CloudbreakSecuritySetupException("Failed to check file: " + getCertDir(stackId) + "/" + fileName);
+            throw new CloudbreakSecuritySetupException("Failed to check file: " + getCertDir(stackId, gatewayInstance) + "/" + fileName);
         }
         return true;
     }
@@ -200,10 +241,10 @@ public class TlsSecurityService {
 
     public GatewayConfig buildGatewayConfig(Long stackId, String connectionIp, InstanceMetaData gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
-        prepareCertDir(stackId);
+        prepareCertDir(stackId, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp);
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                gatewayPort, prepareCertDir(stackId), conf.getServerCert(), conf.getClientCert(),
+                gatewayPort, prepareCertDir(stackId, gatewayInstance), conf.getServerCert(), conf.getClientCert(),
                 conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
                 knoxGatewayEnabled);
     }
@@ -211,8 +252,8 @@ public class TlsSecurityService {
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         if (!BYOS.equals(stack.cloudPlatform())) {
-            prepareCertDir(stackId);
-            return new HttpClientConfig(apiAddress, stack.getGatewayPort(), prepareCertDir(stackId));
+            prepareCertDir(stackId, stack.getGatewayInstance());
+            return new HttpClientConfig(apiAddress, stack.getGatewayPort(), prepareCertDir(stackId), prepareCertDir(stackId, stack.getGatewayInstance()));
         } else {
             return new HttpClientConfig(apiAddress, stack.getGatewayPort());
         }
@@ -234,12 +275,11 @@ public class TlsSecurityService {
         return readSecurityFile(stackId, "cert.pem");
     }
 
-    public String readServerCert(Long stackId) throws CloudbreakSecuritySetupException {
-        Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
-        if (!checkSecurityFileExist(stackId, "ca.pem")) {
-            writeSecurityFile(stackId, stack.getSecurityConfig().getServerCert(), "ca.pem");
+    public String readServerCert(Long stackId, InstanceMetaData gwInstance) throws CloudbreakSecuritySetupException {
+        if (!checkSecurityFileExist(stackId, gwInstance, "ca.pem")) {
+            writeSecurityFile(stackId, gwInstance, gwInstance.getServerCert(), "ca.pem");
         }
-        return readSecurityFile(stackId, "ca.pem");
+        return readSecurityFile(stackId, gwInstance, "ca.pem");
     }
 
     public String readPrivateSshKey(Long stackId) throws CloudbreakSecuritySetupException {
@@ -259,7 +299,7 @@ public class TlsSecurityService {
     }
 
     public byte[] getCertificate(Long id) {
-        String cert = securityConfigRepository.getServerCertByStackId(id);
+        String cert = instanceMetaDataRepository.getServerCertByStackId(id);
         if (cert == null) {
             throw new NotFoundException("Stack doesn't exist, or certificate was not found for stack.");
         }

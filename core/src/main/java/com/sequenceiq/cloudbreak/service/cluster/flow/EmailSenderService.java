@@ -211,7 +211,7 @@ public class EmailSenderService {
     }
 
     private String getMasterInstanceId(Stack stack) {
-        return stack.getGatewayInstanceGroup().getAllInstanceMetaData().iterator().next().getInstanceId();
+        return stack.getGatewayInstance().getInstanceId();
     }
 
     private void sendEmail(CbUser user, String mail, String template, String subject, Map<String, Object> model) {

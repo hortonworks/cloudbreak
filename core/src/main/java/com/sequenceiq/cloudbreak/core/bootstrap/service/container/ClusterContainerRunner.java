@@ -201,8 +201,8 @@ public class ClusterContainerRunner {
     private String getGatewayHostName(Stack stack) {
         String gatewayHostname = "";
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-            if (stack.getGatewayInstanceGroup() != null && !stack.getGatewayInstanceGroup().getInstanceMetaData().isEmpty()) {
-                InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+            if (stack.getGatewayInstance() != null && stack.getGatewayInstance() != null) {
+                InstanceMetaData gatewayInstance = stack.getGatewayInstance();
                 gatewayHostname = gatewayInstance.getDiscoveryFQDN();
             }
         }
@@ -212,7 +212,7 @@ public class ClusterContainerRunner {
     private String getGatewayPrivateIp(Stack stack) {
         String gatewayHostname = "";
         if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-            InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+            InstanceMetaData gatewayInstance = stack.getGatewayInstance();
             gatewayHostname = gatewayInstance.getPrivateIp();
         }
         return gatewayHostname;

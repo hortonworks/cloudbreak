@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.isGateway;
 
-import java.util.Objects;
-
 import javax.inject.Inject;
 
 import org.springframework.security.access.AccessDeniedException;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -38,9 +35,9 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
         instanceGroup.setGroupName(json.getGroup());
         instanceGroup.setNodeCount(json.getNodeCount());
         instanceGroup.setInstanceGroupType(json.getType());
-        if (isGateway(instanceGroup.getInstanceGroupType()) && !Objects.equals(instanceGroup.getNodeCount(),
-                instanceGroup.getInstanceGroupType().getFixedNodeCount())) {
-            throw new BadRequestException(String.format("Gateway has to be exactly %s node.", instanceGroup.getInstanceGroupType().getFixedNodeCount()));
+        if (isGateway(instanceGroup.getInstanceGroupType())) {
+            // TODO remove this...
+            instanceGroup.setNodeCount(2);
         }
         try {
             if (json.getSecurityGroupId() != null) {

@@ -22,11 +22,11 @@ public class HttpClientConfig {
         this.apiPort = apiPort;
     }
 
-    public HttpClientConfig(String apiAddress, Integer apiPort, String certDir) {
+    public HttpClientConfig(String apiAddress, Integer apiPort, String certDir, String serverCertDir) {
         this.apiAddress = apiAddress;
         this.apiPort = apiPort;
         if (certDir != null) {
-            this.serverCert = certDir + DEFAULT_SERVER_CERT_NAME;
+            this.serverCert = serverCertDir + DEFAULT_SERVER_CERT_NAME;
             this.clientCert = certDir + DEFAULT_CLIENT_CERT_NAME;
             this.clientKey = certDir + DEFAULT_PRIVATE_KEY_NAME;
         }

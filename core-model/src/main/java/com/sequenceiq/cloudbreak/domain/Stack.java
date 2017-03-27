@@ -43,6 +43,7 @@ import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -52,7 +53,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
+        @UniqueConstraint(columnNames = {"account", "name"})
 })
 @NamedQueries({
         @NamedQuery(
@@ -622,8 +623,18 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
-    public int getGateWayNodeCount() {
-        return getGatewayInstanceGroup().getNodeCount();
+    public InstanceMetaData getGatewayInstance() {
+        for (InstanceGroup instanceGroup : instanceGroups) {
+            if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
+                    if (InstanceMetadataType.GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType())) {
+                        return instanceMetaData;
+                    }
+                }
+                return instanceGroup.getInstanceMetaData().isEmpty() ? null : instanceGroup.getInstanceMetaData().iterator().next();
+            }
+        }
+        return null;
     }
 
     public Network getNetwork() {

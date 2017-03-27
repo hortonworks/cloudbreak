@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -46,6 +47,7 @@ public class MetadataSetupService {
         boolean ambariServerFound = false;
         Set<InstanceMetaData> updatedInstanceMetadata = new HashSet<>();
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
+        boolean primaryIgSelected = false;
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
             CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
             CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
@@ -57,8 +59,8 @@ public class MetadataSetupService {
                 newInstances++;
             }
             // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
-            String group = instanceMetaDataEntry.getInstanceGroup() == null ? cloudInstance.getTemplate().getGroupName() : instanceMetaDataEntry
-                    .getInstanceGroup().getGroupName();
+            InstanceGroup ig = instanceMetaDataEntry.getInstanceGroup();
+            String group = ig == null ? cloudInstance.getTemplate().getGroupName() : ig.getGroupName();
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stack.getId(), group);
             instanceMetaDataEntry.setPrivateIp(md.getPrivateIp());
             instanceMetaDataEntry.setPublicIp(md.getPublicIp());
@@ -68,6 +70,18 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setInstanceId(instanceId);
             instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setStartDate(timeInMillis);
+            if (ig != null) {
+                if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
+                    if (!primaryIgSelected) {
+                        primaryIgSelected = true;
+                        instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+                    } else {
+                        instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+                    }
+                }
+            } else {
+                instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
+            }
             if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);
                 ambariServerFound = true;

@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -20,8 +19,7 @@ public class GatewayConfigService {
     private TlsSecurityService tlsSecurityService;
 
     public GatewayConfig getGatewayConfig(Stack stack) throws CloudbreakSecuritySetupException {
-        InstanceGroup gateway = stack.getGatewayInstanceGroup();
-        InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+        InstanceMetaData gatewayInstance = stack.getGatewayInstance();
         return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
     }
 
@@ -32,7 +30,7 @@ public class GatewayConfigService {
     }
 
     public String getGatewayIp(Stack stack) {
-        InstanceMetaData gatewayInstance = stack.getGatewayInstanceGroup().getInstanceMetaData().iterator().next();
+        InstanceMetaData gatewayInstance = stack.getGatewayInstance();
         return getGatewayIp(stack, gatewayInstance);
     }
 
