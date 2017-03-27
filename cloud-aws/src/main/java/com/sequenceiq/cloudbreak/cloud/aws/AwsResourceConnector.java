@@ -124,6 +124,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     private static final String S3_ACCESS_ROLE = "S3AccessRole";
 
+    private static final String CREATED_VPC = "CreatedVpc";
+
+    private static final String CREATED_SUBNET = "CreatedSubnet";
+
     @Inject
     private Configuration freemarkerConfiguration;
 
@@ -233,6 +237,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
         AmazonAutoScalingClient amazonASClient = awsClient.createAutoScalingClient(credentialView, regionName);
         saveS3AccessRoleArn(ac, stack, cFStackName, cfClient, resourceNotifier);
+        saveGeneratedSubnet(ac, stack, cFStackName, cfClient, resourceNotifier);
         List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
     }
@@ -278,6 +283,48 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             String s3AccessRoleArn = getCreatedS3AccessRoleArn(cFStackName, client);
             CloudResource s3AccessRoleArnCloudResource = new CloudResource.Builder().type(ResourceType.S3_ACCESS_ROLE_ARN).name(s3AccessRoleArn).build();
             resourceNotifier.notifyAllocation(s3AccessRoleArnCloudResource, ac.getCloudContext());
+        }
+    }
+
+    private void saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
+            PersistenceNotifier resourceNotifier) {
+        AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
+        if (awsNetworkView.isExistingVPC() && !awsNetworkView.isExistingSubnet()) {
+            String subnetId = getCreatedSubnet(cFStackName, client);
+            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
+
+            String vpcId = awsNetworkView.getExistingVPC();
+            CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
+            resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
+        } else if (!awsNetworkView.isExistingVPC() && !awsNetworkView.isExistingSubnet()) {
+            String subnetId = getCreatedSubnet(cFStackName, client);
+            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
+
+            String vpcId = getCreatedVpc(cFStackName, client);
+            CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
+            resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
+        }
+    }
+
+    private String getCreatedVpc(String cFStackName, AmazonCloudFormationClient client) {
+        Map<String, String> outputs = getOutputs(cFStackName, client);
+        if (outputs.containsKey(CREATED_VPC)) {
+            return outputs.get(CREATED_VPC);
+        } else {
+            String outputKeyNotFound = String.format("Vpc could not be found in the Cloudformation stack('%s') output.", cFStackName);
+            throw new CloudConnectorException(outputKeyNotFound);
+        }
+    }
+
+    private String getCreatedSubnet(String cFStackName, AmazonCloudFormationClient client) {
+        Map<String, String> outputs = getOutputs(cFStackName, client);
+        if (outputs.containsKey(CREATED_SUBNET)) {
+            return outputs.get(CREATED_SUBNET);
+        } else {
+            String outputKeyNotFound = String.format("Subnet could not be found in the Cloudformation stack('%s') output.", cFStackName);
+            throw new CloudConnectorException(outputKeyNotFound);
         }
     }
 

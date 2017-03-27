@@ -214,4 +214,5 @@ public class StackResponse extends StackBase {
     public void setNetwork(NetworkResponse network) {
         this.network = network;
     }
+
 }
