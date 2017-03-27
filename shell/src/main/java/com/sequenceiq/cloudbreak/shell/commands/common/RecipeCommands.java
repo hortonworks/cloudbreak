@@ -78,15 +78,15 @@ public class RecipeCommands implements BaseCommands {
             @CliOption(key = "type", mandatory = true, help = "Type of recipe") RecipeType recipeType,
             @CliOption(key = "description", help = "Description of the recepie") String description,
             @CliOption(key = "scriptFile", help = "Path of the script file") File scriptFile,
-            @CliOption(key = "scriptUrl", help = "URL for the script") String url,
+            @CliOption(key = "scriptUrl", help = "URL for the script") String scriptUrl,
             @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the recipe is public in the account") Boolean publicInAccount) {
 
         if (scriptFile != null && !scriptFile.exists()) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException("Pre install script file not exists");
-        } else if (scriptFile != null && url != null) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Recipe file not exists");
+        } else if (scriptFile != null && scriptUrl != null) {
             throw shellContext.exceptionTransformer().transformToRuntimeException("Either the file or the url can be provided for recipe");
-        } else if (scriptFile == null && url == null) {
+        } else if (scriptFile == null && scriptUrl == null) {
             throw shellContext.exceptionTransformer().transformToRuntimeException("File or the url must be provided for recipe");
         }
 
@@ -95,7 +95,7 @@ public class RecipeCommands implements BaseCommands {
             recipeRequest.setRecipeType(recipeType);
             recipeRequest.setName(name);
             recipeRequest.setDescription(description);
-            recipeRequest.setUri(url);
+            recipeRequest.setUri(scriptUrl);
 
             if (scriptFile != null) {
                 String script = IOUtils.toString(new FileInputStream(scriptFile));
