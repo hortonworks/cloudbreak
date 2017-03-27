@@ -333,6 +333,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "remove-ldap",
+			Usage:  "remove an LDAP",
+			Flags:  []cli.Flag{hdc.FlLdapName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.DeleteLdap,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlLdapName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "remove-metastore",
 			Usage:  "remove a metastore",
 			Flags:  []cli.Flag{hdc.FlRdsName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},

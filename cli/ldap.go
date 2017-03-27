@@ -31,7 +31,7 @@ func (l *Ldap) DataAsStringArray() []string {
 }
 
 func CreateLDAP(c *cli.Context) error {
-	defer timeTrack(time.Now(), "create LDAP")
+	defer timeTrack(time.Now(), "create ldap")
 	checkRequiredFlags(c)
 
 	name := c.String(FlLdapName.Name)
@@ -60,7 +60,7 @@ func createLDAPImpl(createLDAP func(*ldap.PostPublicLdapParams) (*ldap.PostPubli
 	name string, server string, port int32, protocol string, domain string, bindDn string, bindPassword string,
 	userSearchBase string, userSearchFilter string, userSearchAttribute string, groupSearchBase string) error {
 
-	log.Infof("[createLDAPImpl] create LDAP with name: %s", name)
+	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
 	resp, err := createLDAP(&ldap.PostPublicLdapParams{
 		Body: &models_cloudbreak.LdapConfigRequest{
 			Name:                name,
@@ -80,12 +80,12 @@ func createLDAPImpl(createLDAP func(*ldap.PostPublicLdapParams) (*ldap.PostPubli
 		logErrorAndExit(err)
 	}
 
-	log.Infof("[createLDAPImpl] LDAP created with name: %s, id: %d", name, *resp.Payload.ID)
+	log.Infof("[createLDAPImpl] ldap created with name: %s, id: %d", name, *resp.Payload.ID)
 	return nil
 }
 
 func ListLdaps(c *cli.Context) error {
-	defer timeTrack(time.Now(), "list LDAPS")
+	defer timeTrack(time.Now(), "list ldap configs")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
@@ -131,4 +131,23 @@ func (c *Cloudbreak) GetLdapByName(name string) *models_cloudbreak.LdapConfigRes
 	id64 := *resp.Payload.ID
 	log.Infof("[GetLdapByName] '%s' ldap id: %d", name, id64)
 	return resp.Payload
+}
+
+func DeleteLdap(c *cli.Context) error {
+	defer timeTrack(time.Now(), "delete an ldap")
+	checkRequiredFlags(c)
+
+	ldapName := c.String(FlLdapName.Name)
+	log.Infof("[DeleteLdap] delete ldap config by name: %s", ldapName)
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	deleteLdapImpl(ldapName, cbClient.Cloudbreak.Ldap.DeletePublicLdap)
+	return nil
+}
+
+func deleteLdapImpl(ldapName string, deleteLdap func(*ldap.DeletePublicLdapParams) error) {
+	if err := deleteLdap(&ldap.DeletePublicLdapParams{Name: ldapName}); err != nil {
+		logErrorAndExit(err)
+	}
+	log.Infof("[deleteLdapImpl] ldap config deleted: %s", ldapName)
 }
