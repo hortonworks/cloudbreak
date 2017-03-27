@@ -91,7 +91,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("platformVariant", "ambariVersion", "hdpVersion"));
+        assertAllFieldsNotNull(result, Arrays.asList("platformVariant", "ambariVersion", "hdpVersion", "flexSubscription"));
     }
 
     @Test
@@ -111,7 +111,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         StackResponse result = underTest.convert(getSource());
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("credentialId", "cloudPlatform", "platformVariant", "ambariVersion", "hdpVersion",
-                "stackTemplate", "cloudbreakDetails"));
+                "stackTemplate", "cloudbreakDetails", "flexSubscription"));
     }
 
     @Test
@@ -131,7 +131,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("cluster", "platformVariant", "ambariVersion", "hdpVersion"));
+        assertAllFieldsNotNull(result, Arrays.asList("cluster", "platformVariant", "ambariVersion", "hdpVersion", "flexSubscription"));
     }
 
     @Test
@@ -152,7 +152,8 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy", "platformVariant", "ambariVersion", "hdpVersion", "stackTemplate", "cloudbreakDetails"));
+        assertAllFieldsNotNull(result, Arrays.asList("failurePolicy", "platformVariant", "ambariVersion", "hdpVersion", "stackTemplate",
+                "cloudbreakDetails", "flexSubscription"));
     }
 
     @Test
@@ -171,7 +172,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // WHEN
         StackResponse result = underTest.convert(getSource());
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("networkId", "platformVariant", "ambariVersion", "hdpVersion", "network"));
+        assertAllFieldsNotNull(result, Arrays.asList("networkId", "platformVariant", "ambariVersion", "hdpVersion", "network", "flexSubscription"));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import java.util.Arrays;
+import static java.util.Arrays.asList;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +24,7 @@ public class JsonToCloudbreakUsageConverterTest extends AbstractJsonConverterTes
         CloudbreakUsage result = underTest.convert(getRequest("usage/cloudbreak-usage.json"));
         // THEN
         assertAllFieldsNotNull(result,
-                Arrays.asList("day", "costs", "periodStarted", "duration", "status", "flexId", "stackUuid", "instanceNum", "peak", "parentUuid"));
+                asList("day", "costs", "periodStarted", "duration", "status", "flexId", "stackUuid", "instanceNum", "peak", "parentUuid", "smartSenseId"));
     }
 
     @Override

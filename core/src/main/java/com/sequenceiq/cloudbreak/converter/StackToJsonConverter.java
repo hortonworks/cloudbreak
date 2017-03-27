@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyResponse;
+import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
@@ -120,6 +121,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         putVpcIdIntoResponse(source, stackJson);
         convertComponentConfig(stackJson, source);
         convertTags(stackJson, source.getTags());
+        addFlexSubscription(stackJson, source);
         return stackJson;
     }
 
@@ -192,4 +194,14 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
                 TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroupResponse.class)));
     }
 
+    private void addFlexSubscription(StackResponse stackJson, Stack source) {
+        if (source.getFlexSubscription() != null) {
+            try {
+                FlexSubscriptionResponse flexSubscription = getConversionService().convert(source.getFlexSubscription(), FlexSubscriptionResponse.class);
+                stackJson.setFlexSubscription(flexSubscription);
+            } catch (Exception ex) {
+                LOGGER.warn("Flex subscription could not be added to stack response.", ex);
+            }
+        }
+    }
 }

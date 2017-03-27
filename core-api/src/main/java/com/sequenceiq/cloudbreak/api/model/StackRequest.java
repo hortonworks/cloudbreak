@@ -37,6 +37,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(value = StackModelDescription.CUSTOM_IMAGE)
     private String customImage;
 
+    @ApiModelProperty(value = StackModelDescription.FLEX_ID)
+    private Long flexId;
+
     public FailurePolicyRequest getFailurePolicy() {
         return failurePolicy;
     }
@@ -91,5 +94,13 @@ public class StackRequest extends StackBase {
 
     public void setCustomImage(String customImage) {
         this.customImage = customImage;
+    }
+
+    public Long getFlexId() {
+        return flexId;
+    }
+
+    public void setFlexId(Long flexId) {
+        this.flexId = flexId;
     }
 }
