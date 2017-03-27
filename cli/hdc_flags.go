@@ -289,7 +289,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "ldap-name",
-			Usage: "name of the ldap to create",
+			Usage: "name of the ldap",
 		},
 	}
 	FlLdapServer = StringFlag{
