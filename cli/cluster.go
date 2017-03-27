@@ -195,11 +195,6 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	dataLake := false
 	if blueprint.BlueprintName != nil && *blueprint.BlueprintName == "hdp26-shared-services" {
 		dataLake = true
-		if skeleton.Tags == nil {
-			skeleton.Tags = map[string]string{"type": "datalake"}
-		} else {
-			skeleton.Tags["type"] = "datalake"
-		}
 	}
 
 	// create stack
@@ -259,9 +254,12 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
 		credReq := createCredentialRequest(credentialName, getCredential("aws-access"), skeleton.SSHKeyName)
-		userDefinedTags := make(map[string]interface{})
+		tags := make(map[string]interface{})
+		if dataLake {
+			tags["type"] = "datalake"
+		}
 		if len(skeleton.Tags) > 0 {
-			userDefinedTags[USER_TAGS] = skeleton.Tags
+			tags[USER_TAGS] = skeleton.Tags
 		}
 
 		stackReq := models_cloudbreak.StackRequest{
@@ -277,7 +275,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			AmbariVersion:   &ambariVersion,
 			HdpVersion:      &skeleton.HDPVersion,
 			Orchestrator:    &orchestrator,
-			Tags:            userDefinedTags,
+			Tags:            tags,
 		}
 
 		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
