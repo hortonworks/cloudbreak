@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
 @Service
 public class StackUtil {
@@ -24,6 +25,9 @@ public class StackUtil {
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
@@ -44,9 +48,9 @@ public class StackUtil {
             if (orchestratorType != null && orchestratorType.containerOrchestrator()) {
                 ambariIp = stack.getCluster().getAmbariIp();
             } else {
-                Set<InstanceMetaData> gateway = stack.getGatewayInstanceGroup().getInstanceMetaData();
-                if (stack.getCluster().getAmbariIp() != null && gateway != null && !gateway.isEmpty()) {
-                    ambariIp = gateway.iterator().next().getPublicIpWrapper();
+                InstanceMetaData gatewayInstance = stack.getGatewayInstance();
+                if (stack.getCluster().getAmbariIp() != null && gatewayInstance != null) {
+                    ambariIp = gatewayInstance.getPublicIpWrapper();
                 }
             }
         } catch (CloudbreakException ex) {

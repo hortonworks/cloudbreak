@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 public enum InstanceGroupType {
-    GATEWAY(1), CORE(0);
+    GATEWAY(0), CORE(0);
 
     private Integer fixedNodeCount;
 

@@ -24,11 +24,13 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
-import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
@@ -77,10 +79,18 @@ public class TlsSetupService {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
+    @Inject
+    private GatewayConfigService gatewayConfigService;
+
+    @Inject
+    private InstanceMetaDataRepository instanceMetaDataRepository;
+
     @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
     private String tlsCertificatePath;
 
-    public void setupTls(Stack stack, String publicIp, int sshPort, String user, Set<String> sshFingerprints) throws CloudbreakException {
+    public void setupTls(Stack stack, InstanceMetaData gwInstance, String user, Set<String> sshFingerprints) throws CloudbreakException {
+        String publicIp = gatewayConfigService.getGatewayIp(stack, gwInstance);
+        int sshPort = gwInstance.getSshPort();
         LOGGER.info("SSHClient parameters: stackId: {}, publicIp: {},  user: {}", stack.getId(), publicIp, user);
         if (publicIp == null) {
             throw new CloudbreakException("Failed to connect to host, IP address not defined.");
@@ -94,7 +104,7 @@ public class TlsSetupService {
             setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
             uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
             executeTlsSetupScript(ssh);
-            downloadAndSavePrivateKey(stack, ssh);
+            downloadAndSavePrivateKey(stack, ssh, gwInstance);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
         } catch (TemplateException e) {
@@ -126,7 +136,7 @@ public class TlsSetupService {
         }
     }
 
-    private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user) {
+    private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user) throws CloudbreakSecuritySetupException {
         sshCheckerTaskContextPollingService.pollWithTimeoutSingleFailure(
                 sshCheckerTask,
                 new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, tlsSecurityService.getSshPrivateFileLocation(stack.getId())),
@@ -222,12 +232,14 @@ public class TlsSetupService {
         }
     }
 
-    private void downloadAndSavePrivateKey(Stack stack, SSHClient ssh) throws IOException, CloudbreakSecuritySetupException {
-        ssh.newSCPFileTransfer().download("/tmp/server.pem", tlsSecurityService.getCertDir(stack.getId()) + "/ca.pem");
-        Stack stackWithSecurity = stackRepository.findByIdWithSecurityConfig(stack.getId());
-        SecurityConfig securityConfig = stackWithSecurity.getSecurityConfig();
-        securityConfig.setServerCert(BaseEncoding.base64().encode(tlsSecurityService.readServerCert(stack.getId()).getBytes()));
-        securityConfigRepository.save(securityConfig);
+    private void downloadAndSavePrivateKey(Stack stack, SSHClient ssh, InstanceMetaData gwInstance) throws IOException, CloudbreakSecuritySetupException {
+        long stackId = stack.getId();
+        String serverCertDir = tlsSecurityService.createServerCertDir(stackId, gwInstance);
+        LOGGER.info("Server cert directory is created at: " + serverCertDir);
+        ssh.newSCPFileTransfer().download("/tmp/server.pem", serverCertDir + "/ca.pem");
+        InstanceMetaData metaData = instanceMetaDataRepository.findOne(gwInstance.getId());
+        metaData.setServerCert(BaseEncoding.base64().encode(tlsSecurityService.readServerCert(stackId, gwInstance).getBytes()));
+        instanceMetaDataRepository.save(metaData);
     }
 
     private Session startSshSession(SSHClient ssh) throws IOException {

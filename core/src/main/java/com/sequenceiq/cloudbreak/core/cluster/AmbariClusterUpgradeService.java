@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -65,8 +64,7 @@ public class AmbariClusterUpgradeService {
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-                InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
-                InstanceMetaData gatewayInstance = gatewayInstanceGroup.getInstanceMetaData().iterator().next();
+                InstanceMetaData gatewayInstance = stack.getGatewayInstance();
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway().getEnableGateway());
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
                 ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId());

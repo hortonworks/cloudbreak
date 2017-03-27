@@ -6,7 +6,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -15,10 +14,6 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "SecurityConfig")
-@NamedQuery(
-        name = "SecurityConfig.getServerCertByStackId",
-        query = "SELECT s.serverCert FROM SecurityConfig s "
-                + "WHERE s.stack.id= :stackId")
 public class SecurityConfig implements ProvisionEntity {
 
     @Id
@@ -33,10 +28,6 @@ public class SecurityConfig implements ProvisionEntity {
     @Type(type = "encrypted_string")
     @Column(columnDefinition = "TEXT")
     private String clientCert;
-
-    @Type(type = "encrypted_string")
-    @Column(columnDefinition = "TEXT")
-    private String serverCert;
 
     @Column(columnDefinition = "TEXT")
     private String cloudbreakSshPublicKey;
@@ -85,14 +76,6 @@ public class SecurityConfig implements ProvisionEntity {
 
     public void setClientCert(String clientCert) {
         this.clientCert = clientCert;
-    }
-
-    public String getServerCert() {
-        return serverCert;
-    }
-
-    public void setServerCert(String serverCert) {
-        this.serverCert = serverCert;
     }
 
     public String getCloudbreakSshPublicKey() {

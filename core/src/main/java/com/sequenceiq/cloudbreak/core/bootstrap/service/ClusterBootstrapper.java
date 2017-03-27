@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabi
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -132,8 +131,7 @@ public class ClusterBootstrapper {
             }
         }
         try {
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            InstanceMetaData gatewayInstance = stack.getGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
             String gatewayIp = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -169,8 +167,7 @@ public class ClusterBootstrapper {
             nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
         }
         try {
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            InstanceMetaData gatewayInstance = stack.getGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
             String gatewayIp = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
@@ -234,8 +231,7 @@ public class ClusterBootstrapper {
             }
         }
         try {
-            InstanceGroup gateway = stack.getGatewayInstanceGroup();
-            InstanceMetaData gatewayInstance = gateway.getInstanceMetaData().iterator().next();
+            InstanceMetaData gatewayInstance = stack.getGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {

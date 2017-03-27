@@ -754,8 +754,7 @@ public class AmbariClusterConnector {
             if (cluster.isSecure()) {
                 String gatewayHost = cluster.getAmbariIp();
                 if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-                    InstanceGroup instanceGroupByType = stack.getGatewayInstanceGroup();
-                    gatewayHost = instanceMetadataRepository.findAliveInstancesHostNamesInInstanceGroup(instanceGroupByType.getId()).get(0);
+                    gatewayHost = stack.getGatewayInstance().getDiscoveryFQDN();
                     String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
                             kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),
