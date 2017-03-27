@@ -38,9 +38,9 @@ type ClusterSkeletonBase struct {
 	ClusterAndAmbariPassword string             `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 	InstanceRole             string             `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
 	Network                  *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
+	Ldap                     *string            `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
 	ClusterInputs            map[string]string  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
 	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
-	Ldap                     *string            `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
 }
 
 type ClusterSkeleton struct {

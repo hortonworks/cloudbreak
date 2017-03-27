@@ -129,6 +129,9 @@ func (c *ClusterSkeletonResult) fill(
 
 		fillWebAccess(stack.Cluster, c)
 
+		if stack.Cluster.LdapConfig != nil {
+			c.Ldap = &stack.Cluster.LdapConfig.Name
+		}
 	}
 
 	c.HDPVersion = SafeStringConvert(stack.HdpVersion)
