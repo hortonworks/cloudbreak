@@ -120,7 +120,9 @@ func (c *ClusterSkeletonResult) fill(
 		if len(stack.Cluster.BlueprintInputs) > 0 {
 			var inputs = make(map[string]string)
 			for _, input := range stack.Cluster.BlueprintInputs {
-				inputs[*input.Name] = *input.PropertyValue
+				if !strings.Contains(*input.Name, "LDAP") {
+					inputs[*input.Name] = *input.PropertyValue
+				}
 			}
 			c.ClusterInputs = inputs
 		}
