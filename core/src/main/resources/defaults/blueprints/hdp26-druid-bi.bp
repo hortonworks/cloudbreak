@@ -2,7 +2,7 @@
   "inputs": [],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp-druid-bi",
+      "blueprint_name": "hdp26-druid-bi",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
