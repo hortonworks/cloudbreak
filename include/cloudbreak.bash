@@ -205,6 +205,9 @@ cloudbreak-conf-uaa() {
 
     env-import UAA_DEFAULT_ACCOUNT "seq1234567.SequenceIQ"
     env-import UAA_DEFAULT_USER_GROUPS "openid,cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,sequenceiq.cloudbreak.admin,sequenceiq.cloudbreak.user,sequenceiq.account.${UAA_DEFAULT_ACCOUNT},cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,periscope.cluster,cloudbreak.recipes,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read"
+
+    env-import UAA_FLEX_USAGE_CLIENT_ID flex_usage_client
+    env-import UAA_FLEX_USAGE_CLIENT_SECRET $UAA_DEFAULT_SECRET
 }
 
 cloudbreak-conf-defaults() {
@@ -484,6 +487,12 @@ oauth:
       scope: cloudbreak.networks,cloudbreak.securitygroups,cloudbreak.templates,cloudbreak.blueprints,cloudbreak.credentials,cloudbreak.stacks,cloudbreak.events,cloudbreak.usages.global,cloudbreak.usages.account,cloudbreak.usages.user,cloudbreak.recipes,openid,cloudbreak.blueprints.read,cloudbreak.templates.read,cloudbreak.credentials.read,cloudbreak.recipes.read,cloudbreak.networks.read,cloudbreak.securitygroups.read,cloudbreak.stacks.read,cloudbreak.sssdconfigs,cloudbreak.sssdconfigs.read,cloudbreak.platforms,cloudbreak.platforms.read,periscope.cluster
       authorities: uaa.none
       redirect-uri: http://cloudbreak.shell
+    ${UAA_FLEX_USAGE_CLIENT_ID}:
+      id: ${UAA_FLEX_USAGE_CLIENT_ID}
+      secret: '$(escape-string-yaml $UAA_FLEX_USAGE_CLIENT_SECRET \')'
+      authorized-grant-types: client_credentials
+      scope: none
+      authorities: cloudbreak.flex
 
 scim:
   username_pattern: '[a-z0-9+\-_.@]+'
@@ -652,4 +661,16 @@ util-smartsense() {
       -v $(which cbd):/bin/cbd \
       -p 9000:9000 \
       $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
+}
+
+util-get-usage() {
+    declare desc="Generate Flex related usages."
+
+    cloudbreak-config
+
+    local CRED="$UAA_FLEX_USAGE_CLIENT_ID:$UAA_FLEX_USAGE_CLIENT_SECRET"
+    local CRED_BASE64=$(echo -n ${CRED}|base64)
+    local TOKEN=$(curl -sX POST -H "Authorization: Basic $CRED_BASE64" "${PUBLIC_IP}:${UAA_PORT}/oauth/token?grant_type=client_credentials" | jq '.access_token' -r)
+    local USAGE=$(curl -sX GET -H "Authorization: Bearer $TOKEN" "${PUBLIC_IP}:8080/cb/api/v1/usages/flex/daily")
+    echo ${USAGE#*=}
 }
