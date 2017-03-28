@@ -22,11 +22,11 @@
     },
     {
       "name": "LDAP_URL",
-      "referenceConfiguration": "hive.server2.authentication.ldap.url"
+      "referenceConfiguration": "ranger.usersync.ldap.url"
     },
     {
       "name": "LDAP_DOMAIN",
-      "referenceConfiguration": "hive.server2.authentication.ldap.Domain"
+      "referenceConfiguration": "ranger.ldap.ad.domain"
     },
     {
       "name": "LDAP_BIND_DN",

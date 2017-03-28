@@ -69,10 +69,6 @@
       },
       {
         "hive-interactive-site": {
-          "hive.server2.authentication.ldap.url":"{{ LDAP_URL }}",
-          "hive.server2.authentication.ldap.Domain":"{{ LDAP_DOMAIN }}",
-          "hive.server2.authentication.ldap.baseDN": "{{ LDAP_SYNC_SEARCH_BASE }}",
-          "hive.server2.authentication":"LDAP",
           "hive.metastore.warehouse.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
         }
       },
@@ -104,10 +100,6 @@
           "hive.merge.mapfiles": "true",
           "hive.server2.tez.initialize.default.sessions": "true",
           "hive.server2.transport.mode": "http",
-          "hive.server2.authentication.ldap.url":"{{ LDAP_URL }}",
-          "hive.server2.authentication.ldap.Domain":"{{ LDAP_DOMAIN }}",
-          "hive.server2.authentication.ldap.baseDN": "{{ LDAP_SYNC_SEARCH_BASE }}",
-          "hive.server2.authentication":"LDAP",
           "hive.metastore.warehouse.dir":"s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
         }
       },
