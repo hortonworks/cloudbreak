@@ -635,6 +635,7 @@ HINT
 }
 
 util-smartsense() {
+  declare desc="Start SmartSense docker container."
 
   cloudbreak-config
 
@@ -648,5 +649,7 @@ util-smartsense() {
       -e CB_SMARTSENSE_CONFIGURE=$CB_SMARTSENSE_CONFIGURE \
       -l traefik.enable=false \
       -v $PWD:/var/lib/cloudbreak-deployment \
+      -v $(which cbd):/bin/cbd \
+      -p 9000:9000 \
       $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
 }
