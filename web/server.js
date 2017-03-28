@@ -327,7 +327,7 @@ function continueInit() {
             };
             res.status(200).send(responseObject);
         } else {
-            res.status(500).send(null);
+            res.status(204).send(null);
         }
     });
 
