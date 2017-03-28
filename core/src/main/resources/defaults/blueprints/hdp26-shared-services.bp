@@ -110,6 +110,54 @@
             "ranger.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}"
           }
         }
+      },
+      {
+        "ams-hbase-site": {
+          "properties": {
+            "hbase.cluster.distributed": "true",
+            "hbase.rootdir": "file:///hadoopfs/fs1/metrics/hbase/data"
+          }
+        }
+      },
+      {
+        "atlas-env": {
+          "properties": {
+            "atlas_solr_shards": "2",
+            "hbase_conf_dir": "/etc/ams-hbase/conf",
+            "content": "\n      # The java implementation to use. If JAVA_HOME is not found we expect java and jar to be in path\n      export JAVA_HOME={{java64_home}}\n\n      # any additional java opts you want to set. This will apply to both client and server operations\n      {% if security_enabled %}\n      export ATLAS_OPTS=\"{{metadata_opts}} -Djava.security.auth.login.config={{atlas_jaas_file}}\"\n      {% else %}\n      export ATLAS_OPTS=\"{{metadata_opts}}\"\n      {% endif %}\n\n      # metadata configuration directory\n      export ATLAS_CONF={{conf_dir}}\n\n      # Where log files are stored. Defatult is logs directory under the base install location\n      export ATLAS_LOG_DIR={{log_dir}}\n\n      # additional classpath entries\n      export ATLASCPPATH={{metadata_classpath}}\n\n      # data dir\n      export ATLAS_DATA_DIR={{data_dir}}\n\n      # pid dir\n      export ATLAS_PID_DIR={{pid_dir}}\n\n      # hbase conf dir\n      export HBASE_CONF_DIR=\"/etc/ams-hbase/conf\"\n\n      # Where do you want to expand the war file. By Default it is in /server/webapp dir under the base install dir.\n      export ATLAS_EXPANDED_WEBAPP_DIR={{expanded_war_dir}}\n      export ATLAS_SERVER_OPTS=\"-server -XX:SoftRefLRUPolicyMSPerMB=0 -XX:+CMSClassUnloadingEnabled -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+PrintTenuringDistribution -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=$ATLAS_LOG_DIR/atlas_server.hprof -Xloggc:$ATLAS_LOG_DIRgc-worker.log -verbose:gc -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=1m -XX:+PrintGCDetails -XX:+PrintHeapAtGC -XX:+PrintGCTimeStamps\"\n      {% if java_version == 8 %}\n      export ATLAS_SERVER_HEAP=\"-Xms{{atlas_server_xmx}}m -Xmx{{atlas_server_xmx}}m -XX:MaxNewSize={{atlas_server_max_new_size}}m -XX:MetaspaceSize=100m -XX:MaxMetaspaceSize=512m\"\n      {% else %}\n      export ATLAS_SERVER_HEAP=\"-Xms{{atlas_server_xmx}}m -Xmx{{atlas_server_xmx}}m -XX:MaxNewSize={{atlas_server_max_new_size}}m -XX:MaxPermSize=512m\"\n      {% endif %}\n"
+          }
+        }
+      },
+      {
+        "application-properties": {
+          "atlas.authentication.method.ldap.ad.bind.dn": "{{ LDAP_BIND_DN }}",
+          "atlas.authentication.method.ldap.type": "ad",
+          "atlas.authentication.method.ldap": "true",
+          "atlas.authentication.method.ldap.ad.url": "{{ LDAP_URL }}",
+          "atlas.authentication.method.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}",
+          "atlas.authentication.method.ldap.ad.domain": "{{ LDAP_DOMAIN }}",
+          "atlas.authentication.method.ldap.ad.bind.password": "{{ LDAP_BIND_PASSWORD }}",
+          "atlas.authentication.method.ldap.ugi-groups": "false",
+          "atlas.authorizer.impl": "ranger",
+          "atlas.audit.hbase.zookeeper.quorum": "{{zookeeper_quorum}}",
+          "atlas.audit.zookeeper.znode.parent": "/ams-hbase-unsecure",
+          "atlas.graph.storage.hostname": "{{zookeeper_quorum}}",
+          "atlas.notification.replicas": "2"
+        }
+      },
+      {
+        "ranger-atlas-plugin-properties": {
+          "ranger-atlas-plugin-enabled": "Yes"
+        }
+      },
+      {
+        "ranger-atlas-audit": {
+          "xasecure.audit.is.enabled": "true",
+          "xasecure.audit.destination.hdfs": "true",
+          "xasecure.audit.destination.hdfs.dir": "s3a://{{ S3_BUCKET }}/{{cluster_name}}/apps/ranger/audit/{{cluster_name}}",
+          "xasecure.audit.destination.solr": "true",
+          "xasecure.audit.destination.solr.zookeepers": "{{zookeeper_quorum}}"
+        }
       }
     ],
     "host_groups": [
@@ -144,6 +192,15 @@
           },
           {
             "name": "INFRA_SOLR"
+          },
+          {
+            "name": "KAFKA_BROKER"
+          },
+          {
+            "name": "ATLAS_SERVER"
+          },
+          {
+            "name": "ATLAS_CLIENT"
           }
         ],
         "cardinality": "1"
@@ -164,6 +221,9 @@
           },
           {
             "name": "INFRA_SOLR_CLIENT"
+          },
+          {
+            "name": "KAFKA_BROKER"
           }
         ],
         "cardinality": "1+"
