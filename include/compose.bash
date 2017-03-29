@@ -226,7 +226,7 @@ traefik:
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./certs/:/certs/
-    image: hortonworks/traefik:$DOCKER_TAG_TRAEFIK
+    image: traefik:$DOCKER_TAG_TRAEFIK
     command: --debug --web --InsecureSkipVerify=true \
         --defaultEntryPoints=http,https \
         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
