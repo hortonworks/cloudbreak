@@ -289,22 +289,24 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     private void saveGeneratedSubnet(AuthenticatedContext ac, CloudStack stack, String cFStackName, AmazonCloudFormationClient client,
             PersistenceNotifier resourceNotifier) {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
-        if (awsNetworkView.isExistingVPC() && !awsNetworkView.isExistingSubnet()) {
-            String subnetId = getCreatedSubnet(cFStackName, client);
-            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
-            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
-
+        if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVPC();
             CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
-        } else if (!awsNetworkView.isExistingVPC() && !awsNetworkView.isExistingSubnet()) {
-            String subnetId = getCreatedSubnet(cFStackName, client);
-            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
-            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
-
+        } else {
             String vpcId = getCreatedVpc(cFStackName, client);
             CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
+        }
+
+        if (awsNetworkView.isExistingSubnet()) {
+            String subnetId = awsNetworkView.getExistingSubnet();
+            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
+        } else {
+            String subnetId = getCreatedSubnet(cFStackName, client);
+            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
         }
     }
 
