@@ -48,7 +48,7 @@ public class StackUtil {
             if (orchestratorType != null && orchestratorType.containerOrchestrator()) {
                 ambariIp = stack.getCluster().getAmbariIp();
             } else {
-                InstanceMetaData gatewayInstance = stack.getGatewayInstance();
+                InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
                 if (stack.getCluster().getAmbariIp() != null && gatewayInstance != null) {
                     ambariIp = gatewayInstance.getPublicIpWrapper();
                 }

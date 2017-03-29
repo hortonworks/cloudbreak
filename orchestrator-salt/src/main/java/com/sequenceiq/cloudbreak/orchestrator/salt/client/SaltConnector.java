@@ -3,14 +3,16 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.client;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltEndpoint.BOOT_HOSTNAME_ENDPOINT;
 import static java.util.Collections.singletonMap;
 
+import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.client.Client;
@@ -28,7 +30,6 @@ import org.glassfish.jersey.media.multipart.MultiPart;
 import org.glassfish.jersey.media.multipart.file.StreamDataBodyPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.util.StreamUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -150,20 +151,29 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    public void upload(String path, String fileName, InputStream inputStream) throws IOException {
-        StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
-        MultiPart multiPart = new FormDataMultiPart()
-                .field("path", path)
-                .bodyPart(streamDataBodyPart);
-        MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
-        contentType = Boundary.addBoundary(contentType);
-        String signature = PkiUtil.generateSignature(signatureKey, StreamUtils.copyToByteArray(inputStream));
-        inputStream.reset();
-        Response response = saltTarget.path(SaltEndpoint.BOOT_FILE_UPLOAD.getContextPath()).request()
-                .header(SIGN_HEADER, signature)
-                .post(Entity.entity(multiPart, contentType));
-        if (!ACCEPTED_STATUSES.contains(response.getStatus())) {
-            throw new IOException("can't upload file, status code: " + response.getStatus());
+    public GenericResponses upload(Set<String> targets, String path, String fileName, byte[] content) throws IOException {
+        Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
+        if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
+            // simple file upload for CB <= 1.14
+            Response singleResponse = upload(SaltEndpoint.BOOT_FILE_UPLOAD.getContextPath(), targets, path, fileName, content);
+            GenericResponses genericResponses = new GenericResponses();
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setAddress(targets.iterator().next());
+            genericResponse.setStatusCode(singleResponse.getStatus());
+            genericResponses.setResponses(Collections.singletonList(genericResponse));
+            return genericResponses;
+        }
+        return JaxRSUtil.response(distributeResponse, GenericResponses.class);
+    }
+
+    private Response upload(String endpoint, Set<String> targets, String path, String fileName, byte[] content) throws IOException {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream(content)) {
+            StreamDataBodyPart streamDataBodyPart = new StreamDataBodyPart("file", inputStream, fileName);
+            MultiPart multiPart = new FormDataMultiPart().field("path", path).field("targets", String.join(",", targets)).bodyPart(streamDataBodyPart);
+            MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
+            contentType = Boundary.addBoundary(contentType);
+            String signature = PkiUtil.generateSignature(signatureKey, content);
+            return saltTarget.path(endpoint).request().header(SIGN_HEADER, signature).post(Entity.entity(multiPart, contentType));
         }
     }
 

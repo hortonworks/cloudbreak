@@ -623,7 +623,7 @@ public class Stack implements ProvisionEntity {
         return null;
     }
 
-    public InstanceMetaData getGatewayInstance() {
+    public InstanceMetaData getPrimaryGatewayInstance() {
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {

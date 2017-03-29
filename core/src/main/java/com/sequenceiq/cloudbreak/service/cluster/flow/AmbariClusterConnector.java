@@ -406,19 +406,19 @@ public class AmbariClusterConnector {
 
     private AmbariClient getDefaultAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getDefaultAmbariClient(clientConfig, stack.getGatewayPort());
     }
 
     private AmbariClient getAmbariClient(Stack stack) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
     }
 
     private AmbariClient getAmbariClient(Stack stack, String user, String password) throws CloudbreakSecuritySetupException {
         Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), user, password);
     }
 
@@ -754,7 +754,7 @@ public class AmbariClusterConnector {
             if (cluster.isSecure()) {
                 String gatewayHost = cluster.getAmbariIp();
                 if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-                    gatewayHost = stack.getGatewayInstance().getDiscoveryFQDN();
+                    gatewayHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
                     String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
                             kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),

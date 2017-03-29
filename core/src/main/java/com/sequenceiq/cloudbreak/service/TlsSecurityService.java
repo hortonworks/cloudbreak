@@ -23,6 +23,7 @@ import com.google.common.io.BaseEncoding;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -39,7 +40,9 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 @Component
 public class TlsSecurityService {
 
-    public static final String SSH_PUBLIC_KEY_EXTENSION = ".pub";
+    public static final String SALT_SIGN_KEY_PREFIX = "/cb-salt-sign-key-";
+
+    private static final String PUBLIC_KEY_EXTENSION = ".pub";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
 
@@ -70,11 +73,14 @@ public class TlsSecurityService {
     public SecurityConfig storeSSHKeys(Long stackId) throws CloudbreakSecuritySetupException {
         try {
             generateTempSshKeypair(stackId);
+            generateSaltSignKeypair(stackId);
             SecurityConfig securityConfig = new SecurityConfig();
             securityConfig.setClientKey(BaseEncoding.base64().encode(readClientKey(stackId).getBytes()));
             securityConfig.setClientCert(BaseEncoding.base64().encode(readClientCert(stackId).getBytes()));
-            securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(readPrivateSshKey(stackId).getBytes()));
-            securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(readPublicSshKey(stackId).getBytes()));
+            securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(readPrivateTempSshKey(stackId).getBytes()));
+            securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(readPublicTempSshKey(stackId).getBytes()));
+            securityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(readPublicSaltSignKey(stackId).getBytes()));
+            securityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(readPrivateSaltSignKey(stackId).getBytes()));
             return securityConfig;
         } catch (IOException | JSchException e) {
             throw new CloudbreakSecuritySetupException("Failed to generate temporary SSH key pair.", e);
@@ -137,8 +143,10 @@ public class TlsSecurityService {
             }
             readClientCert(id);
             readClientKey(id);
-            readPrivateSshKey(id);
-            readPublicSshKey(id);
+            readPrivateTempSshKey(id);
+            readPublicTempSshKey(id);
+            readPrivateSaltSignKey(id);
+            readPublicSaltSignKey(id);
         }
     }
 
@@ -218,8 +226,16 @@ public class TlsSecurityService {
         }
     }
 
+    public String getPublicSaltSignKeyFileName(Long stackId) {
+        return SALT_SIGN_KEY_PREFIX + stackId + PUBLIC_KEY_EXTENSION;
+    }
+
+    public String getPrivateSaltSignKeyFileName(Long stackId) {
+        return SALT_SIGN_KEY_PREFIX + stackId;
+    }
+
     public String getPublicSshKeyFileName(Long stackId) {
-        return SSH_KEY_PREFIX + stackId + SSH_PUBLIC_KEY_EXTENSION;
+        return SSH_KEY_PREFIX + stackId + PUBLIC_KEY_EXTENSION;
     }
 
     public String getPrivateSshKeyFileName(Long stackId) {
@@ -227,9 +243,17 @@ public class TlsSecurityService {
     }
 
     public String generateTempSshKeypair(Long stackId) throws JSchException, IOException {
+        return generateSshKeypair(stackId, getPublicSshKeyFileName(stackId), getPrivateSshKeyFileName(stackId));
+    }
+
+    public String generateSaltSignKeypair(Long stackId) throws JSchException, IOException {
+        return generateSshKeypair(stackId, getPublicSaltSignKeyFileName(stackId), getPrivateSaltSignKeyFileName(stackId));
+    }
+
+    private String generateSshKeypair(Long stackId, String publicKeyName, String privateKeyName) throws JSchException, IOException {
         LOGGER.info("Generating temporary SSH keypair.");
-        String publicKeyPath = getCertDir(stackId) + getPublicSshKeyFileName(stackId);
-        String privateKeyPath = getCertDir(stackId) + getPrivateSshKeyFileName(stackId);
+        String publicKeyPath = getCertDir(stackId) + publicKeyName;
+        String privateKeyPath = getCertDir(stackId) + privateKeyName;
         JSch jsch = new JSch();
         KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, DEFAULT_KEY_SIZE);
         keyPair.writePrivateKey(privateKeyPath);
@@ -239,21 +263,37 @@ public class TlsSecurityService {
         return privateKeyPath;
     }
 
-    public GatewayConfig buildGatewayConfig(Long stackId, String connectionIp, InstanceMetaData gatewayInstance, Integer gatewayPort,
+    public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
+        Stack stack = stackRepository.findOneWithLists(stackId);
         prepareCertDir(stackId, gatewayInstance);
-        HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp);
+        String connectionIp = getGatewayIp(stack, gatewayInstance);
+        HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
+        String saltSignKey = conf.getCertDir() + SALT_SIGN_KEY_PREFIX + stackId;
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                gatewayPort, prepareCertDir(stackId, gatewayInstance), conf.getServerCert(), conf.getClientCert(),
+                gatewayPort, conf.getCertDir(), conf.getServerCert(), conf.getClientCert(),
                 conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
-                knoxGatewayEnabled);
+                knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
+                saltSignKey, saltSignKey + PUBLIC_KEY_EXTENSION);
     }
 
-    public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
+    public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
+        String gatewayIP = gatewayInstance.getPublicIpWrapper();
+        if (stack.getSecurityConfig().usePrivateIpToTls()) {
+            gatewayIP = gatewayInstance.getPrivateIp();
+        }
+        return gatewayIP;
+    }
+
+    public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
+        return buildTLSClientConfig(stackId, apiAddress, stackRepository.findOneWithLists(stackId).getPrimaryGatewayInstance());
+    }
+
+    public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         if (!BYOS.equals(stack.cloudPlatform())) {
-            prepareCertDir(stackId, stack.getGatewayInstance());
-            return new HttpClientConfig(apiAddress, stack.getGatewayPort(), prepareCertDir(stackId), prepareCertDir(stackId, stack.getGatewayInstance()));
+            prepareCertDir(stackId, gateway);
+            return new HttpClientConfig(apiAddress, stack.getGatewayPort(), prepareCertDir(stackId), prepareCertDir(stackId, gateway));
         } else {
             return new HttpClientConfig(apiAddress, stack.getGatewayPort());
         }
@@ -282,20 +322,66 @@ public class TlsSecurityService {
         return readSecurityFile(stackId, gwInstance, "ca.pem");
     }
 
-    public String readPrivateSshKey(Long stackId) throws CloudbreakSecuritySetupException {
-        Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
-        if (!checkSecurityFileExist(stackId, getPrivateSshKeyFileName(stackId))) {
-            writeSecurityFile(stackId, stack.getSecurityConfig().getCloudbreakSshPrivateKey(), getPrivateSshKeyFileName(stackId));
-        }
-        return readSecurityFile(stackId, getPrivateSshKeyFileName(stackId));
+    public String readPrivateSaltSignKey(Long stackId) throws CloudbreakSecuritySetupException {
+        return readPrivateSaltSignKey(stackId, getPrivateSaltSignKeyFileName(stackId));
     }
 
-    public String readPublicSshKey(Long stackId) throws CloudbreakSecuritySetupException {
+    public String readPrivateTempSshKey(Long stackId) throws CloudbreakSecuritySetupException {
+        return readPrivateSshKey(stackId, getPrivateSshKeyFileName(stackId));
+    }
+
+    private String readPrivateSaltSignKey(Long stackId, String keyName) throws CloudbreakSecuritySetupException {
         Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
-        if (!checkSecurityFileExist(stackId, getPublicSshKeyFileName(stackId))) {
-            writeSecurityFile(stackId, stack.getSecurityConfig().getCloudbreakSshPublicKey(), getPublicSshKeyFileName(stackId));
+        if (stack.getSecurityConfig() == null) {
+            return readSecurityFile(stackId, keyName);
         }
-        return readSecurityFile(stackId, getPublicSshKeyFileName(stackId));
+        String key = stack.getSecurityConfig().getSaltSignPrivateKey();
+        if (key != null) {
+            if (!checkSecurityFileExist(stackId, keyName)) {
+                writeSecurityFile(stackId, key, keyName);
+            }
+            return readSecurityFile(stackId, keyName);
+        }
+        return null;
+    }
+
+    private String readPrivateSshKey(Long stackId, String keyName) throws CloudbreakSecuritySetupException {
+        Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
+        if (!checkSecurityFileExist(stackId, keyName)) {
+            writeSecurityFile(stackId, stack.getSecurityConfig().getCloudbreakSshPrivateKey(), keyName);
+        }
+        return readSecurityFile(stackId, keyName);
+    }
+
+    public String readPublicSaltSignKey(Long stackId) throws CloudbreakSecuritySetupException {
+        return readPublicSaltSignKey(stackId, getPublicSaltSignKeyFileName(stackId));
+    }
+
+    public String readPublicTempSshKey(Long stackId) throws CloudbreakSecuritySetupException {
+        return readPublicSshKey(stackId, getPublicSshKeyFileName(stackId));
+    }
+
+    private String readPublicSshKey(Long stackId, String sshKeyName) throws CloudbreakSecuritySetupException {
+        Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
+        if (!checkSecurityFileExist(stackId, sshKeyName)) {
+            writeSecurityFile(stackId, stack.getSecurityConfig().getCloudbreakSshPublicKey(), sshKeyName);
+        }
+        return readSecurityFile(stackId, sshKeyName);
+    }
+
+    private String readPublicSaltSignKey(Long stackId, String keyName) throws CloudbreakSecuritySetupException {
+        Stack stack = stackRepository.findByIdWithSecurityConfig(stackId);
+        if (stack.getSecurityConfig() == null) {
+            return readSecurityFile(stackId, keyName);
+        }
+        String key = stack.getSecurityConfig().getSaltSignPublicKey();
+        if (key != null) {
+            if (!checkSecurityFileExist(stackId, keyName)) {
+                writeSecurityFile(stackId, key, keyName);
+            }
+            return readSecurityFile(stackId, keyName);
+        }
+        return null;
     }
 
     public byte[] getCertificate(Long id) {

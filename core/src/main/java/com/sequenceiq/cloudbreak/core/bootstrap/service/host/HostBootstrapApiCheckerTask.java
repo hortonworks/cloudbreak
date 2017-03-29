@@ -21,6 +21,6 @@ public class HostBootstrapApiCheckerTask extends StackBasedStatusCheckerTask<Hos
 
     @Override
     public String successMessage(HostBootstrapApiContext t) {
-        return "Bootstrap API is available.";
+        return "Bootstrap API is available on gateway: " + t.getGatewayConfig().getPrivateAddress();
     }
 }

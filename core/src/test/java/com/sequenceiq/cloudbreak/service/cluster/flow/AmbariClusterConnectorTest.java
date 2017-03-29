@@ -126,7 +126,7 @@ public class AmbariClusterConnectorTest {
         stack.setCluster(cluster);
         cluster.setHostGroups(new HashSet<>());
         cluster.setConfigStrategy(ConfigStrategy.NEVER_APPLY);
-        when(tlsSecurityService.buildTLSClientConfig(anyLong(), anyString())).thenReturn(httpClientConfig);
+        when(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).thenReturn(httpClientConfig);
         when(ambariClient.extendBlueprintGlobalConfiguration(anyString(), anyMap())).thenReturn("");
         when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<>());
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());

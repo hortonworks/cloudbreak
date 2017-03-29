@@ -36,6 +36,13 @@ public class SecurityConfig implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private String cloudbreakSshPrivateKey;
 
+    @Column(columnDefinition = "TEXT")
+    private String saltSignPublicKey;
+
+    @Type(type = "encrypted_string")
+    @Column(columnDefinition = "TEXT")
+    private String saltSignPrivateKey;
+
     @Type(type = "encrypted_string")
     private String saltPassword;
 
@@ -132,5 +139,21 @@ public class SecurityConfig implements ProvisionEntity {
 
     public void setUsePrivateIpToTls(boolean usePrivateIpToTls) {
         this.usePrivateIpToTls = usePrivateIpToTls;
+    }
+
+    public String getSaltSignPublicKey() {
+        return saltSignPublicKey;
+    }
+
+    public void setSaltSignPublicKey(String saltSignPublicKey) {
+        this.saltSignPublicKey = saltSignPublicKey;
+    }
+
+    public String getSaltSignPrivateKey() {
+        return saltSignPrivateKey;
+    }
+
+    public void setSaltSignPrivateKey(String saltSignPrivateKey) {
+        this.saltSignPrivateKey = saltSignPrivateKey;
     }
 }

@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.isGateway;
-
 import javax.inject.Inject;
 
 import org.springframework.security.access.AccessDeniedException;
@@ -35,10 +33,6 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
         instanceGroup.setGroupName(json.getGroup());
         instanceGroup.setNodeCount(json.getNodeCount());
         instanceGroup.setInstanceGroupType(json.getType());
-        if (isGateway(instanceGroup.getInstanceGroupType())) {
-            // TODO remove this...
-            instanceGroup.setNodeCount(2);
-        }
         try {
             if (json.getSecurityGroupId() != null) {
                 instanceGroup.setSecurityGroup(securityGroupService.get(json.getSecurityGroupId()));
