@@ -18,14 +18,12 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria);
 
-    void bootstrap(GatewayConfig gatewayConfig, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
+    void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void bootstrapNewNodes(GatewayConfig gatewayConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+    void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
-
-    int getMaxBootstrapNodes();
 
     void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;

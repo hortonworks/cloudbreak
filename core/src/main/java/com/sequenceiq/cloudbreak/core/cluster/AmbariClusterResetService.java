@@ -45,7 +45,7 @@ public class AmbariClusterResetService {
     public void resetCluster(Long stackId) throws CloudbreakOrchestratorException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         try {
-            InstanceMetaData gatewayInstance = stack.getGatewayInstance();
+            InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {

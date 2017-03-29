@@ -110,6 +110,6 @@ public class ClusterServiceRunner {
         newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);
         newStatusByGroupType.put(InstanceGroupType.CORE, InstanceStatus.UNREGISTERED);
         instanceMetadataService.updateInstanceStatus(stack.getInstanceGroups(), newStatusByGroupType);
-        return tlsSecurityService.buildTLSClientConfig(stack.getId(), gatewayPublicIp);
+        return tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), gatewayPublicIp);
     }
 }

@@ -29,15 +29,21 @@ public class GatewayConfig {
 
     private final Boolean knoxGatewayEnabled;
 
+    private final boolean primary;
+
+    private final String saltSignPrivateKey;
+
+    private final String saltSignPublicKey;
+
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
             Integer gatewayPort, String certificateDir, Boolean knoxGatewayEnabled) {
         this(connectionAddress, publicAddress, privateAddress, null, gatewayPort, certificateDir,
-                null, null, null, null, null, null, knoxGatewayEnabled);
+                null, null, null, null, null, null, knoxGatewayEnabled, true, null, null);
     }
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
             Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
-            String signatureKey, Boolean knoxGatewayEnabled) {
+            String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey) {
         this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
@@ -51,6 +57,9 @@ public class GatewayConfig {
         this.saltBootPassword = saltBootPassword;
         this.signatureKey = signatureKey;
         this.knoxGatewayEnabled = knoxGatewayEnabled;
+        this.primary = primary;
+        this.saltSignPrivateKey = saltSignPrivateKey;
+        this.saltSignPublicKey = saltSignPublicKey;
     }
 
     public String getConnectionAddress() {
@@ -109,14 +118,29 @@ public class GatewayConfig {
         return knoxGatewayEnabled;
     }
 
+    public boolean isPrimary() {
+        return primary;
+    }
+
+    public String getSaltSignPrivateKey() {
+        return saltSignPrivateKey;
+    }
+
+    public String getSaltSignPublicKey() {
+        return saltSignPublicKey;
+    }
+
     @Override
     public String toString() {
-        return "GatewayConfig{"
-                + "connectionAddress='" + connectionAddress + '\''
-                + ", publicAddress='" + publicAddress + '\''
-                + ", privateAddress='" + privateAddress + '\''
-                + ", certificateDir='" + certificateDir + '\''
-                + ", knoxGatewayEnabled='" + knoxGatewayEnabled + '\''
-                + '}';
+        final StringBuilder sb = new StringBuilder("GatewayConfig{");
+        sb.append("connectionAddress='").append(connectionAddress).append('\'');
+        sb.append(", publicAddress='").append(publicAddress).append('\'');
+        sb.append(", privateAddress='").append(privateAddress).append('\'');
+        sb.append(", hostname='").append(hostname).append('\'');
+        sb.append(", gatewayPort=").append(gatewayPort);
+        sb.append(", knoxGatewayEnabled=").append(knoxGatewayEnabled);
+        sb.append(", primary=").append(primary);
+        sb.append('}');
+        return sb.toString();
     }
 }

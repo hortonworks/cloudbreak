@@ -53,8 +53,8 @@ public class HttpClientConfig {
     }
 
     public String getCertDir() {
-        if (serverCert != null) {
-            return serverCert.substring(0, serverCert.indexOf(DEFAULT_SERVER_CERT_NAME));
+        if (clientCert != null) {
+            return clientCert.substring(0, clientCert.indexOf(DEFAULT_CLIENT_CERT_NAME));
         }
         return null;
     }

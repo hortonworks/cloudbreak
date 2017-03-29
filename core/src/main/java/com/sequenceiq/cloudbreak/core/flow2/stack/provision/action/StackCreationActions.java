@@ -192,7 +192,7 @@ public class StackCreationActions {
 
             @Override
             protected Selectable createRequest(StackContext context) {
-                InstanceMetaData gatewayMetaData = context.getStack().getGatewayInstance();
+                InstanceMetaData gatewayMetaData = context.getStack().getPrimaryGatewayInstance();
                 CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
                 return new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(), context.getCloudCredential(), gatewayInstance);
             }
@@ -216,6 +216,7 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<StackWithFingerprintsEvent>(StackWithFingerprintsEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) throws Exception {
+                // TODO remove from all gw
                 stackCreationService.removeTemporarySShKey(context, payload.getSshFingerprints());
                 stackCreationService.stackCreationFinished(context.getStack());
                 sendEvent(context);

@@ -163,7 +163,7 @@ public class AmbariDecommissioner {
             throw new CloudbreakException(String.format("Not all the hosts found in the given hostgroup."));
         }
         Cluster cluster = stack.getCluster();
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
         List<String> runningHosts = ambariClient.getClusterHosts();
         new HashSet(hostsToRemove.keySet()).forEach(hostName -> {
@@ -197,7 +197,7 @@ public class AmbariDecommissioner {
     }
 
     public boolean deleteHostFromAmbari(Stack stack, HostMetadata data) throws CloudbreakSecuritySetupException {
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), stack.getCluster().getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), stack.getCluster().getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), stack.getCluster());
         Map<String, Map<String, String>> runningComponents = ambariClient.getHostComponentsStates();
         return deleteHostFromAmbari(data, runningComponents, ambariClient);
@@ -257,7 +257,7 @@ public class AmbariDecommissioner {
     private List<HostMetadata> collectDownscaleCandidates(Stack stack, Cluster cluster, String hostGroupName, Integer scalingAdjustment)
             throws CloudbreakSecuritySetupException {
         List<HostMetadata> downScaleCandidates;
-        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfig(stack.getId(), cluster.getAmbariIp());
+        HttpClientConfig clientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stack.getId(), cluster.getAmbariIp());
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
         List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);

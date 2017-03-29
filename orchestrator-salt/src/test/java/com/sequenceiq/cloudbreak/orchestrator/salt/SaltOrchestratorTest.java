@@ -18,6 +18,7 @@ import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -85,7 +86,7 @@ public class SaltOrchestratorTest {
     @Before
     public void setUp() throws Exception {
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "/certdir", "servercert", "clientcert", "clientkey",
-                "saltpasswd", "saltbootpassword", "signkey", false);
+                "saltpasswd", "saltbootpassword", "signkey", false, true, null, null);
         targets = new HashSet<>();
         targets.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com"));
         targets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com"));
@@ -107,13 +108,13 @@ public class SaltOrchestratorTest {
         PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
         PowerMockito.whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
 
-        saltOrchestrator.bootstrap(gatewayConfig, targets, exitCriteriaModel);
+        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
 
-        verify(parallelOrchestratorComponentRunner, times(1)).submit(any(OrchestratorBootstrapRunner.class));
+        verify(parallelOrchestratorComponentRunner, times(2)).submit(any(OrchestratorBootstrapRunner.class));
 
-        verifyNew(OrchestratorBootstrapRunner.class, times(1))
+        verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(any(PillarSave.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
-        verifyNew(OrchestratorBootstrapRunner.class, times(1))
+        verifyNew(OrchestratorBootstrapRunner.class, times(2))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
         verifyNew(SaltBootstrap.class, times(1)).withArguments(eq(saltConnector), eq(gatewayConfig), eq(targets), eq(".example.com"));
     }
@@ -125,7 +126,7 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
-        saltOrchestrator.bootstrapNewNodes(gatewayConfig, targets, exitCriteriaModel);
+        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
