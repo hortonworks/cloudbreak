@@ -526,7 +526,7 @@ uluwatu:
         - AWS_SECRET_ACCESS_KEY
     labels:
       - traefik.port=3000
-      - traefik.frontend.rule=Host:$PUBLIC_IP,$(curl -m 1 -f -s 169.254.169.254/latest/meta-data/public-ipv4 2>/dev/null)
+      - traefik.frontend.rule=Host:$PUBLIC_IP,$CB_TRAEFIK_HOST_ADDRESS
       - traefik.backend=uluwatu-backend
       - traefik.frontend.priority=5
     ports:
