@@ -51,6 +51,9 @@ public class SecurityConfig implements ProvisionEntity {
     @Type(type = "encrypted_string")
     private String saltBootPassword;
 
+    @Type(type = "encrypted_string")
+    private String knoxMasterSecret;
+
     @OneToOne(fetch = FetchType.LAZY)
     private Stack stack;
 
@@ -122,6 +125,14 @@ public class SecurityConfig implements ProvisionEntity {
 
     public void setSaltBootPassword(String saltBootPassword) {
         this.saltBootPassword = saltBootPassword;
+    }
+
+    public String getKnoxMasterSecret() {
+        return knoxMasterSecret;
+    }
+
+    public void setKnoxMasterSecret(String knoxMasterSecret) {
+        this.knoxMasterSecret = knoxMasterSecret;
     }
 
     public Stack getStack() {

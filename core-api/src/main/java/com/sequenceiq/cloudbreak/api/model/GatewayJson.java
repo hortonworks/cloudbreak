@@ -28,7 +28,10 @@ public class GatewayJson {
     private String ssoProvider;
 
     @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_SSO_CERT)
-    private String signKey;
+    private String signCert;
+
+    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_SSO_PUB_KEY)
+    private String signPub;
 
     @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_GATEWAY_TYPE)
     private GatewayType gatewayType;
@@ -76,12 +79,20 @@ public class GatewayJson {
         this.ssoProvider = ssoProvider;
     }
 
-    public String getSignKey() {
-        return signKey;
+    public String getSignCert() {
+        return signCert;
     }
 
-    public void setSignKey(String signKey) {
-        this.signKey = signKey;
+    public void setSignCert(String signCert) {
+        this.signCert = signCert;
+    }
+
+    public String getSignPub() {
+        return signPub;
+    }
+
+    public void setSignPub(String signPub) {
+        this.signPub = signPub;
     }
 
     public GatewayType getGatewayType() {

@@ -144,10 +144,14 @@ public class ClusterHostServiceRunner {
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
+        gateway.put("path", cluster.getGateway().getPath());
         gateway.put("topology", cluster.getGateway().getTopologyName());
         gateway.put("ssotype", cluster.getGateway().getSsoType());
         gateway.put("ssoprovider", cluster.getGateway().getSsoProvider());
+        gateway.put("signpub", cluster.getGateway().getSignPub());
+        gateway.put("signcert", cluster.getGateway().getSignCert());
         gateway.put("signkey", cluster.getGateway().getSignKey());
+        gateway.put("mastersecret", cluster.getStack().getSecurityConfig().getKnoxMasterSecret());
 
         Json exposedJson = cluster.getGateway().getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {

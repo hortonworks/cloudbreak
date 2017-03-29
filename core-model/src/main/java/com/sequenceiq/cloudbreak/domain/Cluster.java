@@ -162,7 +162,7 @@ public class Cluster implements ProvisionEntity {
 
     private String emailTo;
 
-    @OneToOne(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "cluster", cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, orphanRemoval = true)
     private Gateway gateway;
 
     @OneToMany(mappedBy = "cluster", cascade = CascadeType.ALL, orphanRemoval = true)

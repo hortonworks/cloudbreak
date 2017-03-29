@@ -209,6 +209,12 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
             }
         }
+        gatewayJson.setPath(gateway.getPath());
+        gatewayJson.setSignCert(gateway.getSignCert());
+        gatewayJson.setSignPub(gateway.getSignPub());
+        gatewayJson.setSsoProvider(gateway.getSsoProvider());
+        gatewayJson.setSsoType(gateway.getSsoType());
+        gatewayJson.setGatewayType(gateway.getGatewayType());
         clusterResponse.setGateway(gatewayJson);
 
     }

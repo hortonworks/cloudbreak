@@ -317,6 +317,7 @@ public class StackService {
                 SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys(stack.getId());
                 securityConfig.setSaltPassword(PasswordUtil.generatePassword());
                 securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
+                securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());
                 securityConfig.setStack(stack);
                 securityConfigRepository.save(securityConfig);
                 savedStack.setSecurityConfig(securityConfig);

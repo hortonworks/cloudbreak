@@ -11,6 +11,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.hibernate.annotations.Type;
+
 import com.sequenceiq.cloudbreak.api.model.GatewayType;
 import com.sequenceiq.cloudbreak.api.model.SSOType;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -50,7 +52,12 @@ public class Gateway {
 
     private String ssoProvider;
 
+    @Type(type = "encrypted_string")
     private String signKey;
+
+    private String signPub;
+
+    private String signCert;
 
     public Long getId() {
         return id;
@@ -130,5 +137,21 @@ public class Gateway {
 
     public void setSignKey(String signKey) {
         this.signKey = signKey;
+    }
+
+    public String getSignCert() {
+        return signCert;
+    }
+
+    public void setSignCert(String signCert) {
+        this.signCert = signCert;
+    }
+
+    public String getSignPub() {
+        return signPub;
+    }
+
+    public void setSignPub(String signPub) {
+        this.signPub = signPub;
     }
 }

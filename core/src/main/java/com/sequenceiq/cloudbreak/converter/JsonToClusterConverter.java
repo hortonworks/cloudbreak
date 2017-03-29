@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemBase;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
+import com.sequenceiq.cloudbreak.api.model.SSOType;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -94,9 +95,18 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(Boolean.FALSE);
         gateway.setTopologyName(source.getName());
-        gateway.setPath("gateway");
-        ExposedServices exposedServices = new ExposedServices();
+        gateway.setPath(gatewayJson.getPath() == null ? "gateway" : gatewayJson.getPath());
+        gateway.setSignCert(gatewayJson.getSignCert());
+        gateway.setSignPub(gatewayJson.getSignPub());
+        gateway.setSsoProvider(gatewayJson.getSsoProvider());
+        gateway.setSsoType(gatewayJson.getSsoType() == null ? SSOType.NONE : gatewayJson.getSsoType());
+        convertExposedServices(gatewayJson, gateway);
+        cluster.setGateway(gateway);
+        gateway.setCluster(cluster);
+    }
 
+    private void convertExposedServices(GatewayJson gatewayJson, Gateway gateway) {
+        ExposedServices exposedServices = new ExposedServices();
         if (gatewayJson != null) {
             if (gatewayJson.getGatewayType() != null) {
                 gateway.setGatewayType(gatewayJson.getGatewayType());
@@ -126,9 +136,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             LOGGER.error("Failed to store exposedServices", e);
             throw new CloudbreakApiException("Failed to store exposedServices", e);
         }
-
-        cluster.setGateway(gateway);
-        gateway.setCluster(cluster);
     }
 
     private Map<String, String> convertBlueprintInputJsons(Set<BlueprintInputJson> inputs) {

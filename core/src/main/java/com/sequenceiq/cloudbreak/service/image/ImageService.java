@@ -17,7 +17,7 @@ import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.client.RsaKeyUtil;
+import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
@@ -66,7 +66,7 @@ public class ImageService {
             String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion, customImage);
             String cbPrivKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPrivateKey()));
             String cbSshKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPublicKey()));
-            byte[] cbSshKeyDer = RsaKeyUtil.getPublicKeyDer(cbPrivKey);
+            byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(cbPrivKey);
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, cbSshKeyDer, cbSshKey, sshUser, params,

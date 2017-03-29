@@ -9,15 +9,12 @@ knox:
 #/usr/hdp/current/knox-server/conf/topologies/admin.xml:
 #  file.absent
 
-/usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
-  file.absent
-
 /usr/hdp/current/knox-server/conf/topologies/manager.xml:
   file.absent
 
 knox-master-secret:
   cmd.run:
-    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master '{{ salt['pillar.get']('gateway:password') }}'
+    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-master --master '{{ salt['pillar.get']('gateway:mastersecret') }}'
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/master
 
@@ -27,10 +24,49 @@ knox-create-cert:
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/gateway.jks
 
+/usr/hdp/current/knox-server/data/security/keystores/signkey.pem:
+  file.managed:
+    - user: knox
+    - group: hadoop
+    - contents_pillar: gateway:signkey
+
+/usr/hdp/current/knox-server/data/security/keystores/signcert.pem:
+  file.managed:
+    - user: knox
+    - group: hadoop
+    - contents_pillar: gateway:signcert
+
+# openssl pkcs12 -export -in cert.pem -inkey key.pem -out signing.p12 -name signing-identity -password pass:admin
+# keytool -importkeystore -deststorepass admin1 -destkeypass admin1 -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass admin -alias signing-identity
+
+knox-create-sign-pkcs12:
+  cmd.run:
+    - name: cd /usr/hdp/current/knox-server/data/security/keystores/ && openssl pkcs12 -export -in signcert.pem -inkey signkey.pem -out signing.p12 -name signing-identity -password pass:{{ salt['pillar.get']('gateway:mastersecret') }}
+    - user: knox
+    - creates: /usr/hdp/current/knox-server/data/security/keystores/signing.p12
+
+knox-create-sign-jks:
+  cmd.run:
+    - name: cd /usr/hdp/current/knox-server/data/security/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.jks -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
+    - user: knox
+    - creates: /usr/hdp/current/knox-server/data/security/keystores/signing.jks
+
+#knox-export-cert:
+#  cmd.run:
+#    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh export-cert --type PEM
+#    - user: knox
+#    - creates: /usr/hdp/current/knox-server/data/security/keystores/gateway-identity.pem
+
+ # openssl x509 -in /usr/hdp/current/knox-server/data/security/keystores/gateway-identity.pem -text -noout
+
+{% if gateway.is_local_ldap %}
+
 /usr/hdp/current/knox-server/conf/users.ldif:
   file.managed:
     - source: salt://gateway/config/users.ldif.j2
     - template: jinja
+
+{% endif %}
 
 /usr/hdp/current/knox-server/conf/gateway-site.xml:
   file.managed:
@@ -44,10 +80,21 @@ knox-create-cert:
     - user: knox
     - group: knox
 
-#https://github.com/rabits/salt-stack-modules/blob/master/openvpn/server.sls
-#setcap 'cap_net_bind_service=+ep' /usr/hdp/current/knox-server/bin/gateway.sh:
-#  cmd.run:
-#    - unless: getcap /usr/hdp/current/knox-server/bin/gateway.sh | grep -q 'cap_net_bind_service+ep'
+{% if 'SSO_PROVIDER' == salt['pillar.get']('gateway:ssotype') %}
+
+/usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
+  file.managed:
+    - source: salt://gateway/config/knoxsso.xml.j2
+    - template: jinja
+    - user: knox
+    - group: knox
+
+{% else %}
+
+/usr/hdp/current/knox-server/conf/topologies/knoxsso.xml:
+  file.absent
+
+{% endif %}
 
 
 {% if gateway.is_systemd %}
