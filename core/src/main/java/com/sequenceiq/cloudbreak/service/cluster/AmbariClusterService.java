@@ -7,6 +7,8 @@ import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_REQUESTED;
 
 import java.io.IOException;
+import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -42,6 +44,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
@@ -65,6 +68,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Constraint;
+import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -200,6 +204,7 @@ public class AmbariClusterService implements ClusterService {
         cluster.setOwner(user.getUserId());
         cluster.setAccount(user.getAccount());
         stack.setCluster(cluster);
+        generateSignKeys(cluster.getGateway());
         try {
             cluster = clusterRepository.save(cluster);
             clusterComponentConfigProvider.store(components, cluster);
@@ -701,6 +706,19 @@ public class AmbariClusterService implements ClusterService {
                 throw new CloudbreakServiceException(e);
             }
         }
+    }
+
+    private void generateSignKeys(Gateway gateway) {
+        if (gateway.getSignCert() == null) {
+            KeyPair identityKey = PkiUtil.generateKeypair();
+            KeyPair signKey = PkiUtil.generateKeypair();
+            X509Certificate cert = PkiUtil.cert(identityKey, "signing", signKey);
+
+            gateway.setSignKey(PkiUtil.convert(identityKey.getPrivate()));
+            gateway.setSignPub(PkiUtil.convert(identityKey.getPublic()));
+            gateway.setSignCert(PkiUtil.convert(cert));
+        }
+
     }
 
     private void createHDPRepoComponent(HDPRepo hdpRepoUpdate, Stack stack) {

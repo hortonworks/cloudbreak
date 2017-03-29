@@ -33,7 +33,7 @@ import org.springframework.util.StreamUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.client.RsaKeyUtil;
+import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -92,7 +92,7 @@ public class SaltConnector implements Closeable {
 
     public GenericResponse pillar(Pillar pillar) {
         Response response = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
-                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
+                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
                 .post(Entity.json(pillar));
         GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
         LOGGER.info("Pillar response: {}", responseEntity);
@@ -101,7 +101,7 @@ public class SaltConnector implements Closeable {
 
     public GenericResponses action(SaltAction saltAction) {
         Response response = saltTarget.path(SaltEndpoint.BOOT_ACTION_DISTRIBUTE.getContextPath()).request()
-                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
+                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
                 .post(Entity.json(saltAction));
         GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
         LOGGER.info("SaltAction response: {}", responseEntity);
@@ -127,7 +127,7 @@ public class SaltConnector implements Closeable {
             }
         }
         Response response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
-                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
+                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
         LOGGER.info("Salt run response: {}", responseEntity);
@@ -143,7 +143,7 @@ public class SaltConnector implements Closeable {
             form.param("match", match.stream().collect(Collectors.joining(",")));
         }
         Response response = saltTarget.path(SaltEndpoint.SALT_RUN.getContextPath()).request()
-                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
+                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
         LOGGER.info("SaltAction response: {}", responseEntity);
@@ -157,7 +157,7 @@ public class SaltConnector implements Closeable {
                 .bodyPart(streamDataBodyPart);
         MediaType contentType = MediaType.MULTIPART_FORM_DATA_TYPE;
         contentType = Boundary.addBoundary(contentType);
-        String signature = RsaKeyUtil.generateSignature(signatureKey, StreamUtils.copyToByteArray(inputStream));
+        String signature = PkiUtil.generateSignature(signatureKey, StreamUtils.copyToByteArray(inputStream));
         inputStream.reset();
         Response response = saltTarget.path(SaltEndpoint.BOOT_FILE_UPLOAD.getContextPath()).request()
                 .header(SIGN_HEADER, signature)
@@ -170,7 +170,7 @@ public class SaltConnector implements Closeable {
     public Map<String, String> members(List<String> privateIps) throws CloudbreakOrchestratorFailedException {
         Map<String, List<String>> clients = singletonMap("clients", privateIps);
         Response response = saltTarget.path(BOOT_HOSTNAME_ENDPOINT.getContextPath()).request()
-                .header(SIGN_HEADER, RsaKeyUtil.generateSignature(signatureKey, toJson(clients).getBytes()))
+                .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(clients).getBytes()))
                 .post(Entity.json(clients));
         GenericResponses responses = JaxRSUtil.response(response, GenericResponses.class);
         List<GenericResponse> failedResponses = responses.getResponses().stream()

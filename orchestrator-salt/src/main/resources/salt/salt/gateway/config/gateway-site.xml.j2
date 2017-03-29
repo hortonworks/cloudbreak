@@ -26,8 +26,18 @@ limitations under the License.
 
     <property>
         <name>gateway.path</name>
-        <value>gateway</value>
+        <value>{{ salt['pillar.get']('gateway:path') }}</value>
         <description>The default context path for the gateway.</description>
+    </property>
+
+    <property>
+        <name>gateway.signing.keystore.name</name>
+        <value>signing.jks</value>
+    </property>
+
+    <property>
+        <name>gateway.signing.key.alias</name>
+        <value>signing-identity</value>
     </property>
 
     <property>

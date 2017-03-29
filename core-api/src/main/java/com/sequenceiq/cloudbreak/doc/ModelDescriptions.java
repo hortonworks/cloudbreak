@@ -160,6 +160,7 @@ public class ModelDescriptions {
         public static final String EXPOSED_KNOX_SERVICES = "exposed Knox services";
         public static final String KNOX_SSO_PROVIDER = "SSO provider cluster name";
         public static final String KNOX_SSO_CERT = "SSO Provider certificate";
+        public static final String KNOX_SSO_PUB_KEY = "SSO Provider pub key";
     }
 
     public static class ClusterTemplateModelDescription {
