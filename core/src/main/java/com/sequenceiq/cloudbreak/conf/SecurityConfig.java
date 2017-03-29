@@ -88,6 +88,8 @@ public class SecurityConfig {
 
         private static final String[] STACK_TEMPLATE_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/clustertemplates/**"};
 
+        private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/accountpreferences/**";
+
         @Value("${cb.client.id}")
         private String clientId;
 
@@ -143,6 +145,8 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, STACK_URL_PATTERNS)
                         .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')"
                                 + " or #oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
+                        .permitAll()
 
                     .antMatchers(API_ROOT_CONTEXT + "/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
@@ -153,6 +157,8 @@ public class SecurityConfig {
                     .antMatchers(SECURITYGROUP_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.securitygroups')")
                     .antMatchers(STACK_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(STACK_TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(ACCOUNT_PREFERENCES)
+                        .access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/stacks/ambari", API_ROOT_CONTEXT + "/stacks/*/certificate", API_ROOT_CONTEXT + "/stacks/all")
                         .access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(API_ROOT_CONTEXT + "/events").access("#oauth2.hasScope('cloudbreak.events')")
@@ -160,8 +166,6 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/usages/user/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
                     .antMatchers(API_ROOT_CONTEXT + "/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
                     .antMatchers(API_ROOT_CONTEXT + "/subscriptions").access("#oauth2.hasScope('cloudbreak.subscribe')")
-                    .antMatchers(API_ROOT_CONTEXT + "/accountpreferences/**")
-                        .access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/constraints/**")
                         .access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(API_ROOT_CONTEXT + "/topologies/**")
