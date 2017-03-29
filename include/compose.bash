@@ -214,7 +214,7 @@ compose-generate-yaml-force() {
     cat > ${composeFile} <<EOF
 traefik:
     ports:
-        - 8081:8080
+        - "$PRIVATE_IP:8081:8080"
         - 80:80
         - 443:443
     links:
@@ -222,18 +222,18 @@ traefik:
         - identity
         - sultans
         - uluwatu
-    dns: $PRIVATE_IP
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./certs/:/certs/
     image: traefik:$DOCKER_TAG_TRAEFIK
+    restart: on-failure
     command: --debug --web --InsecureSkipVerify=true \
         --defaultEntryPoints=http,https \
         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
         --entryPoints='Name:https Address::443 TLS:$CBD_TRAEFIK_TLS' \
         --maxidleconnsperhost=$TRAEFIK_MAX_IDLE_CONNECTION \
         --docker \
-        --consul --consul.endpoint=consul.service.consul:8500
+        --consul --consul.endpoint=consul:8500
 haveged:
     labels:
       - traefik.enable=false
