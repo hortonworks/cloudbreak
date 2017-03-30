@@ -9,6 +9,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -69,6 +70,13 @@ public interface FlexSubscriptionEndpoint {
     @ApiOperation(value = FlexSubOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deletePublicFlexSubscriptionByName")
     void deletePublic(@PathParam(value = "name") String name);
+
+    @PUT
+    @Path("account/setdefault/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
+            nickname = "putPublicDefaultFlexSubscriptionByName")
+    void setDefaultInAccount(@PathParam(value = "name") String name);
 
     @POST
     @Path("user")

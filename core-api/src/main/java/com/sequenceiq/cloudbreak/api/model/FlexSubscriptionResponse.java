@@ -64,4 +64,5 @@ public class FlexSubscriptionResponse extends FlexSubscriptionRequest implements
     public void setSmartSenseSubscription(SmartSenseSubscriptionJson smartSenseSubscription) {
         this.smartSenseSubscription = smartSenseSubscription;
     }
+
 }

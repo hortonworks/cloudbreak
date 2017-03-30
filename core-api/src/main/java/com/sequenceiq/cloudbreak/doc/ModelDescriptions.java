@@ -404,5 +404,7 @@ public class ModelDescriptions {
         public static final String FLEX_SUBSCRIPTION_ID = "Identifier of Flex subscription.";
         public static final String SMARTSENSE_SUBSCRIPTION_ID = "Identifier of SmartSense subscription Cloudbreak domain object json representation.";
         public static final String SMARTSENSE_SUBSCRIPTION = "The associated SmartSense subscription Cloudbreak domain object json representation.";
+        public static final String IS_DEFAULT = "true if the flex subscription is the default one";
+        public static final String USED_FOR_CONTROLLER = "true if the flex subscription was used for the controller";
     }
 }
