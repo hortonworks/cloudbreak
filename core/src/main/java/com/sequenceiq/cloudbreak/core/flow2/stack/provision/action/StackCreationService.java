@@ -215,9 +215,10 @@ public class StackCreationService {
 
     public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
         Stack stack = context.getStack();
-        InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-        String ipToTls = gatewayConfigService.getGatewayIp(stack);
-        tlsSetupService.removeTemporarySShKey(stack, ipToTls, gatewayInstance.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
+        for (InstanceMetaData gateway : stack.getGatewayInstanceGroup().getInstanceMetaData()) {
+            String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
+            tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
+        }
     }
 
     public void stackCreationFinished(Stack stack) {

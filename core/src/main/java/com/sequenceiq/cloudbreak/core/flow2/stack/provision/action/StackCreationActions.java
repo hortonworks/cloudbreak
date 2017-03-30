@@ -216,7 +216,6 @@ public class StackCreationActions {
         return new AbstractStackCreationAction<StackWithFingerprintsEvent>(StackWithFingerprintsEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) throws Exception {
-                // TODO remove from all gw
                 stackCreationService.removeTemporarySShKey(context, payload.getSshFingerprints());
                 stackCreationService.stackCreationFinished(context.getStack());
                 sendEvent(context);
