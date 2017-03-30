@@ -91,13 +91,23 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
-    public GenericResponse pillar(Pillar pillar) {
-        Response response = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
+    public GenericResponses pillar(Set<String> targets, Pillar pillar) {
+        Response distributeResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_DISTRIBUTE.getContextPath()).request()
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
                 .post(Entity.json(pillar));
-        GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
-        LOGGER.info("Pillar response: {}", responseEntity);
-        return responseEntity;
+        if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
+            // simple pillar save for CB <= 1.14
+            Response singleResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
+                    .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
+                    .post(Entity.json(pillar));
+            GenericResponses genericResponses = new GenericResponses();
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setAddress(targets.iterator().next());
+            genericResponse.setStatusCode(singleResponse.getStatus());
+            genericResponses.setResponses(Collections.singletonList(genericResponse));
+            return genericResponses;
+        }
+        return JaxRSUtil.response(distributeResponse, GenericResponses.class);
     }
 
     public GenericResponses action(SaltAction saltAction) {

@@ -25,7 +25,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
-    void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
+    void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
     void resetAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)

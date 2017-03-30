@@ -161,7 +161,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
         SaltPillarConfig saltPillarConfig = new SaltPillarConfig();
-        saltOrchestrator.runService(gatewayConfig, targets, saltPillarConfig, exitCriteriaModel);
+        saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltPillarConfig, exitCriteriaModel);
 
         // verify pillar save
         verifyNew(OrchestratorBootstrapRunner.class, times(3))

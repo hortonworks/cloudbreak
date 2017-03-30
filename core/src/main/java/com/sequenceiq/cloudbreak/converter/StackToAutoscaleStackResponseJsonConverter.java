@@ -28,7 +28,7 @@ public class StackToAutoscaleStackResponseJsonConverter extends AbstractConversi
 
         if (source.getCluster() != null) {
             Cluster cluster = source.getCluster();
-            String gatewayIp = gatewayConfigService.getGatewayIp(source);
+            String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);
             result.setAmbariServerIp(gatewayIp);
             result.setUserName(cluster.getUserName());
             result.setPassword(cluster.getPassword());
