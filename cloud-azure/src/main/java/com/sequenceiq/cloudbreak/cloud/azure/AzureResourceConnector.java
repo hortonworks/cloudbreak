@@ -100,9 +100,13 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
         } catch (CloudException e) {
             LOGGER.error("Provisioning error, cloud exception happened: ", e);
-            String details = e.getBody().getDetails().stream().map(CloudError::getMessage).collect(Collectors.joining(", "));
-            throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
-                    e.getBody().getCode(), e.getBody().getMessage(), details));
+            if (e.getBody() != null && e.getBody().getDetails() != null) {
+                String details = e.getBody().getDetails().stream().map(CloudError::getMessage).collect(Collectors.joining(", "));
+                throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
+                        e.getBody().getCode(), e.getBody().getMessage(), details));
+            } else {
+                throw new CloudConnectorException(String.format("Stack provisioning failed: '%s', please go to Azure Portal for detailed message", e));
+            }
         } catch (Exception e) {
             LOGGER.error("Provisioning error:", e);
             throw new CloudConnectorException(String.format("Error in provisioning stack %s: %s", stackName, e.getMessage()));
