@@ -22,6 +22,8 @@ public class JsonToFlexSubscriptionConverter extends AbstractConversionServiceAw
         FlexSubscription subscription = new FlexSubscription();
         subscription.setName(source.getName());
         subscription.setSubscriptionId(source.getSubscriptionId());
+        subscription.setDefault(source.isDefault());
+        subscription.setUsedForController(source.isUsedForController());
         Long smartSenseSubscriptionId = source.getSmartSenseSubscriptionId();
         try {
             SmartSenseSubscription smartSenseSubscription = smartSenseSubscriptionService.findOneById(smartSenseSubscriptionId);

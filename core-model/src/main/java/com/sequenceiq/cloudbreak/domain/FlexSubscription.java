@@ -67,6 +67,14 @@ public class FlexSubscription {
     @Column(nullable = false)
     private boolean publicInAccount;
 
+    @Column
+    //CHECKSTYLE:OFF
+    private boolean isDefault;
+    //CHECKSTYLE:ON
+
+    @Column
+    private boolean usedForController;
+
     public Long getId() {
         return id;
     }
@@ -121,6 +129,22 @@ public class FlexSubscription {
 
     public void setPublicInAccount(boolean publicInAccount) {
         this.publicInAccount = publicInAccount;
+    }
+
+    public boolean isDefault() {
+        return isDefault;
+    }
+
+    public void setDefault(boolean aDefault) {
+        isDefault = aDefault;
+    }
+
+    public boolean isUsedForController() {
+        return usedForController;
+    }
+
+    public void setUsedForController(boolean usedForController) {
+        this.usedForController = usedForController;
     }
 
     @Override

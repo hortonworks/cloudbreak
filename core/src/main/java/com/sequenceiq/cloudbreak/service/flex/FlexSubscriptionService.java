@@ -88,4 +88,16 @@ public class FlexSubscriptionService {
             return flexRepo.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
+
+    public void setDefaultFlexSubscription(String name, CbUser cbUser) {
+        List<FlexSubscription> allInAccount = flexRepo.findAllInAccount(cbUser.getAccount());
+        for (FlexSubscription flex : allInAccount) {
+            if (name.equals(flex.getSubscriptionId())) {
+                flex.setDefault(true);
+            } else {
+                flex.setDefault(false);
+            }
+        }
+        flexRepo.save(allInAccount);
+    }
 }

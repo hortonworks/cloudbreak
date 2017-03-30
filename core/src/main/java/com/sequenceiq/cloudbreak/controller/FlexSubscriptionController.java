@@ -69,6 +69,12 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
     }
 
     @Override
+    public void setDefaultInAccount(String name) {
+        CbUser cbUser = authenticatedUserService.getCbUser();
+        flexService.setDefaultFlexSubscription(name, cbUser);
+    }
+
+    @Override
     public FlexSubscriptionResponse postPrivate(FlexSubscriptionRequest flexSubscription) {
         return createFlexSubscription(flexSubscription, false);
     }
