@@ -96,7 +96,8 @@
           "ranger.usersync.ldap.ldapbindpassword": "{{ LDAP_BIND_PASSWORD }}",
           "ranger.usersync.ldap.user.nameattribute": "{{ LDAP_NAME_ATTRIBUTE }}",
           "ranger.usersync.ldap.user.searchbase": "{{ LDAP_SYNC_SEARCH_BASE }}",
-          "ranger.usersync.group.searchenabled": "false"
+          "ranger.usersync.group.searchenabled": "false",
+          "ranger.usersync.ldap.deltasync": "false"
         }
       },
       {
