@@ -9,10 +9,10 @@ smartsense-hst:
     - watch:
       - pkg: smartsense-hst
 
-hst-gateway:
-  service.disabled:
-    - name: hst-gateway
+disable-hst-gateway:
+  cmd.run:
+    - name: chkconfig hst-gateway off
 
-hst:
-  service.enabled:
-    - name: hst
+enable-hst:
+  cmd.run:
+    - name: chkconfig hst on
