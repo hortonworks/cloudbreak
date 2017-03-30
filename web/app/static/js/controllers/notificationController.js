@@ -2,9 +2,10 @@
 
 var log = log4javascript.getLogger("notificationController-logger");
 
-angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster', 'GlobalStack', 'UluwatuCluster', 'AccountCredential',
-    function($scope, $rootScope, $filter, Cluster, GlobalStack, UluwatuCluster, AccountCredential) {
-        var successEvents = ["REQUESTED",
+angular.module('uluwatuControllers').controller('notificationController', ['$scope', '$rootScope', '$filter', 'Cluster', 'GlobalStack', 'UluwatuCluster', 'PeriscopeCluster', 'AccountCredential',
+    function($scope, $rootScope, $filter, Cluster, GlobalStack, UluwatuCluster, PeriscopeCluster, AccountCredential) {
+        var successEvents = [
+            "REQUESTED",
             "CREATE_IN_PROGRESS",
             "START_REQUESTED",
             "START_IN_PROGRESS",
@@ -14,7 +15,8 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
             "DELETE_IN_PROGRESS"
         ];
 
-        var errorEvents = ["CLUSTER_CREATION_FAILED",
+        var errorEvents = [
+            "CLUSTER_CREATION_FAILED",
             "CREATE_FAILED",
             "START_FAILED",
             "DELETE_FAILED",
@@ -28,9 +30,26 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
         function handleNotification(notification) {
             var eventType = notification.eventType;
             if ("PERISCOPE_HISTORY" == eventType) {
-                notification.historyRecord.eventTimestampAsFloat = notification.historyRecord.timestamp;
-                notification.historyRecord.timestamp = new Date(notification.historyRecord.timestamp).toLocaleString();
-                $rootScope.scalingHistory.push(notification.historyRecord)
+                var uluCluster = $filter('filter')($rootScope.clusters, {
+                    id: notification.stackId
+                })[0];
+                if (typeof uluCluster != 'undefined') {
+                    var existingCluster = $filter('filter')($rootScope.periscopeClusters, {
+                        host: uluCluster.cluster.ambariServerIp
+                    })[0];
+                    if (typeof existingCluster == 'undefined') {
+                        PeriscopeCluster.get({ "id" : notification.historyRecord.clusterId }, function(periCluster) {
+                            $rootScope.periscopeClusters.push(periCluster);
+                            var actCluster = $rootScope.activeCluster || {};
+                            if (actCluster.id == notification.historyRecord.cbStackId && notification.historyRecord.scalingStatus == "ENABLED") {
+                                $rootScope.$broadcast('periscopeEnabled', actCluster);
+                            }
+                        });
+                    }
+                    notification.historyRecord.eventTimestampAsFloat = notification.historyRecord.timestamp;
+                    notification.historyRecord.timestamp = new Date(notification.historyRecord.timestamp).toLocaleString();
+                    $rootScope.scalingHistory.push(notification.historyRecord);
+                }
             } else if (successEvents.indexOf(eventType) > -1) {
                 $scope.showSuccess(notification.eventMessage, notification.stackName);
                 handleStatusChange(notification, true);
