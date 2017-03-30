@@ -87,7 +87,7 @@ public class ClusterServiceRunner {
             clusterService.updateHostMetadata(cluster.getId(), hostsPerHostGroup, HostMetadataState.CONTAINER_RUNNING);
         } else if (orchestratorType.hostOrchestrator()) {
             hostRunner.runAmbariServices(stack, cluster);
-            String gatewayIp = gatewayConfigService.getGatewayIp(stack);
+            String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(stack);
             HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, gatewayIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();

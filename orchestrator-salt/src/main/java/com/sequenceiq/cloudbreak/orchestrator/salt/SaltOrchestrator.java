@@ -138,41 +138,44 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(GatewayConfig gatewayConfig, Set<Node> allNodes, SaltPillarConfig pillarConfig,
+    public void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, SaltPillarConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Run Services on nodes: {}", allNodes);
-        try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-            PillarSave ambariServer = new PillarSave(sc, gatewayConfig.getPrivateAddress());
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        String ambariServerAddress = primaryGateway.getPrivateAddress();
+        try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
+            PillarSave ambariServer = new PillarSave(sc, gatewayTargets, ambariServerAddress);
             Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
             Map<String, Object> pillarJson = new HashMap<>();
-            pillarJson.put("consul", ImmutableMap.of("server", gatewayConfig.getPrivateAddress()));
+            pillarJson.put("consul", ImmutableMap.of("server", ambariServerAddress));
             SaltPillarProperties pillarProperties = new SaltPillarProperties("/consul/init.sls", pillarJson);
-            PillarSave consulServer = new PillarSave(sc, pillarProperties);
+            PillarSave consulServer = new PillarSave(sc, gatewayTargets, pillarProperties);
             saltPillarRunner = runner(consulServer, exitCriteria, exitCriteriaModel);
             saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            PillarSave hostSave = new PillarSave(sc, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
+            PillarSave hostSave = new PillarSave(sc, gatewayTargets, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
             saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
             saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
             for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
-                PillarSave pillarSave = new PillarSave(sc, propertiesEntry.getValue());
+                PillarSave pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
                 saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
                 saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
                 saltPillarRunnerFuture.get();
             }
 
-            Set<String> server = Sets.newHashSet(gatewayConfig.getPrivateAddress());
+            Set<String> server = Sets.newHashSet(ambariServerAddress);
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
 
             LOGGER.info("Pillar saved, setting up grains...");
 
-            if (gatewayConfig.getKnoxGatewayEnabled()) {
+            if (primaryGateway.getKnoxGatewayEnabled()) {
                 runSaltCommand(sc, new GrainAddRunner(server, allNodes, "gateway"), exitCriteriaModel);
             }
 
@@ -224,7 +227,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
-                PillarSave pillarSave = new PillarSave(sc, propertiesEntry.getValue());
+                PillarSave pillarSave = new PillarSave(sc, Sets.newHashSet(gatewayConfig.getPrivateAddress()), propertiesEntry.getValue());
                 Callable<Boolean> saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
                 Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
                 saltPillarRunnerFuture.get();
@@ -263,7 +266,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst().get();
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            PillarSave scriptPillarSave = new PillarSave(sc, recipes);
+            PillarSave scriptPillarSave = new PillarSave(sc, gatewayTargets, recipes);
             Callable<Boolean> saltPillarRunner = runner(scriptPillarSave, exitCriteria, exitModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();

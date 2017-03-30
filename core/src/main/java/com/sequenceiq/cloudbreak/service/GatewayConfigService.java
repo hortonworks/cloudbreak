@@ -29,7 +29,7 @@ public class GatewayConfigService {
         return result;
     }
 
-    public GatewayConfig getGatewayConfig(Stack stack) throws CloudbreakSecuritySetupException {
+    public GatewayConfig getPrimaryGatewayConfig(Stack stack) throws CloudbreakSecuritySetupException {
         InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
         return getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
     }
@@ -38,7 +38,7 @@ public class GatewayConfigService {
         return tlsSecurityService.buildGatewayConfig(stack.getId(), gatewayInstance, stack.getGatewayPort(), getSaltClientConfig(stack), knoxGatewayEnabled);
     }
 
-    public String getGatewayIp(Stack stack) {
+    public String getPrimaryGatewayIp(Stack stack) {
         InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
         return getGatewayIp(stack, gatewayInstance);
     }

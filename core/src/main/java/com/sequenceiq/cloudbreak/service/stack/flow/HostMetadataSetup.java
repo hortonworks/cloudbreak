@@ -76,7 +76,7 @@ public class HostMetadataSetup {
                 metadataToUpdate = newInstanceMetadata;
             }
             List<String> privateIps = metadataToUpdate.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack);
+            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
             LOGGER.info("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);

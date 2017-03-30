@@ -102,7 +102,6 @@ public class ClusterHostServiceRunner {
         try {
             Set<Node> nodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack);
             Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
             if (cluster.isSecure()) {
                 Map<String, Object> krb = new HashMap<>();
@@ -117,7 +116,8 @@ public class ClusterHostServiceRunner {
                 servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
             }
             servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
-            saveGatewayPillar(gatewayConfig, cluster, servicePillar);
+            GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+            saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
             if (ambariRepo != null) {
                 servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
@@ -131,7 +131,8 @@ public class ClusterHostServiceRunner {
             credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
             servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
             SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
-            hostOrchestrator.runService(gatewayConfig, nodes, saltPillarConfig, clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), nodes, saltPillarConfig,
+                    clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -187,8 +188,8 @@ public class ClusterHostServiceRunner {
             candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
             Set<Node> allNodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack);
-            hostOrchestrator.runService(gatewayConfig, allNodes, new SaltPillarConfig(), clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), allNodes, new SaltPillarConfig(),
+                    clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException e) {

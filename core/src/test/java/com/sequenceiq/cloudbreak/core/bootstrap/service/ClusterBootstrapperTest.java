@@ -120,7 +120,7 @@ public class ClusterBootstrapperTest {
         when(orchestratorTypeResolver.resolveType(anyString())).thenReturn(OrchestratorType.CONTAINER);
         ReflectionTestUtils.setField(containerConfigService, "munchausenImageName", "sequence/testcont:0.1.1");
 
-        when(gatewayConfigService.getGatewayConfig(any()))
+        when(gatewayConfigService.getPrimaryGatewayConfig(any()))
                 .thenReturn(new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, "/cert/1", false));
         when(gatewayConfigService.getGatewayConfig(any(), any(), any()))
                 .thenReturn(new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, "/cert/1", false));

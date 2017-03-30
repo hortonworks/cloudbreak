@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
 import java.util.Map;
+import java.util.Set;
 
 public class Pillar {
 
@@ -8,9 +9,12 @@ public class Pillar {
 
     private Map<?, ?> json;
 
-    public Pillar(String path, Map<?, ?> json) {
+    private Set<String> targets;
+
+    public Pillar(String path, Map<?, ?> json, Set<String> targets) {
         this.path = path;
         this.json = json;
+        this.targets = targets;
     }
 
     public String getPath() {
@@ -27,5 +31,13 @@ public class Pillar {
 
     public void setJson(Map<?, ?> json) {
         this.json = json;
+    }
+
+    public Set<String> getTargets() {
+        return targets;
+    }
+
+    public void setTargets(Set<String> targets) {
+        this.targets = targets;
     }
 }

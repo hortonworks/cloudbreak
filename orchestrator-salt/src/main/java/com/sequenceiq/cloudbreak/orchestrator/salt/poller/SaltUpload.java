@@ -65,7 +65,7 @@ public class SaltUpload implements OrchestratorBootstrap {
             }
         }
 
-        LOGGER.info("File upload has been completed to nodes: {}", originalTargets);
+        LOGGER.info("File upload has been completed on nodes: {}", originalTargets);
         return true;
     }
 
