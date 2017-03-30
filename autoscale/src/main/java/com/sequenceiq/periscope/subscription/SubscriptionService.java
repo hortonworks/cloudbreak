@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.periscope.domain.Subscription;
 import com.sequenceiq.periscope.repository.SubscriptionRepository;
 
-
 @Service
 @Transactional
 public class SubscriptionService {

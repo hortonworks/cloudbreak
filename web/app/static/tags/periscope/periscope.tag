@@ -3,9 +3,9 @@
     <div class="panel">
         <div class="row btn-row">
             <div class="col-sm-3 col-sm-offset-9">
-                <a id="update-scaling-configuration-btn" class="btn btn-primary btn-block" role="button" ng-show="!autoScalingSLAPoliciesEnabled" ng-click="enableAutoScaling()">
+                <a id="enable-scaling-configuration-btn" class="btn btn-primary btn-block" role="button" ng-show="!autoScalingSLAPoliciesEnabled" ng-click="enableAutoScaling()">
                     <i class="fa fa-power-off fa-fw"></i> {{msg.periscope_enable_label}}</a>
-                <a id="update-scaling-configuration-btn" class="btn btn-danger btn-block" role="button" ng-show="autoScalingSLAPoliciesEnabled" ng-click="disableAutoScaling()">
+                <a id="disable-scaling-configuration-btn" class="btn btn-danger btn-block" role="button" ng-show="autoScalingSLAPoliciesEnabled" ng-click="disableAutoScaling()">
                     <i class="fa fa-power-off fa-fw"></i> {{msg.periscope_disable_label}}</a>
             </div>
         </div>

@@ -75,21 +75,27 @@ public class ClusterCreationEvaluator implements Runnable {
 
     private void createOrUpdateCluster(AutoscaleStackResponse stack, Optional<Cluster> clusterOptional) {
         AmbariStack resolvedAmbari = createAmbariStack(stack);
+        Cluster cluster;
+        boolean sendNotification = false;
         if (clusterOptional.isPresent()) {
-            Cluster cluster = clusterOptional.get();
+            cluster = clusterOptional.get();
             MDCBuilder.buildMdcContext(cluster);
             if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
                 ambariHealthCheck(cluster.getUser(), resolvedAmbari);
                 LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
                 cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
-                History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-                notificationSender.send(history);
+                sendNotification = true;
             }
         } else {
             LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
             PeriscopeUser user = new PeriscopeUser(stack.getOwner(), null, stack.getAccount());
             ambariHealthCheck(user, resolvedAmbari);
-            clusterService.create(user, resolvedAmbari, null);
+            cluster = clusterService.create(user, resolvedAmbari, null);
+            sendNotification = true;
+        }
+        if (sendNotification) {
+            History history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
+            notificationSender.send(history);
         }
     }
 
