@@ -325,7 +325,7 @@ _cloudbreak-shell() {
         -e CLOUDBREAK_ADDRESS=http://cloudbreak.service.consul:8080 \
         -e IDENTITY_ADDRESS=http://identity.service.consul:$UAA_PORT \
         -e SEQUENCEIQ_USER=$UAA_DEFAULT_USER_EMAIL \
-        -e SEQUENCEIQ_PASSWORD="$(escape-string-env $passwd \")" \
+        -e SEQUENCEIQ_PASSWORD="$passwd" \
         -w /data \
         -v $PWD:/data \
         $DOCKER_IMAGE_CLOUDBREAK_SHELL:$DOCKER_TAG_CLOUDBREAK_SHELL
