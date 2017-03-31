@@ -28,6 +28,9 @@ import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
+import com.sequenceiq.periscope.api.endpoint.HistoryEndpoint;
+import com.sequenceiq.periscope.api.model.HistoryJson;
+import com.sequenceiq.periscope.client.AutoscaleClient;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -230,6 +233,32 @@ public class CloudbreakUtil {
         return waitResult;
     }
 
+    public static WaitResult waitForAutoScalingEvent(AutoscaleClient autoscaleClient, Long clusterId, Long currentTime) {
+        WaitResult waitResult = WaitResult.SUCCESSFUL;
+        Boolean exitCriteria = FALSE;
+        int retryCount = 0;
+        do {
+            LOGGER.info("Waiting for auto scaling event is success ...");
+            sleep();
+            HistoryEndpoint historyEndpoint = autoscaleClient.historyEndpoint();
+            List<HistoryJson> historyJson = historyEndpoint.getHistory(clusterId);
+            for (HistoryJson elem : historyJson) {
+                if ((elem.getTimestamp() > currentTime) && elem.getScalingStatus().toString().equals("SUCCESS")) {
+                    exitCriteria = Boolean.TRUE;
+                }
+            }
+
+            retryCount++;
+        } while (!exitCriteria && retryCount < MAX_RETRY);
+
+        LOGGER.info("Auto scaling event happened successfully");
+
+        if (retryCount == MAX_RETRY) {
+            waitResult = WaitResult.TIMEOUT;
+        }
+        return waitResult;
+    }
+
     private static boolean checkStatuses(Map<String, String> currentStatuses, Map<String, String> desiredStatuses) {
         boolean result = true;
         for (Map.Entry<String, String> desiredStatus: desiredStatuses.entrySet()) {
@@ -264,7 +293,7 @@ public class CloudbreakUtil {
         return result;
     }
 
-    private static void sleep() {
+    public static void sleep() {
         try {
             Thread.sleep(POLLING_INTERVAL);
         } catch (InterruptedException e) {

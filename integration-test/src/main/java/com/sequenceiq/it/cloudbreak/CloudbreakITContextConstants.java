@@ -35,6 +35,10 @@ public class CloudbreakITContextConstants {
 
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
+    public static final String AUTOSCALE_CLIENT = "AUTOSCALE_CLIENT";
+
+    public static final String AUTOSCALE_ALERTS = "AUTOSCALE_ALERTS";
+
     public static final String RDS_CONFIG_ID = "RDS_CONFIG_ID";
 
     public static final String INSTANCE_COUNT = "INSTANCE_COUNT";
