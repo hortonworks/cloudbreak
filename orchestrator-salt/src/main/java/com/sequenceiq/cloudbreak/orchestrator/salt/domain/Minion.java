@@ -8,7 +8,12 @@ public class Minion {
 
     private List<String> roles;
 
+    /**
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use servers
+     */
     private String server;
+
+    private List<String> servers;
 
     private String hostGroup;
 
@@ -30,10 +35,16 @@ public class Minion {
         this.roles = roles;
     }
 
+    /**
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use getServers()
+     */
     public String getServer() {
         return server;
     }
 
+    /**
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use setServers()
+     */
     public void setServer(String server) {
         this.server = server;
     }
@@ -52,5 +63,13 @@ public class Minion {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public List<String> getServers() {
+        return servers;
+    }
+
+    public void setServers(List<String> servers) {
+        this.servers = servers;
     }
 }

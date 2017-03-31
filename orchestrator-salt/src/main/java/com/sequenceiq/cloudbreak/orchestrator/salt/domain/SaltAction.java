@@ -10,12 +10,17 @@ public class SaltAction {
     private SaltActionType action;
 
     /**
-     * @deprecated  Do not use it, it is deprecated since salt-bootstrap 0.2.2, please use master.address
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.2.2, please use master.address
      */
     @Deprecated
     private String server;
 
+    /**
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use masters
+     */
     private SaltMaster master;
+
+    private List<SaltMaster> masters;
 
     private List<Minion> minions;
 
@@ -24,7 +29,7 @@ public class SaltAction {
     }
 
     /**
-     * @deprecated  Do not use it, it is deprecated since salt-bootstrap 0.2.2, please use getMaster().setAddress()
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.2.2, please use getMaster().setAddress()
      */
 
     @Deprecated
@@ -33,9 +38,8 @@ public class SaltAction {
     }
 
     /**
-     * @deprecated  Do not use it, it is deprecated since salt-bootstrap 0.2.2, please use getMaster().setAddress()
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.2.2, please use getMaster().setAddress()
      */
-
     @Deprecated
     public void setServer(String server) {
         this.server = server;
@@ -45,10 +49,16 @@ public class SaltAction {
         return action;
     }
 
+    /**
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use getMasters()
+     */
     public SaltMaster getMaster() {
         return master;
     }
 
+    /**
+     * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use setMasters()
+     */
     public void setMaster(SaltMaster master) {
         this.master = master;
     }
@@ -66,5 +76,20 @@ public class SaltAction {
             minions = new ArrayList<>();
         }
         minions.add(minion);
+    }
+
+    public List<SaltMaster> getMasters() {
+        return masters;
+    }
+
+    public void setMasters(List<SaltMaster> masters) {
+        this.masters = masters;
+    }
+
+    public void addMaster(SaltMaster master) {
+        if (masters == null) {
+            masters = new ArrayList<>();
+        }
+        masters.add(master);
     }
 }

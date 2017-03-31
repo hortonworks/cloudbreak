@@ -74,7 +74,8 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
         @NamedQuery(
                 name = "InstanceMetaData.getServerCertByStackId",
                 query = "SELECT i.serverCert FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId")
+                        + "WHERE i.instanceGroup.stack.id= :stackId "
+                        + "AND i.instanceMetadataType = 'GATEWAY_PRIMARY'")
 })
 public class InstanceMetaData implements ProvisionEntity {
 
