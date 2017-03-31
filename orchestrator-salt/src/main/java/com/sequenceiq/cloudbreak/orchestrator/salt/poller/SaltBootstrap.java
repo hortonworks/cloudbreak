@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,7 +32,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private final SaltConnector sc;
 
-    private final GatewayConfig gatewayConfig;
+    private final List<GatewayConfig> allGatewayConfigs;
 
     private final Set<Node> originalTargets;
 
@@ -39,9 +40,9 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private String domain;
 
-    public SaltBootstrap(SaltConnector sc, GatewayConfig gatewayConfig, Set<Node> targets, String domain) {
+    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets, String domain) {
         this.sc = sc;
-        this.gatewayConfig = gatewayConfig;
+        this.allGatewayConfigs = allGatewayConfigs;
         this.originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
         this.domain = domain;
@@ -90,24 +91,26 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private SaltAction createBootstrap() {
         SaltAction saltAction = new SaltAction(SaltActionType.RUN);
-
-        if (targets.stream().map(Node::getPrivateIp).collect(Collectors.toList()).contains(getGatewayPrivateIp())) {
-            SaltAuth auth = new SaltAuth();
-            auth.setPassword(sc.getSaltPassword());
-            SaltMaster master = new SaltMaster();
-            master.setAddress(getGatewayPrivateIp());
-            master.setAuth(auth);
-            master.setDomain(domain);
-            saltAction.setMaster(master);
-            //set due to compatibility reason
-            saltAction.setServer(getGatewayPrivateIp());
-            Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(getGatewayPrivateIp())).findFirst().get();
-            saltAction.addMinion(createMinion(saltMaster));
-        }
-        for (Node minion : targets) {
-            if (!minion.getPrivateIp().equals(getGatewayPrivateIp())) {
-                saltAction.addMinion(createMinion(minion));
+        SaltAuth auth = new SaltAuth();
+        auth.setPassword(sc.getSaltPassword());
+        List<String> targetIps = targets.stream().map(Node::getPrivateIp).collect(Collectors.toList());
+        for (GatewayConfig gatewayConfig : allGatewayConfigs) {
+            String gatewayAddress = gatewayConfig.getPrivateAddress();
+            if (targetIps.contains(gatewayAddress)) {
+                SaltMaster master = new SaltMaster();
+                master.setAddress(gatewayAddress);
+                master.setAuth(auth);
+                master.setDomain(domain);
+                saltAction.addMaster(master);
+                // set due to compatibility reasons
+                saltAction.setMaster(master);
+                saltAction.setServer(gatewayAddress);
+                Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(gatewayAddress)).findFirst().get();
+                saltAction.addMinion(createMinion(saltMaster));
             }
+        }
+        for (Node minion : targets.stream().filter(node -> !getGatewayPrivateIps().contains(node.getPrivateIp())).collect(Collectors.toList())) {
+            saltAction.addMinion(createMinion(minion));
         }
         return saltAction;
     }
@@ -116,22 +119,27 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         Minion minion = new Minion();
         minion.setAddress(node.getPrivateIp());
         minion.setRoles(Collections.emptyList());
-        minion.setServer(getGatewayPrivateIp());
         minion.setHostGroup(node.getHostGroup());
         minion.setDomain(domain);
+        minion.setServers(getGatewayPrivateIps());
+        // set due to compatibility reasons
+        minion.setServer(getGatewayPrivateIps().get(0));
         return minion;
     }
 
-    private String getGatewayPrivateIp() {
-        return gatewayConfig.getPrivateAddress();
+    private List<String> getGatewayPrivateIps() {
+        return allGatewayConfigs.stream().map(GatewayConfig::getPrivateAddress).collect(Collectors.toList());
     }
 
     @Override
     public String toString() {
-        return "SaltBootstrap{"
-                + "gatewayConfig=" + gatewayConfig
-                + ", originalTargets=" + originalTargets
-                + ", targets=" + targets
-                + '}';
+        final StringBuilder sb = new StringBuilder("SaltBootstrap{");
+        sb.append("sc=").append(sc);
+        sb.append(", allGatewayConfigs=").append(allGatewayConfigs);
+        sb.append(", originalTargets=").append(originalTargets);
+        sb.append(", targets=").append(targets);
+        sb.append(", domain='").append(domain).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

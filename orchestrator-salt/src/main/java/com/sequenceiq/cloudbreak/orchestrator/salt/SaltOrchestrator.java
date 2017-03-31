@@ -110,7 +110,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             uploadSaltConfig(sc, gatewayTargets, exitCriteriaModel);
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, primaryGateway, targets, hostDiscoveryService.determineDomain());
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, hostDiscoveryService.determineDomain());
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -127,7 +127,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             uploadSignKey(sc, primaryGateway, Collections.emptySet(), targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, primaryGateway, targets, hostDiscoveryService.determineDomain());
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, hostDiscoveryService.determineDomain());
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
