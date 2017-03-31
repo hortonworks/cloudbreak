@@ -70,17 +70,21 @@ public class MetadataSetupService {
             instanceMetaDataEntry.setInstanceId(instanceId);
             instanceMetaDataEntry.setPrivateId(privateId);
             instanceMetaDataEntry.setStartDate(timeInMillis);
-            if (ig != null) {
-                if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
-                    if (!primaryIgSelected) {
-                        primaryIgSelected = true;
-                        instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+            if (instanceMetaDataEntry.getInstanceMetadataType() == null) {
+                if (ig != null) {
+                    if (InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())) {
+                        if (!primaryIgSelected) {
+                            primaryIgSelected = true;
+                            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+                        } else {
+                            instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+                        }
                     } else {
-                        instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+                        instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                     }
+                } else {
+                    instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
                 }
-            } else {
-                instanceMetaDataEntry.setInstanceMetadataType(InstanceMetadataType.CORE);
             }
             if (!ambariServerFound && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 instanceMetaDataEntry.setAmbariServer(Boolean.TRUE);

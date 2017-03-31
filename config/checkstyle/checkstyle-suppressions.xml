@@ -18,7 +18,7 @@
     <suppress checks="ParameterNumber" files="UserDataBuilder.java"/>
     <suppress checks="EmptyLineSeparator" files=".*Description.java|.*Descriptions.java|Notes.java"/>
     <suppress checks=".*" files="PrometheusResponse.java"/>
-    <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java"/>
+    <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java|MetadataSetupService.java"/>
     <suppress checks="ModifierOrderCheck" files="EncryptedJsonToString.java"/>
 
 
