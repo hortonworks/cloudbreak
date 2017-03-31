@@ -335,7 +335,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         if (gatewayConfig.isPresent()) {
             return gatewayConfig.get();
         }
-        throw new CloudbreakOrchestratorFailedException("No primary gateway speicified");
+        throw new CloudbreakOrchestratorFailedException("No primary gateway specified");
     }
 
     private Set<String> getGatewayPrivateIps(List<GatewayConfig> allGatewayConfigs) {
