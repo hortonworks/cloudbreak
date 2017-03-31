@@ -32,7 +32,7 @@ public class AzureRoleManager {
 
     private static final String OWNER_ROLE = "Owner";
 
-    @Retryable(value = InteractiveLoginException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000))
+    @Retryable(value = InteractiveLoginException.class, maxAttempts = 15, backoff = @Backoff(delay = 1000))
     public void assignRole(String accessToken, String subscriptionId, String principalObjectId) throws InteractiveLoginException {
         String ownerRoleNameRoleIdPair = getOwnerRoleDefinitionId(subscriptionId, accessToken);
         assignRole(accessToken, subscriptionId, ownerRoleNameRoleIdPair, principalObjectId);
