@@ -18,6 +18,7 @@ public class SaltAction {
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use masters
      */
+    @Deprecated
     private SaltMaster master;
 
     private List<SaltMaster> masters;
@@ -52,6 +53,7 @@ public class SaltAction {
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use getMasters()
      */
+    @Deprecated
     public SaltMaster getMaster() {
         return master;
     }
@@ -59,6 +61,7 @@ public class SaltAction {
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use setMasters()
      */
+    @Deprecated
     public void setMaster(SaltMaster master) {
         this.master = master;
     }
