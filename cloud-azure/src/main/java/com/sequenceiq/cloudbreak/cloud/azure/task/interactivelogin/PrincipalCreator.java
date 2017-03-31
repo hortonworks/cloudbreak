@@ -29,7 +29,7 @@ public class PrincipalCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrincipalCreator.class);
 
-    @Retryable(value = InteractiveLoginException.class, maxAttempts = 10, backoff = @Backoff(delay = 1000))
+    @Retryable(value = InteractiveLoginException.class, maxAttempts = 15, backoff = @Backoff(delay = 1000))
     public String createServicePrincipal(String accessToken, String appId, String tenantId) throws InteractiveLoginException {
         Response response = createServicePrincipalWithGraph(accessToken, appId, tenantId);
 
