@@ -19,6 +19,9 @@ integrationtest:
     # cloudbreak properites
     cloudbreak:
         server:
+    # periscope properites
+    periscope:
+        server:
 
     # gcp credential details
     gcpcredential:

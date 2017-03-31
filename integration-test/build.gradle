@@ -25,6 +25,9 @@ dependencies {
   compile (project(':cloud-api')) {
     transitive = false;
   }
+  compile (project(':autoscale-api')) {
+    transitive = false;
+  }
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j';
   }
