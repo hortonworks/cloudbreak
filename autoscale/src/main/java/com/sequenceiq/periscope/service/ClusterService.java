@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.service;
 
 import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+import static org.springframework.util.StringUtils.isEmpty;
 
 import java.util.List;
 import java.util.stream.StreamSupport;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationJson;
+import com.sequenceiq.periscope.domain.Ambari;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.domain.SecurityConfig;
@@ -156,7 +158,15 @@ public class ClusterService {
     private void validateClusterUniqueness(AmbariStack stack) {
         Iterable<Cluster> clusters = clusterRepository.findAll();
         boolean clusterForTheSameStackAndAmbari = StreamSupport.stream(clusters.spliterator(), false)
-                .anyMatch(cluster -> cluster.getStackId().equals(stack.getStackId()) && cluster.getAmbari().getHost().equals(stack.getAmbari().getHost()));
+                .anyMatch(cluster -> {
+                    boolean equalityOfStackId = cluster.getStackId().equals(stack.getStackId());
+                    Ambari ambari = cluster.getAmbari();
+                    Ambari newAmbari = stack.getAmbari();
+                    boolean ambariObjectsNotNull = ambari != null && newAmbari != null;
+                    boolean ambariHostsNotEmpty = !isEmpty(ambari.getHost()) && !isEmpty(newAmbari.getHost());
+                    boolean equalityOfAmbariHost = ambariObjectsNotNull && ambariHostsNotEmpty && ambari.getHost().equals(newAmbari.getHost());
+                    return equalityOfStackId && equalityOfAmbariHost;
+                });
         if (clusterForTheSameStackAndAmbari) {
             throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
         }
