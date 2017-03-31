@@ -11,6 +11,7 @@ public class Minion {
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use servers
      */
+    @Deprecated
     private String server;
 
     private List<String> servers;
@@ -38,6 +39,7 @@ public class Minion {
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use getServers()
      */
+    @Deprecated
     public String getServer() {
         return server;
     }
@@ -45,6 +47,7 @@ public class Minion {
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use setServers()
      */
+    @Deprecated
     public void setServer(String server) {
         this.server = server;
     }

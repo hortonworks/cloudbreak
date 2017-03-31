@@ -157,7 +157,8 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();
 
-        verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(2).verify();
+        verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(0).verify();
+        verify(SALT_BOOT_ROOT + "/file/distribute", "POST").exactTimes(4).verify();
     }
 
     private void addAmbariMappings(Map<String, CloudVmMetaDataStatus> instanceMap) {
@@ -196,7 +197,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap));
         post(SALT_BOOT_ROOT + "/file", (request, response) -> {
-            response.status(200);
+            response.status(HttpStatus.CREATED.value());
             return response;
         });
         post(SALT_BOOT_ROOT + "/salt/server/pillar", (request, response) -> {
@@ -218,10 +219,24 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
                 genericResponse.setStatus(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()));
-                genericResponse.setStatusCode(200);
+                genericResponse.setStatusCode(HttpStatus.OK.value());
                 responses.add(genericResponse);
             }
             genericResponses.setResponses(responses);
+            return genericResponses;
+        }, gson()::toJson);
+        post(SALT_BOOT_ROOT + "/file/distribute", (request, response) -> {
+            GenericResponses genericResponses = new GenericResponses();
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.CREATED.value());
+            genericResponses.setResponses(Collections.singletonList(genericResponse));
+            return genericResponses;
+        }, gson()::toJson);
+        post(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", (request, response) -> {
+            GenericResponses genericResponses = new GenericResponses();
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.OK.value());
+            genericResponses.setResponses(Collections.singletonList(genericResponse));
             return genericResponses;
         }, gson()::toJson);
     }

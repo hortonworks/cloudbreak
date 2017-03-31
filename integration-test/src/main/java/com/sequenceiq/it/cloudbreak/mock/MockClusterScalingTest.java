@@ -10,6 +10,7 @@ import static spark.Spark.post;
 import static spark.Spark.put;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -175,8 +176,8 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
                     .exactTimes(1).verify();
-            verify(SALT_BOOT_ROOT + "/salt/server/pillar", "POST").bodyContains("/ambari/server.sls").exactTimes(1).verify();
-            verify(SALT_BOOT_ROOT + "/salt/server/pillar", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/ambari/server.sls").exactTimes(1).verify();
+            verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
             verify(AMBARI_API_ROOT + "/hosts", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
             verify(AMBARI_API_ROOT + "/clusters/" + clusterName, "GET").exactTimes(1).verify();
@@ -217,6 +218,20 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             return genericResponses;
         }, gson()::toJson);
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap));
+        post(SALT_BOOT_ROOT + "/file/distribute", (request, response) -> {
+            GenericResponses genericResponses = new GenericResponses();
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.CREATED.value());
+            genericResponses.setResponses(Collections.singletonList(genericResponse));
+            return genericResponses;
+        }, gson()::toJson);
+        post(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", (request, response) -> {
+            GenericResponses genericResponses = new GenericResponses();
+            GenericResponse genericResponse = new GenericResponse();
+            genericResponse.setStatusCode(HttpStatus.OK.value());
+            genericResponses.setResponses(Collections.singletonList(genericResponse));
+            return genericResponses;
+        }, gson()::toJson);
 
         get("/ws/v1/cluster/apps", (request, response) -> {
             ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
