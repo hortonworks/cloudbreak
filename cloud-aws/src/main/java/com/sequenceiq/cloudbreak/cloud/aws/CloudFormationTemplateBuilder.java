@@ -74,9 +74,6 @@ public class CloudFormationTemplateBuilder {
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
-        if (isNoneEmpty(context.snapshotId)) {
-            model.put("snapshotId", context.snapshotId);
-        }
         try {
             String template = processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
@@ -106,8 +103,6 @@ public class CloudFormationTemplateBuilder {
         private AuthenticatedContext ac;
 
         private CloudStack stack;
-
-        private String snapshotId;
 
         private boolean existingVPC;
 
@@ -140,11 +135,6 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withStack(CloudStack stack) {
             this.stack = stack;
-            return this;
-        }
-
-        public ModelContext withSnapshotId(String snapshotId) {
-            this.snapshotId = snapshotId;
             return this;
         }
 
