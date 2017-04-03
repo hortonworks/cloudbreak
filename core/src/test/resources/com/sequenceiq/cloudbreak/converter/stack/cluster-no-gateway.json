@@ -1,0 +1,12 @@
+{
+  "name" : "mycluster",
+  "emailNeeded" : true,
+  "blueprintId": 50,
+  "description" : "my cluster description",
+  "userName" : "user",
+  "password" : "pass",
+  "enableSecurity": false,
+  "ldapRequired" : false,
+  "emailTo": "admin@example.com",
+  "validateBlueprint" : true
+}

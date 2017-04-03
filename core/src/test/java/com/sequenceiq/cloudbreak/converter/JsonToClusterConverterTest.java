@@ -52,6 +52,18 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
                 "ambariStackDetails", "sssdConfig", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
     }
 
+    @Test
+    public void testNoGateway() {
+        // GIVEN
+        // WHEN
+        Cluster result = underTest.convert(getRequest("stack/cluster-no-gateway.json"));
+        // THEN
+        assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
+                "ambariStackDetails", "fileSystem", "sssdConfig", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
+
+        assertAllFieldsNotNull(result.getGateway(), Arrays.asList("id", "ssoProvider", "signKey", "signPub", "signCert"));
+    }
+
     @Override
     public Class<ClusterRequest> getRequestClass() {
         return ClusterRequest.class;
