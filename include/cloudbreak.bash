@@ -652,6 +652,7 @@ util-smartsense() {
 
   docker run -d \
       --name cbd-smartsense \
+      --dns=$PRIVATE_IP \
       -e AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID \
       -e AWS_INSTANCE_ID=$AWS_INSTANCE_ID \
       -e ULU_HWX_CLOUD_DEFAULT_REGION=$ULU_HWX_CLOUD_DEFAULT_REGION \
@@ -668,9 +669,24 @@ util-get-usage() {
 
     cloudbreak-config
 
+    local USAGE_PATH="usages/flex/daily"
+
+    if [ $# -eq 1 ]; then
+        local PARAMETER=$1
+        case $PARAMETER in
+            latest)
+                USAGE_PATH="usages/flex/latest"
+                ;;
+            *)
+                error "Invalid parameter: $PARAMETER. Supported parameters: latest"
+                return 1
+                ;;
+        esac
+    fi
+
     local CRED="$UAA_FLEX_USAGE_CLIENT_ID:$UAA_FLEX_USAGE_CLIENT_SECRET"
     local CRED_BASE64=$(echo -n ${CRED}|base64)
     local TOKEN=$(curl -sX POST -H "Authorization: Basic $CRED_BASE64" "${PUBLIC_IP}:${UAA_PORT}/oauth/token?grant_type=client_credentials" | jq '.access_token' -r)
-    local USAGE=$(curl -sX GET -H "Authorization: Bearer $TOKEN" "${PUBLIC_IP}:8080/cb/api/v1/usages/flex/daily")
+    local USAGE=$(curl -sX GET -H "Authorization: Bearer $TOKEN" "${PUBLIC_IP}:8080/cb/api/v1/${USAGE_PATH}")
     echo ${USAGE#*=}
 }
