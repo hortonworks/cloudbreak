@@ -338,7 +338,9 @@
             <#else>
             "Ebs" : {
             <#if group.ebsEncrypted == true>
-              "SnapshotId" : "${snapshotId}",
+              "Encrypted" : true,
+            <#else>
+              "Encrypted" : false,
             </#if>
               "VolumeSize" : ${group.volumeSize},
               "VolumeType" : "${group.volumeType}"

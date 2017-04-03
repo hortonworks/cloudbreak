@@ -47,19 +47,10 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
-import com.amazonaws.services.ec2.model.CreateSnapshotRequest;
-import com.amazonaws.services.ec2.model.CreateSnapshotResult;
-import com.amazonaws.services.ec2.model.CreateTagsRequest;
-import com.amazonaws.services.ec2.model.CreateVolumeRequest;
-import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
-import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
-import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
-import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
@@ -68,11 +59,8 @@ import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
 import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.Vpc;
-import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
@@ -81,7 +69,6 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -205,7 +192,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
                     .withAuthenticatedContext(ac)
                     .withStack(stack)
-                    .withSnapshotId(getEbsSnapshotIdIfNeeded(ac, stack))
                     .withExistingVpc(existingVPC)
                     .withExistingIGW(awsNetworkView.isExistingIGW())
                     .withExistingSubnetCidr(existingSubnet ? getExistingSubnetCidr(ac, stack) : null)
@@ -455,76 +441,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             throw new CloudConnectorException(String.format("Couldn't describe AMI '%s'.", cloudStack.getImage().getImageName()));
         }
         return image.getRootDeviceName();
-    }
-
-    private String getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack) {
-        if (isEncryptedVolumeRequested(cloudStack)) {
-            Optional<String> snapshot = createSnapshotIfNeeded(ac, cloudStack);
-            if (snapshot.isPresent()) {
-                return snapshot.orNull();
-            } else {
-                throw new CloudConnectorException(String.format("Failed to create Ebs encrypted volume on stack: %s", ac.getCloudContext().getId()));
-            }
-        } else {
-            return null;
-        }
-    }
-
-    private Optional<String> createSnapshotIfNeeded(AuthenticatedContext ac, CloudStack cloudStack) {
-        AmazonEC2Client client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()), ac.getCloudContext().getLocation().getRegion().value());
-        DescribeSnapshotsRequest describeSnapshotsRequest = new DescribeSnapshotsRequest()
-                .withFilters(new Filter().withName("tag-key").withValues(CLOUDBREAK_EBS_SNAPSHOT));
-        DescribeSnapshotsResult describeSnapshotsResult = client.describeSnapshots(describeSnapshotsRequest);
-        if (describeSnapshotsResult.getSnapshots().isEmpty()) {
-            DescribeAvailabilityZonesResult availabilityZonesResult = client.describeAvailabilityZones(new DescribeAvailabilityZonesRequest()
-                    .withFilters(new Filter().withName("region-name")
-                            .withValues(ac.getCloudContext().getLocation().getRegion().value())));
-            CreateVolumeResult volumeResult = client.createVolume(new CreateVolumeRequest()
-                    .withSize(SNAPSHOT_VOLUME_SIZE)
-                    .withAvailabilityZone(availabilityZonesResult.getAvailabilityZones().get(0).getZoneName())
-                    .withEncrypted(true));
-            PollTask<Boolean> newEbsVolumeStatusCheckerTask = awsPollTaskFactory
-                    .newEbsVolumeStatusCheckerTask(ac, cloudStack, client, volumeResult.getVolume().getVolumeId());
-            try {
-                Boolean statePollerResult = newEbsVolumeStatusCheckerTask.call();
-                if (!newEbsVolumeStatusCheckerTask.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(newEbsVolumeStatusCheckerTask);
-                }
-            } catch (Exception e) {
-                throw new CloudConnectorException(e.getMessage(), e);
-            }
-            CreateSnapshotResult snapshotResult = client.createSnapshot(
-                    new CreateSnapshotRequest().withVolumeId(volumeResult.getVolume().getVolumeId()).withDescription("Encrypted snapshot"));
-            PollTask<Boolean> newCreateSnapshotReadyStatusCheckerTask = awsPollTaskFactory.newCreateSnapshotReadyStatusCheckerTask(ac, snapshotResult,
-                    snapshotResult.getSnapshot().getSnapshotId(), client);
-            try {
-                Boolean statePollerResult = newCreateSnapshotReadyStatusCheckerTask.call();
-                if (!newCreateSnapshotReadyStatusCheckerTask.completed(statePollerResult)) {
-                    syncPollingScheduler.schedule(newCreateSnapshotReadyStatusCheckerTask);
-                }
-            } catch (Exception e) {
-                throw new CloudConnectorException(e.getMessage(), e);
-            }
-            CreateTagsRequest createTagsRequest = new CreateTagsRequest()
-                    .withTags(ImmutableList.of(new Tag().withKey(CLOUDBREAK_EBS_SNAPSHOT).withValue(CLOUDBREAK_EBS_SNAPSHOT)))
-                    .withResources(snapshotResult.getSnapshot().getSnapshotId());
-            client.createTags(createTagsRequest);
-            return Optional.of(snapshotResult.getSnapshot().getSnapshotId());
-        } else {
-            return Optional.of(describeSnapshotsResult.getSnapshots().get(0).getSnapshotId());
-        }
-    }
-
-    private boolean isEncryptedVolumeRequested(CloudStack stack) {
-        for (Group group : stack.getGroups()) {
-            for (CloudInstance cloudInstance : group.getInstances()) {
-                AwsInstanceView awsInstanceView = new AwsInstanceView(cloudInstance.getTemplate());
-                if (awsInstanceView.isEncryptedVolumes()) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     @Override
