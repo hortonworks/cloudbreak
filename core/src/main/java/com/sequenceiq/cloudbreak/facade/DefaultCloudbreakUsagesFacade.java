@@ -49,9 +49,11 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
                 flexUsageJsonsByStackId.put(stackId, flexUsageJson);
             } else {
                 CloudbreakFlexUsageJson flexUsageJson = flexUsageJsonsByStackId.get(stackId);
-                int peak = flexUsageJson.getPeak() + usage.getPeak();
+                Integer actPeak = usage.getPeak() != null ? usage.getPeak() : 0;
+                Integer peak = flexUsageJson.getPeak() != null ? flexUsageJson.getPeak() : 0;
+                int newPeak = peak + actPeak;
                 int instanceNum = flexUsageJson.getInstanceNum() + usage.getInstanceNum();
-                flexUsageJson.setPeak(peak);
+                flexUsageJson.setPeak(newPeak);
                 flexUsageJson.setInstanceNum(instanceNum);
             }
         }

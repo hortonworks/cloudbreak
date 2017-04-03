@@ -62,7 +62,15 @@ public interface UsageEndpoint {
     @GET
     @Path("flex/daily")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_FLEX, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_FLEX_DAILY, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
             nickname = "getDailyFlexUsage")
     List<CloudbreakFlexUsageJson> getDailyFlexUsages();
+
+    @GET
+    @Path("flex/latest")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_FLEX_LATEST, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+            nickname = "getLatestFlexUsage")
+    List<CloudbreakFlexUsageJson> getLatestFlexUsages();
+
 }

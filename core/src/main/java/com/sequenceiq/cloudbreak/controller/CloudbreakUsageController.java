@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.controller;
 
-import java.util.Calendar;
+import static java.time.ZoneId.systemDefault;
+
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,18 +66,35 @@ public class CloudbreakUsageController implements UsageEndpoint {
         return cloudbreakUsagesFacade.getUsagesFor(params);
     }
 
+    @Override
     public List<CloudbreakFlexUsageJson> getDailyFlexUsages() {
-        Calendar fromDate = Calendar.getInstance();
-        fromDate.add(Calendar.DAY_OF_MONTH, -1);
-        fromDate.set(Calendar.HOUR_OF_DAY, 0);
-        fromDate.set(Calendar.MINUTE, 0);
-        Calendar endDate = Calendar.getInstance();
-        endDate.set(Calendar.HOUR_OF_DAY, 0);
-        endDate.set(Calendar.MINUTE, 0);
+        long fromDate = LocalDate.now()
+                .minusDays(1)
+                .atStartOfDay(systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
+        long endDate = LocalDate.now()
+                .atStartOfDay(systemDefault())
+                .toInstant()
+                .toEpochMilli();
 
         CbUsageFilterParameters cbUsageFilterParameters = new CbUsageFilterParameters.Builder()
-                .setSince(fromDate.getTimeInMillis())
-                .setFilterEndDate(endDate.getTimeInMillis())
+                .setSince(fromDate)
+                .setFilterEndDate(endDate)
+                .build();
+        return cloudbreakUsagesFacade.getFlexUsagesFor(cbUsageFilterParameters);
+    }
+
+    @Override
+    public List<CloudbreakFlexUsageJson> getLatestFlexUsages() {
+        long fromDate = LocalDate.now()
+                .atStartOfDay(systemDefault())
+                .toInstant()
+                .toEpochMilli();
+
+        CbUsageFilterParameters cbUsageFilterParameters = new CbUsageFilterParameters.Builder()
+                .setSince(fromDate)
                 .build();
         return cloudbreakUsagesFacade.getFlexUsagesFor(cbUsageFilterParameters);
     }

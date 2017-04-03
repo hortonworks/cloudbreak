@@ -142,8 +142,8 @@ public class OperationDescriptions {
         public static final String GET_ALL = "retrieve usages by filter parameters";
         public static final String GET_PUBLIC = "retrieve public and private (owned) usages by filter parameters";
         public static final String GET_PRIVATE = "retrieve private usages by filter parameters";
-        public static final String GET_FLEX = "retrieve Flex related daily usages";
-        public static final String GENERATE = "generate usages";
+        public static final String GET_FLEX_DAILY = "retrieve Flex related daily usages";
+        public static final String GET_FLEX_LATEST = "retrieve Flex related latest usages, usages for the given day";
     }
 
     public static class EventOpDescription {
