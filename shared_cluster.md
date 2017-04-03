@@ -19,11 +19,35 @@ a cluster creation skeleton the following way:
 hdc create-cluster generate-cli-shared-skeleton --cluster-type "Enterprise Services: Apache Atlas, Apache Ranger"
 ```
 Once the skeleton is there you need to fill the fields. Please fill the network fields as well, because it only works in 
-an existing VPC and existing Subnet. Once it's done it should look like this (the values are for demonstration purpose only):
+an existing VPC and existing Subnet. 
+The shared skeleton requires the `Ldap` field. In order to register and LDAP use the following command (example):
+```
+hdc register-ldap \
+--ldap-name kriszldap \
+--ldap-server ldaps://10.0.3.138:389 \
+--ldap-bind-dn CN=Administrator,CN=Users,DC=ad,DC=seq,DC=com \
+--ldap-bind-password Admin123! \
+--ldap-domain ad.seq.com \
+--ldap-user-search-base CN=Users,DC=ad,DC=seq,DC=com \
+--ldap-user-search-filter CN \
+--ldap-user-search-attribute sAMAccountName \
+--ldap-group-search-base CN=Users,DC=ad,DC=seq,DC=com
+```
+The same way the hive metastore can be registered (example):
+```
+hdc register-metastore \
+--rds-name kriszrds \
+--rds-url cb.czdydiez9kxf.eu-west-1.rds.amazonaws.com \
+--rds-username postgres \
+--rds-password postgres \
+--rds-type HIVE \
+--hdp-version 2.6
+```
+Once it's done it should look like this (the values are for demonstration purpose only):
 ```
 {
-  "ClusterName": "krisz-shared-cluster",
-  "HDPVersion": "2.5",
+  "ClusterName": "krisz-datalake",
+  "HDPVersion": "2.6",
   "ClusterType": "Enterprise Services: Apache Atlas, Apache Ranger",
   "Master": {
     "InstanceType": "m4.2xlarge",
@@ -56,26 +80,16 @@ an existing VPC and existing Subnet. Once it's done it should look like this (th
     "SubnetId": "subnet-13b03965"
   },
   "HiveMetastore": {
-    "Name": "shared-metastore",
-    "Username": "hiveadmin",
-    "Password": "hiveadmin",
-    "URL": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432/hivedb",
-    "DatabaseType": "POSTGRES"
-  },
+    "Name": "kriszrds"
+  }
+  "Ldap": "kriszldap",
   "ClusterInputs": {
-    "LDAP_BIND_DN": "CN=Administrator,CN=Users,DC=ad,DC=seq,DC=com",
-    "LDAP_BIND_PASSWORD": "Admin123!",
-    "LDAP_NAME_ATTRIBUTE": "sAMAccountName",
-    "LDAP_SYNC_SEARCH_BASE": "CN=Users,DC=ad,DC=seq,DC=com",
-    "LDAP_DOMAIN": "ad.seq.com",
-    "LDAP_URL": "ldap://10.0.3.138:389",
     "RANGER_ADMIN_PASSWORD": "admin",
-    "RANGER_DB_HOST": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
-    "RANGER_DB_NAME": "ranger",
-    "RANGER_DB_PASSWORD": "rangeradmin",
-    "RANGER_DB_ROOT_PASSWORD": "Horton01",
-    "RANGER_DB_ROOT_USER": "rootuser",
-    "RANGER_DB_USER": "rangeradmin"
+    "RANGER_DB_HOST": "cb.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
+    "RANGER_DB_NAME": "rangerkrisz",
+    "RANGER_DB_USER": "ranger",
+    "RANGER_DB_PASSWORD": "ranger",
+    "S3_BUCKET": "krisz"
   }
 }
 ```
@@ -97,36 +111,51 @@ To verify the input fields use the following command:
 hdc describe-cluster --cluster-name krisz-shared-cluster --output json
 ```
 
-### Create a connected cluster
+### Create a connected/ephemeral cluster
 
 To create a cluster which is connected to the previously created cluster generate a new skeleton:
 ```
-hdc create-cluster generate-cli-shared-skeleton --cluster-type "Enterprise ETL-EDW: Apache Hive 1.2.1" --cluster-name krisz-shared-cluster
+hdc create-cluster generate-cli-shared-skeleton --cluster-type "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1 Shared" --cluster-name krisz-datalake
 ```
 Note the you have to provide an extra cluster-name parameter where you specify which cluster do you want to connect to.
 This will pre-fill the fields that are required to connect to the specified cluster. It must be in the same VPC and Subnet as well.
 Fill the missing fields (for the HiveMetastore only the name is required):
 ```
 {
-  "ClusterName": "krisz-connected-cluster-1",
-  "HDPVersion": "2.5",
-  "ClusterType": "Enterprise ETL-EDW: Apache Hive 1.2.1",
+  "ClusterName": "krisz-ephemeral-1",
+  "HDPVersion": "2.6",
+  "ClusterType": "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1 Shared",
   "Master": {
-    "InstanceType": "m4.2xlarge",
+    "InstanceType": "m4.4xlarge",
     "VolumeType": "gp2",
     "VolumeSize": 32,
-    "VolumeCount": 1
+    "VolumeCount": 1,
+    "InstanceCount": 1,
+    "Recipes": []
   },
   "Worker": {
     "InstanceType": "m3.xlarge",
-    "VolumeType": "ephemeral",
+    "VolumeType": "gp2",
     "VolumeSize": 40,
     "VolumeCount": 2,
-    "InstanceCount": 3
+    "InstanceCount": 1,
+    "Recipes": [],
+    "RecoveryMode": "AUTO"
+  },
+  "Compute": {
+    "InstanceType": "m3.xlarge",
+    "VolumeType": "gp2",
+    "VolumeSize": 40,
+    "VolumeCount": 1,
+    "InstanceCount": 0,
+    "Recipes": [],
+    "RecoveryMode": "AUTO"
   },
   "SSHKeyName": "seq-master",
   "RemoteAccess": "0.0.0.0/0",
   "WebAccess": true,
+  "HiveJDBCAccess": true,
+  "ClusterComponentAccess": false,
   "ClusterAndAmbariUser": "admin",
   "ClusterAndAmbariPassword": "admin",
   "InstanceRole": "CREATE",
@@ -135,26 +164,22 @@ Fill the missing fields (for the HiveMetastore only the name is required):
     "SubnetId": "subnet-13b03965"
   },
   "HiveMetastore": {
-    "Name": "shared-metastore"
+      "Name": "kriszrds"
   },
+  "Ldap": "kriszldap",
   "ClusterInputs": {
-    "ATLAS_REST_ADDRESS": "http://ip-10-0-2-90.eu-west-1.compute.internal:21000",
-    "KAFKA_SERVERS": "ip-10-0-2-90.eu-west-1.compute.internal:6667",
-    "LDAP_DOMAIN": "ad.seq.com",
-    "LDAP_URL": "ldap://10.0.3.138:389",
-    "POLICYMGR_EXTERNAL_URL": "http://ip-10-0-2-90.eu-west-1.compute.internal:6080",
+    "ADMIN_USERNAME": "admin",
+    "ATLAS_KAFKA_BOOTSTRAP_SERVERS": "ip-10-0-2-189.eu-west-1.compute.internal:6667,ip-10-0-2-127.eu-west-1.compute.internal:6667",
+    "ATLAS_KAFKA_HOOK_GROUP_ID": "atlas",
     "RANGER_ADMIN_PASSWORD": "admin",
-    "RANGER_DB_HOST": "metastore-eu.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
-    "RANGER_DB_NAME": "ranger",
-    "RANGER_DB_PASSWORD": "rangeradmin",
-    "RANGER_DB_ROOT_PASSWORD": "Horton01",
-    "RANGER_DB_ROOT_USER": "rootuser",
-    "RANGER_DB_USER": "rangeradmin",
-    "REMOTE_CLUSTER_NAME": "krisz-shared-cluster",
-    "SOLR_ZOOKEPERS_SERVERS": "ip-10-0-2-90.eu-west-1.compute.internal:2181",
-    "SOLR_ZOOKEPERS_URL": "ip-10-0-2-90.eu-west-1.compute.internal:2181/infra-solr"
+    "RANGER_ADMIN_USERNAME": "amb_ranger_admin",
+    "RANGER_REST_ADDRESS": "http://ip-10-0-2-189.eu-west-1.compute.internal:6080",
+    "REMOTE_CLUSTER_NAME": "krisz-shared-3",
+    "S3_BUCKET": "krisz",
+    "SOLR_ZOOKEPERS_URL": "ip-10-0-2-127.eu-west-1.compute.internal:2181,ip-10-0-2-189.eu-west-1.compute.internal:2181/infra-solr"
   }
 }
+
 ```
 To create the cluster:
 ```
