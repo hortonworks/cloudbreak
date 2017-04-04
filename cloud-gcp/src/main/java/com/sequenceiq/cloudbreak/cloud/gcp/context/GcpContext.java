@@ -10,10 +10,13 @@ public class GcpContext extends ResourceBuilderContext {
 
     private static final String COMPUTE = "compute";
 
-    public GcpContext(String name, Location location, String projectId, Compute compute, int parallelResourceRequest, boolean build) {
+    private static final String NO_PUBLIC_IP = "noPublicIp";
+
+    public GcpContext(String name, Location location, String projectId, Compute compute, boolean noPublicIp, int parallelResourceRequest, boolean build) {
         super(name, location, parallelResourceRequest, build);
         putParameter(PROJECT_ID, projectId);
         putParameter(COMPUTE, compute);
+        putParameter(NO_PUBLIC_IP, noPublicIp);
     }
 
     public String getProjectId() {
@@ -22,5 +25,9 @@ public class GcpContext extends ResourceBuilderContext {
 
     public Compute getCompute() {
         return getParameter(COMPUTE, Compute.class);
+    }
+
+    public boolean getNoPublicIp() {
+        return getParameter(NO_PUBLIC_IP, Boolean.class);
     }
 }

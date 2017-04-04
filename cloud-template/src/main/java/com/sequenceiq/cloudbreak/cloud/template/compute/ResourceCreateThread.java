@@ -82,23 +82,25 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
             for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
                 LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
                 List<CloudResource> list = builder.create(context, privateId, auth, group, image);
-                buildableResources.addAll(list);
-                createResource(auth, list);
+                if (!list.isEmpty()) {
+                    buildableResources.addAll(list);
+                    createResource(auth, list);
 
-                PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
-                if (pollGroup != null && CANCELLED.equals(pollGroup)) {
-                    throw new CancellationException(format("Building of %s has been cancelled", list));
-                }
+                    PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
+                    if (pollGroup != null && CANCELLED.equals(pollGroup)) {
+                        throw new CancellationException(format("Building of %s has been cancelled", list));
+                    }
 
-                List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list, tags);
-                updateResource(auth, resources);
-                context.addComputeResources(privateId, resources);
-                PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
-                List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                for (CloudResourceStatus resourceStatus : pollerResult) {
-                    resourceStatus.setPrivateId(privateId);
+                    List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list, tags);
+                    updateResource(auth, resources);
+                    context.addComputeResources(privateId, resources);
+                    PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
+                    List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
+                    for (CloudResourceStatus resourceStatus : pollerResult) {
+                        resourceStatus.setPrivateId(privateId);
+                    }
+                    results.addAll(pollerResult);
                 }
-                results.addAll(pollerResult);
             }
         } catch (CancellationException e) {
             throw e;

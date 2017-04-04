@@ -170,12 +170,18 @@
     </#if>
 
     <#if mapPublicIpOnLaunch>
-    "EIP" : {
-       "Type" : "AWS::EC2::EIP",
-       "Properties" : {
-          "Domain" : "vpc"
-       }
-    },
+        <#list instanceGroups as group>
+          <#if group.type == "GATEWAY">
+            <#list 1..group.instanceCount as nth>
+                "EIP${nth}" : {
+                   "Type" : "AWS::EC2::EIP",
+                   "Properties" : {
+                      "Domain" : "vpc"
+                   }
+                },
+            </#list>
+          </#if>
+        </#list>
     </#if>
 
     <#if !existingVPC>
@@ -415,11 +421,17 @@
   "Outputs" : {
   <#if mapPublicIpOnLaunch>
     "AmbariUrl" : {
-        "Value" : { "Fn::Join" : ["", ["https://", { "Ref" : "EIP" }, "/ambari/"]] }
+        "Value" : { "Fn::Join" : ["", ["https://", { "Ref" : "EIP1" }, "/ambari/"]] }
     },
-    "EIPAllocationID" : {
-        "Value" : {"Fn::GetAtt" : [ "EIP" , "AllocationId" ]}
-    }
+    <#list instanceGroups as group>
+      <#if group.type == "GATEWAY">
+        <#list 1..group.instanceCount as nth>
+            "EIPAllocationID${nth}" : {
+                "Value" : {"Fn::GetAtt" : [ "EIP${nth}" , "AllocationId" ]}
+            }<#if (nth_index + 1) != group.instanceCount>,</#if>
+        </#list>
+      </#if>
+    </#list>
   </#if>
   <#if enableInstanceProfile && !existingRole>
     <#if mapPublicIpOnLaunch>,</#if>

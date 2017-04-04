@@ -254,10 +254,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
         if (mapPublicIpOnLaunch) {
-            String eipAllocationId = getElasticIpAllocationId(cFStackName, client);
+            List<String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, client);
             Group gateWay = stack.getGroups().stream().filter(group -> group.getType() == InstanceGroupType.GATEWAY).findFirst().get();
             List<String> instanceIds = cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, gateWay.getName()));
-            associateElasticIpToInstance(amazonEC2Client, eipAllocationId, instanceIds);
+            associateElasticIpsToInstances(amazonEC2Client, eipAllocationIds, instanceIds);
         }
         return cloudResources;
     }
@@ -326,10 +326,12 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private String getElasticIpAllocationId(String cFStackName, AmazonCloudFormationClient client) {
+    private List<String> getElasticIpAllocationIds(String cFStackName, AmazonCloudFormationClient client) {
         Map<String, String> outputs = getOutputs(cFStackName, client);
-        if (outputs.containsKey(CFS_OUTPUT_EIPALLOCATION_ID)) {
-            return outputs.get(CFS_OUTPUT_EIPALLOCATION_ID);
+        List<String> elasticIpIds = outputs.entrySet().stream().filter(e -> e.getKey().startsWith(CFS_OUTPUT_EIPALLOCATION_ID)).map(e -> e.getValue())
+                .collect(Collectors.toList());
+        if (!elasticIpIds.isEmpty()) {
+            return elasticIpIds;
         } else {
             String outputKeyNotFound = String.format("Allocation Id of Elastic IP could not be found in the Cloudformation stack('%s') output.", cFStackName);
             throw new CloudConnectorException(outputKeyNotFound);
@@ -344,13 +346,19 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return cfStackOutputs.stream().collect(Collectors.toMap(Output::getOutputKey, Output::getOutputValue));
     }
 
-    private void associateElasticIpToInstance(AmazonEC2Client amazonEC2Client, String eipAllocationId, List<String> instanceIds) {
-        if (!instanceIds.isEmpty()) {
-            AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
-                    .withAllocationId(eipAllocationId)
-                    .withInstanceId(instanceIds.get(0));
-            amazonEC2Client.associateAddress(associateAddressRequest);
+    private void associateElasticIpsToInstances(AmazonEC2Client amazonEC2Client, List<String> eipAllocationIds, List<String> instanceIds) {
+        if (eipAllocationIds.size() == instanceIds.size()) {
+            for (int i = 0; i < eipAllocationIds.size(); i++) {
+                associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i));
+            }
         }
+    }
+
+    private void associateElasticIpToInstance(AmazonEC2Client amazonEC2Client, String eipAllocationId, String instanceId) {
+        AssociateAddressRequest associateAddressRequest = new AssociateAddressRequest()
+                .withAllocationId(eipAllocationId)
+                .withInstanceId(instanceId);
+        amazonEC2Client.associateAddress(associateAddressRequest);
     }
 
     private Supplier<CloudConnectorException> getCloudConnectorExceptionSupplier(String msg) {

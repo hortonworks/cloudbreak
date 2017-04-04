@@ -28,7 +28,8 @@ public class GcpContextBuilder implements ResourceContextBuilder<GcpContext> {
         String projectId = GcpStackUtil.getProjectId(credential);
         Compute compute = GcpStackUtil.buildCompute(credential);
         Location location = context.getLocation();
-        return new GcpContext(context.getName(), location, projectId, compute, PARALLEL_RESOURCE_REQUEST, build);
+        boolean noPublicIp = network != null ? GcpStackUtil.noPublicIp(network) : false;
+        return new GcpContext(context.getName(), location, projectId, compute, noPublicIp, PARALLEL_RESOURCE_REQUEST, build);
     }
 
     @Override
