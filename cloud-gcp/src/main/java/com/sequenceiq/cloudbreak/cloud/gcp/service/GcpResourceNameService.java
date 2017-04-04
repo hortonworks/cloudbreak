@@ -19,8 +19,6 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
 
     private static final String FIREWALL_IN_NAME_SUFFIX = "in";
 
-    private static final String RESERVED_IP_SUFFIX = "reserved-ip";
-
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
 
     private static final int INSTANCE_NAME_PART_COUNT = 3;
@@ -46,7 +44,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
                 resourceName = stackBasedResourceWithSuffix(FIREWALL_IN_NAME_SUFFIX, parts);
                 break;
             case GCP_RESERVED_IP:
-                resourceName = stackBasedResourceWithSuffix(RESERVED_IP_SUFFIX, parts);
+                resourceName = instanceName(parts);
                 break;
             case GCP_INSTANCE:
                 resourceName = instanceName(parts);

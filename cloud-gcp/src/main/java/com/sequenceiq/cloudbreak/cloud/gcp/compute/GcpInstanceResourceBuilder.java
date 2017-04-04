@@ -50,6 +50,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final String PREEMPTIBLE = "preemptible";
 
+    private static final int ORDER = 3;
+
     @Override
     public List<CloudResource> create(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -63,6 +65,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         InstanceTemplate template = group.getReferenceInstanceConfiguration().getTemplate();
         String projectId = context.getProjectId();
         Location location = context.getLocation();
+        boolean noPublicIp = context.getNoPublicIp();
 
         Compute compute = context.getCompute();
 
@@ -76,7 +79,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
                 projectId, location.getAvailabilityZone().value(), template.getFlavor()));
         instance.setName(buildableResource.get(0).getName());
         instance.setCanIpForward(Boolean.TRUE);
-        instance.setNetworkInterfaces(getNetworkInterface(context.getNetworkResources(), location.getRegion(), group, compute, projectId));
+        instance.setNetworkInterfaces(getNetworkInterface(context.getNetworkResources(), computeResources, location.getRegion(), group, compute, projectId,
+                noPublicIp));
         instance.setDisks(listOfDisks);
         Scheduling scheduling = new Scheduling();
         boolean preemptible = false;
@@ -170,7 +174,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Override
     public int order() {
-        return 2;
+        return ORDER;
     }
 
     private List<AttachedDisk> getBootDiskList(List<CloudResource> resources, String projectId, AvailabilityZone zone) {
@@ -201,21 +205,20 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return attachedDisk;
     }
 
-    private List<NetworkInterface> getNetworkInterface(List<CloudResource> resources,
-            Region region, Group group, Compute compute, String projectId) throws IOException {
+    private List<NetworkInterface> getNetworkInterface(List<CloudResource> networkResources, List<CloudResource> computeResources,
+            Region region, Group group, Compute compute, String projectId, boolean noPublicIp) throws IOException {
         NetworkInterface networkInterface = new NetworkInterface();
-        List<CloudResource> subnet = filterResourcesByType(resources, ResourceType.GCP_SUBNET);
-        String networkName = subnet.isEmpty() ? filterResourcesByType(resources, ResourceType.GCP_NETWORK).get(0).getName() : subnet.get(0).getName();
+        List<CloudResource> subnet = filterResourcesByType(networkResources, ResourceType.GCP_SUBNET);
+        String networkName = subnet.isEmpty() ? filterResourcesByType(networkResources, ResourceType.GCP_NETWORK).get(0).getName() : subnet.get(0).getName();
         networkInterface.setName(networkName);
 
-        List<CloudResource> reservedIp = filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP);
-        if (reservedIp != null && !reservedIp.isEmpty()) {
+        if (!noPublicIp) {
             AccessConfig accessConfig = new AccessConfig();
             accessConfig.setName(networkName);
             accessConfig.setType("ONE_TO_ONE_NAT");
-            if (InstanceGroupType.GATEWAY == group.getType()) {
-                Compute.Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(),
-                        filterResourcesByType(resources, ResourceType.GCP_RESERVED_IP).get(0).getName());
+            List<CloudResource> reservedIp = filterResourcesByType(computeResources, ResourceType.GCP_RESERVED_IP);
+            if (InstanceGroupType.GATEWAY == group.getType() && !reservedIp.isEmpty()) {
+                Compute.Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(), reservedIp.get(0).getName());
                 accessConfig.setNatIP(getReservedIp.execute().getAddress());
             }
             networkInterface.setAccessConfigs(Collections.singletonList(accessConfig));
