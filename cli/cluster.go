@@ -163,7 +163,8 @@ func CreateCluster(c *cli.Context) error {
 		asClient.setConfiguration,
 		asClient.addPrometheusAlert,
 		asClient.addScalingPolicy,
-		cbClient.GetLdapByName)
+		cbClient.GetLdapByName,
+		cbClient.GetClusterByName)
 
 	cbClient.waitForClusterToFinish(stackId, c)
 	return nil
@@ -189,7 +190,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	setScalingConfigurations func(int64, AutoscalingConfiguration),
 	addPrometheusAlert func(int64, AutoscalingPolicy) int64,
 	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64,
-	getLdapConfig func(string) *models_cloudbreak.LdapConfigResponse) int64 {
+	getLdapConfig func(string) *models_cloudbreak.LdapConfigResponse,
+	getCluster func(name string) *models_cloudbreak.StackResponse) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 	dataLake := false
@@ -260,6 +262,13 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 		if len(skeleton.Tags) > 0 {
 			tags[USER_TAGS] = skeleton.Tags
+		}
+
+		if len(skeleton.ClusterInputs) > 0 {
+			if remoteName, ok := skeleton.ClusterInputs["REMOTE_CLUSTER_NAME"]; ok {
+				tags["datalakeName"] = remoteName
+				tags["datalakeId"] = *getCluster(remoteName).ID
+			}
 		}
 
 		stackReq := models_cloudbreak.StackRequest{
