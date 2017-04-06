@@ -97,6 +97,7 @@ public class SaltConnector implements Closeable {
                 .post(Entity.json(pillar));
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
             // simple pillar save for CB <= 1.14
+            distributeResponse.close();
             Response singleResponse = saltTarget.path(SaltEndpoint.BOOT_PILLAR_SAVE.getContextPath()).request()
                     .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(pillar).getBytes()))
                     .post(Entity.json(pillar));
@@ -105,6 +106,7 @@ public class SaltConnector implements Closeable {
             genericResponse.setAddress(targets.iterator().next());
             genericResponse.setStatusCode(singleResponse.getStatus());
             genericResponses.setResponses(Collections.singletonList(genericResponse));
+            singleResponse.close();
             return genericResponses;
         }
         return JaxRSUtil.response(distributeResponse, GenericResponses.class);
@@ -165,12 +167,14 @@ public class SaltConnector implements Closeable {
         Response distributeResponse = upload(SaltEndpoint.BOOT_FILE_DISTRIBUTE.getContextPath(), targets, path, fileName, content);
         if (distributeResponse.getStatus() == HttpStatus.SC_NOT_FOUND) {
             // simple file upload for CB <= 1.14
+            distributeResponse.close();
             Response singleResponse = upload(SaltEndpoint.BOOT_FILE_UPLOAD.getContextPath(), targets, path, fileName, content);
             GenericResponses genericResponses = new GenericResponses();
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.setAddress(targets.iterator().next());
             genericResponse.setStatusCode(singleResponse.getStatus());
             genericResponses.setResponses(Collections.singletonList(genericResponse));
+            singleResponse.close();
             return genericResponses;
         }
         return JaxRSUtil.response(distributeResponse, GenericResponses.class);
