@@ -568,6 +568,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             for (InstanceMetaDataJson instanceMetaDataJson : instanceGroup.getMetadata()) {
                 if (instanceMetaDataJson.getPublicIp() != null) {
                     list.add(instanceMetaDataJson.getPublicIp());
+                } else {
+                    list.add(instanceMetaDataJson.getPrivateIp());
                 }
             }
             returnValues.put(instanceGroup.getGroup(), list);
