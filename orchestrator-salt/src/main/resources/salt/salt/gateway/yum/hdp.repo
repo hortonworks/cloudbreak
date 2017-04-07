@@ -1,6 +1,10 @@
 [{{ salt['pillar.get']('hdp:stack:repoid') }}]
 name={{ salt['pillar.get']('hdp:stack:repoid') }}
-{% set active_stack = 'hdp:stack:redhat' + grains['osmajorrelease'] -%}
+{% if grains['os'] == 'Amazon' %}
+    {% set active_stack = 'hdp:stack:redhat6' -%}
+{% else %}
+    {% set active_stack = 'hdp:stack:redhat' + grains['osmajorrelease'] -%}
+{% endif %}
 baseurl={{ salt['pillar.get'](active_stack) }}
 
 path=/
