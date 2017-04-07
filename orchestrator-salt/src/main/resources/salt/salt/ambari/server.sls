@@ -86,6 +86,21 @@ modify_hadoop_env_template:
   cmd.run:
     - name: /opt/javaagent.sh
 
+add_amazon2017_patch_script_server:
+  file.managed:
+    - name: /tmp/amazon2017.sh
+    - source: salt://ambari/scripts/amazon2017.sh
+    - skip_verify: True
+    - makedirs: True
+    - mode: 755
+
+run_amazon2017_sh_server:
+  cmd.run:
+    - name: sh -x /tmp/amazon2017.sh 2>&1 | tee -a /var/log/amazon2017_server_sh.log && exit ${PIPESTATUS[0]}
+    - unless: ls /var/log/amazon2017_server_sh.log
+    - require:
+      - file: add_amazon2017_patch_script_server
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-server.service:
