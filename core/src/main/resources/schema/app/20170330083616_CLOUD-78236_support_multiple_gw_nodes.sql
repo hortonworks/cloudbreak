@@ -16,7 +16,7 @@ ALTER TABLE securityconfig ADD COLUMN saltSignPrivateKey text;
 -- SQL to undo the change goes here.
 
 ALTER TABLE securityconfig ADD COLUMN servercert text;
-UPDATE securityconfig sc SET servercert = (SELECT servercert FROM instancemetadata im INNER JOIN instancegroup ig ON ig.id = im.instancegroup_id WHERE im.instancemetadatatype='GATEWAY_PRIMARY' AND sc.stack_id=ig.stack_id);
+UPDATE securityconfig sc SET servercert = (SELECT servercert FROM instancemetadata im INNER JOIN instancegroup ig ON ig.id = im.instancegroup_id WHERE im.instancemetadatatype='GATEWAY_PRIMARY' AND sc.stack_id=ig.stack_id AND im.instancestatus <> 'TERMINATED');
 ALTER TABLE instancemetadata DROP COLUMN servercert;
 
 ALTER TABLE securityconfig DROP COLUMN saltSignPublicKey;
