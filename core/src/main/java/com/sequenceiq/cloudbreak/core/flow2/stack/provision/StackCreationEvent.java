@@ -7,10 +7,13 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 
 public enum StackCreationEvent implements FlowEvent {
     START_CREATION_EVENT("STACK_PROVISION_TRIGGER_EVENT"),
+    VALIDATION_FINISHED_EVENT(ValidationResult.selector(ValidationResult.class)),
+    VALIDATION_FAILED_EVENT(ValidationResult.failureSelector(ValidationResult.class)),
     SETUP_FINISHED_EVENT(SetupResult.selector(SetupResult.class)),
     SETUP_FAILED_EVENT(SetupResult.failureSelector(SetupResult.class)),
     IMAGE_PREPARATION_FINISHED_EVENT(PrepareImageResult.selector(PrepareImageResult.class)),

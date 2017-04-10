@@ -20,7 +20,10 @@ import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
+import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
@@ -47,6 +50,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         PlatformRegions regions = cloudParameterService.getRegions();
         PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
         PlatformImages images = cloudParameterService.getImages();
+        Map<Platform, PlatformParameters> platformParameters = cloudParameterService.getPlatformParameters();
         SpecialParameters specialParameters = cloudParameterService.getSpecialParameters();
 
         Map<String, JsonEntity> map = new HashMap<>();
@@ -57,6 +61,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         map.put("regions", conversionService.convert(regions, PlatformRegionsJson.class));
         map.put("orchestrators", conversionService.convert(orchestrators, PlatformOrchestratorsJson.class));
         map.put("images", conversionService.convert(images, PlatformImagesJson.class));
+        map.put("tagspecifications", conversionService.convert(platformParameters, TagSpecificationsJson.class));
         map.put("specialParameters", conversionService.convert(specialParameters, SpecialParametersJson.class));
 
         return map;
@@ -151,6 +156,12 @@ public class PlatformParameterController implements ConnectorEndpoint {
     public PlatformImagesJson getImages() {
         PlatformImages pv = cloudParameterService.getImages();
         return conversionService.convert(pv, PlatformImagesJson.class);
+    }
+
+    @Override
+    public TagSpecificationsJson getTagSpecifications() {
+        Map<Platform, PlatformParameters> platformParameters = cloudParameterService.getPlatformParameters();
+        return conversionService.convert(platformParameters, TagSpecificationsJson.class);
     }
 
     @Override

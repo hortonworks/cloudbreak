@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
+import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
@@ -128,6 +129,13 @@ public interface ConnectorEndpoint {
     @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_IMAGES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getImages")
     PlatformImagesJson getImages();
+
+    @GET
+    @Path(value = "tagspecifications")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_TAG_SPECIFICATIONS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getTagSpecifications")
+    TagSpecificationsJson getTagSpecifications();
 
     @GET
     @Path(value = "custom")

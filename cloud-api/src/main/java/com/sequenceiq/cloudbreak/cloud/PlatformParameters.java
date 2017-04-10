@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -109,15 +109,15 @@ public interface PlatformParameters {
      */
     String imageRegex();
 
-    default <S extends StringType, O> Map<S, O> sortMap(Map<S, O> unsortMap) {
-        Map<S, O> treeMap = new TreeMap<>(
-                new Comparator<S>() {
-                    @Override
-                    public int compare(S o1, S o2) {
-                        return o2.value().compareTo(o1.value());
-                    }
+    /**
+     * Return the platform specific tag specification
+     *
+     * @return the {@link TagSpecification} of a platform
+     */
+    TagSpecification tagSpecification();
 
-                });
+    default <S extends StringType, O> Map<S, O> sortMap(Map<S, O> unsortMap) {
+        Map<S, O> treeMap = new TreeMap<>((o1, o2) -> o2.value().compareTo(o1.value()));
         treeMap.putAll(unsortMap);
         return treeMap;
     }

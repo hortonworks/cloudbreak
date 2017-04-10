@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.Variant.variant;
 import static org.junit.Assert.assertEquals;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
+import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
@@ -88,6 +90,11 @@ public class CloudPlatformConnectorsTest {
             @Override
             public Setup setup() {
                 return null;
+            }
+
+            @Override
+            public List<Validator> validators() {
+                return Collections.emptyList();
             }
 
             @Override

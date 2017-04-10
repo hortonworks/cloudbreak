@@ -177,6 +177,7 @@ public class ModelDescriptions {
         public static final String DISK_MAPPINGS = "disk mappings";
         public static final String IMAGES = "default images";
         public static final String IMAGES_REGEX = "images regex";
+        public static final String TAG_SPECIFICATIONS = "tag specifications";
         public static final String SPECIAL_PARAMETERS = "custom parameters";
         public static final String ORCHESTRATORS = "orchestrators";
         public static final String DEFAULT_ORCHESTRATORS = "default orchestrators";

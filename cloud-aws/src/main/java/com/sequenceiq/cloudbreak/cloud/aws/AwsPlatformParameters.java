@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
@@ -82,6 +84,10 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Inject
     private Environment environment;
+
+    @Inject
+    @Qualifier("AwsTagSpecification")
+    private TagSpecification tagSpecification;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
@@ -284,6 +290,11 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Override
     public String imageRegex() {
         return "^ami-[a-zA-Z0-9]{8}$";
+    }
+
+    @Override
+    public TagSpecification tagSpecification() {
+        return tagSpecification;
     }
 
     public enum AwsDiskType {

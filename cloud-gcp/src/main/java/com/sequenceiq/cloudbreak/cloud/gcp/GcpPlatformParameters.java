@@ -18,6 +18,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import com.google.api.client.util.Lists;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionView;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionWrapper;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionView;
@@ -76,6 +78,10 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Inject
     private Environment environment;
+
+    @Inject
+    @Qualifier("GcpTagSpecification")
+    private TagSpecification tagSpecification;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
@@ -266,6 +272,11 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public String imageRegex() {
         return "(.*)\\/(.*).tar.gz$";
+    }
+
+    @Override
+    public TagSpecification tagSpecification() {
+        return tagSpecification;
     }
 
     private VmType defaultVirtualMachine() {

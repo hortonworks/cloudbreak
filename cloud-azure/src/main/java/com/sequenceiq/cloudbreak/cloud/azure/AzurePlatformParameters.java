@@ -18,6 +18,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
@@ -78,6 +80,10 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     @Inject
     private Environment environment;
+
+    @Inject
+    @Qualifier("AzureTagSpecification")
+    private TagSpecification tagSpecification;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
@@ -270,5 +276,10 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public String imageRegex() {
         return "^https://.*[.]vhd$";
+    }
+
+    @Override
+    public TagSpecification tagSpecification() {
+        return tagSpecification;
     }
 }

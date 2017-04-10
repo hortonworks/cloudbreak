@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -207,6 +208,11 @@ public class MockPlatformParameters implements PlatformParameters {
     @Override
     public String imageRegex() {
         return "";
+    }
+
+    @Override
+    public TagSpecification tagSpecification() {
+        return null;
     }
 
     private enum MockDiskType {

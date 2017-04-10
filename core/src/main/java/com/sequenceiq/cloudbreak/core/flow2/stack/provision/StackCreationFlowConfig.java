@@ -22,6 +22,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.STACK_CREATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.START_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.TLS_SETUP_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.VALIDATION_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.VALIDATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.COLLECTMETADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.CREATE_CREDENTIAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.FINAL_STATE;
@@ -35,6 +37,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.STACK_CREATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.START_PROVISIONING_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.TLS_SETUP_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.VALIDATION_STATE;
 
 import java.util.List;
 
@@ -46,7 +49,8 @@ import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
 public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCreationState, StackCreationEvent> {
     private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = new Transition.Builder<StackCreationState, StackCreationEvent>()
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)
-            .from(INIT_STATE).to(SETUP_STATE).event(START_CREATION_EVENT).noFailureEvent()
+            .from(INIT_STATE).to(VALIDATION_STATE).event(START_CREATION_EVENT).noFailureEvent()
+            .from(VALIDATION_STATE).to(SETUP_STATE).event(VALIDATION_FINISHED_EVENT).failureEvent(VALIDATION_FAILED_EVENT)
             .from(SETUP_STATE).to(IMAGESETUP_STATE).event(SETUP_FINISHED_EVENT).failureEvent(SETUP_FAILED_EVENT)
             .from(IMAGESETUP_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)

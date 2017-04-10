@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.CheckImageAct
 public enum StackCreationState implements FlowState {
     INIT_STATE,
     STACK_CREATION_FAILED_STATE,
+    VALIDATION_STATE,
     SETUP_STATE,
     IMAGESETUP_STATE,
     IMAGE_CHECK_STATE(CheckImageAction.class),
