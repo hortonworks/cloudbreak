@@ -1,7 +1,6 @@
 base:
   '*':
     - ambari.repo
-    - ambari.server
     - hdp.repo
     - nodes.hosts
     - discovery.init
@@ -18,6 +17,13 @@ base:
     - kerberos.init
 
   'roles:ambari_server':
+    - match: grain
+    - ambari.database
+    - ambari.credentials
+    - prometheus.server
+    - grafana.repo
+
+  'roles:ambari_server_standby':
     - match: grain
     - ambari.database
     - ambari.credentials

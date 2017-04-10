@@ -164,7 +164,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltPillarConfig, exitCriteriaModel);
 
         // verify pillar save
-        verifyNew(OrchestratorBootstrapRunner.class, times(3))
+        verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(eq(pillarSave), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
 
         // verify ambari server role

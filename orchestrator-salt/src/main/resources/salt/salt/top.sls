@@ -20,6 +20,12 @@ base:
     - smartsense.server-upgrade
     - ambari.server-upgrade
 
+  'G@roles:ambari_upgrade and G@roles:ambari_server_standby':
+    - match: compound
+    # smartsense needs to run before the Ambari server upgrade, because it needs a running server
+    - smartsense.server-upgrade
+    - ambari.server-upgrade
+
   'roles:gateway':
     - match: grain
     - gateway
@@ -28,6 +34,14 @@ base:
     - match: grain
     - prometheus.server
     - ambari.server
+    - ambari.server-start
+    - grafana
+
+  'roles:ambari_server_standby':
+    - match: grain
+    - prometheus.server
+    - ambari.server
+    - ambari.server-stop
     - grafana
 
   'roles:ambari_agent':

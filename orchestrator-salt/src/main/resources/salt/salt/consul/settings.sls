@@ -6,7 +6,7 @@
 {% endif %}
 {% set node_name = salt['grains.get']('nodename') %}
 {% set bootstrap_expect =  1 %}
-{% set retry_join = [salt['pillar.get']('ambari:server')] %}
+{%- set retry_join = salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').values()[0][0] %}
 
 {% set consul = {} %}
 {% do consul.update({
@@ -14,5 +14,5 @@
     'is_server': is_server,
     'node_name': node_name,
     'bootstrap_expect': bootstrap_expect,
-    'retry_join': retry_join
+    'retry_join': [retry_join]
 }) %}
