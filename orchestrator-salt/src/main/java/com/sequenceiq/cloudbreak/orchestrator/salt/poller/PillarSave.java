@@ -37,13 +37,6 @@ public class PillarSave implements OrchestratorBootstrap {
 
     private final Set<String> originalTargets;
 
-    public PillarSave(SaltConnector sc, Set<String> targets, String ambariServer) {
-        this.sc = sc;
-        this.pillar = new Pillar("/ambari/server.sls", singletonMap("ambari", singletonMap("server", ambariServer)), targets);
-        this.targets = targets;
-        this.originalTargets = targets;
-    }
-
     public PillarSave(SaltConnector sc, Set<String> targets, Set<Node> hosts, boolean useCustomDomain) {
         this.sc = sc;
         Map<String, Map<String, Object>> fqdn = hosts

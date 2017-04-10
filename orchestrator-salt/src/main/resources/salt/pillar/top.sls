@@ -24,6 +24,13 @@ base:
     - prometheus.server
     - grafana.repo
 
+  'roles:ambari_server_standby':
+    - match: grain
+    - ambari.database
+    - ambari.credentials
+    - prometheus.server
+    - grafana.repo
+
   'roles:knox_gateway':
     - match: grain
     - ldap.init
