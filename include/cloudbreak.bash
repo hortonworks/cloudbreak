@@ -694,7 +694,7 @@ util-get-usage() {
     fi
 
     local CRED="$UAA_FLEX_USAGE_CLIENT_ID:$UAA_FLEX_USAGE_CLIENT_SECRET"
-    local CRED_BASE64=$(echo -n ${CRED}|base64)
+    local CRED_BASE64="$(echo -n "${CRED}"|base64|tr -d '\n')"
     local TOKEN=$(curl -sX POST -H "Authorization: Basic $CRED_BASE64" "${PUBLIC_IP}:${UAA_PORT}/oauth/token?grant_type=client_credentials" | jq '.access_token' -r)
     local USAGE=$(curl -sX GET -H "Authorization: Bearer $TOKEN" "${PUBLIC_IP}:8080/cb/api/v1/${USAGE_PATH}")
     echo ${USAGE#*=}
