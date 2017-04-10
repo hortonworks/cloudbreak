@@ -68,7 +68,7 @@ public class AzureClient {
                 .configure()
                 .withLogLevel(HttpLoggingInterceptor.Level.BASIC)
                 .authenticate(creds)
-                .withDefaultSubscription();
+                .withSubscription(subscriptionId);
     }
 
     public ResourceGroup getResourceGroup(String name) {
