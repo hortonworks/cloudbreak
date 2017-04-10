@@ -42,6 +42,7 @@ public class LdapConfigValidator {
             Hashtable<String, String> env = new Hashtable<String, String>();
             //END GENERATED CODE
             env.put("com.sun.jndi.ldap.read.timeout", "1000");
+            env.put("com.sun.jndi.ldap.connect.timeout", "5000");
             env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
             String url = new StringBuilder(protocol).
                     append("://").
