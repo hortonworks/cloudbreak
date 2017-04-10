@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
@@ -60,6 +62,10 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Inject
     private Environment environment;
+
+    @Inject
+    @Qualifier("OpenStackTagSpecification")
+    private TagSpecification tagSpecification;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
@@ -142,6 +148,11 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public String imageRegex() {
         return "";
+    }
+
+    @Override
+    public TagSpecification tagSpecification() {
+        return tagSpecification;
     }
 
     @Override

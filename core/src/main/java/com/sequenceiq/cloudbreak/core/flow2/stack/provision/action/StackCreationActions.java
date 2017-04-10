@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -68,11 +70,26 @@ public class StackCreationActions {
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
-    @Bean(name = "SETUP_STATE")
-    public Action provisioningSetupAction() {
+    @Bean(name = "VALIDATION_STATE")
+    public Action provisioningValidationAction() {
         return new AbstractStackCreationAction<StackEvent>(StackEvent.class) {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+            }
+        };
+    }
+
+    @Bean(name = "SETUP_STATE")
+    public Action provisioningSetupAction() {
+        return new AbstractStackCreationAction<ValidationResult>(ValidationResult.class) {
+            @Override
+            protected void doExecute(StackContext context, ValidationResult payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.setupProvision(context.getStack());
                 sendEvent(context);
             }

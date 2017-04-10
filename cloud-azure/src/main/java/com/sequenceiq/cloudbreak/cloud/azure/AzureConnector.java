@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
+import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
@@ -23,6 +27,9 @@ public class AzureConnector implements CloudConnector {
 
     @Inject
     private AzureSetup azureSetup;
+
+    @Inject
+    private AzureTagValidator azureTagValidator;
 
     @Inject
     private AzureCredentialConnector azureCredentialConnector;
@@ -45,6 +52,11 @@ public class AzureConnector implements CloudConnector {
 
     public Setup setup() {
         return azureSetup;
+    }
+
+    @Override
+    public List<Validator> validators() {
+        return Collections.singletonList(azureTagValidator);
     }
 
     public CredentialConnector credentials() {

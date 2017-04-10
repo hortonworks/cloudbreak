@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
@@ -24,6 +25,9 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersResult;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
@@ -152,6 +156,24 @@ public class CloudParameterService {
             return res.getPlatformImages();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform images", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public Map<Platform, PlatformParameters> getPlatformParameters() {
+        LOGGER.debug("Get platform parameters for");
+        PlatformParametersRequest parametersRequest = new PlatformParametersRequest();
+        eventBus.notify(parametersRequest.selector(), Event.wrap(parametersRequest));
+        try {
+            PlatformParametersResult res = parametersRequest.await();
+            LOGGER.info("Platform parameter result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform parameters", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getPlatformParameters();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting platform parameters", e);
             throw new OperationException(e);
         }
     }

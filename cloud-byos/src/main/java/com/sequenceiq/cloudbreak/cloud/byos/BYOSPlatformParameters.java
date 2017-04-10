@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -113,5 +114,10 @@ public class BYOSPlatformParameters implements PlatformParameters {
     @Override
     public String imageRegex() {
         return "";
+    }
+
+    @Override
+    public TagSpecification tagSpecification() {
+        return null;
     }
 }

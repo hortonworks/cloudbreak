@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.List;
+
 /**
  * In order to integrate a Cloud provider into the Cloudbreak this interface needs to be implemented.  Loading of the Cloud provider specific code
  * is automatically done by Cloudbreak, if the class which implements this interface is on the classpath. Cloud providers implementations are
@@ -20,6 +22,13 @@ public interface CloudConnector extends CloudPlatformAware {
      * @return the {@link Setup} object
      */
     Setup setup();
+
+    /**
+     * Access to the available {@link Validator}s.
+     *
+     * @return the available {@link Validator}s object
+     */
+    List<Validator> validators();
 
     /**
      * Access to the {@link CredentialConnector} object.

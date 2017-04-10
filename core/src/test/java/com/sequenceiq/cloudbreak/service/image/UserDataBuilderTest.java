@@ -18,6 +18,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
@@ -112,6 +113,11 @@ public class UserDataBuilderTest {
             @Override
             public String imageRegex() {
                 return "";
+            }
+
+            @Override
+            public TagSpecification tagSpecification() {
+                return null;
             }
 
             @Override

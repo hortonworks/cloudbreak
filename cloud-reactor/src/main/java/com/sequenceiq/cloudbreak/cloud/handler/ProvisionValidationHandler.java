@@ -7,52 +7,47 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
-import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
+import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
-import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupRequest> {
+public class ProvisionValidationHandler implements CloudPlatformEventHandler<ValidationRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionSetupHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ProvisionValidationHandler.class);
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
-    private ResourceNotifier resourceNotifier;
-
-    @Inject
     private EventBus eventBus;
 
     @Override
-    public Class<SetupRequest> type() {
-        return SetupRequest.class;
+    public Class<ValidationRequest> type() {
+        return ValidationRequest.class;
     }
 
     @Override
-    public void accept(Event<SetupRequest> event) {
+    public void accept(Event<ValidationRequest> event) {
         LOGGER.info("Received event: {}", event);
-        SetupRequest request = event.getData();
+        ValidationRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
-        SetupResult result;
+        ValidationResult result;
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
-            AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
-            connector.setup().prerequisites(auth, cloudStack, resourceNotifier);
-            result = new SetupResult(request);
-
-            LOGGER.info("Provision setup finished for {}", cloudContext);
+            for (Validator v : connector.validators()) {
+                v.validate(cloudStack);
+            }
+            result = new ValidationResult(request);
         } catch (Exception e) {
-            result = new SetupResult(e, request);
+            result = new ValidationResult(e, request);
         }
         request.getResult().onNext(result);
         eventBus.notify(result.selector(), new Event(event.getHeaders(), result));

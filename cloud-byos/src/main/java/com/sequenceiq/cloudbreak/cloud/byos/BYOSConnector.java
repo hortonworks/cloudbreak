@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.byos;
 
+import java.util.Collections;
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
+import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
@@ -50,6 +54,11 @@ public class BYOSConnector implements CloudConnector {
     @Override
     public Setup setup() {
         return byosSetup;
+    }
+
+    @Override
+    public List<Validator> validators() {
+        return Collections.emptyList();
     }
 
     @Override
