@@ -176,7 +176,6 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/hostname/distribute", "POST").bodyRegexp("^.*\\[([\"0-9\\.]+([,]{0,1})){" + scalingAdjustment + "}\\].*")
                     .exactTimes(1).verify();
-            verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/ambari/server.sls").exactTimes(1).verify();
             verify(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", "POST").bodyContains("/nodes/hosts.sls").exactTimes(1).verify();
             verify(AMBARI_API_ROOT + "/hosts", "GET").atLeast(1).verify();
             verify(AMBARI_API_ROOT + "/clusters", "GET").exactTimes(1).verify();
@@ -245,7 +244,8 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(instanceMap), gson()::toJson);
         post(MOCK_ROOT + "/cloud_instance_statuses", new CloudVmInstanceStatuses(instanceMap), gson()::toJson);
         post(MOCK_ROOT + "/terminate_instances", (request, response) -> {
-            List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() { }.getType());
+            List<CloudInstance> cloudInstances = new Gson().fromJson(request.body(), new TypeToken<List<CloudInstance>>() {
+            }.getType());
             cloudInstances.forEach(cloudInstance -> mockInstanceUtil.terminateInstance(instanceMap, cloudInstance.getInstanceId()));
             return null;
         }, gson()::toJson);

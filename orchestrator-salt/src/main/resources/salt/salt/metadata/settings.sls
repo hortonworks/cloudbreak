@@ -1,4 +1,4 @@
-{% set ambari_server = salt['pillar.get']('ambari:server') %}
+{%- set ambari_server = salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').values()[0][0] %}
 {% set platform = salt['pillar.get']('platform') %}
 
 {% set metadata = {} %}
