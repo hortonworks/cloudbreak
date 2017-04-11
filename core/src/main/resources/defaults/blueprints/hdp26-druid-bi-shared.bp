@@ -51,14 +51,6 @@
     {
       "name":"S3_BUCKET",
       "referenceConfiguration":"s3.bucket"
-    },
-    {
-      "name": "ATLAS_KAFKA_HOOK_GROUP_ID",
-      "referenceConfiguration": "atlas.kafka.hook.group.id"
-    },
-    {
-      "name": "ATLAS_KAFKA_BOOTSTRAP_SERVERS",
-      "referenceConfiguration": "atlas.kafka.bootstrap.servers"
     }
   ],
   "blueprint": {

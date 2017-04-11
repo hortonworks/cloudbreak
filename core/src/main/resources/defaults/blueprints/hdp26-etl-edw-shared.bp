@@ -51,14 +51,6 @@
     {
       "name": "S3_BUCKET",
       "referenceConfiguration": "s3.bucket"
-    },
-    {
-      "name": "ATLAS_KAFKA_HOOK_GROUP_ID",
-      "referenceConfiguration": "atlas.kafka.hook.group.id"
-    },
-    {
-      "name": "ATLAS_KAFKA_BOOTSTRAP_SERVERS",
-      "referenceConfiguration": "atlas.kafka.bootstrap.servers"
     }
   ],
   "blueprint": {
@@ -86,8 +78,7 @@
       {
         "hive-env": {
           "properties": {
-            "hive_security_authorization": "Ranger",
-            "hive.atlas.hook": "true"
+            "hive_security_authorization": "Ranger"
           }
         }
       },
@@ -97,8 +88,7 @@
           "hive.merge.mapfiles": "true",
           "hive.server2.tez.initialize.default.sessions": "true",
           "hive.server2.transport.mode": "http",
-          "hive.metastore.warehouse.dir": "s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse",
-          "hive.exec.post.hooks": "org.apache.hadoop.hive.ql.hooks.ATSHook,org.apache.atlas.hive.hook.HiveHook"
+          "hive.metastore.warehouse.dir": "s3a://{{ S3_BUCKET }}/{{ REMOTE_CLUSTER_NAME }}/apps/hive/warehouse"
         }
       },
       {
@@ -188,7 +178,8 @@
       },
       {
         "zeppelin-config": {
-          "zeppelin.interpreters": "org.apache.zeppelin.jdbc.JDBCInterpreter"
+          "zeppelin.interpreters": "org.apache.zeppelin.jdbc.JDBCInterpreter",
+          "zeppelin.interpreter.group.order": "jdbc"
         }
       },
       {
@@ -196,14 +187,6 @@
           "properties": {
             "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nactiveDirectoryRealm = org.apache.zeppelin.realm.ActiveDirectoryGroupRealm\nactiveDirectoryRealm.systemUsername = {{ LDAP_BIND_DN }}\nactiveDirectoryRealm.systemPassword = {{ LDAP_BIND_PASSWORD }}\nactiveDirectoryRealm.searchBase = {{ LDAP_SYNC_SEARCH_BASE }}\nactiveDirectoryRealm.url = {{ LDAP_URL }}\nactiveDirectoryRealm.principalSuffix = @{{ LDAP_DOMAIN }}\nactiveDirectoryRealm.authorizationCachingEnabled = false\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
           }
-        }
-      },
-      {
-        "hive-atlas-application.properties": {
-          "atlas.cluster.name": "{{ REMOTE_CLUSTER_NAME }}",
-          "atlas.kafka.bootstrap.servers": "{{ ATLAS_KAFKA_BOOTSTRAP_SERVERS }}",
-          "atlas.kafka.hook.group.id": "{{ ATLAS_KAFKA_HOOK_GROUP_ID }}",
-          "atlas.kafka.zookeeper.connect": "{{ SOLR_ZOOKEPERS_URL }}"
         }
       }
     ],
