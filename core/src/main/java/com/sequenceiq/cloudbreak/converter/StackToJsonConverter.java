@@ -98,7 +98,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             stackJson.setNetwork(getConversionService().convert(source.getNetwork(), NetworkResponse.class));
         }
         stackJson.setRelocateDocker(source.getRelocateDocker());
-        stackJson.setParameters(source.getParameters());
+        stackJson.setParameters(new HashMap(source.getParameters()));
         stackJson.setPlatformVariant(source.getPlatformVariant());
         if (source.getOrchestrator() != null) {
             stackJson.setOrchestrator(getConversionService().convert(source.getOrchestrator(), OrchestratorResponse.class));
@@ -110,12 +110,6 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         if (accessRoleArnOptional.isPresent()) {
             String s3AccessRoleArn = accessRoleArnOptional.get().getResourceName();
             stackJson.setS3AccessRoleArn(s3AccessRoleArn);
-        }
-        resourcesByType = source.getResourcesByType(ResourceType.AWS_VPC);
-        Optional<Resource> awsVpc = resourcesByType.stream().findFirst();
-        if (awsVpc.isPresent()) {
-            String vpcId = awsVpc.get().getResourceName();
-            stackJson.getParameters().put(ResourceType.AWS_VPC.name(), vpcId);
         }
         putSubnetIdIntoResponse(source, stackJson);
         putVpcIdIntoResponse(source, stackJson);
