@@ -140,7 +140,6 @@ func main() {
 			Action: hdc.CreateCluster,
 			BashComplete: func(c *cli.Context) {
 				fmt.Println("generate-cli-skeleton")
-				fmt.Println("generate-cli-shared-skeleton")
 				fmt.Println("validate-cli-skeleton")
 				for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlAmbariPasswordOptional} {
 					printFlagCompletion(f)
@@ -152,19 +151,6 @@ func main() {
 					Action:    hdc.GenerateCreateClusterSkeleton,
 					ArgsUsage: hdc.AWSCreateClusterSkeletonHelp,
 					Usage:     "generate the cluster creation template",
-				},
-				{
-					Name:        "generate-cli-shared-skeleton",
-					Action:      hdc.GenerateCreateSharedClusterSkeleton,
-					Description: hdc.SharedDescription,
-					Before:      ConfigRead,
-					Flags:       []cli.Flag{hdc.FlClusterType, hdc.FlClusterNameOptional, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
-					Usage:       "generate the cluster creation template for a specified shared cluster",
-					BashComplete: func(c *cli.Context) {
-						for _, f := range []cli.Flag{hdc.FlClusterType, hdc.FlClusterNameOptional, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
-							printFlagCompletion(f)
-						}
-					},
 				},
 				{
 					Name:   "validate-cli-skeleton",

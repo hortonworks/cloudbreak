@@ -225,6 +225,27 @@ func (h *HiveMetastore) Validate() []error {
 	return res
 }
 
+func (h *RangerMetastore) Validate() []error {
+	var res []error = nil
+	if err := validate.RequiredString("Name", "RangerMetastore", h.Name); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("Password", "RangerMetastore", h.Password); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("Username", "RangerMetastore", h.Username); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("URL", "RangerMetastore", h.URL); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("RangerAdminPassword", "RangerMetastore", h.URL); err != nil {
+		res = append(res, err)
+	}
+
+	return res
+}
+
 func (r *Recipe) Validate() []error {
 	var res []error = nil
 

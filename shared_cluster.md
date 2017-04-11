@@ -16,7 +16,7 @@ To install AD tools on Windows: http://docs.aws.amazon.com/directoryservice/late
 It's possible to create a cluster where the Ranger and Atlas services are shared. In order to create such cluster generate
 a cluster creation skeleton the following way:
 ```
-hdc create-cluster generate-cli-shared-skeleton --cluster-type "Enterprise Services: Apache Atlas, Apache Ranger"
+hdc create-cluster generate-cli-skeleton --cluster-type "Enterprise Services: Apache Atlas, Apache Ranger"
 ```
 Once the skeleton is there you need to fill the fields. Please fill the network fields as well, because it only works in 
 an existing VPC and existing Subnet. 
@@ -81,16 +81,16 @@ Once it's done it should look like this (the values are for demonstration purpos
   },
   "HiveMetastore": {
     "Name": "kriszrds"
-  }
-  "Ldap": "kriszldap",
-  "ClusterInputs": {
-    "RANGER_ADMIN_PASSWORD": "admin",
-    "RANGER_DB_HOST": "cb.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
-    "RANGER_DB_NAME": "rangerkrisz",
-    "RANGER_DB_USER": "ranger",
-    "RANGER_DB_PASSWORD": "ranger",
-    "S3_BUCKET": "krisz"
-  }
+  },
+  "RangerMetastore": {
+    "RangerAdminPassword": "admin",
+    "Name": "rangerkrisz",
+    "URL": "cb.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
+    "Username": "rangerkriszr",
+    "Password": "ranger"
+  },
+  "CloudStoragePath": "krisz",
+  "Ldap": "kriszldap"
 }
 ```
 If the LDAP is an AWS Directory Service then it must be in the same VPC as the cluster in order to access it.
@@ -115,7 +115,7 @@ hdc describe-cluster --cluster-name krisz-shared-cluster --output json
 
 To create a cluster which is connected to the previously created cluster generate a new skeleton:
 ```
-hdc create-cluster generate-cli-shared-skeleton --cluster-type "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1 Shared" --cluster-name krisz-datalake
+hdc create-cluster generate-cli-skeleton --cluster-type "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1 Shared"
 ```
 Note the you have to provide an extra cluster-name parameter where you specify which cluster do you want to connect to.
 This will pre-fill the fields that are required to connect to the specified cluster. It must be in the same VPC and Subnet as well.
@@ -123,6 +123,7 @@ Fill the missing fields (for the HiveMetastore only the name is required):
 ```
 {
   "ClusterName": "krisz-ephemeral-1",
+  "SharedClusterName": "krisz-datalake",
   "HDPVersion": "2.6",
   "ClusterType": "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.1 Shared",
   "Master": {
@@ -162,21 +163,6 @@ Fill the missing fields (for the HiveMetastore only the name is required):
   "Network": {
     "VpcId": "vpc-0e1dad6a",
     "SubnetId": "subnet-13b03965"
-  },
-  "HiveMetastore": {
-      "Name": "kriszrds"
-  },
-  "Ldap": "kriszldap",
-  "ClusterInputs": {
-    "ADMIN_USERNAME": "admin",
-    "ATLAS_KAFKA_BOOTSTRAP_SERVERS": "ip-10-0-2-189.eu-west-1.compute.internal:6667,ip-10-0-2-127.eu-west-1.compute.internal:6667",
-    "ATLAS_KAFKA_HOOK_GROUP_ID": "atlas",
-    "RANGER_ADMIN_PASSWORD": "admin",
-    "RANGER_ADMIN_USERNAME": "amb_ranger_admin",
-    "RANGER_REST_ADDRESS": "http://ip-10-0-2-189.eu-west-1.compute.internal:6080",
-    "REMOTE_CLUSTER_NAME": "krisz-shared-3",
-    "S3_BUCKET": "krisz",
-    "SOLR_ZOOKEPERS_URL": "ip-10-0-2-127.eu-west-1.compute.internal:2181,ip-10-0-2-189.eu-west-1.compute.internal:2181/infra-solr"
   }
 }
 

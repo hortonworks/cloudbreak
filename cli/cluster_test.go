@@ -19,11 +19,11 @@ func TestCreateClusterImplFull(t *testing.T) {
 	inputs["key"] = "value"
 	skeleton := &ClusterSkeleton{
 		ClusterSkeletonBase: ClusterSkeletonBase{
-			ClusterName:   "test-cluster",
-			ClusterInputs: inputs,
-			InstanceRole:  "role",
-			Tags:          map[string]string{"tag-key": "tag-value"},
+			ClusterName:  "test-cluster",
+			InstanceRole: "role",
+			Tags:         map[string]string{"tag-key": "tag-value"},
 		},
+		ClusterInputs: inputs,
 		HiveMetastore: &HiveMetastore{},
 	}
 	skeleton.HiveMetastore.Name = "ms-name"
@@ -125,11 +125,14 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	getCluster := func(string) *models_cloudbreak.StackResponse {
 		return nil
 	}
+	getClusterConfig := func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput {
+		return nil
+	}
 
 	actualId = createClusterImpl(*skeleton, createFuncs[0], createFuncs[1], createFuncs[2],
 		createSecurityGroupRequest, createCredentialRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest, createRDSRequest,
 		getBlueprint, getCredential, getNetwork, postStack, getRdsConfig, postCluster, addAutoscalingCluster, setScalingConfigurations, addPrometheusAlert,
-		addScalingPolicy, getLdapConfig, getCluster)
+		addScalingPolicy, getLdapConfig, getCluster, getClusterConfig)
 
 	return
 }
@@ -300,7 +303,7 @@ func TestGenerateCreateSharedClusterSkeletonImplNotAvailable(t *testing.T) {
 			Cluster:   &models_cloudbreak.ClusterResponse{Status: &(&stringWrapper{"CREATED"}).s}}
 	}
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, nil)
+	fillSharedParameters(skeleton, getBlueprint, getCluster, nil)
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplNotAvailable.json")
 	if skeleton.Json() != string(expected) {
@@ -336,7 +339,7 @@ func TestGenerateCreateSharedClusterSkeletonImplMinimalConfig(t *testing.T) {
 		return nil
 	}
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, getClusterConfig)
+	fillSharedParameters(skeleton, getBlueprint, getCluster, getClusterConfig)
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplMinimalConfig.json")
 	if skeleton.Json() != string(expected) {
@@ -374,7 +377,7 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 		return []*models_cloudbreak.BlueprintInput{{Name: &(&stringWrapper{"key"}).s, PropertyValue: &(&stringWrapper{"value"}).s}}
 	}
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, "name", "type", getBlueprint, getCluster, getClusterConfig)
+	fillSharedParameters(skeleton, getBlueprint, getCluster, getClusterConfig)
 
 	expected, _ := ioutil.ReadFile("testdata/TestGenerateCreateSharedClusterSkeletonImplFullConfig.json")
 	if skeleton.Json() != string(expected) {

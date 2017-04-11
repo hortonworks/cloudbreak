@@ -117,15 +117,6 @@ func (c *ClusterSkeletonResult) fill(
 		}
 
 		c.ClusterAndAmbariUser = SafeStringConvert(stack.Cluster.UserName)
-		if len(stack.Cluster.BlueprintInputs) > 0 {
-			var inputs = make(map[string]string)
-			for _, input := range stack.Cluster.BlueprintInputs {
-				if !strings.Contains(*input.Name, "LDAP") {
-					inputs[*input.Name] = *input.PropertyValue
-				}
-			}
-			c.ClusterInputs = inputs
-		}
 		c.Worker.RecoveryMode = recoveryModeMap[WORKER]
 		c.Compute.RecoveryMode = recoveryModeMap[COMPUTE]
 

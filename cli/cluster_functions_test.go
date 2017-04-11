@@ -58,9 +58,6 @@ func TestFillMinimumSet(t *testing.T) {
 	if skeleton.StatusReason != *sr.StatusReason {
 		t.Errorf("status reason not match %s == %s", *sr.StatusReason, skeleton.StatusReason)
 	}
-	if skeleton.ClusterInputs != nil {
-		t.Errorf("cluster inputs not empty %s", skeleton.ClusterInputs)
-	}
 	if skeleton.HDPVersion != "hdp" {
 		t.Errorf("HDP version not match hdp == %s", skeleton.HDPVersion)
 	}
@@ -283,9 +280,6 @@ func TestFillWithCluster(t *testing.T) {
 		t.Errorf("status reason not match %s == %s", *sr.Cluster.StatusReason, skeleton.StatusReason)
 	}
 
-	if len(skeleton.ClusterInputs) != 1 || skeleton.ClusterInputs["property"] != "value" {
-		t.Errorf("cluster inputs not match map[property:value] == %s", skeleton.ClusterInputs)
-	}
 }
 
 func TestFillWithNoInstances(t *testing.T) {

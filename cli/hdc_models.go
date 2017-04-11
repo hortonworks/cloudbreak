@@ -24,6 +24,7 @@ var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cl
 
 type ClusterSkeletonBase struct {
 	ClusterName              string             `json:"ClusterName" yaml:"ClusterName"`
+	SharedClusterName        string             `json:"SharedClusterName,omitempty" yaml:"SharedClusterName,omitempty"`
 	HDPVersion               string             `json:"HDPVersion" yaml:"HDPVersion"`
 	ClusterType              string             `json:"ClusterType" yaml:"ClusterType"`
 	Master                   InstanceConfig     `json:"Master" yaml:"Master"`
@@ -39,16 +40,18 @@ type ClusterSkeletonBase struct {
 	InstanceRole             string             `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
 	Network                  *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
 	Ldap                     *string            `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
-	ClusterInputs            map[string]string  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
 	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
+	CloudStoragePath         string             `json:"CloudStoragePath,omitempty" yaml:"CloudStoragePath,omitempty"`
 }
 
 type ClusterSkeleton struct {
 	ClusterSkeletonBase
-	Autoscaling    *AutoscalingSkeletonBase           `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
-	HiveMetastore  *HiveMetastore                     `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore *DruidMetastore                    `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []models_cloudbreak.Configurations `json:"Configurations" yaml:"Configurations"`
+	Autoscaling     *AutoscalingSkeletonBase           `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
+	HiveMetastore   *HiveMetastore                     `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore  *DruidMetastore                    `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	RangerMetastore *RangerMetastore                   `json:"RangerMetastore,omitempty" yaml:"RangerMetastore,omitempty"`
+	Configurations  []models_cloudbreak.Configurations `json:"Configurations" yaml:"Configurations"`
+	ClusterInputs   map[string]string                  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
 }
 
 type ClusterSkeletonResult struct {
@@ -97,6 +100,11 @@ type MetaStore struct {
 
 type HiveMetastore struct {
 	MetaStore
+}
+
+type RangerMetastore struct {
+	MetaStore
+	RangerAdminPassword string `json:"RangerAdminPassword" yaml:"RangerAdminPassword"`
 }
 
 type HiveMetastoreResult struct {

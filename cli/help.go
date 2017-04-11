@@ -14,6 +14,7 @@ import (
 var AWSCreateClusterSkeletonHelp = `
 {
   "ClusterName": "my-cluster",                                             // Name of the cluster
+  "SharedClusterName": "my-shared-cluster",                                // Connect to the shared cluster specified here
   "HDPVersion": "2.5",                                    	               // HDP version
   "ClusterType": "EDW-ETL: Apache Hive 1.2.1, Apache Spark 2.0",           // Cluster type
   "Master": {                                                              // Master instance group

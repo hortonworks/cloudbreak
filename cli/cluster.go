@@ -11,6 +11,7 @@ import (
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 
+	"encoding/json"
 	"errors"
 	"strconv"
 	"strings"
@@ -164,7 +165,8 @@ func CreateCluster(c *cli.Context) error {
 		asClient.addPrometheusAlert,
 		asClient.addScalingPolicy,
 		cbClient.GetLdapByName,
-		cbClient.GetClusterByName)
+		cbClient.GetClusterByName,
+		cbClient.GetClusterConfig)
 
 	cbClient.waitForClusterToFinish(stackId, c)
 	return nil
@@ -191,12 +193,17 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	addPrometheusAlert func(int64, AutoscalingPolicy) int64,
 	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64,
 	getLdapConfig func(string) *models_cloudbreak.LdapConfigResponse,
-	getCluster func(name string) *models_cloudbreak.StackResponse) int64 {
+	getCluster func(name string) *models_cloudbreak.StackResponse,
+	getClusterConfig func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 	dataLake := false
 	if blueprint.BlueprintName != nil && *blueprint.BlueprintName == "hdp26-shared-services" {
 		dataLake = true
+		convertClusterInputs(&skeleton)
+	} else if len(skeleton.SharedClusterName) > 0 {
+		log.Infof("[CreateStack] ephemeral cluster name: %s", skeleton.ClusterName)
+		fillSharedParameters(&skeleton, getBlueprint, getCluster, getClusterConfig)
 	}
 
 	// create stack
@@ -611,34 +618,58 @@ func GenerateCreateClusterSkeleton(c *cli.Context) error {
 	return nil
 }
 
-func GenerateCreateSharedClusterSkeleton(c *cli.Context) error {
-	defer timeTrack(time.Now(), "generate shared cluster skeleton")
-	checkRequiredFlags(c)
+func convertClusterInputs(skeleton *ClusterSkeleton) {
+	if skeleton.RangerMetastore == nil {
+		logErrorAndExit(errors.New("the cluster template shall contain RangerMetastore"))
+		return
+	}
 
-	skeleton := getBaseSkeleton()
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	validationErrors := skeleton.RangerMetastore.Validate()
+	if len(validationErrors) > 0 {
+		var messages []string = nil
+		for _, e := range validationErrors {
+			messages = append(messages, e.Error())
+		}
+		logErrorAndExit(errors.New(strings.Join(messages, ", ")))
+		return
+	}
 
-	clusterType := c.String(FlClusterType.Name)
-	clusterName := c.String(FlClusterNameOptional.Name)
+	if len(skeleton.CloudStoragePath) == 0 {
+		logErrorAndExit(errors.New("CloudStoragePath is a required value"))
+		return
+	}
 
-	generateCreateSharedClusterSkeletonImpl(skeleton, clusterName, clusterType,
-		oAuth2Client.GetBlueprintByName,
-		oAuth2Client.GetClusterByName,
-		oAuth2Client.GetClusterConfig)
+	putToClusterInput(skeleton, "RANGER_ADMIN_PASSWORD", skeleton.RangerMetastore.RangerAdminPassword)
+	putToClusterInput(skeleton, "RANGER_DB_HOST", skeleton.RangerMetastore.URL)
+	putToClusterInput(skeleton, "RANGER_DB_NAME", skeleton.RangerMetastore.Name)
+	putToClusterInput(skeleton, "RANGER_DB_USER", skeleton.RangerMetastore.Username)
+	putToClusterInput(skeleton, "RANGER_DB_PASSWORD", skeleton.RangerMetastore.Password)
+	putToClusterInput(skeleton, "S3_BUCKET", skeleton.CloudStoragePath)
 
-	Println(skeleton.JsonPretty())
-	return nil
 }
 
-func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterName string, clusterType string,
+func putToClusterInput(skeleton *ClusterSkeleton, key string, value string) {
+	if skeleton.ClusterInputs == nil {
+		skeleton.ClusterInputs = make(map[string]string)
+	}
+
+	skeleton.ClusterInputs[key] = value
+
+}
+
+func fillSharedParameters(skeleton *ClusterSkeleton,
 	getBlueprint func(string) *models_cloudbreak.BlueprintResponse,
 	getCluster func(string) *models_cloudbreak.StackResponse,
 	getClusterConfig func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput) {
 
-	ambariBp := getBlueprint(clusterType)
+	stack := getCluster(skeleton.SharedClusterName)
+	if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
+		logErrorAndExit(errors.New("the cluster is not 'AVAILABLE' yet, please try again later"))
+		return
+	}
 
-	skeleton.ClusterType = clusterType
-	skeleton.HDPVersion = ambariBp.Blueprint.StackVersion
+	ambariBp := getBlueprint(skeleton.ClusterType)
+
 	skeleton.Ldap = &(&stringWrapper{" "}).s
 	var inputs = make(map[string]string)
 	for _, input := range ambariBp.Inputs {
@@ -647,51 +678,51 @@ func generateCreateSharedClusterSkeletonImpl(skeleton *ClusterSkeleton, clusterN
 		}
 	}
 	skeleton.ClusterInputs = inputs
-	log.Infof("[GenerateCreateSharedClusterSkeleton] inputs for cluster type: %+v", inputs)
+	log.Infof("[fillSharedParameters] inputs for cluster type: %+v", inputs)
 
-	if len(clusterName) > 0 {
-		stack := getCluster(clusterName)
-		if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
-			logErrorAndExit(errors.New("the cluster is not 'AVAILABLE' yet, please try again later"))
-			return
-		}
+	var wg sync.WaitGroup
 
-		var wg sync.WaitGroup
-
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			configs := getClusterConfig(*stack.ID, ambariBp.Inputs)
-			for _, input := range configs {
-				if !strings.Contains(*input.Name, "LDAP") {
-					inputs[*input.Name] = *input.PropertyValue
-				}
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		configs := getClusterConfig(*stack.ID, ambariBp.Inputs)
+		for _, input := range configs {
+			if !strings.Contains(*input.Name, "LDAP") {
+				inputs[*input.Name] = *input.PropertyValue
 			}
-		}()
-
-		if stack.Cluster != nil && stack.Cluster.LdapConfig != nil {
-			skeleton.Ldap = &stack.Cluster.LdapConfig.Name
 		}
+	}()
 
-		network := stack.Network
-		if network != nil && network.Parameters["internetGatewayId"] == nil {
-			skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
-		}
+	if stack.Cluster != nil && stack.Cluster.LdapConfig != nil {
+		skeleton.Ldap = &stack.Cluster.LdapConfig.Name
+	}
 
-		if stack.Cluster != nil && len(stack.Cluster.RdsConfigs) > 0 {
-			for _, rds := range stack.Cluster.RdsConfigs {
-				if rds.Type != nil {
-					if *rds.Type == HIVE_RDS {
-						skeleton.HiveMetastore.Name = rds.Name
-					} else if *rds.Type == DRUID_RDS {
-						skeleton.DruidMetastore.Name = rds.Name
+	network := stack.Network
+	if network != nil && network.Parameters["internetGatewayId"] == nil {
+		skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
+	}
+
+	if stack.Cluster != nil && len(stack.Cluster.RdsConfigs) > 0 {
+		for _, rds := range stack.Cluster.RdsConfigs {
+			if rds.Type != nil {
+				if *rds.Type == HIVE_RDS {
+					skeleton.HiveMetastore = &HiveMetastore{
+						MetaStore: MetaStore{Name: rds.Name},
+					}
+				} else if *rds.Type == DRUID_RDS {
+					skeleton.DruidMetastore = &DruidMetastore{
+						MetaStore: MetaStore{Name: rds.Name},
 					}
 				}
 			}
 		}
-
-		wg.Wait()
 	}
+
+	wg.Wait()
+
+	skeletonJson, _ := json.Marshal(skeleton)
+	log.Debugf("[fillSharedParameters] ephemeral cluster skeleton: %s", string(skeletonJson))
+
 }
 
 func getBaseSkeleton() *ClusterSkeleton {
