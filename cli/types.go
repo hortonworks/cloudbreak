@@ -11,3 +11,7 @@ type int32Wrapper struct {
 type int64Wrapper struct {
 	i int64
 }
+
+type boolWrapper struct {
+	b bool
+}

@@ -426,6 +426,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			RdsConfigIds:              rdsConfigIds,
 			BlueprintInputs:           inputs,
 			LdapConfigID:              ldapConfigId,
+			ValidateBlueprint:         &(&boolWrapper{false}).b,
 			BlueprintCustomProperties: skeleton.Configurations,
 			Gateway: &models_cloudbreak.GatewayJSON{
 				EnableGateway:   &enableKnoxGateway,
