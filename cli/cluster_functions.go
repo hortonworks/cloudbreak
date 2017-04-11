@@ -44,6 +44,14 @@ func (c *InstanceConfig) fill(instanceGroup *models_cloudbreak.InstanceGroupResp
 	c.VolumeType = SafeStringConvert(template.VolumeType)
 	c.VolumeSize = &template.VolumeSize
 	c.VolumeCount = &template.VolumeCount
+	parameters := template.Parameters
+	if len(parameters) > 0 {
+		if encrypted, ok := parameters[ENCRYPTED]; ok {
+			c.Encrypted = &(&boolWrapper{encrypted.(bool)}).b
+		}
+	} else {
+		c.Encrypted = &(&boolWrapper{false}).b
+	}
 	return nil
 }
 

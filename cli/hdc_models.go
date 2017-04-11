@@ -15,6 +15,7 @@ var (
 	UNHEALTHY = "UNHEALTHY"
 	HIVE_RDS  = "HIVE"
 	DRUID_RDS = "DRUID"
+	ENCRYPTED = "encrypted"
 )
 
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5, 2.6}
@@ -70,6 +71,7 @@ type InstanceConfig struct {
 	VolumeType    string   `json:"VolumeType" yaml:"VolumeType"`
 	VolumeSize    *int32   `json:"VolumeSize" yaml:"VolumeSize"`
 	VolumeCount   *int32   `json:"VolumeCount" yaml:"VolumeCount"`
+	Encrypted     *bool    `json:"Encrypted" yaml:"Encrypted"`
 	InstanceCount int32    `json:"InstanceCount" yaml:"InstanceCount"`
 	Recipes       []Recipe `json:"Recipes" yaml:"Recipes"`
 	RecoveryMode  string   `json:"RecoveryMode,omitempty" yaml:"RecoveryMode,omitempty"`

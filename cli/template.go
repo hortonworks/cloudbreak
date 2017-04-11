@@ -57,6 +57,12 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
 func createMasterTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest {
 	masterTemplateName := "mtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
+	parameters := make(map[string]interface{})
+	encrypt := skeleton.Master.Encrypted
+	if encrypt != nil {
+		parameters[ENCRYPTED] = *encrypt
+	}
+
 	masterTemplateReqBody := models_cloudbreak.TemplateRequest{
 		Name:          masterTemplateName,
 		CloudPlatform: "AWS",
@@ -64,7 +70,7 @@ func createMasterTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.Te
 		VolumeType:    &skeleton.Master.VolumeType,
 		VolumeSize:    skeleton.Master.VolumeSize,
 		VolumeCount:   skeleton.Master.VolumeCount,
-		Parameters:    make(map[string]interface{}),
+		Parameters:    parameters,
 	}
 
 	return &masterTemplateReqBody
@@ -73,6 +79,12 @@ func createMasterTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.Te
 func createWorkerTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest {
 	workerTemplateName := "wtempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
+	parameters := make(map[string]interface{})
+	encrypt := skeleton.Worker.Encrypted
+	if encrypt != nil {
+		parameters[ENCRYPTED] = *encrypt
+	}
+
 	workerTemplateReqBody := models_cloudbreak.TemplateRequest{
 		Name:          workerTemplateName,
 		CloudPlatform: "AWS",
@@ -80,7 +92,7 @@ func createWorkerTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.Te
 		VolumeType:    &skeleton.Worker.VolumeType,
 		VolumeSize:    skeleton.Worker.VolumeSize,
 		VolumeCount:   skeleton.Worker.VolumeCount,
-		Parameters:    make(map[string]interface{}),
+		Parameters:    parameters,
 	}
 
 	return &workerTemplateReqBody
@@ -89,10 +101,14 @@ func createWorkerTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.Te
 func createComputeTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest {
 	computeTemplateName := "ctempl" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
-	computeParameters := make(map[string]interface{})
+	parameters := make(map[string]interface{})
 	if skeleton.Compute.SpotPrice != "" {
 		floatPrice, _ := strconv.ParseFloat(skeleton.Compute.SpotPrice, 64)
-		computeParameters["spotPrice"] = floatPrice
+		parameters["spotPrice"] = floatPrice
+	}
+	encrypt := skeleton.Compute.Encrypted
+	if encrypt != nil {
+		parameters[ENCRYPTED] = *encrypt
 	}
 
 	computeTemplateReqBody := models_cloudbreak.TemplateRequest{
@@ -102,7 +118,7 @@ func createComputeTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.T
 		VolumeType:    &skeleton.Compute.VolumeType,
 		VolumeSize:    skeleton.Compute.VolumeSize,
 		VolumeCount:   skeleton.Compute.VolumeCount,
-		Parameters:    computeParameters,
+		Parameters:    parameters,
 	}
 
 	return &computeTemplateReqBody

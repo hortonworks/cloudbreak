@@ -22,6 +22,7 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeType": "gp2",                                                   // Volume type of master instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 32,                                                      // Volume size of master instance group
     "VolumeCount": 1,                                                      // Volume count of master instance group
+    "Encrypted": true,                                                     // (Optional) Whether to encrypt the volumes or not, accepted values: true, false
     "Recipes": [                                                           // (Optional) List of recipes
       {
         "URI": "http://some-site.com/test.sh",                             // URI of the script
@@ -34,6 +35,7 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeType": "ephemeral",                                             // Volume type of worker instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 40,                                                      // Volume size of worker instance group
     "VolumeCount": 2,                                                      // Volume count of worker instance group
+    "Encrypted": true,                                                     // (Optional) Whether to encrypt the volumes or not, accepted values: true, false
     "InstanceCount": 3,                                                    // Instance count of worker instance group, accepted value: >0
     "Recipes": [                                                           // (Optional) List of recipes
       {
@@ -48,6 +50,7 @@ var AWSCreateClusterSkeletonHelp = `
     "VolumeType": "ephemeral",                                             // Volume type of compute instance group, accepted values: gp2, standard, ephemeral
     "VolumeSize": 40,                                                      // Volume size of compute instance group
     "VolumeCount": 2,                                                      // Volume count of compute instance group
+    "Encrypted": true,                                                     // (Optional) Whether to encrypt the volumes or not, accepted values: true, false
     "InstanceCount": 0,                                                    // Instance count of compute instance group, accepted value: >=0
     "Recipes": [                                                           // (Optional) List of recipes
       {
