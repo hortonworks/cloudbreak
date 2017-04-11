@@ -17,7 +17,6 @@ import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
@@ -64,34 +63,4 @@ public class PillarSaveTest {
         }
     }
 
-    @Test
-    public void testCall() throws Exception {
-        SaltConnector saltConnector = mock(SaltConnector.class);
-        GenericResponses responses = new GenericResponses();
-        GenericResponse response = new GenericResponse();
-        responses.setResponses(Collections.singletonList(response));
-        response.setStatusCode(HttpStatus.OK.value());
-        when(saltConnector.pillar(any(), any(Pillar.class))).thenReturn(responses);
-        PillarSave pillarSave = new PillarSave(saltConnector, Collections.emptySet(), "10.0.0.1");
-        Boolean callResult = pillarSave.call();
-        Assert.assertTrue(callResult);
-    }
-
-    @Test
-    public void testCallWithNotFound() {
-        SaltConnector saltConnector = mock(SaltConnector.class);
-        GenericResponses responses = new GenericResponses();
-        GenericResponse response = new GenericResponse();
-        response.setStatusCode(HttpStatus.NOT_FOUND.value());
-        response.setAddress("10.0.0.1");
-        responses.setResponses(Collections.singletonList(response));
-        when(saltConnector.pillar(any(), any(Pillar.class))).thenReturn(responses);
-        PillarSave pillarSave = new PillarSave(saltConnector, Sets.newHashSet("10.0.0.1"), "10.0.0.1");
-        try {
-            pillarSave.call();
-            Assert.fail("Exception should happen");
-        } catch (Exception e) {
-            Assert.assertEquals(CloudbreakOrchestratorFailedException.class, e.getClass());
-        }
-    }
 }

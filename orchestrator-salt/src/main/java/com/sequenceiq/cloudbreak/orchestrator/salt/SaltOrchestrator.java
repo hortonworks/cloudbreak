@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +36,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -145,22 +143,9 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         String ambariServerAddress = primaryGateway.getPrivateAddress();
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            PillarSave ambariServer = new PillarSave(sc, gatewayTargets, ambariServerAddress);
-            Callable<Boolean> saltPillarRunner = runner(ambariServer, exitCriteria, exitCriteriaModel);
-            Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
-            saltPillarRunnerFuture.get();
-
-            Map<String, Object> pillarJson = new HashMap<>();
-            pillarJson.put("consul", ImmutableMap.of("server", ambariServerAddress));
-            SaltPillarProperties pillarProperties = new SaltPillarProperties("/consul/init.sls", pillarJson);
-            PillarSave consulServer = new PillarSave(sc, gatewayTargets, pillarProperties);
-            saltPillarRunner = runner(consulServer, exitCriteria, exitCriteriaModel);
-            saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
-            saltPillarRunnerFuture.get();
-
             PillarSave hostSave = new PillarSave(sc, gatewayTargets, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
-            saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
-            saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
+            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
+            Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
             for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
@@ -173,23 +158,28 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> server = Sets.newHashSet(ambariServerAddress);
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
 
-            LOGGER.info("Pillar saved, setting up grains...");
-
+            // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
-                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "gateway"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "gateway"), exitCriteriaModel);
             }
-
             // ambari server
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
+            // ambari server standby
+            Set<String> standbyServers = gatewayTargets.stream().filter(ip -> !server.contains(ip)).collect(Collectors.toSet());
+            if (!standbyServers.isEmpty()) {
+                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_standby"), exitCriteriaModel);
+            }
             // ambari agent
             runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitCriteriaModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
                 runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server"), exitCriteriaModel);
             }
+            // smartsense
             if (configureSmartSense) {
-                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "smartsense"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitCriteriaModel);
             }
+
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
         } catch (Exception e) {
