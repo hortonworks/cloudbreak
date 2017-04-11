@@ -50,6 +50,33 @@ func (a *Client) GetAccountUsage(params *GetAccountUsageParams) (*GetAccountUsag
 }
 
 /*
+GetDailyFlexUsage retrieves flex related daily usages
+
+Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)
+*/
+func (a *Client) GetDailyFlexUsage(params *GetDailyFlexUsageParams) (*GetDailyFlexUsageOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetDailyFlexUsageParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getDailyFlexUsage",
+		Method:             "GET",
+		PathPattern:        "/usages/flex/daily",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetDailyFlexUsageReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetDailyFlexUsageOK), nil
+}
+
+/*
 GetDeployerUsage retrieves usages by filter parameters
 
 Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)
@@ -74,6 +101,33 @@ func (a *Client) GetDeployerUsage(params *GetDeployerUsageParams) (*GetDeployerU
 		return nil, err
 	}
 	return result.(*GetDeployerUsageOK), nil
+}
+
+/*
+GetLatestFlexUsage retrieves flex related latest usages usages for the given day
+
+Cloudbreak gives you an up to date overview of cluster usage based on different filtering criteria (start/end date, users, providers, region, etc)
+*/
+func (a *Client) GetLatestFlexUsage(params *GetLatestFlexUsageParams) (*GetLatestFlexUsageOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetLatestFlexUsageParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getLatestFlexUsage",
+		Method:             "GET",
+		PathPattern:        "/usages/flex/latest",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetLatestFlexUsageReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetLatestFlexUsageOK), nil
 }
 
 /*

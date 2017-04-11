@@ -38,7 +38,11 @@ type GatewayJSON struct {
 
 	/* SSO Provider certificate
 	 */
-	SignKey *string `json:"signKey,omitempty"`
+	SignCert *string `json:"signCert,omitempty"`
+
+	/* SSO Provider pub key
+	 */
+	SignPub *string `json:"signPub,omitempty"`
 
 	/* SSO provider cluster name
 	 */

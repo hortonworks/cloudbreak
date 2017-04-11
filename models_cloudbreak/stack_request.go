@@ -49,6 +49,10 @@ type StackRequest struct {
 	 */
 	FailurePolicy *FailurePolicyRequest `json:"failurePolicy,omitempty"`
 
+	/* id of the related flex subscription
+	 */
+	FlexID *int64 `json:"flexId,omitempty"`
+
 	/* specific version of HDP
 	 */
 	HdpVersion *string `json:"hdpVersion,omitempty"`

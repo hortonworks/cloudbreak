@@ -23,6 +23,10 @@ type FlexSubscriptionResponse struct {
 	*/
 	Account *string `json:"account,omitempty"`
 
+	/* default
+	 */
+	Default *bool `json:"default,omitempty"`
+
 	/* id of the resource
 
 	Read Only: true
@@ -65,6 +69,10 @@ type FlexSubscriptionResponse struct {
 	Pattern: ^(FLEX-[0-9]{10}$)
 	*/
 	SubscriptionID *string `json:"subscriptionId,omitempty"`
+
+	/* true if the flex subscription was used for the controller
+	 */
+	UsedForController *bool `json:"usedForController,omitempty"`
 }
 
 // Validate validates this flex subscription response

@@ -17,6 +17,10 @@ swagger:model FlexSubscriptionRequest
 */
 type FlexSubscriptionRequest struct {
 
+	/* default
+	 */
+	Default *bool `json:"default,omitempty"`
+
 	/* name of the resource
 
 	Required: true
@@ -35,6 +39,10 @@ type FlexSubscriptionRequest struct {
 	Pattern: ^(FLEX-[0-9]{10}$)
 	*/
 	SubscriptionID *string `json:"subscriptionId,omitempty"`
+
+	/* true if the flex subscription was used for the controller
+	 */
+	UsedForController *bool `json:"usedForController,omitempty"`
 }
 
 // Validate validates this flex subscription request

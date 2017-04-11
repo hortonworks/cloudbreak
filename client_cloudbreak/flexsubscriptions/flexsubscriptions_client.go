@@ -292,6 +292,33 @@ func (a *Client) PostPublicFlexSubscription(params *PostPublicFlexSubscriptionPa
 	return result.(*PostPublicFlexSubscriptionOK), nil
 }
 
+/*
+PutPublicDefaultFlexSubscriptionByName sets the account default flag on the flex subscription
+
+Flex subscriptions could be configured.
+*/
+func (a *Client) PutPublicDefaultFlexSubscriptionByName(params *PutPublicDefaultFlexSubscriptionByNameParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutPublicDefaultFlexSubscriptionByNameParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "putPublicDefaultFlexSubscriptionByName",
+		Method:             "PUT",
+		PathPattern:        "/flexsubscriptions/account/setdefault/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutPublicDefaultFlexSubscriptionByNameReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport client.Transport) {
 	a.transport = transport

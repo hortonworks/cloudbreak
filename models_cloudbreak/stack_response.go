@@ -61,6 +61,10 @@ type StackResponse struct {
 	 */
 	FailurePolicy *FailurePolicyResponse `json:"failurePolicy,omitempty"`
 
+	/* the related flex subscription
+	 */
+	FlexSubscription *FlexSubscriptionResponse `json:"flexSubscription,omitempty"`
+
 	/* port of the gateway secured proxy
 	 */
 	GatewayPort *int32 `json:"gatewayPort,omitempty"`
