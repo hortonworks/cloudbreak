@@ -2,7 +2,6 @@
 cloudbreak-config() {
   : ${BRIDGE_IP:=$(docker run --label cbreak.sidekick=true alpine sh -c 'ip ro | grep default | cut -d" " -f 3')}
   env-import PRIVATE_IP $BRIDGE_IP
-  env-import UAA_PORT 8089
   env-import DOCKER_MACHINE ""
   cloudbreak-conf-tags
   cloudbreak-conf-images
@@ -39,7 +38,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.15.0-dev.157
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
 
-    env-import DOCKER_TAG_CBD_SMARTSENSE 0.1.0
+    env-import DOCKER_TAG_CBD_SMARTSENSE 0.2.0
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
@@ -183,6 +182,7 @@ cloudbreak-delete-certs() {
 }
 
 cloudbreak-conf-uaa() {
+    env-import UAA_PORT 8089
 
     env-import UAA_DEFAULT_SECRET
     env-validate UAA_DEFAULT_SECRET *" "* "space"
@@ -676,7 +676,7 @@ util-smartsense() {
 util-get-usage() {
     declare desc="Generate Flex related usages."
 
-    cloudbreak-config
+    cloudbreak-conf-uaa
 
     local USAGE_PATH="usages/flex/daily"
 
