@@ -26,8 +26,8 @@ public class ProxyRegistrator {
     @Inject
     private ConsulClient consulClient;
 
-    public void register(String clusterName, String gatewayHost) {
-        registerKeys(clusterName, String.format("https://%s:8443", gatewayHost), String.format("/gateway/%s/", clusterName));
+    public void register(String clusterName, String contextPath, String gatewayHost) {
+        registerKeys(clusterName, String.format("https://%s:8443", gatewayHost), String.format("/%s/", contextPath));
     }
 
     public void remove(String clusterName) {
@@ -47,8 +47,6 @@ public class ProxyRegistrator {
         LOGGER.info("Remove cluster from Consul: clusterName: {}", clusterName);
         consulClient.deleteKVValues(String.format("traefik/backends/%s", clusterName));
         consulClient.deleteKVValues(String.format("traefik/frontends/%s", clusterName));
-        // consulClient.deleteKVValues(String.format("traefik/backends/%s-sso", name));
-        // consulClient.deleteKVValues(String.format("traefik/frontends/%s-sso", name));
     }
 
     private void removeAll() {

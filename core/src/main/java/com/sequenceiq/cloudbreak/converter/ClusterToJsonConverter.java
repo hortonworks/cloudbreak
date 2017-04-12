@@ -341,10 +341,10 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             if (gateway.getEnableGateway() && ambariIp != null) {
                 String url;
                 if (GatewayType.CENTRAL == gateway.getGatewayType()) {
-                    url = String.format("/gateway/%s%s", gateway.getTopologyName(),
+                    url = String.format("/%s/%s%s", gateway.getPath(), gateway.getTopologyName(),
                             port.getExposedService().getKnoxUrl());
                 } else {
-                    url = String.format("https://%s:8443/gateway/%s%s", ambariIp, gateway.getTopologyName(),
+                    url = String.format("https://%s:8443/%s/%s%s", ambariIp, gateway.getPath(), gateway.getTopologyName(),
                             port.getExposedService().getKnoxUrl());
                 }
                 // filter out what is not exposed
@@ -370,9 +370,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             } else {
                 if (gateway.getEnableGateway() != null && gateway.getEnableGateway()) {
                     if (GatewayType.CENTRAL == gateway.getGatewayType()) {
-                        url = String.format("/gateway/%s/ambari/", gateway.getTopologyName());
+                        url = String.format("/%s/%s/ambari/", gateway.getPath(), gateway.getTopologyName());
                     } else {
-                        url = String.format("https://%s:8443/gateway/%s/ambari/", ambariIp, gateway.getTopologyName());
+                        url = String.format("https://%s:8443/%s/%s/ambari/", ambariIp, gateway.getPath(), gateway.getTopologyName());
                     }
                 } else {
                     url = String.format("https://%s/ambari/", ambariIp);
