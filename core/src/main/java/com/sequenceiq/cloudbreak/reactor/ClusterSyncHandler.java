@@ -49,7 +49,8 @@ public class ClusterSyncHandler implements ClusterEventHandler<ClusterSyncReques
         try {
             Stack stack = stackService.getById(request.getStackId());
             String proxyIp = stackUtil.extractAmbariIp(stack);
-            proxyRegistrator.register(stack.getName(), proxyIp);
+            String contextPath = stack.getCluster().getGateway().getPath();
+            proxyRegistrator.register(stack.getName(), contextPath, proxyIp);
             Cluster cluster = clusterService.retrieveClusterByStackId(request.getStackId());
             ambariClusterStatusUpdater.updateClusterStatus(stack, cluster);
             result = new ClusterSyncResult(request);

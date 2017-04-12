@@ -7,8 +7,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
-import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -45,7 +45,8 @@ public class RegisterProxyHandler implements ReactorEventHandler<RegisterProxyRe
         try {
             Stack stack = stackRepository.findById(stackId);
             String proxyIp = stackUtil.extractAmbariIp(stack);
-            proxyRegistrator.register(stack.getName(), proxyIp);
+            String contextPath = stack.getCluster().getGateway().getPath();
+            proxyRegistrator.register(stack.getName(), contextPath, proxyIp);
             response = new RegisterProxySuccess(stackId);
         } catch (Exception e) {
             response = new RegisterProxyFailed(stackId, e);
