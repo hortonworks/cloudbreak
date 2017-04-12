@@ -253,7 +253,34 @@ public class JacksonBlueprintProcessorTest {
         String result = underTest.addConfigEntries(testBlueprint, configs, false);
 
         Assert.assertEquals(testBlueprint.replaceAll("\\s", ""), result);
+    }
 
+    @Test
+    public void addSettingsToBlueprintWhenNoSettingsBlock() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-without-settings-array.bp");
+        String res = FileReaderUtils.readFileFromClasspath("blueprints/settings-bp-result.bp");
+
+        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
+        configs.add(new BlueprintConfigurationEntry("recovery_settings", "recovery_enabled", "true"));
+        configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_enabled", "true"));
+        configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_type", "AUTO_START"));
+        String result = underTest.addSettingsEntries(testBlueprint, configs, false);
+
+        Assert.assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
+    }
+
+    @Test
+    public void addSettingsToBlueprintWhenSettingsBlockExists() throws Exception {
+        String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/bp-with-settings-array.bp");
+        String res = FileReaderUtils.readFileFromClasspath("blueprints/with-settings-bp-result.bp");
+
+        List<BlueprintConfigurationEntry> configs = new ArrayList<>();
+        configs.add(new BlueprintConfigurationEntry("recovery_settings", "recovery_enabled", "true"));
+        configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_enabled", "true"));
+        configs.add(new BlueprintConfigurationEntry("cluster-env", "recovery_type", "AUTO_START"));
+        String result = underTest.addSettingsEntries(testBlueprint, configs, false);
+
+        Assert.assertEquals(res.replaceAll("\\s", ""), result.replaceAll("\\s", ""));
     }
 
     private boolean componentExistsInHostgroup(String component, JsonNode hostGroupNode) {
