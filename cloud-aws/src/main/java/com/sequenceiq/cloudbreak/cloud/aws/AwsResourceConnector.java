@@ -92,10 +92,6 @@ import freemarker.template.Configuration;
 public class AwsResourceConnector implements ResourceConnector<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceConnector.class);
 
-    private static final String CLOUDBREAK_EBS_SNAPSHOT = "cloudbreak-ebs-snapshot";
-
-    private static final int SNAPSHOT_VOLUME_SIZE = 10;
-
     private static final List<String> CAPABILITY_IAM = singletonList("CAPABILITY_IAM");
 
     private static final int INCREMENT_HOST_NUM = 256;
