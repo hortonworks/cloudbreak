@@ -70,10 +70,14 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
                 JsonNode configFileNode = configurationsArrayNode.findPath(configurationEntry.getConfigFile());
                 if (override || configFileNode.findPath(configurationEntry.getKey()).isMissingNode()) {
                     if (configFileNode.isMissingNode()) {
-                        ObjectNode arrayElementNode = configurationsArrayNode.addObject();
-                        configFileNode = arrayElementNode.putObject(configurationEntry.getConfigFile());
+                        ArrayNode arrayElementNode = configurationsArrayNode.addArray();
+                        ObjectNode jsonNodes = arrayElementNode.addObject();
+                        configFileNode = jsonNodes.putObject(configurationEntry.getConfigFile());
+                        ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
+                    } else {
+                        ObjectNode jsonNodes = ((ArrayNode) configFileNode).addObject();
+                        ((ObjectNode) jsonNodes).put(configurationEntry.getKey(), configurationEntry.getValue());
                     }
-                    ((ObjectNode) configFileNode).put(configurationEntry.getKey(), configurationEntry.getValue());
                 }
             }
             return JsonUtil.writeValueAsString(root);
