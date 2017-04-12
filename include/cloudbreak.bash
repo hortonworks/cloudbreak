@@ -38,7 +38,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.15.0-dev.157
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
 
-    env-import DOCKER_TAG_CBD_SMARTSENSE 0.1.0
+    env-import DOCKER_TAG_CBD_SMARTSENSE 0.2.0
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
