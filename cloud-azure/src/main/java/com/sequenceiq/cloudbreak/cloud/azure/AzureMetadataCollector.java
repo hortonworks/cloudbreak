@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.network.Backend;
+import com.microsoft.azure.management.network.InboundNatRule;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.PublicIpAddress;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
@@ -46,27 +48,28 @@ public class AzureMetadataCollector implements MetadataCollector {
                 AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
                 VirtualMachine vm = azureClient.getVirtualMachine(resource.getName(), instance.getKey());
 
-                NetworkInterface networkInterface = null;
                 String privateIp = null;
                 String publicIp = null;
 
-
                 List<String> networkInterfaceIdList = vm.networkInterfaceIds();
-                for (String networkInterfaceId: networkInterfaceIdList) {
-                    networkInterface = azureClient.getNetworkInterfaceById(networkInterfaceId);
+                for (String networkInterfaceId : networkInterfaceIdList) {
+                    NetworkInterface networkInterface = azureClient.getNetworkInterfaceById(networkInterfaceId);
                     privateIp = networkInterface.primaryPrivateIp();
                     PublicIpAddress publicIpAddress = networkInterface.primaryIpConfiguration().getPublicIpAddress();
-                    if (publicIpAddress == null || publicIpAddress.ipAddress() == null) {
+
+                    List<Backend> backends = networkInterface.primaryIpConfiguration().listAssociatedLoadBalancerBackends();
+                    List<InboundNatRule> inboundNatRules = networkInterface.primaryIpConfiguration().listAssociatedLoadBalancerInboundNatRules();
+
+                    if (backends.size() > 0 || inboundNatRules.size() > 0) {
                         publicIp = azureClient.getLoadBalancerIps(resource.getName(), azureUtils.getLoadBalancerId(resource.getName())).get(0);
-                    } else {
+                    }
+
+                    if (publicIpAddress != null && publicIpAddress.ipAddress() != null) {
                         publicIp = publicIpAddress.ipAddress();
                     }
                 }
 
                 String instanceId = instance.getKey();
-                if (publicIp == null) {
-                    throw new CloudConnectorException(String.format("Public ip address can not be null but it was on %s instance.", instance.getKey()));
-                }
                 CloudInstanceMetaData md = new CloudInstanceMetaData(privateIp, publicIp);
 
                 InstanceTemplate template = templateMap.get(instanceId);
