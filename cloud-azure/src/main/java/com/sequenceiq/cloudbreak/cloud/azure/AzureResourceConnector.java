@@ -97,7 +97,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             for (String name : storageAccounts.keySet()) {
                 azureStorage.createStorage(ac, client, name, storageAccounts.get(name), resourceGroupName, region);
             }
-            client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+            try {
+                client.getTemplateDeployment(resourceGroupName, stackName);
+            } catch (CloudException e) {
+                client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+            }
         } catch (CloudException e) {
             LOGGER.error("Provisioning error, cloud exception happened: ", e);
             if (e.getBody() != null && e.getBody().getDetails() != null) {
