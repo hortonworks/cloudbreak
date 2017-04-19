@@ -170,6 +170,9 @@
           },
           {
             "name": "INFRA_SOLR"
+          },
+          {
+            "name": "HIVE_METASTORE"
           }
         ],
         "cardinality": "1"
