@@ -53,6 +53,22 @@
       "referenceConfiguration":"s3.bucket"
     }
   ],
+  "settings": [
+    {
+      "recovery_settings": []
+    },
+    {
+      "service_settings": [
+        {
+          "name": "HIVE",
+          "credential_store_enabled": "false"
+        }
+      ]
+    },
+    {
+      "component_settings": []
+    }
+  ],
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-edw-analytics-shared",
