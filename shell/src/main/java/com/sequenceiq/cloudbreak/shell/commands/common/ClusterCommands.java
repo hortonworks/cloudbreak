@@ -123,6 +123,8 @@ public class ClusterCommands implements BaseCommands {
                     String ambariAgentImage,
             @CliOption(key = "ambariDbImage", help = "Name of the ambari db image in case of BYOS orchestrator.", mandatory = false)
                     String ambariDbImage,
+            @CliOption(key = "customQueue", help = "Name of the custom queue.", mandatory = false,
+                    unspecifiedDefaultValue = "default", specifiedDefaultValue = "default") String customQueue,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
@@ -190,6 +192,7 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setEnableSecurity(enableSecurity);
             clusterRequest.setHostGroups(hostGroupList);
             clusterRequest.setBlueprintInputs(new HashSet<>());
+            clusterRequest.setCustomQueue(customQueue);
 
             GatewayJson gateway = new GatewayJson();
             gateway.setEnableGateway(enableKnoxGateway);

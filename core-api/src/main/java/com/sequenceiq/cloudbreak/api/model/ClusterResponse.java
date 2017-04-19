@@ -113,6 +113,9 @@ public class ClusterResponse {
     @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_DETAILS)
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
+    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_QUEUE)
+    private String customQueue;
+
     public Boolean getEnableShipyard() {
         return enableShipyard;
     }
@@ -377,5 +380,13 @@ public class ClusterResponse {
 
     public void setAmbariDatabaseDetails(AmbariDatabaseDetailsJson ambariDatabaseDetails) {
         this.ambariDatabaseDetails = ambariDatabaseDetails;
+    }
+
+    public String getCustomQueue() {
+        return customQueue;
+    }
+
+    public void setCustomQueue(String customQueue) {
+        this.customQueue = customQueue;
     }
 }

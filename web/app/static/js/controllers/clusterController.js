@@ -380,6 +380,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         }
                     }
                 }
+                if ($scope.cluster.customQueue !== true) {
+                    $scope.cluster.customQueueId = "default";
+                }
             }
             if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform !== 'AWS') {
                 delete $scope.cluster.parameters.instanceProfile;
@@ -547,6 +550,9 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                             "AMBARI_DB": $scope.cluster.ambariDbId
                         }
                     }
+                }
+                if ($scope.cluster.customQueue !== true) {
+                    $scope.cluster.customQueueId = "default";
                 }
 
                 Cluster.save({
@@ -902,6 +908,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 setInstanceProfile();
                 setAmbariStackDetails($rootScope.activeCredential, $scope.cluster);
                 $scope.cluster.customContainer = false;
+                $scope.cluster.customQueue = false;
+                $scope.cluster.customQueueId = "default";
                 $scope.cluster.customImage = false;
             }
         });
@@ -1243,9 +1251,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                         }
                         $rootScope.filteredTemplates = templates.filter(function(template) {
                             var zoneVmTypes = $rootScope.params.vmTypesPerZone[$rootScope.activeCredential.cloudPlatform][zoneid];
-                            for (i = 0; i < zoneVmTypes.length; i++) {
-                                if (zoneVmTypes[i].value === template.instanceType) {
-                                    return true;
+                            if (typeof zoneVmTypes !== 'undefined') {
+                                for (i = 0; i < zoneVmTypes.length; i++) {
+                                    if (zoneVmTypes[i].value === template.instanceType) {
+                                        return true;
+                                    }
                                 }
                             }
                         })
@@ -1298,6 +1308,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 enableShipyard: false,
                 customImage: false,
                 customContainer: false,
+                customQueue: false,
+                customQueueId: "default",
                 userDefinedTags: [],
                 azureAvailabilitySets: []
             };

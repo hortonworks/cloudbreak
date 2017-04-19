@@ -120,7 +120,9 @@
 <div class="form-group" ng-show="activeCredential && showAdvancedOptionForm && activeCredential.cloudPlatform === 'BYOS'">
     <label class="col-sm-3 control-label" for="provisionCluster">Provision cluster </label>
     <div class="col-sm-8">
-        <label class="control-label" for="provisionCluster">{{activeCredential.parameters.type}}</label>
+        <select class="form-control" id="provisionCluster">
+            <option  value="{{activeCredential.parameters.type}}">{{activeCredential.parameters.type}}</option>
+        </select>
     </div>
 </div>
 
@@ -175,6 +177,23 @@
         <input type="text" name="ambari_db_container_id" class="form-control" id="ambari_db_container_id" ng-model="cluster.ambariDbId" ng-required="cluster.customContainer" placeholder="" >
         <div class="help-block" ng-show="$parent.clusterCreationForm.ambari_db_container_id.$dirty && $parent.clusterCreationForm.ambari_db_container_id.$invalid">
             <i class="fa fa-warning"></i> {{msg.custom_container_error}}
+        </div>
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && (activeStack !== undefined || activeCredential.cloudPlatform === 'BYOS')">
+    <label class="col-sm-3 control-label" for="custom_queue">{{msg.cluster_form_custom_queue}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" name="custom_queue" id="custom_queue" ng-model="cluster.customQueue">
+    </div>
+</div>
+
+<div class="form-group" ng-show="showAdvancedOptionForm && cluster.customQueue && (activeStack !== undefined || activeCredential.cloudPlatform === 'BYOS')" ng-class="{ 'has-error': clusterCreationForm.custom_queue_id.$dirty && clusterCreationForm.custom_queue_id.$invalid }">
+    <label class="col-sm-3 control-label" for="ambari_db_container_id">{{msg.cluster_form_custom_queue_name}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="custom_queue_id" class="form-control" id="custom_queue_id" ng-model="cluster.customQueueId" ng-required="cluster.customQueue" placeholder="" >
+        <div class="help-block" ng-show="$parent.clusterCreationForm.custom_queue_id.$dirty && $parent.clusterCreationForm.custom_queue_id.$invalid">
+            <i class="fa fa-warning"></i> {{msg.custom_queue_error}}
         </div>
     </div>
 </div>

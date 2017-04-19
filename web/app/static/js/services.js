@@ -429,6 +429,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         validateBlueprint: cluster.validateBlueprint,
                         fileSystem: cluster.fileSystem || null,
                         customContainer: cluster.customContainerObj || null,
+                        customQueue: cluster.customQueueId == null ? "default" : cluster.customQueueId,
                         ambariRepoDetailsJson: cluster.ambariRepoDetailsJson === 'undefined' ? null : cluster.ambariRepoDetailsJson,
                         ambariStackDetails: cluster.ambariStackDetails === 'undefined' ? null : cluster.ambariStackDetails,
                         ambariDatabaseDetails: cluster.ambariDatabaseDetails === 'undefined' ? null : cluster.ambariDatabaseDetails,

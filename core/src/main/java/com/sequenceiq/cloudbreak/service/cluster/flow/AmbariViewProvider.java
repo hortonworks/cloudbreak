@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
+import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.VIEW_DEFINITIONS;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,8 +21,6 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 public class AmbariViewProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariViewProvider.class);
 
-    private static final String VIEW_DEFINITIONS = "viewDefinitions";
-
     @Inject
     private ClusterRepository clusterRepository;
 
@@ -29,8 +29,11 @@ public class AmbariViewProvider {
             LOGGER.info("Provide view definitions.");
             List<String> viewDefinitions = (List<String>) ambariClient.getViewDefinitions();
 
-            Map<String, Object> obj = new HashMap<>();
-            obj.put(VIEW_DEFINITIONS, viewDefinitions);
+            Map<String, Object> obj = cluster.getAttributes().getMap();
+            if (obj == null) {
+                obj = new HashMap<>();
+            }
+            obj.put(VIEW_DEFINITIONS.name(), viewDefinitions);
             cluster.setAttributes(new Json(obj));
             return clusterRepository.save(cluster);
         } catch (Exception e) {
@@ -40,7 +43,11 @@ public class AmbariViewProvider {
     }
 
     public boolean isViewDefinitionNotProvided(Cluster cluster) {
-        return ((List<String>) cluster.getAttributes().getMap().get(VIEW_DEFINITIONS)).isEmpty();
+        Object viewDefinitions = cluster.getAttributes().getMap().get(VIEW_DEFINITIONS.name());
+        if (viewDefinitions != null) {
+            return ((List<String>) viewDefinitions).isEmpty();
+        }
+        return true;
     }
 
 }
