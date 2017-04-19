@@ -6,6 +6,22 @@
       "stack_name": "HDP",
       "stack_version": "2.5"
     },
+    "settings": [
+      {
+        "recovery_settings": []
+      },
+      {
+        "service_settings": [
+          {
+            "name": "HIVE",
+            "credential_store_enabled": "false"
+          }
+        ]
+      },
+      {
+        "component_settings": []
+      }
+    ],
     "configurations": [
       {
         "core-site": {

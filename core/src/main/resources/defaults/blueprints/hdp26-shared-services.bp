@@ -63,7 +63,23 @@
       "stack_name":"HDP",
       "stack_version":"2.6"
     },
-    "configurations":[
+    "settings": [
+      {
+        "recovery_settings": []
+      },
+      {
+        "service_settings": [
+          {
+            "name": "HIVE",
+            "credential_store_enabled": "false"
+          }
+        ]
+      },
+      {
+        "component_settings": []
+      }
+    ],
+    "configurations": [
       {
         "admin-properties":{
           "properties":{
@@ -100,7 +116,8 @@
           "ranger.usersync.ldap.binddn":"{{ LDAP_BIND_DN }}",
           "ranger.usersync.ldap.ldapbindpassword":"{{ LDAP_BIND_PASSWORD }}",
           "ranger.usersync.ldap.user.nameattribute":"{{ LDAP_NAME_ATTRIBUTE }}",
-          "ranger.usersync.ldap.user.searchbase":"{{ LDAP_SYNC_SEARCH_BASE }}"
+          "ranger.usersync.ldap.user.searchbase":"{{ LDAP_SYNC_SEARCH_BASE }}",
+          "ranger.usersync.group.searchenabled": "false"
         }
       },
       {
