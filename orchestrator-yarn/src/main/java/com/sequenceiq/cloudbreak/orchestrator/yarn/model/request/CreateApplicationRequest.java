@@ -12,6 +12,8 @@ public class CreateApplicationRequest implements JsonEntity {
 
     private int lifetime;
 
+    private String queue;
+
     private List<YarnComponent> components = new ArrayList<>();
 
     public String getName() {
@@ -28,6 +30,14 @@ public class CreateApplicationRequest implements JsonEntity {
 
     public void setLifetime(int lifetime) {
         this.lifetime = lifetime;
+    }
+
+    public String getQueue() {
+        return queue;
+    }
+
+    public void setQueue(String queue) {
+        this.queue = queue;
     }
 
     public List<YarnComponent> getComponents() {

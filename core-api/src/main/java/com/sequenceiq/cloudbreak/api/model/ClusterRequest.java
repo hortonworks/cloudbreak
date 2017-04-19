@@ -121,6 +121,9 @@ public class ClusterRequest {
     @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerRequest customContainer;
 
+    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_QUEUE)
+    private String customQueue;
+
     public String getDescription() {
         return description;
     }
@@ -348,6 +351,14 @@ public class ClusterRequest {
 
     public CustomContainerRequest getCustomContainer() {
         return customContainer;
+    }
+
+    public String getCustomQueue() {
+        return customQueue;
+    }
+
+    public void setCustomQueue(String customQueue) {
+        this.customQueue = customQueue;
     }
 
     public void setCustomContainer(CustomContainerRequest customContainer) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
+import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -95,42 +97,43 @@ public class ContainerConfigService {
             ContainerOrchestrator orchestrator = containerOrchestratorResolver.get(stack.getOrchestrator().getType());
             Map<String, String> customContainerConfig = getCustomContainerConfig(stack);
             Optional<String> customContainerName = Optional.ofNullable(customContainerConfig.get(dc.name()));
+            Optional<String> customQueue = getCustomQueue(stack);
             switch (dc) {
                 case AMBARI_SERVER:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariServerContainer(customContainerName)).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariServerContainer(customContainerName), customQueue).build();
                     break;
                 case AMBARI_AGENT:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariClientContainer(customContainerName)).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariClientContainer(customContainerName), customQueue).build();
                     break;
                 case AMBARI_DB:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariDbContainer(customContainerName)).build();
+                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariDbContainer(customContainerName), customQueue).build();
                     break;
                 case KERBEROS:
-                    config = new ContainerConfigBuilder.Builder(kerberosDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(kerberosDockerImageName, customQueue).build();
                     break;
                 case REGISTRATOR:
-                    config = new ContainerConfigBuilder.Builder(registratorDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(registratorDockerImageName, customQueue).build();
                     break;
                 case MUNCHAUSEN:
-                    config = new ContainerConfigBuilder.Builder(munchausenImageName).build();
+                    config = new ContainerConfigBuilder.Builder(munchausenImageName, customQueue).build();
                     break;
                 case CONSUL_WATCH:
-                    config = new ContainerConfigBuilder.Builder(consulWatchPlugnDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(consulWatchPlugnDockerImageName, customQueue).build();
                     break;
                 case LOGROTATE:
-                    config = new ContainerConfigBuilder.Builder(logrotateDockerImageName).build();
+                    config = new ContainerConfigBuilder.Builder(logrotateDockerImageName, customQueue).build();
                     break;
                 case HAVEGED:
-                    config = new ContainerConfigBuilder.Builder(havegedImageName).build();
+                    config = new ContainerConfigBuilder.Builder(havegedImageName, customQueue).build();
                     break;
                 case LDAP:
-                    config = new ContainerConfigBuilder.Builder(ldapImageName).build();
+                    config = new ContainerConfigBuilder.Builder(ldapImageName, customQueue).build();
                     break;
                 case SHIPYARD:
-                    config = new ContainerConfigBuilder.Builder(shipyardImageName).build();
+                    config = new ContainerConfigBuilder.Builder(shipyardImageName, customQueue).build();
                     break;
                 case SHIPYARD_DB:
-                    config = new ContainerConfigBuilder.Builder(rethinkDbImageName).build();
+                    config = new ContainerConfigBuilder.Builder(rethinkDbImageName, customQueue).build();
                     break;
                 default:
                     throw new CloudbreakServiceException(String.format("No configuration exist for %s", dc));
@@ -155,6 +158,10 @@ public class ContainerConfigService {
             }
         }
         return new HashMap<>();
+    }
+
+    private Optional<String> getCustomQueue(Stack stack) {
+        return Optional.ofNullable((String) stack.getCluster().getAttributes().getMap().get(CUSTOM_QUEUE.name()));
     }
 
 }

@@ -85,7 +85,7 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenReturn(true);
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
                 exitCriteriaModel());
     }
 
@@ -94,7 +94,7 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
                 exitCriteriaModel());
     }
 
@@ -103,7 +103,7 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
                 exitCriteriaModel());
     }
 
@@ -112,7 +112,7 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenThrow(new NullPointerException("null"));
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
+        underTestSpy.bootstrap(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), FIX_CONSUL_SERVER_COUNT,
                 exitCriteriaModel());
     }
 
@@ -121,7 +121,7 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenReturn(true);
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorCancelledException.class)
@@ -129,7 +129,7 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorCancelledException("cancelled"));
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -137,7 +137,7 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenThrow(new CloudbreakOrchestratorFailedException("failed"));
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
     }
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
@@ -145,6 +145,6 @@ public class SwarmContainerOrchestratorTest {
         when(munchausenBootstrap.call()).thenThrow(new NullPointerException("null"));
         doReturn(munchausenBootstrap).when(underTestSpy).munchausenNewNodeBootstrap(any(GatewayConfig.class), any(String.class), any(String[].class));
 
-        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
+        underTestSpy.bootstrapNewNodes(gatewayConfig(), new ContainerConfig("seq/a", "v1.10", "default"), generateNodes(FIX_NODE_COUNT), exitCriteriaModel());
     }
 }

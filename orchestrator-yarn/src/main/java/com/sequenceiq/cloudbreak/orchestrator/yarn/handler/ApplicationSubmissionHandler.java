@@ -61,6 +61,7 @@ public class ApplicationSubmissionHandler {
         String applicationName = applicationUtils.getApplicationName(constraint, componentNumber);
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();
         createApplicationRequest.setName(applicationName);
+        createApplicationRequest.setQueue(config.getQueue());
         createApplicationRequest.setLifetime(UNLIMITED);
 
         // Define the artifact (docker image) for the component

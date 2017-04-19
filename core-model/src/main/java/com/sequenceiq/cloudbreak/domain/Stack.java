@@ -44,7 +44,6 @@ import javax.persistence.Version;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
-import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -546,30 +545,6 @@ public class Stack implements ProvisionEntity {
         int nodeCount = 0;
         for (InstanceGroup instanceGroup : instanceGroups) {
             nodeCount += instanceGroup.getNodeCount();
-        }
-        return nodeCount;
-    }
-
-    public Integer getFullNodeCountWithoutDecommissionedNodes() {
-        int nodeCount = 0;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                if (!instanceMetaData.getInstanceStatus().equals(InstanceStatus.DECOMMISSIONED)) {
-                    nodeCount++;
-                }
-            }
-        }
-        return nodeCount;
-    }
-
-    public Integer getFullNodeCountWithoutDecommissionedAndUnRegisteredNodes() {
-        int nodeCount = 0;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                if (instanceMetaData.getInstanceStatus().equals(InstanceStatus.REGISTERED)) {
-                    nodeCount++;
-                }
-            }
         }
         return nodeCount;
     }

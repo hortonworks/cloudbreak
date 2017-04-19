@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.SHIPYARD;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
+import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -142,7 +143,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getAttributes() != null) {
             clusterResponse.setAttributes(source.getAttributes().getMap());
         }
-
         String ambariIp = stackUtil.extractAmbariIp(source.getStack());
         clusterResponse.setAmbariServerIp(ambariIp);
         clusterResponse.setUserName(source.getUserName());
@@ -158,6 +158,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
         clusterResponse.setSssdConfig(getConversionService().convert(source.getSssdConfig(), SssdConfigResponse.class));
         convertKnox(source, clusterResponse);
+        convertCustomQueue(source, clusterResponse);
         if (source.getBlueprintCustomProperties() != null) {
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
@@ -178,6 +179,18 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
 
         return response;
+    }
+
+    private void convertCustomQueue(Cluster source, ClusterResponse clusterResponse) {
+        if (source.getAttributes().getValue() != null) {
+            Map<String, Object> attributes = source.getAttributes().getMap();
+            Object customQueue = attributes.get(CUSTOM_QUEUE.name());
+            if (customQueue != null) {
+                clusterResponse.setCustomQueue(customQueue.toString());
+            } else {
+                clusterResponse.setCustomQueue("default");
+            }
+        }
     }
 
     private void convertRdsIds(ClusterResponse clusterResponse, Set<RDSConfig> rdsConfigs) {

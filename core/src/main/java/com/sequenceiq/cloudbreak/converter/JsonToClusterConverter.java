@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.SSOType;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ClusterAttributes;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Gateway;
@@ -67,6 +68,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         FileSystemBase fileSystem = source.getFileSystem();
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());
         cluster.setCloudbreakAmbariUser("cloudbreak");
+        convertAttributes(source, cluster);
         if (fileSystem != null) {
             cluster.setFileSystem(getConversionService().convert(fileSystem, FileSystem.class));
         }
@@ -88,6 +90,18 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             cluster.setCustomContainerDefinition(null);
         }
         return cluster;
+    }
+
+    private void convertAttributes(ClusterRequest source, Cluster cluster) {
+        Map<String, Object> attributesMap = new HashMap<>();
+        if (source.getCustomQueue() != null) {
+            attributesMap.put(ClusterAttributes.CUSTOM_QUEUE.name(), source.getCustomQueue());
+        }
+        try {
+            cluster.setAttributes(new Json(attributesMap));
+        } catch (JsonProcessingException e) {
+            LOGGER.warn("Could not initiate the attribute map on cluster object: ", e);
+        }
     }
 
     private void convertKnox(ClusterRequest source, Cluster cluster) {
