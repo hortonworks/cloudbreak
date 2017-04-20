@@ -31,7 +31,7 @@ public class TagSpecificationsToJsonConverter extends AbstractConversionServiceA
                 specification.put("valueLength", ts.getValueLength());
                 specification.put("valueValidator", ts.getValueValidator());
             }
-            specifications.put(p.toString(), specification);
+            specifications.put(p.value(), specification);
         });
 
         return json;

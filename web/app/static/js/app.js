@@ -261,6 +261,7 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultVariants = initconf.variants.defaultVariants;
                 $rootScope.params.orchestrators = initconf.orchestrators.orchestrators;
                 $rootScope.params.defaultOrchestrators = initconf.orchestrators.defaults;
+                $rootScope.params.tagSpecifications = initconf.tagspecifications.specifications;
                 $rootScope.params.specialParameters = initconf.specialParameters.specialParameters;
             } else {
                 $rootScope.params = {};
@@ -279,6 +280,7 @@ cloudbreakApp.run(function($rootScope, $http) {
                 $rootScope.params.defaultVariants = {};
                 $rootScope.params.orchestrators = {};
                 $rootScope.params.defaultOrchestrators = {};
+                $rootScope.params.tagSpecifications = {};
                 $rootScope.params.specialParameters = {};
             }
         }
