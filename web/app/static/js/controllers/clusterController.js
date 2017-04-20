@@ -1335,6 +1335,24 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             return variants;
         }
 
+        $scope.validateUserDefinedTagKey = (function() {
+            return {
+                test: function(value) {
+                    var ts = $rootScope.params.tagSpecifications[$rootScope.activeCredential.cloudPlatform];
+                    return new RegExp(ts.keyValidator).test(value);
+                }
+            };
+        })();
+
+        $scope.validateUserDefinedTagValue = (function() {
+            return {
+                test: function(value) {
+                    var ts = $rootScope.params.tagSpecifications[$rootScope.activeCredential.cloudPlatform];
+                    return new RegExp(ts.valueValidator).test(value);
+                }
+            };
+        })();
+
         $scope.addUserDefinedTag = function () {
             $scope.cluster.userDefinedTags.push({"key": "", "value": ""});
         }
