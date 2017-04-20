@@ -133,15 +133,17 @@ func main() {
 			},
 		},
 		{
-			Name:   "create-cluster",
-			Usage:  "creates a new cluster",
-			Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlAmbariPasswordOptional},
+			Name:  "create-cluster",
+			Usage: "creates a new cluster",
+			Flags: []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword,
+				hdc.FlAmbariPasswordOptional, hdc.FlClusterNameParamOptional},
 			Before: ConfigRead,
 			Action: hdc.CreateCluster,
 			BashComplete: func(c *cli.Context) {
 				fmt.Println("generate-cli-skeleton")
 				fmt.Println("validate-cli-skeleton")
-				for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlAmbariPasswordOptional} {
+				for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword,
+					hdc.FlAmbariPasswordOptional, hdc.FlClusterNameParamOptional} {
 					printFlagCompletion(f)
 				}
 			},

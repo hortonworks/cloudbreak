@@ -83,6 +83,11 @@ func assembleClusterSkeleton(c *cli.Context) ClusterSkeleton {
 		skeleton.ClusterAndAmbariPassword = ambariPassword
 	}
 
+	clusterNameParam := c.String(FlClusterNameParamOptional.Name)
+	if len(clusterNameParam) != 0 {
+		skeleton.ClusterName = clusterNameParam
+	}
+
 	return skeleton
 }
 

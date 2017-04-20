@@ -87,6 +87,13 @@ var (
 			Usage: "password of the cluster and ambari",
 		},
 	}
+	FlClusterNameParamOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "input-json-param-ClusterName",
+			Usage: "name of the cluster",
+		},
+	}
 	FlWait = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
