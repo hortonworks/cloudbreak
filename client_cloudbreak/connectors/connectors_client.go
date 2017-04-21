@@ -374,6 +374,33 @@ func (a *Client) GetSpecialProperties(params *GetSpecialPropertiesParams) (*GetS
 }
 
 /*
+GetTagSpecifications retrives tag specifications
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetTagSpecifications(params *GetTagSpecificationsParams) (*GetTagSpecificationsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetTagSpecificationsParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getTagSpecifications",
+		Method:             "GET",
+		PathPattern:        "/connectors/tagspecifications",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetTagSpecificationsReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetTagSpecificationsOK), nil
+}
+
+/*
 GetVMTypeByType retrives vm types by type
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.

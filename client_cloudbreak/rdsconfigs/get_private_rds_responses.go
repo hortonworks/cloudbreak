@@ -46,7 +46,7 @@ func NewGetPrivateRdsOK() *GetPrivateRdsOK {
 successful operation
 */
 type GetPrivateRdsOK struct {
-	Payload *models_cloudbreak.RDSConfig
+	Payload *models_cloudbreak.RDSConfigResponse
 }
 
 func (o *GetPrivateRdsOK) Error() string {
@@ -55,7 +55,7 @@ func (o *GetPrivateRdsOK) Error() string {
 
 func (o *GetPrivateRdsOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models_cloudbreak.RDSConfig)
+	o.Payload = new(models_cloudbreak.RDSConfigResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

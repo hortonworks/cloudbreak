@@ -59,6 +59,10 @@ type ClusterRequest struct {
 	 */
 	CustomContainer *CustomContainerRequest `json:"customContainer,omitempty"`
 
+	/* custom queue for yarn orchestrator
+	 */
+	CustomQueue *string `json:"customQueue,omitempty"`
+
 	/* description of the resource
 
 	Max Length: 1000

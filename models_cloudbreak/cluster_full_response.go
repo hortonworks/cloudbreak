@@ -74,6 +74,10 @@ type ClusterFullResponse struct {
 	 */
 	CustomContainers *CustomContainerResponse `json:"customContainers,omitempty"`
 
+	/* custom queue for yarn orchestrator
+	 */
+	CustomQueue *string `json:"customQueue,omitempty"`
+
 	/* description of the resource
 	 */
 	Description *string `json:"description,omitempty"`
