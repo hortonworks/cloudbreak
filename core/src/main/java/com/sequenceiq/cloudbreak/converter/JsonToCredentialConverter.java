@@ -54,7 +54,7 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
         }
         setUserName(credential, source.getParameters());
         if (source.getTopologyId() != null) {
-            credential.setTopology(topologyService.get(source.getTopologyId()));
+            credential.setTopology(topologyService.getById(source.getTopologyId()));
         }
         return credential;
     }

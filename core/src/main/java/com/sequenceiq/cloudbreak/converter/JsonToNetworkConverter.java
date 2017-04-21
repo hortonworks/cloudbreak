@@ -36,7 +36,7 @@ public class JsonToNetworkConverter extends AbstractConversionServiceAwareConver
             }
         }
         if (source.getTopologyId() != null) {
-            network.setTopology(topologyService.get(source.getTopologyId()));
+            network.setTopology(topologyService.getById(source.getTopologyId()));
         }
         return network;
     }
