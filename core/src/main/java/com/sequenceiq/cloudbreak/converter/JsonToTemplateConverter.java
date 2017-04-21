@@ -40,7 +40,7 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
             }
         }
         if (source.getTopologyId() != null) {
-            template.setTopology(topologyService.get(source.getTopologyId()));
+            template.setTopology(topologyService.getById(source.getTopologyId()));
         }
         return template;
     }

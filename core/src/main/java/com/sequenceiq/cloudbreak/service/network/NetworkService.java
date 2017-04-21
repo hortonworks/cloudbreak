@@ -48,11 +48,7 @@ public class NetworkService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Network get(Long id) {
-        Network network = networkRepository.findOne(id);
-        if (network == null) {
-            throw new NotFoundException(String.format("Network '%s' not found", id));
-        }
-        return network;
+        return getById(id);
     }
 
     public Network getById(Long id) {
