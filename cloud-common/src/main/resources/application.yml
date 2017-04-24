@@ -138,8 +138,8 @@ cb:
 
   ambari:
     repo:
-      version: 2.4.2.2-1
-      baseurl: http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.4.2.2-1
+      version: 2.5.0.0-1096
+      baseurl: http://private-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.0-1096
       gpgkey: http://private-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
@@ -150,17 +150,31 @@ cb:
       password: bigdata
 
   hdp:
-    version: 2.5.0.1-210
-    repoid: HDP-2.5
-    repo:
-      stack:
+    entries:
+      2.5:
+        version: 2.5.0.1-210
         repoid: HDP-2.5
-        redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
-        redhat7: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
-      util:
-        repoid: HDP-UTILS-1.1.0.21
-        redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
-        redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
+        repo:
+          stack:
+            repoid: HDP-2.5
+            redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
+            redhat7: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
+          util:
+            repoid: HDP-UTILS-1.1.0.21
+            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
+            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
+      2.6:
+        version: 2.6.0.0-598
+        repoid: HDP-2.6
+        repo:
+          stack:
+            repoid: HDP-2.6
+            redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.0.0-598
+            redhat7: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.0.0-598
+          util:
+            repoid: HDP-UTILS-1.1.0.21
+            redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
+            redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
 
   smartsense.configure: false
   smartsense.id.pattern: A-9990%s-C-%s
