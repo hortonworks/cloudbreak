@@ -2,12 +2,13 @@ package com.sequenceiq.cloudbreak.controller;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Inject;
 import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfos;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -57,12 +60,15 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Controller
 public class ClusterController implements ClusterEndpoint {
@@ -103,6 +109,12 @@ public class ClusterController implements ClusterEndpoint {
     private SssdConfigService sssdConfigService;
 
     @Autowired
+    private BlueprintService blueprintService;
+
+    @Autowired
+    private BlueprintUtils blueprintUtils;
+
+    @Autowired
     private RdsConfigService rdsConfigService;
 
     @Autowired
@@ -111,8 +123,8 @@ public class ClusterController implements ClusterEndpoint {
     @Autowired
     private ComponentConfigProvider componentConfigProvider;
 
-    @Inject
-    private DefaultHDPInfo defaultHDPInfo;
+    @Autowired
+    private DefaultHDPInfos defaultHDPInfos;
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
@@ -303,7 +315,7 @@ public class ClusterController implements ClusterEndpoint {
                 components.add(component);
             } else {
                 ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
-                        new Json(defaultHDPInfo.getRepo()), cluster);
+                        new Json(defaultHDPInfo(request).getRepo()), cluster);
                 components.add(hdpRepoComponent);
             }
         } else {
@@ -312,6 +324,30 @@ public class ClusterController implements ClusterEndpoint {
             components.add(hdpRepoComponent);
         }
         return components;
+    }
+
+    private DefaultHDPInfo defaultHDPInfo(ClusterRequest clusterRequest) {
+        try {
+            JsonNode root = null;
+            if (clusterRequest.getBlueprintId() != null) {
+                Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintId());
+                root = JsonUtil.readTree(blueprint.getBlueprintText());
+            } else {
+                root = JsonUtil.readTree(clusterRequest.getBlueprint().getAmbariBlueprint());
+
+            }
+            if (root != null) {
+                String blueprintHdpVersion = blueprintUtils.getBlueprintHdpVersion(root);
+                for (Map.Entry<String, DefaultHDPInfo> entry: defaultHDPInfos.getEntries().entrySet()) {
+                    if (entry.getKey().equals(blueprintHdpVersion)) {
+                        return entry.getValue();
+                    }
+                }
+            }
+        } catch (IOException ex) {
+            LOGGER.warn("Can not initiate default hdp info: ", ex);
+        }
+        return defaultHDPInfos.getEntries().values().iterator().next();
     }
 
     private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
