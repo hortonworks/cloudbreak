@@ -178,11 +178,11 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @Override
     public String ambariClientContainer(Optional<String> name) {
-        return name.isPresent() ? name.get() : ambariServer;
+        return name.isPresent() ? name.get() : ambariAgent;
     }
 
     @Override
     public String ambariDbContainer(Optional<String> name) {
-        return name.isPresent() ? name.get() : ambariServer;
+        return name.isPresent() ? name.get() : postgresDockerImageName;
     }
 }
