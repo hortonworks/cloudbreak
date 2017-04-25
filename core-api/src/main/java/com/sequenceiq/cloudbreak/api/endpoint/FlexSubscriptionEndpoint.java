@@ -78,6 +78,13 @@ public interface FlexSubscriptionEndpoint {
             nickname = "putPublicDefaultFlexSubscriptionByName")
     void setDefaultInAccount(@PathParam(value = "name") String name);
 
+    @PUT
+    @Path("account/setusedforcontroller/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
+            nickname = "putPublicUsedForControllerFlexSubscriptionByName")
+    void setUsedForControllerInAccount(@PathParam(value = "name") String name);
+
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
