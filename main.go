@@ -168,6 +168,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "delete-flexsubscription",
+			Usage:  "deletes a Flex subscription if itsn't used associated to a running cluster",
+			Flags:  []cli.Flag{hdc.FlFlexSubscriptionName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.DeleteFlexSubscription,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlFlexSubscriptionName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "describe-cluster",
 			Usage:  "get a detailed description of a cluster",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
@@ -192,6 +204,18 @@ func main() {
 						}
 					},
 				},
+			},
+		},
+		{
+			Name:   "describe-smartsensesubscription",
+			Usage:  "get a detailed description of the Smartsense subscription, if it has been set previouly",
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.DescribeSmartSenseSubscription,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
 			},
 		},
 		{
@@ -255,6 +279,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "list-flexsubscriptions",
+			Usage:  "list the available Flex subscriptions",
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.ListFlexSubscriptions,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-ldaps",
 			Usage:  "list the available ldaps",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
@@ -274,6 +310,19 @@ func main() {
 			Action: hdc.ListRDSConfigs,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "register-flexsubscription",
+			Usage:  "register a new Flex subscription",
+			Flags:  []cli.Flag{hdc.FlFlexSubscriptionName, hdc.FlFlexSubscription, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.CreateFlexSubscription,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlFlexSubscriptionName, hdc.FlFlexSubscription, hdc.FlServer,
+					hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
 					printFlagCompletion(f)
 				}
 			},
@@ -370,6 +419,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "set-default-flexsubscription",
+			Usage:  "set the Flex subscription as default",
+			Flags:  []cli.Flag{hdc.FlFlexSubscription, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.SetFlexSubscriptionAsDefault,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlFlexSubscription, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "terminate-cluster",
 			Usage:  "terminates a cluster",
 			Flags:  []cli.Flag{hdc.FlClusterName, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
@@ -377,6 +438,18 @@ func main() {
 			Action: hdc.TerminateCluster,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlClusterName, hdc.FlWait, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "use-flexsubscription-for-controller",
+			Usage:  "use the specified Flex subscription for the Controller",
+			Flags:  []cli.Flag{hdc.FlFlexSubscription, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Before: ConfigRead,
+			Action: hdc.UseFlexSubscriptionForController,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlFlexSubscription, hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
 					printFlagCompletion(f)
 				}
 			},
@@ -434,6 +507,14 @@ func main() {
 			Action: hdc.DeleteNetwork,
 		},
 		{
+			Name:   "delete-smartsensesubscription",
+			Usage:  "delete the SmartSense subscription",
+			Flags:  []cli.Flag{hdc.FlSmartSenseSubscriptionID, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Hidden: true,
+			Action: hdc.DeleteSmartSenseSubscription,
+		},
+		{
 			Name:   "list-credentials",
 			Usage:  "list the credentials",
 			Before: ConfigRead,
@@ -448,6 +529,14 @@ func main() {
 			Hidden: true,
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Action: hdc.ListPrivateNetworks,
+		},
+		{
+			Name:   "register-smartsensesubscription",
+			Usage:  "register the SmartSense subscription",
+			Flags:  []cli.Flag{hdc.FlSmartSenseSubscription, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Hidden: true,
+			Action: hdc.CreateSmartSenseSubscription,
 		},
 	}...)
 

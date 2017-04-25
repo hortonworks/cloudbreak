@@ -355,6 +355,34 @@ var (
 			Usage: "ldap group search base (e.g: OU=scopes,DC=ad,DC=hdc,DC=com)",
 		},
 	}
+	FlSmartSenseSubscription = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "subscription",
+			Usage: "SmartSense subscription id",
+		},
+	}
+	FlSmartSenseSubscriptionID = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "subscription-id",
+			Usage: "id of the SmartSense subscription object in Cloudbreak",
+		},
+	}
+	FlFlexSubscription = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "subscription",
+			Usage: "id of the Flex subscription object in Cloudbreak",
+		},
+	}
+	FlFlexSubscriptionName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "subscription-name",
+			Usage: "name of the Flex stored subscription",
+		},
+	}
 )
 
 type RequiredFlag struct {

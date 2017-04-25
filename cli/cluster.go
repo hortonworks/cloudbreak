@@ -166,7 +166,8 @@ func CreateCluster(c *cli.Context) error {
 		asClient.addScalingPolicy,
 		cbClient.GetLdapByName,
 		cbClient.GetClusterByName,
-		cbClient.GetClusterConfig)
+		cbClient.GetClusterConfig,
+		cbClient.GetFlexSubscriptionByName)
 
 	cbClient.waitForClusterToFinish(stackId, c)
 	return nil
@@ -194,7 +195,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64,
 	getLdapConfig func(string) *models_cloudbreak.LdapConfigResponse,
 	getCluster func(name string) *models_cloudbreak.StackResponse,
-	getClusterConfig func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput) int64 {
+	getClusterConfig func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput,
+	getFlexSubscriptionByName func(name string) *models_cloudbreak.FlexSubscriptionResponse) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 	dataLake := false
@@ -291,6 +293,15 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			HdpVersion:      &skeleton.HDPVersion,
 			Orchestrator:    &orchestrator,
 			Tags:            tags,
+		}
+
+		// flex subscription
+		flexSubscription := skeleton.FlexSubscription
+		if flexSubscription != nil && len(flexSubscription.Name) > 0 {
+			flexSubscription := getFlexSubscriptionByName(flexSubscription.Name)
+			if flexSubscription != nil {
+				stackReq.FlexID = flexSubscription.ID
+			}
 		}
 
 		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
@@ -782,6 +793,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 			InstanceRole:           "CREATE",
 			Network:                &Network{},
 			Tags:                   make(map[string]string, 0),
+			FlexSubscription:       &FlexSubscriptionBase{},
 		},
 		Autoscaling: &AutoscalingSkeletonBase{
 			Configuration: &AutoscalingConfiguration{

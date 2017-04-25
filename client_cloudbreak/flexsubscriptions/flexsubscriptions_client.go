@@ -23,33 +23,6 @@ type Client struct {
 }
 
 /*
-GetFlexsubscriptionsUserName retrieves a private flex subscription by name
-
-Flex subscriptions could be configured.
-*/
-func (a *Client) GetFlexsubscriptionsUserName(params *GetFlexsubscriptionsUserNameParams) (*GetFlexsubscriptionsUserNameOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetFlexsubscriptionsUserNameParams()
-	}
-
-	result, err := a.transport.Submit(&client.Operation{
-		ID:                 "GetFlexsubscriptionsUserName",
-		Method:             "GET",
-		PathPattern:        "/flexsubscriptions/user/{name}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetFlexsubscriptionsUserNameReader{formats: a.formats},
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetFlexsubscriptionsUserNameOK), nil
-}
-
-/*
 DeleteFlexSubscriptionByID deletes flex subscription by id
 
 Flex subscriptions could be configured.
@@ -69,6 +42,33 @@ func (a *Client) DeleteFlexSubscriptionByID(params *DeleteFlexSubscriptionByIDPa
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &DeleteFlexSubscriptionByIDReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+DeletePrivateFlexSubscriptionByName deletes private flex subscription by name
+
+Flex subscriptions could be configured.
+*/
+func (a *Client) DeletePrivateFlexSubscriptionByName(params *DeletePrivateFlexSubscriptionByNameParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeletePrivateFlexSubscriptionByNameParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePrivateFlexSubscriptionByName",
+		Method:             "DELETE",
+		PathPattern:        "/flexsubscriptions/user/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeletePrivateFlexSubscriptionByNameReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -131,19 +131,19 @@ func (a *Client) GetFlexSubscriptionByID(params *GetFlexSubscriptionByIDParams) 
 }
 
 /*
-GetPrivateFlexSubscriptionByName deletes private flex subscription by name
+GetPrivateFlexSubscriptionByName retrieves a private flex subscription by name
 
 Flex subscriptions could be configured.
 */
-func (a *Client) GetPrivateFlexSubscriptionByName(params *GetPrivateFlexSubscriptionByNameParams) error {
+func (a *Client) GetPrivateFlexSubscriptionByName(params *GetPrivateFlexSubscriptionByNameParams) (*GetPrivateFlexSubscriptionByNameOK, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
 		params = NewGetPrivateFlexSubscriptionByNameParams()
 	}
 
-	_, err := a.transport.Submit(&client.Operation{
+	result, err := a.transport.Submit(&client.Operation{
 		ID:                 "getPrivateFlexSubscriptionByName",
-		Method:             "DELETE",
+		Method:             "GET",
 		PathPattern:        "/flexsubscriptions/user/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -152,9 +152,9 @@ func (a *Client) GetPrivateFlexSubscriptionByName(params *GetPrivateFlexSubscrip
 		Reader:             &GetPrivateFlexSubscriptionByNameReader{formats: a.formats},
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	return result.(*GetPrivateFlexSubscriptionByNameOK), nil
 }
 
 /*
@@ -312,6 +312,33 @@ func (a *Client) PutPublicDefaultFlexSubscriptionByName(params *PutPublicDefault
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PutPublicDefaultFlexSubscriptionByNameReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+PutPublicUsedForControllerFlexSubscriptionByName sets the account used for controller flag on the flex subscription
+
+Flex subscriptions could be configured.
+*/
+func (a *Client) PutPublicUsedForControllerFlexSubscriptionByName(params *PutPublicUsedForControllerFlexSubscriptionByNameParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutPublicUsedForControllerFlexSubscriptionByNameParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "putPublicUsedForControllerFlexSubscriptionByName",
+		Method:             "PUT",
+		PathPattern:        "/flexsubscriptions/account/setusedforcontroller/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutPublicUsedForControllerFlexSubscriptionByNameReader{formats: a.formats},
 	})
 	if err != nil {
 		return err

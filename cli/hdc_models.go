@@ -31,26 +31,27 @@ var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cl
 	"SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
 
 type ClusterSkeletonBase struct {
-	ClusterName              string             `json:"ClusterName" yaml:"ClusterName"`
-	SharedClusterName        string             `json:"SharedClusterName,omitempty" yaml:"SharedClusterName,omitempty"`
-	HDPVersion               string             `json:"HDPVersion" yaml:"HDPVersion"`
-	ClusterType              string             `json:"ClusterType" yaml:"ClusterType"`
-	Master                   InstanceConfig     `json:"Master" yaml:"Master"`
-	Worker                   InstanceConfig     `json:"Worker" yaml:"Worker"`
-	Compute                  SpotInstanceConfig `json:"Compute" yaml:"Compute"`
-	SSHKeyName               string             `json:"SSHKeyName" yaml:"SSHKeyName"`
-	RemoteAccess             string             `json:"RemoteAccess" yaml:"RemoteAccess"`
-	WebAccess                bool               `json:"WebAccess" yaml:"WebAccess"`
-	HiveJDBCAccess           bool               `json:"HiveJDBCAccess" yaml:"HiveJDBCAccess"`
-	ClusterComponentAccess   bool               `json:"ClusterComponentAccess" yaml:"ClusterComponentAccess"`
-	ClusterAndAmbariUser     string             `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
-	ClusterAndAmbariPassword string             `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
-	InstanceRole             string             `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
-	Network                  *Network           `json:"Network,omitempty" yaml:"Network,omitempty"`
-	Ldap                     *string            `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
-	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
-	CloudStoragePath         string             `json:"CloudStoragePath,omitempty" yaml:"CloudStoragePath,omitempty"`
-	AmbariDatabase           *AmbariDatabase    `json:"AmbariDatabase,omitempty" yaml:"AmbariDatabase,omitempty"`
+	ClusterName              string                `json:"ClusterName" yaml:"ClusterName"`
+	SharedClusterName        string                `json:"SharedClusterName,omitempty" yaml:"SharedClusterName,omitempty"`
+	HDPVersion               string                `json:"HDPVersion" yaml:"HDPVersion"`
+	ClusterType              string                `json:"ClusterType" yaml:"ClusterType"`
+	Master                   InstanceConfig        `json:"Master" yaml:"Master"`
+	Worker                   InstanceConfig        `json:"Worker" yaml:"Worker"`
+	Compute                  SpotInstanceConfig    `json:"Compute" yaml:"Compute"`
+	SSHKeyName               string                `json:"SSHKeyName" yaml:"SSHKeyName"`
+	RemoteAccess             string                `json:"RemoteAccess" yaml:"RemoteAccess"`
+	WebAccess                bool                  `json:"WebAccess" yaml:"WebAccess"`
+	HiveJDBCAccess           bool                  `json:"HiveJDBCAccess" yaml:"HiveJDBCAccess"`
+	ClusterComponentAccess   bool                  `json:"ClusterComponentAccess" yaml:"ClusterComponentAccess"`
+	ClusterAndAmbariUser     string                `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
+	ClusterAndAmbariPassword string                `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
+	InstanceRole             string                `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
+	Network                  *Network              `json:"Network,omitempty" yaml:"Network,omitempty"`
+	Ldap                     *string               `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
+	Tags                     map[string]string     `json:"Tags" yaml:"Tags"`
+	CloudStoragePath         string                `json:"CloudStoragePath,omitempty" yaml:"CloudStoragePath,omitempty"`
+	AmbariDatabase           *AmbariDatabase       `json:"AmbariDatabase,omitempty" yaml:"AmbariDatabase,omitempty"`
+	FlexSubscription         *FlexSubscriptionBase `json:"FlexSubscription,omitempty" yaml:"FlexSubscription,omitempty"`
 }
 
 type ClusterSkeleton struct {
@@ -161,4 +162,8 @@ type AmbariDatabase struct {
 	Password     string `json:"Password,omitempty" yaml:"Password,omitempty"`
 	DatabaseName string `json:"DatabaseName,omitempty" yaml:"DatabaseName,omitempty"`
 	DatabaseType string `json:"DatabaseType,omitempty" yaml:"DatabaseType,omitempty"`
+}
+
+type FlexSubscriptionBase struct {
+	Name string `json:"Name" yaml:"Name"`
 }

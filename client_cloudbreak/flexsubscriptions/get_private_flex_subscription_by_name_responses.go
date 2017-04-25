@@ -5,11 +5,14 @@ package flexsubscriptions
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/go-swagger/go-swagger/client"
 	"github.com/go-swagger/go-swagger/httpkit"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
+
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 // GetPrivateFlexSubscriptionByNameReader is a Reader for the GetPrivateFlexSubscriptionByName structure.
@@ -21,40 +24,43 @@ type GetPrivateFlexSubscriptionByNameReader struct {
 func (o *GetPrivateFlexSubscriptionByNameReader) ReadResponse(response client.Response, consumer httpkit.Consumer) (interface{}, error) {
 	switch response.Code() {
 
-	default:
-		result := NewGetPrivateFlexSubscriptionByNameDefault(response.Code())
+	case 200:
+		result := NewGetPrivateFlexSubscriptionByNameOK()
 		if err := result.readResponse(response, consumer, o.formats); err != nil {
 			return nil, err
 		}
-		return nil, result
+		return result, nil
+
+	default:
+		return nil, client.NewAPIError("unknown error", response, response.Code())
 	}
 }
 
-// NewGetPrivateFlexSubscriptionByNameDefault creates a GetPrivateFlexSubscriptionByNameDefault with default headers values
-func NewGetPrivateFlexSubscriptionByNameDefault(code int) *GetPrivateFlexSubscriptionByNameDefault {
-	return &GetPrivateFlexSubscriptionByNameDefault{
-		_statusCode: code,
-	}
+// NewGetPrivateFlexSubscriptionByNameOK creates a GetPrivateFlexSubscriptionByNameOK with default headers values
+func NewGetPrivateFlexSubscriptionByNameOK() *GetPrivateFlexSubscriptionByNameOK {
+	return &GetPrivateFlexSubscriptionByNameOK{}
 }
 
-/*GetPrivateFlexSubscriptionByNameDefault handles this case with default header values.
+/*GetPrivateFlexSubscriptionByNameOK handles this case with default header values.
 
 successful operation
 */
-type GetPrivateFlexSubscriptionByNameDefault struct {
-	_statusCode int
+type GetPrivateFlexSubscriptionByNameOK struct {
+	Payload *models_cloudbreak.FlexSubscriptionResponse
 }
 
-// Code gets the status code for the get private flex subscription by name default response
-func (o *GetPrivateFlexSubscriptionByNameDefault) Code() int {
-	return o._statusCode
+func (o *GetPrivateFlexSubscriptionByNameOK) Error() string {
+	return fmt.Sprintf("[GET /flexsubscriptions/user/{name}][%d] getPrivateFlexSubscriptionByNameOK  %+v", 200, o.Payload)
 }
 
-func (o *GetPrivateFlexSubscriptionByNameDefault) Error() string {
-	return fmt.Sprintf("[DELETE /flexsubscriptions/user/{name}][%d] getPrivateFlexSubscriptionByName default ", o._statusCode)
-}
+func (o *GetPrivateFlexSubscriptionByNameOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-func (o *GetPrivateFlexSubscriptionByNameDefault) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
+	o.Payload = new(models_cloudbreak.FlexSubscriptionResponse)
+
+	// response payload
+	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
+		return err
+	}
 
 	return nil
 }

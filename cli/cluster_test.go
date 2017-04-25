@@ -128,11 +128,14 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	getClusterConfig := func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput {
 		return nil
 	}
+	getFlex := func(string) *models_cloudbreak.FlexSubscriptionResponse {
+		return nil
+	}
 
 	actualId = createClusterImpl(*skeleton, createFuncs[0], createFuncs[1], createFuncs[2],
 		createSecurityGroupRequest, createCredentialRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest, createRDSRequest,
 		getBlueprint, getCredential, getNetwork, postStack, getRdsConfig, postCluster, addAutoscalingCluster, setScalingConfigurations, addPrometheusAlert,
-		addScalingPolicy, getLdapConfig, getCluster, getClusterConfig)
+		addScalingPolicy, getLdapConfig, getCluster, getClusterConfig, getFlex)
 
 	return
 }
