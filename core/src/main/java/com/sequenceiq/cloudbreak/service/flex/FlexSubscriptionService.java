@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.flex;
 
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.inject.Inject;
 
@@ -90,12 +91,20 @@ public class FlexSubscriptionService {
     }
 
     public void setDefaultFlexSubscription(String name, CbUser cbUser) {
+        setFlexSubscriptionFlag(name, cbUser, (flex, flag) -> flex.setDefault(flag));
+    }
+
+    public void setUsedForControllerFlexSubscription(String name, CbUser cbUser) {
+        setFlexSubscriptionFlag(name, cbUser, (flex, flag) -> flex.setUsedForController(flag));
+    }
+
+    private void setFlexSubscriptionFlag(String name, CbUser cbUser, BiConsumer<FlexSubscription, Boolean> setter) {
         List<FlexSubscription> allInAccount = flexRepo.findAllInAccount(cbUser.getAccount());
         for (FlexSubscription flex : allInAccount) {
             if (name.equals(flex.getSubscriptionId())) {
-                flex.setDefault(true);
+                setter.accept(flex, true);
             } else {
-                flex.setDefault(false);
+                setter.accept(flex, false);
             }
         }
         flexRepo.save(allInAccount);
