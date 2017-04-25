@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.config;
 
-import java.io.IOException;
 import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
@@ -20,13 +19,10 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
-import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
-
-import freemarker.template.TemplateException;
 
 @Configuration
 @EnableAsync
@@ -83,15 +79,6 @@ public class AppConfig implements AsyncConfigurer {
     @Bean
     public Client restClient() {
         return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug));
-    }
-
-    @Bean
-    public freemarker.template.Configuration freemarkerConfiguration() throws IOException, TemplateException {
-        FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
-        factoryBean.setPreferFileSystemAccess(false);
-        factoryBean.setTemplateLoaderPath("classpath:/");
-        factoryBean.afterPropertiesSet();
-        return factoryBean.getObject();
     }
 
     @Override

@@ -195,7 +195,7 @@
                    },
                    </#if>
                    "properties": {
-                       "publicIPAllocationMethod": "Dynamic"
+                       "publicIPAllocationMethod": "Static"
                    }
                  },
                  </#if>
