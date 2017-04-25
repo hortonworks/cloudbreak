@@ -119,7 +119,7 @@ public class HadoopConfigurationService {
         for (HostGroup hostGroup : hostGroups) {
             Map<String, Map<String, String>> componentConfig = new HashMap<>();
             Integer volumeCount = -1;
-            if (hostGroup.getConstraint().getInstanceGroup() != null) {
+            if (hostGroup.getConstraint().getInstanceGroup().getTemplate() != null) {
                 volumeCount = hostGroup.getConstraint().getInstanceGroup().getTemplate().getVolumeCount();
             }
             if (configUpdateNeeded(hostGroup)) {
