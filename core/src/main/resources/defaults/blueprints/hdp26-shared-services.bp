@@ -88,7 +88,8 @@
             "db_password": "{{ RANGER_DB_PASSWORD }}",
             "db_name": "{{ RANGER_DB_NAME }}",
             "db_host": "{{ RANGER_DB_HOST }}",
-            "DB_FLAVOR": "POSTGRES"
+            "DB_FLAVOR": "POSTGRES",
+            "policymgr_external_url":"http://%HOSTGROUP::master%:6080"
           }
         }
       },
@@ -107,7 +108,8 @@
             "ranger_solr_replication_factor": "2",
             "xasecure.audit.destination.hdfs": "true",
             "xasecure.audit.destination.hdfs.dir": "s3a://{{ S3_BUCKET }}/{{cluster_name}}/apps/ranger/audit/{{cluster_name}}",
-            "xasecure.audit.destination.solr": "true"
+            "xasecure.audit.destination.solr": "true",
+            "xasecure.audit.destination.solr.zookeepers": "{{zookeeper_quorum}}/infra-solr"
           }
         }
       },
@@ -168,6 +170,9 @@
           },
           {
             "name": "INFRA_SOLR"
+          },
+          {
+            "name": "HIVE_METASTORE"
           }
         ],
         "cardinality": "1"
