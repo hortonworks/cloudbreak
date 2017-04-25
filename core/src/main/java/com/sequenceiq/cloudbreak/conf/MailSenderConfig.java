@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.conf;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +17,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessagePreparator;
-import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import org.springframework.util.StringUtils;
-
-import freemarker.template.TemplateException;
 
 @Configuration
 public class MailSenderConfig {
@@ -100,15 +96,6 @@ public class MailSenderConfig {
         props.put("mail.smtp.starttls.enable", smtpStarttlsEnable);
         props.put("mail.debug", true);
         return props;
-    }
-
-    @Bean
-    public freemarker.template.Configuration freemarkerConfiguration() throws IOException, TemplateException {
-        FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
-        factoryBean.setPreferFileSystemAccess(false);
-        factoryBean.setTemplateLoaderPath("classpath:/");
-        factoryBean.afterPropertiesSet();
-        return factoryBean.getObject();
     }
 
     private final class DummyEmailSender implements JavaMailSender {
