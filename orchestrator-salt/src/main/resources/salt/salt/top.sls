@@ -5,9 +5,13 @@ base:
     - java
     - metadata
 
-  'roles:kerberos_server':
+  'roles:kerberos_server_master':
     - match: grain
-    - kerberos
+    - kerberos.master
+
+  'roles:kerberos_server_slave':
+    - match: grain
+    - kerberos.slave
 
   'G@roles:ambari_upgrade and G@roles:ambari_agent':
     - match: compound
@@ -59,3 +63,7 @@ base:
   'recipes:post':
     - match: grain
     - post-recipes
+
+  'G@recipes:post and G@roles:kerberos_server_slave':
+    - match: compound
+    - kerberos.kprop
