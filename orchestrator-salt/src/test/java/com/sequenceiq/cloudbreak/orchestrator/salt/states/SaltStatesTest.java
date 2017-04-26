@@ -104,10 +104,10 @@ public class SaltStatesTest {
         String response = IOUtils.toString(responseStream);
         Map responseMap = new ObjectMapper().readValue(response, Map.class);
 
-        when(saltConnector.run(any(), eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
         Multimap<String, String> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.HIGH);
-        verify(saltConnector, times(1)).run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(3));
@@ -127,10 +127,10 @@ public class SaltStatesTest {
         String response = IOUtils.toString(responseStream);
         Map responseMap = new ObjectMapper().readValue(response, Map.class);
 
-        when(saltConnector.run(any(), eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
+        when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(responseMap);
 
         Multimap<String, String> jidInfo = SaltStates.jidInfo(saltConnector, jobId, target, StateType.SIMPLE);
-        verify(saltConnector, times(1)).run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
+        verify(saltConnector, times(1)).run("jobs.lookup_jid", RUNNER, Map.class, "jid", jobId);
 
         assertThat(jidInfo.keySet(), hasSize(1));
         assertThat(jidInfo.entries(), hasSize(3));
@@ -151,12 +151,12 @@ public class SaltStatesTest {
         resultMap.put(jid, new HashMap<>());
         result.add(resultMap);
         runningJobsResponse.setResult(result);
-        when(saltConnector.run(eq(target), eq("jobs.active"), any(), eq(RunningJobsResponse.class), eq("jid"), any())).thenReturn(runningJobsResponse);
-        boolean running = SaltStates.jobIsRunning(saltConnector, jid, target);
+        when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(runningJobsResponse);
+        boolean running = SaltStates.jobIsRunning(saltConnector, jid);
         assertEquals(true, running);
 
         resultMap.clear();
-        running = SaltStates.jobIsRunning(saltConnector, jid, target);
+        running = SaltStates.jobIsRunning(saltConnector, jid);
         assertEquals(false, running);
     }
 
@@ -166,7 +166,7 @@ public class SaltStatesTest {
         verify(saltConnector, times(1)).run(any(), eq("network.interface_ip"), eq(LOCAL), eq(NetworkInterfaceResponse.class), eq("eth0"));
     }
 
-        @Test
+    @Test
     public void pingTest() {
         SaltStates.ping(saltConnector, target);
         verify(saltConnector, times(1)).run(any(), eq("test.ping"), eq(LOCAL), eq(PingResponse.class));
