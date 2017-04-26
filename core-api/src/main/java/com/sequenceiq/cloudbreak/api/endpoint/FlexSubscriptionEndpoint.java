@@ -110,7 +110,7 @@ public interface FlexSubscriptionEndpoint {
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
-            nickname = "getPrivateFlexSubscriptionByName")
+            nickname = "deletePrivateFlexSubscriptionByName")
     void deletePrivate(@PathParam(value = "name") String name);
 
 }
