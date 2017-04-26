@@ -102,9 +102,8 @@
             "ranger-hive-plugin-enabled": "No",
             "ranger-yarn-plugin-enabled": "No",
             "ranger_privelege_user_jdbc_url": "jdbc:postgresql://{{ RANGER_DB_HOST }}",
-            "ranger-atlas-plugin-enabled": "Yes",
+            "ranger-atlas-plugin-enabled": "No",
             "create_db_dbuser": "false",
-            "ranger_solr_replication_factor": "2",
             "xasecure.audit.destination.hdfs": "true",
             "xasecure.audit.destination.hdfs.dir": "s3a://{{ S3_BUCKET }}/{{cluster_name}}/apps/ranger/audit/{{cluster_name}}",
             "xasecure.audit.destination.solr": "true"
@@ -133,6 +132,12 @@
             "ranger.ldap.ad.domain": "{{ LDAP_DOMAIN }}",
             "ranger.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}"
           }
+        }
+      },
+      {
+        "ranger-hive-plugin-properties": {
+          "ranger.service.config.param.enable.hive.metastore.lookup": "true",
+          "ranger.service.config.param.hive.site.file.path": "/etc/hive/conf/hive-site.xml"
         }
       }
     ],
@@ -168,6 +173,12 @@
           },
           {
             "name": "INFRA_SOLR"
+          },
+          {
+            "name": "HIVE_METASTORE"
+          },
+          {
+            "name": "HIVE_CLIENT"
           }
         ],
         "cardinality": "1"
