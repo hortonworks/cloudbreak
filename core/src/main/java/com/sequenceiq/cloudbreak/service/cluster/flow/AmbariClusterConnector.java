@@ -125,6 +125,8 @@ public class AmbariClusterConnector {
 
     private static final String ADMIN = "admin";
 
+    private static final int KERBEROS_DB_PROPAGATION_PORT = 6318;
+
     @Inject
     private StackRepository stackRepository;
 
@@ -754,6 +756,7 @@ public class AmbariClusterConnector {
             if (cluster.isSecure()) {
                 String gatewayHost = cluster.getAmbariIp();
                 if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
+                    Integer propagationPort = stack.getGatewayInstanceGroup().getInstanceMetaData().size() > 1 ? KERBEROS_DB_PROPAGATION_PORT : null;
                     gatewayHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
                     String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
@@ -763,7 +766,7 @@ public class AmbariClusterConnector {
                             kerberosDomainResolver.getDomains(domain),
                             kerberosLdapResolver.resolveLdapUrlForKerberos(cluster.getKerberosConfig()),
                             kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
-                            !cluster.getKerberosConfig().getKerberosTcpAllowed());
+                            !cluster.getKerberosConfig().getKerberosTcpAllowed(), propagationPort);
                 } else {
                     // TODO this won't work on mesos, but it doesn't work anyway
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
@@ -773,7 +776,7 @@ public class AmbariClusterConnector {
                             DOMAIN,
                             kerberosLdapResolver.resolveLdapUrlForKerberos(cluster.getKerberosConfig()),
                             kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
-                            !cluster.getKerberosConfig().getKerberosTcpAllowed());
+                            !cluster.getKerberosConfig().getKerberosTcpAllowed(), null);
                 }
                 blueprintText = addHBaseClient(blueprintText);
             }

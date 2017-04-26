@@ -12,7 +12,11 @@ base:
     - gateway.init
     - gateway.ldap
 
-  'roles:kerberos_server':
+  'roles:kerberos_server_master':
+    - match: grain
+    - kerberos.init
+
+  'roles:kerberos_server_slave':
     - match: grain
     - kerberos.init
 
