@@ -108,13 +108,19 @@ public class SaltConnector implements Closeable {
         return responseEntity;
     }
 
+    public <T> T run(String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
+        return run(null, fun, clientType, clazz, arg);
+    }
+
     public <T> T run(Target<String> target, String fun, SaltClientType clientType, Class<T> clazz, String... arg) {
         Form form = new Form();
         form = addAuth(form)
                 .param("fun", fun)
-                .param("client", clientType.getType())
-                .param("tgt", target.getTarget())
-                .param("expr_form", target.getType());
+                .param("client", clientType.getType());
+        if (target != null) {
+            form = form.param("tgt", target.getTarget())
+                    .param("expr_form", target.getType());
+        }
         if (arg != null) {
             if (clientType.equals(SaltClientType.LOCAL) || clientType.equals(SaltClientType.LOCAL_ASYNC)) {
                 for (String a : arg) {

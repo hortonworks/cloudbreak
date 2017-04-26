@@ -72,7 +72,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
     }
 
     private void checkIsFinished(String jobId) {
-        boolean jobRunning = SaltStates.jobIsRunning(saltConnector, jobId, new Compound(saltJobRunner.getTarget()));
+        boolean jobRunning = SaltStates.jobIsRunning(saltConnector, jobId);
         if (jobRunning) {
             LOGGER.info("Job: {} is running currently, waiting for next polling attempt.", jobId);
             saltJobRunner.setJobState(JobState.IN_PROGRESS);

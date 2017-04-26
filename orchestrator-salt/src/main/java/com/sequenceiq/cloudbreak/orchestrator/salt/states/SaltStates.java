@@ -58,22 +58,22 @@ public class SaltStates {
 
     public static Multimap<String, String> jidInfo(SaltConnector sc, String jid, Target<String> target, StateType stateType) {
         if (StateType.HIGH.equals(stateType)) {
-            return highStateJidInfo(sc, jid, target);
+            return highStateJidInfo(sc, jid);
         } else if (StateType.SIMPLE.equals(stateType)) {
-            return applyStateJidInfo(sc, jid, target);
+            return applyStateJidInfo(sc, jid);
         }
         return ArrayListMultimap.create();
     }
 
-    private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
-        Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+    private static Multimap<String, String> applyStateJidInfo(SaltConnector sc, String jid) {
+        Map jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt apply state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getSimpleStates(jidInfo);
         return collectMissingTargets(states);
     }
 
-    private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid, Target<String> target) {
-        Map jidInfo = sc.run(target, "jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
+    private static Multimap<String, String> highStateJidInfo(SaltConnector sc, String jid) {
+        Map jidInfo = sc.run("jobs.lookup_jid", RUNNER, Map.class, "jid", jid);
         LOGGER.info("Salt high state jid info: {}", jidInfo);
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
@@ -109,8 +109,8 @@ public class SaltStates {
         }
     }
 
-    public static boolean jobIsRunning(SaltConnector sc, String jid, Target<String> target) {
-        RunningJobsResponse runningInfo = sc.run(target, "jobs.active", RUNNER, RunningJobsResponse.class, "jid", jid);
+    public static boolean jobIsRunning(SaltConnector sc, String jid) {
+        RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
         LOGGER.info("Active salt jobs: {}", runningInfo);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
             for (Map.Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {

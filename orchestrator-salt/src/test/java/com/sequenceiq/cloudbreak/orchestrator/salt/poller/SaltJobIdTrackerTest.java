@@ -55,7 +55,7 @@ public class SaltJobIdTrackerTest {
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
         SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
         PowerMockito.mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.jobIsRunning(any(), any(), any())).thenReturn(true);
+        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(true);
 
         Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
@@ -73,7 +73,7 @@ public class SaltJobIdTrackerTest {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + "'")).and(containsString("is running")));
         }
         PowerMockito.verifyStatic();
-        SaltStates.jobIsRunning(any(), eq(jobId), targetCaptor.capture());
+        SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
         verify(saltJobRunner, times(2)).getJobState();
     }
@@ -83,7 +83,7 @@ public class SaltJobIdTrackerTest {
         String jobId = "1";
         SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
         PowerMockito.mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.jobIsRunning(any(), any(), any())).thenReturn(true);
+        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(true);
 
         SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
@@ -101,7 +101,7 @@ public class SaltJobIdTrackerTest {
             assertThat(e.getMessage(), both(containsString("jobId='" + jobId + "'")).and(containsString("is running")));
         }
         PowerMockito.verifyStatic();
-        SaltStates.jobIsRunning(any(), eq(jobId), any());
+        SaltStates.jobIsRunning(any(), eq(jobId));
     }
 
     private void checkTargets(Set<String> targets, List<Target<String>> allValues) {
@@ -132,7 +132,7 @@ public class SaltJobIdTrackerTest {
         when(saltJobRunner.getTarget()).thenReturn(targets);
 
         PowerMockito.mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.jobIsRunning(any(), any(), any())).thenReturn(true);
+        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(true);
 
         SaltJobIdTracker saltJobIdTracker = new SaltJobIdTracker(saltConnector, saltJobRunner);
         try {
@@ -142,7 +142,7 @@ public class SaltJobIdTrackerTest {
         }
 
         PowerMockito.verifyStatic();
-        SaltStates.jobIsRunning(any(), eq(jobId), targetCaptor.capture());
+        SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
     }
 
@@ -166,7 +166,7 @@ public class SaltJobIdTrackerTest {
         when(saltJobRunner.getTarget()).thenReturn(targets);
 
         PowerMockito.mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.jobIsRunning(any(), any(), any())).thenReturn(false);
+        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
 
         Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
         PowerMockito.when(SaltStates.jidInfo(any(), any(), any(), any())).thenReturn(missingNodesWithReason);
@@ -177,7 +177,7 @@ public class SaltJobIdTrackerTest {
         assertEquals(JobState.FINISHED, saltJobRunner.getJobState());
 
         PowerMockito.verifyStatic();
-        SaltStates.jobIsRunning(any(), eq(jobId), targetCaptor.capture());
+        SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
     }
 
@@ -201,7 +201,7 @@ public class SaltJobIdTrackerTest {
         when(saltJobRunner.getTarget()).thenReturn(targets);
 
         PowerMockito.mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.jobIsRunning(any(), any(), any())).thenReturn(false);
+        PowerMockito.when(SaltStates.jobIsRunning(any(), any())).thenReturn(false);
 
         Multimap<String, String> missingNodesWithReason = ArrayListMultimap.create();
         String missingMachine = "10.0.0.1";
@@ -218,7 +218,7 @@ public class SaltJobIdTrackerTest {
         }
 
         PowerMockito.verifyStatic();
-        SaltStates.jobIsRunning(any(), eq(jobId), targetCaptor.capture());
+        SaltStates.jobIsRunning(any(), eq(jobId));
         checkTargets(targets, targetCaptor.getAllValues());
     }
 
