@@ -13,7 +13,9 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
+import com.sequenceiq.cloudbreak.api.model.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -51,5 +53,11 @@ public interface UtilEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_DATABASE, produces = ContentType.JSON, nickname = "testAmbariDatabaseUtil")
     AmbariDatabaseTestResult testAmbariDatabase(@Valid AmbariDatabaseDetailsJson ambariDatabaseDetailsJson);
+
+    @POST
+    @Path("rds-database")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.CREATE_DATABASE, produces = ContentType.JSON, nickname = "createRDSDatabaseUtil")
+    RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest);
 
 }
