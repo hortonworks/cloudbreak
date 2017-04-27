@@ -10,9 +10,12 @@ import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
+import com.sequenceiq.cloudbreak.api.model.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
+import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
@@ -24,6 +27,9 @@ public class UtilController implements UtilEndpoint {
 
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
+
+    @Inject
+    private RdsConnectionBuilder rdsConnectionBuilder;
 
     @Inject
     private LdapConfigValidator ldapConfigValidator;
@@ -42,6 +48,24 @@ public class UtilController implements UtilEndpoint {
             rdsTestResult.setConnectionResult(e.getMessage());
         }
         return rdsTestResult;
+    }
+
+    @Override
+    public RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest) {
+        RdsBuildResult rdsBuildResult = new RdsBuildResult();
+        try {
+            rdsConnectionBuilder.buildRdsConnection(
+                    rdsBuildRequest.getRdsConfigRequest().getConnectionURL(),
+                    rdsBuildRequest.getRdsConfigRequest().getConnectionUserName(),
+                    rdsBuildRequest.getRdsConfigRequest().getConnectionPassword(),
+                    rdsBuildRequest.getClusterName());
+            rdsBuildResult.setAmbariDbName(rdsBuildRequest.getClusterName() + "-ambari");
+            rdsBuildResult.setHiveDbName(rdsBuildRequest.getClusterName() + "-hive");
+            rdsBuildResult.setRangerDbName(rdsBuildRequest.getClusterName() + "-ranger");
+        } catch (BadRequestException e) {
+            throw new BadRequestException("Could not create databases in metastore.");
+        }
+        return rdsBuildResult;
     }
 
     @Override

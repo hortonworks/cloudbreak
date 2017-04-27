@@ -113,6 +113,9 @@ public class ModelDescriptions {
 
     public static class ClusterModelDescription {
         public static final String STATUS = "status of the cluster";
+        public static final String HIVE_DB = "name of the created hive db";
+        public static final String RANGER_DB = "name of the created ranger db";
+        public static final String AMBARI_DB = "name of the created ambari db";
         public static final String STATUS_REASON = "status message of the cluster";
         public static final String CLUSTER_NAME = "name of the cluster";
         public static final String CLUSTER_ID = "id of the cluster";
@@ -227,6 +230,8 @@ public class ModelDescriptions {
         public static final String VALIDATED = "If true, then the RDS configuration will be validated";
         public static final String RDSTYPE = "Type of rds (HIVE or RANGER)";
         public static final String RDS_PROPERTIES = "custom properties for rds connection";
+        public static final String RDS_REQUEST = "rds config request";
+        public static final String RDS_REQUEST_CLUSTER_NAME = "requested cluster name";
     }
 
     public static class FileSystem {

@@ -1,0 +1,50 @@
+package com.sequenceiq.cloudbreak.controller.validation.rds;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
+
+import org.postgresql.util.PSQLException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
+
+@Component
+public class RdsConnectionBuilder {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RdsConnectionBuilder.class);
+
+    public void buildRdsConnection(String connectionURL, String connectionUserName, String connectionPassword, String clusterName) {
+        Properties connectionProps = new Properties();
+        connectionProps.put("user", connectionUserName);
+        connectionProps.put("password", connectionPassword);
+        try {
+            Connection conn = DriverManager.getConnection(connectionURL, connectionProps);
+            createDb(conn, clusterName, "hive");
+            createDb(conn, clusterName, "ranger");
+            createDb(conn, clusterName, "ambari");
+            conn.close();
+        } catch (SQLException e) {
+            throw new BadRequestException("Failed to connect to RDS: " + e.getMessage(), e);
+        }
+    }
+
+    private void createDb(Connection conn, String clusterName, String service) {
+        try {
+            Statement statement = conn.createStatement();
+            statement.executeUpdate("CREATE DATABASE " + clusterName + service);
+        } catch (PSQLException ex) {
+            if (ex.getSQLState().equals("42P04")) {
+                LOGGER.warn("The expected database already exist");
+            } else {
+                throw new BadRequestException("Failed to create database in RDS: " + ex.getMessage(), ex);
+            }
+        } catch (SQLException e) {
+            throw new BadRequestException("Failed to connect to RDS: " + e.getMessage(), e);
+        }
+    }
+}
