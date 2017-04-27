@@ -70,9 +70,12 @@ type BlueprintResponse struct {
 
 type Configurations map[string]map[string]interface{}
 
+type Settings map[string][]map[string]interface{}
+
 type AmbariBlueprint struct {
 	Blueprint      Blueprint            `json:"Blueprints"`
 	Configurations []Configurations     `json:"configurations"`
+	Settings       []Settings           `json:"settings"`
 	HostGroups     []BlueprintHostGroup `json:"host_groups"`
 }
 
