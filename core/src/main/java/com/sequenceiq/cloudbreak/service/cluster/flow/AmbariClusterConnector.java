@@ -847,26 +847,34 @@ public class AmbariClusterConnector {
                 Map<String, String> topologyMapping = getTopologyMapping(hostGroup);
                 Long instanceGroupId = hostGroup.getConstraint().getInstanceGroup().getId();
                 List<InstanceMetaData> metas = instanceMetadataRepository.findAliveInstancesInInstanceGroup(instanceGroupId);
-                for (InstanceMetaData meta : metas) {
-                    Map<String, String> hostInfo = new HashMap<>();
-                    hostInfo.put(FQDN, meta.getDiscoveryFQDN());
-                    String localityIndicator = meta.getLocalityIndicator();
-                    if (localityIndicator != null) {
-                        if (topologyMapping.isEmpty()) {
-                            // Azure
-                            if (localityIndicator.startsWith("/")) {
-                                hostInfo.put("rack", meta.getLocalityIndicator());
-                            // Openstack
-                            } else {
-                                hostInfo.put("rack", "/" + meta.getLocalityIndicator());
-                            }
-                        // With topology mapping
-                        } else {
-                            hostInfo.put("hypervisor", meta.getLocalityIndicator());
-                            hostInfo.put("rack", topologyMapping.get(meta.getLocalityIndicator()));
-                        }
+                if (metas.isEmpty()) {
+                    for (HostMetadata hostMetadata : hostGroup.getHostMetadata()) {
+                        Map<String, String> hostInfo = new HashMap<>();
+                        hostInfo.put(FQDN, hostMetadata.getHostName());
+                        hostInfoForHostGroup.add(hostInfo);
                     }
-                    hostInfoForHostGroup.add(hostInfo);
+                } else {
+                    for (InstanceMetaData meta : metas) {
+                        Map<String, String> hostInfo = new HashMap<>();
+                        hostInfo.put(FQDN, meta.getDiscoveryFQDN());
+                        String localityIndicator = meta.getLocalityIndicator();
+                        if (localityIndicator != null) {
+                            if (topologyMapping.isEmpty()) {
+                                // Azure
+                                if (localityIndicator.startsWith("/")) {
+                                    hostInfo.put("rack", meta.getLocalityIndicator());
+                                    // Openstack
+                                } else {
+                                    hostInfo.put("rack", "/" + meta.getLocalityIndicator());
+                                }
+                                // With topology mapping
+                            } else {
+                                hostInfo.put("hypervisor", meta.getLocalityIndicator());
+                                hostInfo.put("rack", topologyMapping.get(meta.getLocalityIndicator()));
+                            }
+                        }
+                        hostInfoForHostGroup.add(hostInfo);
+                    }
                 }
             } else {
                 for (HostMetadata hostMetadata : hostGroup.getHostMetadata()) {
