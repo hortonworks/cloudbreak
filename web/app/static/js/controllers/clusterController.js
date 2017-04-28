@@ -881,7 +881,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.orchestrator = {};
                 $scope.cluster.availabilityZone = null;
                 $scope.cluster.region = null;
-                $scope.cluster.gateway = {};
                 delete $scope.cluster.hostGroups;
                 delete $scope.cluster.instanceGroups;
                 delete $scope.cluster.blueprintId;
