@@ -74,8 +74,8 @@ type Settings map[string][]map[string]interface{}
 
 type AmbariBlueprint struct {
 	Blueprint      Blueprint            `json:"Blueprints"`
-	Configurations []Configurations     `json:"configurations"`
-	Settings       []Settings           `json:"settings"`
+	Configurations []Configurations     `json:"configurations,omitempty"`
+	Settings       []Settings           `json:"settings,omitempty"`
 	HostGroups     []BlueprintHostGroup `json:"host_groups"`
 }
 
@@ -87,7 +87,7 @@ type Blueprint struct {
 
 type BlueprintHostGroup struct {
 	Name           string           `json:"name"`
-	Configurations []Configurations `json:"configurations"`
+	Configurations []Configurations `json:"configurations,omitempty"`
 	Components     []Component      `json:"components"`
 	Cardinality    string           `json:"cardinality"`
 }
