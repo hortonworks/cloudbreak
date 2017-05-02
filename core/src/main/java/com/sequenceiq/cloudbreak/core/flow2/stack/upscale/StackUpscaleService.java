@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -35,15 +36,19 @@ import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -53,6 +58,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
+import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Service
@@ -104,6 +110,12 @@ public class StackUpscaleService {
     @Inject
     private UsageService usageService;
 
+    @Inject
+    private TlsSetupService tlsSetupService;
+
+    @Inject
+    private GatewayConfigService gatewayConfigService;
+
     public void startAddInstances(Stack stack, Integer scalingAdjustment) {
         String statusReason = format("Adding %s new instance(s) to the infrastructure.", scalingAdjustment);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
@@ -149,6 +161,28 @@ public class StackUpscaleService {
         usageService.scaleUsagesForStack(stack.getId(), instanceGroupName, nodeCount);
 
         return upscaleCandidateAddresses;
+    }
+
+    public Stack setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
+        LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
+        Stack stack = context.getStack();
+        InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
+        for (InstanceMetaData gwInstance : gatewayInstanceGroup.getInstanceMetaData()) {
+            if (gwInstance.getInstanceStatus() == CREATED) {
+                tlsSetupService.setupTls(stack, gwInstance, stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
+            }
+        }
+        return stackService.getById(stack.getId());
+    }
+
+    public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
+        Stack stack = context.getStack();
+        for (InstanceMetaData gateway : stack.getGatewayInstanceGroup().getInstanceMetaData()) {
+            if (gateway.getInstanceStatus() == CREATED) {
+                String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
+                tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
+            }
+        }
     }
 
     public void bootstrappingNewNodes(Stack stack) {

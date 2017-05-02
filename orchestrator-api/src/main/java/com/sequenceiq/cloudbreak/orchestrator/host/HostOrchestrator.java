@@ -21,7 +21,8 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+    void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorException;
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
@@ -41,4 +42,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
     void tearDown(GatewayConfig gatewayConfig, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException;
 
     Map<String, String> getMembers(GatewayConfig gatewayConfig, List<String> privateIps) throws CloudbreakOrchestratorException;
+
+    void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 }

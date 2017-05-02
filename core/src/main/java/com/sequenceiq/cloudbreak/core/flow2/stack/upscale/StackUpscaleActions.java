@@ -12,28 +12,35 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
+import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
+import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
 
 @Configuration
@@ -54,6 +61,12 @@ public class StackUpscaleActions {
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
+
+    @Inject
+    private InstanceGroupRepository instanceGroupRepository;
+
+    @Inject
+    private InstanceMetaDataToCloudInstanceConverter metadataConverter;
 
     @Bean(name = "ADD_INSTANCES_STATE")
     public Action addInstances() {
@@ -123,8 +136,32 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
                 Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getInstanceGroupName(), payload);
-                BootstrapNewNodesEvent bootstrapPayload = new BootstrapNewNodesEvent(context.getStack().getId(), upscaleCandidateAddresses);
-                sendEvent(context.getFlowId(), StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
+                variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
+                InstanceGroup ig = instanceGroupRepository.findOneByGroupNameInStack(payload.getStackId(), context.getInstanceGroupName());
+                if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
+                    InstanceMetaData gatewayMetaData = context.getStack().getPrimaryGatewayInstance();
+                    CloudInstance gatewayInstance = metadataConverter.convert(gatewayMetaData);
+                    GetSSHFingerprintsRequest sshFingerPrintReq = new GetSSHFingerprintsRequest<GetSSHFingerprintsResult>(context.getCloudContext(),
+                            context.getCloudCredential(), gatewayInstance);
+                    sendEvent(context.getFlowId(), sshFingerPrintReq);
+                } else {
+                    BootstrapNewNodesEvent bootstrapPayload = new BootstrapNewNodesEvent(context.getStack().getId(), upscaleCandidateAddresses);
+                    sendEvent(context.getFlowId(), StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT.event(), bootstrapPayload);
+                }
+            }
+        };
+    }
+
+    @Bean(name = "GATEWAY_TLS_SETUP_STATE")
+    public Action tlsSetupAction() {
+        return new AbstractStackUpscaleAction<GetSSHFingerprintsResult>(GetSSHFingerprintsResult.class) {
+            @Override
+            protected void doExecute(StackScalingFlowContext context, GetSSHFingerprintsResult payload, Map<Object, Object> variables) throws Exception {
+                stackUpscaleService.setupTls(context, payload);
+                stackUpscaleService.removeTemporarySShKey(context, payload.getSshFingerprints());
+                BootstrapNewNodesEvent bootstrapNewNodesEvent =
+                        new BootstrapNewNodesEvent(payload.getStackId(), (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES));
+                sendEvent(context.getFlowId(), StackCreationEvent.TLS_SETUP_FINISHED_EVENT.event(), bootstrapNewNodesEvent);
             }
         };
     }

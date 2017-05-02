@@ -122,13 +122,7 @@ public class ClusterBootstrapper {
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            if (instanceMetaData.getPrivateIp() == null && instanceMetaData.getPublicIpWrapper() == null) {
-                LOGGER.warn("Skipping instancemetadata because the public ip and private ip are null '{}'.", instanceMetaData);
-            } else {
-                Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN());
-                node.setHostGroup(instanceMetaData.getInstanceGroupName());
-                nodes.add(node);
-            }
+            addNode(nodes, instanceMetaData);
         }
         try {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -227,19 +221,20 @@ public class ClusterBootstrapper {
 
     public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
-
         Set<Node> nodes = new HashSet<>();
+        Set<Node> allNodes = new HashSet<>();
         for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
             if (upscaleCandidateAddresses.contains(instanceMetaData.getPrivateIp())) {
                 nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN()));
             }
+            addNode(allNodes, instanceMetaData);
         }
         try {
             InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-                bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes);
+                bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
             } else if (orchestratorType.containerOrchestrator()) {
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
                 bootstrapNewNodesInContainer(stack, gatewayInstance, nodes, gatewayConfig);
@@ -251,7 +246,7 @@ public class ClusterBootstrapper {
         }
     }
 
-    private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes)
+    private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes)
             throws CloudbreakException, CloudbreakOrchestratorException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
 
@@ -271,7 +266,7 @@ public class ClusterBootstrapper {
         nodes.forEach(n -> n.setHostGroup(runningInstanceMetaData.stream()
                 .filter(i -> i.getPrivateIp().equals(n.getPrivateIp())).findFirst().get().getInstanceGroupName()));
 
-        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
+        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
 
         InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
@@ -346,4 +341,13 @@ public class ClusterBootstrapper {
         }
     }
 
+    private void addNode(Set<Node> nodes, InstanceMetaData instanceMetaData) {
+        if (instanceMetaData.getPrivateIp() == null && instanceMetaData.getPublicIpWrapper() == null) {
+            LOGGER.warn("Skipping instancemetadata because the public ip and private ip are null '{}'.", instanceMetaData);
+        } else {
+            Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN());
+            node.setHostGroup(instanceMetaData.getInstanceGroupName());
+            nodes.add(node);
+        }
+    }
 }
