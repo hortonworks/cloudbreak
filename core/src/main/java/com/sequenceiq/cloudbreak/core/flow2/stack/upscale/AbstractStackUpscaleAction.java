@@ -33,6 +33,8 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAct
 
     static final String ADJUSTMENT = "ADJUSTMENT";
 
+    static final String UPSCALE_CANDIDATE_ADDRESSES = "UPSCALE_CANDIDATE_ADDRESSES";
+
     @Inject
     private StackService stackService;
 

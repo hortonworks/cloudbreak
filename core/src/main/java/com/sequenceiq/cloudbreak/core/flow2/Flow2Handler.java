@@ -156,7 +156,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 acceptable.accepted().accept(Boolean.FALSE);
                 return false;
             }
-            acceptable.accepted().accept(Boolean.TRUE);
+            if (!acceptable.accepted().isComplete()) {
+                acceptable.accepted().accept(Boolean.TRUE);
+            }
         }
         return true;
     }

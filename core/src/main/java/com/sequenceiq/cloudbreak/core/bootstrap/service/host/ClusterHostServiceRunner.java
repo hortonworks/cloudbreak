@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -102,37 +103,8 @@ public class ClusterHostServiceRunner {
         try {
             Set<Node> nodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
-            if (cluster.isSecure()) {
-                Map<String, Object> krb = new HashMap<>();
-                Map<String, String> kerberosConf = new HashMap<>();
-                KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-                putIfNotNull(kerberosConf, kerberosConfig.getKerberosMasterKey(), "masterKey");
-                putIfNotNull(kerberosConf, kerberosConfig.getKerberosAdmin(), "user");
-                putIfNotNull(kerberosConf, kerberosConfig.getKerberosPassword(), "password");
-                putIfNotNull(kerberosConf, kerberosConfig.getKerberosUrl(), "url");
-                putIfNotNull(kerberosConf, kerberosConfig.getKerberosRealm(), "realm");
-                krb.put("kerberos", kerberosConf);
-                servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
-            }
-            servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
-            AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
-            if (ambariRepo != null) {
-                servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
-            }
-            servicePillar.put("consul", new SaltPillarProperties("/consul/init.sls", singletonMap("consul", singletonMap("server",
-                    primaryGatewayConfig.getPrivateAddress()))));
-            AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
-            servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
-            saveLdapPillar(cluster.getLdapConfig(), servicePillar);
-            saveHDPPillar(cluster.getId(), servicePillar);
-            Map<String, Object> credentials = new HashMap<>();
-            credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
-            credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
-            servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
-            SaltPillarConfig saltPillarConfig = new SaltPillarConfig(servicePillar);
+            SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, primaryGatewayConfig);
             hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), nodes, saltPillarConfig,
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
@@ -140,6 +112,39 @@ public class ClusterHostServiceRunner {
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakException(e);
         }
+    }
+
+    private SaltPillarConfig createServicePillar(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig) throws IOException {
+        Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        if (cluster.isSecure()) {
+            Map<String, Object> krb = new HashMap<>();
+            Map<String, String> kerberosConf = new HashMap<>();
+            KerberosConfig kerberosConfig = cluster.getKerberosConfig();
+            putIfNotNull(kerberosConf, kerberosConfig.getKerberosMasterKey(), "masterKey");
+            putIfNotNull(kerberosConf, kerberosConfig.getKerberosAdmin(), "user");
+            putIfNotNull(kerberosConf, kerberosConfig.getKerberosPassword(), "password");
+            putIfNotNull(kerberosConf, kerberosConfig.getKerberosUrl(), "url");
+            putIfNotNull(kerberosConf, kerberosConfig.getKerberosRealm(), "realm");
+            krb.put("kerberos", kerberosConf);
+            servicePillar.put("kerberos", new SaltPillarProperties("/kerberos/init.sls", krb));
+        }
+        servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
+        saveGatewayPillar(primaryGatewayConfig, cluster, servicePillar);
+        AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
+        if (ambariRepo != null) {
+            servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
+        }
+        servicePillar.put("consul", new SaltPillarProperties("/consul/init.sls", singletonMap("consul", singletonMap("server",
+                primaryGatewayConfig.getPrivateAddress()))));
+        AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
+        servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
+        saveLdapPillar(cluster.getLdapConfig(), servicePillar);
+        saveHDPPillar(cluster.getId(), servicePillar);
+        Map<String, Object> credentials = new HashMap<>();
+        credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
+        credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
+        servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
+        return new SaltPillarConfig(servicePillar);
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {
@@ -182,6 +187,7 @@ public class ClusterHostServiceRunner {
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
 
+    @Transactional
     public Map<String, String> addAmbariServices(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Map<String, String> candidates;
         try {
@@ -190,11 +196,12 @@ public class ClusterHostServiceRunner {
             candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
             Set<Node> allNodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), allNodes, new SaltPillarConfig(),
+            SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack));
+            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), allNodes, saltPillarConfig,
                     clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException e) {
+        } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakException(e);
         }
         return candidates;
@@ -232,4 +239,22 @@ public class ClusterHostServiceRunner {
         }
     }
 
+    public String changePrimaryGateway(Stack stack) throws CloudbreakException {
+        GatewayConfig formerPrimaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+        Optional<GatewayConfig> newPrimaryCandidate = gatewayConfigs.stream().filter(gc -> !gc.isPrimary()).findFirst();
+        if (newPrimaryCandidate.isPresent()) {
+            GatewayConfig newPrimary = newPrimaryCandidate.get();
+            Set<Node> allNodes = collectNodes(stack);
+            try {
+                hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
+                        allNodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+                return newPrimary.getHostname();
+            } catch (CloudbreakOrchestratorException ex) {
+                throw new CloudbreakException(ex);
+            }
+        } else {
+            throw new CloudbreakException("Primary gateway change is not possible!");
+        }
+    }
 }

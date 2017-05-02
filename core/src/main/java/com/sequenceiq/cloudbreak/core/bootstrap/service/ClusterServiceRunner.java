@@ -105,6 +105,15 @@ public class ClusterServiceRunner {
         }
     }
 
+    public String changePrimaryGateway(Long stackId) throws CloudbreakException {
+        Stack stack = stackService.getById(stackId);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        if (orchestratorTypeResolver.resolveType(orchestrator.getType()).hostOrchestrator()) {
+            return hostRunner.changePrimaryGateway(stack);
+        }
+        throw new CloudbreakException(String.format("Change primary gateway is not supported on orchestrator %s", orchestrator.getType()));
+    }
+
     private HttpClientConfig buildAmbariClientConfig(Stack stack, String gatewayPublicIp) throws CloudbreakSecuritySetupException {
         Map<InstanceGroupType, InstanceStatus> newStatusByGroupType = new HashMap<>();
         newStatusByGroupType.put(InstanceGroupType.GATEWAY, InstanceStatus.REGISTERED);

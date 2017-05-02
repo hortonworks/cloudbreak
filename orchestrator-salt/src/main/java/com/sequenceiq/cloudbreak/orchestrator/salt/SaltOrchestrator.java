@@ -120,12 +120,17 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
+    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
+        Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
+                .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            uploadSignKey(sc, primaryGateway, Collections.emptySet(), targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, hostDiscoveryService.determineDomain());
+            if (!gatewayTargets.isEmpty()) {
+                uploadSaltConfig(sc, gatewayTargets, exitCriteriaModel);
+            }
+            uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, allNodes, hostDiscoveryService.determineDomain());
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -193,6 +198,39 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.info("Run services on nodes finished: {}", allNodes);
+    }
+
+    public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+        LOGGER.info("Change primary gateway: {}", formerGateway);
+        String ambariServerAddress = newPrimaryGateway.getPrivateAddress();
+        try (SaltConnector sc = new SaltConnector(newPrimaryGateway, restDebug)) {
+            // delete salt minion from keys -> salt-key -d ip-10-0-19-148.eu-west-1.compute.internal / downscale
+            SaltStates.removeMinions(sc, Collections.singletonMap(formerGateway.getHostname(), formerGateway.getPrivateAddress()));
+
+            // change ambari_server_standby role to ambari_server
+            Set<String> server = Collections.singleton(ambariServerAddress);
+            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainRemoveRunner(server, allNodes, "roles", "ambari_server_standby", Compound.CompoundType.IP), exitCriteriaModel);
+
+            // salt '*' state.highstate
+            runNewService(sc, new HighStateRunner(server, allNodes), exitCriteriaModel);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred during ambari bootstrap", e);
+            if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
+                throw (CloudbreakOrchestratorFailedException) e.getCause();
+            }
+            throw new CloudbreakOrchestratorFailedException(e);
+        }
+        for (GatewayConfig gc : allGatewayConfigs) {
+            if (!gc.getHostname().equals(formerGateway.getHostname()) && !gc.getHostname().equals(newPrimaryGateway.getHostname())) {
+                try (SaltConnector sc = new SaltConnector(gc, restDebug)) {
+                    sc.wheel("key.delete", Collections.singleton(formerGateway.getHostname()), Object.class);
+                } catch (Exception ex) {
+                    LOGGER.error("Unsuccessful key removal from gateway: " + gc.getHostname(), ex);
+                }
+            }
+        }
     }
 
     @Override

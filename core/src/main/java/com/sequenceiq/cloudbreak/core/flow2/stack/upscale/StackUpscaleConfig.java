@@ -18,6 +18,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleSta
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.GATEWAY_TLS_SETUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_FAILED_STATE;
 
 import java.util.List;
@@ -39,6 +40,10 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
                                     .failureEvent(EXTEND_METADATA_FAILURE_EVENT)
                     .from(EXTEND_METADATA_FINISHED_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_EVENT)
                                     .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
+                    .from(EXTEND_METADATA_FINISHED_STATE).to(GATEWAY_TLS_SETUP_STATE).event(StackUpscaleEvent.SSHFINGERPRINTS_EVENT)
+                                    .failureEvent(StackUpscaleEvent.EXTEND_METADATA_FINISHED_FAILURE_EVENT)
+                    .from(GATEWAY_TLS_SETUP_STATE).to(BOOTSTRAP_NEW_NODES_STATE).event(StackUpscaleEvent.TLS_SETUP_FINISHED_EVENT)
+                                    .failureEvent(StackUpscaleEvent.TLS_SETUP_FINISHED_FAILED_EVENT)
                     .from(BOOTSTRAP_NEW_NODES_STATE).to(EXTEND_HOST_METADATA_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_EVENT)
                                     .failureEvent(StackUpscaleEvent.BOOTSTRAP_NEW_NODES_FAILURE_EVENT)
                     .from(EXTEND_HOST_METADATA_STATE).to(EXTEND_HOST_METADATA_FINISHED_STATE).event(StackUpscaleEvent.EXTEND_HOST_METADATA_FINISHED_EVENT)

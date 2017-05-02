@@ -126,7 +126,7 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
-        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
+        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
