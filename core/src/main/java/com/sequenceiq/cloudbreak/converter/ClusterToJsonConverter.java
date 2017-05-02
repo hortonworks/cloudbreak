@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -164,6 +166,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
         convertContainerConfig(source, clusterResponse);
         convertComponentConfig(clusterResponse, source.getId());
+        convertAmbariDatabaseComponentConfig(clusterResponse, source.getId());
         return clusterResponse;
     }
 
@@ -173,6 +176,20 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             if (ambariRepo != null) {
                 AmbariRepoDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariRepo, AmbariRepoDetailsJson.class);
                 response.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to convert dynamic component.", e);
+        }
+
+        return response;
+    }
+
+    private ClusterResponse convertAmbariDatabaseComponentConfig(ClusterResponse response, Long clusterId) {
+        try {
+            AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(clusterId);
+            if (ambariDatabase != null) {
+                AmbariDatabaseDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariDatabase, AmbariDatabaseDetailsJson.class);
+                response.setAmbariDatabaseDetails(ambariRepoDetailsJson);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to convert dynamic component.", e);
