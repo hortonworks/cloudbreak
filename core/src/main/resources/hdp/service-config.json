@@ -249,6 +249,22 @@
           "host": []
         }
       ]
+    },
+    {
+      "name": "INFRA",
+      "configurations": [
+        {
+          "type": "infra-solr-env",
+          "global": [
+            {
+              "name": "infra_solr_datadir",
+              "prefix": "",
+              "directory": "solr"
+            }
+          ],
+          "host": []
+        }
+      ]
     }
   ]
 }
