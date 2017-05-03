@@ -195,7 +195,11 @@
                    },
                    </#if>
                    "properties": {
+                       <#if instanceGroup == "GATEWAY">
                        "publicIPAllocationMethod": "Static"
+                       <#else>
+                       "publicIPAllocationMethod": "Dynamic"
+                       </#if>
                    }
                  },
                  </#if>

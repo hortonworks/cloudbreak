@@ -9,6 +9,7 @@ import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.management.Azure;
+import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.network.LoadBalancer;
@@ -218,6 +219,10 @@ public class AzureClient {
         return azure.virtualMachines().getByGroup(resourceGroup, vmName);
     }
 
+    public PowerState getVirtualMachinePowerState(String resourceGroup, String vmName) {
+        return getVirtualMachine(resourceGroup, vmName).powerState();
+    }
+
     public VirtualMachineInstanceView getVirtualMachineInstanceView(String resourceGroup, String vmName) {
         return getVirtualMachine(resourceGroup, vmName).instanceView();
     }
@@ -231,7 +236,7 @@ public class AzureClient {
     }
 
     public void deallocateVirtualMachine(String resourceGroup, String vmName) {
-        getVirtualMachine(resourceGroup, vmName).deallocate();
+        azure.virtualMachines().deallocate(resourceGroup, vmName);
     }
 
     public void deleteVirtualMachine(String resourceGroup, String vmName) {

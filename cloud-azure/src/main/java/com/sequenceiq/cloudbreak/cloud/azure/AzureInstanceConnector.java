@@ -7,8 +7,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.microsoft.azure.management.compute.InstanceViewStatus;
-import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
+import com.microsoft.azure.CloudException;
+import com.microsoft.azure.management.compute.PowerState;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureInstanceStatus;
@@ -55,7 +55,7 @@ public class AzureInstanceConnector implements InstanceConnector {
         for (CloudInstance vm : vms) {
             try {
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
-                azureClient.stopVirtualMachine(stackName, vm.getInstanceId());
+                azureClient.deallocateVirtualMachine(stackName, vm.getInstanceId());
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
             } catch (Exception e) {
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getMessage()));
@@ -72,19 +72,16 @@ public class AzureInstanceConnector implements InstanceConnector {
         for (CloudInstance vm : vms) {
             try {
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
-                VirtualMachineInstanceView virtualMachine = azureClient.getVirtualMachineInstanceView(stackName, vm.getInstanceId());
-                List<InstanceViewStatus> vmStatuses = virtualMachine.statuses();
-
-                for (InstanceViewStatus vmStatus : vmStatuses) {
-                    String statusCode = vmStatus.code();
-                    if (statusCode.startsWith("PowerState")) {
-                        statusCode = statusCode.replace("PowerState/", "");
-                        statuses.add(new CloudVmInstanceStatus(vm, AzureInstanceStatus.get(statusCode)));
-                        break;
-                    }
+                PowerState virtualMachinePowerState = azureClient.getVirtualMachinePowerState(stackName, vm.getInstanceId());
+                statuses.add(new CloudVmInstanceStatus(vm, AzureInstanceStatus.get(virtualMachinePowerState)));
+            } catch (CloudException e) {
+                if (e.getBody() != null && "ResourceNotFound".equals(e.getBody().getCode())) {
+                    statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+                } else {
+                    statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
                 }
             } catch (Exception e) {
-                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+                statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
             }
         }
         return statuses;
