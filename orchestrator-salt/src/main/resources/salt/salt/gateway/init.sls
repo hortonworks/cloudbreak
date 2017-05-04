@@ -52,6 +52,10 @@ knox-create-cert:
 
 {% if gateway.is_systemd %}
 
+/usr/lib/tmpfiles.d/knox.conf:
+  file.managed:
+    - source: salt://gateway/systemd/knox.conf
+
 /etc/systemd/system/knox-ldap.service:
   file.managed:
     - source: salt://gateway/systemd/knox-ldap.service
