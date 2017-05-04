@@ -3,21 +3,28 @@ package cli
 import "github.com/hortonworks/hdc-cli/models_cloudbreak"
 
 var (
-	MASTER    = "master"
-	WORKER    = "worker"
-	COMPUTE   = "compute"
-	POSTGRES  = "POSTGRES"
-	PRE       = "pre"
-	POST      = "post"
-	USER_TAGS = "userDefined"
-	UNKNOWN   = "UNKNOWN"
-	HEALTHY   = "HEALTHY"
-	UNHEALTHY = "UNHEALTHY"
-	HIVE_RDS  = "HIVE"
-	DRUID_RDS = "DRUID"
-	ENCRYPTED = "encrypted"
+	MASTER      = "master"
+	WORKER      = "worker"
+	COMPUTE     = "compute"
+	POSTGRES    = "POSTGRES"
+	MYSQL       = "MYSQL"
+	MARIADB     = "MARIADB"
+	MSSQL       = "MSSQL"
+	ORACLE      = "ORACLE"
+	SQLANYWHERE = "SQLANYWHERE"
+	EMBEDDED    = "EMBEDDED"
+	PRE         = "pre"
+	POST        = "post"
+	USER_TAGS   = "userDefined"
+	UNKNOWN     = "UNKNOWN"
+	HEALTHY     = "HEALTHY"
+	UNHEALTHY   = "UNHEALTHY"
+	HIVE_RDS    = "HIVE"
+	DRUID_RDS   = "DRUID"
+	ENCRYPTED   = "encrypted"
 )
 
+var DB_TYPES = [...]string{POSTGRES, MYSQL, MARIADB, MSSQL, ORACLE, SQLANYWHERE, EMBEDDED}
 var SUPPORTED_HDP_VERSIONS = [...]float64{2.5, 2.6}
 
 var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cluster Type", "Master", "Worker", "Compute",
@@ -43,6 +50,7 @@ type ClusterSkeletonBase struct {
 	Ldap                     *string            `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
 	Tags                     map[string]string  `json:"Tags" yaml:"Tags"`
 	CloudStoragePath         string             `json:"CloudStoragePath,omitempty" yaml:"CloudStoragePath,omitempty"`
+	AmbariDatabase           *AmbariDatabase    `json:"AmbariDatabase,omitempty" yaml:"AmbariDatabase,omitempty"`
 }
 
 type ClusterSkeleton struct {
@@ -144,4 +152,13 @@ type AutoscalingPolicy struct {
 	Threshold         float64 `json:"Threshold" yaml:"Threshold"`
 	Period            int32   `json:"Period" yaml:"Period"`
 	NodeType          string  `json:"NodeType" yaml:"NodeType"`
+}
+
+type AmbariDatabase struct {
+	Host         string `json:"Host,omitempty" yaml:"Host,omitempty"`
+	Port         int32  `json:"Port,omitempty" yaml:"Port,omitempty"`
+	Username     string `json:"Username,omitempty" yaml:"Username,omitempty"`
+	Password     string `json:"Password,omitempty" yaml:"Password,omitempty"`
+	DatabaseName string `json:"DatabaseName,omitempty" yaml:"DatabaseName,omitempty"`
+	DatabaseType string `json:"DatabaseType,omitempty" yaml:"DatabaseType,omitempty"`
 }

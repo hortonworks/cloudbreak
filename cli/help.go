@@ -77,6 +77,14 @@ var AWSCreateClusterSkeletonHelp = `
     "tag-1": "value-1",
     "tag-2": "value-2"
   },
+  "AmbariDatabase": {                                                      // (Optional) External Ambari database to connect to
+    "DatabaseName": "ambari",                                              // Name of the database
+    "Host":"mydb.eu-west-1.rds.amazonaws.com",                             // Host of the database
+    "Port":5432,                                                           // Port of the database
+    "Username": "postgres",                                                // Username of the database
+    "Password": "postgres",                                                // Password of the database
+    "DatabaseType": "POSTGRES"                                             // Type of the database, accepted values: POSTGRES, MYSQL, MARIADB, MSSQL, ORACLE, SQLANYWHERE, EMBEDDED
+  }
   "HiveMetastore": {                                                       // (Optional) You can specify an existing Hive metastore or register a new one
    "Name": "my-hive-metastore",                                            // Name of the Hive metastore, if it's an existing one only provide the name, otherwise one will be created with this name
    "Username": "hive-metastore-username",                                  // Username of the Hive metastore

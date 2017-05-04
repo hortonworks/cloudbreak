@@ -414,6 +414,19 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			exposedServices = append(exposedServices, RANGER_EXPOSED_SERVICES...)
 		}
 
+		var ambariDatabase *models_cloudbreak.AmbariDatabaseDetails = nil
+		if skeleton.AmbariDatabase != nil {
+			db := skeleton.AmbariDatabase
+			ambariDatabase = &models_cloudbreak.AmbariDatabaseDetails{
+				Host:     db.Host,
+				Port:     db.Port,
+				UserName: db.Username,
+				Password: db.Password,
+				Name:     db.DatabaseName,
+				Vendor:   db.DatabaseType,
+			}
+		}
+
 		enableKnoxGateway := true
 		gatewayType := "CENTRAL"
 		clusterReq := models_cloudbreak.ClusterRequest{
@@ -433,6 +446,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 				ExposedServices: exposedServices,
 				GatewayType:     &gatewayType,
 			},
+			AmbariDatabaseDetails: ambariDatabase,
 		}
 
 		resp, err := postCluster(&cluster.PostClusterParams{ID: stackId, Body: &clusterReq})

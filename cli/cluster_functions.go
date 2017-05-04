@@ -138,6 +138,18 @@ func (c *ClusterSkeletonResult) fill(
 		if stack.Cluster.LdapConfig != nil {
 			c.Ldap = &stack.Cluster.LdapConfig.Name
 		}
+
+		if stack.Cluster.AmbariDatabaseDetails != nil {
+			db := stack.Cluster.AmbariDatabaseDetails
+			if db.Host != "localhost" {
+				c.AmbariDatabase = &AmbariDatabase{
+					DatabaseName: db.Name,
+					Host:         db.Host,
+					Port:         db.Port,
+					DatabaseType: db.Vendor,
+				}
+			}
+		}
 	}
 
 	c.HDPVersion = SafeStringConvert(stack.HdpVersion)

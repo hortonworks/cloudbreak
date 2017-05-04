@@ -72,7 +72,13 @@ func (s *ClusterSkeleton) Validate() error {
 			}
 		}
 	}
-
+	if s.AmbariDatabase != nil {
+		if err := s.AmbariDatabase.Validate(); err != nil {
+			for _, e := range err {
+				res = append(res, e)
+			}
+		}
+	}
 	if len(s.Master.Recipes) != 0 {
 		if e := validateRecipes(s.Master.Recipes); len(e) != 0 {
 			res = append(res, e...)
@@ -342,5 +348,36 @@ func validateTags(tags map[string]string) []error {
 				"Allowed characters are letters, whitespace, and numbers representable in UTF-8, plus the following special characters: + - = . _ : /", v)))
 		}
 	}
+	return res
+}
+
+func (h *AmbariDatabase) Validate() []error {
+	var res []error = nil
+	if err := validate.RequiredString("DatabaseName", "AmbariDatabase", h.DatabaseName); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("Password", "AmbariDatabase", h.Password); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("Username", "AmbariDatabase", h.Username); err != nil {
+		res = append(res, err)
+	}
+	if err := validate.RequiredString("Host", "AmbariDatabase", h.Host); err != nil {
+		res = append(res, err)
+	}
+	if h.Port == 0 {
+		res = append(res, errors.New("Ambari database port cannot be 0"))
+	}
+	if err := validate.RequiredString("DatabaseType", "AmbariDatabase", h.DatabaseType); err != nil {
+		res = append(res, err)
+	} else {
+		for _, db := range DB_TYPES {
+			if db == h.DatabaseType {
+				return res
+			}
+		}
+		res = append(res, errors.New(fmt.Sprintf("Invalid database type. Accepted values are: %s", DB_TYPES)))
+	}
+
 	return res
 }
