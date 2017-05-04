@@ -99,6 +99,10 @@ knox-create-sign-jks:
 
 {% if gateway.is_systemd %}
 
+/usr/lib/tmpfiles.d/knox.conf:
+  file.managed:
+    - source: salt://gateway/systemd/knox.conf
+
 {% if gateway.is_local_ldap %}
 
 /etc/systemd/system/knox-ldap.service:

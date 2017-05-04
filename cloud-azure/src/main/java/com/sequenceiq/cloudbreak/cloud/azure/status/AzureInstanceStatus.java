@@ -1,28 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.azure.status;
 
+import com.microsoft.azure.management.compute.PowerState;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 public enum AzureInstanceStatus {
 
-    STARTED("running"),
-    STOPPED("stopped");
+    STARTED,
+    STOPPED;
 
-    private final String status;
-
-    AzureInstanceStatus(String status) {
-        this.status = status;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public static InstanceStatus get(String status) {
-        switch (status) {
-            case "stopped":
-                return InstanceStatus.STOPPED;
-            case "running":
+    public static InstanceStatus get(PowerState powerState) {
+        switch (powerState) {
+            case RUNNING:
                 return InstanceStatus.STARTED;
+            case DEALLOCATED:
+                return InstanceStatus.STOPPED;
             default:
                 return InstanceStatus.IN_PROGRESS;
         }
