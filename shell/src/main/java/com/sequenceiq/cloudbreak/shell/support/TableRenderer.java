@@ -94,7 +94,7 @@ public class TableRenderer {
                         List<String> headers = new ArrayList<>();
                         headers.add(mainHeader);
                         for (Field classField : fields) {
-                            if (!classField.getName().contains("jacoco")) {
+                            if (!classField.getName().equals(mainHeader)) {
                                 headers.add(classField.getName());
                                 mainHeaders.add(classField.getName());
                             }
