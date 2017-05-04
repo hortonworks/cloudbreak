@@ -12,3 +12,5 @@ spring:
   freemarker:
     template-loader-path: classpath:/
     prefer-file-system-access: false
+  datasource:
+      maxActive: 30

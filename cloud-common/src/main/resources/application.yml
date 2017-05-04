@@ -8,6 +8,9 @@ spring:
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false
+  datasource:
+    maxActive: 30
+
 cb:
   publicip:
   etc.config.dir: /etc/cloudbreak
@@ -157,8 +160,8 @@ cb:
         repo:
           stack:
             repoid: HDP-2.5
-            redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
-            redhat7: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.0.1-210
+            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0
+            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.5.5.0
           util:
             repoid: HDP-UTILS-1.1.0.21
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
@@ -169,8 +172,8 @@ cb:
         repo:
           stack:
             repoid: HDP-2.6
-            redhat6: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.0.0-598
-            redhat7: http://private-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.0.0-598
+            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.0.3
+            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.0.3
           util:
             repoid: HDP-UTILS-1.1.0.21
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
