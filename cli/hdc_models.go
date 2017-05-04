@@ -106,7 +106,6 @@ type HiveMetastore struct {
 
 type RangerMetastore struct {
 	MetaStore
-	RangerAdminPassword string `json:"RangerAdminPassword" yaml:"RangerAdminPassword"`
 }
 
 type HiveMetastoreResult struct {

@@ -239,9 +239,6 @@ func (h *RangerMetastore) Validate() []error {
 	if err := validate.RequiredString("URL", "RangerMetastore", h.URL); err != nil {
 		res = append(res, err)
 	}
-	if err := validate.RequiredString("RangerAdminPassword", "RangerMetastore", h.URL); err != nil {
-		res = append(res, err)
-	}
 
 	return res
 }

@@ -640,7 +640,8 @@ func convertClusterInputs(skeleton *ClusterSkeleton) {
 		return
 	}
 
-	putToClusterInput(skeleton, "RANGER_ADMIN_PASSWORD", skeleton.RangerMetastore.RangerAdminPassword)
+	putToClusterInput(skeleton, "RANGER_ADMIN_USERNAME", skeleton.ClusterAndAmbariUser)
+	putToClusterInput(skeleton, "RANGER_ADMIN_PASSWORD", skeleton.ClusterAndAmbariPassword)
 	putToClusterInput(skeleton, "RANGER_DB_HOST", skeleton.RangerMetastore.URL)
 	putToClusterInput(skeleton, "RANGER_DB_NAME", skeleton.RangerMetastore.Name)
 	putToClusterInput(skeleton, "RANGER_DB_USER", skeleton.RangerMetastore.Username)
