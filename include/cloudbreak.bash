@@ -449,6 +449,7 @@ database:
   url: jdbc:postgresql://\${IDENTITY_DB_URL}/\${IDENTITY_DB_NAME}
   username: \${IDENTITY_DB_USER}
   password: \${IDENTITY_DB_PASS}
+  maxactive: 30
 
 zones:
  internal:
