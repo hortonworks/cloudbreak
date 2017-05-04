@@ -518,9 +518,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             StackResponse stackResponse = getStackResponse(name, id);
             if (stackResponse != null && stackResponse.getInstanceGroups() != null) {
-                Map<String, List<String>> stringListMap = collectMetadata(
+                Map<String, InstanceMetaDataJson> metadata = collectMetadata(
                         stackResponse.getInstanceGroups() == null ? new ArrayList<>() : stackResponse.getInstanceGroups(), group);
-                return shellContext.outputTransformer().render(outPutType, stringListMap, "FIELD", "VALUE");
+                return shellContext.outputTransformer().render(outPutType, metadata, "instanceId");
             }
             return "No stack specified.";
         } catch (Exception ex) {
@@ -560,25 +560,16 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return null;
     }
 
-    private Map<String, List<String>> collectMetadata(List<InstanceGroupResponse> instanceGroups, final String group) {
-        final Map<String, List<String>> returnValues = new HashMap<>();
+    private Map<String, InstanceMetaDataJson> collectMetadata(List<InstanceGroupResponse> instanceGroups, final String group) {
+        final Map<String, InstanceMetaDataJson> returnValues = new HashMap<>();
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            List<String> list = new ArrayList<>();
             for (InstanceMetaDataJson instanceMetaDataJson : instanceGroup.getMetadata()) {
-                if (instanceMetaDataJson.getPublicIp() != null) {
-                    list.add(instanceMetaDataJson.getPublicIp());
+                if (everyGroupDataNeeded(group) || instanceMetaDataJson.getInstanceGroup().equals(group)) {
+                    returnValues.put(instanceMetaDataJson.getInstanceId(), instanceMetaDataJson);
                 }
             }
-            returnValues.put(instanceGroup.getGroup(), list);
         }
-        if (everyGroupDataNeeded(group)) {
-            return returnValues;
-        }
-        return new HashMap<String, List<String>>() {
-            {
-                put(group, returnValues.get(group));
-            }
-        };
+        return returnValues;
     }
 
     private boolean everyGroupDataNeeded(String group) {
