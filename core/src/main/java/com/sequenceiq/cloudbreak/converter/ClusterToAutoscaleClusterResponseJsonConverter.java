@@ -4,19 +4,19 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.ClusterFullResponse;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 
 @Component
-public class ClusterToFullJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterFullResponse> {
+public class ClusterToAutoscaleClusterResponseJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, AutoscaleClusterResponse> {
 
     @Inject
     private ClusterToJsonConverter clusterToJsonConverter;
 
     @Override
-    public ClusterFullResponse convert(Cluster source) {
+    public AutoscaleClusterResponse convert(Cluster source) {
         try {
-            ClusterFullResponse response = clusterToJsonConverter.convert(source, ClusterFullResponse.class);
+            AutoscaleClusterResponse response = clusterToJsonConverter.convert(source, AutoscaleClusterResponse.class);
             response.setPassword(source.getPassword());
             return response;
         } catch (IllegalAccessException | InstantiationException e) {

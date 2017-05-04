@@ -148,5 +148,5 @@ public interface StackEndpoint {
     @Path(value = "all")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getAllStack")
-    Set<AutoscaleStackResponse> getAll();
+    Set<AutoscaleStackResponse> getAllForAutoscale();
 }

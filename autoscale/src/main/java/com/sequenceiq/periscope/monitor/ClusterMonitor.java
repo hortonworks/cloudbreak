@@ -62,7 +62,7 @@ public class ClusterMonitor implements Monitor {
             CloudbreakClient cloudbreakClient = applicationContext.getBean(CloudbreakClientConfiguration.class).cloudbreakClient();
             ClusterService clusterService = applicationContext.getBean(ClusterService.class);
             List<Cluster> clusters = clusterService.findAll();
-            Set<AutoscaleStackResponse> allStacks = cloudbreakClient.stackEndpoint().getAll();
+            Set<AutoscaleStackResponse> allStacks = cloudbreakClient.stackEndpoint().getAllForAutoscale();
 
             for (AutoscaleStackResponse stack : allStacks) {
                 Status clusterStatus = stack.getClusterStatus();

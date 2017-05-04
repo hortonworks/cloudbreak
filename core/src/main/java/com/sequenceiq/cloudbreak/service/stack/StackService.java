@@ -196,12 +196,18 @@ public class StackService {
     }
 
     @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
-    public Stack getFull(Long id) {
+    public Stack getForAutoscale(Long id) {
         Stack stack = stackRepository.findOne(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         return stack;
+    }
+
+    @PreAuthorize("#oauth2.hasScope('cloudbreak.autoscale')")
+    public Set<AutoscaleStackResponse> getAllForAutoscale() {
+        Set<Stack> aliveOnes = stackRepository.findAliveOnes();
+        return convertStacksForAutoscale(aliveOnes);
     }
 
     public Stack findLazy(Long id) {
@@ -530,11 +536,6 @@ public class StackService {
 
     public List<Stack> getAllAlive() {
         return stackRepository.findAllAlive();
-    }
-
-    public Set<AutoscaleStackResponse> retrieveAllStacks() {
-        Set<Stack> aliveOnes = stackRepository.findAliveOnes();
-        return convertStacksForAutoscale(aliveOnes);
     }
 
     private void validateScalingAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack) {

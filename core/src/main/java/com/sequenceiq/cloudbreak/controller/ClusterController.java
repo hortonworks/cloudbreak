@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.api.model.ClusterFullResponse;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -185,11 +185,11 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     @Override
-    public ClusterFullResponse getFull(Long stackId) {
+    public AutoscaleClusterResponse getForAutoscale(Long stackId) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        Stack stack = stackService.getFull(stackId);
-        ClusterFullResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, ClusterFullResponse.class);
+        Stack stack = stackService.getForAutoscale(stackId);
+        AutoscaleClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, AutoscaleClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
         return clusterService.getClusterResponse(cluster, clusterJson);
     }
