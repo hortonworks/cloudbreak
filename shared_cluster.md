@@ -83,7 +83,6 @@ Once it's done it should look like this (the values are for demonstration purpos
     "Name": "kriszrds"
   },
   "RangerMetastore": {
-    "RangerAdminPassword": "admin",
     "Name": "rangerkrisz",
     "URL": "cb.czdydiez9kxf.eu-west-1.rds.amazonaws.com:5432",
     "Username": "rangerkriszr",
