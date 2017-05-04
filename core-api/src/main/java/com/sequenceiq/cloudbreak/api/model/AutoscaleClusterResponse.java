@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class ClusterFullResponse extends ClusterResponse {
+public class AutoscaleClusterResponse extends ClusterResponse {
 
     @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD)
     private String password;

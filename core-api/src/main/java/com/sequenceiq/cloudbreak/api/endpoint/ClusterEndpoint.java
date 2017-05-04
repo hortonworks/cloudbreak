@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.ClusterRepairRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
-import com.sequenceiq.cloudbreak.api.model.ClusterFullResponse;
+import com.sequenceiq.cloudbreak.api.model.AutoscaleClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
@@ -53,7 +53,7 @@ public interface ClusterEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.ClusterOpDescription.GET_BY_STACK_ID, produces = ContentType.JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "getFullCluster")
-    ClusterFullResponse getFull(@PathParam(value = "id") Long id);
+    AutoscaleClusterResponse getForAutoscale(@PathParam(value = "id") Long id);
 
     @GET
     @Path("account/{name}/cluster")

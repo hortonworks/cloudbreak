@@ -194,9 +194,9 @@ public class StackController implements StackEndpoint {
     }
 
     @Override
-    public Set<AutoscaleStackResponse> getAll() {
+    public Set<AutoscaleStackResponse> getAllForAutoscale() {
         LOGGER.info("Get all stack, autoscale authorized only.");
-        return stackService.retrieveAllStacks();
+        return stackService.getAllForAutoscale();
     }
 
     @Override
