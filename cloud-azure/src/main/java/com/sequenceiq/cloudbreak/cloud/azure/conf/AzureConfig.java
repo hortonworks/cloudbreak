@@ -15,13 +15,13 @@ public class AzureConfig {
     @Value("${cb.azure.tag.key.length:512}")
     private Integer keyLength;
 
-    @Value("${cb.azure.tag.key.validator:^(?!microsoft|azure|windows).*$}")
+    @Value("${cb.azure.tag.key.validator:^(?!microsoft|azure|windows)((?!,).)*$}")
     private String keyValidator;
 
     @Value("${cb.azure.tag.value.length:256}")
     private Integer valueLength;
 
-    @Value("${cb.azure.tag.value.validator:^(?!microsoft|azure|windows).*$}")
+    @Value("${cb.azure.tag.value.validator:^(?!microsoft|azure|windows)((?!,).)*$}")
     private String valueValidator;
 
     @Bean(name = "AzureTagSpecification")
