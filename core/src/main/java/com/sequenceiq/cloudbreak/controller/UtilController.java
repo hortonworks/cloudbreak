@@ -54,14 +54,15 @@ public class UtilController implements UtilEndpoint {
     public RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest) {
         RdsBuildResult rdsBuildResult = new RdsBuildResult();
         try {
+            String clusterName = rdsBuildRequest.getClusterName().replaceAll("[^a-zA-Z0-9]", "");
             rdsConnectionBuilder.buildRdsConnection(
                     rdsBuildRequest.getRdsConfigRequest().getConnectionURL(),
                     rdsBuildRequest.getRdsConfigRequest().getConnectionUserName(),
                     rdsBuildRequest.getRdsConfigRequest().getConnectionPassword(),
-                    rdsBuildRequest.getClusterName());
-            rdsBuildResult.setAmbariDbName(rdsBuildRequest.getClusterName() + "-ambari");
-            rdsBuildResult.setHiveDbName(rdsBuildRequest.getClusterName() + "-hive");
-            rdsBuildResult.setRangerDbName(rdsBuildRequest.getClusterName() + "-ranger");
+                    clusterName);
+            rdsBuildResult.setAmbariDbName(clusterName + "ambari");
+            rdsBuildResult.setHiveDbName(clusterName + "hive");
+            rdsBuildResult.setRangerDbName(clusterName + "ranger");
         } catch (BadRequestException e) {
             throw new BadRequestException("Could not create databases in metastore.");
         }
