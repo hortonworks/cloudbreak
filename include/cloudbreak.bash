@@ -371,11 +371,11 @@ cloudbreak-generate-cert() {
     if [ -f "${CBD_CERT_ROOT_PATH}/client.pem" ] && [ -f "${CBD_CERT_ROOT_PATH}/client-key.pem" ]; then
       debug "Cloudbreak certificate and private key already exist, won't generate new ones."
     else
-      info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH}."
+      info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH} with ${PUBLIC_IP}."
       docker run \
           --label cbreak.sidekick=true \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=local &> /dev/null
+          ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=${PUBLIC_IP} &> /dev/null
       owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)
       [[ "$owner" != "$(whoami)" ]] && sudo chown -R $(whoami):$(id -gn) ${CBD_CERT_ROOT_PATH}
       cat "${CBD_CERT_ROOT_PATH}/ca.pem" >> "${CBD_CERT_ROOT_PATH}/client.pem"
