@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -25,9 +27,9 @@ public class SmartSenseSubscriptionService {
     private SmartSenseSubscriptionRepository repository;
 
     public SmartSenseSubscription create(SmartSenseSubscription subscription) {
-        List<SmartSenseSubscription> byOwner = repository.findByOwner(subscription.getOwner());
-        if (!byOwner.isEmpty()) {
-            throw new BadRequestException("Only one SmartSense subscription is allowed by user.");
+        Iterable<SmartSenseSubscription> subs = repository.findAll();
+        if (subs.iterator().hasNext()) {
+            throw new BadRequestException("Only one SmartSense subscription is allowed by deployment.");
         }
         try {
             subscription = repository.save(subscription);
@@ -81,6 +83,16 @@ public class SmartSenseSubscriptionService {
     public SmartSenseSubscription findBySubscriptionId(String subscriptionId, String account) {
         LOGGER.info("Looking for SmartSense subscription with subscription id: {} in account: {}", subscriptionId, account);
         return repository.findBySubscriptionId(subscriptionId, account);
+    }
+
+    public Optional<SmartSenseSubscription> getOne() {
+        LOGGER.info("Get the SmartSense subscription");
+        Iterator<SmartSenseSubscription> subscriptions = repository.findAll().iterator();
+        if (subscriptions.hasNext()) {
+            return Optional.of(subscriptions.next());
+        } else {
+            return Optional.empty();
+        }
     }
 
     public List<SmartSenseSubscription> findByOwner(String owner) {
