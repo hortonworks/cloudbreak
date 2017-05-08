@@ -52,6 +52,10 @@ public class SaltStates {
         return sc.run(Glob.ALL, "saltutil.sync_grains", LOCAL, ApplyResponse.class);
     }
 
+    public static ApplyResponse updateMine(SaltConnector sc) {
+        return sc.run(Glob.ALL, "mine.update", LOCAL, ApplyResponse.class);
+    }
+
     public static String highstate(SaltConnector sc) {
         return sc.run(Glob.ALL, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid();
     }
@@ -130,7 +134,7 @@ public class SaltStates {
         return sc.run(target, "network.interface_ip", LOCAL, NetworkInterfaceResponse.class, "eth0");
     }
 
-    public static Object removeMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
+    public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
         // This is slow
         // String targetIps = "S@" + hostnames.stream().collect(Collectors.joining(" or S@"));
         //Map<String, String> ipToMinionId = SaltStates.networkInterfaceIP(sc, new Compound(targetIps)).getResultGroupByHost();
@@ -142,8 +146,6 @@ public class SaltStates {
             saltAction.addMinion(minion);
         }
         sc.action(saltAction);
-
-        return sc.wheel("key.delete", privateIPsByFQDN.keySet(), Object.class);
     }
 
     private static ApplyResponse applyState(SaltConnector sc, String service, Target<String> target) {
