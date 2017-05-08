@@ -47,6 +47,9 @@ public class SaltApiRunPostResponse extends ITResponse {
         if (request.body().contains("saltutil.sync_grains")) {
             return saltUtilSyncGrainsResponse();
         }
+        if (request.body().contains("mine.update")) {
+            return saltUtilSyncGrainsResponse();
+        }
         if (request.body().contains("state.highstate")) {
             return stateHighState();
         }

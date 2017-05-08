@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltUpload;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainAddRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.GrainRemoveRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.HighStateRunner;
+import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.MineUpdateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
@@ -130,7 +131,9 @@ public class SaltOrchestrator implements HostOrchestrator {
                 uploadSaltConfig(sc, gatewayTargets, exitCriteriaModel);
             }
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, allNodes, hostDiscoveryService.determineDomain());
+            // if there is a new salt master then re-bootstrap all nodes
+            Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes, hostDiscoveryService.determineDomain());
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -189,6 +192,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
 
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitCriteriaModel);
             runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
@@ -205,8 +209,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         LOGGER.info("Change primary gateway: {}", formerGateway);
         String ambariServerAddress = newPrimaryGateway.getPrivateAddress();
         try (SaltConnector sc = new SaltConnector(newPrimaryGateway, restDebug)) {
-            // delete salt minion from keys -> salt-key -d ip-10-0-19-148.eu-west-1.compute.internal / downscale
-            SaltStates.removeMinions(sc, Collections.singletonMap(formerGateway.getHostname(), formerGateway.getPrivateAddress()));
+            SaltStates.stopMinions(sc, Collections.singletonMap(formerGateway.getHostname(), formerGateway.getPrivateAddress()));
 
             // change ambari_server_standby role to ambari_server
             Set<String> server = Collections.singleton(ambariServerAddress);
@@ -222,12 +225,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             }
             throw new CloudbreakOrchestratorFailedException(e);
         }
-        for (GatewayConfig gc : allGatewayConfigs) {
-            if (!gc.getHostname().equals(formerGateway.getHostname()) && !gc.getHostname().equals(newPrimaryGateway.getHostname())) {
-                try (SaltConnector sc = new SaltConnector(gc, restDebug)) {
+        for (GatewayConfig gatewayConfig : allGatewayConfigs) {
+            if (!gatewayConfig.getHostname().equals(formerGateway.getHostname()) && !gatewayConfig.getHostname().equals(newPrimaryGateway.getHostname())) {
+                try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
                     sc.wheel("key.delete", Collections.singleton(formerGateway.getHostname()), Object.class);
                 } catch (Exception ex) {
-                    LOGGER.error("Unsuccessful key removal from gateway: " + gc.getHostname(), ex);
+                    LOGGER.error("Unsuccessful key removal from gateway: " + gatewayConfig.getHostname(), ex);
                 }
             }
         }
@@ -282,12 +285,21 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void tearDown(GatewayConfig gatewayConfig, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException {
-        try (SaltConnector saltConnector = new SaltConnector(gatewayConfig, restDebug)) {
-            SaltStates.removeMinions(saltConnector, privateIPsByFQDN);
+    public void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException {
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
+        try (SaltConnector saltConnector = new SaltConnector(primaryGateway, restDebug)) {
+            SaltStates.stopMinions(saltConnector, privateIPsByFQDN);
         } catch (Exception e) {
             LOGGER.error("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);
+        }
+        for (GatewayConfig gatewayConfig : allGatewayConfigs) {
+            try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
+                sc.wheel("key.delete", privateIPsByFQDN.keySet(), Object.class);
+            } catch (Exception e) {
+                LOGGER.error("Error occurred during salt minion tear down", e);
+                throw new CloudbreakOrchestratorFailedException(e);
+            }
         }
     }
 

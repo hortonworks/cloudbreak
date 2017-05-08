@@ -168,7 +168,7 @@ public class StackUpscaleService {
         Stack stack = context.getStack();
         InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
         for (InstanceMetaData gwInstance : gatewayInstanceGroup.getInstanceMetaData()) {
-            if (gwInstance.getInstanceStatus() == CREATED) {
+            if (CREATED.equals(gwInstance.getInstanceStatus())) {
                 tlsSetupService.setupTls(stack, gwInstance, stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
             }
         }
@@ -178,7 +178,7 @@ public class StackUpscaleService {
     public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
         Stack stack = context.getStack();
         for (InstanceMetaData gateway : stack.getGatewayInstanceGroup().getInstanceMetaData()) {
-            if (gateway.getInstanceStatus() == CREATED) {
+            if (CREATED.equals(gateway.getInstanceStatus())) {
                 String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
                 tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
             }

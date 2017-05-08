@@ -204,12 +204,12 @@ public class SaltOrchestratorTest {
         privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
 
         mockStatic(SaltStates.class);
-        SaltStates.removeMinions(eq(saltConnector), eq(privateIpsByFQDN));
+        SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
 
-        saltOrchestrator.tearDown(gatewayConfig, privateIpsByFQDN);
+        saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
 
         verifyStatic();
-        SaltStates.removeMinions(eq(saltConnector), eq(privateIpsByFQDN));
+        SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
     }
 
     @Test
@@ -223,10 +223,11 @@ public class SaltOrchestratorTest {
         privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
 
         mockStatic(SaltStates.class);
-        PowerMockito.when(SaltStates.removeMinions(eq(saltConnector), eq(privateIpsByFQDN))).thenThrow(new NullPointerException());
+        PowerMockito.doThrow(new NullPointerException()).when(SaltStates.class);
+        SaltStates.stopMinions(eq(saltConnector), eq(privateIpsByFQDN));
 
         try {
-            saltOrchestrator.tearDown(gatewayConfig, privateIpsByFQDN);
+            saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN);
             fail();
         } catch (CloudbreakOrchestratorFailedException e) {
             assertTrue(NullPointerException.class.isInstance(e.getCause()));

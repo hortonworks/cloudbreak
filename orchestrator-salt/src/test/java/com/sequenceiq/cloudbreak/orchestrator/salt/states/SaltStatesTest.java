@@ -173,12 +173,12 @@ public class SaltStatesTest {
     }
 
     @Test
-    public void removeMinionsTest() {
+    public void stopMinionsTest() {
         Map<String, String> privateIpsByFQDN = new HashMap<>();
         privateIpsByFQDN.put("10-0-0-1.example.com", "10.0.0.1");
         privateIpsByFQDN.put("10-0-0-2.example.com", "10.0.0.2");
         privateIpsByFQDN.put("10-0-0-3.example.com", "10.0.0.3");
-        SaltStates.removeMinions(saltConnector, privateIpsByFQDN);
+        SaltStates.stopMinions(saltConnector, privateIpsByFQDN);
 
         ArgumentCaptor<SaltAction> saltActionArgumentCaptor = ArgumentCaptor.forClass(SaltAction.class);
         verify(saltConnector, times(1)).action(saltActionArgumentCaptor.capture());
@@ -190,9 +190,5 @@ public class SaltStatesTest {
 
         Set<String> minionAddresses = saltAction.getMinions().stream().map(Minion::getAddress).collect(Collectors.toSet());
         assertThat(minionAddresses, containsInAnyOrder("10.0.0.1", "10.0.0.2", "10.0.0.3"));
-
-        verify(saltConnector, times(1)).wheel(eq("key.delete"), minionIdsCaptor.capture(), any());
-        Set<String> minionIds = minionIdsCaptor.getValue();
-        assertThat(minionIds, containsInAnyOrder("10-0-0-1.example.com", "10-0-0-2.example.com", "10-0-0-3.example.com"));
     }
 }

@@ -254,7 +254,7 @@ public class ClusterHostServiceRunner {
                 throw new CloudbreakException(ex);
             }
         } else {
-            throw new CloudbreakException("Primary gateway change is not possible!");
+            throw new CloudbreakException("Primary gateway change is not possible because there is no available node for the action");
         }
     }
 }

@@ -428,12 +428,12 @@ public class AmbariDecommissioner {
                 }
             } else if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
                 Map<String, String> privateIpsByFQDN = new HashMap<>();
                 stack.getInstanceMetaDataAsList().stream()
                         .filter(instanceMetaData -> hostNames.stream().anyMatch(hn -> hn.contains(instanceMetaData.getDiscoveryFQDN().split("\\.")[0])))
                         .forEach(instanceMetaData -> privateIpsByFQDN.put(instanceMetaData.getDiscoveryFQDN(), instanceMetaData.getPrivateIp()));
-                hostOrchestrator.tearDown(gatewayConfig, privateIpsByFQDN);
+                List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+                hostOrchestrator.tearDown(allGatewayConfigs, privateIpsByFQDN);
                 deleteHosts(hostNames, runningComponents, ambariClient);
             }
         } catch (CloudbreakOrchestratorException e) {

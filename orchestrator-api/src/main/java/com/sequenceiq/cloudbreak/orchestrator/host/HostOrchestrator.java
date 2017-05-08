@@ -39,7 +39,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    void tearDown(GatewayConfig gatewayConfig, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException;
+    void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> privateIPsByFQDN) throws CloudbreakOrchestratorException;
 
     Map<String, String> getMembers(GatewayConfig gatewayConfig, List<String> privateIps) throws CloudbreakOrchestratorException;
 
