@@ -420,7 +420,7 @@ You are almost done - one more command and this will create your Hadoop cluster 
 
 *Optional:* If you need a specific filesystem other that the local HDFS it can be configured with the shell:
 
-```
+
 - WASB filesystem
 ```
 cluster fileSystem --WASB --defaultFileSystem true --accountName "accountName" --accountKey "accountKey"
@@ -435,22 +435,56 @@ You can create a cluster now:
 ```
 cluster create --description "my cluster desc"
 ```
-Other available options:
+Here is the list of all the available options:
 
-- --userName "string": ambari username(default is 'admin')
-- --password "string": ambari username(default is 'admin')
-- --stack "string": the specific repository config stack
-- --version "string": the specific repository config hdp version
-- --os "string": the specific repository config os
-- --stackRepoId "string": the specific repository config stack repo id
-- --stackBaseURL "string": the specific repository config stack base url
-- --utilsRepoId "string": the specific repository config utils repo id
-- --utilsBaseURL "string": the specific repository config utils base url
-- --verify "string": the specific repository config verify flag
-- --enableSecurity "boolean": kerberos security status
-- --kerberosMasterKey "string": kerberos master key
-- --kerberosAdmin "string": kerberos admin user name
-- --kerberosPassword "string": kerberos admin password
+| Parameter name | Parameter type | Description                          |
+| -------------- | -------------- | ------------------------------------ |
+| --ambariAgentImage | string | Name of the ambari agent image in case of BYOS orchestrator |
+| --ambariDbImage | string | Name of the ambari db image in case of BYOS orchestrator |
+| --ambariRepoBaseURL | string | Ambari repo base url (e.g. http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates) |
+| --ambariRepoGpgKey | string | Ambari repo GPG key url |
+| --ambariServerImage | string | Name of the ambari server image in case of BYOS orchestrator |
+| --ambariVersion | string | Ambari version (e.g. 2.4.0.0-748) |
+| --configStrategy | string | Config recommendation strategy |
+| --connectionPassword | string | Password to use for the jdbc connection for HIVE metastore |
+| --connectionURL | string | JDBC connection URL for HIVE metastore (jdbc:<db-type>://<address>:<port>/<db>) |
+| --connectionUserName | string | Username to use for the jdbc connection for HIVE metastore |
+| --customQueue | string | Name of the custom queue for yarn orchestrator |
+| --databaseType | string | Type of the external database (MYSQL, POSTGRES) for HIVE metastore |
+| --description | string | Description of the blueprint |
+| --enableKnoxGateway | boolean | Enable Knox Gateway |
+| --enableSecurity | boolean | Kerberos security status |
+| --enableShipyard | boolean | Run shipyard in cluster |
+| --hdpVersion | string | Compatible HDP version for the jdbc configuration for HIVE metastore |
+| --kerberosAdmin | string | Kerberos admin name |
+| --kerberosContainerDn | string | Kerberos container dn (e.g. ou=ambaritest,dc=WWW,dc=ACME,dc=COM) |
+| --kerberosTcpAllowed | boolean | Enable TCP for Kerberos |
+| --kerberosLdapUrl | string | Kerberos ldap url (e.g. ldaps://acme.com) |
+| --kerberosMasterKey | string | Kerberos master key |
+| --kerberosPassword | string | Kerberos admin password |
+| --kerberosPrincipal | string | Kerberos principal (e.g. admin/admin) |
+| --kerberosRealm | string | Kerberos realm (e.g. custom.com)|
+| --kerberosUrl | string | Kerberos url (e.g. 10.0.0.4) |
+| --ldapRequired | boolean | Start and configure LDAP authentication support for Ambari hosts |
+| --os | string | Stack OS to select package manager, default is RedHat | 
+| --password | string | Password of the Ambari server (default is 'admin') |
+| --stack | string | Stack definition name (e.g. HDP) |
+| --stackBaseURL | string | Stack URL (e.g. http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.0.3) |
+| --stackRepoId | string | Stack repository id (e.g. HDP-2.6) |
+| --timeout | number | Wait timeout if wait=true |
+| --userName | string | Username of the Ambari server (default is 'admin') |
+| --utilsBaseURL | string | Stack utils URL (e.g. http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7) |
+| --utilsRepoId  | string | Stack utils repoId (e.g. HDP-UTILS-1.1.0.21) |
+| --validated | boolean | validate the jdbc config parameters for HIVE metastore |
+| --verify | boolean | verify the repository URL-s |
+| --version | string | the specific repository config hdp version (e.g. 2.6) |
+| --wait | boolean | Wait for stack creation |
+
+In the shell, you can get detailed help for the parameters with:
+
+```
+help cluster create
+```
 
 You are done - you can check the progress through the Ambari UI. If you log back to [Cloudbreak UI](https://cloudbreak.sequenceiq.com/) you can check the progress over there as well, and learn the IP address of Ambari.
 
@@ -475,6 +509,28 @@ Other available options:
 
 - --withStackDownScale "flag": indicates stack downscale after the cluster downscale
 
+### Changing the HDP and Ambari versions
+
+A typical scenario is when a user want s to change the version of the  Ambari Server and HDP to be installed.
+This can be implemented with applying the following parameters of cluster create:
+
+```
+cluster create --ambariVersion 2.5.0.0-771 --ambariRepoBaseURL http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/2.x/BUILDS/2.5.0.0-771 --ambariRepoGpgKey http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos7/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins --stack HDP --version 2.6 --os redhat7 --stackRepoId HDP-2.6 --stackBaseURL http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.0.0-422 --utilsRepoId HDP-UTILS-1.1.0.21 --utilsBaseURL http://s3.amazonaws.com/dev.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7 --verify true
+```
+
+The parameters for configuring Ambari Server are:
+- ambariVersion
+- ambariRepoBaseURL
+- ambariRepoBaseURL
+
+The parameters for configuring HDP version are:
+- stack
+- version
+- stackRepoId
+- stackBaseURL
+- utilsRepoId
+- utilsBaseURL
+- verify
 
 ### Automate the process
 Each time you start the shell the executed commands are logged in a file line by line and later either with the `script` command or specifying an `-—cmdfile` option the same commands can be executed again.
