@@ -12,6 +12,8 @@ all: download-cbd buildcb runtest
 
 runtest: create-image create-cloudbreak-context docker-compose stop-containers check-results
 
+delete-and-run: download-cbd clean docker-build runtest
+
 without-build: download-cbd runtest
 
 build-with-docker: download-cbd docker-build runtest
@@ -45,3 +47,6 @@ docker-build:
 
 revert-db:
 	./scripts/revert-db.sh
+
+delete:
+	./scripts/delete.sh

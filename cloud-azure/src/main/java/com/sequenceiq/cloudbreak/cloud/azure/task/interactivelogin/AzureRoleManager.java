@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.AZURE_MANAGEMENT;
 
+import java.io.IOException;
 import java.util.UUID;
 
 import javax.ws.rs.client.Client;
@@ -12,14 +13,14 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 
 /**
@@ -44,11 +45,11 @@ public class AzureRoleManager {
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             String roles = response.readEntity(String.class);
             try {
-                JSONObject rolesJson = new JSONObject(roles);
-                String roleDefinitionId = rolesJson.getJSONArray("value").getJSONObject(0).getString("id");
+                JsonNode rolesJsonNode = new ObjectMapper().readTree(roles).get("refresh_token");
+                String roleDefinitionId = rolesJsonNode.get("value").get(0).get("id").asText();
                 LOGGER.info("Role definition - roleId: " + roleDefinitionId);
                 return roleDefinitionId;
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         } else {
@@ -58,10 +59,9 @@ public class AzureRoleManager {
                 String errorResponse = response.readEntity(String.class);
                 LOGGER.error("get owner role definition id failed: " + errorResponse);
                 try {
-                    JSONObject errorJson = new JSONObject(errorResponse);
-                    throw new InteractiveLoginException("Get 'Owner' role name and definition id request error: " + errorJson.getJSONObject("error")
-                            .getString("message"));
-                } catch (JSONException e) {
+                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                    throw new InteractiveLoginException("Get 'Owner' role name and definition id request error: " + errorMessage);
+                } catch (IOException e) {
                     throw new IllegalStateException(e);
                 }
             }

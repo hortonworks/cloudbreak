@@ -11,10 +11,10 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.azure.management.network.Backend;
-import com.microsoft.azure.management.network.InboundNatRule;
+import com.microsoft.azure.management.network.LoadBalancerBackend;
+import com.microsoft.azure.management.network.LoadBalancerInboundNatRule;
 import com.microsoft.azure.management.network.NetworkInterface;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.PublicIPAddress;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -73,11 +73,11 @@ public class AzureMetadataCollector implements MetadataCollector {
                 List<String> networkInterfaceIdList = vm.networkInterfaceIds();
                 for (String networkInterfaceId : networkInterfaceIdList) {
                     NetworkInterface networkInterface = azureClient.getNetworkInterfaceById(networkInterfaceId);
-                    privateIp = networkInterface.primaryPrivateIp();
-                    PublicIpAddress publicIpAddress = networkInterface.primaryIpConfiguration().getPublicIpAddress();
+                    privateIp = networkInterface.primaryPrivateIP();
+                    PublicIPAddress publicIpAddress = networkInterface.primaryIPConfiguration().getPublicIPAddress();
 
-                    List<Backend> backends = networkInterface.primaryIpConfiguration().listAssociatedLoadBalancerBackends();
-                    List<InboundNatRule> inboundNatRules = networkInterface.primaryIpConfiguration().listAssociatedLoadBalancerInboundNatRules();
+                    List<LoadBalancerBackend> backends = networkInterface.primaryIPConfiguration().listAssociatedLoadBalancerBackends();
+                    List<LoadBalancerInboundNatRule> inboundNatRules = networkInterface.primaryIPConfiguration().listAssociatedLoadBalancerInboundNatRules();
 
                     if (backends.size() > 0 || inboundNatRules.size() > 0) {
                         publicIp = azureClient.getLoadBalancerIps(resource.getName(), azureUtils.getLoadBalancerId(resource.getName())).get(0);

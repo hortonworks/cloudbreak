@@ -253,7 +253,7 @@ subprojects {
     checkstyle('com.puppycrawl.tools:checkstyle:6.11.1') {
       exclude group: 'com.google.guava'
     }
-    checkstyle("com.google.guava:guava:19.0") { force = true }
+    checkstyle("com.google.guava:guava:21.0") { force = true }
   }
 
   task allDeps(type: DependencyReportTask) {}

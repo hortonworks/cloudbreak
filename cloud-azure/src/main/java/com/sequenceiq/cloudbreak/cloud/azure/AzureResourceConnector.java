@@ -25,7 +25,7 @@ import com.microsoft.azure.management.compute.VirtualHardDisk;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkInterfaces;
-import com.microsoft.azure.management.network.NicIpConfiguration;
+import com.microsoft.azure.management.network.NicIPConfiguration;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
@@ -97,13 +97,17 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             for (String name : storageAccounts.keySet()) {
                 azureStorage.createStorage(ac, client, name, storageAccounts.get(name), resourceGroupName, region);
             }
-            client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+            try {
+                client.getTemplateDeployment(resourceGroupName, stackName);
+            } catch (CloudException e) {
+                client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
+            }
         } catch (CloudException e) {
             LOGGER.error("Provisioning error, cloud exception happened: ", e);
-            if (e.getBody() != null && e.getBody().getDetails() != null) {
-                String details = e.getBody().getDetails().stream().map(CloudError::getMessage).collect(Collectors.joining(", "));
+            if (e.body() != null && e.body().details() != null) {
+                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
                 throw new CloudConnectorException(String.format("Stack provisioning failed, status code %s, error message: %s, details: %s",
-                        e.getBody().getCode(), e.getBody().getMessage(), details));
+                        e.body().code(), e.body().message(), details));
             } else {
                 throw new CloudConnectorException(String.format("Stack provisioning failed: '%s', please go to Azure Portal for detailed message", e));
             }
@@ -133,7 +137,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                         CloudResourceStatus templateResourceStatus = azureUtils.getTemplateStatus(resource, resourceGroupDeployment, client, stackName);
                         result.add(templateResourceStatus);
                     } catch (CloudException e) {
-                        if (e.getResponse().code() == AzureConstants.NOT_FOUND) {
+                        if (e.response().code() == AzureConstants.NOT_FOUND) {
                             result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
                         }
                     } catch (Exception e) {
@@ -242,9 +246,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 String interfaceName = networkInterface.name();
                 networkInterfacesNames.add(interfaceName);
                 Set<String> ipNames = new HashSet<>();
-                for (NicIpConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
-                    if (ipConfiguration.getPublicIpAddress() != null && ipConfiguration.getPublicIpAddress().name() != null) {
-                        ipNames.add(ipConfiguration.getPublicIpAddress().name());
+                for (NicIPConfiguration ipConfiguration : networkInterface.ipConfigurations().values()) {
+                    if (ipConfiguration.publicIPAddressId() != null && ipConfiguration.getPublicIPAddress().name() != null) {
+                        ipNames.add(ipConfiguration.getPublicIPAddress().name());
                     }
                 }
                 publicIpAddressNames.addAll(ipNames);

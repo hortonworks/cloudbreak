@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler;
@@ -39,32 +40,26 @@ import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Configuration
+@ComponentScan
 public class SecurityConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SecurityConfig.class);
-
-    @Inject
-    private UserDetailsService userDetailsService;
-
-    @Inject
-    private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
-
-    @Bean MethodSecurityExpressionHandler expressionHandler() {
-        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-        ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
-        expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
-        return expressionHandler;
-    }
 
     @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
         @Inject
-        private MethodSecurityExpressionHandler expressionHandler;
+        private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
+
+        @Inject
+        private UserDetailsService userDetailsService;
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
+            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+            ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
+            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
             return expressionHandler;
         }
     }

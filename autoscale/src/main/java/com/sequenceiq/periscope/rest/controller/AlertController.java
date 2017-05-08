@@ -13,13 +13,13 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.endpoint.AlertEndpoint;
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.api.model.MetricAlertJson;
 import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
 import com.sequenceiq.periscope.api.model.TimeAlertJson;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
-import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.rest.converter.MetricAlertConverter;
 import com.sequenceiq.periscope.rest.converter.PrometheusAlertConverter;
 import com.sequenceiq.periscope.rest.converter.TimeAlertConverter;

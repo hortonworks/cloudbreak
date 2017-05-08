@@ -28,7 +28,7 @@ dependencies {
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter-actuator',           version: springBootVersion
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter-freemarker',         version: springBootVersion
     compile group: 'org.springframework.boot',           name: 'spring-boot-starter-jersey',             version: springBootVersion
-    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',                 version: '2.0.8.RELEASE'
+    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',                 version: '2.1.0.RELEASE'
 
     compile group: 'org.apache.commons',            name: 'commons-lang3',                          version: apacheCommonsLangVersion
     compile group: 'org.apache.hadoop',             name: 'hadoop-yarn-api',                        version: hadoopVersion

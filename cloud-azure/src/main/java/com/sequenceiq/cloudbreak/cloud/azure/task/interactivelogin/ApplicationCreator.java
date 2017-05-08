@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.GRAPH_API_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.GRAPH_WINDOWS;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
@@ -15,12 +16,12 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
@@ -41,20 +42,19 @@ public class ApplicationCreator {
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             String application = response.readEntity(String.class);
             try {
-                JSONObject applicationJson = new JSONObject(application);
-                String appId = applicationJson.getString("appId");
+                JsonNode applicationJson = new ObjectMapper().readTree(application);
+                String appId = applicationJson.get("appId").asText();
                 LOGGER.info("Application created with appId: " + appId);
                 return appId;
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         } else {
             String errorResponse = response.readEntity(String.class);
             try {
-                JSONObject errorJson = new JSONObject(errorResponse);
-                throw new InteractiveLoginException("AD Application creation error: "
-                        + errorJson.getJSONObject("odata.error").getJSONObject("message").getString("value"));
-            } catch (JSONException e) {
+                String errorMessage = new ObjectMapper().readTree(errorResponse).get("odata.error").get("message").get("value").asText();
+                throw new InteractiveLoginException("AD Application creation error: " + errorMessage);
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         }
