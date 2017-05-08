@@ -6,6 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.converter.JsonToSmartSenseSubscriptionConverter;
@@ -48,9 +49,9 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public List<SmartSenseSubscriptionJson> getPublics() {
-        CbUser cbUser = authenticatedUserService.getCbUser();
-        List<SmartSenseSubscription> subscriptions = smartSenseSubService.findByOwner(cbUser.getUserId());
-        return toJsonConverter.convert(subscriptions);
+        List<SmartSenseSubscription> result = Lists.newArrayList();
+        smartSenseSubService.getOne().ifPresent(result::add);
+        return toJsonConverter.convert(result);
     }
 
     @Override
@@ -60,9 +61,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public List<SmartSenseSubscriptionJson> getPrivates() {
-        CbUser cbUser = authenticatedUserService.getCbUser();
-        List<SmartSenseSubscription> subscriptions = smartSenseSubService.findByOwner(cbUser.getUserId());
-        return toJsonConverter.convert(subscriptions);
+        return getPublics();
     }
 
     private SmartSenseSubscriptionJson createSmartSenseSubscription(SmartSenseSubscriptionJson json, boolean publicInAccount) {
