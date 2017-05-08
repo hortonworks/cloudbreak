@@ -322,6 +322,7 @@ commondb:
     volumes:
         - "$COMMON_DB_VOL:/var/lib/postgresql/data"
     image: postgres:$DOCKER_TAG_POSTGRES
+    command: 'postgres -c max_connections=300'
 
 identity:
     labels:
