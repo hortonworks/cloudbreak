@@ -97,7 +97,7 @@ db-wait-for-db-cont() {
     declare contName=${1:? required db container name}
 
     local maxtry=${RETRY:=30}
-    while (! docker exec $contName pg_isready &> /dev/null) && (( maxtry -= 1 > 0 )); do
+    while (! docker run $REMOVE_CONTAINER --network=container:$contName --entrypoint=pg_isready postgres:$DOCKER_TAG_POSTGRES -h 127.0.0.1 &> /dev/null) && (( maxtry -= 1 > 0 )); do
         debug "waiting for DB: $contName to start [tries left: $maxtry] ..."
         sleep 1;
     done
@@ -119,7 +119,7 @@ db-start-database() {
             | debug-cat
 
     local maxtry=${RETRY:=30}
-    while (! docker exec $contName test -e $dbCreatedFile &> /dev/null ) && (( maxtry -= 1 > 0 )); do
+    while (! docker run $REMOVE_CONTAINER --volumes-from $contName --entrypoint=test postgres:$DOCKER_TAG_POSTGRES -e $dbCreatedFile &> /dev/null ) && (( maxtry -= 1 > 0 )); do
         debug "waiting for DB [tries left: $maxtry] ..."
         sleep 1;
     done
@@ -142,7 +142,7 @@ db-create-database() {
 
     if [[ $newDbName != "postgres" ]]; then
         debug "create new database: $newDbName"
-        docker exec $contName psql -U postgres -c "create database $newDbName" | debug-cat
+        docker run $REMOVE_CONTAINER --network=container:$contName --entrypoint=psql postgres:$DOCKER_TAG_POSTGRES -h 127.0.0.1 -U postgres -c "create database $newDbName" | debug-cat
     fi
 }
 
