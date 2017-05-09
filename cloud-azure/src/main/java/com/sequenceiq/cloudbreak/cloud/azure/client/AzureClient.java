@@ -17,7 +17,7 @@ import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkInterfaces;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
-import com.microsoft.azure.management.network.PublicIpAddress;
+import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentMode;
@@ -39,8 +39,7 @@ import com.microsoft.azure.storage.blob.CloudBlockBlob;
 import com.microsoft.azure.storage.blob.CloudPageBlob;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
-
-import okhttp3.logging.HttpLoggingInterceptor;
+import com.microsoft.rest.LogLevel;
 
 public class AzureClient {
 
@@ -67,7 +66,7 @@ public class AzureClient {
                 .withDefaultSubscriptionId(subscriptionId);
         azure = Azure
                 .configure()
-                .withLogLevel(HttpLoggingInterceptor.Level.BASIC)
+                .withLogLevel(LogLevel.BASIC)
                 .authenticate(creds)
                 .withSubscription(subscriptionId);
     }
@@ -85,7 +84,7 @@ public class AzureClient {
     }
 
     public void deleteResourceGroup(String name) {
-        azure.resourceGroups().delete(name);
+        azure.resourceGroups().deleteByName(name);
     }
 
     public ResourceGroup createResourceGroup(String name, String region) {
@@ -105,19 +104,19 @@ public class AzureClient {
     }
 
     public void deleteTemplateDeployment(String resourceGroupName, String deploymentName) {
-        azure.deployments().delete(resourceGroupName, deploymentName);
+        azure.deployments().deleteByResourceGroup(resourceGroupName, deploymentName);
     }
 
     public Deployment getTemplateDeployment(String resourceGroupName, String deploymentName) {
-        return azure.deployments().getByGroup(resourceGroupName, deploymentName);
+        return azure.deployments().getByResourceGroup(resourceGroupName, deploymentName);
     }
 
     public DeploymentOperations getTemplateDeploymentOperations(String resourceGroupName, String deploymentName) {
-        return azure.deployments().getByGroup(resourceGroupName, deploymentName).deploymentOperations();
+        return azure.deployments().getByResourceGroup(resourceGroupName, deploymentName).deploymentOperations();
     }
 
     public void cancelTemplateDeployments(String resourceGroupName, String deploymentName) {
-        azure.deployments().getByGroup(resourceGroupName, deploymentName).cancel();
+        azure.deployments().getByResourceGroup(resourceGroupName, deploymentName).cancel();
     }
 
     public Deployments getTemplateDeployments(String resourceGroupName) {
@@ -129,11 +128,11 @@ public class AzureClient {
     }
 
     public PagedList<StorageAccount> getStorageAccountsForResourceGroup(String resourceGroup) {
-        return azure.storageAccounts().listByGroup(resourceGroup);
+        return azure.storageAccounts().listByResourceGroup(resourceGroup);
     }
 
     public void deleteStorageAccount(String resourceGroup, String storageName) {
-        azure.storageAccounts().delete(resourceGroup, storageName);
+        azure.storageAccounts().deleteByResourceGroup(resourceGroup, storageName);
     }
 
     public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType) {
@@ -155,7 +154,7 @@ public class AzureClient {
     }
 
     public StorageAccount getStorageAccountByGroup(String resourceGroup, String storageName) {
-        return azure.storageAccounts().getByGroup(resourceGroup, storageName);
+        return azure.storageAccounts().getByResourceGroup(resourceGroup, storageName);
     }
 
     public void deleteContainerInStorage(String resourceGroup, String storageName, String containerName) throws Exception {
@@ -213,11 +212,11 @@ public class AzureClient {
     }
 
     public PagedList<VirtualMachine> getVirtualMachines(String resourceGroup) {
-        return azure.virtualMachines().listByGroup(resourceGroup);
+        return azure.virtualMachines().listByResourceGroup(resourceGroup);
     }
 
     public VirtualMachine getVirtualMachine(String resourceGroup, String vmName) {
-        return azure.virtualMachines().getByGroup(resourceGroup, vmName);
+        return azure.virtualMachines().getByResourceGroup(resourceGroup, vmName);
     }
 
     public PowerState getVirtualMachinePowerState(String resourceGroup, String vmName) {
@@ -237,11 +236,11 @@ public class AzureClient {
     }
 
     public AvailabilitySet getAvailabilitySet(String resourceGroup, String asName) {
-        return azure.availabilitySets().getByGroup(resourceGroup, asName);
+        return azure.availabilitySets().getByResourceGroup(resourceGroup, asName);
     }
 
     public void deleteAvailabilitySet(String resourceGroup, String asName) {
-        azure.availabilitySets().delete(resourceGroup, asName);
+        azure.availabilitySets().deleteByResourceGroup(resourceGroup, asName);
     }
 
     public void deallocateVirtualMachine(String resourceGroup, String vmName) {
@@ -250,7 +249,7 @@ public class AzureClient {
 
     public void deleteVirtualMachine(String resourceGroup, String vmName) {
         String id = getVirtualMachine(resourceGroup, vmName).id();
-        azure.virtualMachines().delete(id);
+        azure.virtualMachines().deleteById(id);
     }
 
     public void startVirtualMachine(String resourceGroup, String vmName) {
@@ -263,31 +262,31 @@ public class AzureClient {
 
     public void deletePublicIpAddressByName(String resourceGroup, String ipName) {
         String id = getPublicIpAddress(resourceGroup, ipName).id();
-        azure.publicIpAddresses().delete(id);
+        azure.publicIPAddresses().deleteById(id);
     }
 
     public void deletePublicIpAddressById(String ipId) {
-        azure.publicIpAddresses().delete(ipId);
+        azure.publicIPAddresses().deleteById(ipId);
     }
 
-    public PublicIpAddress getPublicIpAddress(String resourceGroup, String ipName) {
-        return azure.publicIpAddresses().getByGroup(resourceGroup, ipName);
+    public PublicIPAddress getPublicIpAddress(String resourceGroup, String ipName) {
+        return azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName);
     }
 
-    public PagedList<PublicIpAddress> getPublicIpAddresses(String resourceGroup) {
-        return azure.publicIpAddresses().listByGroup(resourceGroup);
+    public PagedList<PublicIPAddress> getPublicIpAddresses(String resourceGroup) {
+        return azure.publicIPAddresses().listByResourceGroup(resourceGroup);
     }
 
-    public PublicIpAddress getPublicIpAddressById(String ipId) {
-        return azure.publicIpAddresses().getById(ipId);
+    public PublicIPAddress getPublicIpAddressById(String ipId) {
+        return azure.publicIPAddresses().getById(ipId);
     }
 
     public void deleteNetworkInterface(String resourceGroup, String networkInterfaceName) {
-        azure.networkInterfaces().delete(resourceGroup, networkInterfaceName);
+        azure.networkInterfaces().deleteByResourceGroup(resourceGroup, networkInterfaceName);
     }
 
     public NetworkInterface getNetworkInterface(String resourceGroup, String networkInterfaceName) {
-        return azure.networkInterfaces().getByGroup(resourceGroup, networkInterfaceName);
+        return azure.networkInterfaces().getByResourceGroup(resourceGroup, networkInterfaceName);
     }
 
     public NetworkInterface getNetworkInterfaceById(String networkInterfaceId) {
@@ -299,22 +298,22 @@ public class AzureClient {
     }
 
     public Subnet getSubnetProperties(String resourceGroup, String virtualNetwork, String subnet) {
-        return azure.networks().getByGroup(resourceGroup, virtualNetwork).subnets().get(subnet);
+        return azure.networks().getByResourceGroup(resourceGroup, virtualNetwork).subnets().get(subnet);
     }
 
     public NetworkSecurityGroup getSecurityGroupProperties(String resourceGroup, String securityGroup) {
-        return azure.networkSecurityGroups().getByGroup(resourceGroup, securityGroup);
+        return azure.networkSecurityGroups().getByResourceGroup(resourceGroup, securityGroup);
     }
 
     public LoadBalancer getLoadBalancer(String name, String loadBalancerName) {
-        return azure.loadBalancers().getByGroup(name, loadBalancerName);
+        return azure.loadBalancers().getByResourceGroup(name, loadBalancerName);
     }
 
     public List<String> getLoadBalancerIps(String name, String loadBalancerName) {
         List<String> ipList = new ArrayList<String>();
-        List<String> publicIpAddressIds = getLoadBalancer(name, loadBalancerName).publicIpAddressIds();
+        List<String> publicIpAddressIds = getLoadBalancer(name, loadBalancerName).publicIPAddressIds();
         for (String publicIpAddressId : publicIpAddressIds) {
-            PublicIpAddress publicIpAddress = getPublicIpAddressById(publicIpAddressId);
+            PublicIPAddress publicIpAddress = getPublicIpAddressById(publicIpAddressId);
             ipList.add(publicIpAddress.ipAddress());
         }
         return ipList;

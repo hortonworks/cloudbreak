@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 import javax.inject.Inject;
 
 import org.junit.runner.RunWith;
-import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
@@ -13,7 +13,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@SpringApplicationConfiguration(classes = TestApplicationContext.class)
+@SpringBootTest(classes = TestApplicationContext.class)
 public abstract class AbstractComponentTest<T> {
     @Inject
     private EventBus eb;

@@ -25,5 +25,5 @@ test:
         parallel: true
     - if [ $CIRCLE_NODE_INDEX == 1 ]; then mkdir -p $CIRCLE_TEST_REPORTS/mock/; cp integration-test/test-output/junitreports/* $CIRCLE_TEST_REPORTS/mock/; fi:
         parallel: true
-    - if [ $CIRCLE_NODE_INDEX == 1 ]; then mkdir -p $CIRCLE_ARTIFACTS/mock/; cp integration-test/cloudbreak.log $CIRCLE_ARTIFACTS/mock/cloudbreak.log; fi:
+    - if [ $CIRCLE_NODE_INDEX == 1 ]; then mkdir -p $CIRCLE_ARTIFACTS/mock/; sudo cp -r integration-test $CIRCLE_ARTIFACTS/integration-test; fi:
         parallel: true

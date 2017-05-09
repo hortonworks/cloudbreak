@@ -20,7 +20,7 @@ plugins {
   id "com.github.jk1.dependency-license-report" version "0.3.4"
 }
 
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
@@ -38,7 +38,7 @@ dependencies {
         exclude group: 'org.slf4j';
     }
 
-    compile group: 'org.springframework.retry',     name: 'spring-retry',                   version: '1.1.4.RELEASE'
+    compile group: 'org.springframework.retry',     name: 'spring-retry',                   version: '1.2.0.RELEASE'
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter',            version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-web',        version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-actuator',   version: springBootVersion
@@ -49,7 +49,7 @@ dependencies {
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
     compile group: 'org.springframework.boot',      name: 'spring-boot-starter-jersey',     version: springBootVersion
     compile (group: 'org.springframework.statemachine', name: 'spring-statemachine-core', version: '1.0.1.RELEASE') { exclude group: 'org.springframework' }
-    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: '2.0.8.RELEASE'
+    compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
     compile group: 'io.projectreactor',             name: 'reactor-core',                   version: eventBusVersion
     compile group: 'io.projectreactor',             name: 'reactor-bus',                    version: eventBusVersion
     compile group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
@@ -99,8 +99,8 @@ dependencies {
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
 
     testCompile project(path: ':core-model', configuration: 'tests')
-    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',         version:springBootVersion
-    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-freemarker',   version:springBootVersion
+    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-test',        version:springBootVersion
+    testCompile group: 'org.springframework.boot', name:'spring-boot-starter-freemarker',  version:springBootVersion
     testCompile group: 'com.jayway.restassured',   name: 'rest-assured',                   version: '2.3.4'
     testCompile group: 'com.jayway.restassured',   name: 'json-path',                      version: '2.3.4'
 
