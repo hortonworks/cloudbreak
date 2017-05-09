@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.XPLAT_CLI_CLIENT_ID;
 
+import java.io.IOException;
+
 import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -12,13 +14,12 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
@@ -85,7 +86,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             String tokenResponseString = response.readEntity(String.class);
             try {
-                String refreshToken = new JSONObject(tokenResponseString).getString("refresh_token");
+                String refreshToken = new ObjectMapper().readTree(tokenResponseString).get("refresh_token").asText();
                 LOGGER.info("Access token received");
 
                 ExtendedCloudCredential extendedCloudCredential = armInteractiveLoginStatusCheckerContext.getExtendedCloudCredential();
@@ -110,7 +111,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     LOGGER.error("Interactive login failed: ", e.getMessage());
                     sendErrorStatusMessage(extendedCloudCredential, e.getMessage());
                 }
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
             return true;
@@ -151,8 +152,8 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         }
         String responseString = response.readEntity(String.class);
         try {
-            return new JSONObject(responseString).getString("access_token");
-        } catch (JSONException e) {
+            return new ObjectMapper().readTree(responseString).get("access_token").asText();
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }

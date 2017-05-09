@@ -36,29 +36,16 @@ import com.sequenceiq.periscope.service.security.UserFilterField;
 @Configuration
 public class SecurityConfig {
 
-    @Inject
-    private UserDetailsService userDetailsService;
-
-    @Inject
-    private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
-
-    @Bean
-    MethodSecurityExpressionHandler expressionHandler() {
-        DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
-        ownerBasedPermissionEvaluator.setUserDetailsService(userDetailsService);
-        expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
-        return expressionHandler;
-    }
-
-    @Configuration
     @EnableGlobalMethodSecurity(prePostEnabled = true)
     protected static class MethodSecurityConfig extends GlobalMethodSecurityConfiguration {
 
         @Inject
-        private MethodSecurityExpressionHandler expressionHandler;
+        private OwnerBasedPermissionEvaluator ownerBasedPermissionEvaluator;
 
         @Override
         protected MethodSecurityExpressionHandler createExpressionHandler() {
+            DefaultMethodSecurityExpressionHandler expressionHandler = new DefaultMethodSecurityExpressionHandler();
+            expressionHandler.setPermissionEvaluator(ownerBasedPermissionEvaluator);
             return expressionHandler;
         }
     }
