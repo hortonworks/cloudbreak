@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 
+import java.util.Collections;
 import java.util.Set;
 
 public class UnhealthyInstancesDetectionResult extends ClusterPlatformResult<UnhealthyInstancesDetectionRequest> {
@@ -15,6 +16,7 @@ public class UnhealthyInstancesDetectionResult extends ClusterPlatformResult<Unh
 
     public UnhealthyInstancesDetectionResult(String statusReason, Exception errorDetails, UnhealthyInstancesDetectionRequest request) {
         super(statusReason, errorDetails, request);
+        this.unhealthyInstanceIds = Collections.emptySet();
     }
 
     public Set<String> getUnhealthyInstanceIds() {
