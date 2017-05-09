@@ -9,6 +9,7 @@
         </select>
 
         <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE') &&  cluster.fileSystem.type == 'WASB'"><i class="fa fa-warning"></i> {{msg.filesystem_wasb_label_azure_warning}}</div>
+        <div class="help-block" ng-show="(activeCredential.cloudPlatform == 'AZURE') &&  cluster.fileSystem.type == 'ADLS'"><i class="fa fa-warning"></i> {{msg.filesystem_adls_label_azure_warning}}</div>
     </div>
 </div>
 <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.wasbaccountname.$dirty && clusterCreationForm.wasbaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'WASB'">
