@@ -39,6 +39,7 @@ public enum Msg {
     STACK_REPAIR_ATTEMPTING("stack.repair.attempting"),
     STACK_REPAIR_TRIGGERED("stack.repair.triggered"),
     STACK_REPAIR_COMPLETE_CLEAN("stack.repair.complete.clean"),
+    STACK_REPAIR_FAILED("stack.repair.failed"),
     FLOW_STACK_PROVISIONED_BILLING("flow.stack.provisioned.billing"),
     FLOW_STACK_PROVISIONED("flow.stack.provisioned"),
     FLOW_STACK_METADATA_COLLECTED("stack.metadata.collected"),

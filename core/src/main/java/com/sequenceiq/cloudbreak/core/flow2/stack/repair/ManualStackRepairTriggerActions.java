@@ -69,6 +69,24 @@ public class ManualStackRepairTriggerActions {
         };
     }
 
+    @Bean(name = "MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE")
+    public Action handleErrorAction() {
+        return new AbstractStackRepairTriggerAction<UnhealthyInstancesDetectionResult>(UnhealthyInstancesDetectionResult.class) {
+
+            @Override
+            protected void doExecute(StackRepairTriggerContext context, UnhealthyInstancesDetectionResult payload, Map<Object, Object> variables)
+                    throws Exception {
+                flowMessageService.fireEventAndLog(payload.getStackId(), Msg.STACK_REPAIR_FAILED, Status.AVAILABLE.name(), payload.getStatusReason());
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackRepairTriggerContext context) {
+                return new StackEvent(ManualStackRepairTriggerEvent.MANUAL_STACK_REPAIR_TRIGGER_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
+            }
+        };
+    }
+
     private abstract class AbstractStackRepairTriggerAction<P extends Payload>
             extends AbstractAction<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent, StackRepairTriggerContext, P> {
 
