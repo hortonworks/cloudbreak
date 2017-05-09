@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
@@ -16,13 +17,13 @@ import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.task.AzurePollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -68,17 +69,17 @@ public class AzureInteractiveLogin {
             String jsonString = deviceCodeResponse.readEntity(String.class);
             LOGGER.info("Device code json response: " + jsonString);
             try {
-                JSONObject jsonObject = new JSONObject(jsonString);
+                JsonNode deviceCodeJsonNode = new ObjectMapper().readTree(jsonString);
 
-                int pollInterval = jsonObject.getInt("interval");
-                int expiresIn = jsonObject.getInt("expires_in");
-                String deviceCode = jsonObject.getString("device_code");
+                int pollInterval = deviceCodeJsonNode.get("interval").intValue();
+                int expiresIn = deviceCodeJsonNode.get("expires_in").intValue();
+                String deviceCode = deviceCodeJsonNode.get("device_code").asText();
 
                 createCheckerContextAndCancelPrevious(extendedCloudCredential, deviceCode, credentialNotifier);
                 startAsyncPolling(cloudContext, pollInterval, expiresIn);
 
-                return extractParameters(jsonObject);
-            } catch (JSONException e) {
+                return extractParameters(deviceCodeJsonNode);
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         } else {
@@ -107,10 +108,10 @@ public class AzureInteractiveLogin {
         azureInteractiveLoginStatusCheckerContext = new AzureInteractiveLoginStatusCheckerContext(deviceCode, extendedCloudCredential, credentialNotifier);
     }
 
-    private Map<String, String> extractParameters(JSONObject jsonObject) throws JSONException {
+    private Map<String, String> extractParameters(JsonNode deviceCodeJsonNode) {
         Map<String, String> parameters = new HashMap<>();
-        parameters.put("user_code", jsonObject.getString("user_code"));
-        parameters.put("verification_url", jsonObject.getString("verification_url"));
+        parameters.put("user_code", deviceCodeJsonNode.get("user_code").asText());
+        parameters.put("verification_url", deviceCodeJsonNode.get("verification_url").asText());
         return parameters;
     }
 

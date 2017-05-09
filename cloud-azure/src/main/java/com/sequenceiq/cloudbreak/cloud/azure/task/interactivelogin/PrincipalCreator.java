@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.GRAPH_API_VERSION;
 import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureInteractiveLoginStatusCheckerTask.GRAPH_WINDOWS;
 
+import java.io.IOException;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
@@ -11,14 +13,13 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 
 /**
@@ -37,21 +38,19 @@ public class PrincipalCreator {
             String principal = response.readEntity(String.class);
 
             try {
-                JSONObject principalJson = new JSONObject(principal);
-                String objectId = principalJson.getString("objectId");
+                String objectId = new ObjectMapper().readTree(principal).get("objectId").asText();
                 LOGGER.info("Service principal created with objectId: " + objectId);
                 return objectId;
-            } catch (JSONException e) {
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         } else {
             String errorResponse = response.readEntity(String.class);
             LOGGER.error("create service principal failed: " + errorResponse);
             try {
-                JSONObject errorJson = new JSONObject(errorResponse);
-                throw new InteractiveLoginException("Service principal creation error: "
-                        + errorJson.getJSONObject("odata.error").getJSONObject("message").getString("value"));
-            } catch (JSONException e) {
+                String errorMessage = new ObjectMapper().readTree(errorResponse).get("odata.error").get("message").get("value").asText();
+                throw new InteractiveLoginException("Service principal creation error: " + errorMessage);
+            } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
         }

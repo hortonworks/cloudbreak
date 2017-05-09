@@ -5,14 +5,12 @@ import static com.sequenceiq.cloudbreak.VersionedApplication.versionedApplicatio
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 
 import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 @EnableAutoConfiguration
 @EnableSwagger2
 @ComponentScan(basePackages = "com.sequenceiq.cloudbreak")
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class CloudbreakApplication {
     public static void main(String[] args) {
         if (!versionedApplication().showVersionInfo(args)) {

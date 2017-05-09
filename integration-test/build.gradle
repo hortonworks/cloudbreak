@@ -12,7 +12,7 @@ jar {
   baseName = 'cloudbreak-integration-test'
 }
 
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 
 dependencies {
   compile project(':core-api')
