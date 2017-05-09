@@ -234,6 +234,8 @@ cloudbreak-conf-defaults() {
     env-import CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP ""
     env-import CB_AWS_VPC ""
     env-import CB_ENABLE_CUSTOM_IMAGE "false"
+    env-import CB_MAX_SALT_NEW_SERVICE_RETRY 90
+    env-import CB_MAX_SALT_RECIPE_EXECUTION_RETRY 90
 }
 
 cloudbreak-conf-cloud-provider() {
@@ -532,7 +534,7 @@ escape-string-json() {
 util-add-default-user() {
     declare desc="Add default admin Cloudbreak user"
     debug $desc
-    
+
     cloudbreak-config
 
     local passwd="$UAA_DEFAULT_USER_PW"

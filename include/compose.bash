@@ -415,6 +415,8 @@ cloudbreak:
         - CB_ENABLEDPLATFORMS
         - CB_ENABLE_CUSTOM_IMAGE
         - CB_INSTANCE_UUID
+        - CB_MAX_SALT_NEW_SERVICE_RETRY
+        - CB_MAX_SALT_RECIPE_EXECUTION_RETRY
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
