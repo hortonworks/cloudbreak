@@ -16,7 +16,7 @@ jar {
   }
 }
 
-apply plugin: 'spring-boot'
+apply plugin: 'org.springframework.boot'
 apply plugin: 'license-report'
 
 

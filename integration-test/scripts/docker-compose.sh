@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-set +x
+set -x
+
+export TRACE=1;
+export DEBUG=1;
 
 : ${INTEGCB_LOCATION?"integcb location"}
 
@@ -14,7 +17,9 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose down
 
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
-./cbd start-wait consul registrator uaadb identity cbdb cloudbreak
+./cbd start-wait consul registrator identity commondb cloudbreak
+# not a mistake, workaround for circle..
+./cbd start-wait consul registrator identity commondb cloudbreak
 
 echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"
 cd ..

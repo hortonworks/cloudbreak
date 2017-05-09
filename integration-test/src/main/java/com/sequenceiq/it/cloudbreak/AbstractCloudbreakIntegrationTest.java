@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;

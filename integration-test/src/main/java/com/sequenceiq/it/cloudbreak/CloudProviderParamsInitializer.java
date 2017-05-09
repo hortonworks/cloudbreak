@@ -6,7 +6,7 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.ConfigFileApplicationContextInitializer;
+import org.springframework.boot.test.context.ConfigFileApplicationContextInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.util.StringUtils;
