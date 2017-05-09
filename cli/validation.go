@@ -100,10 +100,21 @@ func (s *ClusterSkeleton) Validate() error {
 	if err := validateMasterRecoveryMode("master", s.Master.RecoveryMode); err != nil {
 		res = append(res, err)
 	}
+	if err := validateEncryption(s.Master.Encrypted, s.Master.VolumeType); err != nil {
+		res = append(res, err)
+	}
+
 	if err := validateRecoveryMode("worker", s.Worker.RecoveryMode); err != nil {
 		res = append(res, err)
 	}
+	if err := validateEncryption(s.Worker.Encrypted, s.Worker.VolumeType); err != nil {
+		res = append(res, err)
+	}
+
 	if err := validateSpotRecoveryMode("compute", s.Compute.RecoveryMode, s.Compute.SpotPrice); err != nil {
+		res = append(res, err)
+	}
+	if err := validateEncryption(s.Compute.Encrypted, s.Compute.VolumeType); err != nil {
 		res = append(res, err)
 	}
 
@@ -300,6 +311,13 @@ func validateMasterRecoveryMode(hostGroup string, recoveryMode string) error {
 	if recoveryMode != "" && recoveryMode != "MANUAL" {
 		return errors.New(fmt.Sprintf("Invalid recoveryMode [%s] on hostgroup [%s], supported revorery mode on master hostgroups is MANUAL only",
 			recoveryMode, hostGroup))
+	}
+	return nil
+}
+
+func validateEncryption(encryption *bool, volumetype string) error {
+	if encryption != nil && *encryption == true && volumetype == "ephemeral" {
+		return errors.New(fmt.Sprintf("Invalid encryption because [%s] volume does not support encryption", volumetype))
 	}
 	return nil
 }
