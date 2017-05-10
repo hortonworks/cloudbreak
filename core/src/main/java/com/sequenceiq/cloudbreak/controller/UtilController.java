@@ -17,7 +17,9 @@ import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionBuilder;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
+import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 
 @Component
@@ -36,6 +38,9 @@ public class UtilController implements UtilEndpoint {
 
     @Inject
     private RdsConfigRepository rdsConfigRepository;
+
+    @Inject
+    private LdapConfigRepository ldapConfigRepository;
 
     @Override
     public RdsTestResult testRdsConnection(@Valid RDSConfigRequest rdsConfigRequest) {
@@ -92,6 +97,23 @@ public class UtilController implements UtilEndpoint {
         try {
             ldapConfigValidator.validateLdapConnection(ldapConfig);
             ldapTestResult.setConnectionResult(CONNECTED);
+        } catch (BadRequestException e) {
+            ldapTestResult.setConnectionResult(e.getMessage());
+        }
+        return ldapTestResult;
+    }
+
+    @Override
+    public LdapTestResult testLdapConnectionById(Long id) {
+        LdapTestResult ldapTestResult = new LdapTestResult();
+        try {
+            LdapConfig config = ldapConfigRepository.findOne(id);
+            if (config != null) {
+                ldapConfigValidator.validateLdapConnection(config);
+                ldapTestResult.setConnectionResult(CONNECTED);
+            } else {
+                ldapTestResult.setConnectionResult("not found");
+            }
         } catch (BadRequestException e) {
             ldapTestResult.setConnectionResult(e.getMessage());
         }
