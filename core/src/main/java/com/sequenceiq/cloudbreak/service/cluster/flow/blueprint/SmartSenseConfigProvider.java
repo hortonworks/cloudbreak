@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
+import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 
 import java.util.ArrayList;
@@ -73,15 +74,27 @@ public class SmartSenseConfigProvider {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
             String aHostGroupName = hostGroupNames.stream().findFirst().get();
             String finalBlueprintText = blueprintText;
-            Optional<String> hostGroupNameOfNameNode = hostGroupNames
-                    .stream()
-                    .filter(hostGroupName -> blueprintProcessor.getComponentsInHostGroup(finalBlueprintText, hostGroupName).contains(NAMENODE_COMPONENT))
-                    .findFirst();
-            if (hostGroupNameOfNameNode.isPresent()) {
-                aHostGroupName = hostGroupNameOfNameNode.get();
+            if (blueprintProcessor.componentExistsInBlueprint(NAMENODE_COMPONENT, blueprintText)) {
+                Optional<String> hostGroupNameOfNameNode = hostGroupNames
+                        .stream()
+                        .filter(hostGroupName -> blueprintProcessor.getComponentsInHostGroup(finalBlueprintText, hostGroupName).contains(NAMENODE_COMPONENT))
+                        .findFirst();
+                if (hostGroupNameOfNameNode.isPresent()) {
+                    aHostGroupName = hostGroupNameOfNameNode.get();
+                }
+
+            } else {
+                for (HostGroup hostGroup : hostGroups) {
+                    if (hostGroup.getConstraint().getInstanceGroup() != null
+                            && GATEWAY.equals(hostGroup.getConstraint().getInstanceGroup().getInstanceGroupType())) {
+                        aHostGroupName = hostGroup.getName();
+                        break;
+                    }
+                }
             }
             LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
             blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Collections.singletonList(aHostGroupName), blueprintText);
+
         }
         return blueprintText;
     }
