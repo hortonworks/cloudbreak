@@ -190,15 +190,6 @@
         "components": [
           {
             "name": "METRICS_MONITOR"
-          },
-          {
-            "name": "ZOOKEEPER_SERVER"
-          },
-          {
-            "name": "INFRA_SOLR"
-          },
-          {
-            "name": "INFRA_SOLR_CLIENT"
           }
         ],
         "cardinality": "1+"
