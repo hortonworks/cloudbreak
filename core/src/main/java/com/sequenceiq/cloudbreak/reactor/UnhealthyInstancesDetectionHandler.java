@@ -59,8 +59,13 @@ public class UnhealthyInstancesDetectionHandler implements ClusterEventHandler<U
                 result = new UnhealthyInstancesDetectionResult(request, unhealthyInstances);
             }
         } catch (CloudbreakSecuritySetupException e) {
-            LOG.error("Could not get host statuses from Ambari", e);
-            result = new UnhealthyInstancesDetectionResult(e.getMessage(), e, request);
+            String msg = String.format("Could not get host statuses from Ambari: %s", e.getMessage());
+            LOG.error(msg, e);
+            result = new UnhealthyInstancesDetectionResult(msg, e, request);
+        } catch (RuntimeException e) {
+            String msg = String.format("Could not get statuses for unhealty instances: %s", e.getMessage());
+            LOG.error(msg, e);
+            result = new UnhealthyInstancesDetectionResult(msg, e, request);
         }
         eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
     }
