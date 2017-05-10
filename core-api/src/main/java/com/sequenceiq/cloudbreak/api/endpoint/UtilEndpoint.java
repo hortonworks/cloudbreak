@@ -48,6 +48,13 @@ public interface UtilEndpoint {
     @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON, nickname = "testLdapConnectionUtil")
     LdapTestResult testLdapConnection(@Valid LdapConfigRequest ldapConfigRequest);
 
+    @GET
+    @Path("ldap/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION_BY_ID, produces = ContentType.JSON,
+            nickname = "testLdapConnectionByIdUtil")
+    LdapTestResult testLdapConnectionById(@PathParam(value = "id") Long id);
+
     @POST
     @Path("ambari-database")
     @Produces(MediaType.APPLICATION_JSON)
