@@ -139,13 +139,14 @@ init-profile() {
         info "$CBD_PROFILE already exists, now you are ready to run:"
         echo "cbd start" | blue
     else
+        echo "export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')" > $CBD_PROFILE
         ipcommand=$(public-ip-resolver-command)
         if [[ "$ipcommand" ]]; then
             PUBLIC_IP=$(eval "$ipcommand")
-            echo "export PUBLIC_IP=\$($ipcommand)" > $CBD_PROFILE
+            echo "export PUBLIC_IP=\$($ipcommand)" >> $CBD_PROFILE
         else
             warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
-            echo "echo export PUBLIC_IP=1.2.3.4 > $CBD_PROFILE" | blue
+            echo "echo export PUBLIC_IP=1.2.3.4 >> $CBD_PROFILE" | blue
             _exit 2
         fi
     fi
