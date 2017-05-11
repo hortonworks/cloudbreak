@@ -71,8 +71,8 @@ public class AzureInteractiveLogin {
             try {
                 JsonNode deviceCodeJsonNode = new ObjectMapper().readTree(jsonString);
 
-                int pollInterval = deviceCodeJsonNode.get("interval").intValue();
-                int expiresIn = deviceCodeJsonNode.get("expires_in").intValue();
+                int pollInterval = deviceCodeJsonNode.get("interval").asInt();
+                int expiresIn = deviceCodeJsonNode.get("expires_in").asInt();
                 String deviceCode = deviceCodeJsonNode.get("device_code").asText();
 
                 createCheckerContextAndCancelPrevious(extendedCloudCredential, deviceCode, credentialNotifier);

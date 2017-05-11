@@ -45,7 +45,7 @@ public class AzureRoleManager {
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             String roles = response.readEntity(String.class);
             try {
-                JsonNode rolesJsonNode = new ObjectMapper().readTree(roles).get("refresh_token");
+                JsonNode rolesJsonNode = new ObjectMapper().readTree(roles);
                 String roleDefinitionId = rolesJsonNode.get("value").get(0).get("id").asText();
                 LOGGER.info("Role definition - roleId: " + roleDefinitionId);
                 return roleDefinitionId;
