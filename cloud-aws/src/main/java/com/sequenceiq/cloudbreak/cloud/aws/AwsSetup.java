@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 
 import javax.inject.Inject;
@@ -39,9 +38,7 @@ import com.amazonaws.services.identitymanagement.model.ListAttachedRolePoliciesR
 import com.amazonaws.services.identitymanagement.model.ListAttachedRolePoliciesResult;
 import com.amazonaws.services.identitymanagement.model.ListRolePoliciesRequest;
 import com.amazonaws.services.identitymanagement.model.ListRolePoliciesResult;
-import com.amazonaws.util.json.JSONArray;
-import com.amazonaws.util.json.JSONException;
-import com.amazonaws.util.json.JSONObject;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
@@ -57,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 
 @Component
@@ -210,17 +208,17 @@ public class AwsSetup implements Setup {
         throw new CloudConnectorException("Could not get policies on the role because the arn role do not have enough permission.");
     }
 
-    private boolean checkIamOrS3Statement(String roleName, AmazonIdentityManagement client, String s) throws UnsupportedEncodingException, JSONException {
+    private boolean checkIamOrS3Statement(String roleName, AmazonIdentityManagement client, String s) throws Exception {
         GetRolePolicyRequest getRolePolicyRequest = new GetRolePolicyRequest();
         getRolePolicyRequest.setRoleName(roleName);
         getRolePolicyRequest.setPolicyName(s);
         GetRolePolicyResult rolePolicy = client.getRolePolicy(getRolePolicyRequest);
         String decode = URLDecoder.decode(rolePolicy.getPolicyDocument(), "UTF-8");
-        JSONObject object = new JSONObject(decode);
-        JSONArray statement = object.getJSONArray("Statement");
-        for (int i = 0; i < statement.length(); i++) {
-            JSONArray action = statement.getJSONObject(i).getJSONArray("Action");
-            for (int j = 0; j < action.length(); j++) {
+        JsonNode object = JsonUtil.readTree(decode);
+        JsonNode statement = object.get("Statement");
+        for (int i = 0; i < statement.size(); i++) {
+            JsonNode action = statement.get(i).get("Action");
+            for (int j = 0; j < action.size(); j++) {
                 String actionEntry = action.get(j).toString().replaceAll(" ", "").toLowerCase();
                 if ("iam:createrole".equals(actionEntry) || "iam:*".equals(actionEntry)) {
                     LOGGER.info("Role has able to operate on iam resources: {}.", action.get(j).toString());
