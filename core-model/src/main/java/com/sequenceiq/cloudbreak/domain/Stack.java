@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -589,27 +590,20 @@ public class Stack implements ProvisionEntity {
         this.parameters = parameters;
     }
 
-    public InstanceGroup getGatewayInstanceGroup() {
+    public List<InstanceMetaData> getGatewayInstanceMetadata() {
+        List<InstanceMetaData> metadataList = new ArrayList<>();
         for (InstanceGroup instanceGroup : instanceGroups) {
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                return instanceGroup;
+                metadataList.addAll(instanceGroup.getInstanceMetaData());
             }
         }
-        return null;
+        return metadataList;
     }
 
     public InstanceMetaData getPrimaryGatewayInstance() {
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                    if (InstanceMetadataType.GATEWAY_PRIMARY.equals(instanceMetaData.getInstanceMetadataType())) {
-                        return instanceMetaData;
-                    }
-                }
-                return instanceGroup.getInstanceMetaData().isEmpty() ? null : instanceGroup.getInstanceMetaData().iterator().next();
-            }
-        }
-        return null;
+        Optional<InstanceMetaData> metaData = getGatewayInstanceMetadata().stream()
+                .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType())).findFirst();
+        return metaData.orElse(null);
     }
 
     public Network getNetwork() {

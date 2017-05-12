@@ -23,7 +23,7 @@ public class GatewayConfigService {
 
     public List<GatewayConfig> getAllGatewayConfigs(Stack stack) throws CloudbreakSecuritySetupException {
         List<GatewayConfig> result = new ArrayList<>();
-        for (InstanceMetaData instanceMetaData : stack.getGatewayInstanceGroup().getInstanceMetaData()) {
+        for (InstanceMetaData instanceMetaData : stack.getGatewayInstanceMetadata()) {
             result.add(getGatewayConfig(stack, instanceMetaData, stack.getCluster().getGateway().getEnableGateway()));
         }
         return result;
