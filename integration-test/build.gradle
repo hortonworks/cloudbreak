@@ -45,11 +45,13 @@ dependencies {
   compile group:  'org.testng',                   name: 'testng',                         version: '6.9.10'
   compile group:  'javax.el',                     name: 'javax.el-api',                   version: '3.0.0'
   compile group:  'org.apache.commons',           name: 'commons-lang3',                  version: '3.4'
-  compile group:  'org.pacesys',                  name: 'openstack4j',                    version: '2.0.10-siq01'
+  compile group:  'org.pacesys',                  name: 'openstack4j-core',               version: '3.0.4-guava-update'
+  compile (group: 'org.pacesys.openstack4j.connectors', name: 'openstack4j-jersey2',            version: '3.0.4') {
+    exclude group: 'org.pacesys', module: 'openstack4j-core'
+  }
   compile(group:  'org.apache.sshd',              name: 'sshd-core',                      version: '1.2.0') {
     exclude group: 'ch.qos.logback'
   }
-  compile group: 'com.github.docker-java',        name: 'docker-java',                    version: '2.1.2'
   compile group: 'com.sequenceiq',                name: 'consul-api',                     version: '1.10'
   compile group: 'com.sparkjava',                 name: 'spark-core',                     version: '2.5'
 

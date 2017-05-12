@@ -130,31 +130,29 @@ public class OpenStackCommands implements CommandMarker {
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "platformId", help = "Id of a platform the credential belongs to") Long platformId
     ) {
-        String selector = null;
         String keyStoneVersion = null;
         if (tenantName != null) {
-            selector = "cb-keystone-v2";
+            keystoneAuthScope = "cb-keystone-v2";
             keyStoneVersion = "cb-keystone-v2";
         }
         if (userDomain != null && keystoneAuthScope != null) {
             if (domainName != null) {
-                selector = "cb-keystone-v3-domain-scope";
+                keystoneAuthScope = "cb-keystone-v3-domain-scope";
             } else if (projectDomainName != null && projectName != null) {
-                selector = "cb-keystone-v3-project-scope";
+                keystoneAuthScope = "cb-keystone-v3-project-scope";
             } else {
-                selector = "cb-keystone-v3-default-scope";
+                keystoneAuthScope = "cb-keystone-v3-default-scope";
             }
             keyStoneVersion = "cb-keystone-v3";
         }
-        if (selector == null || keyStoneVersion == null) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException("Selector not found for specified parameters");
+        if (keystoneAuthScope == null || keyStoneVersion == null) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException("keystoneAuthScope not found for specified parameters");
         }
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("userName", userName);
         parameters.put("password", password);
         parameters.put("endpoint", endPoint);
         parameters.put("keystoneVersion", keyStoneVersion);
-        parameters.put("selector", selector);
         parameters.put("tenantName", tenantName);
         parameters.put("userDomain", userDomain);
         parameters.put("keystoneAuthScope", keystoneAuthScope);

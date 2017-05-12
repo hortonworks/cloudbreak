@@ -6,7 +6,7 @@ import java.util.Map;
 
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.compute.FloatingIP;
 import org.openstack4j.model.compute.Server;
 import org.springframework.stereotype.Service;
