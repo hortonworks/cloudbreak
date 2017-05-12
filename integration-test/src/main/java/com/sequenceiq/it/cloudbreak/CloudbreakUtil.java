@@ -5,6 +5,7 @@ import static java.lang.Boolean.FALSE;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +91,7 @@ public class CloudbreakUtil {
         do {
             LOGGER.info("Waiting for host status {} in hostgroup {} ...", desiredStatus, hostGroup);
             sleep();
-            StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+            StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
             Set<HostGroupResponse> hostGroupResponse = stackResponse.getCluster().getHostGroups();
             for (HostGroupResponse hr : hostGroupResponse) {
                 if (hr.getName().equals(hostGroup)) {
@@ -114,14 +115,14 @@ public class CloudbreakUtil {
     }
 
     public static void checkClusterFailed(StackEndpoint stackEndpoint, String stackId, String failMessage) {
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "CREATE_FAILED");
         Assert.assertTrue(stackResponse.getCluster().getStatusReason().contains(failMessage));
     }
 
     public static void checkClusterAvailability(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassowrd,
             boolean checkAmbari) {
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
@@ -138,7 +139,7 @@ public class CloudbreakUtil {
     }
 
     public static void checkClusterStopped(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassword) {
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "STOPPED", "The cluster is not stopped!");
         Assert.assertEquals(stackResponse.getStatus(), Status.STOPPED, "The stack is not stopped!");
@@ -160,7 +161,7 @@ public class CloudbreakUtil {
     public static String getAmbariIp(StackEndpoint stackEndpoint, String stackId, IntegrationTestContext itContext) {
         String ambariIp = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_IP_ID);
         if (StringUtils.isEmpty(ambariIp)) {
-            StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+            StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
             ambariIp = stackResponse.getCluster().getAmbariServerIp();
             Assert.assertNotNull(ambariIp, "The Ambari IP is not available!");
             itContext.putContextParam(CloudbreakITContextConstants.AMBARI_IP_ID, ambariIp);

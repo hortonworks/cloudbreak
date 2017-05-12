@@ -199,7 +199,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
 
     private void putStackToContextIfExist(StackEndpoint endpoint, String stackName) {
         if (StringUtils.hasLength(stackName)) {
-            Long resourceId = endpoint.getPublic(stackName).getId();
+            Long resourceId = endpoint.getPublic(stackName, new HashSet<>()).getId();
             itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, resourceId.toString());
         }
     }

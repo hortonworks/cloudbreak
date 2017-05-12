@@ -6,6 +6,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.times;
@@ -75,7 +76,7 @@ public class BaseStackCommandsTest {
 
     @Test
     public void selectStackByIdWhichIsExist() {
-        given(stackEndpoint.get(anyLong())).willReturn(stackResponse());
+        given(stackEndpoint.get(anyLong(), anySet())).willReturn(stackResponse());
 
         String select = underTest.select(50L, null);
 
@@ -84,7 +85,7 @@ public class BaseStackCommandsTest {
 
     @Test(expected = RuntimeException.class)
     public void selectStackByIdWhichIsNotExist() {
-        given(stackEndpoint.get(anyLong())).willThrow(new NotFoundException("not found"));
+        given(stackEndpoint.get(anyLong(), anySet())).willThrow(new NotFoundException("not found"));
         given(shellContext.exceptionTransformer()).willReturn(exceptionTransformer);
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willReturn(new RuntimeException("not found"));
 
@@ -93,7 +94,7 @@ public class BaseStackCommandsTest {
 
     @Test
     public void selectStackByNameWhichIsExist() {
-        given(stackEndpoint.getPublic(anyString())).willReturn(stackResponse());
+        given(stackEndpoint.getPublic(anyString(), anySet())).willReturn(stackResponse());
 
         String select = underTest.select(null, "test1");
 
@@ -102,14 +103,14 @@ public class BaseStackCommandsTest {
 
     @Test(expected = RuntimeException.class)
     public void selectStackByNameWhichIsNotExistThenThowNotFoundException() {
-        given(stackEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
+        given(stackEndpoint.getPublic(anyString(), anySet())).willThrow(new NotFoundException("not found"));
 
         underTest.select(null, "test1");
     }
 
     @Test
     public void showStackByIdWhichIsExist() {
-        given(stackEndpoint.get(anyLong())).willReturn(stackResponse());
+        given(stackEndpoint.get(anyLong(), anySet())).willReturn(stackResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
         String show = underTest.show(50L, null, null);
@@ -117,19 +118,19 @@ public class BaseStackCommandsTest {
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
         verify(responseTransformer, times(1)).transformObjectToStringMap(anyObject(), Matchers.<String>anyVararg());
-        verify(stackEndpoint, times(1)).get(anyLong());
+        verify(stackEndpoint, times(1)).get(anyLong(), anySet());
     }
 
     @Test(expected = RuntimeException.class)
     public void showStackByIdWhichIsNotExist() {
-        given(stackEndpoint.get(anyLong())).willThrow(new NotFoundException("not found"));
+        given(stackEndpoint.get(anyLong(), anySet())).willThrow(new NotFoundException("not found"));
 
         underTest.show(51L, null, null);
     }
 
     @Test
     public void showStackByNameWhichIsExist() {
-        given(stackEndpoint.getPublic(anyString())).willReturn(stackResponse());
+        given(stackEndpoint.getPublic(anyString(), anySet())).willReturn(stackResponse());
         given(responseTransformer.transformObjectToStringMap(anyMap())).willReturn(ImmutableMap.of("id", "1L", "name", "test1"));
 
         String show = underTest.show(null, "test1", null);
@@ -137,12 +138,12 @@ public class BaseStackCommandsTest {
         Assert.assertThat(show, containsString("id"));
         Assert.assertThat(show, containsString("name"));
         verify(responseTransformer, times(1)).transformObjectToStringMap(anyObject(), Matchers.<String>anyVararg());
-        verify(stackEndpoint, times(1)).getPublic(anyString());
+        verify(stackEndpoint, times(1)).getPublic(anyString(), anySet());
     }
 
     @Test(expected = RuntimeException.class)
     public void showStackByNameWhichIsNotExistThenThowNotFoundException() {
-        given(stackEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
+        given(stackEndpoint.getPublic(anyString(), anySet())).willThrow(new NotFoundException("not found"));
 
         underTest.show(null, "test1", null);
     }

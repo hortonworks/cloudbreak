@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.validation.Valid;
 
@@ -52,9 +54,6 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.ORCHESTRATOR)
     private OrchestratorResponse orchestrator;
 
-    @ApiModelProperty(StackModelDescription.STACK_TEMPLATE)
-    private String stackTemplate;
-
     @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
@@ -67,11 +66,20 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.CLOUDBREAK_DETAILS)
     private CloudbreakDetailsJson cloudbreakDetails;
 
-    @ApiModelProperty(StackModelDescription.S3_ACCESS_ROLE_ARN)
-    private String s3AccessRoleArn;
-
     @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
     private FlexSubscriptionResponse flexSubscription;
+
+    @ApiModelProperty(StackModelDescription.NODE_COUNT)
+    private Integer nodeCount;
+
+    @ApiModelProperty(StackModelDescription.HARDWARE_INFO_RESPONSE)
+    private Set<HardwareInfoResponse> hardwareInfos = new HashSet<>();
+
+    @ApiModelProperty(StackModelDescription.EVENTS)
+    private List<CloudbreakEventsJson> cloudbreakEvents = new ArrayList<>();
+
+    @ApiModelProperty(StackModelDescription.USAGES)
+    private List<CloudbreakUsageJson> cloudbreakUsages = new ArrayList<>();
 
     public String getAccount() {
         return account;
@@ -186,22 +194,6 @@ public class StackResponse extends StackBase {
         this.failurePolicy = failurePolicy;
     }
 
-    public String getStackTemplate() {
-        return stackTemplate;
-    }
-
-    public void setStackTemplate(String stackTemplate) {
-        this.stackTemplate = stackTemplate;
-    }
-
-    public String getS3AccessRoleArn() {
-        return s3AccessRoleArn;
-    }
-
-    public void setS3AccessRoleArn(String s3AccessRoleArn) {
-        this.s3AccessRoleArn = s3AccessRoleArn;
-    }
-
     public CredentialResponse getCredential() {
         return credential;
     }
@@ -224,5 +216,37 @@ public class StackResponse extends StackBase {
 
     public void setFlexSubscription(FlexSubscriptionResponse flexSubscription) {
         this.flexSubscription = flexSubscription;
+    }
+
+    public Integer getNodeCount() {
+        return nodeCount;
+    }
+
+    public void setNodeCount(Integer nodeCount) {
+        this.nodeCount = nodeCount;
+    }
+
+    public Set<HardwareInfoResponse> getHardwareInfos() {
+        return hardwareInfos;
+    }
+
+    public void setHardwareInfos(Set<HardwareInfoResponse> hardwareInfos) {
+        this.hardwareInfos = hardwareInfos;
+    }
+
+    public List<CloudbreakEventsJson> getCloudbreakEvents() {
+        return cloudbreakEvents;
+    }
+
+    public void setCloudbreakEvents(List<CloudbreakEventsJson> cloudbreakEvents) {
+        this.cloudbreakEvents = cloudbreakEvents;
+    }
+
+    public List<CloudbreakUsageJson> getCloudbreakUsages() {
+        return cloudbreakUsages;
+    }
+
+    public void setCloudbreakUsages(List<CloudbreakUsageJson> cloudbreakUsages) {
+        this.cloudbreakUsages = cloudbreakUsages;
     }
 }

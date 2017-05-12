@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.recovery;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import org.testng.Assert;
@@ -41,7 +42,7 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
 
         StackEndpoint stackEndpoint = getCloudbreakClient().stackEndpoint();
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         RecoveryUtil.deleteInstance(cloudProviderParams, RecoveryUtil.getInstanceId(stackResponse, hostGroup));
 

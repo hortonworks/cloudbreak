@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.scaling;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -38,7 +39,7 @@ public class ScalingUtil {
     }
 
     public static void checkStackScaled(StackEndpoint stackEndpoint, String stackId, int expectedNodeCount) {
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
         Assert.assertEquals(expectedNodeCount, getNodeCount(stackResponse),
@@ -47,7 +48,7 @@ public class ScalingUtil {
 
     public static void checkClusterScaled(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassword,
             int expectedNodeCount, IntegrationTestContext itContext) {
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
@@ -62,7 +63,7 @@ public class ScalingUtil {
     }
 
     public static int getNodeCountStack(StackEndpoint stackEndpoint, String stackId) {
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
         return getNodeCount(stackResponse);
     }
 
@@ -91,7 +92,7 @@ public class ScalingUtil {
     public static void putInstanceCountToContext(IntegrationTestContext itContext, String stackId) {
         List<Map<String, Integer>> tmpInstanceCount = new ArrayList<>();
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         if (itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class) != null) {
             tmpInstanceCount = itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class);

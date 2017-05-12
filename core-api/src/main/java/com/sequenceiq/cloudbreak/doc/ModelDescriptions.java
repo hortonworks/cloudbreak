@@ -109,6 +109,10 @@ public class ModelDescriptions {
         public static final String NETWORK = "stack related network";
         public static final String FLEX_ID = "id of the related flex subscription";
         public static final String FLEX_SUBSCRIPTION = "the related flex subscription";
+        public static final String NODE_COUNT = "node count of the stack";
+        public static final String HARDWARE_INFO_RESPONSE = "hardware information where pairing hostmetadata with instancemetadata";
+        public static final String USAGES = "usage information for a specific stack";
+        public static final String EVENTS = "related events for a cloudbreak stack";
     }
 
     public static class ClusterModelDescription {

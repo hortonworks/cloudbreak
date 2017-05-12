@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
         StackEndpoint stackEndpoint = getCloudbreakClient().stackEndpoint();
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
 

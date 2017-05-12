@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,7 +51,7 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
-        List<InstanceGroupResponse> instanceGroups = stackEndpoint.get(Long.valueOf(stackId)).getInstanceGroups();
+        List<InstanceGroupResponse> instanceGroups = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>()).getInstanceGroups();
         String[] files = lookingFor.split(",");
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));
         List<Future> futures = new ArrayList<>(publicIps.size() * files.length);

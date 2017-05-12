@@ -67,19 +67,19 @@ public interface StackEndpoint {
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getPrivateStack")
-    StackResponse getPrivate(@PathParam(value = "name") String name);
+    StackResponse getPrivate(@PathParam(value = "name") String name, @QueryParam("entry") Set<String> entries);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getPublicStack")
-    StackResponse getPublic(@PathParam(value = "name") String name);
+    StackResponse getPublic(@PathParam(value = "name") String name, @QueryParam("entry") Set<String> entries);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStack")
-    StackResponse get(@PathParam(value = "id") Long id);
+    StackResponse get(@PathParam(value = "id") Long id, @QueryParam("entry") Set<String> entries);
 
     @DELETE
     @Path("account/{name}")

@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageNameUtil;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -151,6 +152,9 @@ public class StackService {
     @Inject
     private SecurityConfigRepository securityConfigRepository;
 
+    @Inject
+    private Decorator<StackResponse> stackResponseDecorator;
+
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
 
@@ -181,9 +185,11 @@ public class StackService {
         return stackRepository.findForUser(owner);
     }
 
-    public StackResponse getJsonById(Long id) {
+    public StackResponse getJsonById(Long id, Set<String> entry) {
         Stack stack = get(id);
-        return conversionService.convert(stack, StackResponse.class);
+        StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, entry, stack);
+        return stackResponse;
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
@@ -226,14 +232,6 @@ public class StackService {
         return retStack;
     }
 
-    public StackResponse getByIdJson(Long id) {
-        Stack retStack = stackRepository.findOneWithLists(id);
-        if (retStack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
-        }
-        return conversionService.convert(retStack, StackResponse.class);
-    }
-
     public StackResponse get(String ambariAddress) {
         Stack stack = stackRepository.findByAmbari(ambariAddress);
         if (stack == null) {
@@ -250,29 +248,25 @@ public class StackService {
         return stack;
     }
 
-    public StackResponse getPrivateStackJson(String name, CbUser cbUser) {
-        Stack stack = getPrivateStack(name, cbUser);
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", name));
-        }
-        return conversionService.convert(stack, StackResponse.class);
-    }
-
-    public StackResponse getPrivateStackJsonByName(String name, CbUser cbUser) {
+    public StackResponse getPrivateStackJsonByName(String name, CbUser cbUser, Set<String> entries) {
         Stack stack = stackRepository.findByNameInUser(name, cbUser.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        return conversionService.convert(stack, StackResponse.class);
+        StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, entries, stack);
+        return stackResponse;
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public StackResponse getPublicStackJsonByName(String name, CbUser cbUser) {
+    public StackResponse getPublicStackJsonByName(String name, CbUser cbUser, Set<String> entries) {
         Stack stack = stackRepository.findOneByName(name, cbUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        return conversionService.convert(stack, StackResponse.class);
+        StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, entries, stack);
+        return stackResponse;
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")

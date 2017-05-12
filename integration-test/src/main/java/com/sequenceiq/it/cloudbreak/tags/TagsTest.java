@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.tags;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +36,7 @@ public class TagsTest extends AbstractCloudbreakIntegrationTest {
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         Map<String, String> userDefinedTagsStack = TagsUtil.checkTagsStack(stackResponse);
         Map<String, String> tagsToCheckMap = TagsUtil.getTagsToCheck(tags);
