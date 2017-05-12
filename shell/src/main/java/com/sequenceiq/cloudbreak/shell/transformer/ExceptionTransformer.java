@@ -13,8 +13,7 @@ public class ExceptionTransformer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionTransformer.class);
 
     public RuntimeException transformToRuntimeException(Exception e) {
-        LOGGER.error(e.getMessage(), e);
-
+        LOGGER.error("Transform exception: {}", e.getMessage(), e);
         if (e instanceof ClientErrorException) {
             if (((ClientErrorException) e).getResponse() != null && ((ClientErrorException) e).getResponse().hasEntity()) {
                 String response = ((ClientErrorException) e).getResponse().readEntity(String.class);
