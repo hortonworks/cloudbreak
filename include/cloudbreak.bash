@@ -30,7 +30,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_POSTFIX latest
     env-import DOCKER_TAG_UAA 3.6.5
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
-    env-import DOCKER_TAG_CERT_TOOL 0.0.3
+    env-import DOCKER_TAG_CERT_TOOL 0.2.0
     env-import DOCKER_TAG_PERISCOPE 1.15.0-dev.241
     env-import DOCKER_TAG_CLOUDBREAK 1.15.0-dev.241
     env-import DOCKER_TAG_ULUWATU 1.15.0-dev.241
@@ -153,7 +153,7 @@ cloudbreak-conf-cert() {
     declare desc="Declares cloudbreak cert config"
     env-import CBD_CERT_ROOT_PATH "${PWD}/certs"
 
-    env-import CBD_TRAEFIK_TLS "/certs/client-ca.pem,/certs/client-ca-key.pem"
+    env-import CBD_TRAEFIK_TLS "/certs/client.pem,/certs/client-key.pem"
 }
 
 cloudbreak-delete-dbs() {
@@ -377,10 +377,16 @@ cloudbreak-generate-cert() {
       docker run \
           --label cbreak.sidekick=true \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/cert-tool:${DOCKER_TAG_CERT_TOOL} -d /certs -o=${PUBLIC_IP} &> /dev/null
+          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs ca generate -o=local &> /dev/null
+      docker run \
+          --label cbreak.sidekick=true \
+          -v ${CBD_CERT_ROOT_PATH}:/certs \
+          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs client generate --common-name=${PUBLIC_IP} -o=local &> /dev/null
       owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)
       [[ "$owner" != "$(whoami)" ]] && sudo chown -R $(whoami):$(id -gn) ${CBD_CERT_ROOT_PATH}
+      mv "${CBD_CERT_ROOT_PATH}/cert.pem" "${CBD_CERT_ROOT_PATH}/client.pem"
       cat "${CBD_CERT_ROOT_PATH}/ca.pem" >> "${CBD_CERT_ROOT_PATH}/client.pem"
+      mv "${CBD_CERT_ROOT_PATH}/key.pem" "${CBD_CERT_ROOT_PATH}/client-key.pem"
       mv "${CBD_CERT_ROOT_PATH}/ca.pem" "${CBD_CERT_ROOT_PATH}/client-ca.pem"
       mv "${CBD_CERT_ROOT_PATH}/ca-key.pem" "${CBD_CERT_ROOT_PATH}/client-ca-key.pem"
       debug "Certificates successfully generated."
