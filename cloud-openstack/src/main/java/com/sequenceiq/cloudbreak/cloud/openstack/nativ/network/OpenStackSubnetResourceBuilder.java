@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
-import org.openstack4j.model.compute.ActionResponse;
+import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.network.IPVersionType;
 import org.openstack4j.model.network.Subnet;
 import org.springframework.stereotype.Service;

@@ -191,7 +191,7 @@ public class TagsUtil {
 
     protected static void checkTagsOpenstack(String endpoint, String userName, String password, String tenantName, List<String> instanceIdList,
             Map<String, String> tagsToCheckMap) {
-        OSClient os = OSFactory.builder()
+        OSClient os = OSFactory.builderV2()
                 .endpoint(endpoint)
                 .credentials(userName, password)
                 .tenantName(tenantName)

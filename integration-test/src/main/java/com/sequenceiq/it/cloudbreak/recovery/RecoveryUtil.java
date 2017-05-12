@@ -74,7 +74,7 @@ public class RecoveryUtil {
     }
 
     public static void deleteOpenstackInstance(String endpoint, String userName, String password, String tenantName, String instanceId) {
-        OSClient os = OSFactory.builder()
+        OSClient os = OSFactory.builderV2()
                 .endpoint(endpoint)
                 .credentials(userName, password)
                 .tenantName(tenantName)
