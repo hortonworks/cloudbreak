@@ -30,15 +30,12 @@ public class HostGroupToJsonConverter extends AbstractConversionServiceAwareConv
         return hostGroupBase;
     }
 
-    private Set<HostMetadataResponse> getHostMetadata(final Set<HostMetadata> hostMetadata) {
-        return hostMetadata.stream().map(metadata -> {
-            HostMetadataResponse hostMetadataBase = new HostMetadataResponse();
-            hostMetadataBase.setId(metadata.getId());
-            hostMetadataBase.setGroupName(metadata.getHostGroup().getName());
-            hostMetadataBase.setName(metadata.getHostName());
-            hostMetadataBase.setState(metadata.getHostMetadataState().name());
-            return hostMetadataBase;
-        }).collect(Collectors.toSet());
+    private Set<HostMetadataResponse> getHostMetadata(final Set<HostMetadata> hostMetadataCollection) {
+        Set<HostMetadataResponse> hostMetadataResponses = new HashSet<>();
+        for (HostMetadata hostMetadata : hostMetadataCollection) {
+            hostMetadataResponses.add(getConversionService().convert(hostMetadata, HostMetadataResponse.class));
+        }
+        return hostMetadataResponses;
     }
 
     private Set<Long> getRecipeIds(Set<Recipe> recipes) {

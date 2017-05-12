@@ -105,24 +105,24 @@ public class StackController implements StackEndpoint {
     }
 
     @Override
-    public StackResponse get(Long id) {
+    public StackResponse get(Long id, Set<String> entries) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        return stackService.getJsonById(id);
+        return stackService.getJsonById(id, entries);
     }
 
     @Override
-    public StackResponse getPrivate(String name) {
+    public StackResponse getPrivate(String name, Set<String> entries) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        return stackService.getPrivateStackJsonByName(name, user);
+        return stackService.getPrivateStackJsonByName(name, user, entries);
     }
 
     @Override
-    public StackResponse getPublic(String name) {
+    public StackResponse getPublic(String name, Set<String> entries) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        return stackService.getPublicStackJsonByName(name, user);
+        return stackService.getPublicStackJsonByName(name, user, entries);
     }
 
     @Override

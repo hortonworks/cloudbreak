@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.scaling;
 
+import java.util.HashSet;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
@@ -47,7 +49,7 @@ public class StackScalingTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         // THEN
         ScalingUtil.checkStackScaled(stackEndpoint, stackId, expectedNodeCount);
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         itContext.putContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, ScalingUtil.getNodeCountByHostgroup(stackResponse));
     }

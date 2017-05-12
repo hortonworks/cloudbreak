@@ -2,6 +2,12 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
+## [v1.15.0]
+
+### Changed
+
+- ability to query more information about the stack by queryparameters
+
 ## [v1.14.0]
 
 ### Changed

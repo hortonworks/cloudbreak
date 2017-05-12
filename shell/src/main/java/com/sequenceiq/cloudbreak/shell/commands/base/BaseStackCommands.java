@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -164,7 +165,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                     return "Stack termination started with id: " + id;
                 }
             } else if (name != null) {
-                StackResponse response = shellContext.cloudbreakClient().stackEndpoint().getPublic(name);
+                StackResponse response = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
                 shellContext.cloudbreakClient().stackEndpoint().deletePublic(name, false, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
 
@@ -197,7 +198,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String select(Long id, String name) {
         try {
             if (id != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id);
+                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
                 if (stack != null) {
                     shellContext.addStack(id.toString(), stack.getName());
                     shellContext.setCredential(stack.getCredentialId().toString());
@@ -213,7 +214,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 }
 
             } else if (name != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name);
+                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
                 if (stack != null) {
                     Long stackId = stack.getId();
                     shellContext.addStack(stackId.toString(), name);
@@ -371,12 +372,12 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String stop(Long id, String name) {
         try {
             if (id != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id);
+                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
                 if (stack != null) {
                     return stop(stack);
                 }
             } else if (name != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name);
+                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
                 if (stack != null) {
                     return stop(stack);
                 }
@@ -410,12 +411,12 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String start(Long id, String name) {
         try {
             if (id != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id);
+                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
                 if (stack != null) {
                     return start(stack);
                 }
             } else if (name != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name);
+                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
                 if (stack != null) {
                     return start(stack);
                 }
@@ -554,9 +555,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     private StackResponse getStackResponse(String name, Long id) {
         if (name != null) {
-            return shellContext.cloudbreakClient().stackEndpoint().getPublic(name);
+            return shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
         } else if (id != null) {
-            return shellContext.cloudbreakClient().stackEndpoint().get(id);
+            return shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
         }
         return null;
     }

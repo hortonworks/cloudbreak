@@ -28,13 +28,13 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -51,6 +51,9 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private HostMetadataRepository hostMetadataRepository;
 
     @Override
     public StackResponse convert(Stack source) {
@@ -105,18 +108,22 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
         stackJson.setCreated(source.getCreated());
         stackJson.setGatewayPort(source.getGatewayPort());
-        List<Resource> resourcesByType = source.getResourcesByType(ResourceType.S3_ACCESS_ROLE_ARN);
-        Optional<Resource> accessRoleArnOptional = resourcesByType.stream().findFirst();
-        if (accessRoleArnOptional.isPresent()) {
-            String s3AccessRoleArn = accessRoleArnOptional.get().getResourceName();
-            stackJson.setS3AccessRoleArn(s3AccessRoleArn);
-        }
+        addNodeCount(source, stackJson);
         putSubnetIdIntoResponse(source, stackJson);
         putVpcIdIntoResponse(source, stackJson);
+        putS3RoleIntoResponse(source, stackJson);
         convertComponentConfig(stackJson, source);
         convertTags(stackJson, source.getTags());
         addFlexSubscription(stackJson, source);
         return stackJson;
+    }
+
+    private void addNodeCount(Stack source, StackResponse stackJson) {
+        int nodeCount = 0;
+        for (InstanceGroup instanceGroup : source.getInstanceGroups()) {
+            nodeCount += instanceGroup.getNodeCount();
+        }
+        stackJson.setNodeCount(nodeCount);
     }
 
     private void putSubnetIdIntoResponse(Stack source, StackResponse stackJson) {
@@ -125,6 +132,15 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         if (awsSubnet.isPresent()) {
             String subnetId = awsSubnet.get().getResourceName();
             stackJson.getParameters().put(ResourceType.AWS_SUBNET.name(), subnetId);
+        }
+    }
+
+    private void putS3RoleIntoResponse(Stack source, StackResponse stackResponse) {
+        List<Resource> resourcesByType = source.getResourcesByType(ResourceType.S3_ACCESS_ROLE_ARN);
+        Optional<Resource> accessRoleArnOptional = resourcesByType.stream().findFirst();
+        if (accessRoleArnOptional.isPresent()) {
+            String s3AccessRoleArn = accessRoleArnOptional.get().getResourceName();
+            stackResponse.getParameters().put(ResourceType.AWS_S3_ROLE.name(), s3AccessRoleArn);
         }
     }
 
@@ -170,11 +186,6 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             CloudbreakDetails cloudbreakDetails = componentConfigProvider.getCloudbreakDetails(source.getId());
             if (cloudbreakDetails != null) {
                 stackJson.setCloudbreakDetails(getConversionService().convert(cloudbreakDetails, CloudbreakDetailsJson.class));
-            }
-
-            StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(source.getId());
-            if (stackTemplate != null) {
-                stackJson.setStackTemplate(stackTemplate.getTemplate());
             }
         } catch (Exception e) {
             LOGGER.error("Failed to convert dynamic component.", e);

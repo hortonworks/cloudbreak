@@ -6,6 +6,7 @@ public enum ResourceType {
     AWS_RESERVED_IP,
     S3_ACCESS_ROLE_ARN,
     AWS_SUBNET,
+    AWS_S3_ROLE,
     AWS_VPC,
 
     // OPENSTACK

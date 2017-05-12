@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.service.security;
 
+import java.util.HashSet;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -35,7 +37,7 @@ public class ClusterSecurityService {
     private boolean hasAccess(String userId, String account, String ambariAddress, Long stackId) {
         StackResponse stack;
         if (stackId != null) {
-            stack = cloudbreakClient.stackEndpoint().get(stackId);
+            stack = cloudbreakClient.stackEndpoint().get(stackId, new HashSet<>());
         } else {
             AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
             ambariAddressJson.setAmbariAddress(ambariAddress);

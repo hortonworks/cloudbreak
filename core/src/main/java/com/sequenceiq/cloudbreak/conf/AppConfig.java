@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
+import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -98,6 +99,9 @@ public class AppConfig implements ResourceLoaderAware {
     private List<FileSystemConfigurator> fileSystemConfigurators;
 
     @Inject
+    private List<ResponseProvider> responseProviders;
+
+    @Inject
     private ConfigurableEnvironment environment;
 
     @Inject
@@ -136,6 +140,15 @@ public class AppConfig implements ResourceLoaderAware {
         for (ContainerOrchestrator containerOrchestrator : containerOrchestrators) {
             containerOrchestrator.init(simpleParallelContainerRunnerExecutor(), clusterDeletionBasedExitCriteria());
             map.put(containerOrchestrator.name(), containerOrchestrator);
+        }
+        return map;
+    }
+
+    @Bean
+    public Map<String, ResponseProvider> responseProviders() {
+        Map<String, ResponseProvider> map = new HashMap<>();
+        for (ResponseProvider responseProvider : responseProviders) {
+            map.put(responseProvider.type(), responseProvider);
         }
         return map;
     }

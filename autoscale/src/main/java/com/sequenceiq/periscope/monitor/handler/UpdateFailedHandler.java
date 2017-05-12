@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -47,7 +48,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         } else if (RETRY_THRESHOLD - 1 == failed) {
             try {
                 CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-                StackResponse stackResponse = cloudbreakClient.stackEndpoint().get(cluster.getStackId());
+                StackResponse stackResponse = cloudbreakClient.stackEndpoint().get(cluster.getStackId(), new HashSet<>());
                 String stackStatus = stackResponse.getStatus().name();
                 if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
                     clusterService.removeById(id);

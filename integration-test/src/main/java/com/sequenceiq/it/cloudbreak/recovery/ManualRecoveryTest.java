@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.recovery;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
         StackEndpoint stackEndpoint = getCloudbreakClient().stackEndpoint();
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId));
+        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         RecoveryUtil.deleteInstance(cloudProviderParams, RecoveryUtil.getInstanceId(stackResponse, hostGroup));
 
