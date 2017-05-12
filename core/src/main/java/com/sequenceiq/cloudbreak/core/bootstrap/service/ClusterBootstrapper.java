@@ -126,10 +126,9 @@ public class ClusterBootstrapper {
         }
         try {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            Set<InstanceMetaData> gatewayInstances = stack.getGatewayInstanceGroup().getInstanceMetaData();
             List<GatewayConfig> allGatewayConfig = new ArrayList<>();
             Boolean enableKnox = stack.getCluster().getGateway().getEnableGateway();
-            for (InstanceMetaData gateway : gatewayInstances) {
+            for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
                 allGatewayConfig.add(gatewayConfig);
                 PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
@@ -249,16 +248,11 @@ public class ClusterBootstrapper {
     private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes)
             throws CloudbreakException, CloudbreakOrchestratorException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-
-        Set<InstanceMetaData> gatewayInstances = stack.getGatewayInstanceGroup().getInstanceMetaData();
         Boolean enableKnox = stack.getCluster().getGateway().getEnableGateway();
-        for (InstanceMetaData gateway : gatewayInstances) {
+        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
-                    hostBootstrapApiCheckerTask,
-                    new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator),
-                    POLL_INTERVAL,
-                    MAX_POLLING_ATTEMPTS);
+                    hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
         }
 

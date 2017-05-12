@@ -119,8 +119,6 @@ public class AmbariClusterConnector {
 
     private static final String KEY_TYPE = "PERSISTED";
 
-    private static final String PRINCIPAL = "/admin";
-
     private static final String FQDN = "fqdn";
 
     private static final String ADMIN = "admin";
@@ -756,7 +754,7 @@ public class AmbariClusterConnector {
             if (cluster.isSecure()) {
                 String gatewayHost = cluster.getAmbariIp();
                 if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
-                    Integer propagationPort = stack.getGatewayInstanceGroup().getInstanceMetaData().size() > 1 ? KERBEROS_DB_PROPAGATION_PORT : null;
+                    Integer propagationPort = stack.getGatewayInstanceMetadata().size() > 1 ? KERBEROS_DB_PROPAGATION_PORT : null;
                     gatewayHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
                     String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,

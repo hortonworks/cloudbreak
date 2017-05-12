@@ -203,19 +203,17 @@ public class StackCreationService {
         return stack;
     }
 
-    public Stack setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
+    public void setupTls(StackContext context, GetSSHFingerprintsResult sshFingerprints) throws CloudbreakException {
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
         Stack stack = context.getStack();
-        InstanceGroup gatewayInstanceGroup = stack.getGatewayInstanceGroup();
-        for (InstanceMetaData gwInstance : gatewayInstanceGroup.getInstanceMetaData()) {
+        for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
             tlsSetupService.setupTls(stack, gwInstance, stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
         }
-        return stackService.getById(stack.getId());
     }
 
     public void removeTemporarySShKey(StackContext context, Set<String> sshFingerprints) throws CloudbreakException {
         Stack stack = context.getStack();
-        for (InstanceMetaData gateway : stack.getGatewayInstanceGroup().getInstanceMetaData()) {
+        for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
             tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
         }

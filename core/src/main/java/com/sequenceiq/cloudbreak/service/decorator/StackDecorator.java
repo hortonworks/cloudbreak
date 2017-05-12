@@ -11,6 +11,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
@@ -173,7 +174,8 @@ public class StackDecorator implements Decorator<Stack> {
     }
 
     private void validate(Stack stack) {
-        if (stack.getGatewayInstanceGroup() == null && !BYOS.equals(stack.cloudPlatform())) {
+        long instanceGroups = stack.getInstanceGroups().stream().filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType())).count();
+        if (instanceGroups == 0 && !BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Gateway instance group not configured");
         }
         int minNodeCount = ConsulUtils.ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();
