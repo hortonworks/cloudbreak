@@ -39,6 +39,7 @@ public class CredentialDefinitionService {
 
     private Definition getDefinition(Platform cloudPlatform) {
         String json = definitionService.getResourceDefinition(cloudPlatform.value(), RESOURCE_TYPE);
+
         try {
             return JsonUtil.readValue(json, Definition.class);
         } catch (IOException e) {

@@ -5,10 +5,11 @@ import java.lang.reflect.Field;
 
 import javax.inject.Inject;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.common.type.CbUserRole;
@@ -17,12 +18,14 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
-@Component
+@Service
+@Lazy
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
     private static final String AUTO_SCALE_SCOPE = "cloudbreak.autoscale";
 
     @Inject
+    @Lazy
     private UserDetailsService userDetailsService;
 
     @Override
