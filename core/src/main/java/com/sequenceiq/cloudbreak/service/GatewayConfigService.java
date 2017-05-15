@@ -40,7 +40,7 @@ public class GatewayConfigService {
 
     public String getPrimaryGatewayIp(Stack stack) {
         InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-        return getGatewayIp(stack, gatewayInstance);
+        return gatewayInstance == null ? null : getGatewayIp(stack, gatewayInstance);
     }
 
     public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
