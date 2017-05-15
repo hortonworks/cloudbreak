@@ -10,6 +10,6 @@ public interface CloudbreakUsagesFacade {
 
     List<CloudbreakUsageJson> getUsagesFor(CbUsageFilterParameters params);
 
-    List<CloudbreakFlexUsageJson> getFlexUsagesFor(CbUsageFilterParameters params);
+    CloudbreakFlexUsageJson getFlexUsagesFor(CbUsageFilterParameters params);
 
 }

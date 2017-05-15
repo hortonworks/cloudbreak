@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.facade;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -13,11 +10,12 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
+import com.sequenceiq.cloudbreak.service.usages.FlexUsageGenerator;
 
 @Service
 @Transactional
@@ -30,6 +28,9 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
+    @Inject
+    private FlexUsageGenerator flexUsageGenerator;
+
     @Override
     public List<CloudbreakUsageJson> getUsagesFor(CbUsageFilterParameters params) {
         List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(params);
@@ -39,25 +40,9 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     }
 
     @Override
-    public List<CloudbreakFlexUsageJson> getFlexUsagesFor(CbUsageFilterParameters params) {
+    public CloudbreakFlexUsageJson getFlexUsagesFor(CbUsageFilterParameters params) {
         List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(params);
-        Map<Long, CloudbreakFlexUsageJson> flexUsageJsonsByStackId = new HashMap<>();
-        for (CloudbreakUsage usage : usages) {
-            Long stackId = usage.getStackId();
-            if (!flexUsageJsonsByStackId.containsKey(stackId)) {
-                CloudbreakFlexUsageJson flexUsageJson = conversionService.convert(usage, CloudbreakFlexUsageJson.class);
-                flexUsageJsonsByStackId.put(stackId, flexUsageJson);
-            } else {
-                CloudbreakFlexUsageJson flexUsageJson = flexUsageJsonsByStackId.get(stackId);
-                Integer actPeak = usage.getPeak() != null ? usage.getPeak() : 0;
-                Integer peak = flexUsageJson.getPeak() != null ? flexUsageJson.getPeak() : 0;
-                int newPeak = peak + actPeak;
-                int instanceNum = flexUsageJson.getInstanceNum() + usage.getInstanceNum();
-                flexUsageJson.setPeak(newPeak);
-                flexUsageJson.setInstanceNum(instanceNum);
-            }
-        }
-        return flexUsageJsonsByStackId.values().stream().collect(Collectors.toList());
+        return flexUsageGenerator.getUsages(usages);
     }
 
 }

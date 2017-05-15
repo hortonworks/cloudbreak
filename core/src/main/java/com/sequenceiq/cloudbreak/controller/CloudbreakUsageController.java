@@ -67,7 +67,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
     }
 
     @Override
-    public List<CloudbreakFlexUsageJson> getDailyFlexUsages() {
+    public CloudbreakFlexUsageJson getDailyFlexUsages() {
         long fromDate = LocalDate.now()
                 .minusDays(1)
                 .atStartOfDay(systemDefault())
@@ -87,7 +87,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
     }
 
     @Override
-    public List<CloudbreakFlexUsageJson> getLatestFlexUsages() {
+    public CloudbreakFlexUsageJson getLatestFlexUsages() {
         long fromDate = LocalDate.now()
                 .atStartOfDay(systemDefault())
                 .toInstant()

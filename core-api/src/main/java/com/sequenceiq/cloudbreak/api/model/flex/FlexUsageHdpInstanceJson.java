@@ -9,7 +9,7 @@ public class FlexUsageHdpInstanceJson extends FlexUsageComponentInstanceJson {
     private String clusterName;
     private String blueprintName;
     private String terminationTime;
-    private String nodeCount;
+    private Integer nodeCount;
 
     public String getParentGuid() {
         return parentGuid;
@@ -43,11 +43,11 @@ public class FlexUsageHdpInstanceJson extends FlexUsageComponentInstanceJson {
         this.terminationTime = terminationTime;
     }
 
-    public String getNodeCount() {
+    public Integer getNodeCount() {
         return nodeCount;
     }
 
-    public void setNodeCount(String nodeCount) {
+    public void setNodeCount(Integer nodeCount) {
         this.nodeCount = nodeCount;
     }
 }
