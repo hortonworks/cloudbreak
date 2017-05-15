@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
-import com.sequenceiq.cloudbreak.api.model.CloudbreakFlexUsageJson;
+import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -67,7 +67,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
     }
 
     @Override
-    public List<CloudbreakFlexUsageJson> getDailyFlexUsages() {
+    public CloudbreakFlexUsageJson getDailyFlexUsages() {
         long fromDate = LocalDate.now()
                 .minusDays(1)
                 .atStartOfDay(systemDefault())
@@ -87,7 +87,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
     }
 
     @Override
-    public List<CloudbreakFlexUsageJson> getLatestFlexUsages() {
+    public CloudbreakFlexUsageJson getLatestFlexUsages() {
         long fromDate = LocalDate.now()
                 .atStartOfDay(systemDefault())
                 .toInstant()
