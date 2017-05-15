@@ -9,7 +9,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.CloudbreakFlexUsageJson;
+import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
