@@ -7,9 +7,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 @Service
 public class AuthenticatedUserService {
@@ -17,7 +17,7 @@ public class AuthenticatedUserService {
     @Inject
     private UserDetailsService userDetailsService;
 
-    public CbUser getCbUser() {
+    public IdentityUser getCbUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
             OAuth2Authentication oauth = (OAuth2Authentication) authentication;

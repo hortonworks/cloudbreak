@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
@@ -32,11 +32,11 @@ public class RdsConfigService {
     @Inject
     private ClusterRepository clusterRepository;
 
-    public Set<RDSConfig> retrievePrivateRdsConfigs(CbUser user) {
+    public Set<RDSConfig> retrievePrivateRdsConfigs(IdentityUser user) {
         return rdsConfigRepository.findForUser(user.getUserId());
     }
 
-    public RDSConfig getPrivateRdsConfig(String name, CbUser user) {
+    public RDSConfig getPrivateRdsConfig(String name, IdentityUser user) {
         RDSConfig rdsConfig = rdsConfigRepository.findByNameInUser(name, user.getUserId());
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
@@ -44,7 +44,7 @@ public class RdsConfigService {
         return rdsConfig;
     }
 
-    public RDSConfig getPublicRdsConfig(String name, CbUser user) {
+    public RDSConfig getPublicRdsConfig(String name, IdentityUser user) {
         RDSConfig rdsConfig = rdsConfigRepository.findOneByName(name, user.getAccount());
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
@@ -52,8 +52,8 @@ public class RdsConfigService {
         return rdsConfig;
     }
 
-    public Set<RDSConfig> retrieveAccountRdsConfigs(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<RDSConfig> retrieveAccountRdsConfigs(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return rdsConfigRepository.findAllInAccount(user.getAccount());
         } else {
             return rdsConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
@@ -69,7 +69,7 @@ public class RdsConfigService {
         return rdsConfig;
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         RDSConfig rdsConfig = rdsConfigRepository.findByIdInAccount(id, user.getAccount());
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", id));
@@ -77,7 +77,7 @@ public class RdsConfigService {
         delete(rdsConfig, user);
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         RDSConfig rdsConfig = rdsConfigRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
@@ -85,16 +85,16 @@ public class RdsConfigService {
         delete(rdsConfig, user);
     }
 
-    public RDSConfig create(CbUser user, RDSConfig rdsConfig) {
+    public RDSConfig create(IdentityUser user, RDSConfig rdsConfig) {
         LOGGER.debug("Creating RDS configuration: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         rdsConfig.setOwner(user.getUserId());
         rdsConfig.setAccount(user.getAccount());
         return rdsConfigRepository.save(rdsConfig);
     }
 
-    private void delete(RDSConfig rdsConfig, CbUser user) {
+    private void delete(RDSConfig rdsConfig, IdentityUser user) {
         if (clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()).isEmpty()) {
-            if (!user.getUserId().equals(rdsConfig.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(rdsConfig.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("RDS configurations can only be deleted by account admins or owners.");
             }
             if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {

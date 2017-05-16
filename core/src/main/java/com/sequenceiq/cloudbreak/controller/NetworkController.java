@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkCreator;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -35,19 +35,19 @@ public class NetworkController implements NetworkEndpoint {
 
     @Override
     public NetworkResponse postPrivate(NetworkRequest networkRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         return createNetwork(user, networkRequest, false);
     }
 
     @Override
     public NetworkResponse postPublic(NetworkRequest networkRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         return createNetwork(user, networkRequest, true);
     }
 
     @Override
     public Set<NetworkResponse> getPrivates() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         networkCreator.createDefaultNetworks(user);
         Set<Network> networks = networkService.retrievePrivateNetworks(user);
         return convert(networks);
@@ -55,7 +55,7 @@ public class NetworkController implements NetworkEndpoint {
 
     @Override
     public Set<NetworkResponse> getPublics() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         networkCreator.createDefaultNetworks(user);
         Set<Network> networks = networkService.retrieveAccountNetworks(user);
         return convert(networks);
@@ -69,37 +69,37 @@ public class NetworkController implements NetworkEndpoint {
 
     @Override
     public NetworkResponse getPrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         Network network = networkService.getPrivateNetwork(name, user);
         return convert(network);
     }
 
     @Override
     public NetworkResponse getPublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         Network network = networkService.getPublicNetwork(name, user);
         return convert(network);
     }
 
     @Override
     public void delete(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         networkService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         networkService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(@PathVariable String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         networkService.delete(name, user);
     }
 
-    private NetworkResponse createNetwork(CbUser user, NetworkRequest networkRequest, boolean publicInAccount) {
+    private NetworkResponse createNetwork(IdentityUser user, NetworkRequest networkRequest, boolean publicInAccount) {
         Network network = convert(networkRequest, publicInAccount);
         network = networkService.create(user, network);
         return conversionService.convert(network, NetworkResponse.class);

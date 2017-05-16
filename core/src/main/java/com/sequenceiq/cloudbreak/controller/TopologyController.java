@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TopologyRequest;
 import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Topology;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
@@ -35,7 +35,7 @@ public class TopologyController implements TopologyEndpoint {
 
     @Override
     public Set<TopologyResponse> getPublics() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<Topology> stacks = topologyRepository.findAllInAccount(user.getAccount());
 
@@ -56,7 +56,7 @@ public class TopologyController implements TopologyEndpoint {
 
     @Override
     public TopologyResponse postPublic(TopologyRequest topologyRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Topology topology = conversionService.convert(topologyRequest, Topology.class);
         topology = topologyService.create(user, topology);
@@ -65,14 +65,14 @@ public class TopologyController implements TopologyEndpoint {
 
     @Override
     public void delete(Long id, Boolean forced) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         topologyService.delete(id, user);
     }
 
     @Override
     public TopologyResponse get(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Topology topology = topologyService.get(id);
         return convert(topology);

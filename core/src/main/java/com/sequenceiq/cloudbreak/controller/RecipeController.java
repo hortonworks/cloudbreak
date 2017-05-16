@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
@@ -31,21 +31,21 @@ public class RecipeController implements RecipeEndpoint {
 
     @Override
     public RecipeResponse postPublic(RecipeRequest recipeRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRecipe(user, recipeRequest, true);
     }
 
     @Override
     public RecipeResponse postPrivate(RecipeRequest recipeRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRecipe(user, recipeRequest, false);
     }
 
     @Override
     public Set<RecipeResponse> getPrivates() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<Recipe> recipes = recipeService.retrievePrivateRecipes(user);
         return toJsonSet(recipes);
@@ -53,7 +53,7 @@ public class RecipeController implements RecipeEndpoint {
 
     @Override
     public Set<RecipeResponse> getPublics() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<Recipe> recipes = recipeService.retrieveAccountRecipes(user);
         return toJsonSet(recipes);
@@ -61,14 +61,14 @@ public class RecipeController implements RecipeEndpoint {
 
     @Override
     public RecipeResponse getPrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         Recipe recipe = recipeService.getPrivateRecipe(name, user);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 
     @Override
     public RecipeResponse getPublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Recipe recipe = recipeService.getPublicRecipe(name, user);
         return conversionService.convert(recipe, RecipeResponse.class);
@@ -76,7 +76,7 @@ public class RecipeController implements RecipeEndpoint {
 
     @Override
     public RecipeResponse get(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Recipe recipe = recipeService.get(id);
         return conversionService.convert(recipe, RecipeResponse.class);
@@ -84,26 +84,26 @@ public class RecipeController implements RecipeEndpoint {
 
     @Override
     public void delete(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         recipeService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         recipeService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         recipeService.delete(name, user);
     }
 
-    private RecipeResponse createRecipe(CbUser user, RecipeRequest recipeRequest, boolean publicInAccount) {
+    private RecipeResponse createRecipe(IdentityUser user, RecipeRequest recipeRequest, boolean publicInAccount) {
         Recipe recipe = conversionService.convert(recipeRequest, Recipe.class);
         recipe.setPublicInAccount(publicInAccount);
         recipe = recipeService.create(user, recipe);

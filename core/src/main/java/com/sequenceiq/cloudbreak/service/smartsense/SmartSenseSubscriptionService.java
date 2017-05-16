@@ -11,9 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -45,10 +45,10 @@ public class SmartSenseSubscriptionService {
         return repository.save(subscription);
     }
 
-    public void delete(SmartSenseSubscription subscription, CbUser cbUser) {
+    public void delete(SmartSenseSubscription subscription, IdentityUser identityUser) {
         if (subscription != null) {
-            boolean owner = cbUser.getUserId().equals(subscription.getOwner());
-            boolean adminInTheAccount = cbUser.getRoles().contains(CbUserRole.ADMIN) && subscription.getAccount().equals(cbUser.getAccount());
+            boolean owner = identityUser.getUserId().equals(subscription.getOwner());
+            boolean adminInTheAccount = identityUser.getRoles().contains(IdentityUserRole.ADMIN) && subscription.getAccount().equals(identityUser.getAccount());
             if (owner || adminInTheAccount) {
                 try {
                     repository.delete(subscription);
@@ -65,9 +65,9 @@ public class SmartSenseSubscriptionService {
         }
     }
 
-    public void delete(Long id, CbUser cbUser) {
+    public void delete(Long id, IdentityUser identityUser) {
         SmartSenseSubscription subscription = repository.findOneById(id);
-        delete(subscription, cbUser);
+        delete(subscription, identityUser);
     }
 
     public SmartSenseSubscription findById(Long id) {

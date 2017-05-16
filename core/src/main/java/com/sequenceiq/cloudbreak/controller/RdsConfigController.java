@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -38,21 +38,21 @@ public class RdsConfigController implements RdsConfigEndpoint {
 
     @Override
     public RDSConfigResponse postPrivate(RDSConfigRequest rdsConfigRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRdsConfig(user, rdsConfigRequest, false);
     }
 
     @Override
     public RDSConfigResponse postPublic(RDSConfigRequest rdsConfigRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createRdsConfig(user, rdsConfigRequest, true);
     }
 
     @Override
     public Set<RDSConfigResponse> getPrivates() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<RDSConfig> rdsConfigs = rdsConfigService.retrievePrivateRdsConfigs(user);
         return toJsonList(rdsConfigs);
@@ -60,7 +60,7 @@ public class RdsConfigController implements RdsConfigEndpoint {
 
     @Override
     public RDSConfigResponse getPrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         RDSConfig rdsConfig = rdsConfigService.getPrivateRdsConfig(name, user);
         return conversionService.convert(rdsConfig, RDSConfigResponse.class);
@@ -68,14 +68,14 @@ public class RdsConfigController implements RdsConfigEndpoint {
 
     @Override
     public RDSConfigResponse getPublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         RDSConfig rdsConfig = rdsConfigService.getPublicRdsConfig(name, user);
         return conversionService.convert(rdsConfig, RDSConfigResponse.class);
     }
 
     @Override
     public Set<RDSConfigResponse> getPublics() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<RDSConfig> rdsConfigs = rdsConfigService.retrieveAccountRdsConfigs(user);
         return toJsonList(rdsConfigs);
@@ -83,7 +83,7 @@ public class RdsConfigController implements RdsConfigEndpoint {
 
     @Override
     public RDSConfigResponse get(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         RDSConfig rdsConfig = rdsConfigService.get(id);
         return conversionService.convert(rdsConfig, RDSConfigResponse.class);
@@ -91,26 +91,26 @@ public class RdsConfigController implements RdsConfigEndpoint {
 
     @Override
     public void delete(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         rdsConfigService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         rdsConfigService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         rdsConfigService.delete(name, user);
     }
 
-    private RDSConfigResponse createRdsConfig(CbUser user, RDSConfigRequest rdsConfigJson, boolean publicInAccount) {
+    private RDSConfigResponse createRdsConfig(IdentityUser user, RDSConfigRequest rdsConfigJson, boolean publicInAccount) {
         if (rdsConfigJson.isValidated()) {
             rdsConnectionValidator.validateRdsConnection(rdsConfigJson.getConnectionURL(), rdsConfigJson.getConnectionUserName(),
                     rdsConfigJson.getConnectionPassword());

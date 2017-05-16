@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.service.securitygroup.DefaultSecurityGroupCreator;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
@@ -33,19 +33,19 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
 
     @Override
     public SecurityGroupResponse postPrivate(SecurityGroupRequest securityGroupRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         return createSecurityGroup(user, securityGroupRequest, false);
     }
 
     @Override
     public SecurityGroupResponse postPublic(SecurityGroupRequest securityGroupRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         return createSecurityGroup(user, securityGroupRequest, true);
     }
 
     @Override
     public Set<SecurityGroupResponse> getPrivates() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         Set<SecurityGroup> securityGroups = securityGroupService.retrievePrivateSecurityGroups(user);
         return convert(securityGroups);
@@ -53,7 +53,7 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
 
     @Override
     public Set<SecurityGroupResponse> getPublics() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         Set<SecurityGroup> securityGroups = securityGroupService.retrieveAccountSecurityGroups(user);
         return convert(securityGroups);
@@ -67,37 +67,37 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
 
     @Override
     public SecurityGroupResponse getPrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         SecurityGroup securityGroup = securityGroupService.getPrivateSecurityGroup(name, user);
         return convert(securityGroup);
     }
 
     @Override
     public SecurityGroupResponse getPublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         SecurityGroup securityGroup = securityGroupService.getPublicSecurityGroup(name, user);
         return convert(securityGroup);
     }
 
     @Override
     public void delete(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         securityGroupService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         securityGroupService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         securityGroupService.delete(name, user);
     }
 
-    private SecurityGroupResponse createSecurityGroup(CbUser user, SecurityGroupRequest securityGroupRequest, boolean publicInAccount) {
+    private SecurityGroupResponse createSecurityGroup(IdentityUser user, SecurityGroupRequest securityGroupRequest, boolean publicInAccount) {
         SecurityGroup securityGroup = convert(securityGroupRequest, publicInAccount);
         securityGroup = securityGroupService.create(user, securityGroup);
         return conversionService.convert(securityGroup, SecurityGroupResponse.class);

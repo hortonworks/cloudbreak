@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -205,7 +205,7 @@ public final class ServiceTestUtils {
         return event;
     }
 
-    public static CbUser cbUser() {
-        return new CbUser("userId", "userName", "account", new ArrayList<>(), "givenName", "familyName", new Date());
+    public static IdentityUser cbUser() {
+        return new IdentityUser("userId", "userName", "account", new ArrayList<>(), "givenName", "familyName", new Date());
     }
 }

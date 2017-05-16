@@ -12,11 +12,11 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -37,12 +37,12 @@ public class TemplateService {
     @Inject
     private StackRepository stackRepository;
 
-    public Set<Template> retrievePrivateTemplates(CbUser user) {
+    public Set<Template> retrievePrivateTemplates(IdentityUser user) {
         return templateRepository.findForUser(user.getUserId());
     }
 
-    public Set<Template> retrieveAccountTemplates(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<Template> retrieveAccountTemplates(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return templateRepository.findAllInAccount(user.getAccount());
         } else {
             return templateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
@@ -60,7 +60,7 @@ public class TemplateService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Template create(CbUser user, Template template) {
+    public Template create(IdentityUser user, Template template) {
         LOGGER.debug("Creating template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Template savedTemplate;
         template.setOwner(user.getUserId());
@@ -73,7 +73,7 @@ public class TemplateService {
         return savedTemplate;
     }
 
-    public void delete(Long templateId, CbUser user) {
+    public void delete(Long templateId, IdentityUser user) {
         Template template = templateRepository.findByIdInAccount(templateId, user.getAccount());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
@@ -81,7 +81,7 @@ public class TemplateService {
         delete(template, user);
     }
 
-    public Template getPrivateTemplate(String name, CbUser user) {
+    public Template getPrivateTemplate(String name, IdentityUser user) {
         Template template = templateRepository.findByNameInUser(name, user.getUserId());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
@@ -91,7 +91,7 @@ public class TemplateService {
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public Template getPublicTemplate(String name, CbUser user) {
+    public Template getPublicTemplate(String name, IdentityUser user) {
         Template template = templateRepository.findOneByName(name, user.getAccount());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, name));
@@ -100,7 +100,7 @@ public class TemplateService {
         }
     }
 
-    public void delete(String templateName, CbUser user) {
+    public void delete(String templateName, IdentityUser user) {
         Template template = templateRepository.findByNameInAccount(templateName, user.getAccount(), user.getUserId());
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateName));
@@ -108,11 +108,11 @@ public class TemplateService {
         delete(template, user);
     }
 
-    private void delete(Template template, CbUser user) {
+    private void delete(Template template, IdentityUser user) {
         LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
         List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
-            if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Templates can be deleted only by account admins or owners.");
             }
             template.setTopology(null);

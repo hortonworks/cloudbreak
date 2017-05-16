@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.converter.JsonToSmartSenseSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToJsonConverter;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
@@ -38,8 +38,8 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public void delete(Long id) {
-        CbUser cbUser = authenticatedUserService.getCbUser();
-        smartSenseSubService.delete(id, cbUser);
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        smartSenseSubService.delete(id, identityUser);
     }
 
     @Override
@@ -65,10 +65,10 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     }
 
     private SmartSenseSubscriptionJson createSmartSenseSubscription(SmartSenseSubscriptionJson json, boolean publicInAccount) {
-        CbUser cbUser = authenticatedUserService.getCbUser();
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
         SmartSenseSubscription subscription = toSmartSenseSubscriptionConverter.convert(json);
-        subscription.setAccount(cbUser.getAccount());
-        subscription.setOwner(cbUser.getUserId());
+        subscription.setAccount(identityUser.getAccount());
+        subscription.setOwner(identityUser.getUserId());
         subscription.setPublicInAccount(publicInAccount);
         subscription = smartSenseSubService.create(subscription);
         return toJsonConverter.convert(subscription);

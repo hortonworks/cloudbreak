@@ -5,19 +5,23 @@ import java.lang.reflect.Field;
 
 import javax.inject.Inject;
 
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.PermissionEvaluator;
 import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.service.NotFoundException;
 
-@Component
+@Service
+@Lazy
 public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
 
     @Inject
+    @Lazy
     private UserDetailsService userDetailsService;
 
     @Override

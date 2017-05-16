@@ -12,11 +12,11 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
@@ -35,7 +35,7 @@ public class SecurityGroupService {
     private InstanceGroupRepository instanceGroupRepository;
 
     @Transactional(Transactional.TxType.NEVER)
-    public SecurityGroup create(CbUser user, SecurityGroup securityGroup) {
+    public SecurityGroup create(IdentityUser user, SecurityGroup securityGroup) {
         LOGGER.info("Creating SecurityGroup: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         securityGroup.setOwner(user.getUserId());
         securityGroup.setAccount(user.getAccount());
@@ -55,7 +55,7 @@ public class SecurityGroupService {
         return securityGroup;
     }
 
-    public SecurityGroup getPrivateSecurityGroup(String name, CbUser user) {
+    public SecurityGroup getPrivateSecurityGroup(String name, IdentityUser user) {
         SecurityGroup securityGroup = groupRepository.findByNameForUser(name, user.getUserId());
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found for user", name));
@@ -63,7 +63,7 @@ public class SecurityGroupService {
         return securityGroup;
     }
 
-    public SecurityGroup getPublicSecurityGroup(String name, CbUser user) {
+    public SecurityGroup getPublicSecurityGroup(String name, IdentityUser user) {
         SecurityGroup securityGroup = groupRepository.findByNameInAccount(name, user.getAccount());
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found in account", name));
@@ -71,7 +71,7 @@ public class SecurityGroupService {
         return securityGroup;
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         LOGGER.info("Deleting SecurityGroup with id: {}", id);
         SecurityGroup securityGroup = get(id);
         if (securityGroup == null) {
@@ -80,7 +80,7 @@ public class SecurityGroupService {
         delete(user, securityGroup);
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         LOGGER.info("Deleting SecurityGroup with name: {}", name);
         SecurityGroup securityGroup = groupRepository.findByNameInAccount(name, user.getAccount());
         if (securityGroup == null) {
@@ -89,21 +89,21 @@ public class SecurityGroupService {
         delete(user, securityGroup);
     }
 
-    public Set<SecurityGroup> retrievePrivateSecurityGroups(CbUser user) {
+    public Set<SecurityGroup> retrievePrivateSecurityGroups(IdentityUser user) {
         return groupRepository.findForUser(user.getUserId());
     }
 
-    public Set<SecurityGroup> retrieveAccountSecurityGroups(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<SecurityGroup> retrieveAccountSecurityGroups(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return groupRepository.findAllInAccount(user.getAccount());
         } else {
             return groupRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
-    private void delete(CbUser user, SecurityGroup securityGroup) {
+    private void delete(IdentityUser user, SecurityGroup securityGroup) {
         if (instanceGroupRepository.findAllBySecurityGroup(securityGroup.getId()).isEmpty()) {
-            if (!user.getUserId().equals(securityGroup.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(securityGroup.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Public SecurityGroups can only be deleted by owners or account admins.");
             } else {
                 if (ResourceStatus.USER_MANAGED.equals(securityGroup.getStatus())) {

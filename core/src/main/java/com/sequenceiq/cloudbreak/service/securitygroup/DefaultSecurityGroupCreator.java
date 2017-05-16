@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
@@ -43,7 +43,7 @@ public class DefaultSecurityGroupCreator {
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
 
-    public void createDefaultSecurityGroups(CbUser user) {
+    public void createDefaultSecurityGroups(IdentityUser user) {
         Set<SecurityGroup> defaultSecurityGroups = groupRepository.findAllDefaultInAccount(user.getAccount());
         List<String> defSecGroupNames = defaultSecurityGroups.stream()
                 .map(g -> g.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(g.getName()) : g.getName())
@@ -56,7 +56,7 @@ public class DefaultSecurityGroupCreator {
         }
     }
 
-    private void createDefaultStrictSecurityGroup(CbUser user, String platform, String securityGroupName) {
+    private void createDefaultStrictSecurityGroup(IdentityUser user, String platform, String securityGroupName) {
         List<Port> strictSecurityGroupPorts = new ArrayList<>();
         strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
         strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
@@ -65,7 +65,7 @@ public class DefaultSecurityGroupCreator {
         addSecurityGroup(user, platform, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
     }
 
-    private void addSecurityGroup(CbUser user, String platform, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
+    private void addSecurityGroup(IdentityUser user, String platform, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);
         SecurityRule sshAndSslRule = createSecurityRule(concatenatePorts(securityGroupPorts), onlySshAndSsl);
         onlySshAndSsl.setSecurityRules(new HashSet<>(Collections.singletonList(sshAndSslRule)));
@@ -81,7 +81,7 @@ public class DefaultSecurityGroupCreator {
         return allPortsOpenDescBuilder.toString();
     }
 
-    private SecurityGroup createSecurityGroup(CbUser user, String platform, String name, String description) {
+    private SecurityGroup createSecurityGroup(IdentityUser user, String platform, String name, String description) {
         SecurityGroup securityGroup = new SecurityGroup();
         securityGroup.setName(name);
         securityGroup.setOwner(user.getUserId());

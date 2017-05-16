@@ -20,12 +20,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AccountPreferencesValidatorTest {
@@ -128,9 +128,9 @@ public class AccountPreferencesValidatorTest {
         Calendar calendar = Calendar.getInstance();
         calendar.roll(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
-        CbUser cbUser = Mockito.mock(CbUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(cbUser);
-        when(cbUser.getCreated()).thenReturn(calendar.getTime());
+        IdentityUser identityUser = Mockito.mock(IdentityUser.class);
+        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(identityUser.getCreated()).thenReturn(calendar.getTime());
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
@@ -140,9 +140,9 @@ public class AccountPreferencesValidatorTest {
         Calendar calendar = Calendar.getInstance();
         calendar.roll(Calendar.MINUTE, -1);
         when(preferences.getUserTimeToLive()).thenReturn(65000L);
-        CbUser cbUser = Mockito.mock(CbUser.class);
-        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(cbUser);
-        when(cbUser.getCreated()).thenReturn(calendar.getTime());
+        IdentityUser identityUser = Mockito.mock(IdentityUser.class);
+        when(userDetailsService.getDetails(anyString(), any(UserFilterField.class))).thenReturn(identityUser);
+        when(identityUser.getCreated()).thenReturn(calendar.getTime());
 
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }

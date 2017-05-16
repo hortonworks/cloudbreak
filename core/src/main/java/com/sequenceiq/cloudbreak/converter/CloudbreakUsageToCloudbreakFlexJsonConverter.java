@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 @Component
 public class CloudbreakUsageToCloudbreakFlexJsonConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsage, CloudbreakFlexUsageJson> {

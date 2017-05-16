@@ -48,7 +48,7 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidato
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Component;
@@ -131,7 +131,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public ClusterResponse post(Long stackId, ClusterRequest request) throws Exception {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         if (request.getEnableSecurity() && request.getKerberos() == null) {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
@@ -176,7 +176,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public ClusterResponse get(Long stackId) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.get(stackId);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, ClusterResponse.class);
@@ -186,7 +186,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public AutoscaleClusterResponse getForAutoscale(Long stackId) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getForAutoscale(stackId);
         AutoscaleClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, AutoscaleClusterResponse.class);
@@ -196,7 +196,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public ClusterResponse getPrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPrivateStack(name, user);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
@@ -206,7 +206,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public ClusterResponse getPublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPublicStack(name, user);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
@@ -216,7 +216,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public void delete(Long stackId) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
         clusterService.delete(user, stackId);
@@ -254,7 +254,7 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public ConfigsResponse getConfigs(Long stackId, ConfigsRequest requests) throws Exception {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return clusterService.retrieveOutputs(stackId, requests.getRequests());
     }
@@ -382,7 +382,7 @@ public class ClusterController implements ClusterEndpoint {
     }
 
     private void recreateCluster(Long stackId, UpdateClusterJson updateJson) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : updateJson.getHostgroups()) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);

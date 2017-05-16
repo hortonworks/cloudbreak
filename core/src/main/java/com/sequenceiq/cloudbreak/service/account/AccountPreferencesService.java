@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.service.account;
 
 
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 public interface AccountPreferencesService {
 
     AccountPreferences save(AccountPreferences accountPreferences);
 
-    AccountPreferences saveOne(CbUser user, AccountPreferences accountPreferences);
+    AccountPreferences saveOne(IdentityUser user, AccountPreferences accountPreferences);
 
     AccountPreferences get(Long id);
 
@@ -16,10 +16,10 @@ public interface AccountPreferencesService {
 
     AccountPreferences getByAccount(String account);
 
-    AccountPreferences getOneById(Long id, CbUser user);
+    AccountPreferences getOneById(Long id, IdentityUser user);
 
-    AccountPreferences getOneByAccount(CbUser user);
+    AccountPreferences getOneByAccount(IdentityUser user);
 
-    void delete(CbUser user);
+    void delete(IdentityUser user);
 
 }

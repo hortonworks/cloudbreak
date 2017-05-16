@@ -31,12 +31,12 @@ import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -108,12 +108,14 @@ public class TestUtil {
         }
     }
 
-    public static CbUser cbAdminUser() {
-        return new CbUser("userid", "testuser", "testaccount", Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "givenname", "familyname", new Date());
+    public static IdentityUser cbAdminUser() {
+        return new IdentityUser("userid", "testuser", "testaccount",
+                Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
-    public static CbUser cbUser() {
-        return new CbUser("userid", "testuser", "testaccount", Collections.singletonList(CbUserRole.USER), "givenname", "familyname", new Date());
+    public static IdentityUser cbUser() {
+        return new IdentityUser("userid", "testuser", "testaccount",
+                Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static Credential awsCredential() {

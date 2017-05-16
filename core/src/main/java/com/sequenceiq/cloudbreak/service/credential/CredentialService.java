@@ -18,10 +18,10 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
@@ -49,12 +49,12 @@ public class CredentialService {
     @Inject
     private NotificationSender notificationSender;
 
-    public Set<Credential> retrievePrivateCredentials(CbUser user) {
+    public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
         return credentialRepository.findForUser(user.getUserId());
     }
 
-    public Set<Credential> retrieveAccountCredentials(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<Credential> retrieveAccountCredentials(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return credentialRepository.findAllInAccount(user.getAccount());
         } else {
             return credentialRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
@@ -72,7 +72,7 @@ public class CredentialService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Map<String, String> interactiveLogin(CbUser user, Credential credential) {
+    public Map<String, String> interactiveLogin(IdentityUser user, Credential credential) {
         LOGGER.debug("Interactive login: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
@@ -80,7 +80,7 @@ public class CredentialService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Credential create(CbUser user, Credential credential) {
+    public Credential create(IdentityUser user, Credential credential) {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
         credential.setAccount(user.getAccount());
@@ -135,7 +135,7 @@ public class CredentialService {
         return savedCredential;
     }
 
-    public Credential getPublicCredential(String name, CbUser user) {
+    public Credential getPublicCredential(String name, IdentityUser user) {
         Credential credential = credentialRepository.findOneByName(name, user.getAccount());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
@@ -144,7 +144,7 @@ public class CredentialService {
         }
     }
 
-    public Credential getPrivateCredential(String name, CbUser user) {
+    public Credential getPrivateCredential(String name, IdentityUser user) {
         Credential credential = credentialRepository.findByNameInUser(name, user.getUserId());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
@@ -154,7 +154,7 @@ public class CredentialService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
@@ -163,7 +163,7 @@ public class CredentialService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
@@ -181,8 +181,8 @@ public class CredentialService {
         }
     }
 
-    private void delete(Credential credential, CbUser user) {
-        if (!user.getUserId().equals(credential.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+    private void delete(Credential credential, IdentityUser user) {
+        if (!user.getUserId().equals(credential.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
             throw new BadRequestException("Credentials can be deleted only by account admins or owners.");
         }
         List<Stack> stacks = stackRepository.findByCredential(credential.getId());

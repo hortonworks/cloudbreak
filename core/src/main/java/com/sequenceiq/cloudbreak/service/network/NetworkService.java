@@ -12,11 +12,11 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -35,7 +35,7 @@ public class NetworkService {
     private StackRepository stackRepository;
 
     @Transactional(Transactional.TxType.NEVER)
-    public Network create(CbUser user, Network network) {
+    public Network create(IdentityUser user, Network network) {
         LOGGER.info("Creating network: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         network.setOwner(user.getUserId());
         network.setAccount(user.getAccount());
@@ -59,7 +59,7 @@ public class NetworkService {
         return network;
     }
 
-    public Network getPrivateNetwork(String name, CbUser user) {
+    public Network getPrivateNetwork(String name, IdentityUser user) {
         Network network = networkRepository.findByNameForUser(name, user.getUserId());
         if (network == null) {
             throw new NotFoundException(String.format("Network '%s' not found", name));
@@ -67,7 +67,7 @@ public class NetworkService {
         return network;
     }
 
-    public Network getPublicNetwork(String name, CbUser user) {
+    public Network getPublicNetwork(String name, IdentityUser user) {
         Network network = networkRepository.findByNameInAccount(name, user.getAccount());
         if (network == null) {
             throw new NotFoundException(String.format("Network '%s' not found", name));
@@ -76,7 +76,7 @@ public class NetworkService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         LOGGER.info("Deleting network with id: {}", id);
         Network network = get(id);
         if (network == null) {
@@ -86,7 +86,7 @@ public class NetworkService {
         delete(user, network);
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         LOGGER.info("Deleting network with name: {}", name);
         Network network = networkRepository.findByNameInAccount(name, user.getAccount());
         if (network == null) {
@@ -96,21 +96,21 @@ public class NetworkService {
         delete(user, network);
     }
 
-    public Set<Network> retrievePrivateNetworks(CbUser user) {
+    public Set<Network> retrievePrivateNetworks(IdentityUser user) {
         return networkRepository.findForUser(user.getUserId());
     }
 
-    public Set<Network> retrieveAccountNetworks(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<Network> retrieveAccountNetworks(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return networkRepository.findAllInAccount(user.getAccount());
         } else {
             return networkRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
-    private void delete(CbUser user, Network network) {
+    private void delete(IdentityUser user, Network network) {
         if (stackRepository.findAllByNetwork(network.getId()).isEmpty()) {
-            if (!user.getUserId().equals(network.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(network.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Public networks can only be deleted by owners or account admins.");
             } else {
                 if (ResourceStatus.USER_MANAGED.equals(network.getStatus())) {

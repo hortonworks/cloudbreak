@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -62,7 +62,7 @@ public class TopologyService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Topology create(CbUser user, Topology topology) {
+    public Topology create(IdentityUser user, Topology topology) {
         LOGGER.debug("Creating topology: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Topology savedTopology;
         topology.setOwner(user.getUserId());
@@ -75,7 +75,7 @@ public class TopologyService {
         return savedTopology;
     }
 
-    public void delete(Long topologyId, CbUser user) {
+    public void delete(Long topologyId, IdentityUser user) {
         Topology topology = topologyRepository.findByIdInAccount(topologyId, user.getAccount());
         if (topology == null) {
             throw new NotFoundException(String.format(TOPOLOGY_NOT_FOUND_MSG, topologyId));
@@ -83,7 +83,7 @@ public class TopologyService {
         delete(topology, user);
     }
 
-    private void delete(Topology topology, CbUser user) {
+    private void delete(Topology topology, IdentityUser user) {
         LOGGER.debug("Deleting topology. {} - {}", new Object[]{topology.getId(), topology.getName()});
         Set<Credential> credentials = credentialRepository.findByTopology(topology.getId());
         Set<Template> templates = templateRepository.findByTopology(topology.getId());

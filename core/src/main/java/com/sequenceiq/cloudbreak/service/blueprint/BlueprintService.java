@@ -16,12 +16,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -39,12 +39,12 @@ public class BlueprintService {
     @Inject
     private ClusterRepository clusterRepository;
 
-    public Set<Blueprint> retrievePrivateBlueprints(CbUser user) {
+    public Set<Blueprint> retrievePrivateBlueprints(IdentityUser user) {
         return blueprintRepository.findForUser(user.getUserId());
     }
 
-    public Set<Blueprint> retrieveAccountBlueprints(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<Blueprint> retrieveAccountBlueprints(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return blueprintRepository.findAllInAccount(user.getAccount());
         } else {
             return blueprintRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
@@ -61,7 +61,7 @@ public class BlueprintService {
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public Blueprint getByName(String name, CbUser user) {
+    public Blueprint getByName(String name, IdentityUser user) {
         Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUsername());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
@@ -70,7 +70,7 @@ public class BlueprintService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Blueprint create(CbUser user, Blueprint blueprint, List<Map<String, Map<String, String>>> properties) {
+    public Blueprint create(IdentityUser user, Blueprint blueprint, List<Map<String, Map<String, String>>> properties) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint;
         blueprint.setOwner(user.getUserId());
@@ -100,7 +100,7 @@ public class BlueprintService {
         return savedBlueprint;
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         Blueprint blueprint = blueprintRepository.findByIdInAccount(id, user.getAccount());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
@@ -108,7 +108,7 @@ public class BlueprintService {
         delete(blueprint, user);
     }
 
-    public Blueprint getPublicBlueprint(String name, CbUser user) {
+    public Blueprint getPublicBlueprint(String name, IdentityUser user) {
         Blueprint blueprint = blueprintRepository.findOneByName(name, user.getAccount());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
@@ -116,7 +116,7 @@ public class BlueprintService {
         return blueprint;
     }
 
-    public Blueprint getPrivateBlueprint(String name, CbUser user) {
+    public Blueprint getPrivateBlueprint(String name, IdentityUser user) {
         Blueprint blueprint = blueprintRepository.findByNameInUser(name, user.getUserId());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
@@ -124,7 +124,7 @@ public class BlueprintService {
         return blueprint;
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         Blueprint blueprint = blueprintRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
@@ -137,9 +137,9 @@ public class BlueprintService {
         return blueprintRepository.save(entities);
     }
 
-    private void delete(Blueprint blueprint, CbUser user) {
+    private void delete(Blueprint blueprint, IdentityUser user) {
         if (clusterRepository.findAllClustersByBlueprint(blueprint.getId()).isEmpty()) {
-            if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Blueprints can only be deleted by account admins or owners.");
             }
             if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {

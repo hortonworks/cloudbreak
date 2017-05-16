@@ -11,10 +11,10 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
@@ -39,7 +39,7 @@ public class RecipeService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Recipe create(CbUser user, Recipe recipe) {
+    public Recipe create(IdentityUser user, Recipe recipe) {
         recipe.setOwner(user.getUserId());
         recipe.setAccount(user.getAccount());
         try {
@@ -58,19 +58,19 @@ public class RecipeService {
         return recipe;
     }
 
-    public Set<Recipe> retrievePrivateRecipes(CbUser user) {
+    public Set<Recipe> retrievePrivateRecipes(IdentityUser user) {
         return recipeRepository.findForUser(user.getUserId());
     }
 
-    public Set<Recipe> retrieveAccountRecipes(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<Recipe> retrieveAccountRecipes(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return recipeRepository.findAllInAccount(user.getAccount());
         } else {
             return recipeRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
-    public Recipe getPrivateRecipe(String name, CbUser user) {
+    public Recipe getPrivateRecipe(String name, IdentityUser user) {
         Recipe recipe = recipeRepository.findByNameForUser(name, user.getUserId());
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found.", name));
@@ -78,7 +78,7 @@ public class RecipeService {
         return recipe;
     }
 
-    public Recipe getPublicRecipe(String name, CbUser user) {
+    public Recipe getPublicRecipe(String name, IdentityUser user) {
         Recipe recipe = recipeRepository.findByNameInAccount(name, user.getAccount());
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found.", name));
@@ -86,7 +86,7 @@ public class RecipeService {
         return recipe;
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         Recipe recipe = get(id);
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found.", id));
@@ -94,7 +94,7 @@ public class RecipeService {
         delete(recipe, user);
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         Recipe recipe = recipeRepository.findByNameInAccount(name, user.getAccount());
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found.", name));
@@ -102,9 +102,9 @@ public class RecipeService {
         delete(recipe, user);
     }
 
-    private void delete(Recipe recipe, CbUser user) {
+    private void delete(Recipe recipe, IdentityUser user) {
         if (hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()).isEmpty()) {
-            if (!user.getUserId().equals(recipe.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(recipe.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Public recipes can only be deleted by owners or account admins.");
             } else {
                 recipeRepository.delete(recipe);

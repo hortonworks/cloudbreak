@@ -9,12 +9,12 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 @Component
 public class AccountPreferencesValidator {
@@ -94,9 +94,9 @@ public class AccountPreferencesValidator {
     public void validateUserTimeToLive(String owner, AccountPreferences preferences) throws AccountPreferencesValidationFailed {
         Long userTimeToLive = preferences.getUserTimeToLive();
         if (needToValidateField(userTimeToLive)) {
-            CbUser cbUser = userDetailsService.getDetails(owner, UserFilterField.USERID);
+            IdentityUser identityUser = userDetailsService.getDetails(owner, UserFilterField.USERID);
             long now = Calendar.getInstance().getTimeInMillis();
-            long userActiveTime = now - cbUser.getCreated().getTime();
+            long userActiveTime = now - identityUser.getCreated().getTime();
             if (userActiveTime > userTimeToLive) {
                 throw new AccountPreferencesValidationFailed("The user demo time is expired!");
             }

@@ -14,10 +14,10 @@ import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.SssdConfigRepository;
@@ -50,7 +50,7 @@ public class SssdConfigService {
     @Inject
     private ClusterRepository clusterRepository;
 
-    public SssdConfig getDefaultSssdConfig(CbUser user) {
+    public SssdConfig getDefaultSssdConfig(IdentityUser user) {
         SssdConfig config = sssdConfigRepository.findByNameInAccount(sssdName, user.getAccount());
         if (config == null) {
             synchronized (LOCKER) {
@@ -74,7 +74,7 @@ public class SssdConfigService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public SssdConfig create(CbUser user, SssdConfig sssdConfig) {
+    public SssdConfig create(IdentityUser user, SssdConfig sssdConfig) {
         sssdConfig.setOwner(user.getUserId());
         sssdConfig.setAccount(user.getAccount());
         try {
@@ -93,19 +93,19 @@ public class SssdConfigService {
         return sssdConfig;
     }
 
-    public Set<SssdConfig> retrievePrivateConfigs(CbUser user) {
+    public Set<SssdConfig> retrievePrivateConfigs(IdentityUser user) {
         return sssdConfigRepository.findForUser(user.getUserId());
     }
 
-    public Set<SssdConfig> retrieveAccountConfigs(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<SssdConfig> retrieveAccountConfigs(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return sssdConfigRepository.findAllInAccount(user.getAccount());
         } else {
             return sssdConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
-    public SssdConfig getPrivateConfig(String name, CbUser user) {
+    public SssdConfig getPrivateConfig(String name, IdentityUser user) {
         SssdConfig sssdConfig = sssdConfigRepository.findByNameForUser(name, user.getUserId());
         if (sssdConfig == null) {
             throw new NotFoundException(String.format("SssdConfig '%s' not found.", name));
@@ -113,7 +113,7 @@ public class SssdConfigService {
         return sssdConfig;
     }
 
-    public SssdConfig getPublicConfig(String name, CbUser user) {
+    public SssdConfig getPublicConfig(String name, IdentityUser user) {
         SssdConfig sssdConfig = sssdConfigRepository.findByNameInAccount(name, user.getAccount());
         if (sssdConfig == null) {
             throw new NotFoundException(String.format("SssdConfig '%s' not found.", name));
@@ -121,7 +121,7 @@ public class SssdConfigService {
         return sssdConfig;
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         SssdConfig sssdConfig = get(id);
         if (sssdConfig == null) {
             throw new NotFoundException(String.format("SssdConfig '%s' not found.", id));
@@ -129,7 +129,7 @@ public class SssdConfigService {
         delete(sssdConfig, user);
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         SssdConfig sssdConfig = sssdConfigRepository.findByNameInAccount(name, user.getAccount());
         if (sssdConfig == null) {
             throw new NotFoundException(String.format("SssdConfig '%s' not found.", name));
@@ -137,9 +137,9 @@ public class SssdConfigService {
         delete(sssdConfig, user);
     }
 
-    private void delete(SssdConfig sssdConfig, CbUser user) {
+    private void delete(SssdConfig sssdConfig, IdentityUser user) {
         if (clusterRepository.findAllClustersBySssdConfig(sssdConfig.getId()).isEmpty()) {
-            if (!user.getUserId().equals(sssdConfig.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(sssdConfig.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Public SSSD configs can only be deleted by owners or account admins.");
             } else {
                 sssdConfigRepository.delete(sssdConfig);

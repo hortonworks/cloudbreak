@@ -1,8 +1,6 @@
-package com.sequenceiq.cloudbreak.service.user;
+package com.sequenceiq.cloudbreak.common.service;
 
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-
-public class UserDetailsUnavailableException extends CloudbreakServiceException {
+public class UserDetailsUnavailableException extends RuntimeException {
 
     public UserDetailsUnavailableException(String message) {
         super(message);

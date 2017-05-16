@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.user;
+package com.sequenceiq.cloudbreak.common.service;
 
 public enum UserFilterField {
     USERNAME, USERID

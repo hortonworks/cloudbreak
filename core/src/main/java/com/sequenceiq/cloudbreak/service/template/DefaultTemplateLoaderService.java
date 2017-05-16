@@ -20,7 +20,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -45,7 +45,7 @@ public class DefaultTemplateLoaderService {
     @Inject
     private JsonHelper jsonHelper;
 
-    public void createDefaultTemplates(CbUser user) {
+    public void createDefaultTemplates(IdentityUser user) {
         Set<Template> defaultTemplates = templateRepository.findAllDefaultInAccount(user.getAccount());
 
         List<String> defaultNetworkNames = defaultTemplates.stream()
@@ -54,7 +54,7 @@ public class DefaultTemplateLoaderService {
         createDefaultTemplateInstances(user, defaultNetworkNames);
     }
 
-    private void createDefaultTemplateInstances(CbUser user, List<String> defaultNetworkNames) {
+    private void createDefaultTemplateInstances(IdentityUser user, List<String> defaultNetworkNames) {
         for (String templateName : templateArray) {
             if (!templateName.isEmpty() && !defaultNetworkNames.contains(templateName)) {
                 try {
