@@ -65,13 +65,18 @@ type ClusterSkeleton struct {
 
 type ClusterSkeletonResult struct {
 	ClusterSkeletonBase
-	Autoscaling    *AutoscalingSkeletonResult         `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
-	HiveMetastore  *HiveMetastoreResult               `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore *DruidMetastoreResult              `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []models_cloudbreak.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
-	Nodes          string                             `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
-	Status         string                             `json:"Status,omitempty" yaml:"Status,omitempty"`
-	StatusReason   string                             `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	Autoscaling      *AutoscalingSkeletonResult         `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
+	HiveMetastore    *HiveMetastoreResult               `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore   *DruidMetastoreResult              `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	Configurations   []models_cloudbreak.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Nodes            string                             `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
+	Status           string                             `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason     string                             `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	FlexSubscription FlexSubscription                   `json:"FlexSubscription,omitempty" yaml:"FlexSubscription,omitempty"`
+}
+
+type FlexSubscription struct {
+	Name string `json:"Name,omitempty" yaml:"Name,omitempty"`
 }
 
 type InstanceConfig struct {

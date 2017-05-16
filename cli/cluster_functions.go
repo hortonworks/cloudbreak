@@ -258,6 +258,10 @@ func (c *ClusterSkeletonResult) fill(
 		c.Autoscaling = autoscaling
 	}
 
+	if stack.FlexSubscription != nil {
+		c.FlexSubscription = FlexSubscription{stack.FlexSubscription.Name}
+	}
+
 	return nil
 }
 
