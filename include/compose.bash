@@ -82,7 +82,7 @@ util-cleanup() {
 
     compose-remove-exited-containers
 
-    local all_images=$(docker images | sed "s/ \+/ /g"|cut -d' ' -f 1,2|tr ' ' : | tail -n +2)
+    local all_images=$(docker images | grep -v "<none>"| sed "s/ \+/ /g"|cut -d' ' -f 1,2|tr ' ' : | tail -n +2)
     local keep_images=$(sed -n "s/.*image://p" docker-compose.yml)
     local images_to_delete=$(compose-get-old-images <(echo $all_images) <(echo $keep_images))
     if [ -n "$images_to_delete" ]; then
