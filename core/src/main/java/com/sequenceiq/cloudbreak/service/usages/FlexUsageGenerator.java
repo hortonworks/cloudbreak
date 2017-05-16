@@ -91,7 +91,8 @@ public class FlexUsageGenerator {
     private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
-        //TODO Product and Component IDs should looks like https://docs.google.com/presentation/d/1x5K7MaUdFltxUf4fiF3skCe1D_4p0yEul3fZ07goX90/edit#slide=id.g1c321bbed8_1_300
+        //TODO Product and Component IDs should looks like
+        // https://docs.google.com/presentation/d/1x5K7MaUdFltxUf4fiF3skCe1D_4p0yEul3fZ07goX90/edit#slide=id.g1c321bbed8_1_300
         flexUsageProductJson.setProductId(CLOUDBREAK_PRODUCT_ID);
         List<FlexUsageComponentJson> components = new ArrayList<>();
 
@@ -142,6 +143,7 @@ public class FlexUsageGenerator {
                 usageJson.setPeakUsage(usage.getPeak());
                 usageJson.setNodeCount(usage.getInstanceNum());
                 usageJson.setUsageDate(formatDate(usage.getDay()));
+                //TODO creation and termination time need to be inserted into Cloudbreak usage as new fields
                 usageJson.setCreationTime("");
                 usageJson.setTerminationTime("");
                 flexUsageJsonsByStackId.put(stackId, usageJson);
