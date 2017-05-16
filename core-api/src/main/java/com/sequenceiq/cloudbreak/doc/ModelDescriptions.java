@@ -117,9 +117,7 @@ public class ModelDescriptions {
 
     public static class ClusterModelDescription {
         public static final String STATUS = "status of the cluster";
-        public static final String HIVE_DB = "name of the created hive db";
-        public static final String RANGER_DB = "name of the created ranger db";
-        public static final String AMBARI_DB = "name of the created ambari db";
+        public static final String RESULT_DBS = "name of the created dbs";
         public static final String STATUS_REASON = "status message of the cluster";
         public static final String CLUSTER_NAME = "name of the cluster";
         public static final String CLUSTER_ID = "id of the cluster";

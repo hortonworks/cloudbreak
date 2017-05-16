@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint;
 
+import java.util.Set;
+
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -7,6 +9,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
@@ -65,6 +68,6 @@ public interface UtilEndpoint {
     @Path("rds-database")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UtilityOpDescription.CREATE_DATABASE, produces = ContentType.JSON, nickname = "createRDSDatabaseUtil")
-    RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest);
+    RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest, @QueryParam("target") Set<String> targets);
 
 }
