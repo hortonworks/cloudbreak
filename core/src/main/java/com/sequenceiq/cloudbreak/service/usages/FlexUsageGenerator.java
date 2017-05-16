@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -33,13 +35,13 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 public class FlexUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlexUsageGenerator.class);
 
-    private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
-
     private static final String CLOUDBREAK_PRODUCT_ID = "cloudbreak";
 
     private static final String CBD_COMPONENT_ID = "cloudbreak-cbd";
 
     private static final String HDP_COMPONENT_ID = "cloudbreak-hdp";
+
+    private static final String FLEX_TIME_ZONE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss Z";
 
     @Inject
     private UserDetailsService userDetailsService;
@@ -89,6 +91,7 @@ public class FlexUsageGenerator {
     private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
+        //TODO Product and Component IDs should looks like https://docs.google.com/presentation/d/1x5K7MaUdFltxUf4fiF3skCe1D_4p0yEul3fZ07goX90/edit#slide=id.g1c321bbed8_1_300
         flexUsageProductJson.setProductId(CLOUDBREAK_PRODUCT_ID);
         List<FlexUsageComponentJson> components = new ArrayList<>();
 
@@ -138,8 +141,7 @@ public class FlexUsageGenerator {
                 usageJson.setRegion(usage.getRegion());
                 usageJson.setPeakUsage(usage.getPeak());
                 usageJson.setNodeCount(usage.getInstanceNum());
-
-                usageJson.setUsageDate("");
+                usageJson.setUsageDate(formatDate(usage.getDay()));
                 usageJson.setCreationTime("");
                 usageJson.setTerminationTime("");
                 flexUsageJsonsByStackId.put(stackId, usageJson);
@@ -156,8 +158,8 @@ public class FlexUsageGenerator {
         return new ArrayList<>(flexUsageJsonsByStackId.values());
     }
 
-    private String getDayAsString(Date day) {
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT_PATTERN);
-        return sdf.format(day);
+    private String formatDate(Date date) {
+        ZonedDateTime usageDayZoneDate = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+        return usageDayZoneDate.format(DateTimeFormatter.ofPattern(FLEX_TIME_ZONE_FORMAT_PATTERN));
     }
 }
