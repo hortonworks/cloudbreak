@@ -35,12 +35,6 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 public class FlexUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlexUsageGenerator.class);
 
-    private static final String CLOUDBREAK_PRODUCT_ID = "cloudbreak";
-
-    private static final String CBD_COMPONENT_ID = "cloudbreak-cbd";
-
-    private static final String HDP_COMPONENT_ID = "cloudbreak-hdp";
-
     private static final String FLEX_TIME_ZONE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss Z";
 
     @Inject
@@ -54,6 +48,15 @@ public class FlexUsageGenerator {
 
     @Value("${cb.instance.uuid:}")
     private String parentUuid;
+
+    @Value("${cb.product.id:cloudbreak}")
+    private String productId;
+
+    @Value("${cb.component.id:cloudbreak-cbd}")
+    private String controllerComponentId;
+
+    @Value("${cb.component.cluster.id:cloudbreak-hdp}")
+    private String clustersComponentId;
 
     public CloudbreakFlexUsageJson getUsages(List<CloudbreakUsage> usages) {
         LOGGER.info("Generating Cloudbreak Flex related usages.");
@@ -93,17 +96,17 @@ public class FlexUsageGenerator {
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
         //TODO Product and Component IDs should looks like
         // https://docs.google.com/presentation/d/1x5K7MaUdFltxUf4fiF3skCe1D_4p0yEul3fZ07goX90/edit#slide=id.g1c321bbed8_1_300
-        flexUsageProductJson.setProductId(CLOUDBREAK_PRODUCT_ID);
+        flexUsageProductJson.setProductId(productId);
         List<FlexUsageComponentJson> components = new ArrayList<>();
 
         FlexUsageComponentJson cbdComponent = new FlexUsageComponentJson();
-        cbdComponent.setComponentId(CBD_COMPONENT_ID);
+        cbdComponent.setComponentId(controllerComponentId);
         FlexUsageCbdInstanceJson cbdComponentInstance = getFlexUsageCbdInstance();
         cbdComponent.setInstances(Collections.singletonList(cbdComponentInstance));
         components.add(cbdComponent);
 
         FlexUsageComponentJson hdpComponent = new FlexUsageComponentJson();
-        hdpComponent.setComponentId(HDP_COMPONENT_ID);
+        hdpComponent.setComponentId(clustersComponentId);
         hdpComponent.setInstances(getFlexUsageHdpInstances(usages));
         components.add(hdpComponent);
 
