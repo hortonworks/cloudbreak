@@ -6,11 +6,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class FlexUsageComponentInstanceJson {
 
     private String guid;
+
     private String region;
+
     private String provider;
+
     private String flexPlanId;
+
     private String creationTime;
+
     private String usageDate;
+
     private Integer peakUsage;
 
     public String getGuid() {

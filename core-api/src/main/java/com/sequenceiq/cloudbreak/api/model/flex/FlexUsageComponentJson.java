@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class FlexUsageComponentJson {
 
     private String componentId;
+
     private List<? extends FlexUsageComponentInstanceJson> instances;
 
     public String getComponentId() {

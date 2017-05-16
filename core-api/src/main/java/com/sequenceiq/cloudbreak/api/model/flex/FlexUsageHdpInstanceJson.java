@@ -6,9 +6,13 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class FlexUsageHdpInstanceJson extends FlexUsageComponentInstanceJson {
 
     private String parentGuid;
+
     private String clusterName;
+
     private String blueprintName;
+
     private String terminationTime;
+
     private Integer nodeCount;
 
     public String getParentGuid() {

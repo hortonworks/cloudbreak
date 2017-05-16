@@ -6,10 +6,15 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class FlexUsageControllerJson {
 
     private String guid;
+
     private String instanceId;
+
     private String region;
+
     private String provider;
+
     private String smartSenseId;
+
     private String userName;
 
     public String getGuid() {

@@ -32,9 +32,13 @@ import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 @Service
 public class FlexUsageGenerator {
     private static final Logger LOGGER = LoggerFactory.getLogger(FlexUsageGenerator.class);
+
     private static final String DATE_FORMAT_PATTERN = "yyyy-MM-dd";
+
     private static final String CLOUDBREAK_PRODUCT_ID = "cloudbreak";
+
     private static final String CBD_COMPONENT_ID = "cloudbreak-cbd";
+
     private static final String HDP_COMPONENT_ID = "cloudbreak-hdp";
 
     @Inject

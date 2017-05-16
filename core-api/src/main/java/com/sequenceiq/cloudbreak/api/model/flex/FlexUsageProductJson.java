@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class FlexUsageProductJson {
 
     private String productId;
+
     private List<FlexUsageComponentJson> components;
 
     public String getProductId() {
