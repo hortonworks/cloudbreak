@@ -54,6 +54,7 @@ public class FlexUsageGenerator {
     private String parentUuid;
 
     public CloudbreakFlexUsageJson getUsages(List<CloudbreakUsage> usages) {
+        LOGGER.info("Generating Cloudbreak Flex related usages.");
         CloudbreakFlexUsageJson result = new CloudbreakFlexUsageJson();
         Optional<CloudbreakUsage> aUsage = usages.stream().findFirst();
         result.setController(getFlexUsageControllerJson(usages, aUsage));
@@ -93,6 +94,21 @@ public class FlexUsageGenerator {
 
         FlexUsageComponentJson cbdComponent = new FlexUsageComponentJson();
         cbdComponent.setComponentId(CBD_COMPONENT_ID);
+        FlexUsageCbdInstanceJson cbdComponentInstance = getFlexUsageCbdInstance();
+        cbdComponent.setInstances(Collections.singletonList(cbdComponentInstance));
+        components.add(cbdComponent);
+
+        FlexUsageComponentJson hdpComponent = new FlexUsageComponentJson();
+        hdpComponent.setComponentId(HDP_COMPONENT_ID);
+        hdpComponent.setInstances(getFlexUsageHdpInstances(usages));
+        components.add(hdpComponent);
+
+        flexUsageProductJson.setComponents(components);
+        flexUsageProducts.add(flexUsageProductJson);
+        return flexUsageProducts;
+    }
+
+    private FlexUsageCbdInstanceJson getFlexUsageCbdInstance() {
         FlexUsageCbdInstanceJson cbdComponentInstance = new FlexUsageCbdInstanceJson();
         cbdComponentInstance.setGuid(parentUuid);
         cbdComponentInstance.setPeakUsage(1);
@@ -104,12 +120,10 @@ public class FlexUsageGenerator {
         cbdComponentInstance.setFlexPlanId("");
         //TODO add the date as String with the required pattern
         cbdComponentInstance.setUsageDate("");
-        cbdComponent.setInstances(Collections.singletonList(cbdComponentInstance));
+        return cbdComponentInstance;
+    }
 
-        components.add(cbdComponent);
-
-        FlexUsageComponentJson hdpComponent = new FlexUsageComponentJson();
-        hdpComponent.setComponentId(HDP_COMPONENT_ID);
+    private List<FlexUsageHdpInstanceJson> getFlexUsageHdpInstances(List<CloudbreakUsage> usages) {
         Map<Long, FlexUsageHdpInstanceJson> flexUsageJsonsByStackId = new HashMap<>();
         for (CloudbreakUsage usage : usages) {
             Long stackId = usage.getStackId();
@@ -139,11 +153,7 @@ public class FlexUsageGenerator {
                 usageJson.setNodeCount(instanceNum);
             }
         }
-        hdpComponent.setInstances(new ArrayList<>(flexUsageJsonsByStackId.values()));
-
-        flexUsageProductJson.setComponents(components);
-        flexUsageProducts.add(flexUsageProductJson);
-        return flexUsageProducts;
+        return new ArrayList<>(flexUsageJsonsByStackId.values());
     }
 
     private String getDayAsString(Date day) {
