@@ -19,11 +19,11 @@ import org.mockito.MockitoAnnotations;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterTest<CloudbreakUsage> {
 
@@ -33,7 +33,7 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
     @Mock
     private UserDetailsService userDetailsService;
 
-    private CbUser user;
+    private IdentityUser user;
 
     @Before
     public void setUp() {
@@ -88,9 +88,9 @@ public class CloudbreakUsageToJsonConverterTest extends AbstractEntityConverterT
         return TestUtil.gcpCloudbreakUsage(1L);
     }
 
-    private CbUser createCbUser() {
-        return new CbUser("dummyUserId", "john.smith@example.com", "dummyAccount",
-                Arrays.asList(CbUserRole.ADMIN, CbUserRole.USER), "John", "Smith", new Date());
+    private IdentityUser createCbUser() {
+        return new IdentityUser("dummyUserId", "john.smith@example.com", "dummyAccount",
+                Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "John", "Smith", new Date());
     }
 
 }

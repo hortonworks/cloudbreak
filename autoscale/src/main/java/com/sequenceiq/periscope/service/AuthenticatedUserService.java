@@ -6,9 +6,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 import com.sequenceiq.periscope.service.security.UserDetailsService;
-import com.sequenceiq.periscope.service.security.UserFilterField;
 
 @Service
 public class AuthenticatedUserService {

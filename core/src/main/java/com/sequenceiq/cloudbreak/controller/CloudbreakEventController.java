@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
@@ -22,7 +22,7 @@ public class CloudbreakEventController implements EventEndpoint {
 
     @Override
     public List<CloudbreakEventsJson> get(Long since) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return cloudbreakEventsFacade.retrieveEvents(user.getUserId(), since);
     }

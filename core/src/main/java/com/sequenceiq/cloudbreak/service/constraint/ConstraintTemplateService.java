@@ -13,11 +13,11 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -39,12 +39,12 @@ public class ConstraintTemplateService {
     @Inject
     private ClusterRepository clusterRepository;
 
-    public Set<ConstraintTemplate> retrievePrivateConstraintTemplates(CbUser user) {
+    public Set<ConstraintTemplate> retrievePrivateConstraintTemplates(IdentityUser user) {
         return constraintTemplateRepository.findForUser(user.getUserId());
     }
 
-    public Set<ConstraintTemplate> retrieveAccountConstraintTemplates(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<ConstraintTemplate> retrieveAccountConstraintTemplates(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return constraintTemplateRepository.findAllInAccount(user.getAccount());
         } else {
             return constraintTemplateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
@@ -61,7 +61,7 @@ public class ConstraintTemplateService {
         }
     }
 
-    public ConstraintTemplate create(CbUser user, ConstraintTemplate constraintTemplate) {
+    public ConstraintTemplate create(IdentityUser user, ConstraintTemplate constraintTemplate) {
         LOGGER.debug("Creating constraint template: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         constraintTemplate.setOwner(user.getUserId());
         constraintTemplate.setAccount(user.getAccount());
@@ -72,7 +72,7 @@ public class ConstraintTemplateService {
         }
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, name));
@@ -80,7 +80,7 @@ public class ConstraintTemplateService {
         delete(constraintTemplate, user);
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByIdInAccount(id, user.getAccount());
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, id));
@@ -89,7 +89,7 @@ public class ConstraintTemplateService {
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public ConstraintTemplate getPublicTemplate(String name, CbUser user) {
+    public ConstraintTemplate getPublicTemplate(String name, IdentityUser user) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findOneByName(name, user.getAccount());
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, name));
@@ -98,7 +98,7 @@ public class ConstraintTemplateService {
         }
     }
 
-    public ConstraintTemplate getPrivateTemplate(String name, CbUser user) {
+    public ConstraintTemplate getPrivateTemplate(String name, IdentityUser user) {
         ConstraintTemplate constraintTemplate = constraintTemplateRepository.findByNameInUser(name, user.getUserId());
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, name));
@@ -107,11 +107,11 @@ public class ConstraintTemplateService {
         }
     }
 
-    private void delete(ConstraintTemplate constraintTemplate, CbUser user) {
+    private void delete(ConstraintTemplate constraintTemplate, IdentityUser user) {
         LOGGER.debug("Deleting constraint template. {} - {}", new Object[]{constraintTemplate.getId(), constraintTemplate.getName()});
         List<Cluster> clusters = clusterRepository.findAllClustersForConstraintTemplate(constraintTemplate.getId());
         if (clusters.isEmpty()) {
-            if (!user.getUserId().equals(constraintTemplate.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(constraintTemplate.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Constraint templates can only be deleted by account admins or owners.");
             }
             if (ResourceStatus.USER_MANAGED.equals(constraintTemplate.getStatus())) {

@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.api.model.StatusRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -165,12 +165,12 @@ public class StackService {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    public Set<StackResponse> retrievePrivateStacks(CbUser user) {
+    public Set<StackResponse> retrievePrivateStacks(IdentityUser user) {
         return convertStacks(stackRepository.findForUser(user.getUserId()));
     }
 
-    public Set<StackResponse> retrieveAccountStacks(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<StackResponse> retrieveAccountStacks(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return convertStacks(stackRepository.findAllInAccount(user.getAccount()));
         } else {
             return convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
@@ -240,16 +240,16 @@ public class StackService {
         return conversionService.convert(stack, StackResponse.class);
     }
 
-    public Stack getPrivateStack(String name, CbUser cbUser) {
-        Stack stack = stackRepository.findByNameInUser(name, cbUser.getUserId());
+    public Stack getPrivateStack(String name, IdentityUser identityUser) {
+        Stack stack = stackRepository.findByNameInUser(name, identityUser.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         return stack;
     }
 
-    public StackResponse getPrivateStackJsonByName(String name, CbUser cbUser, Set<String> entries) {
-        Stack stack = stackRepository.findByNameInUser(name, cbUser.getUserId());
+    public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
+        Stack stack = stackRepository.findByNameInUser(name, identityUser.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
@@ -259,8 +259,8 @@ public class StackService {
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public StackResponse getPublicStackJsonByName(String name, CbUser cbUser, Set<String> entries) {
-        Stack stack = stackRepository.findOneByName(name, cbUser.getAccount());
+    public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
+        Stack stack = stackRepository.findOneByName(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
@@ -270,15 +270,15 @@ public class StackService {
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public Stack getPublicStack(String name, CbUser cbUser) {
-        Stack stack = stackRepository.findOneByName(name, cbUser.getAccount());
+    public Stack getPublicStack(String name, IdentityUser identityUser) {
+        Stack stack = stackRepository.findOneByName(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         return stack;
     }
 
-    public void delete(String name, CbUser user, Boolean deleteDependencies) {
+    public void delete(String name, IdentityUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
@@ -286,7 +286,7 @@ public class StackService {
         delete(stack, user, deleteDependencies);
     }
 
-    public void forceDelete(String name, CbUser user, Boolean deleteDependencies) {
+    public void forceDelete(String name, IdentityUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
@@ -295,7 +295,7 @@ public class StackService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public Stack create(CbUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> customImage) {
+    public Stack create(IdentityUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> customImage) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -346,7 +346,7 @@ public class StackService {
         stack.setPlatformVariant(connector.checkAndGetPlatformVariant(stack).value());
     }
 
-    public void delete(Long id, CbUser user, Boolean deleteDependencies) {
+    public void delete(Long id, IdentityUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
@@ -354,7 +354,7 @@ public class StackService {
         delete(stack, user, deleteDependencies);
     }
 
-    public void forceDelete(Long id, CbUser user, Boolean deleteDependencies) {
+    public void forceDelete(Long id, IdentityUser user, Boolean deleteDependencies) {
         Stack stack = stackRepository.findByIdInAccount(id, user.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
@@ -362,7 +362,7 @@ public class StackService {
         forceDelete(stack, user, deleteDependencies);
     }
 
-    public void removeInstance(CbUser user, Long stackId, String instanceId) {
+    public void removeInstance(IdentityUser user, Long stackId, String instanceId) {
         Stack stack = get(stackId);
         InstanceMetaData instanceMetaData = instanceMetaDataRepository.findByInstanceId(stackId, instanceId);
         if (instanceMetaData == null) {
@@ -581,9 +581,9 @@ public class StackService {
         }
     }
 
-    private void delete(Stack stack, CbUser user, Boolean deleteDependencies) {
+    private void delete(Stack stack, IdentityUser user, Boolean deleteDependencies) {
         LOGGER.info("Stack delete requested.");
-        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {
@@ -593,9 +593,9 @@ public class StackService {
         }
     }
 
-    private void forceDelete(Stack stack, CbUser user, Boolean deleteDependencies) {
+    private void forceDelete(Stack stack, IdentityUser user, Boolean deleteDependencies) {
         LOGGER.info("Stack forced delete requested.");
-        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
             throw new BadRequestException("Stacks can be force deleted only by account admins or owners.");
         }
         if (!stack.isDeleteCompleted()) {

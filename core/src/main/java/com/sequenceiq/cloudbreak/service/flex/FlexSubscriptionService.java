@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -35,10 +35,10 @@ public class FlexSubscriptionService {
         }
     }
 
-    public void delete(FlexSubscription subscription, CbUser user) {
+    public void delete(FlexSubscription subscription, IdentityUser user) {
         if (subscription != null) {
             boolean owner = user.getUserId().equals(subscription.getOwner());
-            boolean adminInTheAccount = user.getRoles().contains(CbUserRole.ADMIN) && subscription.getAccount().equals(user.getAccount());
+            boolean adminInTheAccount = user.getRoles().contains(IdentityUserRole.ADMIN) && subscription.getAccount().equals(user.getAccount());
             if (owner || adminInTheAccount) {
                 flexRepo.delete(subscription);
                 LOGGER.info("Flex subscription has been deleted: {}", subscription);
@@ -51,7 +51,7 @@ public class FlexSubscriptionService {
         }
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         FlexSubscription subscription = flexRepo.findOneById(id);
         delete(subscription, user);
     }
@@ -81,25 +81,25 @@ public class FlexSubscriptionService {
         return flexRepo.findOneByNameInAccount(name, owner, account);
     }
 
-    public List<FlexSubscription> findPublicInAccountForUser(CbUser user) {
+    public List<FlexSubscription> findPublicInAccountForUser(IdentityUser user) {
         LOGGER.info("Looking for public Flex subscriptions for user: {}", user.getUsername());
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return flexRepo.findAllInAccount(user.getAccount());
         } else {
             return flexRepo.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
-    public void setDefaultFlexSubscription(String name, CbUser cbUser) {
-        setFlexSubscriptionFlag(name, cbUser, (flex, flag) -> flex.setDefault(flag));
+    public void setDefaultFlexSubscription(String name, IdentityUser identityUser) {
+        setFlexSubscriptionFlag(name, identityUser, (flex, flag) -> flex.setDefault(flag));
     }
 
-    public void setUsedForControllerFlexSubscription(String name, CbUser cbUser) {
-        setFlexSubscriptionFlag(name, cbUser, (flex, flag) -> flex.setUsedForController(flag));
+    public void setUsedForControllerFlexSubscription(String name, IdentityUser identityUser) {
+        setFlexSubscriptionFlag(name, identityUser, (flex, flag) -> flex.setUsedForController(flag));
     }
 
-    private void setFlexSubscriptionFlag(String name, CbUser cbUser, BiConsumer<FlexSubscription, Boolean> setter) {
-        List<FlexSubscription> allInAccount = flexRepo.findAllInAccount(cbUser.getAccount());
+    private void setFlexSubscriptionFlag(String name, IdentityUser identityUser, BiConsumer<FlexSubscription, Boolean> setter) {
+        List<FlexSubscription> allInAccount = flexRepo.findAllInAccount(identityUser.getAccount());
         for (FlexSubscription flex : allInAccount) {
             if (name.equals(flex.getSubscriptionId())) {
                 setter.accept(flex, true);

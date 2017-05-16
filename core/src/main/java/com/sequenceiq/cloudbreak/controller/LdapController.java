@@ -10,7 +10,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import com.sequenceiq.cloudbreak.api.endpoint.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
@@ -29,21 +29,21 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public LdapConfigResponse postPrivate(LdapConfigRequest ldapConfigRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, ldapConfigRequest, false);
     }
 
     @Override
     public LdapConfigResponse postPublic(LdapConfigRequest ldapConfigRequest) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, ldapConfigRequest, true);
     }
 
     @Override
     public Set<LdapConfigResponse> getPrivates() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<LdapConfig> configs = ldapConfigService.retrievePrivateConfigs(user);
         return toJsonSet(configs);
@@ -51,7 +51,7 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public Set<LdapConfigResponse> getPublics() {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         Set<LdapConfig> configs = ldapConfigService.retrieveAccountConfigs(user);
         return toJsonSet(configs);
@@ -59,7 +59,7 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public LdapConfigResponse getPrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         LdapConfig config = ldapConfigService.getPrivateConfig(name, user);
         return conversionService.convert(config, LdapConfigResponse.class);
@@ -67,7 +67,7 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public LdapConfigResponse getPublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         LdapConfig config = ldapConfigService.getPublicConfig(name, user);
         return conversionService.convert(config, LdapConfigResponse.class);
@@ -75,7 +75,7 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public LdapConfigResponse get(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         LdapConfig config = ldapConfigService.get(id);
         return conversionService.convert(config, LdapConfigResponse.class);
@@ -83,26 +83,26 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public void delete(Long id) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         ldapConfigService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         ldapConfigService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         ldapConfigService.delete(name, user);
     }
 
-    private LdapConfigResponse createConfig(CbUser user, LdapConfigRequest request, boolean publicInAccount) {
+    private LdapConfigResponse createConfig(IdentityUser user, LdapConfigRequest request, boolean publicInAccount) {
         LdapConfig config = conversionService.convert(request, LdapConfig.class);
         config.setPublicInAccount(publicInAccount);
         config = ldapConfigService.create(user, config);

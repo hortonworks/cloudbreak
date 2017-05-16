@@ -1,11 +1,9 @@
-package com.sequenceiq.cloudbreak.domain;
+package com.sequenceiq.cloudbreak.common.model.user;
 
 import java.util.Date;
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
-
-public class CbUser {
+public class IdentityUser {
 
     private final String userId;
 
@@ -13,7 +11,7 @@ public class CbUser {
 
     private final String account;
 
-    private final List<CbUserRole> roles;
+    private final List<IdentityUserRole> roles;
 
     private final String givenName;
 
@@ -21,7 +19,7 @@ public class CbUser {
 
     private final Date created;
 
-    public CbUser(String userId, String username, String account, List<CbUserRole> roles, String givenName, String familyName, Date created) {
+    public IdentityUser(String userId, String username, String account, List<IdentityUserRole> roles, String givenName, String familyName, Date created) {
         this.userId = userId;
         this.username = username;
         this.account = account;
@@ -43,7 +41,7 @@ public class CbUser {
         return account;
     }
 
-    public List<CbUserRole> getRoles() {
+    public List<IdentityUserRole> getRoles() {
         return roles;
     }
 

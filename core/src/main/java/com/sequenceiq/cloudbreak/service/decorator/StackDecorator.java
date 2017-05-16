@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
@@ -123,7 +123,7 @@ public class StackDecorator implements Decorator<Stack> {
     }
 
     private void prepareInstanceGroups(Stack subject, Object... data) {
-        CbUser user = (CbUser) data[DecorationData.USER.ordinal()];
+        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
         for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
             if (instanceGroup.getTemplate() != null) {
                 Template template = instanceGroup.getTemplate();
@@ -145,7 +145,7 @@ public class StackDecorator implements Decorator<Stack> {
     }
 
     private void prepareDomainIfDefined(Stack subject, Object... data) {
-        CbUser user = (CbUser) data[DecorationData.USER.ordinal()];
+        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
         if (subject.getNetwork() != null) {
             Network network = subject.getNetwork();
             network.setPublicInAccount(subject.isPublicInAccount());

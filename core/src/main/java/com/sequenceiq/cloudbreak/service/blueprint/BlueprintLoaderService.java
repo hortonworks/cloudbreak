@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.util.NameUtil;
@@ -45,7 +45,7 @@ public class BlueprintLoaderService {
     @Inject
     private BlueprintUtils blueprintUtils;
 
-    public Set<Blueprint> loadBlueprints(CbUser user) {
+    public Set<Blueprint> loadBlueprints(IdentityUser user) {
         Set<Blueprint> blueprints = new HashSet<>();
         List<String> blueprintNames = getDefaultBlueprintNames(user);
         for (String blueprintStrings : blueprintArray) {
@@ -78,7 +78,7 @@ public class BlueprintLoaderService {
         return blueprints;
     }
 
-    private List<String> getDefaultBlueprintNames(CbUser user) {
+    private List<String> getDefaultBlueprintNames(IdentityUser user) {
         return blueprintRepository.findAllDefaultInAccount(user.getAccount()).stream()
                 .map(bp -> bp.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(bp.getName()) : bp.getName())
                 .collect(Collectors.toList());

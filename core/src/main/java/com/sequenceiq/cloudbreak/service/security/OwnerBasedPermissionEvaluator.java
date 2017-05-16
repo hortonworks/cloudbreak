@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.conf;
+package com.sequenceiq.cloudbreak.service.security;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
@@ -12,11 +12,11 @@ import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ReflectionUtils;
 
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 @Service
 @Lazy
@@ -38,12 +38,12 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             return true;
         }
         try {
-            CbUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+            IdentityUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
             if (getOwner(targetDomainObject).equals(user.getUserId())) {
                 return true;
             }
             if (getAccount(targetDomainObject).equals(user.getAccount())) {
-                if (user.getRoles().contains(CbUserRole.ADMIN) || isPublicInAccount(targetDomainObject)) {
+                if (user.getRoles().contains(IdentityUserRole.ADMIN) || isPublicInAccount(targetDomainObject)) {
                     return true;
                 }
             }

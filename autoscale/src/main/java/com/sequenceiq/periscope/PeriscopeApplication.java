@@ -12,7 +12,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @Configuration
 @EnableAutoConfiguration
 @EnableSwagger2
-@ComponentScan(basePackages = "com.sequenceiq.periscope")
+@ComponentScan(basePackages = {"com.sequenceiq.periscope", "com.sequenceiq.cloudbreak"})
 public class PeriscopeApplication {
 
     public static void main(String[] args) {

@@ -23,6 +23,9 @@ import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecur
 import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
+import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
+import com.sequenceiq.cloudbreak.service.security.ScimAccountGroupReaderFilter;
+
 @Configuration
 public class SecurityConfig {
 

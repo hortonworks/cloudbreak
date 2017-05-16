@@ -34,9 +34,9 @@ import com.google.common.io.CharStreams;
 import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -53,7 +53,7 @@ public class EmailSenderHostServiceTypeTest {
     @InjectMocks
     private EmailSenderService emailSenderService = new EmailSenderService();
 
-    private CbUser cbUser;
+    private IdentityUser identityUser;
 
     @Mock
     private EmailMimeMessagePreparator emailMimeMessagePreparator;
@@ -64,7 +64,7 @@ public class EmailSenderHostServiceTypeTest {
         greenMail.setUser("demouser", "demopwd");
         greenMail.start();
 
-        cbUser = new CbUser("sdf", "testuser", "testaccount", new ArrayList<>(), "familyname", "givenName", new Date());
+        identityUser = new IdentityUser("sdf", "testuser", "testaccount", new ArrayList<>(), "familyname", "givenName", new Date());
         ReflectionTestUtils.setField(emailSenderService, "msgFrom", "no-reply@sequenceiq.com");
         ReflectionTestUtils.setField(emailSenderService, "freemarkerConfiguration", freemarkerConfiguration());
 
@@ -93,7 +93,7 @@ public class EmailSenderHostServiceTypeTest {
         ReflectionTestUtils.setField(emailSenderService, "emailMimeMessagePreparator", mmp);
 
         when(userDetailsService.getDetails(anyString(), any(UserFilterField.class)))
-                .thenReturn(cbUser);
+                .thenReturn(identityUser);
 
     }
 

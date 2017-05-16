@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
@@ -33,7 +33,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String accountId,
             String cloud,
             String zone) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(accountId).setOwner(userId)
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
@@ -46,7 +46,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String userId,
             String cloud,
             String zone) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(userId)
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
@@ -59,7 +59,7 @@ public class CloudbreakUsageController implements UsageEndpoint {
             Long filterEndDate,
             String cloud,
             String zone) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(user.getUserId())
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();

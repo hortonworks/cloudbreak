@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

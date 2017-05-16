@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -64,7 +64,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -178,7 +178,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     @Transactional(Transactional.TxType.NEVER)
-    public Cluster create(CbUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
+    public Cluster create(IdentityUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
         Stack stack = stackService.getById(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
@@ -222,10 +222,10 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void delete(CbUser user, Long stackId) {
+    public void delete(IdentityUser user, Long stackId) {
         Stack stack = stackService.get(stackId);
         LOGGER.info("Cluster delete requested.");
-        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
             throw new BadRequestException("Clusters can only be deleted by account admins or owners.");
         }
         if (stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {

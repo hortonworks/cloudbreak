@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
@@ -75,7 +75,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
             throw new IllegalArgumentException("Invalid decoration data provided. Cluster: " + subject.getName());
         }
         Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
-        CbUser user = (CbUser) data[DecorationData.USER.ordinal()];
+        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
         ConstraintJson constraintJson = (ConstraintJson) data[DecorationData.CONSTRAINT.ordinal()];
         Set<Long> recipeIds = (Set<Long>) data[DecorationData.RECIPE_IDS.ordinal()];
         boolean postRequest = (boolean) data[DecorationData.REQUEST_TYPE.ordinal()];
@@ -109,7 +109,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         return subject;
     }
 
-    private Constraint decorateConstraint(Long stackId, CbUser user, Constraint constraint, String instanceGroupName, String constraintTemplateName) {
+    private Constraint decorateConstraint(Long stackId, IdentityUser user, Constraint constraint, String instanceGroupName, String constraintTemplateName) {
         if (instanceGroupName != null) {
             InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, instanceGroupName);
             if (instanceGroup == null) {
@@ -129,7 +129,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         return constraint;
     }
 
-    private HostGroup getHostGroup(Long stackId, Constraint constraint, ConstraintJson constraintJson, HostGroup subject, CbUser user) {
+    private HostGroup getHostGroup(Long stackId, Constraint constraint, ConstraintJson constraintJson, HostGroup subject, IdentityUser user) {
         if (constraintJson == null) {
             throw new BadRequestException("The constraint field must be set in the reinstall request!");
         }

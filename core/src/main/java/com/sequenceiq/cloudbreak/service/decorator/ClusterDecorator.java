@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
@@ -82,7 +82,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
             throw new IllegalArgumentException("Invalid decoration data provided. Cluster: " + subject.getName());
         }
         Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
-        CbUser user = (CbUser) data[DecorationData.USER.ordinal()];
+        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
         Long blueprintId = (Long) data[DecorationData.BLUEPRINT_ID.ordinal()];
         Long ldapConfigId = (Long) data[DecorationData.LDAP_CONFIG_ID.ordinal()];
         Set<HostGroupRequest> hostGroupsJsons = (Set<HostGroupRequest>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
@@ -123,7 +123,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         return subject;
     }
 
-    private void prepareSssd(Cluster subject, CbUser user, Long sssdConfigId, SssdConfigRequest requestSssd, Stack stack) {
+    private void prepareSssd(Cluster subject, IdentityUser user, Long sssdConfigId, SssdConfigRequest requestSssd, Stack stack) {
         if (sssdConfigId != null) {
             SssdConfig config = sssdConfigService.get(sssdConfigId);
             subject.setSssdConfig(config);
@@ -135,7 +135,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         }
     }
 
-    private void prepareLdap(Cluster subject, CbUser user, Long ldapConfigId, LdapConfigRequest ldapConfigRequest, Stack stack) {
+    private void prepareLdap(Cluster subject, IdentityUser user, Long ldapConfigId, LdapConfigRequest ldapConfigRequest, Stack stack) {
         if (ldapConfigId != null) {
             LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId);
             subject.setLdapConfig(ldapConfig);
@@ -148,7 +148,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         }
     }
 
-    private void prepareRds(Cluster subject, CbUser user, Set<Long> rdsConfigIds, Set<RDSConfigJson> requestRdsConfigs, Stack stack) {
+    private void prepareRds(Cluster subject, IdentityUser user, Set<Long> rdsConfigIds, Set<RDSConfigJson> requestRdsConfigs, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
         if (rdsConfigIds != null && !rdsConfigIds.isEmpty()) {
             for (Long rdsConfigId : rdsConfigIds) {
@@ -165,7 +165,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         }
     }
 
-    private Set<HostGroup> convertHostGroupsFromJson(Stack stack, CbUser user, Cluster cluster, Set<HostGroupRequest> hostGroupsJsons) {
+    private Set<HostGroup> convertHostGroupsFromJson(Stack stack, IdentityUser user, Cluster cluster, Set<HostGroupRequest> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);

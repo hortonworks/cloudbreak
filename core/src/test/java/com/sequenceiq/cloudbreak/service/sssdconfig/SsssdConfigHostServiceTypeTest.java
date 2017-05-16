@@ -24,7 +24,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -157,7 +157,7 @@ public class SsssdConfigHostServiceTypeTest {
 
     @Test
     public void testDeleteWithoutError() {
-        CbUser user = TestUtil.cbAdminUser();
+        IdentityUser user = TestUtil.cbAdminUser();
         sssdConfig.setOwner(user.getUserId());
         sssdConfig.setAccount(user.getAccount());
         when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);
@@ -171,7 +171,7 @@ public class SsssdConfigHostServiceTypeTest {
 
     @Test(expected = BadRequestException.class)
     public void testDeleteWithPermissionError() {
-        CbUser user = TestUtil.cbUser();
+        IdentityUser user = TestUtil.cbUser();
         sssdConfig.setOwner("owner");
         sssdConfig.setAccount("account");
         when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);
@@ -186,7 +186,7 @@ public class SsssdConfigHostServiceTypeTest {
 
     @Test(expected = BadRequestException.class)
     public void testDeleteWithUsedError() {
-        CbUser user = TestUtil.cbUser();
+        IdentityUser user = TestUtil.cbUser();
         sssdConfig.setOwner("owner");
         sssdConfig.setAccount("account");
         when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);

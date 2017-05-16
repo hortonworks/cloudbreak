@@ -12,10 +12,10 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterTemplateRepository;
@@ -33,12 +33,12 @@ public class ClusterTemplateService {
     @Inject
     private ClusterRepository clusterRepository;
 
-    public Set<ClusterTemplate> retrievePrivateClusterTemplates(CbUser user) {
+    public Set<ClusterTemplate> retrievePrivateClusterTemplates(IdentityUser user) {
         return clusterTemplateRepository.findForUser(user.getUserId());
     }
 
-    public Set<ClusterTemplate> retrieveAccountClusterTemplates(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<ClusterTemplate> retrieveAccountClusterTemplates(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return clusterTemplateRepository.findAllInAccount(user.getAccount());
         } else {
             return clusterTemplateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
@@ -55,7 +55,7 @@ public class ClusterTemplateService {
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public ClusterTemplate getByName(String name, CbUser user) {
+    public ClusterTemplate getByName(String name, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUsername());
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
@@ -64,7 +64,7 @@ public class ClusterTemplateService {
     }
 
     @Transactional(Transactional.TxType.NEVER)
-    public ClusterTemplate create(CbUser user, ClusterTemplate clusterTemplate) {
+    public ClusterTemplate create(IdentityUser user, ClusterTemplate clusterTemplate) {
         LOGGER.debug("Creating clusterTemplate: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         ClusterTemplate savedClusterTemplate;
         clusterTemplate.setOwner(user.getUserId());
@@ -77,7 +77,7 @@ public class ClusterTemplateService {
         return savedClusterTemplate;
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findByIdInAccount(id, user.getAccount());
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", id));
@@ -85,7 +85,7 @@ public class ClusterTemplateService {
         delete(clusterTemplate, user);
     }
 
-    public ClusterTemplate getPublicClusterTemplate(String name, CbUser user) {
+    public ClusterTemplate getPublicClusterTemplate(String name, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findOneByName(name, user.getAccount());
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", name));
@@ -93,7 +93,7 @@ public class ClusterTemplateService {
         return clusterTemplate;
     }
 
-    public ClusterTemplate getPrivateClusterTemplate(String name, CbUser user) {
+    public ClusterTemplate getPrivateClusterTemplate(String name, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInUser(name, user.getUserId());
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", name));
@@ -101,7 +101,7 @@ public class ClusterTemplateService {
         return clusterTemplate;
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         ClusterTemplate clusterTemplate = clusterTemplateRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", name));
@@ -114,8 +114,8 @@ public class ClusterTemplateService {
         return clusterTemplateRepository.save(entities);
     }
 
-    private void delete(ClusterTemplate clusterTemplate, CbUser user) {
-        if (!user.getUserId().equals(clusterTemplate.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+    private void delete(ClusterTemplate clusterTemplate, IdentityUser user) {
+        if (!user.getUserId().equals(clusterTemplate.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
             throw new BadRequestException("ClusterTemplate can only be deleted by account admins or owners.");
         }
         clusterTemplateRepository.delete(clusterTemplate);

@@ -10,10 +10,10 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
@@ -30,7 +30,7 @@ public class LdapConfigService {
     private ClusterRepository clusterRepository;
 
     @Transactional(Transactional.TxType.NEVER)
-    public LdapConfig create(CbUser user, LdapConfig ldapConfig) {
+    public LdapConfig create(IdentityUser user, LdapConfig ldapConfig) {
         ldapConfig.setOwner(user.getUserId());
         ldapConfig.setAccount(user.getAccount());
         try {
@@ -49,19 +49,19 @@ public class LdapConfigService {
         return ldapConfig;
     }
 
-    public Set<LdapConfig> retrievePrivateConfigs(CbUser user) {
+    public Set<LdapConfig> retrievePrivateConfigs(IdentityUser user) {
         return ldapConfigRepository.findForUser(user.getUserId());
     }
 
-    public Set<LdapConfig> retrieveAccountConfigs(CbUser user) {
-        if (user.getRoles().contains(CbUserRole.ADMIN)) {
+    public Set<LdapConfig> retrieveAccountConfigs(IdentityUser user) {
+        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             return ldapConfigRepository.findAllInAccount(user.getAccount());
         } else {
             return ldapConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
-    public LdapConfig getPrivateConfig(String name, CbUser user) {
+    public LdapConfig getPrivateConfig(String name, IdentityUser user) {
         LdapConfig ldapConfig = ldapConfigRepository.findByNameForUser(name, user.getUserId());
         if (ldapConfig == null) {
             throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
@@ -69,7 +69,7 @@ public class LdapConfigService {
         return ldapConfig;
     }
 
-    public LdapConfig getPublicConfig(String name, CbUser user) {
+    public LdapConfig getPublicConfig(String name, IdentityUser user) {
         LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
         if (ldapConfig == null) {
             throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
@@ -77,7 +77,7 @@ public class LdapConfigService {
         return ldapConfig;
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id, IdentityUser user) {
         LdapConfig ldapConfig = get(id);
         if (ldapConfig == null) {
             throw new NotFoundException(String.format("LdapConfig '%s' not found.", id));
@@ -85,7 +85,7 @@ public class LdapConfigService {
         delete(ldapConfig, user);
     }
 
-    public void delete(String name, CbUser user) {
+    public void delete(String name, IdentityUser user) {
         LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
         if (ldapConfig == null) {
             throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
@@ -93,9 +93,9 @@ public class LdapConfigService {
         delete(ldapConfig, user);
     }
 
-    private void delete(LdapConfig ldapConfig, CbUser user) {
+    private void delete(LdapConfig ldapConfig, IdentityUser user) {
         if (clusterRepository.findAllClustersByLdapConfig(ldapConfig.getId()).isEmpty()) {
-            if (!user.getUserId().equals(ldapConfig.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
+            if (!user.getUserId().equals(ldapConfig.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
                 throw new BadRequestException("Public LDAP configs can only be deleted by owners or account admins.");
             } else {
                 ldapConfigRepository.delete(ldapConfig);

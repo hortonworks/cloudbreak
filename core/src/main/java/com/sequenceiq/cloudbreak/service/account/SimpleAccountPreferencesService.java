@@ -11,10 +11,10 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.google.common.util.concurrent.Striped;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
 
 @Service
@@ -38,7 +38,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     @Override
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public AccountPreferences saveOne(CbUser user, AccountPreferences accountPreferences) {
+    public AccountPreferences saveOne(IdentityUser user, AccountPreferences accountPreferences) {
         accountPreferences.setAccount(user.getAccount());
         return repository.save(accountPreferences);
     }
@@ -72,9 +72,9 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     @Override
     @PostAuthorize("hasPermission(returnObject,'read')")
-    public AccountPreferences getOneById(Long id, CbUser user) {
+    public AccountPreferences getOneById(Long id, IdentityUser user) {
         AccountPreferences accountPreferences = repository.findOne(id);
-        if (!user.getRoles().contains(CbUserRole.ADMIN)) {
+        if (!user.getRoles().contains(IdentityUserRole.ADMIN)) {
             throw new BadRequestException("AccountPreferences are only available for admin users!");
         } else if (accountPreferences == null) {
             throw new BadRequestException(String.format("AccountPreferences could not find with id: %s", id));
@@ -86,13 +86,13 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     }
 
     @Override
-    public AccountPreferences getOneByAccount(CbUser user) {
+    public AccountPreferences getOneByAccount(IdentityUser user) {
         String account = user.getAccount();
         return getByAccount(account);
     }
 
     @Override
-    public void delete(CbUser user) {
+    public void delete(IdentityUser user) {
         AccountPreferences preferences = getOneByAccount(user);
         repository.delete(preferences);
     }

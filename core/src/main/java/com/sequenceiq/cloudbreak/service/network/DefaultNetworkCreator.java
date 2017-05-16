@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.NetworkConfig;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
-import com.sequenceiq.cloudbreak.domain.CbUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.util.NameUtil;
@@ -32,7 +32,7 @@ public class DefaultNetworkCreator {
     @Inject
     private NetworkRepository networkRepository;
 
-    public void createDefaultNetworks(CbUser user) {
+    public void createDefaultNetworks(IdentityUser user) {
         Set<Network> defaultNetworks = networkRepository.findAllDefaultInAccount(user.getAccount());
         List<String> defaultNetworkNames = defaultNetworks.stream()
                 .map(n -> n.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(n.getName()) : n.getName())
@@ -40,7 +40,7 @@ public class DefaultNetworkCreator {
         createDefaultNetworkInstances(user, defaultNetworkNames);
     }
 
-    private void createDefaultNetworkInstances(CbUser user, List<String> defaultNetworkNames) {
+    private void createDefaultNetworkInstances(IdentityUser user, List<String> defaultNetworkNames) {
         if (!defaultNetworkNames.contains(DEFAULT_AWS_NETWORK_NAME)) {
             Network awsNetwork = new Network();
             setNetworkCommonFields(awsNetwork, DEFAULT_AWS_NETWORK_NAME, "Default network settings for AWS clusters.",
@@ -61,7 +61,7 @@ public class DefaultNetworkCreator {
         }
     }
 
-    private void setNetworkCommonFields(Network network, String name, String description, String subnet, CbUser user, String platform) {
+    private void setNetworkCommonFields(Network network, String name, String description, String subnet, IdentityUser user, String platform) {
         network.setName(name);
         network.setDescription(description);
         network.setSubnetCIDR(subnet);
