@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.WaitForAmbariServerSu
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewaySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 
 @Configuration
 public class ChangePrimaryGatewayActions {
@@ -54,11 +56,26 @@ public class ChangePrimaryGatewayActions {
         };
     }
 
-    @Bean(name = "CHANGE_PRIMARY_GATEWAY_FINISHED_STATE")
-    public Action changeGatewayFinishedAction() {
+    @Bean(name = "UPDATE_PROXY_STATE")
+    public Action registerProxyAction() {
         return new AbstractClusterAction<WaitForAmbariServerSuccess>(WaitForAmbariServerSuccess.class) {
             @Override
             protected void doExecute(ClusterContext context, WaitForAmbariServerSuccess payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterContext context) {
+                return new RegisterProxyRequest(context.getStack().getId());
+            }
+        };
+    }
+
+    @Bean(name = "CHANGE_PRIMARY_GATEWAY_FINISHED_STATE")
+    public Action changeGatewayFinishedAction() {
+        return new AbstractClusterAction<RegisterProxySuccess>(RegisterProxySuccess.class) {
+            @Override
+            protected void doExecute(ClusterContext context, RegisterProxySuccess payload, Map<Object, Object> variables) throws Exception {
                 changePrimaryGatewayService.ambariServerStarted(context.getStack());
                 sendEvent(context);
             }
