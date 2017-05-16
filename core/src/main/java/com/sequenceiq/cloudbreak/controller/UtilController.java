@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Map;
+import java.util.Set;
+
 import javax.inject.Inject;
 import javax.validation.Valid;
 
@@ -56,18 +59,18 @@ public class UtilController implements UtilEndpoint {
     }
 
     @Override
-    public RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest) {
+    public RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest, Set<String> targets) {
         RdsBuildResult rdsBuildResult = new RdsBuildResult();
         try {
             String clusterName = rdsBuildRequest.getClusterName().replaceAll("[^a-zA-Z0-9]", "");
-            rdsConnectionBuilder.buildRdsConnection(
+            Map<String, String> result = rdsConnectionBuilder.buildRdsConnection(
                     rdsBuildRequest.getRdsConfigRequest().getConnectionURL(),
                     rdsBuildRequest.getRdsConfigRequest().getConnectionUserName(),
                     rdsBuildRequest.getRdsConfigRequest().getConnectionPassword(),
-                    clusterName);
-            rdsBuildResult.setAmbariDbName(clusterName + "ambari");
-            rdsBuildResult.setHiveDbName(clusterName + "hive");
-            rdsBuildResult.setRangerDbName(clusterName + "ranger");
+                    clusterName,
+                    targets);
+
+            rdsBuildResult.setResults(result);
         } catch (BadRequestException e) {
             throw new BadRequestException("Could not create databases in metastore.");
         }

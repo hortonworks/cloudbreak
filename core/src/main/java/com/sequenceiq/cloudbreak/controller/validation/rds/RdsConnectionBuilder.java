@@ -4,7 +4,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.postgresql.util.PSQLException;
 import org.slf4j.Logger;
@@ -18,19 +21,24 @@ public class RdsConnectionBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsConnectionBuilder.class);
 
-    public void buildRdsConnection(String connectionURL, String connectionUserName, String connectionPassword, String clusterName) {
+    public Map<String, String> buildRdsConnection(String connectionURL, String connectionUserName, String connectionPassword, String clusterName,
+            Set<String> targets) {
+        Map<String, String> map = new HashMap<>();
+
         Properties connectionProps = new Properties();
         connectionProps.put("user", connectionUserName);
         connectionProps.put("password", connectionPassword);
         try {
             Connection conn = DriverManager.getConnection(connectionURL, connectionProps);
-            createDb(conn, clusterName, "hive");
-            createDb(conn, clusterName, "ranger");
-            createDb(conn, clusterName, "ambari");
+            for (String target : targets) {
+                createDb(conn, clusterName, target);
+                map.put(target, clusterName + target);
+            }
             conn.close();
         } catch (SQLException e) {
             throw new BadRequestException("Failed to connect to RDS: " + e.getMessage(), e);
         }
+        return map;
     }
 
     private void createDb(Connection conn, String clusterName, String service) {
