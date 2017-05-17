@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"strconv"
+	"time"
+
 	log "github.com/Sirupsen/logrus"
 	f "github.com/hortonworks/hdc-cli/client_cloudbreak/flexsubscriptions"
 	s "github.com/hortonworks/hdc-cli/client_cloudbreak/smartsensesubscriptions"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
-	"strconv"
-	"time"
 )
 
 var FlexSubscriptionHeader []string = []string{"Name", "SubscriptionID", "IsDefault", "UsedForController"}
@@ -52,9 +53,9 @@ func createFlexSubscriptionImpl(
 	name string,
 	subscriptionId string) {
 
-	sss, err1 := getPrivateSmartSenseSubscriptions(&s.GetPrivateSmartSenseSubscriptionsParams{})
-	if err1 != nil {
-		logErrorAndExit(err1)
+	sss, err := getPrivateSmartSenseSubscriptions(&s.GetPrivateSmartSenseSubscriptionsParams{})
+	if err != nil {
+		logErrorAndExit(err)
 	}
 
 	if len(sss.Payload) < 1 {
@@ -64,15 +65,15 @@ func createFlexSubscriptionImpl(
 
 	smartSenseSubscriptionId := sss.Payload[0].ID
 	fa := false
-	resp, err2 := postPrivateFlexSubscription(&f.PostPrivateFlexSubscriptionParams{Body: &models_cloudbreak.FlexSubscriptionRequest{
+	resp, err := postPrivateFlexSubscription(&f.PostPrivateFlexSubscriptionParams{Body: &models_cloudbreak.FlexSubscriptionRequest{
 		Name:                     name,
 		SubscriptionID:           &subscriptionId,
 		SmartSenseSubscriptionID: smartSenseSubscriptionId,
 		Default:                  &fa,
 		UsedForController:        &fa}})
 
-	if err2 != nil {
-		logErrorAndExit(err1)
+	if err != nil {
+		logErrorAndExit(err)
 	}
 
 	log.Infof("[createFlexSubscription] Flex subscription created: %v", *resp.Payload)
