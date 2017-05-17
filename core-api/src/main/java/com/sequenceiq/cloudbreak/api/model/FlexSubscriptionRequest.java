@@ -19,7 +19,7 @@ public class FlexSubscriptionRequest implements JsonEntity {
     private String name;
 
     @ApiModelProperty(value = FlexSubscriptionModelDescription.FLEX_SUBSCRIPTION_ID, readOnly = true)
-    @Pattern(regexp = "^(FLEX-[0-9]{10}$)", message = "The given Flex subscription id is not valid!")
+    @Pattern(regexp = "^(FLEX-[0-9]{10}$)", message = "The given Flex subscription id is not in FLEX-xxxxxxxxxx format!")
     private String subscriptionId;
 
     @ApiModelProperty(value = FlexSubscriptionModelDescription.SMARTSENSE_SUBSCRIPTION_ID, readOnly = true)
