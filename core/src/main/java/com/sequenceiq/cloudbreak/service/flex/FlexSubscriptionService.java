@@ -40,8 +40,12 @@ public class FlexSubscriptionService {
             boolean owner = user.getUserId().equals(subscription.getOwner());
             boolean adminInTheAccount = user.getRoles().contains(CbUserRole.ADMIN) && subscription.getAccount().equals(user.getAccount());
             if (owner || adminInTheAccount) {
-                flexRepo.delete(subscription);
-                LOGGER.info("Flex subscription has been deleted: {}", subscription);
+                try {
+                    flexRepo.delete(subscription);
+                    LOGGER.info("Flex subscription has been deleted: {}", subscription);
+                } catch (DataIntegrityViolationException dex) {
+                    throw new CloudbreakServiceException("The given Flex subscription cannot be deleted, there are associated clusters", dex);
+                }
             } else {
                 String msg = "Only the owner or the account admin has access to delete Flex subscription with id: %s";
                 throw new CloudbreakServiceException(String.format(msg, subscription.getId()));
