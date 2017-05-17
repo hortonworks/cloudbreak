@@ -42,7 +42,7 @@ public class DefaultCloudbreakUsagesFacade implements CloudbreakUsagesFacade {
     @Override
     public CloudbreakFlexUsageJson getFlexUsagesFor(CbUsageFilterParameters params) {
         List<CloudbreakUsage> usages = cloudbreakUsagesService.findUsagesFor(params);
-        return flexUsageGenerator.getUsages(usages);
+        return flexUsageGenerator.getUsages(usages, params.getSince());
     }
 
 }

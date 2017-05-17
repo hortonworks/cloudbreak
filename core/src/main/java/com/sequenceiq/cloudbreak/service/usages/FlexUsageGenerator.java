@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,8 +26,10 @@ import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageHdpInstanceJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageProductJson;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
@@ -37,6 +39,10 @@ public class FlexUsageGenerator {
 
     private static final String FLEX_TIME_ZONE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss Z";
 
+    private static final String FLEX_USAGE_DAY_FORMAT_PATTERN = "yyyy-MM-dd Z";
+
+    private static final String STACK_NAME_DELIMITER = "_";
+
     @Inject
     private UserDetailsService userDetailsService;
 
@@ -45,6 +51,9 @@ public class FlexUsageGenerator {
 
     @Inject
     private FlexSubscriptionService flexSubscriptionService;
+
+    @Inject
+    private StackService stackService;
 
     @Value("${cb.instance.uuid:}")
     private String parentUuid;
@@ -64,12 +73,12 @@ public class FlexUsageGenerator {
     @Value("${cb.component.cluster.id:cloudbreak-hdp}")
     private String clustersComponentId;
 
-    public CloudbreakFlexUsageJson getUsages(List<CloudbreakUsage> usages) {
+    public CloudbreakFlexUsageJson getUsages(List<CloudbreakUsage> usages, Long fromDate) {
         LOGGER.info("Generating Cloudbreak Flex related usages.");
         CloudbreakFlexUsageJson result = new CloudbreakFlexUsageJson();
         Optional<CloudbreakUsage> aUsage = usages.stream().findFirst();
         result.setController(getFlexUsageControllerJson(usages, aUsage));
-        result.setProducts(getFlexUsageProductJsons(usages, aUsage));
+        result.setProducts(getFlexUsageProductJsons(usages, aUsage, fromDate));
         return result;
     }
 
@@ -96,7 +105,7 @@ public class FlexUsageGenerator {
         return cbUser;
     }
 
-    private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
+    private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage, Long fromDate) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
         flexUsageProductJson.setProductId(productId);
@@ -104,7 +113,7 @@ public class FlexUsageGenerator {
 
         FlexUsageComponentJson cbdComponent = new FlexUsageComponentJson();
         cbdComponent.setComponentId(controllerComponentId);
-        FlexUsageCbdInstanceJson cbdComponentInstance = getFlexUsageCbdInstance();
+        FlexUsageCbdInstanceJson cbdComponentInstance = getFlexUsageCbdInstance(fromDate);
         cbdComponent.setInstances(Collections.singletonList(cbdComponentInstance));
         components.add(cbdComponent);
 
@@ -118,7 +127,7 @@ public class FlexUsageGenerator {
         return flexUsageProducts;
     }
 
-    private FlexUsageCbdInstanceJson getFlexUsageCbdInstance() {
+    private FlexUsageCbdInstanceJson getFlexUsageCbdInstance(Long fromDate) {
         FlexUsageCbdInstanceJson cbdComponentInstance = new FlexUsageCbdInstanceJson();
         cbdComponentInstance.setGuid(parentUuid);
         cbdComponentInstance.setPeakUsage(1);
@@ -128,8 +137,7 @@ public class FlexUsageGenerator {
         cbdComponentInstance.setCreationTime("");
         //TODO create a findDefaults method to flexSubscriptionService that will return with the default subscription for controllers
         cbdComponentInstance.setFlexPlanId("");
-        //TODO add the date as String with the required pattern
-        cbdComponentInstance.setUsageDate("");
+        cbdComponentInstance.setUsageDate(formatInstant(Instant.ofEpochMilli(fromDate), FLEX_USAGE_DAY_FORMAT_PATTERN));
         return cbdComponentInstance;
     }
 
@@ -148,10 +156,10 @@ public class FlexUsageGenerator {
                 usageJson.setRegion(usage.getRegion());
                 usageJson.setPeakUsage(usage.getPeak());
                 usageJson.setNodeCount(usage.getInstanceNum());
-                usageJson.setUsageDate(formatDate(usage.getDay()));
-                //TODO creation and termination time need to be inserted into Cloudbreak usage as new fields
-                usageJson.setCreationTime("");
-                usageJson.setTerminationTime("");
+                usageJson.setUsageDate(formatInstant(usage.getDay().toInstant(), FLEX_USAGE_DAY_FORMAT_PATTERN));
+                Stack stack = stackService.getById(usage.getStackId());
+                usageJson.setCreationTime(formatInstant(Instant.ofEpochMilli(stack.getCreated()), FLEX_TIME_ZONE_FORMAT_PATTERN));
+                usageJson.setTerminationTime(getTerminationTime(stack));
                 flexUsageJsonsByStackId.put(stackId, usageJson);
             } else {
                 FlexUsageHdpInstanceJson usageJson = flexUsageJsonsByStackId.get(stackId);
@@ -166,8 +174,23 @@ public class FlexUsageGenerator {
         return new ArrayList<>(flexUsageJsonsByStackId.values());
     }
 
-    private String formatDate(Date date) {
-        ZonedDateTime usageDayZoneDate = ZonedDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
-        return usageDayZoneDate.format(DateTimeFormatter.ofPattern(FLEX_TIME_ZONE_FORMAT_PATTERN));
+    private String formatInstant(Instant instant, String pattern) {
+        ZonedDateTime usageDayZoneDate = ZonedDateTime.ofInstant(instant, ZoneId.systemDefault());
+        return usageDayZoneDate.format(DateTimeFormatter.ofPattern(pattern));
+    }
+
+    private String getTerminationTime(Stack stack) {
+        String terminationTime = "";
+        if (stack.isDeleteCompleted()) {
+            try {
+                String stackName = stack.getName();
+                int indexOfDelimiter = stackName.lastIndexOf(STACK_NAME_DELIMITER) + 1;
+                Long stackTerminationInMillis = Long.valueOf(stackName.substring(indexOfDelimiter));
+                terminationTime = formatInstant(Instant.ofEpochMilli(stackTerminationInMillis), FLEX_TIME_ZONE_FORMAT_PATTERN);
+            } catch (Exception ex) {
+                LOGGER.warn("Stack termination time could not be calculated.", ex);
+            }
+        }
+        return terminationTime;
     }
 }
