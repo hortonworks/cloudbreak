@@ -394,6 +394,14 @@ public class ShellContext {
         return cloudbreakClient.credentialEndpoint().get(Long.valueOf(id));
     }
 
+    public void putTemplate(TemplateResponse t) {
+        if (activeCloudPlatform != null && activeCloudPlatform.equals(t.getCloudPlatform())) {
+            templateMap.put(t.getId(), t);
+            activeTemplateNames.add(t.getName());
+            activeTemplates.add(t.getId().toString());
+        }
+    }
+
     private void fillTemplates(List<TemplateResponse> templateList) {
         for (TemplateResponse t : templateList) {
             templateMap.put(t.getId(), t);

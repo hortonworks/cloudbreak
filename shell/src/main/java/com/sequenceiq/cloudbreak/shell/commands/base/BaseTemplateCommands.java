@@ -165,13 +165,15 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
             }
             templateRequest.setTopologyId(platformId);
 
+            TemplateResponse templateResponse;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().templateEndpoint().postPublic(templateRequest).getId();
+                templateResponse = shellContext.cloudbreakClient().templateEndpoint().postPublic(templateRequest);
             } else {
-                id = shellContext.cloudbreakClient().templateEndpoint().postPrivate(templateRequest).getId();
+                templateResponse = shellContext.cloudbreakClient().templateEndpoint().postPrivate(templateRequest);
             }
+            shellContext.putTemplate(templateResponse);
             createOrSelectBlueprintHint();
-            return String.format(CREATE_SUCCESS_MESSAGE, id, name);
+            return String.format(CREATE_SUCCESS_MESSAGE, templateResponse.getId(), name);
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
