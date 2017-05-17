@@ -49,6 +49,12 @@ public class FlexUsageGenerator {
     @Value("${cb.instance.uuid:}")
     private String parentUuid;
 
+    @Value("${cb.instance.provider:on-prem}")
+    private String cbInstanceProvider;
+
+    @Value("${cb.instance.region:local}")
+    private String cbInstanceRegion;
+
     @Value("${cb.product.id:cloudbreak}")
     private String productId;
 
@@ -71,10 +77,9 @@ public class FlexUsageGenerator {
         Optional<SmartSenseSubscription> smartSenseSubscriptionOptional = smartSenseSubscriptionService.getOne();
         FlexUsageControllerJson controllerJson = new FlexUsageControllerJson();
         controllerJson.setGuid(parentUuid);
-        //TODO get the details of the deployment somehow Provider/Region/CreationDate
-        controllerJson.setInstanceId("");
-        controllerJson.setProvider("");
-        controllerJson.setRegion("");
+        controllerJson.setInstanceId(parentUuid);
+        controllerJson.setProvider(cbInstanceProvider);
+        controllerJson.setRegion(cbInstanceRegion);
         aUsage.ifPresent(cloudbreakUsage -> controllerJson.setUserName(getUserEmail(cloudbreakUsage)));
         smartSenseSubscriptionOptional.ifPresent(smartSenseSubscription -> controllerJson.setSmartSenseId(smartSenseSubscription.getSubscriptionId()));
         return controllerJson;
@@ -94,8 +99,6 @@ public class FlexUsageGenerator {
     private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
-        //TODO Product and Component IDs should looks like
-        // https://docs.google.com/presentation/d/1x5K7MaUdFltxUf4fiF3skCe1D_4p0yEul3fZ07goX90/edit#slide=id.g1c321bbed8_1_300
         flexUsageProductJson.setProductId(productId);
         List<FlexUsageComponentJson> components = new ArrayList<>();
 
@@ -119,9 +122,9 @@ public class FlexUsageGenerator {
         FlexUsageCbdInstanceJson cbdComponentInstance = new FlexUsageCbdInstanceJson();
         cbdComponentInstance.setGuid(parentUuid);
         cbdComponentInstance.setPeakUsage(1);
-        //TODO get the details of the deployment somehow Provider/Region/CreationDate
-        cbdComponentInstance.setProvider("");
-        cbdComponentInstance.setRegion("");
+        cbdComponentInstance.setProvider(cbInstanceProvider);
+        cbdComponentInstance.setRegion(cbInstanceRegion);
+        //TODO get the details of the deployment somehow CreationDate
         cbdComponentInstance.setCreationTime("");
         //TODO create a findDefaults method to flexSubscriptionService that will return with the default subscription for controllers
         cbdComponentInstance.setFlexPlanId("");
