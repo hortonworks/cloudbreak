@@ -2,8 +2,16 @@ package com.sequenceiq.cloudbreak.cloud.azure.client;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.PagedList;
@@ -31,6 +39,7 @@ import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccountKey;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.BlobContainerPermissions;
 import com.microsoft.azure.storage.blob.BlobContainerPublicAccessType;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
@@ -40,8 +49,11 @@ import com.microsoft.azure.storage.blob.CloudPageBlob;
 import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.microsoft.rest.LogLevel;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 public class AzureClient {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureClient.class);
 
     private Azure azure;
 
@@ -75,7 +87,7 @@ public class AzureClient {
         return azure.resourceGroups().getByName(name);
     }
 
-    public ResourceGroups getResourceGroups()  {
+    public ResourceGroups getResourceGroups() {
         return azure.resourceGroups();
     }
 
@@ -101,6 +113,10 @@ public class AzureClient {
                 .withParameters(parameterContent)
                 .withMode(DeploymentMode.INCREMENTAL)
                 .create();
+    }
+
+    public boolean templateDeploymentExists(String resourceGroupName, String deploymentName) {
+        return azure.deployments().checkExistence(resourceGroupName, deploymentName);
     }
 
     public void deleteTemplateDeployment(String resourceGroupName, String deploymentName) {
@@ -157,58 +173,108 @@ public class AzureClient {
         return azure.storageAccounts().getByResourceGroup(resourceGroup, storageName);
     }
 
-    public void deleteContainerInStorage(String resourceGroup, String storageName, String containerName) throws Exception {
+    public void deleteContainerInStorage(String resourceGroup, String storageName, String containerName) {
+        LOGGER.debug("delete container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        container.deleteIfExists();
+        try {
+            boolean existed = container.deleteIfExists();
+            LOGGER.info("is container existed: " + existed);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't delete container in storage, storage service error occurred", e);
+        }
     }
 
-    public void deleteBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String blobName) throws Exception {
+    public void deleteBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String blobName) {
+        LOGGER.debug("delete blob: RG={}, storageName={}, containerName={}, blobName={}", resourceGroup, storageName, containerName, blobName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        CloudBlockBlob blob = container.getBlockBlobReference(blobName);
-        blob.deleteIfExists();
+        try {
+            CloudBlockBlob blob = container.getBlockBlobReference(blobName);
+            boolean wasDeleted = blob.deleteIfExists();
+            LOGGER.info("blob was deleted: " + wasDeleted);
+        } catch (URISyntaxException e) {
+            throw new CloudConnectorException("can't delete blob in storage container, URI is not valid", e);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't delete blob in storage container, storage service error occurred", e);
+        }
     }
 
-    public void createContainerInStorage(String resourceGroup, String storageName, String containerName) throws Exception {
+    public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
+        LOGGER.debug("create container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        container.createIfNotExists();
+        try {
+            boolean created = container.createIfNotExists();
+            LOGGER.info("container created: " + created);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't create container in storage, storage service error occurred", e);
+        }
         setPublicPermissionOnContainer(resourceGroup, storageName, containerName);
     }
 
-    public void setPublicPermissionOnContainer(String resourceGroup, String storageName, String containerName) throws Exception {
+    public void setPublicPermissionOnContainer(String resourceGroup, String storageName, String containerName) {
+        LOGGER.debug("set public permission on container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         BlobContainerPermissions containerPermissions = new BlobContainerPermissions();
         containerPermissions.setPublicAccess(BlobContainerPublicAccessType.CONTAINER);
-        container.uploadPermissions(containerPermissions);
+        try {
+            container.uploadPermissions(containerPermissions);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't set public permission on container, storage service error occurred", e);
+        }
     }
 
-    public String copyImageBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String sourceBlob) throws Exception {
+    public void copyImageBlobInStorageContainer(String resourceGroup, String storageName, String containerName, String sourceBlob) {
+        LOGGER.debug("copy image in storage container: RG={}, storageName={}, containerName={}, sourceBlob={}",
+                resourceGroup, storageName, containerName, sourceBlob);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf("/") + 1));
-        return cloudPageBlob.startCopy(new URI(sourceBlob));
+        try {
+            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf("/") + 1));
+            String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
+            LOGGER.info("image copy started, copy id: %s", copyId);
+        } catch (URISyntaxException e) {
+            throw new CloudConnectorException("can't copy image blob, URI is not valid", e);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't copy image blob, storage service error occurred", e);
+        }
     }
 
-    public CopyState getCopyStatus(String resourceGroup, String storageName, String containerName, String sourceBlob) throws Exception {
+    public CopyState getCopyStatus(String resourceGroup, String storageName, String containerName, String sourceBlob) {
+        LOGGER.debug("get image copy status: RG={}, storageName={}, containerName={}, sourceBlob={}",
+                resourceGroup, storageName, containerName, sourceBlob);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf("/") + 1));
-        container.downloadAttributes();
-        cloudPageBlob.downloadAttributes();
-        return cloudPageBlob.getCopyState();
+        try {
+            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf("/") + 1));
+            container.downloadAttributes();
+            cloudPageBlob.downloadAttributes();
+            return cloudPageBlob.getCopyState();
+        } catch (URISyntaxException e) {
+            throw new CloudConnectorException("can't get copy status, URI is not valid", e);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't get copy status, storage service error occurred", e);
+        }
     }
 
-    public List<ListBlobItem> listBlobInStorage(String resourceGroup, String storageName, String containerName) throws Exception {
+    public List<ListBlobItem> listBlobInStorage(String resourceGroup, String storageName, String containerName) {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
-        List<ListBlobItem> targetCollection = new ArrayList<ListBlobItem>();
+        List<ListBlobItem> targetCollection = new ArrayList<>();
         container.listBlobs().iterator().forEachRemaining(targetCollection::add);
         return targetCollection;
     }
 
-    public CloudBlobContainer getBlobContainer(String resourceGroup, String storageName, String containerName) throws Exception {
+    public CloudBlobContainer getBlobContainer(String resourceGroup, String storageName, String containerName) {
+        LOGGER.debug("get blob container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
         List<StorageAccountKey> keys = getStorageAccountKeys(resourceGroup, storageName);
         String storageConnectionString = String.format("DefaultEndpointsProtocol=http;AccountName=%s;AccountKey=%s", storageName, keys.get(0).value());
-        CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
-        CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
-        CloudBlobContainer container = blobClient.getContainerReference(containerName);
-        return container;
+        try {
+            CloudStorageAccount storageAccount = CloudStorageAccount.parse(storageConnectionString);
+            CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
+            return blobClient.getContainerReference(containerName);
+        } catch (URISyntaxException e) {
+            throw new CloudConnectorException("can't get blob container, URI is not valid", e);
+        } catch (InvalidKeyException e) {
+            throw new CloudConnectorException("can't get blob container, credentials in the connection string contain an invalid key", e);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't get blob container, storage service error occurred", e);
+        }
     }
 
     public PagedList<VirtualMachine> getVirtualMachines(String resourceGroup) {
@@ -245,6 +311,13 @@ public class AzureClient {
 
     public void deallocateVirtualMachine(String resourceGroup, String vmName) {
         azure.virtualMachines().deallocate(resourceGroup, vmName);
+    }
+
+    public boolean isVirtualMachineExists(String resourceGroup, String vmName) {
+        Iterable<VirtualMachine> vmIterable = () -> azure.virtualMachines().listByResourceGroup(resourceGroup).iterator();
+        Stream<VirtualMachine> vmStream = StreamSupport.stream(vmIterable.spliterator(), false);
+        Optional<VirtualMachine> vm = vmStream.filter(virtualMachine -> vmName.equals(virtualMachine.name())).findFirst();
+        return vm.isPresent();
     }
 
     public void deleteVirtualMachine(String resourceGroup, String vmName) {

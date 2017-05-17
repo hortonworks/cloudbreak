@@ -22,7 +22,7 @@ public class Image {
     public Image(@JsonProperty("imageName") String imageName,
             @JsonProperty("userdata") Map<InstanceGroupType, String> userdata) {
         this.imageName = imageName;
-        this.userdata = ImmutableMap.copyOf(userdata);
+        this.userdata = userdata != null ? ImmutableMap.copyOf(userdata) : null;
     }
 
     public String getImageName() {
