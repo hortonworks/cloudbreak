@@ -1334,11 +1334,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             return variants;
         }
 
+        function validateTag(pattern, value) {
+            var caseInSensitivePattern = pattern.replace(/\(\?i\)/g, "");
+            var i = caseInSensitivePattern != pattern ? 'i' : '';
+            return new RegExp(caseInSensitivePattern, i).test(value);
+        }
+
         $scope.validateUserDefinedTagKey = (function() {
             return {
                 test: function(value) {
-                    var ts = $rootScope.params.tagSpecifications[$rootScope.activeCredential.cloudPlatform];
-                    return new RegExp(ts.keyValidator).test(value);
+                    var pattern = $rootScope.params.tagSpecifications[$rootScope.activeCredential.cloudPlatform].keyValidator;
+                    return validateTag(pattern, value);
                 }
             };
         })();
@@ -1346,8 +1352,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.validateUserDefinedTagValue = (function() {
             return {
                 test: function(value) {
-                    var ts = $rootScope.params.tagSpecifications[$rootScope.activeCredential.cloudPlatform];
-                    return new RegExp(ts.valueValidator).test(value);
+                    var pattern = $rootScope.params.tagSpecifications[$rootScope.activeCredential.cloudPlatform].valueValidator;
+                    return validateTag(pattern, value);
                 }
             };
         })();
