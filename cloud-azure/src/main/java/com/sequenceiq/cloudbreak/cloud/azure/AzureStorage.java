@@ -13,14 +13,15 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
+import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
 import com.microsoft.azure.management.storage.StorageAccounts;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 //import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 
 @Service
@@ -66,14 +67,14 @@ public class AzureStorage {
     }
 
     public void createStorage(AuthenticatedContext ac, AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region)
-            throws Exception {
+            throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
             client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()));
         }
     }
 
     public void deleteStorage(AuthenticatedContext authenticatedContext, AzureClient client, String osStorageName, String storageGroup)
-            throws Exception {
+            throws CloudException {
         if (storageAccountExist(client, osStorageName)) {
             client.deleteStorageAccount(storageGroup, osStorageName);
         }

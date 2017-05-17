@@ -72,8 +72,13 @@ public class AzureInstanceConnector implements InstanceConnector {
         for (CloudInstance vm : vms) {
             try {
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
-                PowerState virtualMachinePowerState = azureClient.getVirtualMachinePowerState(stackName, vm.getInstanceId());
-                statuses.add(new CloudVmInstanceStatus(vm, AzureInstanceStatus.get(virtualMachinePowerState)));
+                boolean virtualMachineExists = azureClient.isVirtualMachineExists(stackName, vm.getInstanceId());
+                if (virtualMachineExists) {
+                    PowerState virtualMachinePowerState = azureClient.getVirtualMachinePowerState(stackName, vm.getInstanceId());
+                    statuses.add(new CloudVmInstanceStatus(vm, AzureInstanceStatus.get(virtualMachinePowerState)));
+                } else {
+                    statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
+                }
             } catch (CloudException e) {
                 if (e.body() != null && "ResourceNotFound".equals(e.body().code())) {
                     statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.TERMINATED));
