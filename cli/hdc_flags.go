@@ -366,7 +366,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "subscription-id",
-			Usage: "id of the SmartSense subscription object in Cloudbreak",
+			Usage: "SmartSense subscription id",
 		},
 	}
 	FlFlexSubscription = StringFlag{

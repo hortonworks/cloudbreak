@@ -23,7 +23,61 @@ type Client struct {
 }
 
 /*
-DeleteSmartSenseSubscriptionByID deletes smart sense subscription by id
+DeleteSmartsensesubscriptionsID deletes smart sense subscription by id
+
+SmartSense subscriptions could be configured.
+*/
+func (a *Client) DeleteSmartsensesubscriptionsID(params *DeleteSmartsensesubscriptionsIDParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteSmartsensesubscriptionsIDParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "DeleteSmartsensesubscriptionsID",
+		Method:             "DELETE",
+		PathPattern:        "/smartsensesubscriptions/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteSmartsensesubscriptionsIDReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+DeleteSmartsensesubscriptionsUserSubscriptionID deletes private smart sense subscription by subscription ID
+
+SmartSense subscriptions could be configured.
+*/
+func (a *Client) DeleteSmartsensesubscriptionsUserSubscriptionID(params *DeleteSmartsensesubscriptionsUserSubscriptionIDParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteSmartsensesubscriptionsUserSubscriptionIDParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "DeleteSmartsensesubscriptionsUserSubscriptionID",
+		Method:             "DELETE",
+		PathPattern:        "/smartsensesubscriptions/user/{subscriptionId}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeleteSmartsensesubscriptionsUserSubscriptionIDReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+DeleteSmartSenseSubscriptionByID deletes public owned or private smart sense subscription by subscription ID
 
 SmartSense subscriptions could be configured.
 */
@@ -36,7 +90,7 @@ func (a *Client) DeleteSmartSenseSubscriptionByID(params *DeleteSmartSenseSubscr
 	_, err := a.transport.Submit(&client.Operation{
 		ID:                 "deleteSmartSenseSubscriptionById",
 		Method:             "DELETE",
-		PathPattern:        "/smartsensesubscriptions/{id}",
+		PathPattern:        "/smartsensesubscriptions/account/{subscriptionId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
