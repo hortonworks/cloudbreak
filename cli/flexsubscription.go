@@ -33,9 +33,9 @@ func CreateFlexSubscription(c *cli.Context) error {
 		logMissingParameterAndExit(c, []string{FlFlexSubscriptionName.Name})
 	}
 
-	subscriptionId := c.String(FlFlexSubscription.Name)
+	subscriptionId := c.String(FlFlexSubscriptionID.Name)
 	if len(subscriptionId) == 0 {
-		logMissingParameterAndExit(c, []string{FlFlexSubscription.Name})
+		logMissingParameterAndExit(c, []string{FlFlexSubscriptionID.Name})
 	}
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -147,9 +147,9 @@ func SetFlexSubscriptionAsDefault(c *cli.Context) error {
 	defer timeTrack(time.Now(), "set the Flex subscription as default")
 	checkRequiredFlags(c)
 
-	name := c.String(FlFlexSubscription.Name)
+	name := c.String(FlFlexSubscriptionName.Name)
 	if len(name) == 0 {
-		logMissingParameterAndExit(c, []string{FlFlexSubscription.Name})
+		logMissingParameterAndExit(c, []string{FlFlexSubscriptionName.Name})
 	}
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
@@ -172,9 +172,9 @@ func UseFlexSubscriptionForController(c *cli.Context) error {
 	defer timeTrack(time.Now(), "use-flexsubscription-for-controller")
 	checkRequiredFlags(c)
 
-	name := c.String(FlFlexSubscription.Name)
+	name := c.String(FlFlexSubscriptionName.Name)
 	if len(name) == 0 {
-		logMissingParameterAndExit(c, []string{FlFlexSubscription.Name})
+		logMissingParameterAndExit(c, []string{FlFlexSubscriptionName.Name})
 	}
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))

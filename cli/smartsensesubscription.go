@@ -25,9 +25,9 @@ func CreateSmartSenseSubscription(c *cli.Context) error {
 	defer timeTrack(time.Now(), "creation of SmartSenseSubscription")
 	checkRequiredFlags(c)
 
-	subscriptionId := c.String(FlSmartSenseSubscription.Name)
+	subscriptionId := c.String(FlSmartSenseSubscriptionID.Name)
 	if len(subscriptionId) == 0 {
-		logMissingParameterAndExit(c, []string{FlSmartSenseSubscription.Name})
+		logMissingParameterAndExit(c, []string{FlSmartSenseSubscriptionID.Name})
 	}
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
