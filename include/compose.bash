@@ -414,9 +414,14 @@ cloudbreak:
         - CB_AWS_VPC
         - CB_ENABLEDPLATFORMS
         - CB_ENABLE_CUSTOM_IMAGE
-        - CB_INSTANCE_UUID
         - CB_MAX_SALT_NEW_SERVICE_RETRY
         - CB_MAX_SALT_RECIPE_EXECUTION_RETRY
+        - CB_INSTANCE_UUID
+        - CB_INSTANCE_PROVIDER
+        - CB_INSTANCE_REGION
+        - CB_PRODUCT_ID
+        - CB_COMPONENT_ID
+        - CB_COMPONENT_CLUSTER_ID
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
