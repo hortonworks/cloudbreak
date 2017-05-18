@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.converter.JsonToSmartSenseSubscriptionConverter
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
 @Component
@@ -39,7 +40,22 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     @Override
     public void delete(Long id) {
         CbUser cbUser = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(cbUser);
         smartSenseSubService.delete(id, cbUser);
+    }
+
+    @Override
+    public void deletePublic(String subscriptionId) {
+        CbUser cbUser = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(cbUser);
+        smartSenseSubService.delete(subscriptionId, cbUser);
+    }
+
+    @Override
+    public void deletePrivate(String subscriptionId) {
+        CbUser cbUser = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(cbUser);
+        smartSenseSubService.delete(subscriptionId, cbUser);
     }
 
     @Override

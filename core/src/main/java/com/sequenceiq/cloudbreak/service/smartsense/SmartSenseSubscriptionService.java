@@ -61,12 +61,17 @@ public class SmartSenseSubscriptionService {
                 throw new CloudbreakServiceException(String.format(msg, subscription.getId()));
             }
         } else {
-            throw new CloudbreakServiceException(String.format("SmartSense subscription could not be found with id: %s", subscription.getId()));
+            throw new CloudbreakServiceException("SmartSense subscription not found");
         }
     }
 
     public void delete(Long id, CbUser cbUser) {
         SmartSenseSubscription subscription = repository.findOneById(id);
+        delete(subscription, cbUser);
+    }
+
+    public void delete(String subscriptionId, CbUser cbUser) {
+        SmartSenseSubscription subscription = repository.findBySubscriptionIdInAccount(subscriptionId, cbUser.getAccount());
         delete(subscription, cbUser);
     }
 
