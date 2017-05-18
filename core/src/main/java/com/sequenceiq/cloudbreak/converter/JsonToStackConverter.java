@@ -170,8 +170,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
                 if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                     gatewaySpecified = true;
                 }
-            } else if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                throw new BadRequestException("Only 1 Ambari server can be specified");
             }
         }
         boolean containerOrchestrator = false;

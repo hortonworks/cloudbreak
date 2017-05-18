@@ -88,9 +88,9 @@ public class SaltOrchestratorTest {
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443, "/certdir", "servercert", "clientcert", "clientkey",
                 "saltpasswd", "saltbootpassword", "signkey", false, true, null, null);
         targets = new HashSet<>();
-        targets.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com"));
-        targets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com"));
-        targets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com"));
+        targets.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg"));
+        targets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg"));
+        targets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg"));
 
         saltConnector = mock(SaltConnector.class);
         PowerMockito.whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);

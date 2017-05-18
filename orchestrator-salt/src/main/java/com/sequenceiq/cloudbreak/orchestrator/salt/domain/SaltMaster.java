@@ -8,6 +8,8 @@ public class SaltMaster {
 
     private String domain;
 
+    private String hostName;
+
     public String getAddress() {
         return address;
     }
@@ -30,5 +32,13 @@ public class SaltMaster {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 }

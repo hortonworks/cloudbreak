@@ -67,9 +67,9 @@ public class SaltBootstrapTest {
     @Test
     public void callTest() {
         Set<Node> targets = new HashSet<>();
-        targets.add(new Node("10.0.0.1", null, null));
-        targets.add(new Node("10.0.0.2", null, null));
-        targets.add(new Node("10.0.0.3", null, null));
+        targets.add(new Node("10.0.0.1", null, null, "hg"));
+        targets.add(new Node("10.0.0.2", null, null, "hg"));
+        targets.add(new Node("10.0.0.3", null, null, "hg"));
 
         SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, null);
         try {
@@ -86,10 +86,10 @@ public class SaltBootstrapTest {
         networkMap.put("host-10-0-0-2.example.com", "10.0.0.2");
 
         Set<Node> targets = new HashSet<>();
-        targets.add(new Node("10.0.0.1", null, null));
-        targets.add(new Node("10.0.0.2", null, null));
+        targets.add(new Node("10.0.0.1", null, null, "hg"));
+        targets.add(new Node("10.0.0.2", null, null, "hg"));
         String missingNodeIp = "10.0.0.3";
-        targets.add(new Node(missingNodeIp, null, null));
+        targets.add(new Node(missingNodeIp, null, null, "hg"));
 
         SaltBootstrap saltBootstrap = new SaltBootstrap(saltConnector, Collections.singletonList(gatewayConfig), targets, null);
         try {

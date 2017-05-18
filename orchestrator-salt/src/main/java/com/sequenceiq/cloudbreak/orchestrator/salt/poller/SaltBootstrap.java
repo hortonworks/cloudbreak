@@ -97,29 +97,30 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         for (GatewayConfig gatewayConfig : allGatewayConfigs) {
             String gatewayAddress = gatewayConfig.getPrivateAddress();
             if (targetIps.contains(gatewayAddress)) {
+                Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(gatewayAddress)).findFirst().get();
                 SaltMaster master = new SaltMaster();
                 master.setAddress(gatewayAddress);
                 master.setAuth(auth);
                 master.setDomain(domain);
-                saltAction.addMaster(master);
+                master.setHostName(saltMaster.getHostGroup());
                 // set due to compatibility reasons
-                saltAction.setMaster(master);
                 saltAction.setServer(gatewayAddress);
-                Node saltMaster = targets.stream().filter(n -> n.getPrivateIp().equals(gatewayAddress)).findFirst().get();
-                saltAction.addMinion(createMinion(saltMaster));
+                saltAction.setMaster(master);
+                saltAction.addMinion(createMinion(saltMaster, master.getHostName()));
+                saltAction.addMaster(master);
             }
         }
         for (Node minion : targets.stream().filter(node -> !getGatewayPrivateIps().contains(node.getPrivateIp())).collect(Collectors.toList())) {
-            saltAction.addMinion(createMinion(minion));
+            saltAction.addMinion(createMinion(minion, null));
         }
         return saltAction;
     }
 
-    private Minion createMinion(Node node) {
+    private Minion createMinion(Node node, String hostName) {
         Minion minion = new Minion();
         minion.setAddress(node.getPrivateIp());
-        minion.setRoles(Collections.emptyList());
         minion.setHostGroup(node.getHostGroup());
+        minion.setHostName(hostName);
         minion.setDomain(domain);
         minion.setServers(getGatewayPrivateIps());
         // set due to compatibility reasons

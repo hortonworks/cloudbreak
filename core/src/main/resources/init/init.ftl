@@ -20,3 +20,5 @@ export SALT_BOOT_SIGN_KEY=${signaturePublicKey}
 ${customUserData}
 
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+curl -Lo $(which salt-bootstrap) https://s3-eu-west-1.amazonaws.com/krisz/salt-bootstrap-hostname
