@@ -16,5 +16,8 @@ public interface SmartSenseSubscriptionRepository extends CrudRepository<SmartSe
 
     SmartSenseSubscription findBySubscriptionId(@Param("subscriptionId") String subscription, @Param("account") String account);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    SmartSenseSubscription findBySubscriptionIdInAccount(@Param("subscriptionId") String subscription, @Param("account") String account);
+
     List<SmartSenseSubscription> findByOwner(@Param("owner") String owner);
 }
