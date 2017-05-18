@@ -25,6 +25,10 @@ import javax.persistence.UniqueConstraint;
                 query = "SELECT s FROM SmartSenseSubscription s WHERE s.subscriptionId= :subscriptionId AND s.account= :account"
         ),
         @NamedQuery(
+                name = "SmartSenseSubscription.findBySubscriptionIdInAccount",
+                query = "SELECT s FROM SmartSenseSubscription s "
+                        + "WHERE s.subscriptionId= :subscriptionId and s.account= :account"),
+        @NamedQuery(
                 name = "SmartSenseSubscription.findByOwner",
                 query = "SELECT s FROM SmartSenseSubscription s WHERE s.owner= :owner"
         )
