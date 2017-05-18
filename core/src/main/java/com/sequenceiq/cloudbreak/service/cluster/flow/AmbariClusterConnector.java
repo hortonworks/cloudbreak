@@ -262,7 +262,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    public Cluster buildAmbariCluster(Stack stack) {
+    public void buildAmbariCluster(Stack stack) {
         Cluster cluster = stack.getCluster();
         try {
             if (cluster.getCreationStarted() == null) {
@@ -319,7 +319,6 @@ public class AmbariClusterConnector {
             triggerSmartSenseCapture(ambariClient, blueprintText);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);
             cluster = handleClusterCreationSuccess(stack, cluster);
-            return cluster;
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (HttpResponseException hre) {
