@@ -25,4 +25,28 @@ function AzureCredentialSecondController($rootScope) {
         name: 'Interactive',
         id: 'interactive'
     }];
+
+    ctrl.azureRole = [{
+        key: 'CONTRIBUTOR',
+        value: 'Use existing "Contributor" role'
+    }, {
+        key: 'REUSE_EXISTING',
+        value: 'Reuse existing custom role'
+    }, {
+        key: 'CREATE_CUSTOM',
+        value: 'Let Cloudbreak create a custom role'
+    }];
+
+    this.refreshRole =  function() {
+        if (ctrl.credentialAzure.parameters.roleType == 'CONTRIBUTOR') {
+            ctrl.credentialAzure.parameters.roleName = 'Contributor'
+        } else {
+            ctrl.credentialAzure.parameters.roleName = ''
+        }
+    }
+
+    this.test = function () {
+        console.log('roleName', ctrl.credentialAzure.parameters.roleName);
+    }
+
 }

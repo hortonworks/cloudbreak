@@ -4,6 +4,10 @@ The Change Log summarizes the changes in Cloudbreak.
 
 ## [v1.15.0]
 
+### Added
+
+- Azure custom role support for credential creation
+
 ### Changed
 
 - ability to query more information about the stack by queryparameters

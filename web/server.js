@@ -421,10 +421,9 @@ function continueInit() {
         console.log("interactive login: " + JSON.stringify(req.body));
         console.log("tenant id: " + config.azureTenantId + ", subscription id: " + config.azureSubscriptionId);
         if (config.azureSubscriptionId && config.azureTenantId) {
-            req.body.parameters = {
-                subscriptionId: config.azureSubscriptionId,
-                tenantId: config.azureTenantId
-            };
+            req.body.parameters["subscriptionId"] = config.azureSubscriptionId;
+            req.body.parameters["tenantId"] = config.azureTenantId;
+
             console.log("interactive login request: " + JSON.stringify(req.body));
             return proxyCloudbreakRequest(req, res, proxyRestClient.post);
         } else {

@@ -26,7 +26,9 @@ function AzureCredentialController($rootScope, $filter, InteractiveLogin, Accoun
         ctrl.activePanel = 1;
         ctrl.credentialAzure = {
             parameters: {
-                selector: 'interactive'
+                selector: 'interactive',
+                roleType: 'CONTRIBUTOR',
+                roleName: 'Contributor'
             },
             publicKey: defaultSshKey
         };
