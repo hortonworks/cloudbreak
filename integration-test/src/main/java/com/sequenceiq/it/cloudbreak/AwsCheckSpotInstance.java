@@ -13,9 +13,9 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult;
 import com.amazonaws.services.ec2.model.SpotInstanceRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
@@ -58,8 +58,7 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
             }
         }
         //WHEN
-        AmazonEC2Client ec2 = new AmazonEC2Client();
-        ec2.setRegion(Region.getRegion(region));
+        AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard().withRegion(region).build();
         DescribeSpotInstanceRequestsResult describeSpotInstanceRequestsResult = ec2.describeSpotInstanceRequests();
         List<SpotInstanceRequest> spotInstanceRequests = describeSpotInstanceRequestsResult.getSpotInstanceRequests();
         //THEN

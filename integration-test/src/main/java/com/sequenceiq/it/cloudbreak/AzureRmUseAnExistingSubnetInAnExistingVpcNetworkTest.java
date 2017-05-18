@@ -18,9 +18,8 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.amazonaws.services.cloudformation.model.StackStatus;
-import com.microsoft.azure.Azure;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
-import com.microsoft.rest.credentials.ServiceClientCredentials;
+import com.microsoft.azure.management.Azure;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 
 public class AzureRmUseAnExistingSubnetInAnExistingVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
@@ -52,7 +51,7 @@ public class AzureRmUseAnExistingSubnetInAnExistingVpcNetworkTest extends Abstra
             String regionName, @Optional("it-vpc-resource-group") String resourceGroupName, @Optional("it-vpc") String vpcName,
             @Optional("it-vpc-subnet") String vpcSubnet) throws Exception {
 
-        ServiceClientCredentials serviceClientCredentials = new ApplicationTokenCredentials(defaultAccesKey, defaultTenantId, defaultSecretKey, null);
+        ApplicationTokenCredentials serviceClientCredentials = new ApplicationTokenCredentials(defaultAccesKey, defaultTenantId, defaultSecretKey, null);
         Azure azure = Azure.authenticate(serviceClientCredentials).withSubscription(defaultSubscriptionId);
 
         azure.networks()

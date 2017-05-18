@@ -13,9 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.Assert;
 
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
@@ -65,8 +65,7 @@ public class RecoveryUtil {
         List<String> idList = new ArrayList<>();
         idList.add(instanceId);
 
-        AmazonEC2Client ec2 = new AmazonEC2Client();
-        ec2.setRegion(Region.getRegion(region));
+        AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard().withRegion(region).build();
 
         TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest(idList);
         ec2.terminateInstances(terminateInstancesRequest);

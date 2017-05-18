@@ -5,9 +5,8 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.microsoft.azure.Azure;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
-import com.microsoft.rest.credentials.ServiceClientCredentials;
+import com.microsoft.azure.management.Azure;
 
 public class AzureDeleteVpcTest extends AbstractCloudbreakIntegrationTest {
 
@@ -30,9 +29,9 @@ public class AzureDeleteVpcTest extends AbstractCloudbreakIntegrationTest {
     @Parameters({ "resourceGroupName", "vpcName" })
     public void deleteNetwork(@Optional("it-vpc-resource-group") String resourceGroupName, @Optional("it-vpc") String vpcName) throws Exception {
         springTestContextPrepareTestInstance();
-        ServiceClientCredentials serviceClientCredentials = new ApplicationTokenCredentials(defaultAccesKey, defaultTenantId, defaultSecretKey, null);
+        ApplicationTokenCredentials serviceClientCredentials = new ApplicationTokenCredentials(defaultAccesKey, defaultTenantId, defaultSecretKey, null);
         Azure azure = Azure.authenticate(serviceClientCredentials).withSubscription(defaultSubscriptionId);
 
-        azure.networks().delete(resourceGroupName, vpcName);
+        azure.networks().deleteByResourceGroup(resourceGroupName, vpcName);
     }
 }
