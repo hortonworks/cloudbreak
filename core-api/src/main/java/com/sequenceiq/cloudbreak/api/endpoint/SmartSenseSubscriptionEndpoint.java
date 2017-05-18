@@ -41,6 +41,20 @@ public interface SmartSenseSubscriptionEndpoint {
             nickname = "deleteSmartSenseSubscriptionById")
     void delete(@PathParam(value = "id") Long id);
 
+    @DELETE
+    @Path("account/{subscriptionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = SmartSenseSubOpDescription.DELETE_PUBLIC_BY_ID, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
+            nickname = "deletePublicSmartSenseSubscriptionBySubscriptionId")
+    void deletePublic(@PathParam(value = "subscriptionId") String subscriptionId);
+
+    @DELETE
+    @Path("user/{subscriptionId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = SmartSenseSubOpDescription.DELETE_PRIVATE_BY_ID, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
+            nickname = "deletePrivateSmartSenseSubscriptionBySubscriptionId")
+    void deletePrivate(@PathParam(value = "subscriptionId") String subscriptionId);
+
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)

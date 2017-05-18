@@ -263,8 +263,8 @@ public class OperationDescriptions {
         public static final String GET_PRIVATE_BY_NAME = "retrieve a private SmartSense subscription by name";
         public static final String GET_PUBLIC_BY_NAME = "retrieve a public or private (owned) SmartSense subscription by name";
         public static final String GET_BY_ID = "retrieve SmartSense subscription by id";
-        public static final String DELETE_PRIVATE_BY_NAME = "delete private SmartSense subscription by name";
-        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private SmartSense subscription by name";
+        public static final String DELETE_PRIVATE_BY_ID = "delete private SmartSense subscription by subscription ID";
+        public static final String DELETE_PUBLIC_BY_ID = "delete public (owned) or private SmartSense subscription by subscription ID";
         public static final String DELETE_BY_ID = "delete SmartSense subscription by id";
     }
 
