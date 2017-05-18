@@ -159,7 +159,7 @@ public class ClusterService {
         Iterable<Cluster> clusters = clusterRepository.findAll();
         boolean clusterForTheSameStackAndAmbari = StreamSupport.stream(clusters.spliterator(), false)
                 .anyMatch(cluster -> {
-                    boolean equalityOfStackId = cluster.getStackId().equals(stack.getStackId());
+                    boolean equalityOfStackId = cluster.getStackId() != null && cluster.getStackId().equals(stack.getStackId());
                     Ambari ambari = cluster.getAmbari();
                     Ambari newAmbari = stack.getAmbari();
                     boolean ambariObjectsNotNull = ambari != null && newAmbari != null;
