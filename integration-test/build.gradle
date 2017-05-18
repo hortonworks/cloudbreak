@@ -31,10 +31,10 @@ dependencies {
   compile("com.sequenceiq:${ambariClientName}:${ambariClientVersion}") {
     exclude group: 'org.slf4j';
   }
-  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: '1.10.50') {
+  compile (group: 'com.amazonaws',                name: 'aws-java-sdk',                   version: awsSdkVersion) {
     exclude group: 'commons-logging'
   }
-  compile group:  'com.microsoft.azure',          name: 'azure',                          version: '1.0.0-beta2'
+  compile (group:  'com.microsoft.azure',          name: 'azure',                          version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile group:  'com.google.apis',              name: 'google-api-services-compute',    version: 'v1-rev133-1.22.0'
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter',            version: springBootVersion
   compile group:  'org.springframework.boot',     name: 'spring-boot-starter-test',       version: springBootVersion

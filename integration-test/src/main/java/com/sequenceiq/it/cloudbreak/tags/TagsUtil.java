@@ -17,9 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.AmazonEC2;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
@@ -34,11 +34,10 @@ import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Tags;
-import com.microsoft.azure.Azure;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.VirtualMachine;
-import com.microsoft.rest.credentials.ServiceClientCredentials;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -116,8 +115,7 @@ public class TagsUtil {
     protected static void checkTagsAws(Regions region, List<String> instanceIdList, Map<String, String> tagsToCheckMap) {
         Map<String, String> extractedTagsToCheck = new HashMap<>();
         List<Tag> extractedTags;
-        AmazonEC2Client ec2 = new AmazonEC2Client();
-        ec2.setRegion(Region.getRegion(region));
+        AmazonEC2 ec2 = AmazonEC2ClientBuilder.standard().withRegion(region).build();
         DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
         describeInstancesRequest.withInstanceIds(instanceIdList);
         DescribeInstancesResult describeInstancesResultAll = ec2.describeInstances(describeInstancesRequest);
@@ -137,7 +135,7 @@ public class TagsUtil {
 
     protected static void checkTagsAzure(String accesKey, String tenantId, String secretKey, String subscriptionId,
             String stackName, Map<String, String> tagsToCheckMap) throws Exception {
-        ServiceClientCredentials serviceClientCredentials = new ApplicationTokenCredentials(accesKey, tenantId, secretKey, null);
+        ApplicationTokenCredentials serviceClientCredentials = new ApplicationTokenCredentials(accesKey, tenantId, secretKey, null);
         Azure azure = Azure.authenticate(serviceClientCredentials).withSubscription(subscriptionId);
         PagedList<VirtualMachine> virtualMachinesList = azure.virtualMachines().list();
         for (VirtualMachine vm : virtualMachinesList) {
