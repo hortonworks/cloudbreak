@@ -39,7 +39,7 @@ public class FlexUsageGenerator {
 
     private static final String FLEX_TIME_ZONE_FORMAT_PATTERN = "yyyy-MM-dd HH:mm:ss Z";
 
-    private static final String FLEX_USAGE_DAY_FORMAT_PATTERN = "yyyy-MM-dd Z";
+    private static final String FLEX_USAGE_DAY_FORMAT_PATTERN = "yyyy-MM-dd";
 
     private static final String STACK_NAME_DELIMITER = "_";
 
