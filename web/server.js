@@ -255,6 +255,16 @@ function continueInit() {
     });
 
     app.get('/logout', function(req, res) {
+        var sessionToken = req.session.token
+        proxyRestClient.delete(config.cloudbreakAddress + '/users/evict', getCbRequestArgs(sessionToken), function(data, response) {
+               if (response.statusCode === 200) {
+                   console.log("Evict user data from Cloudbreak: ", data);
+               } else {
+                   console.log(response.statusCode)
+                   console.log("Something unexpected happened. Couldn't evict user data from Cloudbreak.")
+                   console.log(response)
+               }
+           });
         var sourceUrl = req.protocol + '://' + req.headers.host;
         var source = new Buffer(sourceUrl).toString('base64')
         req.session.destroy(function() {

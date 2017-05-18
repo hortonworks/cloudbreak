@@ -21,7 +21,9 @@ import net.sf.ehcache.config.CacheConfiguration;
 @EnableAutoConfiguration
 public class CachingConfig implements CachingConfigurer {
 
-    private static final int MAX_ENTRIES = 1000;
+    private static final long MAX_ENTRIES = 1000L;
+
+    private static final long TIME_TO_LIVE = 15 * 60;
 
     @Bean
     public net.sf.ehcache.CacheManager ehCacheManager() {
@@ -57,6 +59,7 @@ public class CachingConfig implements CachingConfigurer {
         cacheConfiguration.setName("userCache");
         cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
         cacheConfiguration.setMaxEntriesLocalHeap(MAX_ENTRIES);
+        cacheConfiguration.setTimeToLiveSeconds(TIME_TO_LIVE);
         return cacheConfiguration;
     }
 

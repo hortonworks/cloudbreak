@@ -12,12 +12,15 @@ public class UserCache implements CacheDefinition {
 
     private static final long MAX_ENTRIES = 1000L;
 
+    private static final long TIME_TO_LIVE = 15 * 60;
+
     @Override
     public CacheConfiguration cacheConfiguration() {
         CacheConfiguration cacheConfiguration = new CacheConfiguration();
         cacheConfiguration.setName("userCache");
         cacheConfiguration.setMemoryStoreEvictionPolicy("LRU");
         cacheConfiguration.setMaxEntriesLocalHeap(MAX_ENTRIES);
+        cacheConfiguration.setTimeToLiveSeconds(TIME_TO_LIVE);
         return cacheConfiguration;
     }
 

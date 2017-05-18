@@ -165,6 +165,7 @@ public class OperationDescriptions {
 
     public static class UserOpDescription {
         public static final String USER_DETAILS_EVICT = "remove user from cache (by username)";
+        public static final String CURRENT_USER_DETAILS_EVICT = "remove current user from cache";
         public static final String USER_GET_RESOURCE = "check that account user has any resources";
     }
 

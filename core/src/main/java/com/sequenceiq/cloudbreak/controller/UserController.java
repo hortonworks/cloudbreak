@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
-import com.sequenceiq.cloudbreak.api.model.UserRequest;
+import com.sequenceiq.cloudbreak.api.model.User;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.service.user.UserResourceCheck;
@@ -23,9 +23,16 @@ public class UserController implements UserEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     @Override
-    public String evictUserDetails(String id, UserRequest userRequest) {
-        userDetailsService.evictUserDetails(id, userRequest.getUsername());
-        return userRequest.getUsername();
+    public String evictUserDetails(String id, User user) {
+        userDetailsService.evictUserDetails(id, user.getUsername());
+        return user.getUsername();
+    }
+
+    @Override
+    public User evictCurrentUserDetails() {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        userDetailsService.evictUserDetails(user.getUserId(), user.getUsername());
+        return new User(user.getUsername());
     }
 
     @Override

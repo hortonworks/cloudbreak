@@ -124,9 +124,9 @@ public class RemoteUserDetailsService {
         return "";
     }
 
-    @CacheEvict(value = "userCache", key = "#filterValue")
-    public void evictUserDetails(String updatedUserId, String filterValue) {
-        LOGGER.info("Remove userid: {} / username: {} from user cache", updatedUserId, filterValue);
+    @CacheEvict(value = "userCache", key = "#username")
+    public void evictUserDetails(String updatedUserId, String username) {
+        LOGGER.info("Remove userid: {} / username: {} from user cache", updatedUserId, username);
     }
 
     private Date parseUserCreated(String dateOfCreation) {
