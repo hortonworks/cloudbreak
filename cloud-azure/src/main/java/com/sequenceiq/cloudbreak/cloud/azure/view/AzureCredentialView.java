@@ -38,6 +38,14 @@ public class AzureCredentialView {
         return cloudCredential.getParameter("tenantId", String.class);
     }
 
+    public String getRoleName() {
+        return cloudCredential.getParameter("roleName", String.class);
+    }
+
+    public String getRoleType() {
+        return cloudCredential.getParameter("roleType", String.class);
+    }
+
     public boolean passwordAuthenticationRequired() {
         return cloudCredential.getPublicKey().startsWith("Basic: ");
     }
