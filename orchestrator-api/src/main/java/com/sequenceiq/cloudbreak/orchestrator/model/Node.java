@@ -13,9 +13,10 @@ public class Node {
 
     private Set<String> dataVolumes;
 
-    public Node(String privateIp, String publicIp, String fqdn) {
+    public Node(String privateIp, String publicIp, String fqdn, String hostGroup) {
         this(privateIp, publicIp);
         this.hostname = fqdn;
+        this.hostGroup = hostGroup;
     }
 
     public Node(String privateIp, String publicIp) {
@@ -48,10 +49,6 @@ public class Node {
 
     public String getHostGroup() {
         return hostGroup;
-    }
-
-    public void setHostGroup(String hostGroup) {
-        this.hostGroup = hostGroup;
     }
 
     @Override

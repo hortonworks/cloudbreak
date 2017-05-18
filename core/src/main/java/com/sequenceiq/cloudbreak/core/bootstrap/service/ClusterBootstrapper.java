@@ -222,11 +222,11 @@ public class ClusterBootstrapper {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            if (upscaleCandidateAddresses.contains(instanceMetaData.getPrivateIp())) {
-                nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN()));
+        for (InstanceMetaData im : stack.getRunningInstanceMetaData()) {
+            if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
+                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
             }
-            addNode(allNodes, instanceMetaData);
+            addNode(allNodes, im);
         }
         try {
             InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
@@ -255,10 +255,6 @@ public class ClusterBootstrapper {
                     hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
         }
-
-        Set<InstanceMetaData> runningInstanceMetaData = stack.getRunningInstanceMetaData();
-        nodes.forEach(n -> n.setHostGroup(runningInstanceMetaData.stream()
-                .filter(i -> i.getPrivateIp().equals(n.getPrivateIp())).findFirst().get().getInstanceGroupName()));
 
         hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), null));
 
@@ -335,12 +331,11 @@ public class ClusterBootstrapper {
         }
     }
 
-    private void addNode(Set<Node> nodes, InstanceMetaData instanceMetaData) {
-        if (instanceMetaData.getPrivateIp() == null && instanceMetaData.getPublicIpWrapper() == null) {
-            LOGGER.warn("Skipping instancemetadata because the public ip and private ip are null '{}'.", instanceMetaData);
+    private void addNode(Set<Node> nodes, InstanceMetaData im) {
+        if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
+            LOGGER.warn("Skipping instancemetadata because the public ip and private ip are null '{}'.", im);
         } else {
-            Node node = new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper(), instanceMetaData.getDiscoveryFQDN());
-            node.setHostGroup(instanceMetaData.getInstanceGroupName());
+            Node node = new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getDiscoveryFQDN(), im.getInstanceGroupName());
             nodes.add(node);
         }
     }

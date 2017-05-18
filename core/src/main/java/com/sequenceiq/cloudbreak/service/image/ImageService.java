@@ -65,7 +65,7 @@ public class ImageService {
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
             String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion, customImage);
             String cbPrivKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPrivateKey()));
-            String cbSshKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPublicKey()));
+            String cbSshKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPublicKey())).replace("\n", "");;
             byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(cbPrivKey);
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();

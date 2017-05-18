@@ -6,8 +6,6 @@ public class Minion {
 
     private String address;
 
-    private List<String> roles;
-
     /**
      * @deprecated Do not use it, it is deprecated since salt-bootstrap 0.11.0, please use servers
      */
@@ -20,20 +18,14 @@ public class Minion {
 
     private String domain;
 
+    private String hostName;
+
     public String getAddress() {
         return address;
     }
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public List<String> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(List<String> roles) {
-        this.roles = roles;
     }
 
     /**
@@ -74,5 +66,13 @@ public class Minion {
 
     public void setServers(List<String> servers) {
         this.servers = servers;
+    }
+
+    public String getHostName() {
+        return hostName;
+    }
+
+    public void setHostName(String hostName) {
+        this.hostName = hostName;
     }
 }

@@ -57,17 +57,12 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), failedNodes.getKey());
             InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
             if (instanceGroup.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
-                if (instanceGroup.getNodeCount() <= 1) {
-                    LOGGER.warn("Gateway instancegroup cannot be repaired if its nodecount is less or equal to 1.");
-                    continue;
-                } else {
-                    List<InstanceMetaData> primary = instanceMetadataRepository.findAllByInstanceGroup(instanceGroup).stream().filter(
-                            imd -> failedNodes.getValue().contains(imd.getDiscoveryFQDN())
-                                    && imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).collect(Collectors.toList());
-                    if (!primary.isEmpty()) {
-                        flowChainTriggers.add(new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
-                                event.getStackId(), event.accepted()));
-                    }
+                List<InstanceMetaData> primary = instanceMetadataRepository.findAllByInstanceGroup(instanceGroup).stream().filter(
+                        imd -> failedNodes.getValue().contains(imd.getDiscoveryFQDN())
+                                && imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).collect(Collectors.toList());
+                if (!primary.isEmpty()) {
+                    flowChainTriggers.add(new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
+                            event.getStackId(), event.accepted()));
                 }
             }
             flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getStackId(),

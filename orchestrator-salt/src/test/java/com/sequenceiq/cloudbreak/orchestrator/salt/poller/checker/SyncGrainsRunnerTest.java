@@ -39,9 +39,9 @@ public class SyncGrainsRunnerTest {
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
         allNode = new HashSet<>();
-        allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com"));
-        allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com"));
-        allNode.add(new Node("10.0.0.3", "5.5.5.3", "10-0-0-3.example.com"));
+        allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com", "hg"));
+        allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));
+        allNode.add(new Node("10.0.0.3", "5.5.5.3", "10-0-0-3.example.com", "hg"));
 
         PowerMockito.mockStatic(SaltStates.class);
         ApplyResponse applyResponse = new ApplyResponse();

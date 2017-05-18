@@ -132,7 +132,7 @@ public class BaseSaltJobRunnerTest {
     private Set<Node> allNodeWithPostFix() {
         Set<Node> allNode = new HashSet<>();
         for (int i = 1; i <= 3; i++) {
-            Node node = new Node("10.0.0." + i, "88.77.66.5" + i, "host-10-0-0-" + i + ".example.com");
+            Node node = new Node("10.0.0." + i, "88.77.66.5" + i, "host-10-0-0-" + i + ".example.com", "hg");
             allNode.add(node);
         }
         return allNode;
@@ -141,7 +141,7 @@ public class BaseSaltJobRunnerTest {
     private Set<Node> allNodeWithoutPostFix() {
         Set<Node> allNode = new HashSet<>();
         for (int i = 1; i <= 3; i++) {
-            Node node = new Node("10.0.0." + i, "88.77.66.5" + i, "host-10-0-0-" + i);
+            Node node = new Node("10.0.0." + i, "88.77.66.5" + i, "host-10-0-0-" + i, "hg");
             allNode.add(node);
         }
         return allNode;

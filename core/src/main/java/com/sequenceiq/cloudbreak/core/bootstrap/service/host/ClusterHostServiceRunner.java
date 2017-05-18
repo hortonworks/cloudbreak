@@ -225,8 +225,8 @@ public class ClusterHostServiceRunner {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData instanceMetaData : instanceGroup.getInstanceMetaData()) {
-                    agents.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIp(), instanceMetaData.getDiscoveryFQDN()));
+                for (InstanceMetaData im : instanceGroup.getInstanceMetaData()) {
+                    agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
                 }
             }
         }
