@@ -51,7 +51,7 @@ public class FlexSubscriptionService {
                 throw new CloudbreakServiceException(String.format(msg, subscription.getId()));
             }
         } else {
-            throw new CloudbreakServiceException(String.format("Flex subscription could not be found with id: %s", subscription.getId()));
+            throw new CloudbreakServiceException("Flex subscription not found");
         }
     }
 
