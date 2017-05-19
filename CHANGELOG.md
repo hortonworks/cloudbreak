@@ -8,13 +8,43 @@ The Change Log summarizes the changes in Cloudbreak.
 
 - ability to query more information about the stack by queryparameters
 
-## [v1.14.0]
+## [v1.14.4]
+
+### Fixed
+
+- fix settings generation
+- fix unable to create Azure cluster with WASB
+- preserve Knox settings when switching credentials
+- automatically create /var/run/knox after restart
+
+### Added
+
+- Azure Private IP support
+- add missing settings block for etl-edw blueprint
+- show all instance metadata information on shell "stack metadata"
+- add proper error handling for repair flow
 
 ### Changed
 
-- ability to specify more rdsconfig on one cluster
-- new azure connector implemented with interactive login
+- update HDP version (2.2.0.1 -> 2.5.5.0 and 2.6.0.0 -> 2.6.0.3)
+- update Ambari version (2.5.0.0 -> 2.5.0.3)
+- disable Hive credential provider
+- Azure static IP allocation method instead of dynamic
+- Azure deallocate VM-s instead of just stopping them on cluster stop
+- conform to more strict Salt-api calls (since 2016.11.4)
+- use redhat6 repo on amazonlinux
+
+## [v1.14.0]
+
+### Added
+
+- new Azure connector based on Azure Java SDK
+- Azure interactive credential creation
 - new alerting system implemented based on prometheus
+
+### Changed
+
+- ability to specify multiple rdsconfig-s per cluster
 
 ## [v1.6.3]
 
@@ -38,7 +68,7 @@ The Change Log summarizes the changes in Cloudbreak.
 - autocreate default security groups for every provider
 - fix bower retry in web dockerfile to avoid UI build fails
 - Cloudbreak does not work with CentOS on AWS
-- Shiro config of Zepplein is always overwritten by Cloudbreak 
+- Shiro config of Zepplein is always overwritten by Cloudbreak
 - fix cluster sync when a new service is added to Ambari through the wizard
 - rename all open port security group to denote unsecure
 - remove all port open security group as default
@@ -58,7 +88,7 @@ The Change Log summarizes the changes in Cloudbreak.
 ### Changed
 
 - OS parameter is optional when providing the HDP repo
-- modularize integration test Makefile to sh scripts 
+- modularize integration test Makefile to sh scripts
 
 ## [v1.6.1]
 
