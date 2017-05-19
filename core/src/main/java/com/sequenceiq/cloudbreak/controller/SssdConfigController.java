@@ -87,7 +87,7 @@ public class SssdConfigController implements SssdConfigEndpoint {
     public void delete(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        sssdConfigService.delete(id, user);
+        sssdConfigService.delete(id);
     }
 
     @Override

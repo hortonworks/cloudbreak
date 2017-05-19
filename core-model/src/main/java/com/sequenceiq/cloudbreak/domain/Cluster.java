@@ -51,21 +51,9 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 })
 @NamedQueries({
         @NamedQuery(
-                name = "Cluster.findAllClustersByBlueprint",
-                query = "SELECT c FROM Cluster c "
-                        + "WHERE c.blueprint.id= :id"),
-        @NamedQuery(
                 name = "Cluster.findAllClustersByRDSConfig",
                 query = "SELECT c FROM Cluster c inner join c.rdsConfigs rc "
                         + "WHERE rc.id= :id"),
-        @NamedQuery(
-                name = "Cluster.findAllClustersBySssdConfig",
-                query = "SELECT c FROM Cluster c "
-                        + "WHERE c.sssdConfig.id= :id"),
-        @NamedQuery(
-                name = "Cluster.findAllClustersByLdapConfig",
-                query = "SELECT c FROM Cluster c "
-                        + "WHERE c.ldapConfig.id= :id"),
         @NamedQuery(
                 name = "Cluster.findOneWithLists",
                 query = "SELECT c FROM Cluster c "

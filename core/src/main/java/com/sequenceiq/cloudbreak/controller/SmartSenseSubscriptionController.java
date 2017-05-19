@@ -41,7 +41,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     public void delete(Long id) {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(cbUser);
-        smartSenseSubService.delete(id, cbUser);
+        smartSenseSubService.delete(id);
     }
 
     @Override

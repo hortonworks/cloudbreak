@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -36,6 +37,9 @@ public class TemplateService {
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public Set<Template> retrievePrivateTemplates(IdentityUser user) {
         return templateRepository.findForUser(user.getUserId());
@@ -78,7 +82,7 @@ public class TemplateService {
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateId));
         }
-        delete(template, user);
+        delete(template);
     }
 
     public Template getPrivateTemplate(String name, IdentityUser user) {
@@ -105,16 +109,14 @@ public class TemplateService {
         if (template == null) {
             throw new NotFoundException(String.format(TEMPLATE_NOT_FOUND_MSG, templateName));
         }
-        delete(template, user);
+        delete(template);
     }
 
-    private void delete(Template template, IdentityUser user) {
+    private void delete(Template template) {
+        authorizationService.hasWritePermission(template);
         LOGGER.debug("Deleting template. {} - {}", new Object[]{template.getId(), template.getName()});
         List<Stack> allStackForTemplate = stackRepository.findAllStackForTemplate(template.getId());
         if (allStackForTemplate.isEmpty()) {
-            if (!user.getUserId().equals(template.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-                throw new BadRequestException("Templates can be deleted only by account admins or owners.");
-            }
             template.setTopology(null);
             if (ResourceStatus.USER_MANAGED.equals(template.getStatus())) {
                 templateRepository.delete(template);
@@ -123,31 +125,22 @@ public class TemplateService {
                 template.setStatus(ResourceStatus.DEFAULT_DELETED);
                 templateRepository.save(template);
             }
+        } else if (isRunningStackReferToTemplate(allStackForTemplate)) {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));
         } else {
-            if (isRunningStackReferToTemplate(allStackForTemplate)) {
-                throw new BadRequestException(String.format(
-                        "There are stacks associated with template '%s'. Please remove these before deleting the template.", template.getName()));
-            } else {
-                template.setName(NameUtil.postfixWithTimestamp(template.getName()));
-                template.setTopology(null);
-                template.setDeleted(true);
-                if (ResourceStatus.DEFAULT.equals(template.getStatus())) {
-                    template.setStatus(ResourceStatus.DEFAULT_DELETED);
-                }
-                templateRepository.save(template);
+            template.setName(NameUtil.postfixWithTimestamp(template.getName()));
+            template.setTopology(null);
+            template.setDeleted(true);
+            if (ResourceStatus.DEFAULT.equals(template.getStatus())) {
+                template.setStatus(ResourceStatus.DEFAULT_DELETED);
             }
+            templateRepository.save(template);
         }
     }
 
     private boolean isRunningStackReferToTemplate(List<Stack> allStackForTemplate) {
-        boolean result = false;
-        for (Stack stack : allStackForTemplate) {
-            if (!stack.isDeleteCompleted()) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+        return allStackForTemplate.stream().anyMatch(s -> !s.isDeleteCompleted());
     }
 
 }

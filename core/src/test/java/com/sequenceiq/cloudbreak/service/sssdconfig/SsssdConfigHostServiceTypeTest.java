@@ -8,8 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,13 +20,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.SssdConfigRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -45,6 +43,9 @@ public class SsssdConfigHostServiceTypeTest {
 
     @Mock
     private SssdConfig sssdConfig;
+
+    @Mock
+    private AuthorizationService authorizationService;
 
     @Before
     public void setUp() {
@@ -161,27 +162,11 @@ public class SsssdConfigHostServiceTypeTest {
         sssdConfig.setOwner(user.getUserId());
         sssdConfig.setAccount(user.getAccount());
         when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);
-        when(clusterRepository.findAllClustersBySssdConfig(anyLong())).thenReturn(Collections.emptySet());
-        underTest.delete(1L, user);
+        when(clusterRepository.countBySssdConfig(any())).thenReturn(0L);
+        underTest.delete(1L);
         verify(sssdConfigRepository, times(1)).findOne(anyLong());
-        verify(clusterRepository, times(1)).findAllClustersBySssdConfig(anyLong());
-        verify(sssdConfig, times(1)).getOwner();
+        verify(clusterRepository, times(1)).countBySssdConfig(any());
         verify(sssdConfigRepository, times(1)).delete(any(SssdConfig.class));
-    }
-
-    @Test(expected = BadRequestException.class)
-    public void testDeleteWithPermissionError() {
-        IdentityUser user = TestUtil.cbUser();
-        sssdConfig.setOwner("owner");
-        sssdConfig.setAccount("account");
-        when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);
-        when(clusterRepository.findAllClustersBySssdConfig(anyLong())).thenReturn(Collections.emptySet());
-        try {
-            underTest.delete(1L, user);
-        } catch (Exception e) {
-            verify(sssdConfigRepository, times(0)).delete(any(SssdConfig.class));
-            throw e;
-        }
     }
 
     @Test(expected = BadRequestException.class)
@@ -190,11 +175,10 @@ public class SsssdConfigHostServiceTypeTest {
         sssdConfig.setOwner("owner");
         sssdConfig.setAccount("account");
         when(sssdConfigRepository.findOne(anyLong())).thenReturn(sssdConfig);
-        when(clusterRepository.findAllClustersBySssdConfig(anyLong())).thenReturn(Collections.singleton(new Cluster()));
+        when(clusterRepository.countBySssdConfig(any())).thenReturn(1L);
         try {
-            underTest.delete(1L, user);
+            underTest.delete(1L);
         } catch (Exception e) {
-            verify(sssdConfig, times(0)).getOwner();
             verify(sssdConfigRepository, times(0)).delete(any(SssdConfig.class));
             throw e;
         }

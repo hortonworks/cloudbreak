@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
@@ -28,6 +29,9 @@ public class LdapConfigService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     @Transactional(Transactional.TxType.NEVER)
     public LdapConfig create(IdentityUser user, LdapConfig ldapConfig) {
@@ -77,12 +81,12 @@ public class LdapConfigService {
         return ldapConfig;
     }
 
-    public void delete(Long id, IdentityUser user) {
+    public void delete(Long id) {
         LdapConfig ldapConfig = get(id);
         if (ldapConfig == null) {
             throw new NotFoundException(String.format("LdapConfig '%s' not found.", id));
         }
-        delete(ldapConfig, user);
+        delete(ldapConfig);
     }
 
     public void delete(String name, IdentityUser user) {
@@ -90,19 +94,15 @@ public class LdapConfigService {
         if (ldapConfig == null) {
             throw new NotFoundException(String.format("LdapConfig '%s' not found.", name));
         }
-        delete(ldapConfig, user);
+        delete(ldapConfig);
     }
 
-    private void delete(LdapConfig ldapConfig, IdentityUser user) {
-        if (clusterRepository.findAllClustersByLdapConfig(ldapConfig.getId()).isEmpty()) {
-            if (!user.getUserId().equals(ldapConfig.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-                throw new BadRequestException("Public LDAP configs can only be deleted by owners or account admins.");
-            } else {
-                ldapConfigRepository.delete(ldapConfig);
-            }
-        } else {
+    private void delete(LdapConfig ldapConfig) {
+        authorizationService.hasWritePermission(ldapConfig);
+        if (!clusterRepository.countByLdapConfig(ldapConfig).equals(0L)) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with LDAP config '%s'. Please remove these before deleting the LDAP config.", ldapConfig.getId()));
         }
+        ldapConfigRepository.delete(ldapConfig);
     }
 }

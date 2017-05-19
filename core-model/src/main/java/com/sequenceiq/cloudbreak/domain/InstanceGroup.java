@@ -28,11 +28,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
         @NamedQuery(name = "InstanceGroup.findOneByGroupNameInStack",
                 query = "SELECT i from InstanceGroup i "
                         + "WHERE i.stack.id = :stackId "
-                        + "AND i.groupName = :groupName"),
-        @NamedQuery(
-                name = "InstanceGroup.findAllBySecurityGroup",
-                query = "SELECT t FROM InstanceGroup t "
-                        + "WHERE t.securityGroup.id= :securityGroupId ")
+                        + "AND i.groupName = :groupName")
 })
 public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
 

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.SssdConfigRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
@@ -49,6 +50,9 @@ public class SssdConfigService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public SssdConfig getDefaultSssdConfig(IdentityUser user) {
         SssdConfig config = sssdConfigRepository.findByNameInAccount(sssdName, user.getAccount());
@@ -121,12 +125,12 @@ public class SssdConfigService {
         return sssdConfig;
     }
 
-    public void delete(Long id, IdentityUser user) {
+    public void delete(Long id) {
         SssdConfig sssdConfig = get(id);
         if (sssdConfig == null) {
             throw new NotFoundException(String.format("SssdConfig '%s' not found.", id));
         }
-        delete(sssdConfig, user);
+        delete(sssdConfig);
     }
 
     public void delete(String name, IdentityUser user) {
@@ -134,19 +138,15 @@ public class SssdConfigService {
         if (sssdConfig == null) {
             throw new NotFoundException(String.format("SssdConfig '%s' not found.", name));
         }
-        delete(sssdConfig, user);
+        delete(sssdConfig);
     }
 
-    private void delete(SssdConfig sssdConfig, IdentityUser user) {
-        if (clusterRepository.findAllClustersBySssdConfig(sssdConfig.getId()).isEmpty()) {
-            if (!user.getUserId().equals(sssdConfig.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-                throw new BadRequestException("Public SSSD configs can only be deleted by owners or account admins.");
-            } else {
-                sssdConfigRepository.delete(sssdConfig);
-            }
-        } else {
+    private void delete(SssdConfig sssdConfig) {
+        authorizationService.hasWritePermission(sssdConfig);
+        if (!clusterRepository.countBySssdConfig(sssdConfig).equals(0L)) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with SSSD config '%s'. Please remove these before deleting the SSSD config.", sssdConfig.getId()));
         }
+        sssdConfigRepository.delete(sssdConfig);
     }
 }

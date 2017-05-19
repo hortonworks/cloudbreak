@@ -7,6 +7,9 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
+import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 @EntityType(entityClass = Stack.class)
@@ -40,10 +43,6 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findOneByName(@Param("name") String name, @Param("account") String account);
 
-    List<Stack> findByCredential(@Param("credentialId") Long credentialId);
-
-    List<Stack> findAllByNetwork(@Param("networkId") Long networkId);
-
     Stack findByIdWithSecurityConfig(@Param("id") Long id);
 
     List<Stack> findAllAlive();
@@ -55,4 +54,10 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Set<Long> findStacksWithoutEvents();
 
     Set<Stack> findAliveOnes();
+
+    Long countByFlexSubscription(FlexSubscription flexSubscription);
+
+    Long countByCredential(Credential credential);
+
+    Long countByNetwork(Network network);
 }

@@ -25,10 +25,6 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 })
 @NamedQueries({
         @NamedQuery(
-                name = "Network.findByTopology",
-                query = "SELECT r FROM Network r "
-                        + "WHERE r.topology.id= :topologyId"),
-        @NamedQuery(
                 name = "Network.findOneById",
                 query = "SELECT r FROM Network r "
                         + "WHERE r.id= :id"),

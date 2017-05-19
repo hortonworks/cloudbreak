@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintTemplateRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -38,6 +39,9 @@ public class ConstraintTemplateService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public Set<ConstraintTemplate> retrievePrivateConstraintTemplates(IdentityUser user) {
         return constraintTemplateRepository.findForUser(user.getUserId());
@@ -77,7 +81,7 @@ public class ConstraintTemplateService {
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, name));
         }
-        delete(constraintTemplate, user);
+        delete(constraintTemplate);
     }
 
     public void delete(Long id, IdentityUser user) {
@@ -85,7 +89,7 @@ public class ConstraintTemplateService {
         if (constraintTemplate == null) {
             throw new NotFoundException(String.format(CONSTRAINT_NOT_FOUND_MSG, id));
         }
-        delete(constraintTemplate, user);
+        delete(constraintTemplate);
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
@@ -107,13 +111,11 @@ public class ConstraintTemplateService {
         }
     }
 
-    private void delete(ConstraintTemplate constraintTemplate, IdentityUser user) {
+    private void delete(ConstraintTemplate constraintTemplate) {
+        authorizationService.hasWritePermission(constraintTemplate);
         LOGGER.debug("Deleting constraint template. {} - {}", new Object[]{constraintTemplate.getId(), constraintTemplate.getName()});
         List<Cluster> clusters = clusterRepository.findAllClustersForConstraintTemplate(constraintTemplate.getId());
         if (clusters.isEmpty()) {
-            if (!user.getUserId().equals(constraintTemplate.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-                throw new BadRequestException("Constraint templates can only be deleted by account admins or owners.");
-            }
             if (ResourceStatus.USER_MANAGED.equals(constraintTemplate.getStatus())) {
                 constraintTemplateRepository.delete(constraintTemplate);
             } else {
@@ -121,30 +123,20 @@ public class ConstraintTemplateService {
                 constraintTemplate.setStatus(ResourceStatus.DEFAULT_DELETED);
                 constraintTemplateRepository.save(constraintTemplate);
             }
+        } else if (isRunningClusterReferToTemplate(clusters)) {
+            throw new BadRequestException(String.format(
+                    "There are stacks associated with template '%s'. Please remove these before deleting the template.", constraintTemplate.getName()));
         } else {
-            if (isRunningClusterReferToTemplate(clusters)) {
-                throw new BadRequestException(String.format(
-                        "There are stacks associated with template '%s'. Please remove these before deleting the template.", constraintTemplate.getName()));
-            } else {
-                constraintTemplate.setName(NameUtil.postfixWithTimestamp(constraintTemplate.getName()));
-                constraintTemplate.setDeleted(true);
-                if (ResourceStatus.DEFAULT.equals(constraintTemplate.getStatus())) {
-                    constraintTemplate.setStatus(ResourceStatus.DEFAULT_DELETED);
-                }
-                constraintTemplateRepository.save(constraintTemplate);
+            constraintTemplate.setName(NameUtil.postfixWithTimestamp(constraintTemplate.getName()));
+            constraintTemplate.setDeleted(true);
+            if (ResourceStatus.DEFAULT.equals(constraintTemplate.getStatus())) {
+                constraintTemplate.setStatus(ResourceStatus.DEFAULT_DELETED);
             }
+            constraintTemplateRepository.save(constraintTemplate);
         }
     }
 
     private boolean isRunningClusterReferToTemplate(List<Cluster> clusters) {
-        boolean result = false;
-        for (Cluster cluster: clusters) {
-            if (!cluster.isDeleteCompleted()) {
-                result = true;
-                break;
-            }
-        }
-        return result;
+        return clusters.stream().anyMatch(c -> !c.isDeleteCompleted());
     }
-
 }
