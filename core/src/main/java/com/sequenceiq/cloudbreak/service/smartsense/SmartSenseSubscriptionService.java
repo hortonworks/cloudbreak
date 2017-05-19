@@ -70,7 +70,7 @@ public class SmartSenseSubscriptionService {
         delete(subscription, identityUser);
     }
 
-    public void delete(String subscriptionId, CbUser cbUser) {
+    public void delete(String subscriptionId, IdentityUser cbUser) {
         SmartSenseSubscription subscription = repository.findBySubscriptionIdInAccount(subscriptionId, cbUser.getAccount());
         delete(subscription, cbUser);
     }

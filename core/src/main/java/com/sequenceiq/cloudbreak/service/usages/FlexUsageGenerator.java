@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageComponentJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageControllerJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageHdpInstanceJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageProductJson;
+import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -31,7 +32,6 @@ import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.service.user.UserFilterField;
 
 @Service
 public class FlexUsageGenerator {

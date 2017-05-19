@@ -39,21 +39,21 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public void delete(Long id) {
-        CbUser cbUser = authenticatedUserService.getCbUser();
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(cbUser);
         smartSenseSubService.delete(id, cbUser);
     }
 
     @Override
     public void deletePublic(String subscriptionId) {
-        CbUser cbUser = authenticatedUserService.getCbUser();
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(cbUser);
         smartSenseSubService.delete(subscriptionId, cbUser);
     }
 
     @Override
     public void deletePrivate(String subscriptionId) {
-        CbUser cbUser = authenticatedUserService.getCbUser();
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(cbUser);
         smartSenseSubService.delete(subscriptionId, cbUser);
     }
