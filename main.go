@@ -471,6 +471,11 @@ func main() {
 			Hidden: true,
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Action: hdc.CleanupResources,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:  "create-credential",
@@ -479,7 +484,12 @@ func main() {
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			Hidden: true,
-			Action: hdc.CreateCredential,
+			Action: hdc.CreateCredential, BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlCredentialName, hdc.FlRoleARN, hdc.FlSSHKeyURL, hdc.FlSSHKeyPair,
+					hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:  "create-network",
@@ -489,6 +499,12 @@ func main() {
 			Before: ConfigRead,
 			Hidden: true,
 			Action: hdc.CreateNetworkCommand,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlNetworkName, hdc.FlSubnet, hdc.FlVPC, hdc.FlIGW,
+					hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "delete-credential",
@@ -497,6 +513,11 @@ func main() {
 			Before: ConfigRead,
 			Hidden: true,
 			Action: hdc.DeleteCredential,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlCredentialName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "delete-network",
@@ -505,6 +526,11 @@ func main() {
 			Before: ConfigRead,
 			Hidden: true,
 			Action: hdc.DeleteNetwork,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlNetworkName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "delete-smartsensesubscription",
@@ -513,6 +539,11 @@ func main() {
 			Before: ConfigRead,
 			Hidden: true,
 			Action: hdc.DeleteSmartSenseSubscription,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlSmartSenseSubscriptionID, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "list-credentials",
@@ -521,6 +552,11 @@ func main() {
 			Hidden: true,
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Action: hdc.ListPrivateCredentials,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "list-networks",
@@ -529,6 +565,11 @@ func main() {
 			Hidden: true,
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Action: hdc.ListPrivateNetworks,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 		{
 			Name:   "register-smartsensesubscription",
@@ -537,6 +578,11 @@ func main() {
 			Before: ConfigRead,
 			Hidden: true,
 			Action: hdc.CreateSmartSenseSubscription,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlSmartSenseSubscriptionID, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
 		},
 	}...)
 
