@@ -216,10 +216,9 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public void delete(Long stackId) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         Stack stack = stackService.get(stackId);
         MDCBuilder.buildMdcContext(stack);
-        clusterService.delete(user, stackId);
+        clusterService.delete(stackId);
     }
 
     @Override

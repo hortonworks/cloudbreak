@@ -11,14 +11,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterTemplateRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
@@ -32,6 +32,9 @@ public class ClusterTemplateService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public Set<ClusterTemplate> retrievePrivateClusterTemplates(IdentityUser user) {
         return clusterTemplateRepository.findForUser(user.getUserId());
@@ -82,7 +85,7 @@ public class ClusterTemplateService {
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", id));
         }
-        delete(clusterTemplate, user);
+        delete(clusterTemplate);
     }
 
     public ClusterTemplate getPublicClusterTemplate(String name, IdentityUser user) {
@@ -106,7 +109,7 @@ public class ClusterTemplateService {
         if (clusterTemplate == null) {
             throw new NotFoundException(String.format("ClusterTemplate '%s' not found.", name));
         }
-        delete(clusterTemplate, user);
+        delete(clusterTemplate);
     }
 
     @Transactional(Transactional.TxType.NEVER)
@@ -114,10 +117,8 @@ public class ClusterTemplateService {
         return clusterTemplateRepository.save(entities);
     }
 
-    private void delete(ClusterTemplate clusterTemplate, IdentityUser user) {
-        if (!user.getUserId().equals(clusterTemplate.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            throw new BadRequestException("ClusterTemplate can only be deleted by account admins or owners.");
-        }
+    private void delete(ClusterTemplate clusterTemplate) {
+        authorizationService.hasWritePermission(clusterTemplate);
         clusterTemplateRepository.delete(clusterTemplate);
     }
 }

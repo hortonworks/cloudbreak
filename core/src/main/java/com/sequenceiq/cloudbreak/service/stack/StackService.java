@@ -74,6 +74,7 @@ import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -164,6 +165,9 @@ public class StackService {
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public Set<StackResponse> retrievePrivateStacks(IdentityUser user) {
         return convertStacks(stackRepository.findForUser(user.getUserId()));
@@ -283,7 +287,7 @@ public class StackService {
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        delete(stack, user, deleteDependencies);
+        delete(stack, deleteDependencies);
     }
 
     public void forceDelete(String name, IdentityUser user, Boolean deleteDependencies) {
@@ -291,7 +295,7 @@ public class StackService {
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
-        forceDelete(stack, user, deleteDependencies);
+        forceDelete(stack, deleteDependencies);
     }
 
     @Transactional(Transactional.TxType.NEVER)
@@ -351,7 +355,7 @@ public class StackService {
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        delete(stack, user, deleteDependencies);
+        delete(stack, deleteDependencies);
     }
 
     public void forceDelete(Long id, IdentityUser user, Boolean deleteDependencies) {
@@ -359,7 +363,7 @@ public class StackService {
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
-        forceDelete(stack, user, deleteDependencies);
+        forceDelete(stack, deleteDependencies);
     }
 
     public void removeInstance(IdentityUser user, Long stackId, String instanceId) {
@@ -581,11 +585,9 @@ public class StackService {
         }
     }
 
-    private void delete(Stack stack, IdentityUser user, Boolean deleteDependencies) {
+    private void delete(Stack stack, Boolean deleteDependencies) {
+        authorizationService.hasWritePermission(stack);
         LOGGER.info("Stack delete requested.");
-        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            throw new BadRequestException("Stacks can be deleted only by account admins or owners.");
-        }
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerTermination(stack.getId(), deleteDependencies);
         } else {
@@ -593,11 +595,9 @@ public class StackService {
         }
     }
 
-    private void forceDelete(Stack stack, IdentityUser user, Boolean deleteDependencies) {
+    private void forceDelete(Stack stack, Boolean deleteDependencies) {
+        authorizationService.hasWritePermission(stack);
         LOGGER.info("Stack forced delete requested.");
-        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            throw new BadRequestException("Stacks can be force deleted only by account admins or owners.");
-        }
         if (!stack.isDeleteCompleted()) {
             flowManager.triggerForcedTermination(stack.getId(), deleteDependencies);
         } else {

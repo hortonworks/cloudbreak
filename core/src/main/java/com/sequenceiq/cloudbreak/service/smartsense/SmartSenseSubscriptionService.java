@@ -11,11 +11,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
+import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Service
@@ -26,9 +27,15 @@ public class SmartSenseSubscriptionService {
     @Inject
     private SmartSenseSubscriptionRepository repository;
 
+    @Inject
+    private FlexSubscriptionRepository flexSubscriptionRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
+
     public SmartSenseSubscription create(SmartSenseSubscription subscription) {
-        Iterable<SmartSenseSubscription> subs = repository.findAll();
-        if (subs.iterator().hasNext()) {
+        long count = repository.count();
+        if (count != 0L) {
             throw new BadRequestException("Only one SmartSense subscription is allowed by deployment.");
         }
         try {
@@ -45,34 +52,23 @@ public class SmartSenseSubscriptionService {
         return repository.save(subscription);
     }
 
-    public void delete(SmartSenseSubscription subscription, IdentityUser identityUser) {
-        if (subscription != null) {
-            boolean owner = identityUser.getUserId().equals(subscription.getOwner());
-            boolean adminInTheAccount = identityUser.getRoles().contains(IdentityUserRole.ADMIN) && subscription.getAccount().equals(identityUser.getAccount());
-            if (owner || adminInTheAccount) {
-                try {
-                    repository.delete(subscription);
-                    LOGGER.info("SmartSense subscription has been deleted: {}", subscription);
-                } catch (DataIntegrityViolationException divex) {
-                    throw new CloudbreakServiceException("Subscription could not be deleted, because it is assigned to Flex subscription(s).", divex);
-                }
-            } else {
-                String msg = "Only the owner or the account admin has access to delete SmartSense subscription with id: %s";
-                throw new CloudbreakServiceException(String.format(msg, subscription.getId()));
-            }
-        } else {
-            throw new CloudbreakServiceException("SmartSense subscription not found");
+    public void delete(SmartSenseSubscription subscription) {
+        authorizationService.hasWritePermission(subscription);
+        if (!flexSubscriptionRepository.countBySmartSenseSubscription(subscription).equals(0L)) {
+            throw new BadRequestException("Subscription could not be deleted, because it is assigned to Flex subscription(s).");
         }
+        repository.delete(subscription);
+        LOGGER.info("SmartSense subscription has been deleted: {}", subscription);
     }
 
-    public void delete(Long id, IdentityUser identityUser) {
+    public void delete(Long id) {
         SmartSenseSubscription subscription = repository.findOneById(id);
-        delete(subscription, identityUser);
+        delete(subscription);
     }
 
     public void delete(String subscriptionId, IdentityUser cbUser) {
         SmartSenseSubscription subscription = repository.findBySubscriptionIdInAccount(subscriptionId, cbUser.getAccount());
-        delete(subscription, cbUser);
+        delete(subscription);
     }
 
     public SmartSenseSubscription findById(Long id) {

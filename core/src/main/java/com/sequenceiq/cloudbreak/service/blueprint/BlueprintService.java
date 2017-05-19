@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -38,6 +39,9 @@ public class BlueprintService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public Set<Blueprint> retrievePrivateBlueprints(IdentityUser user) {
         return blueprintRepository.findForUser(user.getUserId());
@@ -105,7 +109,7 @@ public class BlueprintService {
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", id));
         }
-        delete(blueprint, user);
+        delete(blueprint);
     }
 
     public Blueprint getPublicBlueprint(String name, IdentityUser user) {
@@ -129,7 +133,7 @@ public class BlueprintService {
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint '%s' not found.", name));
         }
-        delete(blueprint, user);
+        delete(blueprint);
     }
 
     @Transactional(Transactional.TxType.NEVER)
@@ -137,21 +141,18 @@ public class BlueprintService {
         return blueprintRepository.save(entities);
     }
 
-    private void delete(Blueprint blueprint, IdentityUser user) {
-        if (clusterRepository.findAllClustersByBlueprint(blueprint.getId()).isEmpty()) {
-            if (!user.getUserId().equals(blueprint.getOwner()) && !user.getRoles().contains(IdentityUserRole.ADMIN)) {
-                throw new BadRequestException("Blueprints can only be deleted by account admins or owners.");
-            }
-            if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
-                blueprintRepository.delete(blueprint);
-            } else {
-                blueprint.setName(NameUtil.postfixWithTimestamp(blueprint.getName()));
-                blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
-                blueprintRepository.save(blueprint);
-            }
-        } else {
+    private void delete(Blueprint blueprint) {
+        authorizationService.hasWritePermission(blueprint);
+        if (!clusterRepository.countByBlueprint(blueprint).equals(0L)) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with blueprint '%s'. Please remove these before deleting the blueprint.", blueprint.getId()));
+        }
+        if (ResourceStatus.USER_MANAGED.equals(blueprint.getStatus())) {
+            blueprintRepository.delete(blueprint);
+        } else {
+            blueprint.setName(NameUtil.postfixWithTimestamp(blueprint.getName()));
+            blueprint.setStatus(ResourceStatus.DEFAULT_DELETED);
+            blueprintRepository.save(blueprint);
         }
     }
 }

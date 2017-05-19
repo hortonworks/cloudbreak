@@ -116,4 +116,8 @@ public class Topology {
     public void setDeleted(boolean deleted) {
         this.deleted = deleted;
     }
+
+    public boolean isPublicInAccount() {
+        return true;
+    }
 }
