@@ -94,7 +94,7 @@ public class NetworkController implements NetworkEndpoint {
 
     @Override
     public void deletePrivate(String name) {
-        CbUser user = authenticatedUserService.getCbUser();
+        IdentityUser user = authenticatedUserService.getCbUser();
         networkService.delete(name, user);
     }
 

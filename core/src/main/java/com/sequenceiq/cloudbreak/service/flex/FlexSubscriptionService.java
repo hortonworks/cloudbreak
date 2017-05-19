@@ -10,8 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -104,6 +105,9 @@ public class FlexSubscriptionService {
 
     private void setFlexSubscriptionFlag(String name, IdentityUser identityUser, BiConsumer<FlexSubscription, Boolean> setter) {
         List<FlexSubscription> allInAccount = flexRepo.findAllInAccount(identityUser.getAccount());
+        if (!allInAccount.stream().anyMatch(f -> name.equals(f.getSubscriptionId()))) {
+            throw new BadRequestException("Given subscription not found with name: " + name);
+        }
         for (FlexSubscription flex : allInAccount) {
             if (name.equals(flex.getSubscriptionId())) {
                 setter.accept(flex, true);
