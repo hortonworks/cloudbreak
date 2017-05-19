@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
@@ -33,6 +34,9 @@ public class SecurityGroupService {
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     @Transactional(Transactional.TxType.NEVER)
     public SecurityGroup create(CbUser user, SecurityGroup securityGroup) {
@@ -77,7 +81,7 @@ public class SecurityGroupService {
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found.", id));
         }
-        delete(user, securityGroup);
+        delete(securityGroup);
     }
 
     public void delete(String name, CbUser user) {
@@ -86,7 +90,7 @@ public class SecurityGroupService {
         if (securityGroup == null) {
             throw new NotFoundException(String.format("SecurityGroup '%s' not found.", name));
         }
-        delete(user, securityGroup);
+        delete(securityGroup);
     }
 
     public Set<SecurityGroup> retrievePrivateSecurityGroups(CbUser user) {
@@ -101,23 +105,19 @@ public class SecurityGroupService {
         }
     }
 
-    private void delete(CbUser user, SecurityGroup securityGroup) {
-        if (instanceGroupRepository.findAllBySecurityGroup(securityGroup.getId()).isEmpty()) {
-            if (!user.getUserId().equals(securityGroup.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("Public SecurityGroups can only be deleted by owners or account admins.");
-            } else {
-                if (ResourceStatus.USER_MANAGED.equals(securityGroup.getStatus())) {
-                    groupRepository.delete(securityGroup);
-                } else {
-                    securityGroup.setName(NameUtil.postfixWithTimestamp(securityGroup.getName()));
-                    securityGroup.setStatus(ResourceStatus.DEFAULT_DELETED);
-                    groupRepository.save(securityGroup);
-                }
-            }
-        } else {
+    private void delete(SecurityGroup securityGroup) {
+        authorizationService.hasWritePermission(securityGroup);
+        if (!instanceGroupRepository.countBySecurityGroup(securityGroup).equals(0L)) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with SecurityGroup '%s'(ID:'%s'). Please remove these before deleting the SecurityGroup.",
                     securityGroup.getName(), securityGroup.getId()));
+        }
+        if (ResourceStatus.USER_MANAGED.equals(securityGroup.getStatus())) {
+            groupRepository.delete(securityGroup);
+        } else {
+            securityGroup.setName(NameUtil.postfixWithTimestamp(securityGroup.getName()));
+            securityGroup.setStatus(ResourceStatus.DEFAULT_DELETED);
+            groupRepository.save(securityGroup);
         }
     }
 }

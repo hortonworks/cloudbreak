@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.repository;
 
-import java.util.List;
-
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 
 @EntityType(entityClass = InstanceGroup.class)
 public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, Long> {
@@ -14,6 +13,5 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
 
     InstanceGroup findOneByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
-    List<InstanceGroup> findAllBySecurityGroup(@Param("securityGroupId") Long securityGroupId);
-
+    Long countBySecurityGroup(SecurityGroup securityGroup);
 }

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
@@ -31,6 +32,9 @@ public class RdsConfigService {
 
     @Inject
     private ClusterRepository clusterRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public Set<RDSConfig> retrievePrivateRdsConfigs(CbUser user) {
         return rdsConfigRepository.findForUser(user.getUserId());
@@ -74,7 +78,7 @@ public class RdsConfigService {
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", id));
         }
-        delete(rdsConfig, user);
+        delete(rdsConfig);
     }
 
     public void delete(String name, CbUser user) {
@@ -82,7 +86,7 @@ public class RdsConfigService {
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
         }
-        delete(rdsConfig, user);
+        delete(rdsConfig);
     }
 
     public RDSConfig create(CbUser user, RDSConfig rdsConfig) {
@@ -92,21 +96,18 @@ public class RdsConfigService {
         return rdsConfigRepository.save(rdsConfig);
     }
 
-    private void delete(RDSConfig rdsConfig, CbUser user) {
-        if (clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()).isEmpty()) {
-            if (!user.getUserId().equals(rdsConfig.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("RDS configurations can only be deleted by account admins or owners.");
-            }
-            if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
-                rdsConfigRepository.delete(rdsConfig);
-            } else {
-                rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
-                rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
-                rdsConfigRepository.save(rdsConfig);
-            }
-        } else {
+    private void delete(RDSConfig rdsConfig) {
+        authorizationService.hasWritePermission(rdsConfig);
+        if (!clusterRepository.findAllClustersByRDSConfig(rdsConfig.getId()).isEmpty()) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with RDS config '%s'. Please remove these before deleting the RDS configuration.", rdsConfig.getId()));
+        }
+        if (ResourceStatus.USER_MANAGED.equals(rdsConfig.getStatus())) {
+            rdsConfigRepository.delete(rdsConfig);
+        } else {
+            rdsConfig.setName(NameUtil.postfixWithTimestamp(rdsConfig.getName()));
+            rdsConfig.setStatus(ResourceStatus.DEFAULT_DELETED);
+            rdsConfigRepository.save(rdsConfig);
         }
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.Topology;
 
 @EntityType(entityClass = Template.class)
 public interface TemplateRepository extends CrudRepository<Template, Long> {
@@ -28,6 +29,5 @@ public interface TemplateRepository extends CrudRepository<Template, Long> {
 
     Set<Template> findAllDefaultInAccount(@Param("account") String account);
 
-    Set<Template> findByTopology(@Param("topologyId") Long topologyId);
-
+    Long countByTopology(Topology topology);
 }

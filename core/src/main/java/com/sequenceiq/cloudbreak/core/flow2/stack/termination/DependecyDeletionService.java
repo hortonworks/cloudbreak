@@ -94,7 +94,7 @@ public class DependecyDeletionService {
     private void deleteCredential(Credential credential) {
         try {
             if (credential != null) {
-                credentialService.delete(credential);
+                credentialService.archiveCredential(credential);
             }
         } catch (Exception ex) {
             LOGGER.warn("Could not delete credential {} which is associated with the stack: {}", credential, ex.getMessage());

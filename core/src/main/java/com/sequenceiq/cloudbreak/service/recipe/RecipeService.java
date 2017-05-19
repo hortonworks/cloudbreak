@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
 @Service
@@ -32,6 +33,9 @@ public class RecipeService {
 
     @Inject
     private RecipeMigration recipeMigration;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     @PostConstruct
     public void migrate() {
@@ -91,7 +95,7 @@ public class RecipeService {
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found.", id));
         }
-        delete(recipe, user);
+        delete(recipe);
     }
 
     public void delete(String name, CbUser user) {
@@ -99,19 +103,15 @@ public class RecipeService {
         if (recipe == null) {
             throw new NotFoundException(String.format("Recipe '%s' not found.", name));
         }
-        delete(recipe, user);
+        delete(recipe);
     }
 
-    private void delete(Recipe recipe, CbUser user) {
-        if (hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()).isEmpty()) {
-            if (!user.getUserId().equals(recipe.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-                throw new BadRequestException("Public recipes can only be deleted by owners or account admins.");
-            } else {
-                recipeRepository.delete(recipe);
-            }
-        } else {
+    private void delete(Recipe recipe) {
+        authorizationService.hasWritePermission(recipe);
+        if (!hostGroupRepository.findAllHostGroupsByRecipe(recipe.getId()).isEmpty()) {
             throw new BadRequestException(String.format(
                     "There are clusters associated with recipe '%s'. Please remove these before deleting the recipe.", recipe.getId()));
         }
+        recipeRepository.delete(recipe);
     }
 }

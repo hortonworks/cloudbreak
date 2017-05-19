@@ -22,10 +22,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 })
 @NamedQueries({
         @NamedQuery(
-                name = "Credential.findByTopology",
-                query = "SELECT c FROM Credential c "
-                        + "WHERE c.topology.id= :topologyId"),
-        @NamedQuery(
                 name = "Credential.findForUser",
                 query = "SELECT c FROM Credential c "
                         + "WHERE c.owner= :user"

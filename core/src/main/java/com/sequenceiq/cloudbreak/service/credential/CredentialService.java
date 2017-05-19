@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -23,9 +22,9 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
@@ -48,6 +47,9 @@ public class CredentialService {
 
     @Inject
     private NotificationSender notificationSender;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public Set<Credential> retrievePrivateCredentials(CbUser user) {
         return credentialRepository.findForUser(user.getUserId());
@@ -159,7 +161,7 @@ public class CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
         }
-        delete(credential, user);
+        delete(credential);
     }
 
     @Transactional(Transactional.TxType.NEVER)
@@ -168,7 +170,7 @@ public class CredentialService {
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", name));
         }
-        delete(credential, user);
+        delete(credential);
     }
 
     @Transactional(Transactional.TxType.NEVER)
@@ -181,31 +183,23 @@ public class CredentialService {
         }
     }
 
-    private void delete(Credential credential, CbUser user) {
-        if (!user.getUserId().equals(credential.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-            throw new BadRequestException("Credentials can be deleted only by account admins or owners.");
-        }
-        List<Stack> stacks = stackRepository.findByCredential(credential.getId());
-        if (stacks.isEmpty()) {
-            delete(credential);
-        } else {
+    private void delete(Credential credential) {
+        authorizationService.hasWritePermission(credential);
+        if (!stackRepository.countByCredential(credential).equals(0L)) {
             throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
         }
+        archiveCredential(credential);
     }
 
-    public void delete(Credential credential) {
-        archiveCredential(credential);
+    public void archiveCredential(Credential credential) {
+        credential.setName(generateArchiveName(credential.getName()));
+        credential.setArchived(true);
+        credential.setTopology(null);
+        credentialRepository.save(credential);
     }
 
     private String generateArchiveName(String name) {
         //generate new name for the archived credential to by pass unique constraint
         return new StringBuilder().append(name).append("_").append(UUID.randomUUID()).toString();
-    }
-
-    private void archiveCredential(Credential credential) {
-        credential.setName(generateArchiveName(credential.getName()));
-        credential.setArchived(true);
-        credential.setTopology(null);
-        credentialRepository.save(credential);
     }
 }

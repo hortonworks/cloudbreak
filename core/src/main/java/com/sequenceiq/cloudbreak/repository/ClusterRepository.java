@@ -8,16 +8,15 @@ import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.domain.SssdConfig;
 
 @EntityType(entityClass = Cluster.class)
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Cluster findById(@Param("id") Long id);
-
-    Set<Cluster> findAllClustersByBlueprint(@Param("id") Long blueprintId);
-
-    Set<Cluster> findAllClustersBySssdConfig(@Param("id") Long sssdConfigId);
 
     Cluster findOneWithLists(@Param("id") Long id);
 
@@ -29,5 +28,9 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     Set<Cluster> findAllClustersByRDSConfig(@Param("id") Long rdsConfigId);
 
-    Set<Cluster> findAllClustersByLdapConfig(@Param("id") Long ldapConfigId);
+    Long countByBlueprint(Blueprint blueprint);
+
+    Long countByLdapConfig(LdapConfig ldapConfig);
+
+    Long countBySssdConfig(SssdConfig sssdConfig);
 }

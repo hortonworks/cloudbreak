@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.common.type.CbUserRole;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -83,6 +82,7 @@ import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -176,6 +176,9 @@ public class AmbariClusterService implements ClusterService {
     @Inject
     private StackUpdater stackUpdater;
 
+    @Inject
+    private AuthorizationService authorizationService;
+
     @Override
     @Transactional(Transactional.TxType.NEVER)
     public Cluster create(CbUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
@@ -222,15 +225,13 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void delete(CbUser user, Long stackId) {
+    public void delete(Long stackId) {
         Stack stack = stackService.get(stackId);
-        LOGGER.info("Cluster delete requested.");
-        if (!user.getUserId().equals(stack.getOwner()) && !user.getRoles().contains(CbUserRole.ADMIN)) {
-            throw new BadRequestException("Clusters can only be deleted by account admins or owners.");
-        }
+        authorizationService.hasWritePermission(stack);
         if (stack.getCluster() != null && Status.DELETE_COMPLETED.equals(stack.getCluster().getStatus())) {
             throw new BadRequestException("Clusters is already deleted.");
         }
+        LOGGER.info("Cluster delete requested.");
         flowManager.triggerClusterTermination(stackId);
     }
 

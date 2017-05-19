@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
 
 import com.sequenceiq.cloudbreak.domain.Network;
+import com.sequenceiq.cloudbreak.domain.Topology;
 
 @EntityType(entityClass = Network.class)
 public interface NetworkRepository extends CrudRepository<Network, Long> {
@@ -29,5 +30,5 @@ public interface NetworkRepository extends CrudRepository<Network, Long> {
 
     Set<Network> findAllDefaultInAccount(@Param("account") String account);
 
-    Set<Network> findByTopology(@Param("topologyId") Long topologyId);
+    Long countByTopology(Topology topology);
 }

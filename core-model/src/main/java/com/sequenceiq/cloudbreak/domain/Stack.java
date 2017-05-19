@@ -175,20 +175,6 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                         + "LEFT JOIN FETCH ig.instanceMetaData "
                         + "WHERE t.owner= :owner and t.name= :name"),
         @NamedQuery(
-                name = "Stack.findByCredential",
-                query = "SELECT t FROM Stack t "
-                        + "LEFT JOIN FETCH t.resources "
-                        + "LEFT JOIN FETCH t.instanceGroups ig "
-                        + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE t.credential.id= :credentialId "),
-        @NamedQuery(
-                name = "Stack.findAllByNetwork",
-                query = "SELECT t FROM Stack t "
-                        + "LEFT JOIN FETCH t.resources "
-                        + "LEFT JOIN FETCH t.instanceGroups ig "
-                        + "LEFT JOIN FETCH ig.instanceMetaData "
-                        + "WHERE t.network.id= :networkId "),
-        @NamedQuery(
                 name = "Stack.findAllAlive",
                 query = "SELECT s FROM Stack s "
                         + "WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "),

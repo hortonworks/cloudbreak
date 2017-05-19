@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.CbUser;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Service
@@ -24,6 +26,12 @@ public class FlexSubscriptionService {
 
     @Inject
     private FlexSubscriptionRepository flexRepo;
+
+    @Inject
+    private StackRepository stackRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
 
     public FlexSubscription create(FlexSubscription subscription) {
         try {
@@ -36,29 +44,18 @@ public class FlexSubscriptionService {
         }
     }
 
-    public void delete(FlexSubscription subscription, CbUser user) {
-        if (subscription != null) {
-            boolean owner = user.getUserId().equals(subscription.getOwner());
-            boolean adminInTheAccount = user.getRoles().contains(CbUserRole.ADMIN) && subscription.getAccount().equals(user.getAccount());
-            if (owner || adminInTheAccount) {
-                try {
-                    flexRepo.delete(subscription);
-                    LOGGER.info("Flex subscription has been deleted: {}", subscription);
-                } catch (DataIntegrityViolationException dex) {
-                    throw new CloudbreakServiceException("The given Flex subscription cannot be deleted, there are associated clusters", dex);
-                }
-            } else {
-                String msg = "Only the owner or the account admin has access to delete Flex subscription with id: %s";
-                throw new CloudbreakServiceException(String.format(msg, subscription.getId()));
-            }
-        } else {
-            throw new CloudbreakServiceException("Flex subscription not found");
+    public void delete(FlexSubscription subscription) {
+        authorizationService.hasWritePermission(subscription);
+        if (!stackRepository.countByFlexSubscription(subscription).equals(0L)) {
+            throw new BadRequestException("The given Flex subscription cannot be deleted, there are associated clusters");
         }
+        flexRepo.delete(subscription);
+        LOGGER.info("Flex subscription has been deleted: {}", subscription);
     }
 
-    public void delete(Long id, CbUser user) {
+    public void delete(Long id) {
         FlexSubscription subscription = flexRepo.findOneById(id);
-        delete(subscription, user);
+        delete(subscription);
     }
 
     public FlexSubscription findById(Long id) {

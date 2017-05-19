@@ -85,7 +85,7 @@ public class LdapController implements LdapConfigEndpoint {
     public void delete(Long id) {
         CbUser user = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(user);
-        ldapConfigService.delete(id, user);
+        ldapConfigService.delete(id);
     }
 
     @Override
