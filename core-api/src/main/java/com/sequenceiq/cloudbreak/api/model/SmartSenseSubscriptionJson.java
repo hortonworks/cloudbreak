@@ -16,7 +16,7 @@ public class SmartSenseSubscriptionJson implements JsonEntity {
     private Long id;
 
     @ApiModelProperty(value = ModelDescriptions.SmartSenseSubscriptionModelDescription.SUBSCRIPTION_ID, required = true)
-    @Pattern(regexp = "^([A-Z]{1}-[0-9]{8}-[A-Z]{1}-[0-9]{8}$)", message = "The given SmartSense subscription id is not valid!")
+    @Pattern(regexp = "^([A-Z]{1}-[0-9]{8}-[A-Z]{1}-[0-9]{8}$)", message = "The given SmartSense subscription id is not in A-xxxxxxxx-C-xxxxxxxx format!")
     private String subscriptionId;
 
     @ApiModelProperty(value = ModelDescriptions.OWNER, readOnly = true)
