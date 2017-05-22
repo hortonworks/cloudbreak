@@ -16,6 +16,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -81,6 +82,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Inject
     private ConversionService conversionService;
+
+    @Inject
+    private RdsConfigService rdsConfigService;
 
     @Inject
     private TlsSecurityService tlsSecurityService;
@@ -219,7 +223,8 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private void convertRdsConfigs(Cluster source, ClusterResponse clusterResponse) {
-        for (RDSConfig rdsConfig : source.getRdsConfigs()) {
+        Set<RDSConfig> rdsConfigs = rdsConfigService.findByClusterId(source.getOwner(), source.getAccount(), source.getId());
+        for (RDSConfig rdsConfig : rdsConfigs) {
             clusterResponse.getRdsConfigs().add(getConversionService().convert(rdsConfig, RDSConfigResponse.class));
         }
     }

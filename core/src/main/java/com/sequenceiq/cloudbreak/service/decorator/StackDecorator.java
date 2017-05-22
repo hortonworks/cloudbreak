@@ -149,14 +149,14 @@ public class StackDecorator implements Decorator<Stack> {
         if (subject.getNetwork() != null) {
             Network network = subject.getNetwork();
             network.setPublicInAccount(subject.isPublicInAccount());
-            network.setCloudPlatform(subject.getCredential().cloudPlatform());
+            network.setCloudPlatform(subject.cloudPlatform());
             network = networkService.create(user, network);
             subject.setNetwork(network);
         }
         if (subject.getCredential() != null) {
             Credential credential = subject.getCredential();
             credential.setPublicInAccount(subject.isPublicInAccount());
-            credential.setCloudPlatform(subject.getCredential().cloudPlatform());
+            credential.setCloudPlatform(subject.cloudPlatform());
             credential = credentialAdapter.init(credential);
             credential = credentialService.create(user, credential);
             subject.setCredential(credential);

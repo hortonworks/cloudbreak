@@ -70,6 +70,7 @@ public class ModelDescriptions {
         public static final String REGION = "region of the stack";
         public static final String AVAILABILITY_ZONE = "availability zone of the stack";
         public static final String CREDENTIAL_ID = "credential resource id for the stack";
+        public static final String CREDENTIAL_NAME = "credential resource name for the stack";
         public static final String USERNAME = "ambari username";
         public static final String PASSWORD = "ambari password";
         public static final String ENABLE_SECURITY = "enable Kerberos security";
@@ -108,6 +109,7 @@ public class ModelDescriptions {
         public static final String CREDENTIAL = "stack related credential";
         public static final String NETWORK = "stack related network";
         public static final String FLEX_ID = "id of the related flex subscription";
+        public static final String SOURCE_CREDENTIAL = "source credential object for cloning";
         public static final String FLEX_SUBSCRIPTION = "the related flex subscription";
         public static final String NODE_COUNT = "node count of the stack";
         public static final String HARDWARE_INFO_RESPONSE = "hardware information where pairing hostmetadata with instancemetadata";
@@ -138,6 +140,7 @@ public class ModelDescriptions {
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
         public static final String CUSTOM_CONTAINERS = "custom containers";
         public static final String CUSTOM_QUEUE = "custom queue for yarn orchestrator";
+        public static final String CONNECTED_CLUSTER = "cluster can connect to a datalake you can define the parameters here";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
         public static final String RDSCONFIGS = "RDS configurations for the cluster";

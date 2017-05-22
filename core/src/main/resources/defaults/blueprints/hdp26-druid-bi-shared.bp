@@ -1,30 +1,6 @@
 {
   "inputs": [
     {
-      "name":"LDAP_URL",
-      "referenceConfiguration":"hive.server2.authentication.ldap.url"
-    },
-    {
-      "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
-    },
-    {
-      "name":"LDAP_BIND_DN",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
-    },
-    {
-      "name":"LDAP_BIND_PASSWORD",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
-    },
-    {
-      "name": "LDAP_SYNC_SEARCH_BASE",
-      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
-    },
-    {
-      "name":"LDAP_GROUP_SEARCH_BASE",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
-    },
-    {
       "name":"RANGER_REST_ADDRESS",
       "referenceConfiguration":"policymgr_external_url"
     },
@@ -43,10 +19,6 @@
     {
       "name":"RANGER_ADMIN_USERNAME",
       "referenceConfiguration":"ranger_admin_username"
-    },
-    {
-      "name":"RANGER_ADMIN_PASSWORD",
-      "referenceConfiguration":"ranger_admin_password"
     },
     {
       "name":"S3_BUCKET",
@@ -128,7 +100,7 @@
             "druid.server.http.numThreads": "50",
             "druid.worker.capacity": "3",
             "druid.processing.numThreads": "2",
-            "druid.indexer.runner.javaOpts": "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{stack_version}} -Dhadoop.mapreduce.job.classloader=true",
+            "druid.indexer.runner.javaOpts": "-server -Xmx2g -Duser.timezone=UTC -Dfile.encoding=UTF-8 -Djava.util.logging.manager=org.apache.logging.log4j.jul.LogManager -Dhdp.version={{{stack_version}}} -Dhadoop.mapreduce.job.classloader=true",
             "druid.service": "druid/middlemanager",
             "druid.port": "8091"
           }

@@ -37,11 +37,15 @@ public class CredentialDefinitionService {
     private PBEStringCleanablePasswordEncryptor legacyEncryptor;
 
     public Map<String, Object> processProperties(Platform cloudPlatform, Map<String, Object> properties) {
-        return processValues(getDefinition(cloudPlatform), properties, false);
+        return processValues(getDefinition(cloudPlatform), properties, false, false);
     }
 
     public Map<String, Object> revertProperties(Platform cloudPlatform, Map<String, Object> properties) {
-        return processValues(getDefinition(cloudPlatform), properties, true);
+        return processValues(getDefinition(cloudPlatform), properties, true, false);
+    }
+
+    public Map<String, Object> revertAndRemoveProperties(Platform cloudPlatform, Map<String, Object> properties) {
+        return processValues(getDefinition(cloudPlatform), properties, true, true);
     }
 
     private Definition getDefinition(Platform cloudPlatform) {
@@ -54,13 +58,13 @@ public class CredentialDefinitionService {
         }
     }
 
-    private Map<String, Object> processValues(Definition definition, Map<String, Object> properties, boolean revert) {
+    private Map<String, Object> processValues(Definition definition, Map<String, Object> properties, boolean revert, boolean remove) {
         Map<String, Object> processed = new HashMap<>();
-        processed.putAll(processValues(properties, definition.getDefaultValues(), revert));
+        processed.putAll(processValues(properties, definition.getDefaultValues(), revert, remove));
         Object selector = properties.get(SELECTOR);
         if (selector != null) {
             processed.put(SELECTOR, selector);
-            processed.putAll(processValues(properties, collectSelectorValues(definition, String.valueOf(selector)), revert));
+            processed.putAll(processValues(properties, collectSelectorValues(definition, String.valueOf(selector)), revert, remove));
         }
         return processed;
     }
@@ -86,7 +90,7 @@ public class CredentialDefinitionService {
         return null;
     }
 
-    private Map<String, Object> processValues(Map<String, Object> properties, List<Value> values, boolean revert) {
+    private Map<String, Object> processValues(Map<String, Object> properties, List<Value> values, boolean revert, boolean remove) {
         Map<String, Object> processed = new HashMap<>();
         for (Value value : values) {
             String key = value.getName();
@@ -102,7 +106,13 @@ public class CredentialDefinitionService {
                     property = encryptor.encrypt(property);
                 }
             }
-            processed.put(key, property);
+            if (isSensitve(value)) {
+                if (!remove) {
+                    processed.put(key, property);
+                }
+            } else {
+                processed.put(key, property);
+            }
         }
         return processed;
     }
@@ -110,6 +120,11 @@ public class CredentialDefinitionService {
     private boolean isEncrypted(Value value) {
         Boolean encrypted = value.getEncrypted();
         return isNotNull(encrypted) && encrypted;
+    }
+
+    private boolean isSensitve(Value value) {
+        Boolean sensitive = value.getSensitive();
+        return isNotNull(sensitive) && sensitive;
     }
 
     private boolean isOptional(Value value) {

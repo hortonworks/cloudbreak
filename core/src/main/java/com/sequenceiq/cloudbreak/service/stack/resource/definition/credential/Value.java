@@ -16,6 +16,9 @@ public class Value {
     @JsonProperty("optional")
     private Boolean optional;
 
+    @JsonProperty("sensitive")
+    private Boolean sensitive = false;
+
     public String getName() {
         return name;
     }
@@ -46,5 +49,13 @@ public class Value {
 
     public void setOptional(Boolean optional) {
         this.optional = optional;
+    }
+
+    public Boolean getSensitive() {
+        return sensitive;
+    }
+
+    public void setSensitive(Boolean sensitive) {
+        this.sensitive = sensitive;
     }
 }
