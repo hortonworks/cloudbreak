@@ -72,7 +72,7 @@ public class UtilController implements UtilEndpoint {
 
             rdsBuildResult.setResults(result);
         } catch (BadRequestException e) {
-            throw new BadRequestException("Could not create databases in metastore.");
+            throw new BadRequestException("Could not create databases in metastore - " + e.getMessage(), e);
         }
         return rdsBuildResult;
     }
