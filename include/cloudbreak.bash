@@ -38,7 +38,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.16.0-dev.3
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
 
-    env-import DOCKER_TAG_CBD_SMARTSENSE 0.2.0
+    env-import DOCKER_TAG_CBD_SMARTSENSE 0.4.0
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
@@ -51,6 +51,7 @@ cloudbreak-conf-tags() {
     env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
     env-import CB_DEFAULT_SUBSCRIPTION_ADDRESS http://uluwatu.service.consul:3000/notifications
     env-import CERTS_BUCKET ""
+
 }
 
 docker-ip() {
@@ -236,6 +237,11 @@ cloudbreak-conf-defaults() {
     env-import CB_ENABLE_CUSTOM_IMAGE "false"
     env-import CB_MAX_SALT_NEW_SERVICE_RETRY 90
     env-import CB_MAX_SALT_RECIPE_EXECUTION_RETRY 90
+
+    env-import CB_INSTANCE_UUID
+    env-validate CB_INSTANCE_UUID *" "* "space"
+
+    env-import CB_SMARTSENSE_ID ""
 }
 
 cloudbreak-conf-cloud-provider() {
@@ -675,6 +681,13 @@ util-smartsense() {
       -e AWS_INSTANCE_ID=$AWS_INSTANCE_ID \
       -e ULU_HWX_CLOUD_DEFAULT_REGION=$ULU_HWX_CLOUD_DEFAULT_REGION \
       -e CB_SMARTSENSE_CONFIGURE=$CB_SMARTSENSE_CONFIGURE \
+      -e CB_SMARTSENSE_ID=$CB_SMARTSENSE_ID \
+      -e CB_SMARTSENSE_CLUSTER_NAME_PREFIX=$CB_SMARTSENSE_CLUSTER_NAME_PREFIX \
+      -e CB_INSTANCE_UUID=$CB_INSTANCE_UUID \
+      -e CB_INSTANCE_PROVIDER=$CB_INSTANCE_PROVIDER \
+      -e CB_PRODUCT_ID=$CB_PRODUCT_ID \
+      -e CB_COMPONENT_ID=$CB_COMPONENT_ID \
+      -e CAPTURE_CRON_EXPRESSION="$CAPTURE_CRON_EXPRESSION" \
       -l traefik.enable=false \
       -v $PWD:/var/lib/cloudbreak-deployment \
       -v $(which cbd):/bin/cbd \
