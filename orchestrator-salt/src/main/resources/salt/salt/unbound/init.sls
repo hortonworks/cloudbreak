@@ -20,3 +20,9 @@ reload_unbound:
     - watch:
       - file: /etc/unbound/conf.d/01-consul.conf
       - file: /etc/unbound/conf.d/00-cluster.conf
+
+/etc/dhcp/dhclient.d/google_hostname.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://unbound/dhcp/google_hostname.sh
+    - mode: 744
