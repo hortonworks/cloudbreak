@@ -86,6 +86,7 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
@@ -245,6 +246,9 @@ public class AmbariClusterConnector {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
+    @Inject
+    private BlueprintTemplateProcessor blueprintTemplateProcessor;
+
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient defaultAmbariClient = getDefaultAmbariClient(stack);
         AmbariClient cloudbreakAmbariClient = getAmbariClient(stack);
@@ -274,10 +278,10 @@ public class AmbariClusterConnector {
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
 
             recipeEngine.executePreInstall(stack, hostGroups);
-
-            String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint());
-
             Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
+
+            String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint(), rdsConfigs);
+
             FileSystem fs = cluster.getFileSystem();
             blueprintText = updateBlueprintConfiguration(stack, blueprintText, rdsConfigs, fs);
 
@@ -352,18 +356,10 @@ public class AmbariClusterConnector {
         return blueprintText;
     }
 
-    public String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint) throws CloudbreakSecuritySetupException, IOException {
+    public String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint, Set<RDSConfig> rdsConfigs)
+            throws CloudbreakSecuritySetupException, IOException {
         String blueprintText = blueprint.getBlueprintText();
-
-        Map<String, String> bpI = cluster.getBlueprintInputs().get(Map.class);
-        if (bpI != null) {
-            for (Map.Entry<String, String> stringStringEntry : bpI.entrySet()) {
-                blueprintText = blueprintText.replaceAll(String.format("\\{\\{ %s \\}\\}",
-                        stringStringEntry.getKey()), stringStringEntry.getValue());
-            }
-        }
-
-        return blueprintText;
+        return blueprintTemplateProcessor.process(blueprintText, cluster, rdsConfigs);
     }
 
     private void executeSmokeTest(Stack stack, AmbariClient ambariClient) {

@@ -11,6 +11,9 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @ApiModel
 public abstract class BlueprintBase implements JsonEntity {
 
@@ -25,6 +28,9 @@ public abstract class BlueprintBase implements JsonEntity {
     @Size(max = 1000)
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     private String description;
+
+    @ApiModelProperty(value = BlueprintModelDescription.INPUTS)
+    private Set<BlueprintParameterJson> inputs = new HashSet<>();
 
     public String getName() {
         return name;
@@ -49,5 +55,13 @@ public abstract class BlueprintBase implements JsonEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<BlueprintParameterJson> getInputs() {
+        return inputs;
+    }
+
+    public void setInputs(Set<BlueprintParameterJson> inputs) {
+        this.inputs = inputs;
     }
 }

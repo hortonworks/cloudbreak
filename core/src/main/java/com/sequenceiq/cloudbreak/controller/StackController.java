@@ -26,10 +26,11 @@ import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.validation.StackSensitiveDataPropagator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -75,6 +76,9 @@ public class StackController implements StackEndpoint {
 
     @Autowired
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    @Autowired
+    private StackSensitiveDataPropagator stackSensitiveDataPropagator;
 
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) {
@@ -228,6 +232,7 @@ public class StackController implements StackEndpoint {
         stackValidator.validate(stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
+        stack = stackSensitiveDataPropagator.propagate(stackRequest, stack, user);
         stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user, stackRequest.getFlexId());
         stack.setPublicInAccount(publicInAccount);
         validateAccountPreferences(stack, user);

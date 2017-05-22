@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Cluster> {
@@ -98,6 +101,9 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     @Mock
     private StackUtil stackUtil;
 
+    @Mock
+    private RdsConfigService rdsConfigService;
+
     private StackServiceComponentDescriptor stackServiceComponentDescriptor;
 
     @Before
@@ -105,6 +111,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         underTest = new ClusterToJsonConverter();
         MockitoAnnotations.initMocks(this);
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
+        given(rdsConfigService.findByClusterId(anyString(), anyString(), anyLong())).willReturn(new HashSet<>());
         stackServiceComponentDescriptor = createStackServiceComponentDescriptor();
     }
 

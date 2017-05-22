@@ -336,7 +336,7 @@ public class TestUtil {
         return stack(AVAILABLE, gcpCredential());
     }
 
-    public static Cluster cluster() {
+    public static Cluster  cluster() {
         return cluster(TestUtil.blueprint(), stack(AVAILABLE, gcpCredential()), 0L);
     }
 
@@ -377,6 +377,14 @@ public class TestUtil {
         cluster.setRdsConfigs(rdsConfigs);
         cluster.setLdapConfig(ldapConfig());
         cluster.setHostGroups(hostGroups(cluster));
+        Map<String, String> inputs = new HashMap<>();
+        inputs.put("S3_BUCKET", "testbucket");
+        try {
+            cluster.setBlueprintInputs(new Json(inputs));
+        } catch (JsonProcessingException e) {
+            cluster.setBlueprintInputs(null);
+        }
+
         Map<String, String> map = new HashMap<>();
         try {
             cluster.setAttributes(new Json(map));
