@@ -271,11 +271,10 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			tags[USER_TAGS] = skeleton.Tags
 		}
 
-		if len(skeleton.ClusterInputs) > 0 {
-			if remoteName, ok := skeleton.ClusterInputs["REMOTE_CLUSTER_NAME"]; ok {
-				tags["datalakeName"] = remoteName
-				tags["datalakeId"] = *getCluster(remoteName).ID
-			}
+		if len(skeleton.SharedClusterName) > 0 {
+			tags["datalakeName"] = skeleton.SharedClusterName
+			tags["datalakeId"] = *getCluster(skeleton.SharedClusterName).ID
+			log.Infof("[CreateStack] tags added for datalake: %s", tags)
 		}
 
 		stackReq := models_cloudbreak.StackRequest{
