@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.Event;
@@ -65,6 +67,18 @@ public class CloudParameterService {
             LOGGER.error("Error while getting the platform variants", e);
             throw new OperationException(e);
         }
+    }
+
+    public String getPlatformByVariant(String requestedVariant) {
+        PlatformVariants platformVariants = getPlatformVariants();
+        for (Map.Entry<Platform, Collection<Variant>> platformCollectionEntry : platformVariants.getPlatformToVariants().entrySet()) {
+            for (Variant variant : platformCollectionEntry.getValue()) {
+                if (variant.value().equals(requestedVariant)) {
+                    return platformCollectionEntry.getKey().value();
+                }
+            }
+        }
+        return null;
     }
 
     public PlatformDisks getDiskTypes() {

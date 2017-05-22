@@ -5,6 +5,7 @@ import java.util.Set;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 @EntityType(entityClass = RDSConfig.class)
@@ -26,4 +27,7 @@ public interface RdsConfigRepository extends CrudRepository<RDSConfig, Long> {
     RDSConfig findById(@Param("id") Long id);
 
     Set<RDSConfig> findByClusterId(@Param("user") String user, @Param("account") String account, @Param("clusterId") Long clusterId);
+
+    RDSConfig findByClusterIdAndType(@Param("user") String user, @Param("account") String account, @Param("clusterId") Long clusterId,
+            @Param("type") RdsType type);
 }

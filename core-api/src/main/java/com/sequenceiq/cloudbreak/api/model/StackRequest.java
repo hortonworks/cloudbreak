@@ -40,6 +40,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(value = StackModelDescription.FLEX_ID)
     private Long flexId;
 
+    @ApiModelProperty(value = StackModelDescription.SOURCE_CREDENTIAL)
+    private CredentialSourceRequest credentialSource;
+
     public FailurePolicyRequest getFailurePolicy() {
         return failurePolicy;
     }
@@ -102,5 +105,13 @@ public class StackRequest extends StackBase {
 
     public void setFlexId(Long flexId) {
         this.flexId = flexId;
+    }
+
+    public CredentialSourceRequest getCredentialSource() {
+        return credentialSource;
+    }
+
+    public void setCredentialSource(CredentialSourceRequest credentialSource) {
+        this.credentialSource = credentialSource;
     }
 }

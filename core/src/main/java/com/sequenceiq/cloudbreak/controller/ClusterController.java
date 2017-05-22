@@ -144,7 +144,6 @@ public class ClusterController implements ClusterEndpoint {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
-        validateRdsConfigParams(request);
         if (request.getRdsConfigJsons() != null && !request.getRdsConfigJsons().isEmpty()) {
             for (RDSConfigRequest rdsConfigJson : request.getRdsConfigJsons()) {
                 validateRdsConnection(rdsConfigJson);
@@ -156,7 +155,8 @@ public class ClusterController implements ClusterEndpoint {
         cluster = clusterDecorator.decorate(cluster, stackId, user,
                 request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getSssdConfigId(), request.getRdsConfigIds(), request.getLdapConfigId(),
-                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJsons(), request.getLdapConfig());
+                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJsons(),
+                request.getLdapConfig(), request.getConnectedCluster());
         if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
             cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
         }
@@ -411,12 +411,5 @@ public class ClusterController implements ClusterEndpoint {
         LOGGER.info("Cluster username password update request received. Stack id:  {}, username: {}",
                 stackId, userNamePasswordJson.getUserName());
         clusterService.updateUserNamePassword(stackId, userNamePasswordJson);
-    }
-
-    private void validateRdsConfigParams(ClusterRequest request) {
-        if (request.getRdsConfigJsons() != null && !request.getRdsConfigJsons().isEmpty()
-                && request.getRdsConfigIds() != null && !request.getRdsConfigIds().isEmpty()) {
-            throw new BadRequestException("Both rdsConfigs and rdsConfigIds cannot be set in the same request.");
-        }
     }
 }

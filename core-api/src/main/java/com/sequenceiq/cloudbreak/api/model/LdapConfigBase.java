@@ -62,10 +62,6 @@ public abstract class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.DOMAIN)
     private String domain;
 
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD, required = true)
-    private String bindPassword;
-
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.DIRECTORY_TYPE)
     private DirectoryType directoryType;
 
@@ -80,14 +76,6 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
     private String groupMemberAttribute;
-
-    public String getBindPassword() {
-        return bindPassword;
-    }
-
-    public void setBindPassword(String bindPassword) {
-        this.bindPassword = bindPassword;
-    }
 
     public String getName() {
         return name;

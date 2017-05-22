@@ -1,9 +1,16 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.inject.Inject;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
+import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
+import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -47,6 +54,8 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         blueprint.setName(json.getName());
         blueprint.setDescription(json.getDescription());
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
+        prepareBlueprintInputs(json, blueprint);
+
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
             blueprint.setBlueprintName(blueprintUtils.getBlueprintName(root));
@@ -56,6 +65,23 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         }
 
         return blueprint;
+    }
+
+    private void prepareBlueprintInputs(BlueprintRequest json, Blueprint blueprint) {
+        List<BlueprintParameter> blueprintParameterList = new ArrayList<>();
+        for (BlueprintParameterJson blueprintParameterJson : json.getInputs()) {
+            BlueprintParameter blueprintParameter = new BlueprintParameter();
+            blueprintParameter.setReferenceConfiguration(blueprintParameterJson.getReferenceConfiguration());
+            blueprintParameter.setDescription(blueprintParameterJson.getDescription());
+            blueprintParameter.setName(blueprintParameterJson.getName());
+            blueprintParameterList.add(blueprintParameter);
+        }
+        BlueprintInputParameters inputParameters = new BlueprintInputParameters(blueprintParameterList);
+        try {
+            blueprint.setInputParameters(new Json(inputParameters));
+        } catch (JsonProcessingException e) {
+            throw new BadRequestException("Invalid Blueprint: Failed to parse inputs.", e);
+        }
     }
 
     public Blueprint convert(String name, String blueprintText, boolean publicInAccount) {
