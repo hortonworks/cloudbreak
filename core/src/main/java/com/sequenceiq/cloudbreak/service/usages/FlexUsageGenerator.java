@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageComponentJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageControllerJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageHdpInstanceJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageProductJson;
-import com.sequenceiq.cloudbreak.common.service.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.common.service;
+package com.sequenceiq.cloudbreak.common.service.user;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -28,9 +28,9 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
-public class RemoteUserDetailsService {
+public class CachedUserDetailsService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RemoteUserDetailsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CachedUserDetailsService.class);
 
     private static final int ACCOUNT_PART = 2;
 

@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.service.RemoteUserDetailsService;
-import com.sequenceiq.cloudbreak.common.service.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.periscope.domain.PeriscopeUser;
 
 @Service
@@ -19,10 +19,10 @@ public class UserDetailsService {
     private String clientSecret;
 
     @Inject
-    private RemoteUserDetailsService remoteUserDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     public PeriscopeUser getDetails(String fieldValue, UserFilterField filterField) {
-        IdentityUser identityUser = remoteUserDetailsService.getDetails(fieldValue, filterField, clientSecret);
+        IdentityUser identityUser = cachedUserDetailsService.getDetails(fieldValue, filterField, clientSecret);
         return new PeriscopeUser(identityUser.getUserId(), identityUser.getUsername(), identityUser.getAccount());
     }
 

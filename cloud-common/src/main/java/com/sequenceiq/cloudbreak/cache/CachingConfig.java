@@ -18,7 +18,7 @@ import org.springframework.cache.interceptor.CacheResolver;
 import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.cache.interceptor.SimpleCacheErrorHandler;
 import org.springframework.cache.interceptor.SimpleCacheResolver;
-import org.springframework.cache.interceptor.SimpleKey;
+import org.springframework.cache.interceptor.SimpleKeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -35,7 +35,9 @@ public class CachingConfig implements CachingConfigurer {
     @PostConstruct
     public void postCachDefinition() {
         for (CacheDefinition cacheDefinition : cacheDefinitions) {
-            classCacheDefinitionMap.put(cacheDefinition.type(), cacheDefinition);
+            if (cacheDefinition.type() != null) {
+                classCacheDefinitionMap.put(cacheDefinition.type(), cacheDefinition);
+            }
         }
     }
 
@@ -74,18 +76,13 @@ public class CachingConfig implements CachingConfigurer {
 
         @Override
         public Object generate(Object target, Method method, Object... params) {
-            if (params.length == 0) {
-                return SimpleKey.EMPTY;
-            }
             if (params.length == 1) {
                 CacheDefinition cacheDefinition = classCacheDefinitionMap.get(params[0].getClass());
-                if (cacheDefinition == null) {
-                    return classCacheDefinitionMap.get(Object.class).generate(target, method, params);
-                } else {
-                    return cacheDefinition.generate(target, method, params);
+                if (cacheDefinition != null) {
+                    return cacheDefinition.generateKey(target, method, params);
                 }
             }
-            return new SimpleKey(params);
+            return SimpleKeyGenerator.generateKey(params);
         }
     }
 

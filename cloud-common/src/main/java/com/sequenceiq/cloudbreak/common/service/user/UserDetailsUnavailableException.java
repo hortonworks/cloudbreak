@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.common.service;
+package com.sequenceiq.cloudbreak.common.service.user;
 
 public class UserDetailsUnavailableException extends RuntimeException {
 

@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.service.RemoteUserDetailsService;
-import com.sequenceiq.cloudbreak.common.service.UserFilterField;
+import com.sequenceiq.cloudbreak.common.service.user.CachedUserDetailsService;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 
 @Service
 @Lazy
@@ -18,13 +18,13 @@ public class UserDetailsService {
     private String clientSecret;
 
     @Inject
-    private RemoteUserDetailsService remoteUserDetailsService;
+    private CachedUserDetailsService cachedUserDetailsService;
 
     public IdentityUser getDetails(String username, UserFilterField filterField) {
-        return remoteUserDetailsService.getDetails(username, filterField, clientSecret);
+        return cachedUserDetailsService.getDetails(username, filterField, clientSecret);
     }
 
     public void evictUserDetails(String updatedUserId, String filterValue) {
-        remoteUserDetailsService.evictUserDetails(updatedUserId, filterValue);
+        cachedUserDetailsService.evictUserDetails(updatedUserId, filterValue);
     }
 }
