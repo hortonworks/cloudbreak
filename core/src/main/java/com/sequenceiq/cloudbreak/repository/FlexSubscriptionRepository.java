@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PostAuthorize;
@@ -13,18 +14,20 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 public interface FlexSubscriptionRepository extends CrudRepository<FlexSubscription, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    FlexSubscription findOneById(@Param("id") Long id);
+    FlexSubscription findById(Long id);
 
     @PostAuthorize("hasPermission(returnObject,'read')")
-    FlexSubscription findOneByName(@Param("name") String name);
+    FlexSubscription findByName(String name);
 
-    FlexSubscription findOneByNameInAccount(@Param("name") String name, @Param("owner") String owner, @Param("account") String account);
+    List<FlexSubscription> findAllByOwner(String owner);
 
-    List<FlexSubscription> findByOwner(@Param("owner") String owner);
+    List<FlexSubscription> findAllByAccount(String account);
 
-    List<FlexSubscription> findPublicInAccountForUser(@Param("owner") String owner, @Param("account") String account);
+    @Query("SELECT f FROM FlexSubscription f WHERE f.name= :name AND ((f.account= :account AND f.publicInAccount= true) OR f.owner= :owner)")
+    FlexSubscription findPublicInAccountByNameForUser(@Param("name") String name, @Param("owner") String owner, @Param("account") String account);
 
-    List<FlexSubscription> findAllInAccount(@Param("account") String account);
+    @Query("SELECT f FROM FlexSubscription f WHERE (f.account= :account AND f.publicInAccount= true) OR f.owner= :owner")
+    List<FlexSubscription> findAllPublicInAccountForUser(@Param("owner") String owner, @Param("account") String account);
 
     Long countBySmartSenseSubscription(SmartSenseSubscription smartSenseSubscription);
 }
