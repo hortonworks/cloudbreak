@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.smartsense;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -11,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
@@ -67,7 +66,7 @@ public class SmartSenseSubscriptionService {
     }
 
     public void delete(String subscriptionId, IdentityUser cbUser) {
-        SmartSenseSubscription subscription = repository.findBySubscriptionIdInAccount(subscriptionId, cbUser.getAccount());
+        SmartSenseSubscription subscription = repository.findBySubscriptionIdAndAccount(subscriptionId, cbUser.getAccount());
         delete(subscription);
     }
 
@@ -81,11 +80,6 @@ public class SmartSenseSubscriptionService {
         return repository.findOneById(id);
     }
 
-    public SmartSenseSubscription findBySubscriptionId(String subscriptionId, String account) {
-        LOGGER.info("Looking for SmartSense subscription with subscription id: {} in account: {}", subscriptionId, account);
-        return repository.findBySubscriptionId(subscriptionId, account);
-    }
-
     public Optional<SmartSenseSubscription> getOne() {
         LOGGER.info("Get the SmartSense subscription");
         Iterator<SmartSenseSubscription> subscriptions = repository.findAll().iterator();
@@ -94,10 +88,5 @@ public class SmartSenseSubscriptionService {
         } else {
             return Optional.empty();
         }
-    }
-
-    public List<SmartSenseSubscription> findByOwner(String owner) {
-        LOGGER.info("Looking for SmartSense subscriptions for owner: {}", owner);
-        return repository.findByOwner(owner);
     }
 }

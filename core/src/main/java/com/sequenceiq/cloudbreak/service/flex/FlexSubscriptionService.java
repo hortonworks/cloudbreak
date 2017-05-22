@@ -54,7 +54,7 @@ public class FlexSubscriptionService {
     }
 
     public void delete(Long id) {
-        FlexSubscription subscription = flexRepo.findOneById(id);
+        FlexSubscription subscription = flexRepo.findById(id);
         delete(subscription);
     }
 
@@ -65,30 +65,30 @@ public class FlexSubscriptionService {
 
     public FlexSubscription findOneById(Long id) {
         LOGGER.info("Looking for one Flex subscription with id: {}", id);
-        return flexRepo.findOneById(id);
+        return flexRepo.findById(id);
     }
 
     public List<FlexSubscription> findByOwner(String owner) {
         LOGGER.info("Looking for Flex subscriptions for owner: {}", owner);
-        return flexRepo.findByOwner(owner);
+        return flexRepo.findAllByOwner(owner);
     }
 
     public FlexSubscription findOneByName(String name) {
         LOGGER.info("Looking for Flex subscription name id: {}", name);
-        return flexRepo.findOneByName(name);
+        return flexRepo.findByName(name);
     }
 
     public FlexSubscription findByNameInAccount(String name, String owner, String account) {
         LOGGER.info("Looking for Flex subscription with name: {}, in account: {}", name, account);
-        return flexRepo.findOneByNameInAccount(name, owner, account);
+        return flexRepo.findPublicInAccountByNameForUser(name, owner, account);
     }
 
     public List<FlexSubscription> findPublicInAccountForUser(IdentityUser user) {
         LOGGER.info("Looking for public Flex subscriptions for user: {}", user.getUsername());
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return flexRepo.findAllInAccount(user.getAccount());
+            return flexRepo.findAllByAccount(user.getAccount());
         } else {
-            return flexRepo.findPublicInAccountForUser(user.getUserId(), user.getAccount());
+            return flexRepo.findAllPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
     }
 
@@ -101,7 +101,7 @@ public class FlexSubscriptionService {
     }
 
     private void setFlexSubscriptionFlag(String name, IdentityUser identityUser, BiConsumer<FlexSubscription, Boolean> setter) {
-        List<FlexSubscription> allInAccount = flexRepo.findAllInAccount(identityUser.getAccount());
+        List<FlexSubscription> allInAccount = flexRepo.findAllByAccount(identityUser.getAccount());
         if (!allInAccount.stream().anyMatch(f -> name.equals(f.getSubscriptionId()))) {
             throw new BadRequestException("Given subscription not found with name: " + name);
         }

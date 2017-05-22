@@ -5,8 +5,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -14,24 +12,6 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"account", "subscriptionId"})
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "SmartSenseSubscription.findById",
-                query = "SELECT s FROM SmartSenseSubscription s WHERE s.id= :id"
-        ),
-        @NamedQuery(
-                name = "SmartSenseSubscription.findBySubscriptionId",
-                query = "SELECT s FROM SmartSenseSubscription s WHERE s.subscriptionId= :subscriptionId AND s.account= :account"
-        ),
-        @NamedQuery(
-                name = "SmartSenseSubscription.findBySubscriptionIdInAccount",
-                query = "SELECT s FROM SmartSenseSubscription s "
-                        + "WHERE s.subscriptionId= :subscriptionId and s.account= :account"),
-        @NamedQuery(
-                name = "SmartSenseSubscription.findByOwner",
-                query = "SELECT s FROM SmartSenseSubscription s WHERE s.owner= :owner"
-        )
 })
 public class SmartSenseSubscription {
 

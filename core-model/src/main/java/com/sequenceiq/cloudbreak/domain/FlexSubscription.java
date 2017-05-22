@@ -6,8 +6,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -15,32 +13,6 @@ import javax.persistence.UniqueConstraint;
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = {"account", "name"})
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "FlexSubscription.findById",
-                query = "SELECT f FROM FlexSubscription f WHERE f.id= :id"
-        ),
-        @NamedQuery(
-                name = "FlexSubscription.findOneByName",
-                query = "SELECT f FROM FlexSubscription f WHERE f.name= :name"
-        ),
-        @NamedQuery(
-                name = "FlexSubscription.findOneByNameInAccount",
-                query = "SELECT f FROM FlexSubscription f WHERE f.name= :name AND ((f.account= :account AND f.publicInAccount= true) OR f.owner= :owner)"
-        ),
-        @NamedQuery(
-                name = "FlexSubscription.findByOwner",
-                query = "SELECT f FROM FlexSubscription f WHERE f.owner= :owner"
-        ),
-        @NamedQuery(
-                name = "FlexSubscription.findPublicInAccountForUser",
-                query = "SELECT f FROM FlexSubscription f WHERE (f.account= :account AND f.publicInAccount= true) OR f.owner= :owner"
-        ),
-        @NamedQuery(
-                name = "FlexSubscription.findAllInAccount",
-                query = "SELECT f FROM FlexSubscription f WHERE f.account= :account"
-        )
 })
 public class FlexSubscription {
 
