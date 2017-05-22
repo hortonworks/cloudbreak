@@ -102,7 +102,7 @@ public class FlexSubscriptionService {
 
     private void setFlexSubscriptionFlag(String name, IdentityUser identityUser, BiConsumer<FlexSubscription, Boolean> setter) {
         List<FlexSubscription> allInAccount = flexRepo.findAllByAccount(identityUser.getAccount());
-        if (!allInAccount.stream().anyMatch(f -> name.equals(f.getSubscriptionId()))) {
+        if (!allInAccount.stream().anyMatch(f -> name.equals(f.getName()))) {
             throw new BadRequestException("Given subscription not found with name: " + name);
         }
         for (FlexSubscription flex : allInAccount) {
