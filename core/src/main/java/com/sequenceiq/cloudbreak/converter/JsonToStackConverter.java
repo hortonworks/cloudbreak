@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
@@ -44,6 +45,9 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
 
     @Inject
     private StackParameterService stackParameterService;
+
+    @Inject
+    private CloudParameterService cloudParameterService;
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
@@ -59,6 +63,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         Stack stack = new Stack();
         stack.setName(source.getName());
         stack.setRegion(getRegion(source));
+        setPlatform(source);
+        stack.setCloudPlatform(source.getCloudPlatform());
         stack.setTags(getTags(source.getTags()));
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
@@ -76,6 +82,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         if (source.getNetwork() != null) {
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
         }
+
         stack.setUuid(UUID.randomUUID().toString());
         validateCustomImage(source);
         return stack;
@@ -125,6 +132,15 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
             }
         }
         return source.getRegion();
+    }
+
+    private void setPlatform(StackRequest source) {
+        if (isEmpty(source.getCloudPlatform())) {
+            if (!isEmpty(source.getPlatformVariant())) {
+                String platform = cloudParameterService.getPlatformByVariant(source.getPlatformVariant());
+                source.setCloudPlatform(platform);
+            }
+        }
     }
 
     private Map<String, String> getValidParameters(StackRequest stackRequest) {

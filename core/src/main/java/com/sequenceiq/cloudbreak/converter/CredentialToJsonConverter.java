@@ -35,7 +35,8 @@ public class CredentialToJsonConverter extends AbstractConversionServiceAwareCon
         credentialJson.setName(source.getName());
         credentialJson.setPublicInAccount(source.isPublicInAccount());
         if (source.getAttributes() != null) {
-            Map<String, Object> parameters = credentialDefinitionService.revertProperties(platform(source.cloudPlatform()), source.getAttributes().getMap());
+            Map<String, Object> parameters =
+                    credentialDefinitionService.revertAndRemoveProperties(platform(source.cloudPlatform()), source.getAttributes().getMap());
             credentialJson.setParameters(parameters);
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());

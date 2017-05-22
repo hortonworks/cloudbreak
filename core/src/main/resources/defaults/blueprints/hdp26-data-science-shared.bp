@@ -1,34 +1,5 @@
 {
-  "inputs": [
-    {
-      "name":"LDAP_URL",
-      "referenceConfiguration":"hive.server2.authentication.ldap.url"
-    },
-    {
-      "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
-    },
-    {
-      "name":"LDAP_BIND_DN",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
-    },
-    {
-      "name":"LDAP_BIND_PASSWORD",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
-    },
-    {
-      "name": "LDAP_SYNC_SEARCH_BASE",
-      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
-    },
-    {
-      "name": "LDAP_NAME_ATTRIBUTE",
-      "referenceConfiguration": "ranger.usersync.ldap.user.nameattribute"
-    },
-    {
-      "name":"LDAP_GROUP_SEARCH_BASE",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
-    }
-  ],
+  "inputs": [],
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-data-science-shared",
@@ -40,10 +11,10 @@
         "core-site": {
           "fs.trash.interval": "4320",
           "hadoop.security.group.mapping":"org.apache.hadoop.security.LdapGroupsMapping",
-          "hadoop.security.group.mapping.ldap.url":"{{ LDAP_URL }}",
-          "hadoop.security.group.mapping.ldap.bind.user":"{{ LDAP_BIND_DN }}",
-          "hadoop.security.group.mapping.ldap.bind.password":"{{ LDAP_BIND_PASSWORD }}",
-          "hadoop.security.group.mapping.ldap.base":"{{ LDAP_GROUP_SEARCH_BASE }}"
+          "hadoop.security.group.mapping.ldap.url":"{{{ ldapConfig.connectionURL }}}",
+          "hadoop.security.group.mapping.ldap.bind.user":"{{{ ldapConfig.bindDn }}}",
+          "hadoop.security.group.mapping.ldap.bind.password":"{{{ ldapConfig.bindPassword }}}",
+          "hadoop.security.group.mapping.ldap.base":"{{{ ldapConfig.userSearchBase }}}"
         }
       },
       {
@@ -73,7 +44,7 @@
       {
         "zeppelin-shiro-ini": {
           "properties": {
-            "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nldapRealm = org.apache.shiro.realm.ldap.JndiLdapRealm\nldapRealm.userDnTemplate = {{ LDAP_NAME_ATTRIBUTE }}={0},{{ LDAP_SYNC_SEARCH_BASE }}\nldapRealm.contextFactory.url = {{ LDAP_URL }}\nldapRealm.contextFactory.authenticationMechanism = SIMPLE\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
+            "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nldapRealm = org.apache.shiro.realm.ldap.JndiLdapRealm\nldapRealm.userDnTemplate = {{{ ldapConfig.userSearchAttribute }}}={0},{{{ ldapConfig.userSearchBase }}}\nldapRealm.contextFactory.url = {{{ ldapConfig.connectionURL }}}\nldapRealm.contextFactory.authenticationMechanism = SIMPLE\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
           }
         }
       }

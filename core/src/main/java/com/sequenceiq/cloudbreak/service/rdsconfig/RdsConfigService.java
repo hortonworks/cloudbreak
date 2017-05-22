@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
@@ -102,6 +103,14 @@ public class RdsConfigService {
         } catch (NotFoundException e) {
             return create(user, rdsConfig);
         }
+    }
+
+    public Set<RDSConfig> findByClusterId(String user, String account, Long clusterId) {
+        return rdsConfigRepository.findByClusterId(user, account, clusterId);
+    }
+
+    public RDSConfig findByClusterIdAndType(String user, String account, Long clusterId, RdsType rdsType) {
+        return rdsConfigRepository.findByClusterIdAndType(user, account, clusterId, rdsType);
     }
 
     private void delete(RDSConfig rdsConfig) {

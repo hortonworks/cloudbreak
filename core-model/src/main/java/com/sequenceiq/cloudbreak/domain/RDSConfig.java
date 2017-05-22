@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                 name = "RDSConfig.findByClusterId",
                 query = "SELECT r FROM RDSConfig r "
                         + "INNER JOIN r.clusters cluster "
+                        + "LEFT JOIN FETCH r.clusters "
                         + "WHERE cluster.id= :clusterId AND "
                         + "((r.account= :account AND r.publicInAccount= true) OR r.owner= :user)"),
         @NamedQuery(
@@ -84,6 +85,13 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
                         + "LEFT JOIN FETCH r.clusters "
                         + "WHERE  r.name= :name and ((r.publicInAccount=true and r.account= :account) or r.owner= :owner) "
                         + "AND r.status <> 'DEFAULT_DELETED' "),
+        @NamedQuery(
+                name = "RDSConfig.findByClusterIdAndType",
+                query = "SELECT r FROM RDSConfig r "
+                        + "INNER JOIN r.clusters cluster "
+                        + "WHERE cluster.id= :clusterId AND "
+                        + "((r.publicInAccount=true and r.account= :account) or r.owner= :user) "
+                        + "AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
 })
 public class RDSConfig {
 
