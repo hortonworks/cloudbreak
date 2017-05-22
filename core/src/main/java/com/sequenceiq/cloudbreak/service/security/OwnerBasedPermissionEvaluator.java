@@ -16,9 +16,9 @@ import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
-import com.sequenceiq.cloudbreak.common.service.UserFilterField;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 
 @Service
 @Lazy

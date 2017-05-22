@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.conf;
 import static com.sequenceiq.cloudbreak.api.CoreApi.API_ROOT_CONTEXT;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
 import org.jasypt.encryption.pbe.StandardPBEStringEncryptor;
@@ -20,7 +19,7 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.oauth2.config.annotation.web.configurers.ResourceServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.expression.OAuth2MethodSecurityExpressionHandler;
-import org.springframework.security.oauth2.provider.token.RemoteTokenServices;
+import org.springframework.security.oauth2.provider.token.ResourceServerTokenServices;
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter;
 
 import com.sequenceiq.cloudbreak.service.security.OwnerBasedPermissionEvaluator;
@@ -65,27 +64,14 @@ public class SecurityConfig {
 
         private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/accountpreferences/**";
 
-        @Value("${cb.client.id}")
-        private String clientId;
-
         @Value("${cb.client.secret}")
         private String clientSecret;
 
         @Inject
-        @Named("identityServerUrl")
-        private String identityServerUrl;
+        private ResourceServerTokenServices resourceServerTokenServices;
 
         @Inject
         private ScimAccountGroupReaderFilter scimAccountGroupReaderFilter;
-
-        @Bean
-        RemoteTokenServices remoteTokenServices() {
-            RemoteTokenServices rts = new RemoteTokenServices();
-            rts.setClientId(clientId);
-            rts.setClientSecret(clientSecret);
-            rts.setCheckTokenEndpointUrl(identityServerUrl + "/check_token");
-            return rts;
-        }
 
         @Bean
         PBEStringCleanablePasswordEncryptor encryptor() {
@@ -97,7 +83,7 @@ public class SecurityConfig {
         @Override
         public void configure(ResourceServerSecurityConfigurer resources) throws Exception {
             resources.resourceId("cloudbreak");
-            resources.tokenServices(remoteTokenServices());
+            resources.tokenServices(resourceServerTokenServices);
         }
 
         @Override

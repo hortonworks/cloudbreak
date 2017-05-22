@@ -29,10 +29,7 @@ public class AwsCachingConfig implements CacheDefinition {
     }
 
     @Override
-    public Object generate(Object target, Method method, Object... params) {
-        if (params.length == 0) {
-            return SimpleKey.EMPTY;
-        }
+    public Object generateKey(Object target, Method method, Object... params) {
         if (params.length == 1) {
             AwsCredentialView param = (AwsCredentialView) params[0];
             if (param.getId() != null) {
