@@ -148,7 +148,7 @@ public class ClusterController implements ClusterEndpoint {
         if (request.getRdsConfigJsons() != null && !request.getRdsConfigJsons().isEmpty()) {
             for (RDSConfigRequest rdsConfigJson : request.getRdsConfigJsons()) {
                 validateRdsConnection(rdsConfigJson);
-                RDSConfig rdsConfig = rdsConfigService.create(user, conversionService.convert(rdsConfigJson, RDSConfig.class));
+                RDSConfig rdsConfig = rdsConfigService.createIfNotExists(user, conversionService.convert(rdsConfigJson, RDSConfig.class));
                 request.getRdsConfigIds().add(rdsConfig.getId());
             }
         }

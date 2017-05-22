@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
@@ -90,6 +90,14 @@ public class RdsConfigService {
         rdsConfig.setOwner(user.getUserId());
         rdsConfig.setAccount(user.getAccount());
         return rdsConfigRepository.save(rdsConfig);
+    }
+
+    public RDSConfig createIfNotExists(IdentityUser user, RDSConfig rdsConfig) {
+        try {
+            return getPrivateRdsConfig(rdsConfig.getName(), user);
+        } catch (NotFoundException e) {
+            return create(user, rdsConfig);
+        }
     }
 
     private void delete(RDSConfig rdsConfig, IdentityUser user) {
