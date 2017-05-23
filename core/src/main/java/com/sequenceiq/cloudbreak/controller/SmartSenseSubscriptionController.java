@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -30,6 +31,15 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Inject
     private JsonToSmartSenseSubscriptionConverter toSmartSenseSubscriptionConverter;
+
+    @Override
+    public SmartSenseSubscriptionJson get() {
+        Optional<SmartSenseSubscription> subscription = smartSenseSubService.getOne();
+        if (!subscription.isPresent()) {
+            throw new NotFoundException("SmartSense subscription not found");
+        }
+        return toJsonConverter.convert(subscription.get());
+    }
 
     @Override
     public SmartSenseSubscriptionJson get(Long id) {

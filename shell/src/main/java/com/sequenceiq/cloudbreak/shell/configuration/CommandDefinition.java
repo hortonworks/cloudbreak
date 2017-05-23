@@ -6,20 +6,22 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseCredentialCommands;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseInstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseNetworkCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BasePlatformCommands;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseSecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseStackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseTemplateCommands;
-import com.sequenceiq.cloudbreak.shell.commands.base.BaseSecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.BasicCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.BlueprintCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.ClusterCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.DatabaseCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.FlexSubscriptionCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.HostGroupCommands;
-import com.sequenceiq.cloudbreak.shell.commands.base.BaseInstanceGroupCommands;
-import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.LdapConfigCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.SmartSenseSubscriptionCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.SssdConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AwsCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AzureCommands;
@@ -92,6 +94,16 @@ public class CommandDefinition {
     @Bean
     LdapConfigCommands ldapConfigCommands() {
         return new LdapConfigCommands(shellContext);
+    }
+
+    @Bean
+    SmartSenseSubscriptionCommands smartSenseSubscriptionCommands() {
+        return new SmartSenseSubscriptionCommands(shellContext);
+    }
+
+    @Bean
+    FlexSubscriptionCommands flexSubscriptionCommands() {
+        return new FlexSubscriptionCommands(shellContext);
     }
 
     @Bean

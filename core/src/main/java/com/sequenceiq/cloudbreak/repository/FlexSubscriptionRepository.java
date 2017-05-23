@@ -30,4 +30,8 @@ public interface FlexSubscriptionRepository extends CrudRepository<FlexSubscript
     List<FlexSubscription> findAllPublicInAccountForUser(@Param("owner") String owner, @Param("account") String account);
 
     Long countBySmartSenseSubscription(SmartSenseSubscription smartSenseSubscription);
+
+    Long countByNameAndAccount(String name, String account);
+
+    Long countBySubscriptionId(String subscriptionId);
 }

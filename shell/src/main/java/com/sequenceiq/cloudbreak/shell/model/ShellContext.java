@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
+import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
@@ -112,6 +113,8 @@ public class ShellContext {
     private Map<String, YarnHostgroupEntry> yarnHostgroups = new HashMap<>();
 
     private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
+
+    private SmartSenseSubscriptionJson smartSenseSubscription;
 
     @Inject
     private CloudbreakClient cloudbreakClient;
@@ -788,6 +791,22 @@ public class ShellContext {
 
     public void resetAmbariDatabaseDetailsJson() {
         this.ambariDatabaseDetailsJson = null;
+    }
+
+    public SmartSenseSubscriptionJson getSmartSenseSubscription() {
+        if (smartSenseSubscription == null) {
+            try {
+                smartSenseSubscription = cloudbreakClient().smartSenseSubscriptionEndpoint().get();
+            } catch (Exception ex) {
+                smartSenseSubscription = new SmartSenseSubscriptionJson();
+                smartSenseSubscription.setId(Long.MIN_VALUE);
+            }
+        }
+        return smartSenseSubscription.getId().equals(Long.MIN_VALUE) ? null : smartSenseSubscription;
+    }
+
+    public void resetSmartSenseSubscription() {
+        smartSenseSubscription = null;
     }
 
     private enum PropertyKey {

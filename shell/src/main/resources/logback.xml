@@ -15,6 +15,7 @@
     </appender>
 
     <logger name="org.springframework.shell.core.JLineShellComponent.exceptions" level="OFF" />
+    <logger name="org.glassfish.jersey.client.JerseyInvocation" level="ERROR" />
 
     <root level="DEBUG">
         <appender-ref ref="FILE"/>
