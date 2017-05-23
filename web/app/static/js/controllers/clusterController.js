@@ -906,6 +906,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 setOrchestrator();
                 setInstanceProfile();
                 setAmbariStackDetails($rootScope.activeCredential, $scope.cluster);
+                setFlex();
                 $scope.cluster.customContainer = false;
                 $scope.cluster.customQueue = false;
                 $scope.cluster.customQueueId = "default";
@@ -982,6 +983,15 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 var orderedNets = $filter('orderBy')(nets, 'name', false);
                 if (orderedNets.length > 0) {
                     $scope.cluster.networkId = orderedNets[0].id;
+                }
+            }
+        }
+
+        function setFlex() {
+            if ($rootScope.activeCredential != undefined && $rootScope.activeCredential.cloudPlatform !== "BYOS") {
+                var defaultFlexs = $filter('filter')($rootScope.flexs, {default: true});
+                if (defaultFlexs.length > 0) {
+                    $scope.cluster.flexId = defaultFlexs[0].id.toString();
                 }
             }
         }
@@ -1320,6 +1330,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             setFileSystem();
             initWizard();
             setNetwork();
+            setFlex();
             setRegion();
             setPlatformVariant();
             setOrchestrator();

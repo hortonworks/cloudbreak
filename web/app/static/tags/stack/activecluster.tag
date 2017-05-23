@@ -148,6 +148,12 @@
                                     <a id="sl_network_active" class="networkselect form-control-static review-a" ng-repeat="network in $root.networks|filter: { id: $root.activeCluster.networkId }:notStrictFilter" segment="#panel-network-collapse{{$root.activeCluster.networkId}}">{{network.name}}</a>
                                 </div>
                             </div>
+                            <div class="form-group" ng-show="activeCluster.flexSubscription && activeCluster.flexSubscription.id">
+                                <label class="col-sm-3 control-label" for="sl_flex_active">{{msg.active_cluster_flex_label}}</label>
+                                <div class="flexselect col-sm-8">
+                                    <a id="sl_flex_active" class="flexselect form-control-static review-a" ng-repeat="flex in $root.flexs|filter: { id: $root.activeCluster.flexSubscription.id }:notStrictFilter" segment="#panel-flex-collapse{{$root.activeCluster.flexSubscription.id}}">{{flex.name}}</a>
+                                </div>
+                            </div>
                             <div class="row" style="margin-top: 20px;    margin-bottom: 30px;">
                                 <div class="col-sm-8 col-md-offset-2" data-example-id="togglable-tabs" ng-show="activeCluster.instanceGroups[0] != null">
                                     <ul id="myTabs" class="nav nav-tabs" role="tablist">

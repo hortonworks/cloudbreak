@@ -253,6 +253,7 @@
         <input type="checkbox" name="cluster_publicInAccount" id="cluster_publicInAccount" ng-model="cluster.public">
     </div>
 </div>
+
 <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform !== 'BYOS'">
     <label class="col-sm-3 control-label" for="cluster_enableLifetime">{{msg.cluster_form_enable_lifetime_label}}</label>
     <div class="col-sm-8">
@@ -267,7 +268,14 @@
     </div>
 </div>
 
-
+<div class="form-group" ng-show="showAdvancedOptionForm && $root.flexs.length > 0">
+    <label class="col-sm-3 control-label" for="selectFlexSubscription">{{msg.flex_label}}</label>
+    <div class="col-sm-8">
+        <select class="form-control" id="selectFlexSubscription" ng-model="cluster.flexId">
+            <option ng-repeat="flex in flexs" value="{{flex.id}}">{{flex.name}}</option>
+        </select>
+    </div>
+</div>
 
 <div class="form-group">
     <div class="col-sm-11">

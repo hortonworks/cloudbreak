@@ -69,6 +69,10 @@ function addClusterListPanelJQEventListeners() {
         e.stopPropagation();
         goToPanel(this, 'network');
     });
+    $jq(document).on("click", ".flexselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'flex');
+    });
     $jq(document).on("click", ".templateselect", function(e) {
         e.stopPropagation();
         goToPanel(this, 'templates');
@@ -119,6 +123,10 @@ function addClusterFormJQEventListeners() {
     $jq(document).on("click", ".networkselect", function(e) {
         e.stopPropagation();
         goToPanel(this, 'network');
+    });
+    $jq(document).on("click", ".flexselect", function(e) {
+        e.stopPropagation();
+        goToPanel(this, 'flex');
     });
     $jq(document).on("click", ".templateselect", function(e) {
         e.stopPropagation();
