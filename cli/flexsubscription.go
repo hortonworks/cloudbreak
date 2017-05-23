@@ -6,7 +6,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	f "github.com/hortonworks/hdc-cli/client_cloudbreak/flexsubscriptions"
-	s "github.com/hortonworks/hdc-cli/client_cloudbreak/smartsensesubscriptions"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -25,6 +24,10 @@ func (b *FlexSubscription) DataAsStringArray() []string {
 }
 
 func CreateFlexSubscription(c *cli.Context) error {
+	ss, err := getAvailableSmartSenseSubscription(c)
+	if err != nil {
+		return err
+	}
 	defer timeTrack(time.Now(), "creation of Flex subscription")
 	checkRequiredFlags(c)
 
@@ -39,31 +42,17 @@ func CreateFlexSubscription(c *cli.Context) error {
 	}
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	createFlexSubscriptionImpl(
-		cbClient.Cloudbreak.Flexsubscriptions.PostPrivateFlexSubscription,
-		cbClient.Cloudbreak.Smartsensesubscriptions.GetPrivateSmartSenseSubscriptions,
-		name,
-		subscriptionId)
+	createFlexSubscriptionImpl(cbClient.Cloudbreak.Flexsubscriptions.PostPrivateFlexSubscription, ss, name, subscriptionId)
 	return nil
 }
 
 func createFlexSubscriptionImpl(
 	postPrivateFlexSubscription func(params *f.PostPrivateFlexSubscriptionParams) (*f.PostPrivateFlexSubscriptionOK, error),
-	getPrivateSmartSenseSubscriptions func(params *s.GetPrivateSmartSenseSubscriptionsParams) (*s.GetPrivateSmartSenseSubscriptionsOK, error),
+	ss *models_cloudbreak.SmartSenseSubscriptionJSON,
 	name string,
 	subscriptionId string) {
 
-	sss, err := getPrivateSmartSenseSubscriptions(&s.GetPrivateSmartSenseSubscriptionsParams{})
-	if err != nil {
-		logErrorAndExit(err)
-	}
-
-	if len(sss.Payload) < 1 {
-		logErrorMessage("No SmartSense subscription is configured for user!")
-		exit(1)
-	}
-
-	smartSenseSubscriptionId := sss.Payload[0].ID
+	smartSenseSubscriptionId := ss.ID
 	fa := false
 	resp, err := postPrivateFlexSubscription(&f.PostPrivateFlexSubscriptionParams{Body: &models_cloudbreak.FlexSubscriptionRequest{
 		Name:                     name,
