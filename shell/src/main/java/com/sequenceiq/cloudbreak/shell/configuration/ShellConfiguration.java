@@ -70,7 +70,7 @@ public class ShellConfiguration {
                 identity = cloudbreakAddress + IDENTITY_ROOT_CONTEXT;
             }
             return new CloudbreakClientBuilder(cloudbreakAddress + cbRootContextPath, identity, CLIENT_ID).withCredential(user, password).
-                    withDebug(restDebug).withCertificateValidation(certificateValidation).build();
+                    withDebug(restDebug).withCertificateValidation(certificateValidation).withIgnorePreValidation(true).build();
         } catch (SSLConnectionException e) {
             System.out.println(String.format("%s Try to start the shell with --cert.validation=false parameter.", e.getMessage()));
             System.exit(1);

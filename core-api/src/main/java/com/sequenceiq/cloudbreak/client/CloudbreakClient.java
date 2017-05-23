@@ -26,11 +26,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.ConstraintTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.EventEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
@@ -109,6 +111,10 @@ public class CloudbreakClient {
 
     private EndpointWrapper<LdapConfigEndpoint> ldapConfigEndpoint;
 
+    private EndpointWrapper<SmartSenseSubscriptionEndpoint> smartSenseSubscriptionEndpoint;
+
+    private EndpointWrapper<FlexSubscriptionEndpoint> flexSubscriptionEndpoint;
+
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
         this.client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
@@ -181,6 +187,8 @@ public class CloudbreakClient {
         this.constraintTemplateEndpoint = newResource(this.constraintTemplateEndpoint, ConstraintTemplateEndpoint.class, headers);
         this.utilEndpoint = newResource(this.utilEndpoint, UtilEndpoint.class, headers);
         this.ldapConfigEndpoint = newResource(this.ldapConfigEndpoint, LdapConfigEndpoint.class, headers);
+        this.smartSenseSubscriptionEndpoint = newResource(this.smartSenseSubscriptionEndpoint, SmartSenseSubscriptionEndpoint.class, headers);
+        this.flexSubscriptionEndpoint = newResource(this.flexSubscriptionEndpoint, FlexSubscriptionEndpoint.class, headers);
         LOGGER.info("Endpoints have been renewed for CloudbreakClient");
     }
 
@@ -283,6 +291,16 @@ public class CloudbreakClient {
         return ldapConfigEndpoint.getEndpointProxy();
     }
 
+    public SmartSenseSubscriptionEndpoint smartSenseSubscriptionEndpoint() {
+        refresh();
+        return smartSenseSubscriptionEndpoint.getEndpointProxy();
+    }
+
+    public FlexSubscriptionEndpoint flexSubscriptionEndpoint() {
+        refresh();
+        return flexSubscriptionEndpoint.getEndpointProxy();
+    }
+
     public ConstraintTemplateEndpoint constraintTemplateEndpoint() {
         return constraintTemplateEndpoint.getEndpointProxy();
     }
@@ -355,6 +373,8 @@ public class CloudbreakClient {
 
         private boolean secure = true;
 
+        private boolean ignorePreValidation;
+
         public CloudbreakClientBuilder(String cloudbreakAddress, String identityServerAddress, String clientId) {
             this.cloudbreakAddress = cloudbreakAddress;
             this.identityServerAddress = identityServerAddress;
@@ -382,8 +402,13 @@ public class CloudbreakClient {
             return this;
         }
 
+        public CloudbreakClientBuilder withIgnorePreValidation(boolean ignorePreValidation) {
+            this.ignorePreValidation = ignorePreValidation;
+            return this;
+        }
+
         public CloudbreakClient build() {
-            ConfigKey configKey = new ConfigKey(secure, debug);
+            ConfigKey configKey = new ConfigKey(secure, debug, ignorePreValidation);
             if (secret != null) {
                 return new CloudbreakClient(cloudbreakAddress, identityServerAddress, secret, clientId, configKey);
             } else {

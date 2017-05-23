@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
@@ -17,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
-import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 
 @Service
 public class FlexSubscriptionService {
@@ -34,14 +32,15 @@ public class FlexSubscriptionService {
     private AuthorizationService authorizationService;
 
     public FlexSubscription create(FlexSubscription subscription) {
-        try {
-            subscription = flexRepo.save(subscription);
-            LOGGER.info("Flex subscription has been created: {}", subscription);
-            return subscription;
-        } catch (DataIntegrityViolationException dex) {
-            String msg = String.format("The name: '%s' has already taken by an other FlexSubscription.", subscription.getName());
-            throw new CloudbreakServiceException(msg, dex);
+        if (!flexRepo.countByNameAndAccount(subscription.getName(), subscription.getAccount()).equals(0L)) {
+            throw new BadRequestException(String.format("The name: '%s' has already taken by an other FlexSubscription.", subscription.getName()));
+        } else if (!flexRepo.countBySubscriptionId(subscription.getSubscriptionId()).equals(0L)) {
+            throw new BadRequestException(String.format("The subscriptionId: '%s' has already taken by an other FlexSubscription.",
+                    subscription.getSubscriptionId()));
         }
+        subscription = flexRepo.save(subscription);
+        LOGGER.info("Flex subscription has been created: {}", subscription);
+        return subscription;
     }
 
     public void delete(FlexSubscription subscription) {

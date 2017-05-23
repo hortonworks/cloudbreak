@@ -1,15 +1,30 @@
 package com.sequenceiq.cloudbreak.client;
 
 
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
+import com.sequenceiq.cloudbreak.common.CloudbreakToStringStyle;
+
 public class ConfigKey {
 
-    private boolean secure;
+    private final boolean secure;
 
-    private boolean debug;
+    private final boolean debug;
+
+    private final boolean ignorePreValidation;
 
     public ConfigKey(boolean secure, boolean debug) {
         this.secure = secure;
         this.debug = debug;
+        this.ignorePreValidation = false;
+    }
+
+    public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation) {
+        this.secure = secure;
+        this.debug = debug;
+        this.ignorePreValidation = ignorePreValidation;
     }
 
     public boolean isSecure() {
@@ -18,6 +33,10 @@ public class ConfigKey {
 
     public boolean isDebug() {
         return debug;
+    }
+
+    public boolean isIgnorePreValidation() {
+        return ignorePreValidation;
     }
 
     @Override
@@ -30,21 +49,28 @@ public class ConfigKey {
 
         ConfigKey configKey = (ConfigKey) o;
 
-        return secure == configKey.secure && debug == configKey.debug;
+        return new EqualsBuilder()
+                .append(secure, configKey.secure)
+                .append(debug, configKey.debug)
+                .append(ignorePreValidation, configKey.ignorePreValidation)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        int result = secure ? 1 : 0;
-        result = 31 * result + (debug ? 1 : 0);
-        return result;
+        return new HashCodeBuilder(17, 31)
+                .append(secure)
+                .append(debug)
+                .append(ignorePreValidation)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ConfigKey{"
-                + "secure=" + secure
-                + ", debug=" + debug
-                + '}';
+        return new ToStringBuilder(this, CloudbreakToStringStyle.getInstance())
+                .append("secure", secure)
+                .append("debug", debug)
+                .append("ignorePreValidation", ignorePreValidation)
+                .build();
     }
 }

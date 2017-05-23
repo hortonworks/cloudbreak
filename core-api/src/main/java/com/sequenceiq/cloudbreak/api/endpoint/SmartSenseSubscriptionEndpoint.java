@@ -28,6 +28,12 @@ import io.swagger.annotations.ApiOperation;
 public interface SmartSenseSubscriptionEndpoint {
 
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = SmartSenseSubOpDescription.GET, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
+            nickname = "getSmartSenseSubscription")
+    SmartSenseSubscriptionJson get();
+
+    @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = SmartSenseSubOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = SMARTSENSE_SUBSCRIPTION_NOTES,
