@@ -53,6 +53,13 @@
         </div>
     </div>
 
+    <div class="form-group" ng-show="cluster.flexId && activeCredential.cloudPlatform !== 'BYOS'">
+        <label class="col-sm-3 control-label" for="sl_flex_active">{{msg.active_cluster_flex_label}}</label>
+        <div class="flexselect col-sm-8">
+            <a id="sl_flex_active" class="flexselect form-control-static review-a" ng-repeat="flex in $root.flexs|filter: { id: cluster.flexId }:notStrictFilter" segment="#panel-flex-collapse{{cluster.flexId}}">{{flex.name}}</a>
+        </div>
+    </div>
+
     <div class="form-group" ng-show="cluster.blueprintId">
         <label class="col-sm-3 control-label" for="sl_network_active">{{msg.active_cluster_blueprint_label}}</label>
         <div class="col-sm-8">

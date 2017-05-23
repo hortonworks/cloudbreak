@@ -92,6 +92,45 @@ uluwatuServices.factory('GlobalRecipe', ['$resource',
     }
 ]);
 
+
+uluwatuServices.factory('AccountFlex', ['$resource',
+    function($resource) {
+        return $resource('flexsubscriptions/account');
+    }
+]);
+
+uluwatuServices.factory('GlobalFlex', ['$resource',
+    function($resource) {
+        return $resource('flexsubscriptions/:id');
+    }
+]);
+
+uluwatuServices.factory('AccountDefaultFlex', ['$resource',
+    function($resource) {
+      return $resource('flexsubscriptions/account/setdefault/:name', null, {
+          'update': {
+              method: 'PUT'
+          }
+      });
+    }
+]);
+
+uluwatuServices.factory('AccountUsedForControllerFlex', ['$resource',
+    function($resource) {
+      return $resource('flexsubscriptions/account/setusedforcontroller/:name', null, {
+          'update': {
+              method: 'PUT'
+          }
+      });
+    }
+]);
+
+uluwatuServices.factory('SmartSense', ['$resource',
+    function($resource) {
+        return $resource('smartsensesubscriptions');
+    }
+]);
+
 uluwatuServices.factory('UserSssdConfig', ['$resource',
     function($resource) {
         return $resource('sssd/user');
@@ -394,7 +433,8 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                             "userDefined": userDefined(cluster.userDefinedTags)
                         },
                         platformVariant: cluster.platformVariant,
-                        customImage: cluster.customImage == true ? cluster.imageId : null
+                        customImage: cluster.customImage == true ? cluster.imageId : null,
+                        flexId: cluster.flexId || null
                     }
                     if (cluster.public) {
                         AccountStack.save(stack, function(result) {
