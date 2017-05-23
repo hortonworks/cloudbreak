@@ -106,7 +106,7 @@ public class FlexSubscriptionService {
             throw new BadRequestException("Given subscription not found with name: " + name);
         }
         for (FlexSubscription flex : allInAccount) {
-            if (name.equals(flex.getSubscriptionId())) {
+            if (name.equals(flex.getName())) {
                 setter.accept(flex, true);
             } else {
                 setter.accept(flex, false);
