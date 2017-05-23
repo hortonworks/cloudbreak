@@ -730,6 +730,7 @@ public class AmbariClusterConnector {
                 Map<String, String> utilRepo = hdpRepo.getUtil();
                 String stackRepoId = stackRepo.remove(HDPRepo.REPO_ID_TAG);
                 String utilRepoId = utilRepo.remove(HDPRepo.REPO_ID_TAG);
+                stackRepo.remove(HDPRepo.MPACK_TAG);
                 String[] typeVersion = stackRepoId.split("-");
                 String stackType = typeVersion[0];
                 String version = "";

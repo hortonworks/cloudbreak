@@ -190,6 +190,7 @@ cb:
             repoid: HDF-3.0
             redhat6: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos6/3.x/BUILDS/3.0.0.0-345
             redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/3.0.0.0-345
+            mpack: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos6/3.x/BUILDS/3.0.0.0-345/tars/hdf_ambari_mp/hdf-ambari-mpack-3.0.0.0-345.tar.gz
           util:
             repoid: HDP-UTILS-1.1.0.21
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
