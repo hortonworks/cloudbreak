@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class HDPRepo {
     public static final String REPO_ID_TAG = "repoid";
 
+    public static final String MPACK_TAG = "mpack";
+
     private Map<String, String> stack;
 
     private Map<String, String> util;

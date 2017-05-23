@@ -109,6 +109,8 @@ run_amazon2017_sh_server:
     - source: salt://ambari/scripts/install-hdf-mpack.sh
     - template: jinja
     - mode: 744
+    - context:
+      mpack: {{ salt['pillar.get']('hdp:stack:mpack') }}
 
 install_hdf_mpack:
   cmd.run:
