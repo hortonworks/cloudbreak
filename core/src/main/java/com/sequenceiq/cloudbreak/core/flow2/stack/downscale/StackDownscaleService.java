@@ -50,8 +50,8 @@ public class StackDownscaleService {
         LOGGER.debug("Downscaling of stack ", context.getStack().getId());
         MDCBuilder.buildMdcContext(context.getStack());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        Object msgParam = stackDownscaleTriggerEvent.getHostNames() == null ? Math.abs(stackDownscaleTriggerEvent.getAdjustment())
-                : stackDownscaleTriggerEvent.getHostNames();
+        Set<String> hostNames = stackDownscaleTriggerEvent.getHostNames();
+        Object msgParam = hostNames == null || hostNames.isEmpty() ? Math.abs(stackDownscaleTriggerEvent.getAdjustment()) : hostNames;
         flowMessageService.fireEventAndLog(context.getStack().getId(), Msg.STACK_DOWNSCALE_INSTANCES, UPDATE_IN_PROGRESS.name(), msgParam);
     }
 

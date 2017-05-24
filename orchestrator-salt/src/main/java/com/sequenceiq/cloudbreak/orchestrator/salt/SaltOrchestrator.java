@@ -220,14 +220,14 @@ public class SaltOrchestrator implements HostOrchestrator {
             // salt '*' state.highstate
             runNewService(sc, new HighStateRunner(server, allNodes), exitCriteriaModel);
         } catch (Exception e) {
-            LOGGER.error("Error occurred during ambari bootstrap", e);
+            LOGGER.error("Error occurred during primary gateway change", e);
             if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
             throw new CloudbreakOrchestratorFailedException(e);
         }
         for (GatewayConfig gatewayConfig : allGatewayConfigs) {
-            if (!gatewayConfig.getHostname().equals(formerGateway.getHostname()) && !gatewayConfig.getHostname().equals(newPrimaryGateway.getHostname())) {
+            if (!gatewayConfig.getHostname().equals(formerGateway.getHostname())) {
                 try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
                     sc.wheel("key.delete", Collections.singleton(formerGateway.getHostname()), Object.class);
                 } catch (Exception ex) {
@@ -294,7 +294,9 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.error("Error occurred during salt minion tear down", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
-        for (GatewayConfig gatewayConfig : allGatewayConfigs) {
+        List<GatewayConfig> liveGateways = allGatewayConfigs.stream()
+                .filter(gw -> !privateIPsByFQDN.values().contains(gw.getPrivateAddress())).collect(Collectors.toList());
+        for (GatewayConfig gatewayConfig : liveGateways) {
             try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
                 sc.wheel("key.delete", privateIPsByFQDN.keySet(), Object.class);
             } catch (Exception e) {

@@ -43,6 +43,10 @@ public class Node {
         return hostname;
     }
 
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
     public Set<String> getDataVolumes() {
         return dataVolumes;
     }

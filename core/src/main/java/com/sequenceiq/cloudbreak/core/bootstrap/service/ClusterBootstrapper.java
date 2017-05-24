@@ -8,11 +8,13 @@ import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -121,8 +123,12 @@ public class ClusterBootstrapper {
     @SuppressWarnings("unchecked")
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            addNode(nodes, instanceMetaData);
+        for (InstanceMetaData im : stack.getRunningInstanceMetaData()) {
+            if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
+                LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
+            } else {
+                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generateHostname(stack.getId(), im), im.getInstanceGroupName()));
+            }
         }
         try {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
@@ -218,15 +224,31 @@ public class ClusterBootstrapper {
         }
     }
 
-    public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses) throws CloudbreakException {
+    public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<String> recoveryHostNames) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
+        boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
         for (InstanceMetaData im : stack.getRunningInstanceMetaData()) {
-            if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
-                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getDiscoveryFQDN(), im.getInstanceGroupName()));
+            if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
+                LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
+                continue;
             }
-            addNode(allNodes, im);
+            // generate hostname for the new nodes, retain the hostname for old nodes
+            // note that if we recovered a node the private id is not the same as it is in the hostname
+            String hostName = StringUtils.isNoneBlank(im.getDiscoveryFQDN()) ? im.getDiscoveryFQDN().split("\\.")[0] : generateHostname(stackId, im);
+            Node node = new Node(im.getPrivateIp(), im.getPublicIpWrapper(), hostName, im.getInstanceGroupName());
+            if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
+                // use the hostname of the node we're recovering instead of generating a new one
+                if (recoveredNodes) {
+                    Iterator<String> iterator = recoveryHostNames.iterator();
+                    node.setHostname(iterator.next().split("\\.")[0]);
+                    iterator.remove();
+                    LOGGER.info("Set the hostname to {} for address: {}", node.getHostname(), im.getPrivateIp());
+                }
+                nodes.add(node);
+            }
+            allNodes.add(node);
         }
         try {
             InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
@@ -331,12 +353,8 @@ public class ClusterBootstrapper {
         }
     }
 
-    private void addNode(Set<Node> nodes, InstanceMetaData im) {
-        if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
-            LOGGER.warn("Skipping instancemetadata because the public ip and private ip are null '{}'.", im);
-        } else {
-            Node node = new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getDiscoveryFQDN(), im.getInstanceGroupName());
-            nodes.add(node);
-        }
+    private String generateHostname(long stackId, InstanceMetaData instanceMetaData) {
+        return instanceMetaData.getInstanceGroupName().replaceAll("_", "") + stackId + instanceMetaData.getPrivateId();
     }
+
 }

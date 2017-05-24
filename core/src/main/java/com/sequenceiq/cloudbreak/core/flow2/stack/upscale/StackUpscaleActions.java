@@ -75,6 +75,7 @@ public class StackUpscaleActions {
             protected void prepareExecution(StackScaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(INSTANCEGROUPNAME, payload.getInstanceGroup());
                 variables.put(ADJUSTMENT, payload.getAdjustment());
+                variables.put(HOSTNAMES, payload.getHostNames());
             }
 
             @Override
@@ -172,7 +173,8 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) throws Exception {
                 stackUpscaleService.bootstrappingNewNodes(context.getStack());
-                BootstrapNewNodesRequest request = new BootstrapNewNodesRequest(context.getStack().getId(), payload.getUpscaleCandidateAddresses());
+                BootstrapNewNodesRequest request = new BootstrapNewNodesRequest(context.getStack().getId(),
+                        payload.getUpscaleCandidateAddresses(), context.getHostNames());
                 sendEvent(context.getFlowId(), request);
             }
         };

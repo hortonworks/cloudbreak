@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -121,9 +122,9 @@ public class ClusterBootstrapperTest {
         ReflectionTestUtils.setField(containerConfigService, "munchausenImageName", "sequence/testcont:0.1.1");
 
         when(gatewayConfigService.getPrimaryGatewayConfig(any()))
-                .thenReturn(new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, "/cert/1", false));
+                .thenReturn(new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
         when(gatewayConfigService.getGatewayConfig(any(), any(), any()))
-                .thenReturn(new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, "/cert/1", false));
+                .thenReturn(new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 8443, "/cert/1", false));
         when(gatewayConfigService.getGatewayIp(any(Stack.class), any(InstanceMetaData.class))).thenReturn("10.0.0.1");
     }
 
@@ -264,7 +265,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack), Collections.emptySet());
 
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
@@ -290,7 +291,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack), Collections.emptySet());
         verify(clusterBootstrapperErrorHandler, times(0))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
         verify(gatewayConfigService, times(1)).getGatewayConfig(any(), any(), any());
@@ -315,7 +316,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack), Collections.emptySet());
 
         verify(clusterBootstrapperErrorHandler, times(1))
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class), any(GatewayConfig.class), anySet());
@@ -341,7 +342,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack), Collections.emptySet());
     }
 
     @Test(expected = CloudbreakException.class)
@@ -361,7 +362,7 @@ public class ClusterBootstrapperTest {
                 .terminateFailedNodes(any(HostOrchestrator.class), any(ContainerOrchestrator.class), any(Stack.class),
                         any(GatewayConfig.class), any(Set.class));
 
-        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack));
+        underTest.bootstrapNewNodes(stack.getId(), getPrivateIps(stack), Collections.emptySet());
     }
 
     private Set<String> getPrivateIps(Stack stack) {

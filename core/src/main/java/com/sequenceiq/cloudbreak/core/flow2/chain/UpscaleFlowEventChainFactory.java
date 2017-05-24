@@ -43,7 +43,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getStackId(), false, event.accepted()));
         flowEventChain.add(new StackScaleTriggerEvent(ADD_INSTANCES_EVENT.event(), event.getStackId(), event.getInstanceGroup(),
-                event.getAdjustment()));
+                event.getAdjustment(), event.getHostNames()));
         if (ScalingType.isClusterUpScale(event.getScalingType()) && cluster != null) {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), event.getInstanceGroup());
             flowEventChain.add(new ClusterScaleTriggerEvent(CLUSTER_UPSCALE_TRIGGER_EVENT.event(), stack.getId(), hostGroup.getName(),
