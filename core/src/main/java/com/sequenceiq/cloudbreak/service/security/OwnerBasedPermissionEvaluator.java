@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.security;
 
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.Collection;
+import java.util.Collections;
 
 import javax.inject.Inject;
 
@@ -16,9 +18,9 @@ import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 
 @Service
 @Lazy
@@ -33,32 +35,40 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     private UserDetailsService userDetailsService;
 
     @Override
-    public boolean hasPermission(Authentication authentication, final Object targetDomainObject, Object permission) {
+    public boolean hasPermission(Authentication authentication, final Object target, Object permission) {
         Permission p = Permission.valueOf(permission.toString().toUpperCase());
-        if (targetDomainObject == null) {
+        if (target == null) {
             throw new NotFoundException("Resource not found.");
         }
         OAuth2Authentication oauth = (OAuth2Authentication) authentication;
         if (oauth.getUserAuthentication() == null) {
             return oauth.getOAuth2Request().getScope().contains(AUTO_SCALE_SCOPE);
         }
-        try {
-            IdentityUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
-            if (getOwner(targetDomainObject).equals(user.getUserId())) {
-                return true;
+
+        IdentityUser user = userDetailsService.getDetails((String) authentication.getPrincipal(), UserFilterField.USERNAME);
+        Collection<?> targets = target instanceof Collection ? (Collection<?>) target : Collections.singleton(target);
+        return targets.stream().allMatch(t -> {
+            try {
+                return hasPermission(user, p, t);
+            } catch (IllegalAccessException e) {
+                LOGGER.error("Object doesn't have properties to check permission with class: " + t.getClass().getCanonicalName(), e);
+                return false;
             }
-            if (getAccount(targetDomainObject).equals(user.getAccount())
-                    && (user.getRoles().contains(IdentityUserRole.ADMIN) || (p == Permission.READ && isPublicInAccount(targetDomainObject)))) {
-                return true;
-            }
-        } catch (IllegalAccessException e) {
-            LOGGER.error("Object doesn't have properties to check permission with class: " + targetDomainObject.getClass().getCanonicalName(), e);
-        }
-        return false;
+        });
     }
 
     @Override
     public boolean hasPermission(Authentication authentication, Serializable targetId, String targetType, Object permission) {
+        return false;
+    }
+
+    private boolean hasPermission(IdentityUser user, Permission p, Object targetDomainObject) throws IllegalAccessException {
+        if (getOwner(targetDomainObject).equals(user.getUserId())) {
+            return true;
+        } else if (getAccount(targetDomainObject).equals(user.getAccount())
+                && (user.getRoles().contains(IdentityUserRole.ADMIN) || (p == Permission.READ && isPublicInAccount(targetDomainObject)))) {
+            return true;
+        }
         return false;
     }
 
