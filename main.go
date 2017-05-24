@@ -459,8 +459,8 @@ func main() {
 	// hidden commands
 	app.Commands = append(app.Commands, []cli.Command{
 		{
-			Name:   "hidden",
-			Usage:  "shows the hidden commands",
+			Name:   "internal",
+			Usage:  "shows the internal commands",
 			Hidden: true,
 			Action: hdc.ShowHiddenCommands,
 		},
