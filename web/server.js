@@ -214,7 +214,7 @@ function continueInit() {
                 error.status = 500;
                 return next(error);
             }
-            console.log(data)
+            console.log("token retrieved: " + JSON.stringify(data));
             req.session.token = data.access_token;
             res.redirect(config.hostAddress);
         });
@@ -276,18 +276,27 @@ function continueInit() {
     });
 
     app.get('/user', function(req, res) {
-        retrieveUserByToken(req.session.token, function(data) {
-            res.json(data);
-        });
+        if(req.session.userdata === undefined) {
+            retrieveUserByToken(req.session, function(data) {
+                res.json(data);
+            });
+        } else {
+            console.log("session.userdata: " +  JSON.stringify(req.session.userdata));
+            res.json(req.session.userdata);
+        }
     });
 
-    function retrieveUserByToken(token, success) {
+    function retrieveUserByToken(session, success) {
         var requestArgs = {
             headers: {
-                "Authorization": "Bearer " + token
+                "Authorization": "Bearer " + session.token
             }
         };
         identityServerClient.get(config.identityServerAddress + "userinfo", requestArgs, function(data, response) {
+            session.userdata = data;
+            session.save(function (err) {
+                console.log("session saved");
+            });
             success(data);
         });
     }
@@ -517,7 +526,7 @@ function continueInit() {
 
     sessionSockets.on('connection', function(err, socket, session) {
         if (session) {
-            retrieveUserByToken(session.token, function(data) {
+            retrieveUserByToken(session, function(data) {
                 socket.join(data.user_id)
             });
         } else {
