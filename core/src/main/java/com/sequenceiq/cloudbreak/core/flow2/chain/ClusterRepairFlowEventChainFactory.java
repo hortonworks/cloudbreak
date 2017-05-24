@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -54,11 +55,13 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
         Map<String, List<String>> failedNodesMap = event.getFailedNodesMap();
         for (Map.Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), failedNodes.getKey());
+            String hostGroupName = failedNodes.getKey();
+            List<String> hostNames = failedNodes.getValue();
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
             InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
             if (instanceGroup.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
                 List<InstanceMetaData> primary = instanceMetadataRepository.findAllByInstanceGroup(instanceGroup).stream().filter(
-                        imd -> failedNodes.getValue().contains(imd.getDiscoveryFQDN())
+                        imd -> hostNames.contains(imd.getDiscoveryFQDN())
                                 && imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).collect(Collectors.toList());
                 if (!primary.isEmpty()) {
                     flowChainTriggers.add(new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
@@ -66,10 +69,10 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 }
             }
             flowChainTriggers.add(new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getStackId(),
-                    failedNodes.getKey(), new HashSet<>(failedNodes.getValue()), ScalingType.DOWNSCALE_TOGETHER, event.accepted()));
+                    hostGroupName, new HashSet<>(hostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted()));
             if (!event.isRemoveOnly()) {
                 flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getStackId(),
-                        failedNodes.getKey(), failedNodes.getValue().size(), ScalingType.UPSCALE_TOGETHER));
+                        hostGroupName, hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames)));
             }
         }
         return flowChainTriggers;

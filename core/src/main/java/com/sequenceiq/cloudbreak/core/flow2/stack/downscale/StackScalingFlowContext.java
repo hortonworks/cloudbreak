@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.downscale;
 
+import java.util.Collections;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -15,12 +16,20 @@ public class StackScalingFlowContext extends StackContext {
 
     private final Integer adjustment;
 
+    private final Set<String> hostNames;
+
     public StackScalingFlowContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
             String instanceGroupName, Set<String> instanceIds, Integer adjustment) {
+        this(flowId, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment, Collections.emptySet());
+    }
+
+    public StackScalingFlowContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
+            String instanceGroupName, Set<String> instanceIds, Integer adjustment, Set<String> hostNames) {
         super(flowId, stack, cloudContext, cloudCredential, cloudStack);
         this.instanceGroupName = instanceGroupName;
         this.instanceIds = instanceIds;
         this.adjustment = adjustment;
+        this.hostNames = hostNames;
     }
 
     public Set<String> getInstanceIds() {
@@ -33,5 +42,9 @@ public class StackScalingFlowContext extends StackContext {
 
     public Integer getAdjustment() {
         return adjustment;
+    }
+
+    public Set<String> getHostNames() {
+        return hostNames;
     }
 }

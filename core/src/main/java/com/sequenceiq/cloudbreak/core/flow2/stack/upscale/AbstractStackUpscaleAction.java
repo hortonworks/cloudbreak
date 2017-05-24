@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -34,6 +35,8 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAct
     static final String ADJUSTMENT = "ADJUSTMENT";
 
     static final String UPSCALE_CANDIDATE_ADDRESSES = "UPSCALE_CANDIDATE_ADDRESSES";
+
+    static final String HOSTNAMES = "HOSTNAMES";
 
     @Inject
     private StackService stackService;
@@ -65,7 +68,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAct
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackScalingFlowContext(flowId, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables), Collections.emptySet(),
-                getAdjustment(variables));
+                getAdjustment(variables), getHostNames(variables));
     }
 
     @Override
@@ -79,5 +82,9 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractAct
 
     private Integer getAdjustment(Map<Object, Object> variables) {
         return (Integer) variables.get(ADJUSTMENT);
+    }
+
+    private Set<String> getHostNames(Map<Object, Object> variables) {
+        return (Set<String>) variables.get(HOSTNAMES);
     }
 }

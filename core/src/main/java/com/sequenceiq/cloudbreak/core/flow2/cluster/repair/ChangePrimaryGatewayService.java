@@ -51,11 +51,11 @@ public class ChangePrimaryGatewayService {
 
     public void changePrimaryGatewayStarted(Stack stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Changing gateway."));
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
     }
 
     public void primaryGatewayChanged(Stack stack, String newPrimaryGatewayFQDN) throws CloudbreakException {
-        Set<InstanceMetaData> imds = instanceMetaDataRepository.findAllInStack(stack.getId());
+        Set<InstanceMetaData> imds = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         Optional<InstanceMetaData> formerPrimaryGateway =
                 imds.stream().filter(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).findFirst();
         Optional<InstanceMetaData> newPrimaryGateway =

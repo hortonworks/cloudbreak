@@ -89,7 +89,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         if (payload instanceof StackDownscaleTriggerEvent) {
             StackDownscaleTriggerEvent ssc = (StackDownscaleTriggerEvent) payload;
             Set<String> instanceIds;
-            if (ssc.getHostNames() == null) {
+            if (ssc.getHostNames() == null || ssc.getHostNames().isEmpty()) {
                 Map<String, String> unusedInstanceIds = stackScalingService.getUnusedInstanceIds(ssc.getInstanceGroup(), ssc.getAdjustment(), stack);
                 instanceIds = new HashSet<>(unusedInstanceIds.keySet());
             } else {
@@ -121,7 +121,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         return (String) variables.get(INSTANCEGROUPNAME);
     }
 
-    protected  Set<String> getInstanceIds(Map<Object, Object> variables) {
+    protected Set<String> getInstanceIds(Map<Object, Object> variables) {
         return (Set<String>) variables.get(INSTANCEIDS);
     }
 
