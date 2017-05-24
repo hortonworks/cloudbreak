@@ -19,13 +19,17 @@ public interface FlexSubscriptionRepository extends CrudRepository<FlexSubscript
     @PostAuthorize("hasPermission(returnObject,'read')")
     FlexSubscription findByName(String name);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
     List<FlexSubscription> findAllByOwner(String owner);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
     List<FlexSubscription> findAllByAccount(String account);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
     @Query("SELECT f FROM FlexSubscription f WHERE f.name= :name AND ((f.account= :account AND f.publicInAccount= true) OR f.owner= :owner)")
     FlexSubscription findPublicInAccountByNameForUser(@Param("name") String name, @Param("owner") String owner, @Param("account") String account);
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
     @Query("SELECT f FROM FlexSubscription f WHERE (f.account= :account AND f.publicInAccount= true) OR f.owner= :owner")
     List<FlexSubscription> findAllPublicInAccountForUser(@Param("owner") String owner, @Param("account") String account);
 
