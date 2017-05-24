@@ -19,6 +19,8 @@ var path = require('path');
 var cons = require('consolidate');
 var dns = require('dns');
 
+var lastSessionID;
+
 // general config ==============================================================
 
 app.engine('html', cons.underscore);
@@ -276,9 +278,16 @@ function continueInit() {
     });
 
     app.get('/user', function(req, res) {
-        retrieveUserByToken(req.session.token, function(data) {
-            res.json(data);
-        });
+        if(typeof session.user == 'undefined' || req.sessionID != lastSessionID ){
+            retrieveUserByToken(req.session.token, function(data) {
+                session.user = data;
+                lastSessionID = req.sessionID;
+                res.json(data);
+            });
+        }else{
+            lastSessionID = req.sessionID;
+            res.json(session.user);
+        }
     });
 
     function retrieveUserByToken(token, success) {
