@@ -41,7 +41,7 @@ cb:
   db.env:
     user: postgres
     pass:
-    db: postgres
+    db: cbdb
     schema: public
 
   aws:

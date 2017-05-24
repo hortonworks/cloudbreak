@@ -34,7 +34,7 @@ public class DatabaseConfig {
     @Value("${periscope.db.pass:}")
     private String dbPassword;
 
-    @Value("${periscope.db.name:postgres}")
+    @Value("${periscope.db.name:periscopedb}")
     private String dbName;
 
     @Value("${periscope.db.schema.name:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + "}")
