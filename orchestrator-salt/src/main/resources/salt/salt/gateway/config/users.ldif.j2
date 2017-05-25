@@ -23,15 +23,15 @@ objectclass: dcObject
 o: Hadoop
 dc: hadoop
 
-# Entry for a sample people container
+# Entry for a sample Users container
 # Please replace with site specific values
-dn: ou=people,dc=hadoop,dc=apache,dc=org
+dn: ou=Users,dc=hadoop,dc=apache,dc=org
 objectclass:top
 objectclass:organizationalUnit
-ou: people
+ou: Users
 
 # entry for sample user admin
-dn: uid={{ salt['pillar.get']('gateway:username') }},ou=people,dc=hadoop,dc=apache,dc=org
+dn: uid={{ salt['pillar.get']('gateway:username') }},ou=Users,dc=hadoop,dc=apache,dc=org
 objectclass:top
 objectclass:person
 objectclass:organizationalPerson
@@ -40,4 +40,3 @@ cn: {{ salt['pillar.get']('gateway:username') }}
 sn: {{ salt['pillar.get']('gateway:username') }}
 uid: {{ salt['pillar.get']('gateway:username') }}
 userPassword: {{ salt['pillar.get']('gateway:password') }}
-
