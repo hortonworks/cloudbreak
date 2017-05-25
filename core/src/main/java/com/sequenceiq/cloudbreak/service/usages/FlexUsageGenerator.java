@@ -26,8 +26,10 @@ import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageHdpInstanceJson;
 import com.sequenceiq.cloudbreak.api.model.flex.FlexUsageProductJson;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
+import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -43,6 +45,10 @@ public class FlexUsageGenerator {
 
     private static final String STACK_NAME_DELIMITER = "_";
 
+    private static final long TIMESTAMP_MAX_SEC = 9999999999L;
+
+    private static final long REDUCE_TO_SEC = 1000;
+
     @Inject
     private UserDetailsService userDetailsService;
 
@@ -54,6 +60,9 @@ public class FlexUsageGenerator {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private FlexSubscriptionRepository flexSubscriptionRepository;
 
     @Value("${cb.instance.uuid:}")
     private String parentUuid;
@@ -69,6 +78,9 @@ public class FlexUsageGenerator {
 
     @Value("${cb.component.id:cloudbreak-cbd}")
     private String controllerComponentId;
+
+    @Value("${cb.component.created:}")
+    private Long controllerCreated;
 
     @Value("${cb.component.cluster.id:cloudbreak-hdp}")
     private String clustersComponentId;
@@ -133,10 +145,15 @@ public class FlexUsageGenerator {
         cbdComponentInstance.setPeakUsage(1);
         cbdComponentInstance.setProvider(cbInstanceProvider);
         cbdComponentInstance.setRegion(cbInstanceRegion);
-        //TODO get the details of the deployment somehow CreationDate
-        cbdComponentInstance.setCreationTime("");
-        //TODO create a findDefaults method to flexSubscriptionService that will return with the default subscription for controllers
-        cbdComponentInstance.setFlexPlanId("");
+        String creationTime = "";
+        if (controllerCreated != null) {
+            long created = controllerCreated > TIMESTAMP_MAX_SEC ? controllerCreated / REDUCE_TO_SEC : controllerCreated;
+            creationTime = formatInstant(Instant.ofEpochSecond(created), FLEX_TIME_ZONE_FORMAT_PATTERN);
+        }
+        cbdComponentInstance.setCreationTime(creationTime);
+        FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionRepository.findFirstByUsedForController(true))
+                .orElse(flexSubscriptionRepository.findFirstByIsDefault(true));
+        cbdComponentInstance.setFlexPlanId(usedForController == null ? "" : usedForController.getSubscriptionId());
         cbdComponentInstance.setUsageDate(formatInstant(Instant.ofEpochMilli(fromDate), FLEX_USAGE_DAY_FORMAT_PATTERN));
         return cbdComponentInstance;
     }
