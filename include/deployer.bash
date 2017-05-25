@@ -192,8 +192,14 @@ public-ip-resolver-command() {
     fi
 }
 
-load-profile() {
+start-time-init() {
+    if ! [[ "$(cat .starttime 2> /dev/null)" ]]; then
+        echo "$(date +%s)" > .starttime
+    fi
+    export CB_COMPONENT_CREATED=$(cat .starttime)
+}
 
+load-profile() {
     CBD_PROFILE="Profile"
     if [ -f $CBD_PROFILE ]; then
         debug "Use profile: $CBD_PROFILE"
@@ -455,6 +461,7 @@ main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
 
     cbd-find-root
+    start-time-init
 	color-init
     load-profile "$@"
     deps-init

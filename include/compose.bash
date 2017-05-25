@@ -421,6 +421,7 @@ cloudbreak:
         - CB_INSTANCE_REGION
         - CB_PRODUCT_ID
         - CB_COMPONENT_ID
+        - CB_COMPONENT_CREATED
         - CB_COMPONENT_CLUSTER_ID
     labels:
       - traefik.port=8080
