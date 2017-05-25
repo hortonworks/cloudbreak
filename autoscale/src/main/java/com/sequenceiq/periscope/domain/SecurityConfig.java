@@ -20,8 +20,8 @@ import javax.persistence.Table;
 public class SecurityConfig {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "securityconfig_generator")
-    @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "securityconfig_generator")
+    @SequenceGenerator(name = "securityconfig_generator", sequenceName = "securityconfig_id_seq", allocationSize = 1)
     private Long id;
 
     @Column

@@ -45,8 +45,8 @@ public class History {
     public static final String PARAMETERS = "parameters";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "history_generator")
-    @SequenceGenerator(name = "history_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "history_generator")
+    @SequenceGenerator(name = "history_generator", sequenceName = "history_id_seq", allocationSize = 1)
     private long id;
 
     @Column(name = "cluster_id")

@@ -11,8 +11,8 @@ import javax.persistence.SequenceGenerator;
 public class Ambari {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ambari_generator")
-    @SequenceGenerator(name = "ambari_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "ambari_generator")
+    @SequenceGenerator(name = "ambari_generator", sequenceName = "ambari_id_seq", allocationSize = 1)
     private long id;
 
     @Column(name = "ambari_host")
