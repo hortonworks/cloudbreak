@@ -22,8 +22,8 @@ import com.sequenceiq.periscope.api.model.AdjustmentType;
 public class ScalingPolicy {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "policy_generator")
-    @SequenceGenerator(name = "policy_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "policy_generator")
+    @SequenceGenerator(name = "policy_generator", sequenceName = "scalingpolicy_id_seq", allocationSize = 1)
     private long id;
 
     private String name;

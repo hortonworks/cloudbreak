@@ -12,8 +12,8 @@ import javax.persistence.SequenceGenerator;
 public class Notification {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_generator")
-    @SequenceGenerator(name = "notification_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "notification_generator")
+    @SequenceGenerator(name = "notification_generator", sequenceName = "notification_id_seq", allocationSize = 1)
     private long id;
 
     private String[] target;
