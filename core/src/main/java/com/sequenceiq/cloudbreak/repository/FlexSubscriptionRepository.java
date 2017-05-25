@@ -29,6 +29,10 @@ public interface FlexSubscriptionRepository extends CrudRepository<FlexSubscript
     @Query("SELECT f FROM FlexSubscription f WHERE (f.account= :account AND f.publicInAccount= true) OR f.owner= :owner")
     List<FlexSubscription> findAllPublicInAccountForUser(@Param("owner") String owner, @Param("account") String account);
 
+    FlexSubscription findFirstByUsedForController(boolean usedForController);
+
+    FlexSubscription findFirstByIsDefault(boolean defaultFlag);
+
     Long countBySmartSenseSubscription(SmartSenseSubscription smartSenseSubscription);
 
     Long countByNameAndAccount(String name, String account);
