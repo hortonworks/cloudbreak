@@ -23,15 +23,15 @@ objectclass: dcObject
 o: Hadoop
 dc: hadoop
 
-# Entry for a sample Users container
+# Entry for a sample people container
 # Please replace with site specific values
-dn: ou=Users,dc=hadoop,dc=apache,dc=org
+dn: ou=people,dc=hadoop,dc=apache,dc=org
 objectclass:top
 objectclass:organizationalUnit
-ou: Users
+ou: people
 
 # entry for sample user admin
-dn: cn={{ salt['pillar.get']('gateway:username') }},ou=Users,dc=hadoop,dc=apache,dc=org
+dn: uid={{ salt['pillar.get']('gateway:username') }},ou=people,dc=hadoop,dc=apache,dc=org
 objectclass:top
 objectclass:person
 objectclass:organizationalPerson
@@ -41,77 +41,3 @@ sn: {{ salt['pillar.get']('gateway:username') }}
 uid: {{ salt['pillar.get']('gateway:username') }}
 userPassword: {{ salt['pillar.get']('gateway:password') }}
 
-
-# dn: cn=user1,ou=Users,dc=hadoop,dc=apache,dc=org
-# objectclass: inetOrgPerson
-# objectclass: organizationalPerson
-# objectclass: person
-# objectclass: top
-# cn: user1
-# sn: user1
-# uid: user1
-# userPassword: user1{{ salt['pillar.get']('gateway:password') }}
-
-# dn: cn=user2,ou=Users,dc=hadoop,dc=apache,dc=org
-# objectclass: inetOrgPerson
-# objectclass: organizationalPerson
-# objectclass: person
-# objectclass: top
-# cn: user2
-# sn: user2
-# uid: user2
-# userPassword: user2{{ salt['pillar.get']('gateway:password') }}
-
-# dn: cn=user3,ou=Users,dc=hadoop,dc=apache,dc=org
-# objectclass: inetOrgPerson
-# objectclass: organizationalPerson
-# objectclass: person
-# objectclass: top
-# cn: user3
-# sn: user3
-# uid: user3
-# userPassword: user3{{ salt['pillar.get']('gateway:password') }}
-
-# dn: cn=user4,ou=Users,dc=hadoop,dc=apache,dc=org
-# objectclass: inetOrgPerson
-# objectclass: organizationalPerson
-# objectclass: person
-# objectclass: top
-# cn: user4
-# sn: user4
-# uid: user4
-# userPassword: user4{{ salt['pillar.get']('gateway:password') }}
-
-# dn: cn=user5,ou=Users,dc=hadoop,dc=apache,dc=org
-# objectclass: inetOrgPerson
-# objectclass: organizationalPerson
-# objectclass: person
-# objectclass: top
-# cn: user5
-# sn: user5
-# uid: user5
-# userPassword: user5{{ salt['pillar.get']('gateway:password') }}
-
-# dn: cn=Admins,ou=IT,ou=Groups,dc=hadoop,dc=apache,dc=org
-# objectclass: groupOfUniqueNames
-# objectclass: top
-# cn: Admins
-# uniquemember: cn=user1,ou=Users,dc=hadoop,dc=apache,dc=org
-# uniquemember: cn=user2,ou=Users,dc=hadoop,dc=apache,dc=org
-# uniquemember: cn=user3,ou=Users,dc=hadoop,dc=apache,dc=org
-
-# dn: cn=Analysts,ou=Business,ou=Groups,dc=hadoop,dc=apache,dc=org
-# objectclass: groupOfUniqueNames
-# objectclass: top
-# cn: Analysts
-# uniquemember: cn=user1,ou=Users,dc=hadoop,dc=apache,dc=org
-# uniquemember: cn=user3,ou=Users,dc=hadoop,dc=apache,dc=org
-# uniquemember: cn=user4,ou=Users,dc=hadoop,dc=apache,dc=org
-
-# dn: cn=Scientists,ou=Business,ou=Groups,dc=hadoop,dc=apache,dc=org
-# objectclass: groupOfUniqueNames
-# objectclass: top
-# cn: Scientists
-# uniquemember: cn=user3,ou=Users,dc=hadoop,dc=apache,dc=org
-# uniquemember: cn=user4,ou=Users,dc=hadoop,dc=apache,dc=org
-# uniquemember: cn=user5,ou=Users,dc=hadoop,dc=apache,dc=org
