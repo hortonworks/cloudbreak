@@ -3,5 +3,5 @@ ldap:
   protocol: ldap
   serverHost: localhost
   serverPort: 33389
-  userSearchBase: ou=people,dc=hadoop,dc=apache,dc=org
-  userSearchFilter: uid
+  userSearchBase: ou=Users,dc=hadoop,dc=apache,dc=org
+  userSearchFilter: cn
