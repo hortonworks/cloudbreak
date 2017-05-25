@@ -90,8 +90,15 @@ public class FlexUsageGenerator {
         CloudbreakFlexUsageJson result = new CloudbreakFlexUsageJson();
         Optional<CloudbreakUsage> aUsage = usages.stream().findFirst();
         result.setController(getFlexUsageControllerJson(usages, aUsage));
-        result.setProducts(getFlexUsageProductJsons(usages, aUsage, fromDate));
+        result.setProducts(Collections.emptyList());
+        if (controllerCreated == null || convertToSec(controllerCreated) < convertToSec(fromDate)) {
+            result.setProducts(getFlexUsageProductJsons(usages, aUsage, fromDate));
+        }
         return result;
+    }
+
+    private long convertToSec(long stamp) {
+        return stamp > TIMESTAMP_MAX_SEC ? stamp / REDUCE_TO_SEC : stamp;
     }
 
     private FlexUsageControllerJson getFlexUsageControllerJson(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
@@ -147,8 +154,7 @@ public class FlexUsageGenerator {
         cbdComponentInstance.setRegion(cbInstanceRegion);
         String creationTime = "";
         if (controllerCreated != null) {
-            long created = controllerCreated > TIMESTAMP_MAX_SEC ? controllerCreated / REDUCE_TO_SEC : controllerCreated;
-            creationTime = formatInstant(Instant.ofEpochSecond(created), FLEX_TIME_ZONE_FORMAT_PATTERN);
+            creationTime = formatInstant(Instant.ofEpochSecond(convertToSec(controllerCreated)), FLEX_TIME_ZONE_FORMAT_PATTERN);
         }
         cbdComponentInstance.setCreationTime(creationTime);
         FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionRepository.findFirstByUsedForController(true))
