@@ -11,7 +11,7 @@ admin = ${ zeppelin_admin_password }
 [main]
 <#if knoxGateway>
 ldapRealm = org.apache.shiro.realm.ldap.JndiLdapRealm
-ldapRealm.userDnTemplate = uid={0},ou=people,dc=hadoop,dc=apache,dc=org
+ldapRealm.userDnTemplate = uid={0},ou=Users,dc=hadoop,dc=apache,dc=org
 ldapRealm.contextFactory.url = ldap://localhost:33389
 ldapRealm.contextFactory.authenticationMechanism = SIMPLE
 </#if>
