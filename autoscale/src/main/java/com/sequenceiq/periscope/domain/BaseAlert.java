@@ -17,8 +17,8 @@ import javax.persistence.SequenceGenerator;
 public abstract class BaseAlert {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "alert_generator")
-    @SequenceGenerator(name = "alert_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "alert_generator")
+    @SequenceGenerator(name = "alert_generator", sequenceName = "alert_id_seq", allocationSize = 1)
     private long id;
 
     private String name;

@@ -38,8 +38,8 @@ public class Cluster {
     private static final int DEFAULT_COOLDOWN = 30;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cluster_generator")
-    @SequenceGenerator(name = "cluster_generator", sequenceName = "sequence_table")
+    @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
+    @SequenceGenerator(name = "cluster_generator", sequenceName = "cluster_id_seq", allocationSize = 1)
     private long id;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
