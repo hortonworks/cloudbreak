@@ -109,12 +109,16 @@ public class SmartSenseSubscriptionService {
         SmartSenseSubscription subscription = null;
         try {
             subscription = repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId());
+            if (!defaultSmartsenseId.isEmpty() && !defaultSmartsenseId.equals(subscription.getSubscriptionId())) {
+                subscription.setSubscriptionId(defaultSmartsenseId);
+                repository.save(subscription);
+            }
         } catch (NotFoundException nfe) {
             LOGGER.info("Default SmartSense subscription not found");
         }
         return Optional.ofNullable(subscription).orElseGet(() -> {
             SmartSenseSubscription newSubscription = null;
-            if (defaultSmartsenseId != null) {
+            if (!defaultSmartsenseId.isEmpty()) {
                 LOGGER.info("Generating default SmartSense subscription");
                 newSubscription = new SmartSenseSubscription();
                 newSubscription.setSubscriptionId(defaultSmartsenseId);
