@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
 import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
 import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -478,6 +479,11 @@ public class TestUtil {
         config.setDomain("ad.hdc.com");
         config.setServerPort(389);
         config.setProtocol("ldap://");
+        config.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
+        config.setUserObjectClass("person");
+        config.setGroupObjectClass("groupOfNames");
+        config.setGroupIdAttribute("cn");
+        config.setGroupMemberAttribute("member");
         return config;
     }
 

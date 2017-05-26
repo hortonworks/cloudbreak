@@ -5,6 +5,7 @@ import javax.validation.constraints.Size;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Max;
 
+import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;
@@ -64,6 +65,21 @@ public abstract class LdapConfigBase implements JsonEntity {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
+
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.DIRECTORY_TYPE)
+    private DirectoryType directoryType;
+
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_OBJECT_CLASS)
+    private String userObjectClass;
+
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_OBJECT_CLASS)
+    private String groupObjectClass;
+
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_ID_ATTRIBUTE)
+    private String groupIdAttribute;
+
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
+    private String groupMemberAttribute;
 
     public String getBindPassword() {
         return bindPassword;
@@ -175,5 +191,45 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public DirectoryType getDirectoryType() {
+        return directoryType;
+    }
+
+    public void setDirectoryType(DirectoryType directoryType) {
+        this.directoryType = directoryType;
+    }
+
+    public String getUserObjectClass() {
+        return userObjectClass;
+    }
+
+    public void setUserObjectClass(String userObjectClass) {
+        this.userObjectClass = userObjectClass;
+    }
+
+    public String getGroupObjectClass() {
+        return groupObjectClass;
+    }
+
+    public void setGroupObjectClass(String groupObjectClass) {
+        this.groupObjectClass = groupObjectClass;
+    }
+
+    public String getGroupIdAttribute() {
+        return groupIdAttribute;
+    }
+
+    public void setGroupIdAttribute(String groupIdAttribute) {
+        this.groupIdAttribute = groupIdAttribute;
+    }
+
+    public String getGroupMemberAttribute() {
+        return groupMemberAttribute;
+    }
+
+    public void setGroupMemberAttribute(String groupMemberAttribute) {
+        this.groupMemberAttribute = groupMemberAttribute;
     }
 }

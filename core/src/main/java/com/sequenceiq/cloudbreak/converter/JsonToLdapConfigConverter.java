@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 @Component
@@ -25,6 +26,11 @@ public class JsonToLdapConfigConverter extends AbstractConversionServiceAwareCon
         config.setPrincipalRegex(json.getPrincipalRegex());
         config.setUserSearchAttribute(json.getUserSearchAttribute());
         config.setDomain(json.getDomain());
+        config.setDirectoryType(json.getDirectoryType() != null ? json.getDirectoryType() : DirectoryType.LDAP);
+        config.setUserObjectClass(json.getUserObjectClass() != null ? json.getUserObjectClass() : "person");
+        config.setGroupObjectClass(json.getGroupObjectClass() != null ? json.getGroupObjectClass() : "groupOfNames");
+        config.setGroupIdAttribute(json.getGroupIdAttribute() != null ? json.getGroupIdAttribute() : "cn");
+        config.setGroupMemberAttribute(json.getGroupMemberAttribute() != null ? json.getGroupMemberAttribute() : "member");
         return config;
     }
 }

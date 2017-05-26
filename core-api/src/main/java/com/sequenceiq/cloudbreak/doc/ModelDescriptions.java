@@ -380,6 +380,11 @@ public class ModelDescriptions {
         public static final String PRINCIPAL_REGEX = "parses the principal for insertion into templates via regex.";
         public static final String USER_SEARCH_ATTRIBUTE = "attribute name for simplified search filter (e.g. sAMAccountName).";
         public static final String DOMAIN = "domain in LDAP server (e.g. ad.seq.com).";
+        public static final String DIRECTORY_TYPE = "directory type of server LDAP or AD";
+        public static final String USER_OBJECT_CLASS = "User Object Class (defaults to person)";
+        public static final String GROUP_OBJECT_CLASS = "Group Object Class (defaults to groupOfNames)";
+        public static final String GROUP_ID_ATTRIBUTE = "Group Id Attribute (defaults to cn)";
+        public static final String GROUP_MEMBER_ATTRIBUTE = "Group Member Attribute (defaults to member)";
     }
 
     public static class RDSConfigModelDescription {
