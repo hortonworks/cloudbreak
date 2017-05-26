@@ -153,7 +153,7 @@ public class FlexUsageGenerator {
         cbdComponentInstance.setCreationTime(creationTime);
         FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionRepository.findFirstByUsedForController(true))
                 .orElse(flexSubscriptionRepository.findFirstByIsDefault(true));
-        cbdComponentInstance.setFlexPlanId(usedForController == null ? "" : usedForController.getSubscriptionId());
+        cbdComponentInstance.setFlexSubscriptionId(usedForController == null ? "" : usedForController.getSubscriptionId());
         cbdComponentInstance.setUsageDate(formatInstant(Instant.ofEpochMilli(fromDate), FLEX_USAGE_DAY_FORMAT_PATTERN));
         return cbdComponentInstance;
     }
@@ -168,7 +168,7 @@ public class FlexUsageGenerator {
                 usageJson.setParentGuid(usage.getParentUuid());
                 usageJson.setClusterName(usage.getStackName());
                 usageJson.setBlueprintName(usage.getBlueprintName());
-                usageJson.setFlexPlanId(usage.getFlexId());
+                usageJson.setFlexSubscriptionId(usage.getFlexId());
                 usageJson.setProvider(usage.getProvider());
                 usageJson.setRegion(usage.getRegion());
                 usageJson.setPeakUsage(usage.getPeak());

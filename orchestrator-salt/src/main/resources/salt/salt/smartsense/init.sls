@@ -3,7 +3,7 @@ smartsense-hst:
 
 update-smartsense:
   cmd.run:
-    - name: yum -q -y update http://s3.amazonaws.com/dev.hortonworks.com/hst/centos7/smartsense-hst-1.4.1.2.5.0.1-1814.x86_64.rpm
+    - name: yum -q -y update http://s3.amazonaws.com/dev.hortonworks.com/hst/centos7/smartsense-hst-1.4.1.2.5.0.1-1817.x86_64.rpm
     - unless: test -f /var/lib/ambari-server/resources/stacks/HDP/2.1/services/SMARTSENSE/configuration/product-info.xml
 
 upgrade-smartsense-ambari-service:
