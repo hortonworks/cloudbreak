@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -13,6 +15,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
+
+import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 
 @Entity
 @Table(name = "ldapconfig", uniqueConstraints = {
@@ -92,6 +96,17 @@ public class LdapConfig implements ProvisionEntity {
     private String principalRegex;
 
     private String domain;
+
+    @Enumerated(EnumType.STRING)
+    private DirectoryType directoryType;
+
+    private String userObjectClass;
+
+    private String groupObjectClass;
+
+    private String groupIdAttribute;
+
+    private String groupMemberAttribute;
 
     public Long getId() {
         return id;
@@ -235,5 +250,45 @@ public class LdapConfig implements ProvisionEntity {
 
     public void setDomain(String domain) {
         this.domain = domain;
+    }
+
+    public DirectoryType getDirectoryType() {
+        return directoryType;
+    }
+
+    public void setDirectoryType(DirectoryType directoryType) {
+        this.directoryType = directoryType;
+    }
+
+    public String getUserObjectClass() {
+        return userObjectClass;
+    }
+
+    public void setUserObjectClass(String userObjectClass) {
+        this.userObjectClass = userObjectClass;
+    }
+
+    public String getGroupObjectClass() {
+        return groupObjectClass;
+    }
+
+    public void setGroupObjectClass(String groupObjectClass) {
+        this.groupObjectClass = groupObjectClass;
+    }
+
+    public String getGroupIdAttribute() {
+        return groupIdAttribute;
+    }
+
+    public void setGroupIdAttribute(String groupIdAttribute) {
+        this.groupIdAttribute = groupIdAttribute;
+    }
+
+    public String getGroupMemberAttribute() {
+        return groupMemberAttribute;
+    }
+
+    public void setGroupMemberAttribute(String groupMemberAttribute) {
+        this.groupMemberAttribute = groupMemberAttribute;
     }
 }
