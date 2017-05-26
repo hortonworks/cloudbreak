@@ -130,7 +130,8 @@
             "ranger.audit.source.type": "solr",
             "ranger.authentication.method": "ACTIVE_DIRECTORY",
             "ranger.ldap.ad.domain": "{{ LDAP_DOMAIN }}",
-            "ranger.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}"
+            "ranger.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}",
+            "ranger.ldap.ad.user.searchfilter": "({{ LDAP_NAME_ATTRIBUTE }}={0})"
           }
         }
       },

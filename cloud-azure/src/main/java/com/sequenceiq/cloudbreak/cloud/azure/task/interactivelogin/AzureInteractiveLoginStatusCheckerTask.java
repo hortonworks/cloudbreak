@@ -58,6 +58,12 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     private Client client;
 
     @Inject
+    private SubscriptionChecker subscriptionChecker;
+
+    @Inject
+    private TenantChecker tenantChecker;
+
+    @Inject
     private ApplicationCreator applicationCreator;
 
     @Inject
@@ -95,11 +101,17 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                 try {
                     String graphApiAccessToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), GRAPH_WINDOWS);
                     String managementApiToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), AZURE_MANAGEMENT);
+                    subscriptionChecker.checkSubscription(armCredentialView.getSubscriptionId(), managementApiToken);
+                    tenantChecker.checkTenant(armCredentialView.getTenantId(), managementApiToken);
+
                     String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId());
                     sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
                     String principalObjectId = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
                     sendStatusMessage(extendedCloudCredential, "Principal created for application");
-                    azureRoleManager.assignRole(managementApiToken, armCredentialView.getSubscriptionId(), principalObjectId);
+                    String roleName = armCredentialView.getRoleName();
+                    String roleType = armCredentialView.getRoleType();
+                    String roleId = azureRoleManager.handleRoleOperations(managementApiToken, armCredentialView.getSubscriptionId(), roleName, roleType);
+                    azureRoleManager.assignRole(managementApiToken, armCredentialView.getSubscriptionId(), roleId, principalObjectId);
                     sendStatusMessage(extendedCloudCredential, "Role assigned for principal");
 
                     extendedCloudCredential.putParameter("accessKey", appId);
@@ -107,7 +119,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
 
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
-                } catch (InteractiveLoginException e) {
+                } catch (InteractiveLoginException | InteractiveLoginUnrecoverableException e) {
                     LOGGER.error("Interactive login failed: ", e.getMessage());
                     sendErrorStatusMessage(extendedCloudCredential, e.getMessage());
                 }
