@@ -95,7 +95,7 @@ public class FlexUsageGenerator {
     }
 
     private FlexUsageControllerJson getFlexUsageControllerJson(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
-        Optional<SmartSenseSubscription> smartSenseSubscriptionOptional = smartSenseSubscriptionService.getOne();
+        Optional<SmartSenseSubscription> smartSenseSubscriptionOptional = smartSenseSubscriptionService.getDefault();
         FlexUsageControllerJson controllerJson = new FlexUsageControllerJson();
         controllerJson.setGuid(parentUuid);
         controllerJson.setInstanceId(parentUuid);
