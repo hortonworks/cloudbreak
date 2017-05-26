@@ -29,10 +29,6 @@
       "referenceConfiguration": "ranger.usersync.ldap.url"
     },
     {
-      "name": "LDAP_DOMAIN",
-      "referenceConfiguration": "ranger.ldap.ad.domain"
-    },
-    {
       "name": "LDAP_BIND_DN",
       "referenceConfiguration": "ranger.usersync.ldap.binddn"
     },
@@ -42,10 +38,6 @@
     },
     {
       "name": "LDAP_USER_SEARCH_BASE",
-      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
-    },
-    {
-      "name": "LDAP_USER_SEARCH_FILTER",
       "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
     },
     {
@@ -131,7 +123,6 @@
           "ranger.usersync.ldap.ldapbindpassword": "{{ LDAP_BIND_PASSWORD }}",
           "ranger.usersync.ldap.user.nameattribute": "{{ LDAP_USERNAME_ATTRIBUTE }}",
           "ranger.usersync.ldap.user.searchbase": "{{ LDAP_USER_SEARCH_BASE }}",
-          "ranger.usersync.ldap.user.searchfilter": "{{ LDAP_USER_SEARCH_FILTER }}",
           "ranger.usersync.group.searchenabled": "true",
           "ranger.usersync.group.searchbase": "{{ LDAP_GROUP_SEARCH_BASE }}",
           "ranger.usersync.group.objectclass": "{{ LDAP_GROUP_OBJECT_CLASS }}"
@@ -146,7 +137,6 @@
             "ranger.authentication.method": "{{ LDAP_METHOD }}",
             "ranger.ldap.ad.url": "{{ LDAP_URL }}",
             "ranger.ldap.ad.base.dn": "{{ LDAP_USER_SEARCH_BASE }}",
-            "ranger.ldap.ad.user.searchfilter": "{{ LDAP_USER_SEARCH_FILTER }}",
             "ranger.ldap.ad.bind.dn": "{{ LDAP_BIND_DN }}",
             "ranger.ldap.ad.bind.password": "{{ LDAP_BIND_PASSWORD }}",
             "ranger.ldap.url": "{{ LDAP_URL }}",
@@ -154,7 +144,6 @@
             "ranger.ldap.bind.dn": "{{ LDAP_BIND_DN }}",
             "ranger.ldap.bind.password": "{{ LDAP_BIND_PASSWORD }}",
             "ranger.ldap.group.searchbase": "{{ LDAP_GROUP_SEARCH_BASE }}",
-            "ranger.ldap.user.searchfilter": "{{ LDAP_USER_SEARCH_FILTER }}",
             "ranger.ldap.user.dnpattern": "{{ LDAP_USERNAME_ATTRIBUTE }}={0},{{ LDAP_USER_SEARCH_BASE }}"
           }
         }
