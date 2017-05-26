@@ -12,11 +12,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SmartSenseSubscriptionJson implements JsonEntity {
 
+    public static final String ID_PATTERN = "^([a-zA-Z]{1}-[0-9]{8}-[a-zA-Z]{1}-[0-9]{8}$)";
+
+    public static final String ID_FORMAT = "The given SmartSense subscription id is not in A-xxxxxxxx-C-xxxxxxxx format!";
+
     @ApiModelProperty(value = ModelDescriptions.ID, readOnly = true)
     private Long id;
 
     @ApiModelProperty(value = ModelDescriptions.SmartSenseSubscriptionModelDescription.SUBSCRIPTION_ID, required = true)
-    @Pattern(regexp = "^([a-zA-Z]{1}-[0-9]{8}-[a-zA-Z]{1}-[0-9]{8}$)", message = "The given SmartSense subscription id is not in A-xxxxxxxx-C-xxxxxxxx format!")
+    @Pattern(regexp = ID_PATTERN, message = ID_FORMAT)
     private String subscriptionId;
 
     @ApiModelProperty(value = ModelDescriptions.OWNER, readOnly = true)

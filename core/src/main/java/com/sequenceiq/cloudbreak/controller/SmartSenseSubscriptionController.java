@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -10,9 +9,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.endpoint.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.JsonToSmartSenseSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToJsonConverter;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
@@ -34,11 +33,13 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public SmartSenseSubscriptionJson get() {
-        Optional<SmartSenseSubscription> subscription = smartSenseSubService.getOne();
-        if (!subscription.isPresent()) {
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(cbUser);
+        SmartSenseSubscription subscription = smartSenseSubService.getDefault(cbUser);
+        if (subscription == null) {
             throw new NotFoundException("SmartSense subscription not found");
         }
-        return toJsonConverter.convert(subscription.get());
+        return toJsonConverter.convert(subscription);
     }
 
     @Override
@@ -76,7 +77,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     @Override
     public List<SmartSenseSubscriptionJson> getPublics() {
         List<SmartSenseSubscription> result = Lists.newArrayList();
-        smartSenseSubService.getOne().ifPresent(result::add);
+        smartSenseSubService.getDefault().ifPresent(result::add);
         return toJsonConverter.convert(result);
     }
 

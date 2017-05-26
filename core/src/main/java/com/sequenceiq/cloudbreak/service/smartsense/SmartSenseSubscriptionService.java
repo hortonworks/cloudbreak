@@ -2,16 +2,21 @@ package com.sequenceiq.cloudbreak.service.smartsense;
 
 import java.util.Iterator;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.repository.SmartSenseSubscriptionRepository;
@@ -31,6 +36,16 @@ public class SmartSenseSubscriptionService {
 
     @Inject
     private AuthorizationService authorizationService;
+
+    @Value("${cb.smartsense.id:}")
+    private String defaultSmartsenseId;
+
+    @PostConstruct
+    public void init() {
+        if (!defaultSmartsenseId.isEmpty() && !Pattern.matches(SmartSenseSubscriptionJson.ID_PATTERN, defaultSmartsenseId)) {
+            throw new IllegalArgumentException(SmartSenseSubscriptionJson.ID_FORMAT);
+        }
+    }
 
     public SmartSenseSubscription create(SmartSenseSubscription subscription) {
         long count = repository.count();
@@ -80,7 +95,7 @@ public class SmartSenseSubscriptionService {
         return repository.findOneById(id);
     }
 
-    public Optional<SmartSenseSubscription> getOne() {
+    public Optional<SmartSenseSubscription> getDefault() {
         LOGGER.info("Get the SmartSense subscription");
         Iterator<SmartSenseSubscription> subscriptions = repository.findAll().iterator();
         if (subscriptions.hasNext()) {
@@ -88,5 +103,27 @@ public class SmartSenseSubscriptionService {
         } else {
             return Optional.empty();
         }
+    }
+
+    public SmartSenseSubscription getDefault(IdentityUser cbUser) {
+        SmartSenseSubscription subscription = null;
+        try {
+            subscription = repository.findByAccountAndOwner(cbUser.getAccount(), cbUser.getUserId());
+        } catch (NotFoundException nfe) {
+            LOGGER.info("Default SmartSense subscription not found");
+        }
+        return Optional.ofNullable(subscription).orElseGet(() -> {
+            SmartSenseSubscription newSubscription = null;
+            if (defaultSmartsenseId != null) {
+                LOGGER.info("Generating default SmartSense subscription");
+                newSubscription = new SmartSenseSubscription();
+                newSubscription.setSubscriptionId(defaultSmartsenseId);
+                newSubscription.setAccount(cbUser.getAccount());
+                newSubscription.setOwner(cbUser.getUserId());
+                newSubscription.setPublicInAccount(true);
+                repository.save(newSubscription);
+            }
+            return newSubscription;
+        });
     }
 }
