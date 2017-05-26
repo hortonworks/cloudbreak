@@ -11,7 +11,7 @@ public class FlexUsageComponentInstanceJson {
 
     private String provider;
 
-    private String flexPlanId;
+    private String flexSubscriptionId;
 
     private String creationTime;
 
@@ -43,12 +43,12 @@ public class FlexUsageComponentInstanceJson {
         this.provider = provider;
     }
 
-    public String getFlexPlanId() {
-        return flexPlanId;
+    public String getFlexSubscriptionId() {
+        return flexSubscriptionId;
     }
 
-    public void setFlexPlanId(String flexPlanId) {
-        this.flexPlanId = flexPlanId;
+    public void setFlexSubscriptionId(String flexSubscriptionId) {
+        this.flexSubscriptionId = flexSubscriptionId;
     }
 
     public String getCreationTime() {

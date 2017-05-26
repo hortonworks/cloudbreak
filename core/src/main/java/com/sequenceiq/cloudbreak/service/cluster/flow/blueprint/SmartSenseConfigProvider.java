@@ -162,7 +162,7 @@ public class SmartSenseConfigProvider {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class HSTMetadataInstanceInfoJson {
-        private String flexPlanId;
+        private String flexSubscriptionId;
 
         private String guid;
 
@@ -170,15 +170,15 @@ public class SmartSenseConfigProvider {
 
         private String parentGuid;
 
-        HSTMetadataInstanceInfoJson(String flexPlanId, String guid, String name, String parentGuid) {
-            this.flexPlanId = flexPlanId;
+        HSTMetadataInstanceInfoJson(String flexSubscriptionId, String guid, String name, String parentGuid) {
+            this.flexSubscriptionId = flexSubscriptionId;
             this.guid = guid;
             this.name = name;
             this.parentGuid = parentGuid;
         }
 
-        public String getFlexPlanId() {
-            return flexPlanId;
+        public String getFlexSubscriptionId() {
+            return flexSubscriptionId;
         }
 
         public String getGuid() {
