@@ -39,7 +39,6 @@ func CreateLDAP(c *cli.Context) error {
 	bindDn := c.String(FlLdapBindDN.Name)
 	bindPassword := c.String(FlLdapBindPassword.Name)
 	userSearchBase := c.String(FlLdapUserSearchBase.Name)
-	userSearchFilter := c.String(FlLdapUserSearchFilter.Name)
 	userSearchAttribute := c.String(FlLdapUserSearchAttribute.Name)
 	groupSearchBase := c.String(FlLdapGroupSearchBase.Name)
 	server := c.String(FlLdapServer.Name)
@@ -53,12 +52,12 @@ func CreateLDAP(c *cli.Context) error {
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	return createLDAPImpl(cbClient.Cloudbreak.Ldap.PostPublicLdap, name, server, int32(serverPort), protocol, domain, bindDn, bindPassword,
-		userSearchBase, userSearchFilter, userSearchAttribute, groupSearchBase)
+		userSearchBase, userSearchAttribute, groupSearchBase)
 }
 
 func createLDAPImpl(createLDAP func(*ldap.PostPublicLdapParams) (*ldap.PostPublicLdapOK, error),
 	name string, server string, port int32, protocol string, domain string, bindDn string, bindPassword string,
-	userSearchBase string, userSearchFilter string, userSearchAttribute string, groupSearchBase string) error {
+	userSearchBase string, userSearchAttribute string, groupSearchBase string) error {
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
 	resp, err := createLDAP(&ldap.PostPublicLdapParams{
@@ -71,7 +70,6 @@ func createLDAPImpl(createLDAP func(*ldap.PostPublicLdapParams) (*ldap.PostPubli
 			BindDn:              bindDn,
 			BindPassword:        bindPassword,
 			UserSearchBase:      userSearchBase,
-			UserSearchFilter:    &userSearchFilter,
 			UserSearchAttribute: &userSearchAttribute,
 			GroupSearchBase:     &groupSearchBase,
 		}})

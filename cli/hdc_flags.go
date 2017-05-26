@@ -334,13 +334,6 @@ var (
 			Usage: "ldap user search base (e.g: CN=Users,DC=ad,DC=hdc,DC=com)",
 		},
 	}
-	FlLdapUserSearchFilter = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name:  "ldap-user-search-filter",
-			Usage: "ldap user search filter (e.g: CN)",
-		},
-	}
 	FlLdapUserSearchAttribute = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

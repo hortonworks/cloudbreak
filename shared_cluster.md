@@ -29,7 +29,6 @@ hdc register-ldap \
 --ldap-bind-password Admin123! \
 --ldap-domain ad.seq.com \
 --ldap-user-search-base CN=Users,DC=ad,DC=seq,DC=com \
---ldap-user-search-filter CN \
 --ldap-user-search-attribute sAMAccountName \
 --ldap-group-search-base CN=Users,DC=ad,DC=seq,DC=com
 ```
