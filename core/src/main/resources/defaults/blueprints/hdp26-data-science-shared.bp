@@ -1,28 +1,36 @@
 {
   "inputs": [
     {
-      "name":"LDAP_URL",
-      "referenceConfiguration":"hive.server2.authentication.ldap.url"
+      "name": "LDAP_URL",
+      "referenceConfiguration": "ranger.usersync.ldap.url"
     },
     {
-      "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
+      "name": "LDAP_DOMAIN",
+      "referenceConfiguration": "ranger.ldap.ad.domain"
     },
     {
-      "name":"LDAP_BIND_DN",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
+      "name": "LDAP_BIND_DN",
+      "referenceConfiguration": "ranger.usersync.ldap.binddn"
     },
     {
-      "name":"LDAP_BIND_PASSWORD",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
+      "name": "LDAP_BIND_PASSWORD",
+      "referenceConfiguration": "ranger.usersync.ldap.ldapbindpassword"
     },
     {
-      "name": "LDAP_SYNC_SEARCH_BASE",
+      "name": "LDAP_USER_SEARCH_BASE",
       "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
     },
     {
-      "name":"LDAP_GROUP_SEARCH_BASE",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
+      "name": "LDAP_USERNAME_ATTRIBUTE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.nameattribute"
+    },
+    {
+      "name": "LDAP_GROUP_SEARCH_BASE",
+      "referenceConfiguration": "hadoop.security.group.mapping.ldap.base"
+    },
+    {
+      "name": "LDAP_GROUP_OBJECT_CLASS",
+      "referenceConfiguration": "ranger.usersync.group.objectclass"
     }
   ],
   "blueprint": {
@@ -39,7 +47,10 @@
           "hadoop.security.group.mapping.ldap.url":"{{ LDAP_URL }}",
           "hadoop.security.group.mapping.ldap.bind.user":"{{ LDAP_BIND_DN }}",
           "hadoop.security.group.mapping.ldap.bind.password":"{{ LDAP_BIND_PASSWORD }}",
-          "hadoop.security.group.mapping.ldap.base":"{{ LDAP_GROUP_SEARCH_BASE }}"
+          "hadoop.security.group.mapping.ldap.groupbase": "{{ LDAP_GROUP_SEARCH_BASE }}",
+          "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass={{ LDAP_GROUP_OBJECT_CLASS }})",
+          "hadoop.security.group.mapping.ldap.search.filter.user": "({{ LDAP_USERNAME_ATTRIBUTE }}={0})",
+          "hadoop.security.group.mapping.ldap.userbase": "{{ LDAP_USER_SEARCH_BASE }}"
         }
       },
       {
@@ -69,8 +80,7 @@
       {
         "zeppelin-shiro-ini": {
           "properties": {
-            "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nactiveDirectoryRealm = org.apache.zeppelin.realm.ActiveDirectoryGroupRealm\nactiveDirectoryRealm.systemUsername = {{ LDAP_BIND_DN }}\nactiveDirectoryRealm.systemPassword = {{ LDAP_BIND_PASSWORD }}\nactiveDirectoryRealm.searchBase = {{ LDAP_SYNC_SEARCH_BASE }}\nactiveDirectoryRealm.url = {{ LDAP_URL }}\nactiveDirectoryRealm.principalSuffix = @{{ LDAP_DOMAIN }}\nactiveDirectoryRealm.authorizationCachingEnabled = false\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
-          }
+            "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nldapRealm = org.apache.zeppelin.realm.LdapRealm\n# search base for ldap groups (only relevant for LdapGroupRealm):\nldapRealm.contextFactory.url = {{ LDAP_URL }}\nldapRealm.contextFactory.authenticationMechanism = simple\nldapRealm.contextFactory.systemUsername = {{ LDAP_BIND_DN }}\nldapRealm.contextFactory.systemPassword = {{ LDAP_BIND_PASSWORD }}\nldapRealm.searchBase = {{ LDAP_USER_SEARCH_BASE }}\nldapRealm.userSearchAttributeName = {{ LDAP_USERNAME_ATTRIBUTE }}\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n/api/interpreter/** = authc, roles[admin]\n#/** = anon\n/** = authc\n"          }
         }
       }
     ],
