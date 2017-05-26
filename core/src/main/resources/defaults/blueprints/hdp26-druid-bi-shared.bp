@@ -1,28 +1,40 @@
 {
   "inputs": [
     {
-      "name":"LDAP_URL",
-      "referenceConfiguration":"hive.server2.authentication.ldap.url"
+      "name": "LDAP_URL",
+      "referenceConfiguration": "ranger.usersync.ldap.url"
     },
     {
-      "name":"LDAP_DOMAIN",
-      "referenceConfiguration":"hive.server2.authentication.ldap.Domain"
+      "name": "LDAP_DOMAIN",
+      "referenceConfiguration": "ranger.ldap.ad.domain"
     },
     {
-      "name":"LDAP_BIND_DN",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.user"
+      "name": "LDAP_BIND_DN",
+      "referenceConfiguration": "ranger.usersync.ldap.binddn"
     },
     {
-      "name":"LDAP_BIND_PASSWORD",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.bind.password"
+      "name": "LDAP_BIND_PASSWORD",
+      "referenceConfiguration": "ranger.usersync.ldap.ldapbindpassword"
     },
     {
-      "name": "LDAP_SYNC_SEARCH_BASE",
+      "name": "LDAP_USER_SEARCH_BASE",
       "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
     },
     {
-      "name":"LDAP_GROUP_SEARCH_BASE",
-      "referenceConfiguration":"hadoop.security.group.mapping.ldap.base"
+      "name": "LDAP_USER_SEARCH_FILTER",
+      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
+    },
+    {
+      "name": "LDAP_USERNAME_ATTRIBUTE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.nameattribute"
+    },
+    {
+      "name": "LDAP_GROUP_SEARCH_BASE",
+      "referenceConfiguration": "hadoop.security.group.mapping.ldap.base"
+    },
+    {
+      "name": "LDAP_GROUP_OBJECT_CLASS",
+      "referenceConfiguration": "ranger.usersync.group.objectclass"
     },
     {
       "name":"RANGER_REST_ADDRESS",
