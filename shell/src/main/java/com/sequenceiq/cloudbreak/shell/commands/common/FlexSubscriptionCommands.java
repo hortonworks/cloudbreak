@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -9,6 +11,7 @@ import org.springframework.shell.core.annotation.CliOption;
 
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
+import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class FlexSubscriptionCommands implements CommandMarker {
@@ -122,7 +125,49 @@ public class FlexSubscriptionCommands implements CommandMarker {
     }
 
     @CliCommand(value = "flex delete --name", help = "Deletes Flex subscription by its name")
-    public String deleteBySubscriptionId(@CliOption(key = "", mandatory = true) String name) throws Exception {
+    public String deleteByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
         return delete(null, name);
+    }
+
+    @CliAvailabilityIndicator(value = { "flex show --id", "flex show --name" })
+    public boolean showAvailable() {
+        return true;
+    }
+
+    private String show(Long id, String name, OutPutType outPutType) {
+        try {
+            FlexSubscriptionResponse flexSubscriptionResponse;
+            if (id != null) {
+                flexSubscriptionResponse = shellContext.cloudbreakClient().flexSubscriptionEndpoint().get(id);
+            } else if (name != null) {
+                flexSubscriptionResponse = shellContext.cloudbreakClient().flexSubscriptionEndpoint().getPublic(name);
+            } else {
+                throw shellContext.exceptionTransformer().transformToRuntimeException("Id or subscription id not specified");
+            }
+
+            Map<String, String> map = new HashMap<>();
+            map.put("id", flexSubscriptionResponse.getId().toString());
+            map.put("name", flexSubscriptionResponse.getName());
+            map.put("subscriptionId", flexSubscriptionResponse.getSubscriptionId());
+            map.put("smartSenseSubscription", flexSubscriptionResponse.getSmartSenseSubscription().getSubscriptionId());
+            map.put("isDefault", Boolean.toString(flexSubscriptionResponse.isDefault()));
+            map.put("isUsedForController", Boolean.toString(flexSubscriptionResponse.isUsedForController()));
+
+            return shellContext.outputTransformer().render(outPutType, map, "FIELD", "INFO");
+        } catch (Exception ex) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
+        }
+    }
+
+    @CliCommand(value = "flex show --id", help = "Describes Flex subscription by its id")
+    public String showById(@CliOption(key = "", mandatory = true) Long id,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(id, null, outPutType);
+    }
+
+    @CliCommand(value = "flex show --name", help = "Describes Flex subscription by its name")
+    public String showByName(@CliOption(key = "", mandatory = true) String name,
+            @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
+        return show(null, name, outPutType);
     }
 }
