@@ -158,6 +158,33 @@ func (a *Client) GetPublicSmartSenseSubscriptions(params *GetPublicSmartSenseSub
 }
 
 /*
+GetSmartSenseSubscription retrieves default smart sense subscription
+
+SmartSense subscriptions could be configured.
+*/
+func (a *Client) GetSmartSenseSubscription(params *GetSmartSenseSubscriptionParams) (*GetSmartSenseSubscriptionOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetSmartSenseSubscriptionParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "getSmartSenseSubscription",
+		Method:             "GET",
+		PathPattern:        "/smartsensesubscriptions",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetSmartSenseSubscriptionReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetSmartSenseSubscriptionOK), nil
+}
+
+/*
 GetSmartSenseSubscriptionByID retrieves smart sense subscription by id
 
 SmartSense subscriptions could be configured.
