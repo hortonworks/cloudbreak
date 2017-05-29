@@ -1,13 +1,11 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import static com.sequenceiq.cloudbreak.api.model.InstanceGroupType.GATEWAY;
-import static com.sequenceiq.cloudbreak.cloud.model.CloudCredential.SMART_SENSE_ID;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -15,7 +13,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -23,11 +20,12 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
 @Component
 public class SmartSenseConfigProvider {
@@ -66,24 +64,24 @@ public class SmartSenseConfigProvider {
     @Inject
     private HostGroupService hostGroupService;
 
+    @Inject
+    private SmartSenseSubscriptionService smartSenseSubscriptionService;
+
     public boolean smartSenseIsConfigurable(String blueprint) {
         return configureSmartSense && blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprint);
     }
 
     public String addToBlueprint(Stack stack, String blueprintText) {
         List<BlueprintConfigurationEntry> configs = new ArrayList<>();
-        Credential credential = stack.getCredential();
-        if (credential != null) {
-            Map<String, Object> params = credential.getAttributes().getMap();
-            String smartSenseId = String.valueOf(params.get(SMART_SENSE_ID));
-            if (configureSmartSense && StringUtils.isNoneEmpty(smartSenseId)) {
-                Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
-                Set<String> hostGroupNames = hostGroups.stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
-                blueprintText = addSmartSenseServerToBp(blueprintText, hostGroups, hostGroupNames);
-                blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
-                configs.addAll(getSmartSenseServerConfigs(stack, smartSenseId));
-                blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
-            }
+        Optional<SmartSenseSubscription> smartSenseSubscription = smartSenseSubscriptionService.getDefault();
+        if (configureSmartSense && smartSenseSubscription.isPresent()) {
+            String smartSenseId = smartSenseSubscription.get().getSubscriptionId();
+            Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
+            Set<String> hostGroupNames = hostGroups.stream().map(getHostGroupNameMapper()).collect(Collectors.toSet());
+            blueprintText = addSmartSenseServerToBp(blueprintText, hostGroups, hostGroupNames);
+            blueprintText = blueprintProcessor.addComponentToHostgroups(HST_AGENT_COMPONENT, hostGroupNames, blueprintText);
+            configs.addAll(getSmartSenseServerConfigs(stack, smartSenseId));
+            blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, true);
         }
         return blueprintText;
     }
@@ -131,7 +129,7 @@ public class SmartSenseConfigProvider {
         configs.add(new BlueprintConfigurationEntry(SMART_SENSE_SERVER_CONFIG_FILE, "customer.smartsense.id", smartSenseId));
 
         HSTMetadataInstanceInfoJson instanceInfoJson = new HSTMetadataInstanceInfoJson(
-                stack.getFlexSubscription().getSubscriptionId(),
+                stack.getFlexSubscription() != null ? stack.getFlexSubscription().getSubscriptionId() : "",
                 stack.getUuid(),
                 clusterName,
                 parentUuid);
