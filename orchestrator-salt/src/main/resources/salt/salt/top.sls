@@ -34,10 +34,18 @@ base:
     - match: grain
     - gateway
 
-  'roles:ambari_server':
-    - match: grain
+  'G@roles:ambari_server and not G@roles:smartsense':
+    - match: compound
     - prometheus.server
     - ambari.server
+    - ambari.server-start
+    - grafana
+
+  'G@roles:ambari_server and G@roles:smartsense':
+    - match: compound
+    - prometheus.server
+    - ambari.server
+    - smartsense
     - ambari.server-start
     - grafana
 
@@ -51,10 +59,6 @@ base:
   'roles:ambari_agent':
     - match: grain
     - ambari.agent
-
-  'roles:smartsense':
-    - match: grain
-    - smartsense
 
   'recipes:pre':
     - match: grain
