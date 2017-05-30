@@ -19,8 +19,10 @@ import com.microsoft.azure.credentials.ApplicationTokenCredentials;
 import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
+import com.microsoft.azure.management.compute.OperatingSystemStateTypes;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
 import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.NetworkInterface;
@@ -254,6 +256,19 @@ public class AzureClient {
         }
     }
 
+    public String getImageBlobUri(String resourceGroup, String storageName, String containerName, String sourceBlob) {
+        CloudBlobContainer blobContainer = getBlobContainer(resourceGroup, storageName, containerName);
+        String vhdName = sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1);
+        try {
+            CloudPageBlob pageBlobReference = blobContainer.getPageBlobReference(vhdName);
+            return pageBlobReference.getUri().toString();
+        } catch (URISyntaxException e) {
+            throw new CloudConnectorException("can't get image blob uri, URI is not valid", e);
+        } catch (StorageException e) {
+            throw new CloudConnectorException("can't get image blob uri, storage service error occurred", e);
+        }
+    }
+
     public List<ListBlobItem> listBlobInStorage(String resourceGroup, String storageName, String containerName) {
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         List<ListBlobItem> targetCollection = new ArrayList<>();
@@ -345,6 +360,40 @@ public class AzureClient {
 
     public PublicIPAddress getPublicIpAddress(String resourceGroup, String ipName) {
         return azure.publicIPAddresses().getByResourceGroup(resourceGroup, ipName);
+    }
+
+    public String getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
+        String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
+        String imageName = vhdName + "-" + region.toLowerCase().replaceAll("\\s", "");
+        Optional<VirtualMachineCustomImage> virtualMachineCustomImage = getCustomImageList(resourceGroup).stream()
+                .filter(customImage -> customImage.name().equals(imageName) && customImage.region().name().equals(region)).findFirst();
+        if (virtualMachineCustomImage.isPresent()) {
+            LOGGER.info("custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
+            return virtualMachineCustomImage.get().id();
+        } else {
+            LOGGER.info("custom image NOT found in '{}' resource group with name '{}'", resourceGroup, imageName);
+            VirtualMachineCustomImage customImage = createCustomImage(imageName, resourceGroup, fromVhdUri, region);
+            return customImage.id();
+        }
+    }
+
+    private PagedList<VirtualMachineCustomImage> getCustomImageList(String resourceGroup) {
+        return azure.virtualMachineCustomImages()
+                .listByResourceGroup(resourceGroup);
+    }
+
+    private VirtualMachineCustomImage createCustomImage(String imageName, String resourceGroup, String fromVhdUri, String region) {
+        LOGGER.info("create custom image from '{}' with name '{}' into '{}' resource group (Region: {})",
+                fromVhdUri, imageName, resourceGroup, region);
+        if (!azure.resourceGroups().checkExistence(resourceGroup)) {
+            azure.resourceGroups().define(resourceGroup).withRegion(region).create();
+        }
+        return azure.virtualMachineCustomImages()
+                .define(imageName)
+                .withRegion(region)
+                .withExistingResourceGroup(resourceGroup)
+                .withLinuxFromVhd(fromVhdUri, OperatingSystemStateTypes.GENERALIZED)
+                .create();
     }
 
     public PagedList<PublicIPAddress> getPublicIpAddresses(String resourceGroup) {

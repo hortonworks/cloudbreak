@@ -82,16 +82,20 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         AzureStackView azureStackView = getAzureStack(azureCredentialView, ac.getCloudContext(), stack);
         azureUtils.validateStorageType(stack);
-        String template = azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
+        AzureClient client = ac.getParameter(AzureClient.class);
+
+        String customImageId = azureStorage.getCustomImageId(client, ac, stack);
+        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
 
-        AzureClient client = ac.getParameter(AzureClient.class);
         azureUtils.validateSubnetRules(client, stack.getNetwork());
         try {
             String region = ac.getCloudContext().getLocation().getRegion().value();
-            Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
-            for (String name : storageAccounts.keySet()) {
-                azureStorage.createStorage(ac, client, name, storageAccounts.get(name), resourceGroupName, region);
+            if (AzureUtils.hasUnmanagedDisk(stack)) {
+                Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
+                for (String name : storageAccounts.keySet()) {
+                    azureStorage.createStorage(client, name, storageAccounts.get(name), resourceGroupName, region);
+                }
             }
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
                 Deployment templateDeployment = client.createTemplateDeployment(resourceGroupName, stackName, template, parameters);
@@ -193,7 +197,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
         AzureStackView azureStackView = getAzureStack(azureCredentialView, authenticatedContext.getCloudContext(), stack);
-        String template = azureTemplateBuilder.build(stackName, azureCredentialView, azureStackView, authenticatedContext.getCloudContext(), stack);
+
+        String customImageId = azureStorage.getCustomImageId(client, authenticatedContext, stack);
+        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
+                authenticatedContext.getCloudContext(), stack);
+
         String parameters = azureTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
         String resourceGroupName = azureUtils.getResourceGroupName(authenticatedContext.getCloudContext());
 
@@ -201,7 +209,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             String region = authenticatedContext.getCloudContext().getLocation().getRegion().value();
             Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
             for (String name : storageAccounts.keySet()) {
-                azureStorage.createStorage(authenticatedContext, client, name, storageAccounts.get(name), resourceGroupName, region);
+                azureStorage.createStorage(client, name, storageAccounts.get(name), resourceGroupName, region);
             }
             Deployment templateDeployment = client.createTemplateDeployment(stackName, stackName, template, parameters);
             LOGGER.info("created template deployment for upscale: {}", templateDeployment.exportTemplate().template().toString());

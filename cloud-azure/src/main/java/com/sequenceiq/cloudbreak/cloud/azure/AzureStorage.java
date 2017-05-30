@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 //import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 
 @Service
@@ -50,6 +51,23 @@ public class AzureStorage {
         return ArmAttachedStorageOption.valueOf(attachedStorageOption);
     }
 
+    public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
+        String imageResourceGroupName = getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
+        AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
+        ArmAttachedStorageOption armAttachedStorageOption = getArmAttachedStorageOption(stack.getParameters());
+        String persistentStorageName = getPersistentStorageName(stack.getParameters());
+        String imageStorageName = getImageStorageName(acv, ac.getCloudContext(), persistentStorageName, armAttachedStorageOption);
+        String imageBlobUri = client.getImageBlobUri(imageResourceGroupName, imageStorageName, IMAGES, stack.getImage().getImageName());
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        return getCustomImageId(imageBlobUri, imageResourceGroupName, region, client);
+    }
+
+    private String getCustomImageId(String vhd, String imageResourceGroupName, String region, AzureClient client) {
+        String customImageId = client.getCustomImageId(imageResourceGroupName, vhd, region);
+        LOGGER.info("custom image id: {}", customImageId);
+        return customImageId;
+    }
+
     public String getImageStorageName(AzureCredentialView acv, CloudContext cloudContext, String persistentStorageName,
             ArmAttachedStorageOption armAttachedStorageOption) {
         String storageName;
@@ -66,7 +84,7 @@ public class AzureStorage {
         return buildStorageName(armAttachedStorageOption, acv, vmId, cloudContext, storageType);
     }
 
-    public void createStorage(AuthenticatedContext ac, AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region)
+    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region)
             throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
             client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()));
