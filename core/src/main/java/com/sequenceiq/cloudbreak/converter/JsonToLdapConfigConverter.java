@@ -20,16 +20,13 @@ public class JsonToLdapConfigConverter extends AbstractConversionServiceAwareCon
         config.setServerPort(json.getServerPort());
         config.setProtocol(json.getProtocol());
         config.setGroupSearchBase(json.getGroupSearchBase());
-        config.setGroupSearchFilter(json.getGroupSearchFilter());
         config.setUserSearchBase(json.getUserSearchBase());
-        config.setUserSearchFilter(json.getUserSearchFilter());
-        config.setPrincipalRegex(json.getPrincipalRegex());
-        config.setUserSearchAttribute(json.getUserSearchAttribute());
+        config.setUserNameAttribute(json.getUserNameAttribute());
         config.setDomain(json.getDomain());
         config.setDirectoryType(json.getDirectoryType() != null ? json.getDirectoryType() : DirectoryType.LDAP);
         config.setUserObjectClass(json.getUserObjectClass() != null ? json.getUserObjectClass() : "person");
         config.setGroupObjectClass(json.getGroupObjectClass() != null ? json.getGroupObjectClass() : "groupOfNames");
-        config.setGroupIdAttribute(json.getGroupIdAttribute() != null ? json.getGroupIdAttribute() : "cn");
+        config.setGroupNameAttribute(json.getGroupNameAttribute() != null ? json.getGroupNameAttribute() : "cn");
         config.setGroupMemberAttribute(json.getGroupMemberAttribute() != null ? json.getGroupMemberAttribute() : "member");
         return config;
     }

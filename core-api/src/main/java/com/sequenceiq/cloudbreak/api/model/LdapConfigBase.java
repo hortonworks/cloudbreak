@@ -44,20 +44,11 @@ public abstract class LdapConfigBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
     private String userSearchBase;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_SEARCH_FILTER)
-    private String userSearchFilter;
-
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_SEARCH_BASE)
     private String groupSearchBase;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_SEARCH_FILTER)
-    private String groupSearchFilter;
-
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.PRINCIPAL_REGEX)
-    private String principalRegex;
-
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_SEARCH_ATTRIBUTE)
-    private String userSearchAttribute;
+    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_NAME_ATTRIBUTE)
+    private String userNameAttribute;
 
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.DOMAIN)
     private String domain;
@@ -72,7 +63,7 @@ public abstract class LdapConfigBase implements JsonEntity {
     private String groupObjectClass;
 
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_ID_ATTRIBUTE)
-    private String groupIdAttribute;
+    private String groupNameAttribute;
 
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
     private String groupMemberAttribute;
@@ -133,14 +124,6 @@ public abstract class LdapConfigBase implements JsonEntity {
         this.userSearchBase = userSearchBase;
     }
 
-    public String getUserSearchFilter() {
-        return userSearchFilter;
-    }
-
-    public void setUserSearchFilter(String userSearchFilter) {
-        this.userSearchFilter = userSearchFilter;
-    }
-
     public String getGroupSearchBase() {
         return groupSearchBase;
     }
@@ -149,28 +132,12 @@ public abstract class LdapConfigBase implements JsonEntity {
         this.groupSearchBase = groupSearchBase;
     }
 
-    public String getGroupSearchFilter() {
-        return groupSearchFilter;
+    public String getUserNameAttribute() {
+        return userNameAttribute;
     }
 
-    public void setGroupSearchFilter(String groupSearchFilter) {
-        this.groupSearchFilter = groupSearchFilter;
-    }
-
-    public String getPrincipalRegex() {
-        return principalRegex;
-    }
-
-    public void setPrincipalRegex(String principalRegex) {
-        this.principalRegex = principalRegex;
-    }
-
-    public String getUserSearchAttribute() {
-        return userSearchAttribute;
-    }
-
-    public void setUserSearchAttribute(String userSearchAttribute) {
-        this.userSearchAttribute = userSearchAttribute;
+    public void setUserNameAttribute(String userNameAttribute) {
+        this.userNameAttribute = userNameAttribute;
     }
 
     public String getDomain() {
@@ -205,12 +172,12 @@ public abstract class LdapConfigBase implements JsonEntity {
         this.groupObjectClass = groupObjectClass;
     }
 
-    public String getGroupIdAttribute() {
-        return groupIdAttribute;
+    public String getGroupNameAttribute() {
+        return groupNameAttribute;
     }
 
-    public void setGroupIdAttribute(String groupIdAttribute) {
-        this.groupIdAttribute = groupIdAttribute;
+    public void setGroupNameAttribute(String groupNameAttribute) {
+        this.groupNameAttribute = groupNameAttribute;
     }
 
     public String getGroupMemberAttribute() {

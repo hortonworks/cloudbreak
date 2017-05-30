@@ -377,11 +377,8 @@ public class ModelDescriptions {
         public static final String BIND_DN = "bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)";
         public static final String BIND_PASSWORD = "password for the provided bind DN";
         public static final String USER_SEARCH_BASE = "template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)";
-        public static final String USER_SEARCH_FILTER = "filter for user search for authentication (e.g. (&amp;(objectclass=person)(sAMAccountName={2})) )";
         public static final String GROUP_SEARCH_BASE = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)";
-        public static final String GROUP_SEARCH_FILTER = "filter for group search for authorization";
-        public static final String PRINCIPAL_REGEX = "parses the principal for insertion into templates via regex.";
-        public static final String USER_SEARCH_ATTRIBUTE = "attribute name for simplified search filter (e.g. sAMAccountName).";
+        public static final String USER_NAME_ATTRIBUTE = "attribute name for simplified search filter (e.g. sAMAccountName in case of AD, UID or cn for LDAP).";
         public static final String DOMAIN = "domain in LDAP server (e.g. ad.seq.com).";
         public static final String DIRECTORY_TYPE = "directory type of server LDAP or AD";
         public static final String USER_OBJECT_CLASS = "User Object Class (defaults to person)";

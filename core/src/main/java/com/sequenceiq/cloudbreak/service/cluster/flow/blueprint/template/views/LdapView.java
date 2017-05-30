@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.views;
 
+import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 public class LdapView {
@@ -10,17 +11,21 @@ public class LdapView {
 
     private String bindPassword;
 
+    private DirectoryType directoryType;
+
     private String userSearchBase;
 
-    private String userSearchFilter;
+    private String userNameAttribute;
 
-    private String userSearchAttribute;
+    private String userObjectClass;
 
     private String groupSearchBase;
 
-    private String groupSearchFilter;
+    private String groupNameAttribute;
 
-    private String principalRegex;
+    private String groupObjectClass;
+
+    private String groupMemberAttribute;
 
     private String domain;
 
@@ -28,12 +33,14 @@ public class LdapView {
         this.connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost() + ":" + ldapConfig.getServerPort();
         this.bindDn = ldapConfig.getBindDn();
         this.bindPassword = ldapConfig.getBindPassword();
+        this.directoryType = ldapConfig.getDirectoryType();
         this.userSearchBase = ldapConfig.getUserSearchBase();
-        this.userSearchFilter = ldapConfig.getGroupSearchFilter();
-        this.userSearchAttribute = ldapConfig.getUserSearchAttribute();
+        this.userNameAttribute = ldapConfig.getUserNameAttribute();
+        this.userObjectClass = ldapConfig.getUserObjectClass();
         this.groupSearchBase = ldapConfig.getGroupSearchBase();
-        this.groupSearchFilter = ldapConfig.getGroupSearchFilter();
-        this.principalRegex = ldapConfig.getPrincipalRegex();
+        this.groupNameAttribute = ldapConfig.getGroupNameAttribute();
+        this.groupObjectClass = ldapConfig.getGroupObjectClass();
+        this.groupMemberAttribute = ldapConfig.getGroupMemberAttribute();
         this.domain = ldapConfig.getDomain();
     }
 
@@ -49,28 +56,36 @@ public class LdapView {
         return bindPassword;
     }
 
+    public DirectoryType getDirectoryType() {
+        return directoryType;
+    }
+
     public String getUserSearchBase() {
         return userSearchBase;
     }
 
-    public String getUserSearchFilter() {
-        return userSearchFilter;
+    public String getUserNameAttribute() {
+        return userNameAttribute;
     }
 
-    public String getUserSearchAttribute() {
-        return userSearchAttribute;
+    public String getUserObjectClass() {
+        return userObjectClass;
     }
 
     public String getGroupSearchBase() {
         return groupSearchBase;
     }
 
-    public String getGroupSearchFilter() {
-        return groupSearchFilter;
+    public String getGroupNameAttribute() {
+        return groupNameAttribute;
     }
 
-    public String getPrincipalRegex() {
-        return principalRegex;
+    public String getGroupObjectClass() {
+        return groupObjectClass;
+    }
+
+    public String getGroupMemberAttribute() {
+        return groupMemberAttribute;
     }
 
     public String getDomain() {

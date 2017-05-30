@@ -69,7 +69,7 @@
           "ranger.usersync.ldap.url": "{{{ ldapConfig.connectionURL }}}",
           "ranger.usersync.ldap.binddn": "{{{ ldapConfig.bindDn }}}",
           "ranger.usersync.ldap.ldapbindpassword": "{{{ ldapConfig.bindPassword }}}",
-          "ranger.usersync.ldap.user.nameattribute": "{{{ ldapConfig.userSearchAttribute }}}",
+          "ranger.usersync.ldap.user.nameattribute": "{{{ ldapConfig.userNameAttribute }}}",
           "ranger.usersync.ldap.user.searchbase": "{{{ ldapConfig.userSearchBase }}}",
           "ranger.usersync.group.searchenabled": "false"
         }
@@ -81,7 +81,7 @@
             "ranger.jpa.jdbc.url": "jdbc:postgresql://{{{ rangerRds.connectionHost }}}/{{{ rangerRds.databaseName }}}",
             "ranger.audit.source.type": "solr",
             "ranger.authentication.method": "ACTIVE_DIRECTORY",
-            "ranger.ldap.ad.user.searchfilter": "({{{ ldapConfig.userSearchAttribute }}}={0})",
+            "ranger.ldap.ad.user.searchfilter": "({{{ ldapConfig.userNameAttribute }}}={0})",
             "ranger.ldap.ad.domain": "{{{ ldapConfig.domain }}}",
             "ranger.ldap.ad.base.dn": "{{{ ldapConfig.userSearchBase }}}"
           }
