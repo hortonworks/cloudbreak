@@ -272,6 +272,12 @@ uluwatuServices.factory('AccountUsers', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('AccountDetails', ['$resource',
+    function($resource) {
+        return $resource('sultans/account/details');
+    }
+]);
+
 uluwatuServices.factory('ActivateAccountUsers', ['$resource',
     function($resource) {
         return $resource('sultans/activate');
