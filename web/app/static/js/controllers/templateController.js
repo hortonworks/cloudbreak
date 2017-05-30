@@ -172,6 +172,9 @@ angular.module('uluwatuControllers').controller('templateController', [
 
         $scope.createAzureTemplate = function() {
             $scope.azureTemp.cloudPlatform = "AZURE";
+            if ($scope.azureTemp.parameters.managedDisk) {
+                $scope.azureTemp.volumeType = $rootScope.params.defaultDisks.AZURE;
+            }
             if ($scope.azureTemp.public) {
                 AccountTemplate.save($scope.azureTemp, function(result) {
                     handleAzureTemplateSuccess(result)
@@ -387,8 +390,10 @@ angular.module('uluwatuControllers').controller('templateController', [
                 volumeSize: 100,
                 volumeType: $rootScope.params.defaultDisks.AZURE,
                 instanceType: $rootScope.params.defaultVmTypes.AZURE,
-                parameters: {}
-            }
+                parameters: {
+                    managedDisk: true
+                }
+            };
             $scope.changeInstanceType($scope.azureTemp.instanceType, $scope.azureTemp.volumeType, "AZURE", $scope.azureTemp);
         }
 

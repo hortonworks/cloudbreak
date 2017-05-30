@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
@@ -19,9 +20,10 @@ import com.microsoft.azure.management.resources.Deployment;
 import com.microsoft.azure.management.resources.DeploymentOperation;
 import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStackStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -153,6 +155,20 @@ public class AzureUtils {
         } else {
             return false;
         }
+    }
+
+    public static List<CloudInstance> getInstanceList(CloudStack stack) {
+        return stack.getGroups().stream().flatMap(group -> group.getInstances().stream()).collect(Collectors.toList());
+    }
+
+    public static boolean hasManagedDisk(CloudStack stack) {
+        List<CloudInstance> instanceList = getInstanceList(stack);
+        return instanceList.stream().anyMatch(cloudInstance -> Boolean.TRUE.equals(cloudInstance.getTemplate().getParameter("managedDisk", Boolean.class)));
+    }
+
+    public static boolean hasUnmanagedDisk(CloudStack stack) {
+        List<CloudInstance> instanceList = getInstanceList(stack);
+        return instanceList.stream().anyMatch(cloudInstance -> !Boolean.TRUE.equals(cloudInstance.getTemplate().getParameter("managedDisk", Boolean.class)));
     }
 
     public String getCustomNetworkId(Network network) {

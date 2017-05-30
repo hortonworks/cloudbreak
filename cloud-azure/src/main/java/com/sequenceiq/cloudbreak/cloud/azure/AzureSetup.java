@@ -32,9 +32,9 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -62,25 +62,11 @@ public class AzureSetup implements Setup {
     public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image) {
         LOGGER.info("prepare image: {}", image);
 
-        AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
-        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
-                armStorage.getArmAttachedStorageOption(stack.getParameters()));
-        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
         String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
         String region = ac.getCloudContext().getLocation().getRegion().value();
         AzureClient client = ac.getParameter(AzureClient.class);
         try {
-            if (!client.resourceGroupExists(resourceGroupName)) {
-                client.createResourceGroup(resourceGroupName, region);
-            }
-            if (!client.resourceGroupExists(imageResourceGroupName)) {
-                client.createResourceGroup(imageResourceGroupName, region);
-            }
-            armStorage.createStorage(ac, client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region);
-            client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES);
-            if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
-                client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
-            }
+            copyVhdImageIfNecessary(ac, stack, image, imageResourceGroupName, region, client);
         } catch (Exception ex) {
             LOGGER.error("Could not create image with the specified parameters: {}", ex);
             throw new CloudConnectorException("Image creation failed because " + image.getImageName() + "does not exist or Cloudbreak could not reach.");
@@ -88,17 +74,42 @@ public class AzureSetup implements Setup {
         LOGGER.debug("prepare image has been executed");
     }
 
-    @Override
-    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
+    private void copyVhdImageIfNecessary(AuthenticatedContext ac, CloudStack stack, Image image, String imageResourceGroupName,
+            String region, AzureClient client) throws Exception {
         AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
         String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
                 armStorage.getArmAttachedStorageOption(stack.getParameters()));
+        String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
+        if (!client.resourceGroupExists(resourceGroupName)) {
+            client.createResourceGroup(resourceGroupName, region);
+        }
+        if (!client.resourceGroupExists(imageResourceGroupName)) {
+            client.createResourceGroup(imageResourceGroupName, region);
+        }
+        armStorage.createStorage(client, imageStorageName, AzureDiskType.LOCALLY_REDUNDANT, imageResourceGroupName, region);
+        client.createContainerInStorage(imageResourceGroupName, imageStorageName, IMAGES);
+        if (!storageContainsImage(client, imageResourceGroupName, imageStorageName, image.getImageName())) {
+            client.copyImageBlobInStorageContainer(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
+        }
+    }
+
+    @Override
+    public ImageStatusResult checkImageStatus(AuthenticatedContext ac, CloudStack stack, Image image) {
         String imageResourceGroupName = armStorage.getImageResourceGroupName(ac.getCloudContext(), stack.getParameters());
-        AzureCredentialView armCredentialView = new AzureCredentialView(ac.getCloudCredential());
+        AzureClient client = ac.getParameter(AzureClient.class);
+
+        AzureCredentialView acv = new AzureCredentialView(ac.getCloudCredential());
+        String imageStorageName = armStorage.getImageStorageName(acv, ac.getCloudContext(), armStorage.getPersistentStorageName(stack.getParameters()),
+                armStorage.getArmAttachedStorageOption(stack.getParameters()));
         try {
-            AzureClient client = ac.getParameter(AzureClient.class);
             CopyState copyState = client.getCopyStatus(imageResourceGroupName, imageStorageName, IMAGES, image.getImageName());
             if (CopyStatus.SUCCESS.equals(copyState.getStatus())) {
+                if (AzureUtils.hasManagedDisk(stack)) {
+                    String customImageId = armStorage.getCustomImageId(client, ac, stack);
+                    if (customImageId == null) {
+                        return new ImageStatusResult(ImageStatus.CREATE_FAILED, ImageStatusResult.COMPLETED);
+                    }
+                }
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);

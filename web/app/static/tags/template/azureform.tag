@@ -33,7 +33,7 @@
         <!-- .col-sm-9 -->
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-show="!azureTemp.parameters.managedDisk">
         <label class="col-sm-3 control-label" for="azure_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
         <div class="col-sm-9">
@@ -67,6 +67,14 @@
         </div>
         <!-- .col-sm-9 -->
 
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="azuremanaged">{{msg.template_form_managed}}</label>
+
+        <div class="col-sm-9">
+            <input type="checkbox" name="azuremanaged" id="azuremanaged" ng-model="azureTemp.parameters.managedDisk">
+        </div>
+        <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
         <label class="col-sm-3 control-label" for="azure_publicInAccount">{{msg.public_in_account_label}}</label>

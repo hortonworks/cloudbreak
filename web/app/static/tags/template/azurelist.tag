@@ -44,6 +44,14 @@
         <!-- .col-sm-9 -->
     </div>
     <div class="form-group">
+        <label class="col-sm-3 control-label" for="azuremanaged">{{msg.template_form_managed}}</label>
+
+        <div class="col-sm-9">
+            <p id="azuremanaged" class="form-control-static">{{template.parameters.managedDisk ? template.parameters.managedDisk : false}}</p>
+        </div>
+        <!-- .col-sm-9 -->
+    </div>
+    <div class="form-group">
         <label class="col-sm-3 control-label" for="location">{{msg.template_form_volume_count_label}}</label>
 
         <div class="col-sm-9">

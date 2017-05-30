@@ -59,7 +59,7 @@ cb:
     domain: default.com
 
   blueprint.defaults: hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster;hdp24-etl-edw;hdp25-data-science;hdp25-edw-analytics;hdp25-etl-edw;hdp25-etl-edw-spark2
-  template.defaults: minviable-gcp,minviable-azure,minviable-aws
+  template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |
     touch /tmp/custom-user-data
     date >> /tmp/custom-user-data

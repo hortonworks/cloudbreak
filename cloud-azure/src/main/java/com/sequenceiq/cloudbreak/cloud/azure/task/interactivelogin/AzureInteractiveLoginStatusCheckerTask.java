@@ -126,7 +126,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
                 } catch (InteractiveLoginException | InteractiveLoginUnrecoverableException e) {
-                    LOGGER.error("Interactive login failed: ", e.getMessage());
+                    LOGGER.error("Interactive login failed: {}", e);
                     sendErrorStatusMessage(extendedCloudCredential, e.getMessage());
                 }
             } catch (IOException e) {
