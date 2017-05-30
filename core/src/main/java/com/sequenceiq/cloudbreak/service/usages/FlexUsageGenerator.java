@@ -49,6 +49,8 @@ public class FlexUsageGenerator {
 
     private static final long REDUCE_TO_SEC = 1000;
 
+    private static final long DAY_IN_SEC = 86_400;
+
     @Inject
     private UserDetailsService userDetailsService;
 
@@ -91,7 +93,7 @@ public class FlexUsageGenerator {
         Optional<CloudbreakUsage> aUsage = usages.stream().findFirst();
         result.setController(getFlexUsageControllerJson(usages, aUsage));
         result.setProducts(Collections.emptyList());
-        if (controllerCreated == null || convertToSec(controllerCreated) < convertToSec(fromDate)) {
+        if (controllerCreated == null || (convertToSec(fromDate) - convertToSec(controllerCreated)) / DAY_IN_SEC >= 0) {
             result.setProducts(getFlexUsageProductJsons(usages, aUsage, fromDate));
         }
         return result;
