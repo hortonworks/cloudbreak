@@ -54,6 +54,12 @@ run_kadm5_sh_script:
     - source: salt://kerberos/init.d/kpropd
     - mode: 755
 
+create_cluster_user:
+  cmd.run:
+    - name: 'kadmin.local -q "addprinc -pw {{ kerberos.clusterPassword }} {{ kerberos.clusterUser }}"'
+    - shell: /bin/bash
+    - unless: kadmin.local -q "list_principals *" | grep "^{{ kerberos.clusterUser }}@{{ kerberos.clusterPassword }} *"
+
 {% if grains['init'] == 'systemd' %}
 
 kpropd_service:
