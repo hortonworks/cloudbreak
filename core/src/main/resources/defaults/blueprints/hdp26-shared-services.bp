@@ -21,12 +21,12 @@
       "referenceConfiguration": "ranger_admin_password"
     },
     {
-      "name": "LDAP_URL",
-      "referenceConfiguration": "ranger.usersync.ldap.url"
+      "name": "LDAP_DIRECTORY_TYPE",
+      "referenceConfiguration": "ranger.authentication.method"
     },
     {
-      "name": "LDAP_DOMAIN",
-      "referenceConfiguration": "ranger.ldap.ad.domain"
+      "name": "LDAP_URL",
+      "referenceConfiguration": "ranger.usersync.ldap.url"
     },
     {
       "name": "LDAP_BIND_DN",
@@ -37,16 +37,20 @@
       "referenceConfiguration": "ranger.usersync.ldap.ldapbindpassword"
     },
     {
-      "name": "LDAP_NAME_ATTRIBUTE",
-      "referenceConfiguration": "ranger.usersync.ldap.user.nameattribute"
+      "name": "LDAP_USER_SEARCH_BASE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
     },
     {
-      "name": "LDAP_SYNC_SEARCH_BASE",
-      "referenceConfiguration": "ranger.usersync.ldap.user.searchbase"
+      "name": "LDAP_USERNAME_ATTRIBUTE",
+      "referenceConfiguration": "ranger.usersync.ldap.user.nameattribute"
     },
     {
       "name": "LDAP_GROUP_SEARCH_BASE",
       "referenceConfiguration": "hadoop.security.group.mapping.ldap.base"
+    },
+    {
+      "name": "LDAP_GROUP_OBJECT_CLASS",
+      "referenceConfiguration": "ranger.usersync.group.objectclass"
     },
     {
       "name": "S3_BUCKET",
@@ -117,9 +121,11 @@
           "ranger.usersync.ldap.url": "{{ LDAP_URL }}",
           "ranger.usersync.ldap.binddn": "{{ LDAP_BIND_DN }}",
           "ranger.usersync.ldap.ldapbindpassword": "{{ LDAP_BIND_PASSWORD }}",
-          "ranger.usersync.ldap.user.nameattribute": "{{ LDAP_NAME_ATTRIBUTE }}",
-          "ranger.usersync.ldap.user.searchbase": "{{ LDAP_SYNC_SEARCH_BASE }}",
-          "ranger.usersync.group.searchenabled": "false"
+          "ranger.usersync.ldap.user.nameattribute": "{{ LDAP_USERNAME_ATTRIBUTE }}",
+          "ranger.usersync.ldap.user.searchbase": "{{ LDAP_USER_SEARCH_BASE }}",
+          "ranger.usersync.group.searchenabled": "true",
+          "ranger.usersync.group.searchbase": "{{ LDAP_GROUP_SEARCH_BASE }}",
+          "ranger.usersync.group.objectclass": "{{ LDAP_GROUP_OBJECT_CLASS }}"
         }
       },
       {
@@ -128,10 +134,17 @@
             "ranger.jpa.jdbc.driver": "org.postgresql.Driver",
             "ranger.jpa.jdbc.url": "jdbc:postgresql://{{ RANGER_DB_HOST }}/{{ RANGER_DB_NAME }}",
             "ranger.audit.source.type": "solr",
-            "ranger.authentication.method": "ACTIVE_DIRECTORY",
-            "ranger.ldap.ad.domain": "{{ LDAP_DOMAIN }}",
-            "ranger.ldap.ad.base.dn": "{{ LDAP_SYNC_SEARCH_BASE }}",
-            "ranger.ldap.ad.user.searchfilter": "({{ LDAP_NAME_ATTRIBUTE }}={0})"
+            "ranger.authentication.method": "{{ LDAP_DIRECTORY_TYPE }}",
+            "ranger.ldap.ad.url": "{{ LDAP_URL }}",
+            "ranger.ldap.ad.base.dn": "{{ LDAP_USER_SEARCH_BASE }}",
+            "ranger.ldap.ad.bind.dn": "{{ LDAP_BIND_DN }}",
+            "ranger.ldap.ad.bind.password": "{{ LDAP_BIND_PASSWORD }}",
+            "ranger.ldap.url": "{{ LDAP_URL }}",
+            "ranger.ldap.base.dn": "{{ LDAP_USER_SEARCH_BASE }}",
+            "ranger.ldap.bind.dn": "{{ LDAP_BIND_DN }}",
+            "ranger.ldap.bind.password": "{{ LDAP_BIND_PASSWORD }}",
+            "ranger.ldap.group.searchbase": "{{ LDAP_GROUP_SEARCH_BASE }}",
+            "ranger.ldap.user.dnpattern": "{{ LDAP_USERNAME_ATTRIBUTE }}={0},{{ LDAP_USER_SEARCH_BASE }}"
           }
         }
       },
