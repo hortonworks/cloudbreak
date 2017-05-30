@@ -178,7 +178,6 @@ public class FlexUsageGenerator {
                 usageJson.setProvider(usage.getProvider());
                 usageJson.setRegion(usage.getRegion());
                 usageJson.setPeakUsage(usage.getPeak());
-                usageJson.setNodeCount(usage.getInstanceNum());
                 usageJson.setUsageDate(formatInstant(usage.getDay().toInstant(), FLEX_USAGE_DAY_FORMAT_PATTERN));
                 Stack stack = stackService.getById(usage.getStackId());
                 usageJson.setCreationTime(formatInstant(Instant.ofEpochMilli(stack.getCreated()), FLEX_TIME_ZONE_FORMAT_PATTERN));
@@ -189,9 +188,7 @@ public class FlexUsageGenerator {
                 Integer actPeak = usage.getPeak() != null ? usage.getPeak() : 0;
                 Integer peak = usageJson.getPeakUsage() != null ? usageJson.getPeakUsage() : 0;
                 int newPeak = peak + actPeak;
-                int instanceNum = usageJson.getNodeCount() + usage.getInstanceNum();
                 usageJson.setPeakUsage(newPeak);
-                usageJson.setNodeCount(instanceNum);
             }
         }
         return new ArrayList<>(flexUsageJsonsByStackId.values());
