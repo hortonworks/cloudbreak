@@ -2,7 +2,6 @@ package cli
 
 import (
 	"fmt"
-	"sync"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -13,7 +12,6 @@ import (
 
 	"encoding/json"
 	"errors"
-	"strconv"
 	"strings"
 )
 
@@ -149,13 +147,11 @@ func CreateCluster(c *cli.Context) error {
 		createWorkerTemplateRequest,
 		createComputeTemplateRequest,
 		createSecurityGroupRequest,
-		createCredentialRequest,
 		createNetworkRequest,
 		createRecipeRequests,
 		createBlueprintRequest,
 		createRDSRequest,
 		cbClient.GetBlueprintByName,
-		cbClient.GetCredential,
 		cbClient.GetNetwork,
 		cbClient.Cloudbreak.Stacks.PostPrivateStack,
 		cbClient.GetRDSConfigByName,
@@ -178,13 +174,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	createWorkerTemplateRequest func(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest,
 	createComputeTemplateRequest func(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest,
 	createSecurityGroupRequest func(skeleton ClusterSkeleton, group string) *models_cloudbreak.SecurityGroupRequest,
-	createCredentialRequest func(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string) *models_cloudbreak.CredentialRequest,
 	createNetworkRequest func(skeleton ClusterSkeleton, getNetwork func(string) models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkRequest,
 	createRecipeRequests func(recipes []Recipe) []*models_cloudbreak.RecipeRequest,
 	createBlueprintRequest func(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse) *models_cloudbreak.BlueprintRequest,
-	createRDSRequest func(metastore MetaStore, rdsType string, hdpVersion string) *models_cloudbreak.RDSConfig,
+	createRDSRequest func(metastore MetaStore, rdsType string, hdpVersion string, properties []*models_cloudbreak.RdsConfigProperty) *models_cloudbreak.RDSConfig,
 	getBlueprint func(string) *models_cloudbreak.BlueprintResponse,
-	getCredential func(string) models_cloudbreak.CredentialResponse,
 	getNetwork func(name string) models_cloudbreak.NetworkResponse,
 	postStack func(*stacks.PostPrivateStackParams) (*stacks.PostPrivateStackOK, error),
 	getRdsConfig func(string) models_cloudbreak.RDSConfigResponse,
@@ -200,12 +194,14 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 	dataLake := false
+	var connectedClusterRequest *models_cloudbreak.ConnectedClusterRequest = nil
 	if blueprint.BlueprintName != nil && *blueprint.BlueprintName == "hdp26-shared-services" {
 		dataLake = true
 		convertClusterInputs(&skeleton)
 	} else if len(skeleton.SharedClusterName) > 0 {
 		log.Infof("[CreateStack] ephemeral cluster name: %s", skeleton.ClusterName)
 		fillSharedParameters(&skeleton, getBlueprint, getCluster, getClusterConfig)
+		connectedClusterRequest = &models_cloudbreak.ConnectedClusterRequest{SourceClusterName: &skeleton.SharedClusterName}
 	}
 
 	// create stack
@@ -263,8 +259,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		log.Infof("[CreateStack] selected ambariVersion %s", ambariVersion)
 
-		credentialName := "cred" + strconv.FormatInt(time.Now().UnixNano(), 10)
-		credReq := createCredentialRequest(credentialName, getCredential("aws-access"), skeleton.SSHKeyName)
+		credReq := &models_cloudbreak.CredentialSourceRequest{SourceName: "aws-access"}
 		tags := make(map[string]interface{})
 		if dataLake {
 			tags["type"] = "datalake"
@@ -280,19 +275,19 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		stackReq := models_cloudbreak.StackRequest{
-			Name:            skeleton.ClusterName,
-			Credential:      credReq,
-			FailurePolicy:   &models_cloudbreak.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
-			OnFailureAction: &failureAction,
-			InstanceGroups:  instanceGroups,
-			Parameters:      stackParameters,
-			CloudPlatform:   &platform,
-			PlatformVariant: &platform,
-			Network:         createNetworkRequest(skeleton, getNetwork),
-			AmbariVersion:   &ambariVersion,
-			HdpVersion:      &skeleton.HDPVersion,
-			Orchestrator:    &orchestrator,
-			Tags:            tags,
+			Name:             skeleton.ClusterName,
+			CredentialSource: credReq,
+			FailurePolicy:    &models_cloudbreak.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
+			OnFailureAction:  &failureAction,
+			InstanceGroups:   instanceGroups,
+			Parameters:       stackParameters,
+			CloudPlatform:    &platform,
+			PlatformVariant:  &platform,
+			Network:          createNetworkRequest(skeleton, getNetwork),
+			AmbariVersion:    &ambariVersion,
+			HdpVersion:       &skeleton.HDPVersion,
+			Orchestrator:     &orchestrator,
+			Tags:             tags,
 		}
 
 		// flex subscription
@@ -376,7 +371,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		hiveMetastore := skeleton.HiveMetastore
 		if hiveMetastore != nil {
 			if len(hiveMetastore.URL) > 0 {
-				hiveRds := createRDSRequest(hiveMetastore.MetaStore, HIVE_RDS, skeleton.HDPVersion)
+				hiveRds := createRDSRequest(hiveMetastore.MetaStore, HIVE_RDS, skeleton.HDPVersion, nil)
 				rdsConfigs = append(rdsConfigs, hiveRds)
 			} else if len(hiveMetastore.Name) > 0 {
 				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(hiveMetastore.Name).ID)
@@ -386,10 +381,24 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		druidMetastore := skeleton.DruidMetastore
 		if druidMetastore != nil {
 			if len(druidMetastore.URL) > 0 {
-				druidRds := createRDSRequest(druidMetastore.MetaStore, DRUID_RDS, skeleton.HDPVersion)
+				druidRds := createRDSRequest(druidMetastore.MetaStore, DRUID_RDS, skeleton.HDPVersion, nil)
 				rdsConfigs = append(rdsConfigs, druidRds)
 			} else if len(druidMetastore.Name) > 0 {
 				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(druidMetastore.Name).ID)
+			}
+		}
+		// ranger metastore
+		rangerMetastore := skeleton.RangerMetastore
+		if rangerMetastore != nil {
+			if len(rangerMetastore.URL) > 0 {
+				properties := []*models_cloudbreak.RdsConfigProperty{
+					&models_cloudbreak.RdsConfigProperty{
+						Name:  &(&stringWrapper{"rangerAdminPassword"}).s,
+						Value: &(&stringWrapper{skeleton.ClusterAndAmbariPassword}).s,
+					},
+				}
+				rangerRds := createRDSRequest(rangerMetastore.MetaStore, RANGER_RDS, skeleton.HDPVersion, properties)
+				rdsConfigs = append(rdsConfigs, rangerRds)
 			}
 		}
 
@@ -403,7 +412,6 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		if skeleton.Ldap != nil && len(*skeleton.Ldap) > 0 {
 			ldap := getLdapConfig(*skeleton.Ldap)
 			ldapConfigId = ldap.ID
-			inputs = append(inputs, getLdapInputs(ldap, blueprint.Inputs)...)
 		}
 
 		exposedServices := []string{}
@@ -439,9 +447,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		enableKnoxGateway := true
 		gatewayType := "CENTRAL"
+
 		clusterReq := models_cloudbreak.ClusterRequest{
 			Name:                      skeleton.ClusterName,
 			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
+			ConnectedCluster:          connectedClusterRequest,
 			HostGroups:                hostGroups,
 			UserName:                  skeleton.ClusterAndAmbariUser,
 			Password:                  skeleton.ClusterAndAmbariPassword,
@@ -486,41 +496,6 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	}()
 
 	return stackId
-}
-
-func getLdapInputs(ldap *models_cloudbreak.LdapConfigResponse, blueprintParameters []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput {
-	var inputs []*models_cloudbreak.BlueprintInput = make([]*models_cloudbreak.BlueprintInput, 0)
-	for _, input := range blueprintParameters {
-		name := *input.Name
-		switch name {
-		case "LDAP_BIND_DN":
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_BIND_DN"}).s, PropertyValue: &ldap.BindDn})
-			break
-		case "LDAP_BIND_PASSWORD":
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_BIND_PASSWORD"}).s, PropertyValue: &ldap.BindPassword})
-			break
-		case "LDAP_DOMAIN":
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_DOMAIN"}).s, PropertyValue: ldap.Domain})
-			break
-		case "LDAP_GROUP_SEARCH_BASE":
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_GROUP_SEARCH_BASE"}).s, PropertyValue: ldap.GroupSearchBase})
-			break
-		case "LDAP_URL":
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_URL"}).s,
-				PropertyValue: &(&stringWrapper{fmt.Sprintf("%s://%s:%d", *ldap.Protocol, ldap.ServerHost, ldap.ServerPort)}).s})
-			break
-		case "LDAP_NAME_ATTRIBUTE":
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_NAME_ATTRIBUTE"}).s,
-				PropertyValue: ldap.UserSearchAttribute})
-			break
-		case "LDAP_SYNC_SEARCH_BASE":
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"LDAP_SYNC_SEARCH_BASE"}).s, PropertyValue: &ldap.UserSearchBase})
-			break
-		default:
-			break
-		}
-	}
-	return inputs
 }
 
 func ValidateCreateClusterSkeleton(c *cli.Context) error {
@@ -664,11 +639,6 @@ func convertClusterInputs(skeleton *ClusterSkeleton) {
 		return
 	}
 
-	putToClusterInput(skeleton, "RANGER_ADMIN_PASSWORD", skeleton.ClusterAndAmbariPassword)
-	putToClusterInput(skeleton, "RANGER_DB_HOST", skeleton.RangerMetastore.URL)
-	putToClusterInput(skeleton, "RANGER_DB_NAME", skeleton.RangerMetastore.Name)
-	putToClusterInput(skeleton, "RANGER_DB_USER", skeleton.RangerMetastore.Username)
-	putToClusterInput(skeleton, "RANGER_DB_PASSWORD", skeleton.RangerMetastore.Password)
 	putToClusterInput(skeleton, "S3_BUCKET", skeleton.CloudStoragePath)
 
 }
@@ -703,20 +673,6 @@ func fillSharedParameters(skeleton *ClusterSkeleton,
 		}
 	}
 	skeleton.ClusterInputs = inputs
-	log.Infof("[fillSharedParameters] inputs for cluster type: %+v", inputs)
-
-	var wg sync.WaitGroup
-
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		configs := getClusterConfig(*stack.ID, ambariBp.Inputs)
-		for _, input := range configs {
-			if !strings.Contains(*input.Name, "LDAP") {
-				inputs[*input.Name] = *input.PropertyValue
-			}
-		}
-	}()
 
 	if stack.Cluster != nil && stack.Cluster.LdapConfig != nil {
 		skeleton.Ldap = &stack.Cluster.LdapConfig.Name
@@ -742,8 +698,6 @@ func fillSharedParameters(skeleton *ClusterSkeleton,
 			}
 		}
 	}
-
-	wg.Wait()
 
 	skeletonJson, _ := json.Marshal(skeleton)
 	log.Debugf("[fillSharedParameters] ephemeral cluster skeleton: %s", string(skeletonJson))

@@ -55,6 +55,10 @@ type ClusterRequest struct {
 	 */
 	ConfigStrategy *string `json:"configStrategy,omitempty"`
 
+	/* cluster can connect to a datalake you can define the parameters here
+	 */
+	ConnectedCluster *ConnectedClusterRequest `json:"connectedCluster,omitempty"`
+
 	/* custom containers
 	 */
 	CustomContainer *CustomContainerRequest `json:"customContainer,omitempty"`

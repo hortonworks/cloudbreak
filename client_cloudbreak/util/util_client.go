@@ -23,6 +23,31 @@ type Client struct {
 }
 
 /*
+CreateRDSDatabaseUtil creates a database connection parameters
+*/
+func (a *Client) CreateRDSDatabaseUtil(params *CreateRDSDatabaseUtilParams) (*CreateRDSDatabaseUtilOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateRDSDatabaseUtilParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "createRDSDatabaseUtil",
+		Method:             "POST",
+		PathPattern:        "/util/rds-database",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &CreateRDSDatabaseUtilReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*CreateRDSDatabaseUtilOK), nil
+}
+
+/*
 TestAmbariDatabaseUtil tests a database connection parameters
 */
 func (a *Client) TestAmbariDatabaseUtil(params *TestAmbariDatabaseUtilParams) (*TestAmbariDatabaseUtilOK, error) {
@@ -45,6 +70,31 @@ func (a *Client) TestAmbariDatabaseUtil(params *TestAmbariDatabaseUtilParams) (*
 		return nil, err
 	}
 	return result.(*TestAmbariDatabaseUtilOK), nil
+}
+
+/*
+TestLdapConnectionByIDUtil tests an already exists l d a p connection
+*/
+func (a *Client) TestLdapConnectionByIDUtil(params *TestLdapConnectionByIDUtilParams) (*TestLdapConnectionByIDUtilOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewTestLdapConnectionByIDUtilParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "testLdapConnectionByIdUtil",
+		Method:             "GET",
+		PathPattern:        "/util/ldap/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &TestLdapConnectionByIDUtilReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*TestLdapConnectionByIDUtilOK), nil
 }
 
 /*

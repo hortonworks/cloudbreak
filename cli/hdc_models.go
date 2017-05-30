@@ -21,6 +21,7 @@ var (
 	UNHEALTHY   = "UNHEALTHY"
 	HIVE_RDS    = "HIVE"
 	DRUID_RDS   = "DRUID"
+	RANGER_RDS  = "RANGER"
 	ENCRYPTED   = "encrypted"
 )
 

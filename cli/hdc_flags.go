@@ -320,11 +320,53 @@ var (
 			Usage: "ldap bind dn (e.g: CN=Administrator,CN=Users,DC=ad,DC=hdc,DC=com)",
 		},
 	}
+	FlLdapUserNameAttribute = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-name-attribute",
+			Usage: "ldap user name attribute",
+		},
+	}
+	FlLdapUserObjectClass = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-object-class",
+			Usage: "ldap user object class",
+		},
+	}
+	FlLdapGroupMemberAttribute = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-member-attribute",
+			Usage: "ldap group member attribute",
+		},
+	}
+	FlLdapGroupNameAttribute = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-name-attribute",
+			Usage: "ldap group name attribute",
+		},
+	}
+	FlLdapGroupObjectClass = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-object-class",
+			Usage: "ldap group object class",
+		},
+	}
 	FlLdapBindPassword = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "ldap-bind-password",
 			Usage: "ldap bind password",
+		},
+	}
+	FlLdapDirectoryType = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-directory-type",
+			Usage: "ldap directory type (LDAP or ACTIVE_DIRECTORY)",
 		},
 	}
 	FlLdapUserSearchBase = StringFlag{

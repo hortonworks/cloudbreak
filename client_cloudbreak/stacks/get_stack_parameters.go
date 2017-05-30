@@ -23,8 +23,16 @@ for the get stack operation typically these are written to a http.Request
 */
 type GetStackParams struct {
 
+	/*Entry*/
+	Entry []string
 	/*ID*/
 	ID int64
+}
+
+// WithEntry adds the entry to the get stack params
+func (o *GetStackParams) WithEntry(entry []string) *GetStackParams {
+	o.Entry = entry
+	return o
 }
 
 // WithID adds the id to the get stack params
@@ -37,6 +45,14 @@ func (o *GetStackParams) WithID(id int64) *GetStackParams {
 func (o *GetStackParams) WriteToRequest(r client.Request, reg strfmt.Registry) error {
 
 	var res []error
+
+	valuesEntry := o.Entry
+
+	joinedEntry := swag.JoinByFormat(valuesEntry, "multi")
+	// query array param entry
+	if err := r.SetQueryParam("entry", joinedEntry...); err != nil {
+		return err
+	}
 
 	// path param id
 	if err := r.SetPathParam("id", swag.FormatInt64(o.ID)); err != nil {

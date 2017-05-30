@@ -65,9 +65,6 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 			AmbariBlueprint: models_cloudbreak.AmbariBlueprint{},
 		}
 	}
-	getCredential := func(name string) models_cloudbreak.CredentialResponse {
-		return models_cloudbreak.CredentialResponse{}
-	}
 	getNetwork := func(name string) models_cloudbreak.NetworkResponse {
 		return models_cloudbreak.NetworkResponse{}
 	}
@@ -95,9 +92,6 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	}
 	createSecurityGroupRequest := func(skeleton ClusterSkeleton, group string) *models_cloudbreak.SecurityGroupRequest {
 		return &models_cloudbreak.SecurityGroupRequest{CloudPlatform: "AWS", Name: "secg", SecurityRules: make([]*models_cloudbreak.SecurityRuleRequest, 0)}
-	}
-	createCredentialRequest := func(name string, defaultCredential models_cloudbreak.CredentialResponse, existingKey string) *models_cloudbreak.CredentialRequest {
-		return &models_cloudbreak.CredentialRequest{Name: "cred", CloudPlatform: "AWS", PublicKey: &(&stringWrapper{"key"}).s}
 	}
 	createNetworkRequest := func(skeleton ClusterSkeleton, getNetwork func(string) models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkRequest {
 		return &models_cloudbreak.NetworkRequest{Name: "net", CloudPlatform: "AWS"}
@@ -133,8 +127,8 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	}
 
 	actualId = createClusterImpl(*skeleton, createFuncs[0], createFuncs[1], createFuncs[2],
-		createSecurityGroupRequest, createCredentialRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest, createRDSRequest,
-		getBlueprint, getCredential, getNetwork, postStack, getRdsConfig, postCluster, addAutoscalingCluster, setScalingConfigurations, addPrometheusAlert,
+		createSecurityGroupRequest, createNetworkRequest, createRecipeRequests, createBlueprintRequest, createRDSRequest,
+		getBlueprint, getNetwork, postStack, getRdsConfig, postCluster, addAutoscalingCluster, setScalingConfigurations, addPrometheusAlert,
 		addScalingPolicy, getLdapConfig, getCluster, getClusterConfig, getFlex)
 
 	return

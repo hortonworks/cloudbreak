@@ -153,7 +153,7 @@ func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params
 	log.Infof("[DeleteRDSConfig] RDS config deleted: %s", rdsName)
 }
 
-func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string) *models_cloudbreak.RDSConfig {
+func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string, properties []*models_cloudbreak.RdsConfigProperty) *models_cloudbreak.RDSConfig {
 	validate := false
 	return &models_cloudbreak.RDSConfig{
 		Name:               metastore.Name,
@@ -164,6 +164,7 @@ func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string) *m
 		HdpVersion:         hdpVersion,
 		Validated:          &validate,
 		Type:               &rdsType,
+		Properties:         properties,
 	}
 }
 

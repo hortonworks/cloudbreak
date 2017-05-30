@@ -41,6 +41,14 @@ type StackResponse struct {
 	 */
 	CloudbreakDetails *CloudbreakDetailsJSON `json:"cloudbreakDetails,omitempty"`
 
+	/* related events for a cloudbreak stack
+	 */
+	CloudbreakEvents []*CloudbreakEvent `json:"cloudbreakEvents,omitempty"`
+
+	/* usage information for a specific stack
+	 */
+	CloudbreakUsages []*CloudbreakUsage `json:"cloudbreakUsages,omitempty"`
+
 	/* cluster
 	 */
 	Cluster *ClusterResponse `json:"cluster,omitempty"`
@@ -68,6 +76,12 @@ type StackResponse struct {
 	/* port of the gateway secured proxy
 	 */
 	GatewayPort *int32 `json:"gatewayPort,omitempty"`
+
+	/* hardware information where pairing hostmetadata with instancemetadata
+
+	Unique: true
+	*/
+	HardwareInfos []*HardwareInfoResponse `json:"hardwareInfos,omitempty"`
 
 	/* specific version of HDP
 	 */
@@ -102,6 +116,10 @@ type StackResponse struct {
 	 */
 	NetworkID *int64 `json:"networkId,omitempty"`
 
+	/* node count of the stack
+	 */
+	NodeCount *int32 `json:"nodeCount,omitempty"`
+
 	/* action on failure
 	 */
 	OnFailureAction *string `json:"onFailureAction,omitempty"`
@@ -134,14 +152,6 @@ type StackResponse struct {
 	 */
 	RelocateDocker *bool `json:"relocateDocker,omitempty"`
 
-	/* S3 access role arn
-	 */
-	S3AccessRoleArn *string `json:"s3AccessRoleArn,omitempty"`
-
-	/* freemarker template for the stack
-	 */
-	StackTemplate *string `json:"stackTemplate,omitempty"`
-
 	/* status of the stack
 	 */
 	Status *string `json:"status,omitempty"`
@@ -158,6 +168,21 @@ type StackResponse struct {
 // Validate validates this stack response
 func (m *StackResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateCloudbreakEvents(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateCloudbreakUsages(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateHardwareInfos(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateInstanceGroups(formats); err != nil {
 		// prop
@@ -187,6 +212,70 @@ func (m *StackResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *StackResponse) validateCloudbreakEvents(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CloudbreakEvents) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.CloudbreakEvents); i++ {
+
+		if m.CloudbreakEvents[i] != nil {
+
+			if err := m.CloudbreakEvents[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *StackResponse) validateCloudbreakUsages(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.CloudbreakUsages) { // not required
+		return nil
+	}
+
+	for i := 0; i < len(m.CloudbreakUsages); i++ {
+
+		if m.CloudbreakUsages[i] != nil {
+
+			if err := m.CloudbreakUsages[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
+	return nil
+}
+
+func (m *StackResponse) validateHardwareInfos(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.HardwareInfos) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("hardwareInfos", "body", m.HardwareInfos); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.HardwareInfos); i++ {
+
+		if m.HardwareInfos[i] != nil {
+
+			if err := m.HardwareInfos[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

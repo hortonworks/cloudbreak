@@ -4,6 +4,8 @@ package models_cloudbreak
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"encoding/json"
+
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
 	"github.com/go-swagger/go-swagger/swag"
 
@@ -23,12 +25,6 @@ type LdapConfigResponse struct {
 	*/
 	BindDn string `json:"bindDn"`
 
-	/* password for the provided bind DN
-
-	Required: true
-	*/
-	BindPassword string `json:"bindPassword"`
-
 	/* description of the resource
 
 	Max Length: 1000
@@ -36,17 +32,29 @@ type LdapConfigResponse struct {
 	*/
 	Description *string `json:"description,omitempty"`
 
+	/* directory type of server LDAP or AD
+	 */
+	DirectoryType *string `json:"directoryType,omitempty"`
+
 	/* domain in LDAP server (e.g. ad.seq.com).
 	 */
 	Domain *string `json:"domain,omitempty"`
 
+	/* Group Member Attribute (defaults to member)
+	 */
+	GroupMemberAttribute *string `json:"groupMemberAttribute,omitempty"`
+
+	/* Group Id Attribute (defaults to cn)
+	 */
+	GroupNameAttribute *string `json:"groupNameAttribute,omitempty"`
+
+	/* Group Object Class (defaults to groupOfNames)
+	 */
+	GroupObjectClass *string `json:"groupObjectClass,omitempty"`
+
 	/* template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)
 	 */
 	GroupSearchBase *string `json:"groupSearchBase,omitempty"`
-
-	/* filter for group search for authorization
-	 */
-	GroupSearchFilter *string `json:"groupSearchFilter,omitempty"`
 
 	/* id of the resource
 	 */
@@ -59,10 +67,6 @@ type LdapConfigResponse struct {
 	Min Length: 1
 	*/
 	Name string `json:"name"`
-
-	/* parses the principal for insertion into templates via regex.
-	 */
-	PrincipalRegex *string `json:"principalRegex,omitempty"`
 
 	/* determines the protocol (LDAP or LDAP over SSL)
 	 */
@@ -86,19 +90,19 @@ type LdapConfigResponse struct {
 	*/
 	ServerPort int32 `json:"serverPort"`
 
-	/* attribute name for simplified search filter (e.g. sAMAccountName).
+	/* attribute name for simplified search filter (e.g. sAMAccountName in case of AD, UID or cn for LDAP).
 	 */
-	UserSearchAttribute *string `json:"userSearchAttribute,omitempty"`
+	UserNameAttribute *string `json:"userNameAttribute,omitempty"`
+
+	/* User Object Class (defaults to person)
+	 */
+	UserObjectClass *string `json:"userObjectClass,omitempty"`
 
 	/* template for user search for authentication (e.g. dc=hadoop,dc=apache,dc=org)
 
 	Required: true
 	*/
 	UserSearchBase string `json:"userSearchBase"`
-
-	/* filter for user search for authentication (e.g. (&amp;(objectclass=person)(sAMAccountName={2})) )
-	 */
-	UserSearchFilter *string `json:"userSearchFilter,omitempty"`
 }
 
 // Validate validates this ldap config response
@@ -110,12 +114,12 @@ func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
-	if err := m.validateBindPassword(formats); err != nil {
+	if err := m.validateDescription(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
 
-	if err := m.validateDescription(formats); err != nil {
+	if err := m.validateDirectoryType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -155,15 +159,6 @@ func (m *LdapConfigResponse) validateBindDn(formats strfmt.Registry) error {
 	return nil
 }
 
-func (m *LdapConfigResponse) validateBindPassword(formats strfmt.Registry) error {
-
-	if err := validate.RequiredString("bindPassword", "body", string(m.BindPassword)); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *LdapConfigResponse) validateDescription(formats strfmt.Registry) error {
 
 	if swag.IsZero(m.Description) { // not required
@@ -175,6 +170,37 @@ func (m *LdapConfigResponse) validateDescription(formats strfmt.Registry) error 
 	}
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var ldapConfigResponseTypeDirectoryTypePropEnum []interface{}
+
+func (m *LdapConfigResponse) validateDirectoryTypeEnum(path, location string, value string) error {
+	if ldapConfigResponseTypeDirectoryTypePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["LDAP","ACTIVE_DIRECTORY"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			ldapConfigResponseTypeDirectoryTypePropEnum = append(ldapConfigResponseTypeDirectoryTypePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, ldapConfigResponseTypeDirectoryTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *LdapConfigResponse) validateDirectoryType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DirectoryType) { // not required
+		return nil
+	}
+
+	if err := m.validateDirectoryTypeEnum("directoryType", "body", *m.DirectoryType); err != nil {
 		return err
 	}
 

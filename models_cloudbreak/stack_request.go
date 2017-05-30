@@ -41,6 +41,10 @@ type StackRequest struct {
 	 */
 	CredentialID *int64 `json:"credentialId,omitempty"`
 
+	/* source credential object for cloning
+	 */
+	CredentialSource *CredentialSourceRequest `json:"credentialSource,omitempty"`
+
 	/* custom image for the cluster
 	 */
 	CustomImage *string `json:"customImage,omitempty"`

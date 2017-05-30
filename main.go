@@ -330,14 +330,16 @@ func main() {
 		{
 			Name:  "register-ldap",
 			Usage: "register a new LDAP",
-			Flags: []cli.Flag{hdc.FlLdapName, hdc.FlLdapServer, hdc.FlLdapDomain, hdc.FlLdapBindDN, hdc.FlLdapBindPassword,
-				hdc.FlLdapUserSearchBase, hdc.FlLdapUserSearchAttribute, hdc.FlLdapGroupSearchBase,
+			Flags: []cli.Flag{hdc.FlLdapName, hdc.FlLdapServer, hdc.FlLdapDomain, hdc.FlLdapBindDN, hdc.FlLdapBindPassword, hdc.FlLdapDirectoryType,
+				hdc.FlLdapUserSearchBase, hdc.FlLdapUserNameAttribute, hdc.FlLdapUserObjectClass,
+				hdc.FlLdapGroupMemberAttribute, hdc.FlLdapGroupNameAttribute, hdc.FlLdapGroupObjectClass, hdc.FlLdapGroupSearchBase,
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			Action: hdc.CreateLDAP,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlLdapName, hdc.FlLdapServer, hdc.FlLdapDomain, hdc.FlLdapBindDN, hdc.FlLdapBindPassword,
-					hdc.FlLdapUserSearchBase, hdc.FlLdapUserSearchAttribute, hdc.FlLdapGroupSearchBase,
+				for _, f := range []cli.Flag{hdc.FlLdapName, hdc.FlLdapServer, hdc.FlLdapDomain, hdc.FlLdapBindDN, hdc.FlLdapBindPassword, hdc.FlLdapDirectoryType,
+					hdc.FlLdapUserSearchBase, hdc.FlLdapUserNameAttribute, hdc.FlLdapUserObjectClass,
+					hdc.FlLdapGroupMemberAttribute, hdc.FlLdapGroupNameAttribute, hdc.FlLdapGroupObjectClass, hdc.FlLdapGroupSearchBase,
 					hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}

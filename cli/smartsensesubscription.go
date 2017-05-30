@@ -55,19 +55,19 @@ func DeleteSmartSenseSubscription(c *cli.Context) error {
 	defer timeTrack(time.Now(), "deletion of SmartSenseSubscription")
 	checkRequiredFlags(c)
 
-	id := c.String(FlSmartSenseSubscriptionID.Name)
-	if len(id) == 0 {
+	id := c.Int64(FlSmartSenseSubscriptionID.Name)
+	if id == 0 {
 		logMissingParameterAndExit(c, []string{FlSmartSenseSubscriptionID.Name})
 	}
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	deleteSmartSenseSubscriptionImpl(cbClient.Cloudbreak.Smartsensesubscriptions.DeleteSmartsensesubscriptionsUserSubscriptionID, id)
+	deleteSmartSenseSubscriptionImpl(cbClient.Cloudbreak.Smartsensesubscriptions.DeleteSmartSenseSubscriptionByID, id)
 	log.Infof("[deleteSmartSenseSubscription] SmartSense subscription has been deleted with id: %s ", id)
 	return nil
 }
 
-func deleteSmartSenseSubscriptionImpl(deleteSmartSenseSubscriptionByID func(params *s.DeleteSmartsensesubscriptionsUserSubscriptionIDParams) error, id string) {
-	err := deleteSmartSenseSubscriptionByID(&s.DeleteSmartsensesubscriptionsUserSubscriptionIDParams{SubscriptionID: id})
+func deleteSmartSenseSubscriptionImpl(deleteSmartSenseSubscriptionByID func(params *s.DeleteSmartSenseSubscriptionByIDParams) error, id int64) {
+	err := deleteSmartSenseSubscriptionByID(&s.DeleteSmartSenseSubscriptionByIDParams{ID: id})
 
 	if err != nil {
 		logErrorAndExit(err)

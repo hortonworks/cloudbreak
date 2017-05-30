@@ -13,21 +13,27 @@ import (
 	"strings"
 )
 
-var LdapHeader []string = []string{"Name", "Server", "Domain", "BindDn", "UserSearchBase", "UserSearchFilter", "UserSearchAttribute", "GroupSearchBase"}
+var LdapHeader []string = []string{"Name", "Server", "Domain", "BindDn", "DirectoryType",
+	"UserSearchBase", "UserNameAttribute", "UserObjectClass",
+	"GroupMemberAttribute", "GroupNameAttribute", "GroupObjectClass", "GroupSearchBase"}
 
 type Ldap struct {
-	Name                string `json:"Name" yaml:"Name"`
-	Server              string `json:"Server" yaml:"Server"`
-	Domain              string `json:"Domain,omitempty" yaml:"Domain,omitempty"`
-	BindDn              string `json:"BindDn" yaml:"BindDn"`
-	UserSearchBase      string `json:"UserSearchBase" yaml:"UserSearchBase"`
-	UserSearchFilter    string `json:"UserSearchFilter,omitempty" yaml:"UserSearchFilter,omitempty"`
-	UserSearchAttribute string `json:"UserSearchAttribute,omitempty" yaml:"UserSearchAttribute,omitempty"`
-	GroupSearchBase     string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
+	Name                 string `json:"Name" yaml:"Name"`
+	Server               string `json:"Server" yaml:"Server"`
+	Domain               string `json:"Domain,omitempty" yaml:"Domain,omitempty"`
+	BindDn               string `json:"BindDn" yaml:"BindDn"`
+	DirectoryType        string `json:"DirectoryType" yaml:"DirectoryType"`
+	UserSearchBase       string `json:"UserSearchBase" yaml:"UserSearchBase"`
+	UserNameAttribute    string `json:"UserNameAttribute,omitempty" yaml:"UserNameAttribute,omitempty"`
+	UserObjectClass      string `json:"UserObjectClass,omitempty" yaml:"UserObjectClass,omitempty"`
+	GroupMemberAttribute string `json:"GroupMemberAttribute,omitempty" yaml:"GroupMemberAttribute,omitempty"`
+	GroupNameAttribute   string `json:"GroupNameAttribute,omitempty" yaml:"GroupNameAttribute,omitempty"`
+	GroupObjectClass     string `json:"GroupObjectClass,omitempty" yaml:"GroupObjectClass,omitempty"`
+	GroupSearchBase      string `json:"GroupSearchBase,omitempty" yaml:"GroupSearchBase,omitempty"`
 }
 
 func (l *Ldap) DataAsStringArray() []string {
-	return []string{l.Name, l.Server, l.Domain, l.BindDn, l.UserSearchBase, l.UserSearchFilter, l.UserSearchAttribute, l.GroupSearchBase}
+	return []string{l.Name, l.Server, l.Domain, l.BindDn, l.UserSearchBase, l.UserNameAttribute, l.UserObjectClass, l.GroupSearchBase}
 }
 
 func CreateLDAP(c *cli.Context) error {
@@ -38,9 +44,17 @@ func CreateLDAP(c *cli.Context) error {
 	domain := c.String(FlLdapDomain.Name)
 	bindDn := c.String(FlLdapBindDN.Name)
 	bindPassword := c.String(FlLdapBindPassword.Name)
+
+	directoryType := c.String(FlLdapDirectoryType.Name)
 	userSearchBase := c.String(FlLdapUserSearchBase.Name)
-	userSearchAttribute := c.String(FlLdapUserSearchAttribute.Name)
+	userNameAttribute := c.String(FlLdapUserNameAttribute.Name)
+	userObjectClass := c.String(FlLdapUserObjectClass.Name)
+
 	groupSearchBase := c.String(FlLdapGroupSearchBase.Name)
+	groupMemberAttribute := c.String(FlLdapGroupMemberAttribute.Name)
+	groupNameAttribute := c.String(FlLdapGroupNameAttribute.Name)
+	groupObjectClass := c.String(FlLdapGroupObjectClass.Name)
+
 	server := c.String(FlLdapServer.Name)
 	portSeparatorIndex := strings.LastIndex(server, ":")
 	if (!strings.Contains(server, "ldap://") && !strings.Contains(server, "ldaps://")) || portSeparatorIndex == -1 {
@@ -51,27 +65,34 @@ func CreateLDAP(c *cli.Context) error {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	return createLDAPImpl(cbClient.Cloudbreak.Ldap.PostPublicLdap, name, server, int32(serverPort), protocol, domain, bindDn, bindPassword,
-		userSearchBase, userSearchAttribute, groupSearchBase)
+	return createLDAPImpl(cbClient.Cloudbreak.Ldap.PostPublicLdap, name, server, int32(serverPort), protocol, domain, bindDn, bindPassword, directoryType,
+		userSearchBase, userNameAttribute, userObjectClass,
+		groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass)
 }
 
 func createLDAPImpl(createLDAP func(*ldap.PostPublicLdapParams) (*ldap.PostPublicLdapOK, error),
-	name string, server string, port int32, protocol string, domain string, bindDn string, bindPassword string,
-	userSearchBase string, userSearchAttribute string, groupSearchBase string) error {
+	name string, server string, port int32, protocol string, domain string, bindDn string, bindPassword string, directoryType string,
+	userSearchBase string, userNameAttribute string, userObjectClass string,
+	groupSearchBase string, groupMemberAttribute string, groupNameAttribute string, groupObjectClass string) error {
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
 	resp, err := createLDAP(&ldap.PostPublicLdapParams{
 		Body: &models_cloudbreak.LdapConfigRequest{
-			Name:                name,
-			ServerHost:          server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")],
-			ServerPort:          port,
-			Protocol:            &protocol,
-			Domain:              &domain,
-			BindDn:              bindDn,
-			BindPassword:        bindPassword,
-			UserSearchBase:      userSearchBase,
-			UserSearchAttribute: &userSearchAttribute,
-			GroupSearchBase:     &groupSearchBase,
+			Name:                 name,
+			ServerHost:           server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")],
+			ServerPort:           port,
+			Protocol:             &protocol,
+			Domain:               &domain,
+			BindDn:               bindDn,
+			BindPassword:         bindPassword,
+			DirectoryType:        &directoryType,
+			UserSearchBase:       userSearchBase,
+			UserNameAttribute:    &userNameAttribute,
+			UserObjectClass:      &userObjectClass,
+			GroupMemberAttribute: &groupMemberAttribute,
+			GroupNameAttribute:   &groupNameAttribute,
+			GroupObjectClass:     &groupObjectClass,
+			GroupSearchBase:      &groupSearchBase,
 		}})
 
 	if err != nil {
@@ -101,14 +122,18 @@ func ListLdapsImpl(getLdaps func(*ldap.GetPublicsLdapParams) (*ldap.GetPublicsLd
 	var tableRows []Row
 	for _, l := range resp.Payload {
 		row := &Ldap{
-			Name:                l.Name,
-			Server:              fmt.Sprintf("%s://%s:%d", *l.Protocol, l.ServerHost, l.ServerPort),
-			Domain:              *l.Domain,
-			BindDn:              l.BindDn,
-			UserSearchBase:      l.UserSearchBase,
-			UserSearchFilter:    *l.UserSearchFilter,
-			UserSearchAttribute: *l.UserSearchAttribute,
-			GroupSearchBase:     *l.GroupSearchBase,
+			Name:                 l.Name,
+			Server:               fmt.Sprintf("%s://%s:%d", *l.Protocol, l.ServerHost, l.ServerPort),
+			Domain:               *l.Domain,
+			BindDn:               l.BindDn,
+			DirectoryType:        *l.DirectoryType,
+			UserSearchBase:       l.UserSearchBase,
+			UserNameAttribute:    *l.UserNameAttribute,
+			UserObjectClass:      *l.UserObjectClass,
+			GroupMemberAttribute: *l.GroupMemberAttribute,
+			GroupNameAttribute:   *l.GroupNameAttribute,
+			GroupObjectClass:     *l.GroupObjectClass,
+			GroupSearchBase:      *l.GroupSearchBase,
 		}
 		tableRows = append(tableRows, row)
 	}

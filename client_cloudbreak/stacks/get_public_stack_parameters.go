@@ -6,6 +6,7 @@ package stacks
 import (
 	"github.com/go-swagger/go-swagger/client"
 	"github.com/go-swagger/go-swagger/errors"
+	"github.com/go-swagger/go-swagger/swag"
 
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
 )
@@ -22,8 +23,16 @@ for the get public stack operation typically these are written to a http.Request
 */
 type GetPublicStackParams struct {
 
+	/*Entry*/
+	Entry []string
 	/*Name*/
 	Name string
+}
+
+// WithEntry adds the entry to the get public stack params
+func (o *GetPublicStackParams) WithEntry(entry []string) *GetPublicStackParams {
+	o.Entry = entry
+	return o
 }
 
 // WithName adds the name to the get public stack params
@@ -36,6 +45,14 @@ func (o *GetPublicStackParams) WithName(name string) *GetPublicStackParams {
 func (o *GetPublicStackParams) WriteToRequest(r client.Request, reg strfmt.Registry) error {
 
 	var res []error
+
+	valuesEntry := o.Entry
+
+	joinedEntry := swag.JoinByFormat(valuesEntry, "multi")
+	// query array param entry
+	if err := r.SetQueryParam("entry", joinedEntry...); err != nil {
+		return err
+	}
 
 	// path param name
 	if err := r.SetPathParam("name", o.Name); err != nil {

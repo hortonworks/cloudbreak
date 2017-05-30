@@ -23,6 +23,33 @@ type Client struct {
 }
 
 /*
+EvictCurrentUserDetails removes current user from cache
+
+Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users
+*/
+func (a *Client) EvictCurrentUserDetails(params *EvictCurrentUserDetailsParams) (*EvictCurrentUserDetailsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewEvictCurrentUserDetailsParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "evictCurrentUserDetails",
+		Method:             "DELETE",
+		PathPattern:        "/users/evict",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &EvictCurrentUserDetailsReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*EvictCurrentUserDetailsOK), nil
+}
+
+/*
 EvictUserDetails removes user from cache by username
 
 Users can be invited under an account by the administrator, and all resources (e.g. resources, networks, blueprints, credentials, clusters) can be shared across account users

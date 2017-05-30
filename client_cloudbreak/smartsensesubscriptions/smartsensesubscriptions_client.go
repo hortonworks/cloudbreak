@@ -23,52 +23,25 @@ type Client struct {
 }
 
 /*
-DeleteSmartsensesubscriptionsID deletes smart sense subscription by id
+DeletePrivateSmartSenseSubscriptionBySubscriptionID deletes private smart sense subscription by subscription ID
 
 SmartSense subscriptions could be configured.
 */
-func (a *Client) DeleteSmartsensesubscriptionsID(params *DeleteSmartsensesubscriptionsIDParams) error {
+func (a *Client) DeletePrivateSmartSenseSubscriptionBySubscriptionID(params *DeletePrivateSmartSenseSubscriptionBySubscriptionIDParams) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewDeleteSmartsensesubscriptionsIDParams()
+		params = NewDeletePrivateSmartSenseSubscriptionBySubscriptionIDParams()
 	}
 
 	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSmartsensesubscriptionsID",
-		Method:             "DELETE",
-		PathPattern:        "/smartsensesubscriptions/{id}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &DeleteSmartsensesubscriptionsIDReader{formats: a.formats},
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-/*
-DeleteSmartsensesubscriptionsUserSubscriptionID deletes private smart sense subscription by subscription ID
-
-SmartSense subscriptions could be configured.
-*/
-func (a *Client) DeleteSmartsensesubscriptionsUserSubscriptionID(params *DeleteSmartsensesubscriptionsUserSubscriptionIDParams) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewDeleteSmartsensesubscriptionsUserSubscriptionIDParams()
-	}
-
-	_, err := a.transport.Submit(&client.Operation{
-		ID:                 "DeleteSmartsensesubscriptionsUserSubscriptionID",
+		ID:                 "deletePrivateSmartSenseSubscriptionBySubscriptionId",
 		Method:             "DELETE",
 		PathPattern:        "/smartsensesubscriptions/user/{subscriptionId}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &DeleteSmartsensesubscriptionsUserSubscriptionIDReader{formats: a.formats},
+		Reader:             &DeletePrivateSmartSenseSubscriptionBySubscriptionIDReader{formats: a.formats},
 	})
 	if err != nil {
 		return err
@@ -77,7 +50,34 @@ func (a *Client) DeleteSmartsensesubscriptionsUserSubscriptionID(params *DeleteS
 }
 
 /*
-DeleteSmartSenseSubscriptionByID deletes public owned or private smart sense subscription by subscription ID
+DeletePublicSmartSenseSubscriptionBySubscriptionID deletes public owned or private smart sense subscription by subscription ID
+
+SmartSense subscriptions could be configured.
+*/
+func (a *Client) DeletePublicSmartSenseSubscriptionBySubscriptionID(params *DeletePublicSmartSenseSubscriptionBySubscriptionIDParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeletePublicSmartSenseSubscriptionBySubscriptionIDParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "deletePublicSmartSenseSubscriptionBySubscriptionId",
+		Method:             "DELETE",
+		PathPattern:        "/smartsensesubscriptions/account/{subscriptionId}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &DeletePublicSmartSenseSubscriptionBySubscriptionIDReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+DeleteSmartSenseSubscriptionByID deletes smart sense subscription by id
 
 SmartSense subscriptions could be configured.
 */
@@ -90,7 +90,7 @@ func (a *Client) DeleteSmartSenseSubscriptionByID(params *DeleteSmartSenseSubscr
 	_, err := a.transport.Submit(&client.Operation{
 		ID:                 "deleteSmartSenseSubscriptionById",
 		Method:             "DELETE",
-		PathPattern:        "/smartsensesubscriptions/account/{subscriptionId}",
+		PathPattern:        "/smartsensesubscriptions/{id}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},

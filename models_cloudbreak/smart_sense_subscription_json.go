@@ -47,7 +47,7 @@ type SmartSenseSubscriptionJSON struct {
 	/* Identifier of SmartSense subscription.
 
 	Required: true
-	Pattern: ^([A-Z]{1}-[0-9]{8}-[A-Z]{1}-[0-9]{8}$)
+	Pattern: ^([a-zA-Z]{1}-[0-9]{8}-[a-zA-Z]{1}-[0-9]{8}$)
 	*/
 	SubscriptionID string `json:"subscriptionId"`
 }
@@ -73,7 +73,7 @@ func (m *SmartSenseSubscriptionJSON) validateSubscriptionID(formats strfmt.Regis
 		return err
 	}
 
-	if err := validate.Pattern("subscriptionId", "body", string(m.SubscriptionID), `^([A-Z]{1}-[0-9]{8}-[A-Z]{1}-[0-9]{8}$)`); err != nil {
+	if err := validate.Pattern("subscriptionId", "body", string(m.SubscriptionID), `^([a-zA-Z]{1}-[0-9]{8}-[a-zA-Z]{1}-[0-9]{8}$)`); err != nil {
 		return err
 	}
 
