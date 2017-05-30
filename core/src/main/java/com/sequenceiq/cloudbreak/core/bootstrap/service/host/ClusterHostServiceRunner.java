@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
 
 import java.io.IOException;
@@ -105,8 +105,8 @@ public class ClusterHostServiceRunner {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, primaryGatewayConfig);
-            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), nodes, saltPillarConfig,
-                    clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), nodes, stack.getName(), saltPillarConfig,
+                    clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -197,8 +197,8 @@ public class ClusterHostServiceRunner {
             Set<Node> allNodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack));
-            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), allNodes, saltPillarConfig,
-                    clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId()));
+            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), allNodes, stack.getName(), saltPillarConfig,
+                    clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -248,7 +248,7 @@ public class ClusterHostServiceRunner {
             Set<Node> allNodes = collectNodes(stack);
             try {
                 hostOrchestratorResolver.get(stack.getOrchestrator().getType()).changePrimaryGateway(formerPrimaryGatewayConfig, newPrimary, gatewayConfigs,
-                        allNodes, clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+                        allNodes, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
                 return newPrimary.getHostname();
             } catch (CloudbreakOrchestratorException ex) {
                 throw new CloudbreakException(ex);

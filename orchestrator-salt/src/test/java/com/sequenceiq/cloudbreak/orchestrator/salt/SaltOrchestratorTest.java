@@ -96,7 +96,7 @@ public class SaltOrchestratorTest {
         PowerMockito.whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
         parallelOrchestratorComponentRunner = mock(ParallelOrchestratorComponentRunner.class);
         when(parallelOrchestratorComponentRunner.submit(any())).thenReturn(CompletableFuture.completedFuture(true));
-        when(hostDiscoveryService.determineDomain()).thenReturn(".example.com");
+        when(hostDiscoveryService.determineDomain("test")).thenReturn(".example.com");
         exitCriteria = mock(ExitCriteria.class);
         exitCriteriaModel = mock(ExitCriteriaModel.class);
     }
@@ -108,7 +108,7 @@ public class SaltOrchestratorTest {
         PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
         PowerMockito.whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
 
-        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
+        saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, "test", exitCriteriaModel);
 
         verify(parallelOrchestratorComponentRunner, times(2)).submit(any(OrchestratorBootstrapRunner.class));
 
@@ -126,7 +126,7 @@ public class SaltOrchestratorTest {
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
-        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel);
+        saltOrchestrator.bootstrapNewNodes(Collections.singletonList(gatewayConfig), targets, targets, "test", exitCriteriaModel);
 
         verifyNew(OrchestratorBootstrapRunner.class, times(1))
                 .withArguments(any(SaltBootstrap.class), eq(exitCriteria), eq(exitCriteriaModel), any(), anyInt(), anyInt());
@@ -161,7 +161,7 @@ public class SaltOrchestratorTest {
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
         SaltPillarConfig saltPillarConfig = new SaltPillarConfig();
-        saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltPillarConfig, exitCriteriaModel);
+        saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, "test", saltPillarConfig, exitCriteriaModel);
 
         // verify pillar save
         verifyNew(OrchestratorBootstrapRunner.class, times(1))

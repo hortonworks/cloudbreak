@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 
 import java.util.Collections;
 import java.util.Set;
@@ -51,7 +51,7 @@ public class AmbariClusterResetService {
             if (orchestratorType.hostOrchestrator()) {
                 HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
-                ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId());
+                ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId());
                 hostOrchestrator.resetAmbari(gatewayConfig, gatewayFQDN, stackUtil.collectNodes(stack), exitCriteriaModel);
             } else {
                 throw new UnsupportedOperationException("ambari reset cluster works only with host orchestrator");
