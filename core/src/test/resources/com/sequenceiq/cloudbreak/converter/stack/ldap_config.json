@@ -7,10 +7,7 @@
   "bindDn": "cn=admin,dc=example,dc=org",
   "bindPassword": "admin",
   "userSearchBase": "cn=users,dc=example,dc=org",
-  "userSearchFilter": "(&amp;(objectclass=person)(sAMAccountName={2}))",
   "groupSearchBase": "cn=groups,dc=example,dc=org",
-  "groupSearchFilter": "(&amp;(objectclass=person)(sAMAccountName={2}))",
-  "principalRegex": "(.*)",
-  "userSearchAttribute": "cn=groups,dc=example,dc=org",
+  "userNameAttribute": "cn",
   "domain": "ad.hdc.com"
 }
