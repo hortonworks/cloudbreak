@@ -13,8 +13,6 @@ public class FlexUsageHdpInstanceJson extends FlexUsageComponentInstanceJson {
 
     private String terminationTime;
 
-    private Integer nodeCount;
-
     public String getParentGuid() {
         return parentGuid;
     }
@@ -47,11 +45,4 @@ public class FlexUsageHdpInstanceJson extends FlexUsageComponentInstanceJson {
         this.terminationTime = terminationTime;
     }
 
-    public Integer getNodeCount() {
-        return nodeCount;
-    }
-
-    public void setNodeCount(Integer nodeCount) {
-        this.nodeCount = nodeCount;
-    }
 }
