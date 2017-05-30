@@ -214,7 +214,6 @@ function continueInit() {
                 error.status = 500;
                 return next(error);
             }
-            console.log("token retrieved: " + JSON.stringify(data));
             req.session.token = data.access_token;
             res.redirect(config.hostAddress);
         });
