@@ -475,22 +475,19 @@ public class TestUtil {
         config.setName(DUMMY_NAME);
         config.setDescription(DUMMY_DESCRIPTION);
         config.setPublicInAccount(true);
-        config.setPrincipalRegex("(.*)");
         config.setUserSearchBase("cn=users,dc=example,dc=org");
-        config.setUserSearchFilter("");
         config.setGroupSearchBase("cn=groups,dc=example,dc=org");
-        config.setGroupSearchFilter("");
         config.setBindDn("cn=admin,dc=example,dc=org");
         config.setBindPassword("admin");
         config.setServerHost("localhost");
-        config.setUserSearchAttribute("cn=admin,dc=example,dc=org");
+        config.setUserNameAttribute("cn=admin,dc=example,dc=org");
         config.setDomain("ad.hdc.com");
         config.setServerPort(389);
         config.setProtocol("ldap://");
         config.setDirectoryType(DirectoryType.ACTIVE_DIRECTORY);
         config.setUserObjectClass("person");
         config.setGroupObjectClass("groupOfNames");
-        config.setGroupIdAttribute("cn");
+        config.setGroupNameAttribute("cn");
         config.setGroupMemberAttribute("member");
         return config;
     }
