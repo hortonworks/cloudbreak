@@ -44,9 +44,6 @@ public class LdapConfigCommands implements BaseCommands {
                     help = "filter for user search for authentication (e.g. (&amp;(objectclass=person)(sAMAccountName={2})) )") String userSearchFilter,
             @CliOption(key = "groupSearchBase",
                     help = "template for group search for authorization (e.g. dc=hadoop,dc=apache,dc=org)") String groupSearchBase,
-            @CliOption(key = "groupSearchFilter",  help = "filter for group search for authorization") String groupSearchFilter,
-            @CliOption(key = "principalRegex", help = "parses the principal for insertion into templates via regex.") String principalRegex,
-
             @CliOption(key = "publicInAccount", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
                     help = "flags if the config is public in the account") Boolean publicInAccount) {
         try {
@@ -59,10 +56,7 @@ public class LdapConfigCommands implements BaseCommands {
             config.setServerPort(serverPort);
             config.setProtocol(protocol);
             config.setGroupSearchBase(groupSearchBase);
-            config.setGroupSearchFilter(groupSearchFilter);
             config.setUserSearchBase(userSearchBase);
-            config.setUserSearchFilter(userSearchFilter);
-            config.setPrincipalRegex(principalRegex);
             Long id;
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPublic(config).getId();
@@ -140,9 +134,7 @@ public class LdapConfigCommands implements BaseCommands {
             map.put("protocol", response.getProtocol());
             map.put("bindDn", response.getBindDn());
             map.put("userSearchBase", response.getUserSearchBase());
-            map.put("userSearchFilter", response.getUserSearchFilter());
             map.put("groupSearchBase", response.getGroupSearchBase());
-            map.put("groupSearchFilter", response.getGroupSearchFilter());
             return shellContext.outputTransformer().render(outPutType, map, "FIELD", "INFO");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);

@@ -82,31 +82,25 @@ public class LdapConfig implements ProvisionEntity {
     @Column(nullable = false)
     private String bindPassword;
 
-    @Column(nullable = false)
-    private String userSearchBase;
-
-    private String userSearchFilter;
-
-    private String userSearchAttribute;
-
-    private String groupSearchBase;
-
-    private String groupSearchFilter;
-
-    private String principalRegex;
-
-    private String domain;
-
     @Enumerated(EnumType.STRING)
     private DirectoryType directoryType;
 
+    @Column(nullable = false)
+    private String userSearchBase;
+
+    private String userNameAttribute;
+
     private String userObjectClass;
+
+    private String groupSearchBase;
+
+    private String groupNameAttribute;
 
     private String groupObjectClass;
 
-    private String groupIdAttribute;
-
     private String groupMemberAttribute;
+
+    private String domain;
 
     public Long getId() {
         return id;
@@ -196,6 +190,14 @@ public class LdapConfig implements ProvisionEntity {
         this.bindPassword = bindPassword;
     }
 
+    public DirectoryType getDirectoryType() {
+        return directoryType;
+    }
+
+    public void setDirectoryType(DirectoryType directoryType) {
+        this.directoryType = directoryType;
+    }
+
     public String getUserSearchBase() {
         return userSearchBase;
     }
@@ -204,60 +206,12 @@ public class LdapConfig implements ProvisionEntity {
         this.userSearchBase = userSearchBase;
     }
 
-    public String getUserSearchFilter() {
-        return userSearchFilter;
+    public String getUserNameAttribute() {
+        return userNameAttribute;
     }
 
-    public void setUserSearchFilter(String userSearchFilter) {
-        this.userSearchFilter = userSearchFilter;
-    }
-
-    public String getGroupSearchBase() {
-        return groupSearchBase;
-    }
-
-    public void setGroupSearchBase(String groupSearchBase) {
-        this.groupSearchBase = groupSearchBase;
-    }
-
-    public String getGroupSearchFilter() {
-        return groupSearchFilter;
-    }
-
-    public void setGroupSearchFilter(String groupSearchFilter) {
-        this.groupSearchFilter = groupSearchFilter;
-    }
-
-    public String getPrincipalRegex() {
-        return principalRegex;
-    }
-
-    public void setPrincipalRegex(String principalRegex) {
-        this.principalRegex = principalRegex;
-    }
-
-    public String getUserSearchAttribute() {
-        return userSearchAttribute;
-    }
-
-    public void setUserSearchAttribute(String userSearchAttribute) {
-        this.userSearchAttribute = userSearchAttribute;
-    }
-
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
-
-    public DirectoryType getDirectoryType() {
-        return directoryType;
-    }
-
-    public void setDirectoryType(DirectoryType directoryType) {
-        this.directoryType = directoryType;
+    public void setUserNameAttribute(String userNameAttribute) {
+        this.userNameAttribute = userNameAttribute;
     }
 
     public String getUserObjectClass() {
@@ -268,6 +222,22 @@ public class LdapConfig implements ProvisionEntity {
         this.userObjectClass = userObjectClass;
     }
 
+    public String getGroupSearchBase() {
+        return groupSearchBase;
+    }
+
+    public void setGroupSearchBase(String groupSearchBase) {
+        this.groupSearchBase = groupSearchBase;
+    }
+
+    public String getGroupNameAttribute() {
+        return groupNameAttribute;
+    }
+
+    public void setGroupNameAttribute(String groupNameAttribute) {
+        this.groupNameAttribute = groupNameAttribute;
+    }
+
     public String getGroupObjectClass() {
         return groupObjectClass;
     }
@@ -276,19 +246,19 @@ public class LdapConfig implements ProvisionEntity {
         this.groupObjectClass = groupObjectClass;
     }
 
-    public String getGroupIdAttribute() {
-        return groupIdAttribute;
-    }
-
-    public void setGroupIdAttribute(String groupIdAttribute) {
-        this.groupIdAttribute = groupIdAttribute;
-    }
-
     public String getGroupMemberAttribute() {
         return groupMemberAttribute;
     }
 
     public void setGroupMemberAttribute(String groupMemberAttribute) {
         this.groupMemberAttribute = groupMemberAttribute;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
     }
 }
