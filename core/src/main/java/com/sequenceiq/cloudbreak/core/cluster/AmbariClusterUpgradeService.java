@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static java.util.Collections.singletonMap;
 
 import java.util.Collections;
@@ -67,7 +67,7 @@ public class AmbariClusterUpgradeService {
                 InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
                 GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway().getEnableGateway());
                 Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
-                ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedExitCriteriaModel(stack.getId(), cluster.getId());
+                ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
                 AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(cluster.getId());
                 Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
                 Map<String, Object> credentials = new HashMap<>();

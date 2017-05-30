@@ -101,7 +101,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
+    public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, String stackName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException {
         LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
@@ -109,7 +109,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             uploadSaltConfig(sc, gatewayTargets, exitCriteriaModel);
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, hostDiscoveryService.determineDomain());
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, hostDiscoveryService.determineDomain(stackName));
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -121,8 +121,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, String stackName,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
@@ -133,7 +133,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes, hostDiscoveryService.determineDomain());
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes, hostDiscoveryService.determineDomain(stackName));
             Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
@@ -144,14 +144,14 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, SaltPillarConfig pillarConfig,
+    public void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, String stackName, SaltPillarConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Run Services on nodes: {}", allNodes);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         String ambariServerAddress = primaryGateway.getPrivateAddress();
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            PillarSave hostSave = new PillarSave(sc, gatewayTargets, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain()));
+            PillarSave hostSave = new PillarSave(sc, gatewayTargets, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain(stackName)));
             Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();

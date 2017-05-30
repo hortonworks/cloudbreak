@@ -18,16 +18,16 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void init(ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner, ExitCriteria exitCriteria);
 
-    void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitCriteriaModel)
+    void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, String stackName, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;
 
-    void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException;
+    void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes, String stackName,
+            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
-    void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException;
+    void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, String stackName,
+            SaltPillarConfig pillarConfig, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     void resetAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorException;

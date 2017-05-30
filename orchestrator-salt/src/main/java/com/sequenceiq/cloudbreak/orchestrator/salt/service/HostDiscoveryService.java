@@ -15,13 +15,19 @@ public class HostDiscoveryService {
     private String customDomain;
 
     public String determineDomain() {
+        return determineDomain(null);
+    }
+
+    public String determineDomain(String subDomain) {
+        subDomain = subDomain == null ? "" : subDomain;
+//        subDomain = subDomain.replaceAll("[0-9]", "");
         String domainName = null;
         if (!StringUtils.isEmpty(customDomain)) {
             // this is just for convenience
             if (customDomain.startsWith(".")) {
-                domainName = customDomain;
+                domainName = subDomain + customDomain;
             } else {
-                domainName = "." + customDomain;
+                domainName = subDomain + "." + customDomain;
             }
             LOGGER.info("Custom domain defined: {}", domainName);
 

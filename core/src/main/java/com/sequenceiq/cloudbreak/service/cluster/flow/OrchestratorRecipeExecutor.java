@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedExitCriteriaModel;
+import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine.DEFAULT_RECIPES;
 
 import java.util.ArrayList;
@@ -57,7 +57,7 @@ public class OrchestratorRecipeExecutor {
         recipesEvent(stack.getId(), stack.getStatus(), recipeMap);
         try {
             hostOrchestrator.uploadRecipes(allGatewayConfigs, recipeMap, collectNodes(stack),
-                    clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
@@ -68,7 +68,7 @@ public class OrchestratorRecipeExecutor {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.preInstallRecipes(gatewayConfig, collectNodes(stack),
-                    clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
@@ -79,7 +79,7 @@ public class OrchestratorRecipeExecutor {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
             hostOrchestrator.postInstallRecipes(gatewayConfig, collectNodes(stack),
-                    clusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
