@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.usages;
 
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -47,7 +49,7 @@ public class FlexUsageGenerator {
 
     private static final long TIMESTAMP_MAX_SEC = 9999999999L;
 
-    private static final long REDUCE_TO_SEC = 1000;
+    private static final long UP_TO_MILLIS = 1000;
 
     @Inject
     private UserDetailsService userDetailsService;
@@ -91,14 +93,20 @@ public class FlexUsageGenerator {
         Optional<CloudbreakUsage> aUsage = usages.stream().findFirst();
         result.setController(getFlexUsageControllerJson(usages, aUsage));
         result.setProducts(Collections.emptyList());
-        if (controllerCreated == null || convertToSec(controllerCreated) < convertToSec(fromDate)) {
+        if (controllerCreated == null || isValidFrom(fromDate)) {
             result.setProducts(getFlexUsageProductJsons(usages, aUsage, fromDate));
         }
         return result;
     }
 
-    private long convertToSec(long stamp) {
-        return stamp > TIMESTAMP_MAX_SEC ? stamp / REDUCE_TO_SEC : stamp;
+    private boolean isValidFrom(long fromDate) {
+        LocalDate reference = LocalDateTime.ofInstant(Instant.ofEpochMilli(bumpToMillis(controllerCreated)), ZoneId.systemDefault()).toLocalDate();
+        LocalDate from = LocalDateTime.ofInstant(Instant.ofEpochMilli(bumpToMillis(fromDate)), ZoneId.systemDefault()).toLocalDate();
+        return reference.compareTo(from) <= 0;
+    }
+
+    private long bumpToMillis(long stamp) {
+        return stamp <= TIMESTAMP_MAX_SEC ? stamp * UP_TO_MILLIS : stamp;
     }
 
     private FlexUsageControllerJson getFlexUsageControllerJson(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
@@ -154,7 +162,7 @@ public class FlexUsageGenerator {
         cbdComponentInstance.setRegion(cbInstanceRegion);
         String creationTime = "";
         if (controllerCreated != null) {
-            creationTime = formatInstant(Instant.ofEpochSecond(convertToSec(controllerCreated)), FLEX_TIME_ZONE_FORMAT_PATTERN);
+            creationTime = formatInstant(Instant.ofEpochMilli(bumpToMillis(controllerCreated)), FLEX_TIME_ZONE_FORMAT_PATTERN);
         }
         cbdComponentInstance.setCreationTime(creationTime);
         FlexSubscription usedForController = Optional.ofNullable(flexSubscriptionRepository.findFirstByUsedForController(true))
