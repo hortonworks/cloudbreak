@@ -148,6 +148,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Value("${cb.nginx.port:9443}")
     private int gatewayPort;
 
+    @Value("${cb.knox.port:8443}")
+    private int knoxPort;
+
     @Value("${cb.aws.cf.template.new.path:}")
     private String awsCloudformationTemplatePath;
 
@@ -192,6 +195,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withCloudbreakPublicIp(cloudbreakPublicIp)
                     .withDefaultInboundSecurityGroup(inboundSecurityGroup)
                     .withGatewayPort(gatewayPort)
+                    .withKnoxPort(knoxPort)
                     .withDefaultGatewayCidr(defaultGatewayCidr);
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
