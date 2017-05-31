@@ -15,9 +15,9 @@ import com.google.common.base.Splitter;
 
 
 public abstract class CloudbreakResourceNameService implements ResourceNameService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakResourceNameService.class);
+    public static final String DELIMITER = "-";
 
-    private static final String DELIMITER = "-";
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakResourceNameService.class);
 
     private static final int MAX_PART_LENGTH = 20;
 
