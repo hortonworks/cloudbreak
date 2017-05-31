@@ -75,16 +75,16 @@ public class FlexUsageGenerator {
     @Value("${cb.instance.region:local}")
     private String cbInstanceRegion;
 
-    @Value("${cb.product.id:cloudbreak}")
+    @Value("${cb.product.id:CLOUDBREAK}")
     private String productId;
 
-    @Value("${cb.component.id:cloudbreak-cbd}")
+    @Value("${cb.component.id:CLOUDBREAK-CBD}")
     private String controllerComponentId;
 
     @Value("${cb.component.created:}")
     private Long controllerCreated;
 
-    @Value("${cb.component.cluster.id:cloudbreak-hdp}")
+    @Value("${cb.component.cluster.id:CLOUDBREAK-HDP}")
     private String clustersComponentId;
 
     public CloudbreakFlexUsageJson getUsages(List<CloudbreakUsage> usages, Long fromDate) {
