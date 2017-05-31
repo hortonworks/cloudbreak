@@ -45,8 +45,12 @@ function AzureCredentialSecondController($rootScope) {
         }
     }
 
-    this.test = function () {
-        console.log('roleName', ctrl.credentialAzure.parameters.roleName);
+    this.capitalize = function(str) {
+        if (str) {
+            return str.replace(/(?:^\w|[A-Z]|\b\w)/g, function (letter) {
+                return letter.toUpperCase();
+            });
+        }
+        return str;
     }
-
 }
