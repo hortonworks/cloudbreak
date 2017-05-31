@@ -535,7 +535,6 @@ main() {
         cmd-export util-token-debug
         cmd-export util-local-dev
         cmd-export util-cleanup
-        cmd-export util-smartsense
         cmd-export util-add-default-user
         cmd-export util-get-usage
     fi
