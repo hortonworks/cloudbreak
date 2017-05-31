@@ -78,6 +78,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
@@ -164,15 +165,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         boolean existingVPC = awsNetworkView.isExistingVPC();
         boolean existingSubnet = awsNetworkView.isExistingSubnet();
-        boolean mapPublicIpOnLaunch = true;
-        if (existingVPC && existingSubnet) {
-            DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
-            describeSubnetsRequest.setSubnetIds(awsNetworkView.getSubnetList());
-            DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
-            if (!describeSubnetsResult.getSubnets().isEmpty()) {
-                mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
-            }
-        }
+        boolean mapPublicIpOnLaunch = isMapPublicOnLaunch(awsNetworkView, amazonEC2Client);
         try {
             cfClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
             LOGGER.info("Stack already exists: {}", cFStackName);
@@ -250,10 +243,13 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
         if (mapPublicIpOnLaunch) {
-            List<String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, client);
-            Group gateWay = stack.getGroups().stream().filter(group -> group.getType() == InstanceGroupType.GATEWAY).findFirst().get();
-            List<String> instanceIds = cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, gateWay.getName()));
-            associateElasticIpsToInstances(amazonEC2Client, eipAllocationIds, instanceIds);
+            Map<String, String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, client);
+            List<Group> gateways = getGatewayGroups(stack.getGroups());
+            for (Group gateway : gateways) {
+                List<String> eips = getEipsForGatewayGroup(eipAllocationIds, gateway);
+                List<String> instanceIds = getInstancesForGroup(ac, amazonASClient, client, gateway);
+                associateElasticIpsToInstances(amazonEC2Client, eips, instanceIds);
+            }
         }
         return cloudResources;
     }
@@ -322,10 +318,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
     }
 
-    private List<String> getElasticIpAllocationIds(String cFStackName, AmazonCloudFormationClient client) {
+    private Map<String, String> getElasticIpAllocationIds(String cFStackName, AmazonCloudFormationClient client) {
         Map<String, String> outputs = getOutputs(cFStackName, client);
-        List<String> elasticIpIds = outputs.entrySet().stream().filter(e -> e.getKey().startsWith(CFS_OUTPUT_EIPALLOCATION_ID)).map(e -> e.getValue())
-                .collect(Collectors.toList());
+        Map<String, String> elasticIpIds = outputs.entrySet().stream().filter(e -> e.getKey().startsWith(CFS_OUTPUT_EIPALLOCATION_ID))
+                .collect(Collectors.toMap(e -> e.getKey(), e -> e.getValue()));
         if (!elasticIpIds.isEmpty()) {
             return elasticIpIds;
         } else {
@@ -563,8 +559,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 ac.getCloudContext().getLocation().getRegion().value());
         AmazonCloudFormationClient cloudFormationClient = awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()),
                 ac.getCloudContext().getLocation().getRegion().value());
+        AmazonEC2Client amazonEC2Client = awsClient.createAccess(new AwsCredentialView(ac.getCloudCredential()),
+                ac.getCloudContext().getLocation().getRegion().value());
 
-        for (Group group : stack.getGroups()) {
+        List<Group> scaledGroups = getScaledGroups(stack);
+        for (Group group : scaledGroups) {
             String asGroupName = cfStackUtil.getAutoscalingGroupName(ac, cloudFormationClient, group.getName());
 
             amazonASClient.updateAutoScalingGroup(new UpdateAutoScalingGroupRequest()
@@ -576,6 +575,21 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
         scheduleStatusChecks(stack, ac, cloudFormationClient);
         suspendAutoScaling(ac, stack);
+
+        boolean mapPublicIpOnLaunch = isMapPublicOnLaunch(new AwsNetworkView(stack.getNetwork()), amazonEC2Client);
+        List<Group> gateways = getGatewayGroups(scaledGroups);
+        if (mapPublicIpOnLaunch && !gateways.isEmpty()) {
+            String cFStackName = getCloudFormationStackResource(resources).getName();
+            Map<String, String> eipAllocationIds = getElasticIpAllocationIds(cFStackName, cloudFormationClient);
+            for (Group gateway : gateways) {
+                List<String> eips = getEipsForGatewayGroup(eipAllocationIds, gateway);
+                List<String> freeEips = getFreeIps(eips, amazonEC2Client);
+                List<String> instanceIds = getInstancesForGroup(ac, amazonASClient, cloudFormationClient, gateway);
+                List<String> newInstances = instanceIds.stream().filter(
+                        iid -> gateway.getInstances().stream().noneMatch(inst -> iid.equals(inst.getInstanceId()))).collect(Collectors.toList());
+                associateElasticIpsToInstances(amazonEC2Client, freeEips, newInstances);
+            }
+        }
 
         return singletonList(new CloudResourceStatus(getCloudFormationStackResource(resources), ResourceStatus.UPDATED));
     }
@@ -638,6 +652,43 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         } catch (IOException e) {
             throw new CloudConnectorException("can't get freemarker template", e);
         }
+    }
+
+    private List<Group> getScaledGroups(CloudStack stack) {
+        return stack.getGroups().stream().filter(g -> g.getInstances().stream().anyMatch(
+                inst -> InstanceStatus.CREATE_REQUESTED == inst.getTemplate().getStatus())).collect(Collectors.toList());
+    }
+
+    private List<String> getEipsForGatewayGroup(Map<String, String> eipAllocationIds, Group gateway) {
+        return eipAllocationIds.entrySet().stream().filter(e -> e.getKey().contains(gateway.getName())).map(e -> e.getValue())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getInstancesForGroup(AuthenticatedContext ac, AmazonAutoScalingClient amazonASClient, AmazonCloudFormationClient client, Group group) {
+        return cfStackUtil.getInstanceIds(amazonASClient, cfStackUtil.getAutoscalingGroupName(ac, client, group.getName()));
+    }
+
+    private List<Group> getGatewayGroups(List<Group> groups) {
+        return groups.stream().filter(group -> group.getType() == InstanceGroupType.GATEWAY).collect(Collectors.toList());
+    }
+
+    private List<String> getFreeIps(List<String> eips, AmazonEC2Client amazonEC2Client) {
+        DescribeAddressesResult addresses = amazonEC2Client.describeAddresses(new DescribeAddressesRequest().withAllocationIds(eips));
+        return addresses.getAddresses().stream().filter(address -> address.getInstanceId() == null)
+                .map(Address::getAllocationId).collect(Collectors.toList());
+    }
+
+    private boolean isMapPublicOnLaunch(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
+        boolean mapPublicIpOnLaunch = true;
+        if (awsNetworkView.isExistingVPC() && awsNetworkView.isExistingSubnet()) {
+            DescribeSubnetsRequest describeSubnetsRequest = new DescribeSubnetsRequest();
+            describeSubnetsRequest.setSubnetIds(awsNetworkView.getSubnetList());
+            DescribeSubnetsResult describeSubnetsResult = amazonEC2Client.describeSubnets(describeSubnetsRequest);
+            if (!describeSubnetsResult.getSubnets().isEmpty()) {
+                mapPublicIpOnLaunch = describeSubnetsResult.getSubnets().get(0).isMapPublicIpOnLaunch();
+            }
+        }
+        return mapPublicIpOnLaunch;
     }
 
     private void scheduleStatusChecks(CloudStack stack, AuthenticatedContext ac, AmazonCloudFormationClient cloudFormationClient) {

@@ -7,6 +7,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -119,8 +120,13 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     @Override
     public List<CloudResource> collectResourcesToRemove(AuthenticatedContext authenticatedContext, CloudStack stack,
             List<CloudResource> resources, List<CloudInstance> vms) {
-        return getDeleteResources(resources, vms);
+        List<CloudResource> result = Lists.newArrayList();
+        result.addAll(getDeleteResources(resources, vms));
+        result.addAll(collectProviderSpecificResources(resources, vms));
+        return result;
     }
+
+    protected abstract List<CloudResource> collectProviderSpecificResources(List<CloudResource> resources, List<CloudInstance> vms);
 
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,

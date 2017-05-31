@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
@@ -35,25 +36,29 @@ public class CloudFormationTemplateBuilder {
         Map<String, Object> model = new HashMap<>();
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(context.stack);
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
+        List<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
-            awsGroupViews.add(
-                    new AwsGroupView(
-                            group.getInstancesSize(),
-                            group.getType().name(),
-                            awsInstanceView.getFlavor(),
-                            group.getName(),
-                            awsInstanceView.getVolumes().size(),
-                            awsInstanceView.isEncryptedVolumes(),
-                            awsInstanceView.getVolumeSize(),
-                            awsInstanceView.getVolumeType(),
-                            awsInstanceView.getSpotPrice(),
-                            group.getSecurity().getRules(),
-                            group.getSecurity().getCloudSecurityId()
-                    )
+            AwsGroupView groupView = new AwsGroupView(
+                    group.getInstancesSize(),
+                    group.getType().name(),
+                    awsInstanceView.getFlavor(),
+                    group.getName(),
+                    awsInstanceView.getVolumes().size(),
+                    awsInstanceView.isEncryptedVolumes(),
+                    awsInstanceView.getVolumeSize(),
+                    awsInstanceView.getVolumeType(),
+                    awsInstanceView.getSpotPrice(),
+                    group.getSecurity().getRules(),
+                    group.getSecurity().getCloudSecurityId()
             );
+            awsGroupViews.add(groupView);
+            if (group.getType() == InstanceGroupType.GATEWAY) {
+                awsGatewayGroupViews.add(groupView);
+            }
         }
         model.put("instanceGroups", awsGroupViews);
+        model.put("gatewayGroups", awsGatewayGroupViews);
         model.put("existingVPC", context.existingVPC);
         model.put("existingIGW", context.existingIGW);
         model.put("existingSubnet", !isNullOrEmptyList(context.existingSubnetCidr));
