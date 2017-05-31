@@ -38,7 +38,7 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.16.0-rc.5
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
 
-    env-import DOCKER_TAG_CBD_SMARTSENSE 0.7.0
+    env-import DOCKER_TAG_CBD_SMARTSENSE 0.8.0
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
     env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cloudbreak-web
@@ -665,34 +665,6 @@ HINT
         -l traefik.frontend.priority=10 \
         sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:8085
 
-}
-
-util-smartsense() {
-  declare desc="Start SmartSense docker container."
-
-  cloudbreak-config
-
-  docker rm -f cbd-smartsense 2> /dev/null || :
-
-  docker run -d \
-      --name cbd-smartsense \
-      --dns=$PRIVATE_IP \
-      -e AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID \
-      -e AWS_INSTANCE_ID=$AWS_INSTANCE_ID \
-      -e CB_SMARTSENSE_CONFIGURE=$CB_SMARTSENSE_CONFIGURE \
-      -e CB_SMARTSENSE_ID=$CB_SMARTSENSE_ID \
-      -e CB_SMARTSENSE_CLUSTER_NAME_PREFIX=$CB_SMARTSENSE_CLUSTER_NAME_PREFIX \
-      -e CB_INSTANCE_UUID=$CB_INSTANCE_UUID \
-      -e CB_INSTANCE_PROVIDER=$CB_INSTANCE_PROVIDER \
-      -e CB_INSTANCE_REGION=$CB_INSTANCE_REGION \
-      -e CB_PRODUCT_ID=$CB_PRODUCT_ID \
-      -e CB_COMPONENT_ID=$CB_COMPONENT_ID \
-      -e CAPTURE_CRON_EXPRESSION="$CAPTURE_CRON_EXPRESSION" \
-      -l traefik.enable=false \
-      -v $PWD:/var/lib/cloudbreak-deployment \
-      -v $(which cbd):/bin/cbd \
-      -p 9000:9000 \
-      $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
 }
 
 util-get-usage() {
