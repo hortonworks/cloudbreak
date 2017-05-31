@@ -6,6 +6,7 @@ base:
     - discovery.init
     - recipes.init
     - consul.init
+    - unbound.forwarders
 
   'roles:gateway':
     - match: grain

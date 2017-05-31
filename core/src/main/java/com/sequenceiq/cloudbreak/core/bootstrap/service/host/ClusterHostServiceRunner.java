@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -98,6 +99,9 @@ public class ClusterHostServiceRunner {
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
 
+    @Inject
+    private HostDiscoveryService hostDiscoveryService;
+
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
         try {
@@ -116,6 +120,7 @@ public class ClusterHostServiceRunner {
 
     private SaltPillarConfig createServicePillar(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig) throws IOException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
+        saveDatalakeNameservers(stack, servicePillar);
         if (cluster.isSecure()) {
             Map<String, Object> krb = new HashMap<>();
             Map<String, String> kerberosConf = new HashMap<>();
@@ -145,6 +150,24 @@ public class ClusterHostServiceRunner {
         credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
         return new SaltPillarConfig(servicePillar);
+    }
+
+    /**
+     * In order to be able to connect an ephemeral cluster to a datalake, the ephemeral cluster needs to know some of the datalake nameservers to resolve
+     * the custom hostnames.
+     */
+    private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
+        Json tags = stack.getTags();
+        if (tags != null && !tags.getMap().isEmpty()) {
+            Integer dataLakeId = (Integer) tags.getMap().get("datalakeId");
+            if (dataLakeId != null) {
+                Stack dataLakeStack = stackRepository.findOneWithLists(Long.valueOf(dataLakeId));
+                String domain = hostDiscoveryService.determineDomain(dataLakeStack.getName());
+                List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+                servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                        singletonMap("forwarder-zones", singletonMap(domain, singletonMap("nameservers", ipList)))));
+            }
+        }
     }
 
     private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) throws IOException {

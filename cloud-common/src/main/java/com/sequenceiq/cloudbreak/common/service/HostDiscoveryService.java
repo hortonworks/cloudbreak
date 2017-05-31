@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator.salt.service;
+package com.sequenceiq.cloudbreak.common.service;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +20,6 @@ public class HostDiscoveryService {
 
     public String determineDomain(String subDomain) {
         subDomain = subDomain == null ? "" : subDomain;
-//        subDomain = subDomain.replaceAll("[0-9]", "");
         String domainName = null;
         if (!StringUtils.isEmpty(customDomain)) {
             // this is just for convenience
