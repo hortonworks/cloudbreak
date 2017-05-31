@@ -34,6 +34,10 @@ base:
     - match: grain
     - gateway
 
+  'roles:smartsense_agent_update':
+    - match: grain
+    - smartsense.agent-update
+
   'G@roles:ambari_server and not G@roles:smartsense':
     - match: compound
     - prometheus.server

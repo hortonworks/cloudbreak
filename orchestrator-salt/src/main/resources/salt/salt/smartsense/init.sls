@@ -14,14 +14,6 @@ upgrade-smartsense-ambari-service:
     - source: /usr/hdp/share/hst/ambari-service/SMARTSENSE
     - unless: test -f /var/lib/ambari-server/resources/stacks/HDP/2.1/services/SMARTSENSE/configuration/product-info.xml
 
-upgrade-smartsense-ambari-agent-cache:
-    file.copy:
-    - name:  /var/lib/ambari-agent/cache/stacks/HDP/2.1/services/SMARTSENSE
-    - force: True
-    - mode: 755
-    - source: /usr/hdp/share/hst/ambari-service/SMARTSENSE
-    - unless: test -f /var/lib/ambari-agent/cache/stacks/HDP/2.1/services/SMARTSENSE/configuration/product-info.xml
-
 /etc/hst/conf/hst-gateway.ini:
   file.managed:
     - makedirs: True
