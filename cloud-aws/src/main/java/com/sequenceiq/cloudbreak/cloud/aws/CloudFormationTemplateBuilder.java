@@ -74,6 +74,7 @@ public class CloudFormationTemplateBuilder {
         model.put("dedicatedInstances", areDedicatedInstancesRequested(context.stack));
         model.put("availabilitySetNeeded", context.ac.getCloudContext().getLocation().getAvailabilityZone().value() != null);
         model.put("mapPublicIpOnLaunch", context.mapPublicIpOnLaunch);
+        model.put("knoxPort", context.knoxPort);
         try {
             String template = processTemplateIntoString(new Template("aws-template", context.template, freemarkerConfiguration), model);
             return template.replaceAll("\\t|\\n| [\\s]+", "");
@@ -127,6 +128,8 @@ public class CloudFormationTemplateBuilder {
         private int gatewayPort;
 
         private String defaultGatewayCidr;
+
+        private int knoxPort;
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
@@ -195,6 +198,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withDefaultGatewayCidr(String defaultGatewayCidr) {
             this.defaultGatewayCidr = defaultGatewayCidr;
+            return this;
+        }
+
+        public ModelContext withKnoxPort(int knoxPort) {
+            this.knoxPort = knoxPort;
             return this;
         }
 
