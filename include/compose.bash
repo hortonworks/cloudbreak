@@ -310,6 +310,29 @@ mail:
         - 'smtp_user=admin:$(escape-string-compose-yaml $LOCAL_SMTP_PASSWORD \')'
     image: catatnight/postfix:$DOCKER_TAG_POSTFIX
 
+smartsense:
+    labels:
+        - traefik.enable=false
+    ports:
+        - "9000:9000"
+    environment:
+        - AWS_ACCOUNT_ID
+        - AWS_INSTANCE_ID
+        - CB_VERSION=$(echo $(bin-version))
+        - CB_SMARTSENSE_CONFIGURE
+        - CB_SMARTSENSE_ID
+        - CB_SMARTSENSE_CLUSTER_NAME_PREFIX
+        - CB_INSTANCE_UUID
+        - CB_INSTANCE_PROVIDER
+        - CB_INSTANCE_REGION
+        - CB_PRODUCT_ID
+        - CB_COMPONENT_ID
+        - CAPTURE_CRON_EXPRESSION
+        - UAA_FLEX_USAGE_CLIENT_ID
+        - UAA_FLEX_USAGE_CLIENT_SECRET
+    dns: $PRIVATE_IP
+    image: $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
+
 commondb:
     labels:
       - traefik.enable=false
