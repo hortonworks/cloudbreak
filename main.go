@@ -295,6 +295,7 @@ func main() {
 			Usage:  "list the available ldaps",
 			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
 			Before: ConfigRead,
+			Hidden: true,
 			Action: hdc.ListLdaps,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
@@ -335,6 +336,7 @@ func main() {
 				hdc.FlLdapGroupMemberAttribute, hdc.FlLdapGroupNameAttribute, hdc.FlLdapGroupObjectClass, hdc.FlLdapGroupSearchBase,
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
+			Hidden: true,
 			Action: hdc.CreateLDAP,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlLdapName, hdc.FlLdapServer, hdc.FlLdapDomain, hdc.FlLdapBindDN, hdc.FlLdapBindPassword, hdc.FlLdapDirectoryType,
@@ -376,6 +378,7 @@ func main() {
 			Usage:  "remove an LDAP",
 			Flags:  []cli.Flag{hdc.FlLdapName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
+			Hidden: true,
 			Action: hdc.DeleteLdap,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlLdapName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
