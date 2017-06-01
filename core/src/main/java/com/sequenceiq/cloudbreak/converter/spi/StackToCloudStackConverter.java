@@ -113,7 +113,7 @@ public class StackToCloudStackConverter {
                 for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                     InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
                     instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(),
-                            metaData.getDiscoveryName(), status));
+                            metaData.getShortHostname(), status));
                 }
                 // new instances
                 int existingNodesSize = instances.size();

@@ -38,14 +38,11 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     private Set<Node> targets;
 
-    private String domain;
-
-    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets, String domain) {
+    public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets) {
         this.sc = sc;
         this.allGatewayConfigs = allGatewayConfigs;
         this.originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
-        this.domain = domain;
     }
 
     @Override
@@ -101,7 +98,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
                 SaltMaster master = new SaltMaster();
                 master.setAddress(gatewayAddress);
                 master.setAuth(auth);
-                master.setDomain(domain);
+                master.setDomain(saltMaster.getDomain());
                 master.setHostName(saltMaster.getHostname());
                 // set due to compatibility reasons
                 saltAction.setServer(gatewayAddress);
@@ -121,7 +118,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         minion.setAddress(node.getPrivateIp());
         minion.setHostGroup(node.getHostGroup());
         minion.setHostName(node.getHostname());
-        minion.setDomain(domain);
+        minion.setDomain(node.getDomain());
         minion.setServers(getGatewayPrivateIps());
         // set due to compatibility reasons
         minion.setServer(getGatewayPrivateIps().get(0));
@@ -139,7 +136,6 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         sb.append(", allGatewayConfigs=").append(allGatewayConfigs);
         sb.append(", originalTargets=").append(originalTargets);
         sb.append(", targets=").append(targets);
-        sb.append(", domain='").append(domain).append('\'');
         sb.append('}');
         return sb.toString();
     }

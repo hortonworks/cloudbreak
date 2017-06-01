@@ -17,6 +17,12 @@ public class HostDiscoveryService {
     @Value("${cb.host.discovery.custom.hostname.enabled:}")
     private Boolean enabledCustomHostNames;
 
+    /*
+     * Determines the cluster domain. If the 'cb.host.discovery.custom.domain' variable is not
+     * defined it returns null. Null means we're going to use the cloud provider's default domain.
+     * If 'cb.host.discovery.custom.hostname.enabled' is set to true the domain will have a sub-domain as well
+     * to be able to connect multiple clusters by hostname.
+     */
     public String determineDomain(String subDomain) {
         subDomain = subDomain == null ? "" : subDomain;
         if (enabledCustomHostNames == null || !enabledCustomHostNames) {
@@ -35,6 +41,10 @@ public class HostDiscoveryService {
         return domainName;
     }
 
+    /*
+     * It generates a hostname based on the instance group name and the node's private id
+     * if the 'cb.host.discovery.custom.hostname.enabled' is set to true. Otherwise returns empty string.
+     */
     public String generateHostname(String instanceGroupName, long privateId) {
         if (enabledCustomHostNames == null || !enabledCustomHostNames) {
             return "";

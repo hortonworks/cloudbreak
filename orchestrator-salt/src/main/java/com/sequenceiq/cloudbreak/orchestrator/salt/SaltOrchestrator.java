@@ -23,8 +23,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import javax.inject.Inject;
-
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,10 +32,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
@@ -87,9 +83,6 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
 
-    @Inject
-    private HostDiscoveryService hostDiscoveryService;
-
     private ParallelOrchestratorComponentRunner parallelOrchestratorComponentRunner;
 
     private ExitCriteria exitCriteria;
@@ -101,16 +94,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, String stackName, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         LOGGER.info("Start SaltBootstrap on nodes: {}", targets);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            uploadSaltConfig(sc, gatewayTargets, exitCriteriaModel);
-            uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets, hostDiscoveryService.determineDomain(stackName));
-            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
+            uploadSaltConfig(sc, gatewayTargets, exitModel);
+            uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, targets);
+            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
         } catch (Exception e) {
@@ -121,20 +113,20 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, String stackName,
-            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes,
+            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             if (!gatewayTargets.isEmpty()) {
-                uploadSaltConfig(sc, gatewayTargets, exitCriteriaModel);
+                uploadSaltConfig(sc, gatewayTargets, exitModel);
             }
-            uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitCriteriaModel);
+            uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
             Set<Node> nodes = gatewayTargets.isEmpty() ? targets : allNodes;
-            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes, hostDiscoveryService.determineDomain(stackName));
-            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitCriteriaModel);
+            SaltBootstrap saltBootstrap = new SaltBootstrap(sc, allGatewayConfigs, nodes);
+            Callable<Boolean> saltBootstrapRunner = runner(saltBootstrap, exitCriteria, exitModel);
             Future<Boolean> saltBootstrapRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltBootstrapRunner);
             saltBootstrapRunnerFuture.get();
         } catch (Exception e) {
@@ -144,21 +136,21 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, String stackName, SaltPillarConfig pillarConfig,
-            ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
+    public void runService(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorException {
         LOGGER.info("Run Services on nodes: {}", allNodes);
-        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
-        Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
+        GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
         String ambariServerAddress = primaryGateway.getPrivateAddress();
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
-            PillarSave hostSave = new PillarSave(sc, gatewayTargets, allNodes, !StringUtils.isEmpty(hostDiscoveryService.determineDomain(stackName)));
-            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitCriteriaModel);
+            PillarSave hostSave = new PillarSave(sc, gatewayTargets, allNodes);
+            Callable<Boolean> saltPillarRunner = runner(hostSave, exitCriteria, exitModel);
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
             for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
                 PillarSave pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
-                saltPillarRunner = runner(pillarSave, exitCriteria, exitCriteriaModel);
+                saltPillarRunner = runner(pillarSave, exitCriteria, exitModel);
                 saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
                 saltPillarRunnerFuture.get();
             }
@@ -168,33 +160,33 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             // knox
             if (primaryGateway.getKnoxGatewayEnabled()) {
-                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "gateway"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "gateway"), exitModel);
             }
             // ambari server
-            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitModel);
             // ambari server standby
             Set<String> standbyServers = gatewayTargets.stream().filter(ip -> !server.contains(ip)).collect(Collectors.toSet());
             if (!standbyServers.isEmpty()) {
-                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_standby"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "ambari_server_standby"), exitModel);
             }
             // ambari agent
-            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitModel);
             // kerberos
             if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
-                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server_master"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server_master"), exitModel);
                 if (!standbyServers.isEmpty()) {
-                    runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "kerberos_server_slave"), exitCriteriaModel);
+                    runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "kerberos_server_slave"), exitModel);
                 }
             }
             // smartsense
             if (configureSmartSense) {
-                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitCriteriaModel);
-                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "smartsense_agent_update"), exitCriteriaModel);
+                runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitModel);
+                runSaltCommand(sc, new GrainAddRunner(all, allNodes, "smartsense_agent_update"), exitModel);
             }
 
-            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
-            runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitCriteriaModel);
-            runNewService(sc, new HighStateRunner(all, allNodes), exitCriteriaModel);
+            runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitModel);
+            runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
+            runNewService(sc, new HighStateRunner(all, allNodes), exitModel);
         } catch (Exception e) {
             LOGGER.error("Error occurred during ambari bootstrap", e);
             if (e instanceof ExecutionException && e.getCause() instanceof CloudbreakOrchestratorFailedException) {
