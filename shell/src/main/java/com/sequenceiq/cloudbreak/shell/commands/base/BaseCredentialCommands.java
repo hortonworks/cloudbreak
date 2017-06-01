@@ -75,7 +75,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     @Override
     @CliAvailabilityIndicator(value = { "credential select --id", "credential select --name" })
     public boolean selectAvailable() {
-        return shellContext.isCredentialAccessible();
+        return true;
     }
 
     @CliCommand(value = "credential select --id", help = "Select the credential by its id")
