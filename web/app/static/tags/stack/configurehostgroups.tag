@@ -67,6 +67,7 @@
                                 <div class="col-sm-8">
                                     <select class="form-control" id="securityGroupNameName{{$index}}" name="securityGroupNameName{{$index}}" ng-model="instanceGroup.securityGroupId" ng-options="securitygroup.id as securitygroup.name for securitygroup in $root.securitygroups | filter: {'cloudPlatform': activeCredential.cloudPlatform} | orderBy:'name'" ng-required="activeCredential && activeCredential.cloudPlatform !== 'BYOS'">
                                     </select>
+                                    <div class="help-block" ng-show="showSecurityGroupKnoxWarning(instanceGroup)"><i class="fa fa-warning"></i> {{msg.cluster_form_hostgroup_securitygroup_warning}}</div>
                                 </div>
                             </div>
                              <div class="form-group" ng-show="cluster.parameters.azureAvailabilitySetsEnabled">

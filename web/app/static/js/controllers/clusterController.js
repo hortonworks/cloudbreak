@@ -55,6 +55,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             "ONLY_STACK_DEFAULTS_APPLY"
         ]
 
+        $scope.knoxPort = "8443";
+
         $rootScope.activeCluster = {};
 
         $scope.detailsShow = true;
@@ -1529,6 +1531,41 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             });
             return result
+        }
+
+        $scope.showSecurityGroupKnoxWarning = function(instanceGroup) {
+            var result = false;
+            if ($rootScope.securitygroups &&
+                $rootScope.securitygroups.length != 0 &&
+                $rootScope.activeCredential.cloudPlatform !== "BYOS" &&
+                instanceGroup.type === 'GATEWAY' &&
+                $scope.cluster.gateway &&
+                $scope.cluster.gateway.enableGateway) {
+                result = true;
+                var actualSg = $filter('filter')($rootScope.securitygroups, {
+                    id: instanceGroup.securityGroupId
+                }, true);
+                if (actualSg[0]) {
+                    angular.forEach(actualSg[0].securityRules, function(rules) {
+                        if (result) {
+                            angular.forEach(rules.portarray, function (port) {
+                                if (result) {
+                                    if (port === $scope.knoxPort) {
+                                        result = false;
+                                    } else if (port.split('-').length == 2) {
+                                        var min = port.split('-')[0];
+                                        var max = port.split('-')[1];
+                                        if (parseInt(min) <= parseInt($scope.knoxPort) && parseInt(max) >= parseInt($scope.knoxPort)) {
+                                            result = false;
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+            return result;
         }
 
         $scope.hideAvailabilitySetHostgroupWarning = function(instanceGroup) {
