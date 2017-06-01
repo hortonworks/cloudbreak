@@ -89,6 +89,10 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.configureReview = false;
         }
 
+        $scope.clearWasb = function () {
+            $scope.cluster.fileSystem.properties.accountKey = "";
+        };
+
         $scope.showWizardActualElement = function(element) {
             $scope.configureHostGroups = false;
             $scope.configureFailureAction = false;
@@ -1379,6 +1383,12 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             var index = $scope.cluster.userDefinedTags.indexOf(tag);
             if (index > -1) {
                 $scope.cluster.userDefinedTags.splice(index, 1);
+            }
+        }
+
+        $scope.removeAvailabilitySetsIfDisabled = function () {
+            if (!$scope.cluster.parameters.azureAvailabilitySetsEnabled) {
+                $scope.cluster.azureAvailabilitySets = [];
             }
         }
 
