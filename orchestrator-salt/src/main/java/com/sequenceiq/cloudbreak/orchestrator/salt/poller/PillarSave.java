@@ -37,11 +37,11 @@ public class PillarSave implements OrchestratorBootstrap {
 
     private final Set<String> originalTargets;
 
-    public PillarSave(SaltConnector sc, Set<String> targets, Set<Node> hosts, boolean useCustomDomain) {
+    public PillarSave(SaltConnector sc, Set<String> targets, Set<Node> hosts) {
         this.sc = sc;
         Map<String, Map<String, Object>> fqdn = hosts
                 .stream()
-                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp(), useCustomDomain)));
+                .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp())));
         this.pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn), targets);
         this.targets = targets;
         this.originalTargets = targets;
@@ -72,12 +72,13 @@ public class PillarSave implements OrchestratorBootstrap {
         this.originalTargets = targets;
     }
 
-    private Map<String, Object> discovery(String hostname, String publicAddress, boolean useCustomDomain) {
+    private Map<String, Object> discovery(String hostname, String publicAddress) {
         Map<String, Object> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
         map.put("domain", hostname.replaceFirst(hostname.split("\\.")[0] + ".", ""));
-        map.put("custom_domain", useCustomDomain);
+        // Deprecated: this is just for backward compatibility, it is no longer in use
+        map.put("custom_domain", true);
         map.put("public_address", StringUtils.isEmpty(publicAddress) ? Boolean.FALSE : Boolean.TRUE);
         return map;
     }

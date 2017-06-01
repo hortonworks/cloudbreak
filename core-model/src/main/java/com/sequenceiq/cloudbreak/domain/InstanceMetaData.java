@@ -200,13 +200,6 @@ public class InstanceMetaData implements ProvisionEntity {
         this.discoveryFQDN = discoveryFQDN;
     }
 
-    public String getDiscoveryName() {
-        if (discoveryFQDN == null) {
-            return null;
-        }
-        return discoveryFQDN.split("\\.")[0];
-    }
-
     public InstanceStatus getInstanceStatus() {
         return instanceStatus;
     }
@@ -296,5 +289,19 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setServerCert(String serverCert) {
         this.serverCert = serverCert;
+    }
+
+    public String getDomain() {
+        if (discoveryFQDN == null || discoveryFQDN.length() == 0) {
+            return null;
+        }
+        return discoveryFQDN.contains(".") ? discoveryFQDN.substring(discoveryFQDN.indexOf(".") + 1) : null;
+    }
+
+    public String getShortHostname() {
+        if (discoveryFQDN == null || discoveryFQDN.length() == 0) {
+            return null;
+        }
+        return discoveryFQDN.split("\\.")[0];
     }
 }

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.MUNCHAUSEN;
 import static com.sequenceiq.cloudbreak.service.PollingResult.EXIT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
+import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -14,7 +15,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -127,12 +127,13 @@ public class ClusterBootstrapper {
     @SuppressWarnings("unchecked")
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
+        String domain = hostDiscoveryService.determineDomain(stack.getName());
         for (InstanceMetaData im : stack.getRunningInstanceMetaData()) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
                 String generatedHostName = hostDiscoveryService.generateHostname(im.getInstanceGroupName(), im.getPrivateId());
-                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generatedHostName, im.getInstanceGroupName()));
+                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generatedHostName, domain, im.getInstanceGroupName()));
             }
         }
         try {
@@ -147,7 +148,7 @@ public class ClusterBootstrapper {
                 validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
             }
 
-            hostOrchestrator.bootstrap(allGatewayConfig, nodes, stack.getName(), clusterDeletionBasedModel(stack.getId(), null));
+            hostOrchestrator.bootstrap(allGatewayConfig, nodes, clusterDeletionBasedModel(stack.getId(), null));
 
             InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
@@ -234,19 +235,18 @@ public class ClusterBootstrapper {
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
-        for (InstanceMetaData im : stack.getRunningInstanceMetaData()) {
+        Set<InstanceMetaData> metaDataSet = stack.getRunningInstanceMetaData();
+        String clusterDomain = metaDataSet.stream().filter(im -> isNoneBlank(im.getDiscoveryFQDN())).findAny().get().getDomain();
+        for (InstanceMetaData im : metaDataSet) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
                 continue;
             }
-            // generate hostname for the new nodes, retain the hostname for old nodes
-            // note that if we recovered a node the private id is not the same as it is in the hostname
-            String generatedHostName = hostDiscoveryService.generateHostname(im.getInstanceGroupName(), im.getPrivateId());
-            String hostName = StringUtils.isNoneBlank(im.getDiscoveryFQDN()) ? im.getDiscoveryFQDN().split("\\.")[0] : generatedHostName;
-            Node node = new Node(im.getPrivateIp(), im.getPublicIpWrapper(), hostName, im.getInstanceGroupName());
+            Node node = createNode(im, clusterDomain);
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
-                if (recoveredNodes) {
+                // but only when we would have generated a hostname, otherwise use the cloud provider's default mechanism
+                if (recoveredNodes && isNoneBlank(node.getHostname())) {
                     Iterator<String> iterator = recoveryHostNames.iterator();
                     node.setHostname(iterator.next().split("\\.")[0]);
                     iterator.remove();
@@ -284,7 +284,7 @@ public class ClusterBootstrapper {
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
         }
 
-        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stack.getName(), clusterDeletionBasedModel(stack.getId(), null));
+        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, clusterDeletionBasedModel(stack.getId(), null));
 
         InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);
@@ -342,6 +342,21 @@ public class ClusterBootstrapper {
             result.add(newNodes);
         }
         return result;
+    }
+
+    /*
+     * Generate hostname for the new nodes, retain the hostname for old nodes
+     * Even if the domain has changed keep the rest of the nodes domain.
+     * Note: if we recovered a node the private id is not the same as it is in the hostname
+     */
+    private Node createNode(InstanceMetaData im, String domain) {
+        String discoveryFQDN = im.getDiscoveryFQDN();
+        if (isNoneBlank(discoveryFQDN)) {
+            return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getShortHostname(), domain, im.getInstanceGroupName());
+        } else {
+            String hostname = hostDiscoveryService.generateHostname(im.getInstanceGroupName(), im.getPrivateId());
+            return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), hostname, domain, im.getInstanceGroupName());
+        }
     }
 
     private Node getGateWayNode(Set<Node> nodes, String gatewayIp) {

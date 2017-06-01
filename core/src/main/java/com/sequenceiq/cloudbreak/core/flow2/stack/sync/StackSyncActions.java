@@ -139,21 +139,21 @@ public class StackSyncActions {
             MDCBuilder.buildMdcContext(stack);
             // we need a find all in stack where we have host metadata associated
             // if there are multiple instances with the same hostname let's use the latest one only
-            Map<String, InstanceMetaData> instancesByName = new HashMap<>();
+            Map<String, InstanceMetaData> metaDataMap = new HashMap<>();
             for (InstanceMetaData im : instanceMetaDataRepository.findAllInStack(stackId)) {
                 String hostName = im.getDiscoveryFQDN();
-                InstanceMetaData instanceMetaData = instancesByName.get(hostName);
+                InstanceMetaData instanceMetaData = metaDataMap.get(hostName);
                 if (instanceMetaData == null) {
-                    instancesByName.put(hostName, im);
+                    metaDataMap.put(hostName, im);
                 } else if (im.getPrivateId().compareTo(instanceMetaData.getPrivateId()) == 1) {
-                    instancesByName.put(hostName, im);
+                    metaDataMap.put(hostName, im);
                 }
             }
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = new CloudContext(stack.getId(), stack.getName(), stack.cloudPlatform(), stack.getOwner(), stack.getPlatformVariant(),
                     location);
             CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
-            return new StackSyncContext(flowId, stack, new ArrayList<>(instancesByName.values()), cloudContext, cloudCredential, isStatusUpdateEnabled(variables));
+            return new StackSyncContext(flowId, stack, new ArrayList<>(metaDataMap.values()), cloudContext, cloudCredential, isStatusUpdateEnabled(variables));
         }
 
         @Override

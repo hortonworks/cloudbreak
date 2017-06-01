@@ -9,14 +9,21 @@ public class Node {
 
     private String hostname;
 
+    private String domain;
+
     private String hostGroup;
 
     private Set<String> dataVolumes;
 
     public Node(String privateIp, String publicIp, String fqdn, String hostGroup) {
+        this(privateIp, publicIp, fqdn, null, hostGroup);
+    }
+
+    public Node(String privateIp, String publicIp, String fqdn, String domain, String hostGroup) {
         this(privateIp, publicIp);
         this.hostname = fqdn;
         this.hostGroup = hostGroup;
+        this.domain = domain;
     }
 
     public Node(String privateIp, String publicIp) {
@@ -55,12 +62,17 @@ public class Node {
         return hostGroup;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Node{");
         sb.append("privateIp='").append(privateIp).append('\'');
         sb.append(", publicIp='").append(publicIp).append('\'');
         sb.append(", hostname='").append(hostname).append('\'');
+        sb.append(", domain='").append(domain).append('\'');
         sb.append(", hostGroup='").append(hostGroup).append('\'');
         sb.append(", dataVolumes=").append(dataVolumes);
         sb.append('}');

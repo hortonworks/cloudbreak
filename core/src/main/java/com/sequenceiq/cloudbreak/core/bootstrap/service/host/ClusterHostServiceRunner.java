@@ -109,8 +109,8 @@ public class ClusterHostServiceRunner {
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, primaryGatewayConfig);
-            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), nodes, stack.getName(), saltPillarConfig,
-                    clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltPillarConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -162,11 +162,10 @@ public class ClusterHostServiceRunner {
             Integer dataLakeId = (Integer) tags.getMap().get("datalakeId");
             if (dataLakeId != null) {
                 Stack dataLakeStack = stackRepository.findOneWithLists(Long.valueOf(dataLakeId));
-                String discoveryFQDN = dataLakeStack.getGatewayInstanceMetadata().get(0).getDiscoveryFQDN();
-                String domain = discoveryFQDN.substring(discoveryFQDN.indexOf(".") + 1);
+                String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
                 List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
                 servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                        singletonMap("forwarder-zones", singletonMap(domain, singletonMap("nameservers", ipList)))));
+                        singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
             }
         }
     }
@@ -221,8 +220,8 @@ public class ClusterHostServiceRunner {
             Set<Node> allNodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack));
-            hostOrchestrator.runService(gatewayConfigService.getAllGatewayConfigs(stack), allNodes, stack.getName(), saltPillarConfig,
-                    clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            hostOrchestrator.runService(gatewayConfigs, allNodes, saltPillarConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
