@@ -157,6 +157,27 @@
         "components": [
           {
             "name": "METRICS_MONITOR"
+          },
+          {
+            "name": "ZOOKEEPER_CLIENT"
+          },
+          {
+            "name": "ZOOKEEPER_SERVER"
+          },
+          {
+            "name": "INFRA_SOLR_CLIENT"
+          },
+          {
+            "name": "RANGER_ADMIN"
+          },
+          {
+            "name": "INFRA_SOLR"
+          },
+          {
+            "name": "HIVE_METASTORE"
+          },
+          {
+            "name": "HIVE_CLIENT"
           }
         ],
         "cardinality": "1+"

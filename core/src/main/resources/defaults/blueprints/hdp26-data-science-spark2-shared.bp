@@ -1,5 +1,10 @@
 {
-  "inputs": [],
+  "inputs": [
+    {
+      "name":"S3_BUCKET",
+      "referenceConfiguration":"s3.bucket"
+    }
+  ],
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-data-science-spark2-shared",
@@ -14,10 +19,12 @@
           "hadoop.security.group.mapping.ldap.url":"{{{ ldapConfig.connectionURL }}}",
           "hadoop.security.group.mapping.ldap.bind.user":"{{{ ldapConfig.bindDn }}}",
           "hadoop.security.group.mapping.ldap.bind.password":"{{{ ldapConfig.bindPassword }}}",
-          "hadoop.security.group.mapping.ldap.groupbase":"{{{ ldapConfig.groupSearchBase }}}",
+          "hadoop.security.group.mapping.ldap.userbase": "{{{ ldapConfig.userSearchBase }}}",
+          "hadoop.security.group.mapping.ldap.search.filter.user": "(&(objectClass={{{ ldapConfig.userObjectClass }}})({{{ ldapConfig.userNameAttribute }}}={0}))",
+          "hadoop.security.group.mapping.ldap.groupbase": "{{{ ldapConfig.groupSearchBase }}}",
           "hadoop.security.group.mapping.ldap.search.filter.group": "(objectClass={{{ ldapConfig.groupObjectClass }}})",
-          "hadoop.security.group.mapping.ldap.search.filter.user": "({{{ ldapConfig.userNameAttribute }}}={0})",
-          "hadoop.security.group.mapping.ldap.userbase": "{{{ ldapConfig.groupSearchBase }}}"
+          "hadoop.security.group.mapping.ldap.search.attr.group.name": "{{{ ldapConfig.groupNameAttribute }}}",
+          "hadoop.security.group.mapping.ldap.search.attr.member": "{{{ ldapConfig.groupMemberAttribute }}}"
         }
       },
       {
@@ -40,7 +47,7 @@
       {
         "zeppelin-shiro-ini": {
           "properties": {
-            "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nldapRealm = org.apache.shiro.realm.ldap.JndiLdapRealm\nldapRealm.userDnTemplate = {{{ ldapConfig.userNameAttribute }}}={0},{{{ ldapConfig.userSearchBase }}}\nldapRealm.contextFactory.url = {{{ ldapConfig.connectionURL }}}\nldapRealm.contextFactory.authenticationMechanism = SIMPLE\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
+            "shiro_ini_content": "\n[users]\n# List of users with their password allowed to access Zeppelin.\n# To use a different strategy (LDAP / Database / ...) check the shiro doc at http://shiro.apache.org/configuration.html#Configuration-INISections\n\n\n# Sample LDAP configuration, for user Authentication, currently tested for single Realm\n[main]\nldapRealm = org.apache.zeppelin.realm.LdapRealm\nldapRealm.contextFactory.url = {{{ ldapConfig.connectionURL }}}\nldapRealm.contextFactory.authenticationMechanism = simple\nldapRealm.contextFactory.systemUsername = {{{ ldapConfig.bindDn }}}\nldapRealm.contextFactory.systemPassword = {{{ ldapConfig.bindPassword }}}\nldapRealm.searchBase = {{{ ldapConfig.userSearchBase }}}\nldapRealm.userSearchAttributeName = {{{ ldapConfig.userNameAttribute }}}\nldapRealm.userObjectClass = {{{ ldapConfig.userObjectClass }}}\nldapRealm.memberAttribute = {{{ ldapConfig.groupMemberAttribute }}}\nldapRealm.groupObjectClass = {{{ ldapConfig.groupObjectClass }}}\nldapRealm.authorizationEnabled = true\nldapRealm.groupSearchBase = {{{ ldapConfig.groupSearchBase }}}\n\n\nsessionManager = org.apache.shiro.web.session.mgt.DefaultWebSessionManager\nsecurityManager.sessionManager = $sessionManager\n# 86,400,000 milliseconds = 24 hour\nsecurityManager.sessionManager.globalSessionTimeout = 86400000\nshiro.loginUrl = /api/login\n\n[urls]\n# anon means the access is anonymous.\n# authcBasic means Basic Auth Security\n# To enfore security, comment the line below and uncomment the next one\n/api/version = anon\n#/** = anon\n/** = authc\n"
           }
         }
       }
