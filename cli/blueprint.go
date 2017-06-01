@@ -41,7 +41,7 @@ func init() {
 
 func getDefaultClusterType() string {
 	for _, v := range BlueprintMap {
-		if !strings.Contains(v, "Enterprise") && !strings.Contains(v, "Druid") && !strings.Contains(v, "Spark 2.1") {
+		if !strings.Contains(v, "Enterprise") && !strings.Contains(v, "Shared") && !strings.Contains(v, "Druid") && !strings.Contains(v, "Spark 2.0") && !strings.Contains(v, "Zeppelin 0.6.0") {
 			return v
 		}
 	}
