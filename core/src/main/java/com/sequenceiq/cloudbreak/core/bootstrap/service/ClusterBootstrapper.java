@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
+import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
@@ -103,6 +104,9 @@ public class ClusterBootstrapper {
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
 
+    @Inject
+    private HostDiscoveryService hostDiscoveryService;
+
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         String stackOrchestratorType = stack.getOrchestrator().getType();
@@ -127,7 +131,8 @@ public class ClusterBootstrapper {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
-                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generateHostname(stack.getId(), im), im.getInstanceGroupName()));
+                String generatedHostName = hostDiscoveryService.generateHostname(im.getInstanceGroupName(), im.getPrivateId());
+                nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generatedHostName, im.getInstanceGroupName()));
             }
         }
         try {
@@ -236,7 +241,8 @@ public class ClusterBootstrapper {
             }
             // generate hostname for the new nodes, retain the hostname for old nodes
             // note that if we recovered a node the private id is not the same as it is in the hostname
-            String hostName = StringUtils.isNoneBlank(im.getDiscoveryFQDN()) ? im.getDiscoveryFQDN().split("\\.")[0] : generateHostname(stackId, im);
+            String generatedHostName = hostDiscoveryService.generateHostname(im.getInstanceGroupName(), im.getPrivateId());
+            String hostName = StringUtils.isNoneBlank(im.getDiscoveryFQDN()) ? im.getDiscoveryFQDN().split("\\.")[0] : generatedHostName;
             Node node = new Node(im.getPrivateIp(), im.getPublicIpWrapper(), hostName, im.getInstanceGroupName());
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
@@ -351,10 +357,6 @@ public class ClusterBootstrapper {
         if (EXIT.equals(pollingResult)) {
             throw new CancellationException(cancelledMessage);
         }
-    }
-
-    private String generateHostname(long stackId, InstanceMetaData instanceMetaData) {
-        return instanceMetaData.getInstanceGroupName().replaceAll("_", "") + instanceMetaData.getPrivateId();
     }
 
 }

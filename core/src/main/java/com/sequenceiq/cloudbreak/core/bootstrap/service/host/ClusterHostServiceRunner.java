@@ -162,7 +162,8 @@ public class ClusterHostServiceRunner {
             Integer dataLakeId = (Integer) tags.getMap().get("datalakeId");
             if (dataLakeId != null) {
                 Stack dataLakeStack = stackRepository.findOneWithLists(Long.valueOf(dataLakeId));
-                String domain = hostDiscoveryService.determineDomain(dataLakeStack.getName());
+                String discoveryFQDN = dataLakeStack.getGatewayInstanceMetadata().get(0).getDiscoveryFQDN();
+                String domain = discoveryFQDN.substring(discoveryFQDN.indexOf(".") + 1);
                 List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
                 servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                         singletonMap("forwarder-zones", singletonMap(domain, singletonMap("nameservers", ipList)))));
