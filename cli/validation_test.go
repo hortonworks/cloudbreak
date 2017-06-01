@@ -34,7 +34,7 @@ func TestClusterSkeletonValidateAllGood(t *testing.T) {
 	skeleton := ClusterSkeleton{
 		ClusterSkeletonBase: ClusterSkeletonBase{
 			ClusterName:              "name",
-			HDPVersion:               "2.5",
+			HDPVersion:               "2.6",
 			ClusterType:              "type",
 			Master:                   InstanceConfig{InstanceCount: 1},
 			Worker:                   InstanceConfig{InstanceCount: 1, RecoveryMode: "AUTO"},

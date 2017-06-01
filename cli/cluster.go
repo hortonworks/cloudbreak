@@ -754,7 +754,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 	return &ClusterSkeleton{
 		ClusterSkeletonBase: ClusterSkeletonBase{
 			ClusterType: getDefaultClusterType(),
-			HDPVersion:  "2.5",
+			HDPVersion:  "2.6",
 			Master: InstanceConfig{
 				InstanceType:  "m4.4xlarge",
 				VolumeType:    "gp2",
