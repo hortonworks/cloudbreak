@@ -33,7 +33,7 @@ cbd start
 export CB_SCHEMA_SCRIPTS_LOCATION=/Users/myusername/prj/cloudbreak/core/src/main/resources/schema
 ```
 
-**Step 6:** Use the following command to kill a Cloudbreak container running inside the boot2docker and to redirect the Cloudbreak-related traffic to the Cloudbreak running in the IDEA:
+**Step 6:** Use the following command to kill a Cloudbreak container running inside the docker machine and to redirect the Cloudbreak-related traffic to the Cloudbreak running in the IDEA:
 
 ```
 cbd util local-dev
