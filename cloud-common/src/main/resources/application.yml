@@ -24,6 +24,8 @@ cb:
     core.size: 40
     capacity.size: 4000
 
+  host.discovery.custom.hostname.enabled: false
+
   cert:
     dir: /certs/
 
