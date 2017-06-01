@@ -125,7 +125,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
             }
             throw shellContext.exceptionTransformer().transformToRuntimeException("No template specified");
         } catch (Exception ex) {
-            return ex.toString();
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 

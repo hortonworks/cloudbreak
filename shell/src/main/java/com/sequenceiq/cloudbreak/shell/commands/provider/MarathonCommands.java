@@ -180,7 +180,7 @@ public class MarathonCommands implements CommandMarker {
             }
             throw shellContext.exceptionTransformer().transformToRuntimeException("No constraint specified");
         } catch (Exception ex) {
-            return ex.toString();
+            throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }
     }
 
