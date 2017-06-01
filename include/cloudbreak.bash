@@ -638,11 +638,6 @@ util-local-dev() {
     debug starting an ambassador to be registered as cloudbreak.service.consul.
     debug "all traffic to ambassador will be proxied to localhost"
 
-: << HINT
-sed -i  "s/cb.db.port.5432.tcp.addr=[^ ]*/cb.db.port.5432.tcp.addr=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' cbreak_cbdb_1)/" \
-    ~/prj/cloudbreak.idea/runConfigurations/cloudbreak_remote.xml
-HINT
-
     docker run -d \
         --name cloudbreak-proxy \
         -p 8080:8080 \
