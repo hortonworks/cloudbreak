@@ -12,6 +12,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -235,13 +236,10 @@ public class ClusterBootstrapper {
         Set<Node> nodes = new HashSet<>();
         Set<Node> allNodes = new HashSet<>();
         boolean recoveredNodes = Integer.valueOf(recoveryHostNames.size()).equals(upscaleCandidateAddresses.size());
-        Set<InstanceMetaData> metaDataSet = stack.getRunningInstanceMetaData();
+        Set<InstanceMetaData> metaDataSet = stack.getRunningInstanceMetaData().stream()
+                .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null).collect(Collectors.toSet());
         String clusterDomain = metaDataSet.stream().filter(im -> isNoneBlank(im.getDiscoveryFQDN())).findAny().get().getDomain();
         for (InstanceMetaData im : metaDataSet) {
-            if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
-                LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
-                continue;
-            }
             Node node = createNode(im, clusterDomain);
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
