@@ -59,7 +59,7 @@ set_ambari_server_address:
   file.replace:
     - name: /etc/ambari-agent/conf/ambari-agent.ini
     - pattern: "hostname.*=.*localhost"
-    - repl: "hostname=ambari-server.{{ ambari.cluster_domain }}"
+    - repl: "hostname={{ ambari.server_address }}"
 
 set_public_hostname_script:
   file.replace:
