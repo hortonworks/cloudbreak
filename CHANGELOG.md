@@ -6,6 +6,13 @@ The Change Log summarizes the changes in Cloudbreak.
 
 ### Added
 
+- Added SmartSense and Flex subscription integration
+
+
+## [v1.15.0]
+
+### Added
+
 - Azure custom role support for credential creation
 
 ### Changed
