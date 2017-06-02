@@ -184,6 +184,7 @@ compose-generate-yaml() {
     else
         info "generating docker-compose.yml"
         compose-generate-yaml-force docker-compose.yml
+        docker-compose -f docker-compose.yml config 1> /dev/null
     fi
 }
 
