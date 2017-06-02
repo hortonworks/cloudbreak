@@ -129,29 +129,8 @@ latest-version() {
       |sed -n "s/^Location:.*tag.v\([0-9\.]*\).*/\1/p"
 }
 
-init-profile() {
-    declare desc="Creates Profile if missing"
-
-    CBD_PROFILE="Profile"
-
-    # if the profile exist
-    if [ -f $CBD_PROFILE ]; then
-        info "$CBD_PROFILE already exists, now you are ready to run:"
-        echo "cbd start" | blue
-    else
-        echo "export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')" > $CBD_PROFILE
-        ipcommand=$(public-ip-resolver-command)
-        if [[ "$ipcommand" ]]; then
-            PUBLIC_IP=$(eval "$ipcommand")
-            echo "export PUBLIC_IP=\$($ipcommand)" >> $CBD_PROFILE
-        else
-            warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
-            echo "echo export PUBLIC_IP=1.2.3.4 >> $CBD_PROFILE" | blue
-            _exit 2
-        fi
-    fi
-
-    #doctor
+init-profile-deprecated() {
+    warn "Initialization is not need any more"
 }
 
 public-ip-resolver-command() {
@@ -193,24 +172,38 @@ public-ip-resolver-command() {
 }
 
 start-time-init() {
+    declare desc="Resolve or set Cloudbreak deployment start time"
+
     if ! [[ "$(cat .starttime 2> /dev/null)" ]]; then
         echo "$(date +%s)" > .starttime
     fi
     export CB_COMPONENT_CREATED=$(cat .starttime)
 }
 
-load-profile() {
-    CBD_PROFILE="Profile"
+init-profile() {
+    declare desc="Creates Profile if missing"
+
     if [ -f $CBD_PROFILE ]; then
-        debug "Use profile: $CBD_PROFILE"
+        debug "Use existing profile: $CBD_PROFILE"
         module-load "$CBD_PROFILE"
-        PROFILE_LOADED=true
-    else
-        if [[ "$1" != "init" ]];then
-            echo "!! No Profile found. Please initalize your 'Profile' with the init command." | red
-            echo "cbd init" | blue
-        fi
     fi
+
+    if ! [[ "$CB_INSTANCE_UUID" ]]; then
+        debug "Instance UUID not found, let's generate one"
+        echo "export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')" >> $CBD_PROFILE
+    fi
+
+    if ! [[ "$UAA_DEFAULT_SECRET" ]]; then
+        info "Your secret is auto-generated in $CBD_PROFILE as UAA_DEFAULT_SECRET"
+        echo "Make backup of your secret, because used for data encryption !!!" | red
+        echo "export UAA_DEFAULT_SECRET=$(uuidgen | md5)" >> $CBD_PROFILE
+    fi
+}
+
+load-profile() {
+    declare desc="Loads Profile"
+
+    module-load "$CBD_PROFILE"
 
     if [[ "$CBD_DEFAULT_PROFILE" && -f "Profile.$CBD_DEFAULT_PROFILE" ]]; then
         CBD_PROFILE="Profile.$CBD_DEFAULT_PROFILE"
@@ -218,6 +211,26 @@ load-profile() {
 		module-load $CBD_PROFILE
 		debug "Using profile $CBD_DEFAULT_PROFILE"
 	fi
+}
+
+public-ip-init() {
+    declare desc="Tries to guess PUBLIC_IP if not found"
+
+    if [[ ! "$PUBLIC_IP" ]]; then
+        debug "PUBLIC_IP not found, try to guess"
+        ipcommand=$(public-ip-resolver-command)
+        if [[ "$ipcommand" ]]; then
+            export PUBLIC_IP=$(eval "$ipcommand")
+            debug "Used PUBLIC_IP: $PUBLIC_IP"
+        else
+            warn "We can not guess your PUBLIC_IP, please run the following command: (replace 1.2.3.4 with a real IP)"
+            if is_macos; then
+                warn "On Mac OS the PUBLIC_IP should be the Docker host's bridge ip"
+            fi
+            echo "echo export PUBLIC_IP=1.2.3.4 >> $CBD_PROFILE" | blue
+            _exit 2
+        fi
+    fi
 }
 
 doctor() {
@@ -457,13 +470,23 @@ _exit() {
     exit $1
 }
 
+is_command_needs_profile() {
+    [[ ' '"aws azure bash-complete doctor help init machine version update"' ' != *" $1 "* ]]
+}
+
 main() {
 	set -eo pipefail; [[ "$TRACE" ]] && set -x
+
+    CBD_PROFILE="Profile"
 
     cbd-find-root
     start-time-init
 	color-init
-    load-profile "$@"
+    if is_command_needs_profile $1; then
+        init-profile
+        load-profile
+        public-ip-init
+    fi
     deps-init
     deps-require sed
 
@@ -481,7 +504,7 @@ main() {
     cmd-export cmd-help help
     cmd-export cbd-version version
     cmd-export doctor doctor
-    cmd-export init-profile init
+    cmd-export init-profile-deprecated init
     cmd-export cmd-bash-complete bash-complete
     cmd-export-ns env "Environment namespace"
     cmd-export env-show
@@ -508,36 +531,35 @@ main() {
     cmd-export db-init-volume-from-dump
     cmd-export db-restore-volume-from-dump
     
-    if [[ "$PROFILE_LOADED" ]] ; then
-        cmd-export cbd-update update
-        cmd-export deployer-generate generate
-        cmd-export deployer-regenerate regenerate
-        cmd-export deployer-delete delete
-        cmd-export compose-ps ps
-        cmd-export start-cmd start
-        cmd-export restart-cmd restart
-        cmd-export start-wait-cmd start-wait
-        cmd-export compose-kill kill
-        cmd-export compose-logs logs
-        cmd-export compose-logs-tail logs-tail
-        cmd-export compose-pull pull
-        cmd-export compose-pull-parallel pull-parallel
-        cmd-export deployer-login login
+    cmd-export cbd-update update
 
-        cmd-export migrate-startdb-cmd startdb
-        cmd-export migrate-cmd migrate
+    cmd-export deployer-generate generate
+    cmd-export deployer-regenerate regenerate
+    cmd-export deployer-delete delete
+    cmd-export deployer-login login
+    cmd-export start-cmd start
+    cmd-export restart-cmd restart
+    cmd-export start-wait-cmd start-wait
+    cmd-export compose-ps ps
+    cmd-export compose-kill kill
+    cmd-export compose-logs logs
+    cmd-export compose-logs-tail logs-tail
+    cmd-export compose-pull pull
+    cmd-export compose-pull-parallel pull-parallel
 
-        cmd-export-ns util "Util namespace"
-        cmd-export util-cloudbreak-shell
-        cmd-export util-cloudbreak-shell-quiet
-        cmd-export util-cloudbreak-shell-remote
-        cmd-export util-token
-        cmd-export util-token-debug
-        cmd-export util-local-dev
-        cmd-export util-cleanup
-        cmd-export util-add-default-user
-        cmd-export util-get-usage
-    fi
+    cmd-export migrate-startdb-cmd startdb
+    cmd-export migrate-cmd migrate
+
+    cmd-export-ns util "Util namespace"
+    cmd-export util-cloudbreak-shell
+    cmd-export util-cloudbreak-shell-quiet
+    cmd-export util-cloudbreak-shell-remote
+    cmd-export util-token
+    cmd-export util-token-debug
+    cmd-export util-local-dev
+    cmd-export util-cleanup
+    cmd-export util-add-default-user
+    cmd-export util-get-usage
 
     if [[ "$DEBUG" ]]; then
         cmd-export fn-call fn
