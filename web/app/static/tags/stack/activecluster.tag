@@ -284,19 +284,16 @@
                                     <table id="metadataTable" class="table table-report table-sortable-cols table-with-pagination table-condensed" style="background-color: transparent;">
                                         <thead>
                                             <tr>
-                                                <th class="col-md-3">
+                                                <th class="col-md-4">
                                                     <span>{{msg.active_cluster_stack_description_name_label}}</span>
                                                 </th>
-                                                <th class="col-md-3">
-                                                    <span>FQDN</span>
-                                                </th>
-                                                <th class="col-md-1">
+                                                <th class="col-md-2">
                                                     <span>{{msg.active_cluster_stack_description_public_address_label}}</span>
                                                 </th>
-                                                <th class="col-md-1">
+                                                <th class="col-md-2">
                                                     <span>{{msg.active_cluster_stack_description_private_address_label}}</span>
                                                 </th>
-                                                <th class="col-md-1 text-center">
+                                                <th class="col-md-2 text-center">
                                                     <span>{{msg.active_cluster_stack_description_hostgroup_name_label}}</span>
                                                 </th>
                                                 <th class="col-md-1 text-center">
@@ -310,7 +307,6 @@
                                         <tbody>
                                             <tr ng-repeat="instance in filteredActiveClusterData | orderBy: ['instanceGroup', 'privateIp']" ng-class="instance.state == 'UNHEALTHY' ? 'danger' : ''">
                                                 <td class="col-md-4" data-title="'name'">{{instance.instanceId||msg.active_cluster_pending}}</td>
-                                                <td class="col-md-2" data-title="'fqdn'">{{instance.discoveryFQDN||msg.active_cluster_pending}}</td>
                                                 <td class="col-md-2" data-title="'public IP'">{{instance.publicIp||msg.active_cluster_pending}}</td>
                                                 <td class="col-md-2" data-title="'private IP'">{{instance.privateIp||msg.active_cluster_pending}}</td>
                                                 <td class="col-md-2 text-center" data-title="'host group'"><span class="label label-default">{{instance.instanceGroup}}</span></td>
