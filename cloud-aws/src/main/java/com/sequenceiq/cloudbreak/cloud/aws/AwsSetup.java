@@ -147,7 +147,7 @@ public class AwsSetup implements Setup {
                     .withMinCount(1)
                     .withMaxCount(1)
                     .withImageId(imageName)
-                    .withInstanceType(InstanceType.M3Large);
+                    .withInstanceType(InstanceType.M3Xlarge);
             amazonEC2Client.dryRun(request);
             LOGGER.info("Dry run succeeded, AMI '{}' is safe to launch.", imageName);
         } catch (AmazonServiceException e) {
