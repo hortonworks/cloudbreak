@@ -331,6 +331,8 @@ smartsense:
         - UAA_FLEX_USAGE_CLIENT_ID
         - UAA_FLEX_USAGE_CLIENT_SECRET
     dns: $PRIVATE_IP
+    volumes:
+        - .:/var/lib/cloudbreak-deployment
     image: $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
 
 commondb:
