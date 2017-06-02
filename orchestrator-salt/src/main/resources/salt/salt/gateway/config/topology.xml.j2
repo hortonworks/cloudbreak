@@ -25,13 +25,38 @@
                 <value>$ldapContextFactory</value>
             </param>
             <param>
-                <name>main.ldapRealm.userDnTemplate</name>
-                <value>{{ salt['pillar.get']('ldap:userNameAttribute') }}={0},{{ salt['pillar.get']('ldap:userSearchBase') }}</value>
-            </param>
-            <param>
                 <name>main.ldapRealm.contextFactory.url</name>
                 <value>{{ salt['pillar.get']('ldap:protocol') }}://{{ salt['pillar.get']('ldap:serverHost') }}:{{ salt['pillar.get']('ldap:serverPort') }}</value>
             </param>
+
+            {% if salt['pillar.get']('ldap:local', False) -%}
+            <param>
+                <name>main.ldapRealm.userDnTemplate</name>
+                <value>{{ salt['pillar.get']('ldap:userNameAttribute') }}={0},{{ salt['pillar.get']('ldap:userSearchBase') }}</value>
+            </param>
+            {%- else %}
+            <param>
+                <name>main.ldapRealm.contextFactory.systemUsername</name>
+                <value>{{ salt['pillar.get']('ldap:bindDn') }}</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.contextFactory.systemPassword</name>
+                <value>{{ salt['pillar.get']('ldap:bindPassword') }}</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.searchBase</name>
+                <value>{{ salt['pillar.get']('ldap:userSearchBase') }}</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.userSearchAttributeName</name>
+                <value>{{ salt['pillar.get']('ldap:userNameAttribute') }}</value>
+            </param>
+            <param>
+                <name>main.ldapRealm.userObjectClass</name>
+                <value>{{ salt['pillar.get']('ldap:userObjectClass') }}</value>
+            </param>
+            {%- endif %}
+
             <param>
                 <name>main.ldapRealm.contextFactory.authenticationMechanism</name>
                 <value>simple</value>
