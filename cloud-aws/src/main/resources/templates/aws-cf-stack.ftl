@@ -172,7 +172,7 @@
     <#if mapPublicIpOnLaunch>
         <#list gatewayGroups as group>
             <#list 1..group.instanceCount as nth>
-                "EIP${group.groupName}${nth}" : {
+                "EIP${group.groupName?replace('_', '')}${nth}" : {
                    "Type" : "AWS::EC2::EIP",
                    "Properties" : {
                       "Domain" : "vpc"
@@ -423,8 +423,8 @@
   <#if mapPublicIpOnLaunch>
     <#list gatewayGroups as group>
       <#list 1..group.instanceCount as nth>
-          "EIPAllocationID${group.groupName}${nth}" : {
-              "Value" : {"Fn::GetAtt" : [ "EIP${group.groupName}${nth}" , "AllocationId" ]}
+          "EIPAllocationID${group.groupName?replace('_', '')}${nth}" : {
+              "Value" : {"Fn::GetAtt" : [ "EIP${group.groupName?replace('_', '')}${nth}" , "AllocationId" ]}
           }<#if (nth_index + 1) != group.instanceCount || group?has_next>,</#if>
         </#list>
     </#list>
