@@ -1,15 +1,21 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.http.MethodNotSupportedException;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
@@ -35,6 +41,7 @@ import com.sequenceiq.cloudbreak.shell.commands.base.BaseStackCommands;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
+import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.MarathonHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.NodeCountEntry;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
@@ -77,7 +84,7 @@ public class ClusterCommands implements BaseCommands {
     public String createCluster(
             @CliOption(key = "userName", unspecifiedDefaultValue = "admin", help = "Username of the Ambari server") String userName,
             @CliOption(key = "password", unspecifiedDefaultValue = "admin", help = "Password of the Ambari server") String password,
-            @CliOption(key = "description", help = "Description of the blueprint") String description,
+            @CliOption(key = "description", help = "Description of the cluster") String description,
             @CliOption(key = "ambariVersion", help = "Ambari version (e.g. 2.4.0.0-748)") String ambariVersion,
             @CliOption(key = "ambariRepoBaseURL",
                     help = "Ambari repo base url: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates") String ambariRepoBaseURL,
@@ -197,6 +204,30 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setHostGroups(hostGroupList);
             clusterRequest.setBlueprintInputs(new HashSet<>());
             clusterRequest.setCustomQueue(customQueue);
+
+            if (enableKnoxGateway) {
+                // Check if Knox is configured in selected blueprint
+                List<InstanceGroupEntry> gatewayIgList = shellContext.getInstanceGroups().values()
+                        .stream()
+                        .filter(e -> e.getType().equals("GATEWAY")).collect(Collectors.toList());
+                List<String> gatewayIgNameList = new ArrayList<>();
+
+                for (Map.Entry<String, InstanceGroupEntry> entry : shellContext.getInstanceGroups().entrySet()) {
+                    for (InstanceGroupEntry gatewayIg : gatewayIgList) {
+                        if (Objects.equals(gatewayIg, entry.getValue())) {
+                            gatewayIgNameList.add(entry.getKey());
+                        }
+                    }
+                }
+                Map<String, List<String>> componentMap = getComponentMap(shellContext.getBlueprintText());
+
+                for (String gatewayIgName : gatewayIgNameList) {
+                    if (componentMap.get(gatewayIgName).contains("KNOX_GATEWAY")) {
+                        throw shellContext.exceptionTransformer().transformToRuntimeException(
+                                "Please select another blueprint! Knox gateway is enabled but it is present in the blueprint's gateway hostgroup as well.");
+                    }
+                }
+            }
 
             GatewayJson gateway = new GatewayJson();
             gateway.setEnableGateway(enableKnoxGateway);
@@ -640,6 +671,24 @@ public class ClusterCommands implements BaseCommands {
         }
         cloudbreakShellUtil.checkResponse("ambariUpgrade", shellContext.cloudbreakClient().clusterEndpoint().upgradeCluster(Long.valueOf(stackId), request));
         return "Upgrade request successfully sent";
+    }
+
+    private Map<String, List<String>> getComponentMap(String json) {
+        Map<String, List<String>> map = new HashMap<>();
+        try {
+            JsonNode hostGroups = shellContext.objectMapper().readTree(json.getBytes()).get("host_groups");
+            for (JsonNode hostGroup : hostGroups) {
+                List<String> components = new ArrayList<>();
+                JsonNode componentsNodes = hostGroup.get("components");
+                for (JsonNode componentsNode : componentsNodes) {
+                    components.add(componentsNode.get("name").asText());
+                }
+                map.put(hostGroup.get("name").asText(), components);
+            }
+        } catch (IOException e) {
+            map = new HashMap<>();
+        }
+        return map;
     }
 
     @Override

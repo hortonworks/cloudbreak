@@ -12,7 +12,7 @@ The Change Log summarizes the changes in Cloudbreak.
 
 - update HDP version (2.6.0.3 -> 2.6.1.0)
 - update Ambari version (2.5.0.3 -> 2.5.1.0)
-
+- disable Knox from CB if blueprint contains Knox
 
 ## [v1.15.0]
 
