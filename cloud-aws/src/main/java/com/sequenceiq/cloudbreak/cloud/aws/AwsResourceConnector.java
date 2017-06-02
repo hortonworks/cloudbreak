@@ -347,6 +347,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             for (int i = 0; i < eipAllocationIds.size(); i++) {
                 associateElasticIpToInstance(amazonEC2Client, eipAllocationIds.get(i), instanceIds.get(i));
             }
+        } else {
+            LOGGER.warn("The number of elastic ips are not equals with the number of instances. EIP association will be skipped!");
         }
     }
 
@@ -664,7 +666,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     private List<String> getEipsForGatewayGroup(Map<String, String> eipAllocationIds, Group gateway) {
-        return eipAllocationIds.entrySet().stream().filter(e -> e.getKey().contains(gateway.getName())).map(e -> e.getValue())
+        return eipAllocationIds.entrySet().stream().filter(e -> e.getKey().contains(gateway.getName().replace("_", ""))).map(e -> e.getValue())
                 .collect(Collectors.toList());
     }
 
