@@ -45,4 +45,30 @@ public class InstanceGroupEntry {
     public Map<String, Object> getAttributes() {
         return attributes;
     }
+
+    //BEGIN GENERATED CODE
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        InstanceGroupEntry that = (InstanceGroupEntry) o;
+
+        if (templateId != null ? !templateId.equals(that.templateId) : that.templateId != null) return false;
+        if (nodeCount != null ? !nodeCount.equals(that.nodeCount) : that.nodeCount != null) return false;
+        if (type != null ? !type.equals(that.type) : that.type != null) return false;
+        if (securityGroupId != null ? !securityGroupId.equals(that.securityGroupId) : that.securityGroupId != null) return false;
+        return attributes != null ? attributes.equals(that.attributes) : that.attributes == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = templateId != null ? templateId.hashCode() : 0;
+        result = 31 * result + (nodeCount != null ? nodeCount.hashCode() : 0);
+        result = 31 * result + (type != null ? type.hashCode() : 0);
+        result = 31 * result + (securityGroupId != null ? securityGroupId.hashCode() : 0);
+        result = 31 * result + (attributes != null ? attributes.hashCode() : 0);
+        return result;
+    }
+    //END GENERATED CODE
 }

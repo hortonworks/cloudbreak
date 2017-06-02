@@ -279,6 +279,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 $scope.cluster.hostGroups = hostGroups;
                 $scope.cluster.activeGroup = $scope.cluster.hostGroups[0].name;
             }
+
+            $scope.showBlueprintKnoxError();
         }
 
         $scope.isUndefined = function(variable) {
@@ -1526,6 +1528,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     ig.type = 'CORE'
                 }
             });
+            $scope.showBlueprintKnoxError();
         }
 
         $scope.ambariServerSelected = function() {
@@ -1541,6 +1544,33 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 }
             });
             return result
+        }
+
+        $scope.blueprintKnoxError = false;
+
+        $scope.showBlueprintKnoxError = function() {
+            var result = false;
+                var actualBp = $filter('filter')($rootScope.blueprints, {
+                    id: $scope.cluster.blueprintId
+                }, true);
+                actualBp[0].ambariBlueprint.host_groups.forEach(function (group) {
+                    if (!result) {
+                        var gatewayGroup = $filter('filter')($scope.cluster.instanceGroups, {
+                            group: group.name,
+                            type: 'GATEWAY'
+                        }, true);
+                        if (gatewayGroup && gatewayGroup[0]) {
+                            var knoxGateway = $filter('filter')(group.components, {
+                                name: 'KNOX_GATEWAY'
+                            }, true);
+                            if (knoxGateway && knoxGateway[0]) {
+                                result = true;
+                            }
+                        }
+                    }
+                });
+            $scope.blueprintKnoxError = result;
+            return result;
         }
 
         $scope.showSecurityGroupKnoxWarning = function(instanceGroup) {

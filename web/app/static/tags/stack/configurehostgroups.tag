@@ -3,6 +3,7 @@
     <div class="col-sm-8">
         <select class="form-control" id="selectBlueprint" ng-model="cluster.blueprintId" required ng-change="selectedBlueprintChange()" ng-options="blueprint.id as blueprint.name for blueprint in $root.blueprints | orderBy:'name'">
         </select>
+        <div class="help-block" ng-show="cluster.gateway.enableGateway && blueprintKnoxError"><i class="fa fa-warning"></i> {{msg.cluster_form_blueprint_knox_error}}</div>
     </div>
 </div>
 <div class="form-group" ng-show="showAdvancedOptionForm">
@@ -152,15 +153,15 @@
                 <button type="button" class="btn btn-sm btn-default"></button>
             </div>
             <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform == 'AZURE' || activeCredential.cloudPlatform == 'GCP'">
-                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || !cluster.blueprintId || !ambariServerSelected()">{{msg.cluster_form_ambari_filesystem_tag}} <i class="fa fa-angle-double-right"></i></button>
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureFileSystem')" ng-disabled="!cluster.name || !cluster.region || !cluster.networkId || !cluster.blueprintId || !ambariServerSelected() || (cluster.gateway.enableGateway && blueprintKnoxError)">{{msg.cluster_form_ambari_filesystem_tag}} <i class="fa fa-angle-double-right"></i></button>
             </div>
             <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'GCP'" ng-hide="!showAdvancedOptionForm">
-                <button type="button" class="btn btn-sm btn-default" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureAmbariRepository')" ng-disabled="!cluster.name || !cluster.blueprintId || ((activeCredential !== undefined && activeCredential.cloudPlatform !== 'BYOS') && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()">
+                <button type="button" class="btn btn-sm btn-default" ng-click="(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? showWizardActualElement('configureFailureAction') : showWizardActualElement('configureAmbariRepository')" ng-disabled="!cluster.name || !cluster.blueprintId || ((activeCredential !== undefined && activeCredential.cloudPlatform !== 'BYOS') && (!cluster.region || !cluster.networkId)) || !ambariServerSelected() || (cluster.gateway.enableGateway && blueprintKnoxError)">
                     {{(activeStack === undefined && activeCredential.cloudPlatform !== 'BYOS') ? msg.cluster_form_ambari_failure_tag : msg.cluster_form_ambari_hdprepo_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>
             <div class="btn-group" role="group" ng-if="activeCredential.cloudPlatform != 'AZURE' && activeCredential.cloudPlatform != 'GCP'" ng-hide="clusterCreationForm.$invalid || showAdvancedOptionForm">
-                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')" ng-disabled="!cluster.name || !cluster.blueprintId || ((activeCredential !== undefined && activeCredential.cloudPlatform !== 'BYOS') && (!cluster.region || !cluster.networkId)) || !ambariServerSelected()">
+                <button type="button" class="btn btn-sm btn-default" ng-click="showWizardActualElement('configureReview')" ng-disabled="!cluster.name || !cluster.blueprintId || ((activeCredential !== undefined && activeCredential.cloudPlatform !== 'BYOS') && (!cluster.region || !cluster.networkId)) || !ambariServerSelected() || (cluster.gateway.enableGateway && blueprintKnoxError)">
                     {{msg.cluster_form_ambari_launch_tag}} <i class="fa fa-angle-double-right"></i>
                 </button>
             </div>
