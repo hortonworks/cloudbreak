@@ -7,7 +7,7 @@
   ],
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp26-shared-services",
+      "blueprint_name": "hdp26-shared-services-ha",
       "stack_name": "HDP",
       "stack_version": "2.6"
     },
