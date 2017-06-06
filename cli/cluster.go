@@ -195,7 +195,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	blueprint := getBlueprint(skeleton.ClusterType)
 	dataLake := false
 	var connectedClusterRequest *models_cloudbreak.ConnectedClusterRequest = nil
-	if blueprint.BlueprintName != nil && *blueprint.BlueprintName == "hdp26-shared-services" {
+	bpName := blueprint.BlueprintName
+	if bpName != nil && (*bpName == "hdp26-shared-services" || *bpName == "hdp26-shared-services-ha") {
 		dataLake = true
 		convertClusterInputs(&skeleton)
 	} else if len(skeleton.SharedClusterName) > 0 {
