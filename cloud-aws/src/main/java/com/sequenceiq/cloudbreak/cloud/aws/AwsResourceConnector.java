@@ -191,6 +191,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withExistingVpc(existingVPC)
                     .withExistingIGW(awsNetworkView.isExistingIGW())
                     .withExistingSubnetCidr(existingSubnet ? getExistingSubnetCidr(ac, stack) : null)
+                    .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
                     .mapPublicIpOnLaunch(mapPublicIpOnLaunch)
                     .withEnableInstanceProfile(awsInstanceProfileView.isEnableInstanceProfileStrategy())
                     .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())

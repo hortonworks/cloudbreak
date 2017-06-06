@@ -37,6 +37,7 @@ public class CloudFormationTemplateBuilder {
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(context.stack);
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         List<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
+        int i = 0;
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
             AwsGroupView groupView = new AwsGroupView(
@@ -50,12 +51,13 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getVolumeType(),
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
-                    group.getSecurity().getCloudSecurityId()
-            );
+                    group.getSecurity().getCloudSecurityId(),
+                    getSubnetIds(context.existingSubnetIds, i, group));
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
             }
+            i++;
         }
         model.put("instanceGroups", awsGroupViews);
         model.put("gatewayGroups", awsGatewayGroupViews);
@@ -88,6 +90,11 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
+    private String getSubnetIds(List<String> existingSubnetIds, int i, Group group) {
+        return group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds)
+                ? existingSubnetIds.get(i % existingSubnetIds.size()) : null;
+    }
+
     private boolean isNullOrEmptyList(List<?> list) {
         return list == null || list.isEmpty();
     }
@@ -113,6 +120,8 @@ public class CloudFormationTemplateBuilder {
         private boolean existingVPC;
 
         private boolean existingIGW;
+
+        private List<String> existingSubnetIds;
 
         private List<String> existingSubnetCidr;
 
@@ -158,6 +167,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withExistingSubnetCidr(List<String> cidr) {
             this.existingSubnetCidr = cidr;
+            return this;
+        }
+
+        public ModelContext withExistingSubnetIds(List<String> subnetIds) {
+            this.existingSubnetIds = subnetIds;
             return this;
         }
 
