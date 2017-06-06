@@ -7,7 +7,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -65,9 +64,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     @Value("${cb.azure.host.name.prefix.length}")
     private int stackNamePrefixLength;
-
-    @Value("${cb.azure.termination.retries:10}")
-    private int terminationRetries;
 
     @Inject
     private AzureTemplateBuilder azureTemplateBuilder;
@@ -162,9 +158,10 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         for (CloudResource resource : resources) {
             try {
-                if (isResourceGroupExists(client, resource.getName(), terminationRetries)) {
+                if (client.resourceGroupExists(resource.getName())) {
                     client.deleteResourceGroup(resource.getName());
                 }
+
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack.getParameters()))) {
                     CloudContext cloudCtx = authenticatedContext.getCloudContext();
                     String imageStorageName = azureStorage.getImageStorageName(new AzureCredentialView(authenticatedContext.getCloudCredential()), cloudCtx,
@@ -182,19 +179,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             }
         }
         return check(authenticatedContext, resources);
-    }
-
-    private boolean isResourceGroupExists(AzureClient client, String name, int triesLeft) {
-        boolean exists = client.resourceGroupExists(name);
-        if (!exists && triesLeft != 0) {
-            try {
-                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-            } catch (InterruptedException ie) {
-                LOGGER.info("Thread interrupted", ie);
-            }
-            return isResourceGroupExists(client, name, --triesLeft);
-        }
-        return exists;
     }
 
     @Override

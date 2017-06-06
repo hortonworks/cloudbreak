@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -145,9 +144,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Value("${cb.aws.vpc:}")
     private String cloudbreakVpc;
-
-    @Value("${cb.aws.termination.retries:10}")
-    private int terminationRetries;
 
     @Value("${cb.nginx.port:9443}")
     private int gatewayPort;
@@ -465,17 +461,19 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         if (resources != null && !resources.isEmpty()) {
             AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-            CloudResource stackResource = getCloudFormationStackResource(resources);
-            if (stackResource == null) {
-                return Collections.emptyList();
-            }
-            String cFStackName = stackResource.getName();
+            String cFStackName = getCloudFormationStackResource(resources).getName();
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
-            if (!isStackExists(cfClient, cFStackName, describeStacksRequest, terminationRetries)) {
-                AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
-                releaseReservedIp(amazonEC2Client, resources);
-                return Collections.emptyList();
+            try {
+                cfClient.describeStacks(describeStacksRequest);
+            } catch (AmazonServiceException e) {
+                if (e.getErrorMessage().contains(cFStackName + " does not exist")) {
+                    AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
+                    releaseReservedIp(amazonEC2Client, resources);
+                    return Collections.emptyList();
+                } else {
+                    throw e;
+                }
             }
             resumeAutoScalingPolicies(ac, stack);
             DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
@@ -498,27 +496,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             LOGGER.info("No CloudFormation stack saved for stack.");
         }
         return check(ac, resources);
-    }
-
-    private boolean isStackExists(AmazonCloudFormationClient cfClient, String cFStackName, DescribeStacksRequest describeStacksRequest, int triesLeft) {
-        try {
-            cfClient.describeStacks(describeStacksRequest);
-        } catch (AmazonServiceException e) {
-            if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
-                throw e;
-            }
-            if (triesLeft != 0) {
-                try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-                } catch (InterruptedException ie) {
-                    LOGGER.info("Thread interrupted", ie);
-                }
-                return isStackExists(cfClient, cFStackName, describeStacksRequest, --triesLeft);
-            }
-            return false;
-        }
-
-        return true;
     }
 
     private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack) {
