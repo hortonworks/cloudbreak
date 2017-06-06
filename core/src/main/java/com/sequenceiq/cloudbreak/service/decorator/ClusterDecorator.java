@@ -229,7 +229,8 @@ public class ClusterDecorator implements Decorator<Cluster> {
                 RDSConfig rdsConfig = rdsConfigService.get(rdsConfigId);
                 subject.getRdsConfigs().add(rdsConfig);
             }
-        } else if (requestRdsConfigs != null && !requestRdsConfigs.isEmpty()) {
+        }
+        if (requestRdsConfigs != null && !requestRdsConfigs.isEmpty()) {
             for (RDSConfigJson requestRdsConfig : requestRdsConfigs) {
                 RDSConfig rdsConfig = conversionService.convert(requestRdsConfig, RDSConfig.class);
                 rdsConfig.setPublicInAccount(stack.isPublicInAccount());
