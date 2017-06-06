@@ -7,13 +7,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @Service
 public class AzureResourceConnector implements ResourceConnector<Map<String, Map<String, Object>>> {
@@ -66,9 +67,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     @Value("${cb.azure.host.name.prefix.length}")
     private int stackNamePrefixLength;
 
-    @Value("${cb.azure.termination.retries:10}")
-    private int terminationRetries;
-
     @Inject
     private AzureTemplateBuilder azureTemplateBuilder;
 
@@ -77,6 +75,10 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     @Inject
     private AzureStorage azureStorage;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
@@ -162,8 +164,17 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         for (CloudResource resource : resources) {
             try {
-                if (isResourceGroupExists(client, resource.getName(), terminationRetries)) {
+                try {
+                    retryService.testWith2SecDelayMax5Times(() -> {
+                        boolean exists = client.resourceGroupExists(resource.getName());
+                        if (!exists) {
+                            throw new Retry.ActionWentFail();
+                        }
+                        return exists;
+                    });
                     client.deleteResourceGroup(resource.getName());
+                } catch (Retry.ActionWentFail af) {
+                    LOGGER.info(String.format("Resource group not found with name: %s", resource.getName()));
                 }
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack.getParameters()))) {
                     CloudContext cloudCtx = authenticatedContext.getCloudContext();
@@ -182,19 +193,6 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             }
         }
         return check(authenticatedContext, resources);
-    }
-
-    private boolean isResourceGroupExists(AzureClient client, String name, int triesLeft) {
-        boolean exists = client.resourceGroupExists(name);
-        if (!exists && triesLeft != 0) {
-            try {
-                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-            } catch (InterruptedException ie) {
-                LOGGER.info("Thread interrupted", ie);
-            }
-            return isResourceGroupExists(client, name, --triesLeft);
-        }
-        return exists;
     }
 
     @Override

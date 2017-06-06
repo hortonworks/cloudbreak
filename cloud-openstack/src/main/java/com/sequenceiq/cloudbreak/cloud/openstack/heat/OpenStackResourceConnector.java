@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -14,7 +13,7 @@ import org.openstack4j.model.heat.Stack;
 import org.openstack4j.model.heat.StackUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @Service
 public class OpenStackResourceConnector implements ResourceConnector<Object> {
@@ -42,9 +42,6 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackResourceConnector.class);
 
     private static final long OPERATION_TIMEOUT = 60L;
-
-    @Value("${cb.openstack.termination.retries:10}")
-    private int terminationRetries;
 
     @Inject
     private OpenStackClient openStackClient;
@@ -54,6 +51,10 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     @Inject
     private OpenStackUtils utils;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -139,8 +140,17 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                     String stackName = utils.getStackName(authenticatedContext);
                     LOGGER.info("Terminate stack: {}", stackName);
                     OSClient client = openStackClient.createOSClient(authenticatedContext);
-                    if (isStackExists(client, stackName, terminationRetries)) {
+                    try {
+                        retryService.testWith2SecDelayMax5Times(() -> {
+                            boolean exists = client.heat().stacks().getStackByName(resource.getName()) != null;
+                            if (!exists) {
+                                throw new Retry.ActionWentFail();
+                            }
+                            return exists;
+                        });
                         client.heat().stacks().delete(stackName, heatStackId);
+                    } catch (Retry.ActionWentFail af) {
+                        LOGGER.info(String.format("Stack not found with name: %s", resource.getName()));
                     }
                     break;
                 default:
@@ -148,19 +158,6 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             }
         }
         return check(authenticatedContext, resources);
-    }
-
-    private boolean isStackExists(OSClient client, String name, int triesLeft) {
-        boolean exists = client.heat().stacks().getStackByName(name) != null;
-        if (!exists && triesLeft != 0) {
-            try {
-                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-            } catch (InterruptedException ie) {
-                LOGGER.info("Thread interrupted", ie);
-            }
-            return isStackExists(client, name, --triesLeft);
-        }
-        return exists;
     }
 
     @Override
