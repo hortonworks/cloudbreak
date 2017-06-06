@@ -33,6 +33,12 @@ type BlueprintRequest struct {
 	*/
 	Description *string `json:"description,omitempty"`
 
+	/* input parameters of the blueprint
+
+	Unique: true
+	*/
+	Inputs []*BlueprintParameter `json:"inputs,omitempty"`
+
 	/* name of the resource
 
 	Required: true
@@ -55,6 +61,11 @@ func (m *BlueprintRequest) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateDescription(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateInputs(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -87,6 +98,29 @@ func (m *BlueprintRequest) validateDescription(formats strfmt.Registry) error {
 
 	if err := validate.MaxLength("description", "body", string(*m.Description), 1000); err != nil {
 		return err
+	}
+	return nil
+}
+
+func (m *BlueprintRequest) validateInputs(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Inputs) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("inputs", "body", m.Inputs); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.Inputs); i++ {
+
+		if m.Inputs[i] != nil {
+
+			if err := m.Inputs[i].Validate(formats); err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil

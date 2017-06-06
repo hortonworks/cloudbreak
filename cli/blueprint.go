@@ -144,6 +144,7 @@ func createBlueprintRequest(skeleton ClusterSkeleton, blueprint *models_cloudbre
 		Name:            blueprintName,
 		AmbariBlueprint: blueprint.AmbariBlueprint,
 		Properties:      skeleton.Configurations,
+		Inputs:          blueprint.Inputs,
 	}
 
 	return &bpRequest
