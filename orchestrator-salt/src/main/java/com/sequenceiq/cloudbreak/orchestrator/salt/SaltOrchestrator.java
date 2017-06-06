@@ -209,6 +209,18 @@ public class SaltOrchestrator implements HostOrchestrator {
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
             runSaltCommand(sc, new GrainRemoveRunner(server, allNodes, "roles", "ambari_server_standby", Compound.CompoundType.IP), exitCriteriaModel);
 
+            // remove minion key from all remaining gateway nodes
+            for (GatewayConfig gatewayConfig : allGatewayConfigs) {
+                if (!gatewayConfig.getHostname().equals(formerGateway.getHostname())) {
+                    try (SaltConnector sc1 = new SaltConnector(gatewayConfig, restDebug)) {
+                        LOGGER.info("Removing minion key '{}' from gateway '{}'", formerGateway.getHostname(), gatewayConfig.getHostname());
+                        sc1.wheel("key.delete", Collections.singleton(formerGateway.getHostname()), Object.class);
+                    } catch (Exception ex) {
+                        LOGGER.error("Unsuccessful key removal from gateway: " + gatewayConfig.getHostname(), ex);
+                    }
+                }
+            }
+
             // salt '*' state.highstate
             runNewService(sc, new HighStateRunner(server, allNodes), exitCriteriaModel);
         } catch (Exception e) {
@@ -217,15 +229,6 @@ public class SaltOrchestrator implements HostOrchestrator {
                 throw (CloudbreakOrchestratorFailedException) e.getCause();
             }
             throw new CloudbreakOrchestratorFailedException(e);
-        }
-        for (GatewayConfig gatewayConfig : allGatewayConfigs) {
-            if (!gatewayConfig.getHostname().equals(formerGateway.getHostname())) {
-                try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
-                    sc.wheel("key.delete", Collections.singleton(formerGateway.getHostname()), Object.class);
-                } catch (Exception ex) {
-                    LOGGER.error("Unsuccessful key removal from gateway: " + gatewayConfig.getHostname(), ex);
-                }
-            }
         }
     }
 

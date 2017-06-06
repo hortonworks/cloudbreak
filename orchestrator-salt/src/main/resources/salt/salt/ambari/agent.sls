@@ -58,8 +58,8 @@ reduce_connect_retry_delay:
 set_ambari_server_address:
   file.replace:
     - name: /etc/ambari-agent/conf/ambari-agent.ini
-    - pattern: "hostname.*=.*localhost"
-    - repl: "hostname={{ ambari.server_address }}"
+    - pattern: "^hostname[ ]{0,1}=.*"
+    - repl: "hostname=ambari-server.{{ ambari.cluster_domain }}"
 
 set_public_hostname_script:
   file.replace:
@@ -109,7 +109,7 @@ start-ambari-agent:
     - enable: True
     - name: ambari-agent
     - watch:
-        - file: /etc/systemd/system/ambari-agent.service
+      - file: /etc/systemd/system/ambari-agent.service
 
 {% else %}
 
@@ -120,7 +120,6 @@ disable-ambari-agent-sysv:
   cmd.run:
     - name: chkconfig ambari-agent off
     - onlyif: chkconfig --list ambari-agent | grep on
-
 
 /etc/init/ambari-agent.override:
   file.managed:
