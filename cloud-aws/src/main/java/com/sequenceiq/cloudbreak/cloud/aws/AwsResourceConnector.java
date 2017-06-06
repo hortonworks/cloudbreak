@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -26,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 import freemarker.template.Configuration;
 
@@ -146,9 +147,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Value("${cb.aws.vpc:}")
     private String cloudbreakVpc;
 
-    @Value("${cb.aws.termination.retries:10}")
-    private int terminationRetries;
-
     @Value("${cb.nginx.port:9443}")
     private int gatewayPort;
 
@@ -160,6 +158,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
     @Value("${cb.default.gateway.cidr:}")
     private String defaultGatewayCidr;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
@@ -473,7 +475,20 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             String cFStackName = stackResource.getName();
             LOGGER.info("Deleting CloudFormation stack for stack: {} [cf stack id: {}]", cFStackName, ac.getCloudContext().getId());
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
-            if (!isStackExists(cfClient, cFStackName, describeStacksRequest, terminationRetries)) {
+            try {
+                retryService.testWith2SecDelayMax5Times(() -> {
+                    try {
+                        cfClient.describeStacks(describeStacksRequest);
+                    } catch (AmazonServiceException e) {
+                        if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
+                            throw e;
+                        }
+                        throw new Retry.ActionWentFail();
+                    }
+                    return Boolean.TRUE;
+                });
+            } catch (Retry.ActionWentFail af) {
+                LOGGER.info(String.format("Stack not found with name: %s", cFStackName));
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
                 releaseReservedIp(amazonEC2Client, resources);
                 return Collections.emptyList();
@@ -499,27 +514,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             LOGGER.info("No CloudFormation stack saved for stack.");
         }
         return check(ac, resources);
-    }
-
-    private boolean isStackExists(AmazonCloudFormationClient cfClient, String cFStackName, DescribeStacksRequest describeStacksRequest, int triesLeft) {
-        try {
-            cfClient.describeStacks(describeStacksRequest);
-        } catch (AmazonServiceException e) {
-            if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
-                throw e;
-            }
-            if (triesLeft != 0) {
-                try {
-                    Thread.sleep(TimeUnit.SECONDS.toMillis(1));
-                } catch (InterruptedException ie) {
-                    LOGGER.info("Thread interrupted", ie);
-                }
-                return isStackExists(cfClient, cFStackName, describeStacksRequest, --triesLeft);
-            }
-            return false;
-        }
-
-        return true;
     }
 
     private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack) {
