@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
@@ -13,6 +14,7 @@ import org.openstack4j.model.heat.Stack;
 import org.openstack4j.model.heat.StackUpdate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
@@ -40,6 +42,9 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackResourceConnector.class);
 
     private static final long OPERATION_TIMEOUT = 60L;
+
+    @Value("${cb.openstack.termination.retries:10}")
+    private int terminationRetries;
 
     @Inject
     private OpenStackClient openStackClient;
@@ -127,7 +132,6 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> terminate(AuthenticatedContext authenticatedContext, CloudStack cloudStack, List<CloudResource> resources) {
-
         for (CloudResource resource : resources) {
             switch (resource.getType()) {
                 case HEAT_STACK:
@@ -135,14 +139,28 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                     String stackName = utils.getStackName(authenticatedContext);
                     LOGGER.info("Terminate stack: {}", stackName);
                     OSClient client = openStackClient.createOSClient(authenticatedContext);
-                    client.heat().stacks().delete(stackName, heatStackId);
+                    if (isStackExists(client, stackName, terminationRetries)) {
+                        client.heat().stacks().delete(stackName, heatStackId);
+                    }
                     break;
                 default:
                     throw new CloudConnectorException(String.format("Invalid resource type: %s", resource.getType()));
             }
         }
-
         return check(authenticatedContext, resources);
+    }
+
+    private boolean isStackExists(OSClient client, String name, int triesLeft) {
+        boolean exists = client.heat().stacks().getStackByName(name) != null;
+        if (!exists && triesLeft != 0) {
+            try {
+                Thread.sleep(TimeUnit.SECONDS.toMillis(1));
+            } catch (InterruptedException ie) {
+                LOGGER.info("Thread interrupted", ie);
+            }
+            return isStackExists(client, name, --triesLeft);
+        }
+        return exists;
     }
 
     @Override
