@@ -43,7 +43,7 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
             if (!Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())) {
                 credential = credentialRepository.findOneByName(credentialSourceRequest.getSourceName(), identityUser.getAccount());
             } else {
-                credential = credentialRepository.findByIdInAccount(credentialSourceRequest.getSourceId(), identityUser.getAccount());
+                credential = credentialRepository.findOne(credentialSourceRequest.getSourceId());
             }
 
             if (credential == null) {

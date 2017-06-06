@@ -21,10 +21,6 @@
       "referenceConfiguration": "ranger_admin_username"
     },
     {
-      "name": "RANGER_ADMIN_PASSWORD",
-      "referenceConfiguration": "ranger_admin_password"
-    },
-    {
       "name": "S3_BUCKET",
       "referenceConfiguration": "s3.bucket"
     }
