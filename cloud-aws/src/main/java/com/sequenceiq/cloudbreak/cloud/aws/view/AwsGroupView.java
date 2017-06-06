@@ -28,8 +28,10 @@ public class AwsGroupView {
 
     private String cloudSecurityId;
 
+    private String subnetId;
+
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount,
-            Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId) {
+            Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId, String subnetId) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -41,6 +43,7 @@ public class AwsGroupView {
         this.volumeType = volumeType;
         this.rules = rules;
         this.cloudSecurityId = cloudSecurityId;
+        this.subnetId = subnetId;
     }
 
     public Integer getInstanceCount() {
@@ -89,5 +92,9 @@ public class AwsGroupView {
 
     public String getCloudSecurityId() {
         return cloudSecurityId;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
     }
 }

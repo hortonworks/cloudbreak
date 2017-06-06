@@ -300,7 +300,11 @@
         "AvailabilityZones" : [{ "Fn::GetAtt" : [ "PublicSubnet", "AvailabilityZone" ] }],
         "VPCZoneIdentifier" : [{ "Ref" : "PublicSubnet" }],
         <#else>
+        <#if group.subnetId??>
+        "VPCZoneIdentifier" : [ "${group.subnetId}" ],
+        <#else>
         "VPCZoneIdentifier" : [{ "Ref" : "SubnetId" }],
+        </#if>
         </#if>
         "LaunchConfigurationName" : { "Ref" : "AmbariNodeLaunchConfig${group.groupName?replace('_', '')}" },
         "MinSize" : 0,
