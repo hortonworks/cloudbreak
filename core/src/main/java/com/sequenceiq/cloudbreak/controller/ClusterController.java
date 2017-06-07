@@ -32,7 +32,6 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.FailureReport;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.UpdateClusterJson;
 import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
@@ -41,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfos;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -48,13 +48,11 @@ import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidato
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -144,13 +142,6 @@ public class ClusterController implements ClusterEndpoint {
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
         fileSystemValidator.validateFileSystem(stack.cloudPlatform(), cloudCredential, request.getFileSystem());
-        if (request.getRdsConfigJsons() != null && !request.getRdsConfigJsons().isEmpty()) {
-            for (RDSConfigRequest rdsConfigJson : request.getRdsConfigJsons()) {
-                validateRdsConnection(rdsConfigJson);
-                RDSConfig rdsConfig = rdsConfigService.createIfNotExists(user, conversionService.convert(rdsConfigJson, RDSConfig.class));
-                request.getRdsConfigIds().add(rdsConfig.getId());
-            }
-        }
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stackId, user,
                 request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
@@ -166,12 +157,6 @@ public class ClusterController implements ClusterEndpoint {
         components = addAmbariDatabaseConfig(components, request, cluster);
         Cluster resp = clusterService.create(user, stackId, cluster, components);
         return conversionService.convert(resp, ClusterResponse.class);
-    }
-
-    private void validateRdsConnection(RDSConfigRequest request) {
-        if (request.isValidated()) {
-            rdsConnectionValidator.validateRdsConnection(request.getConnectionURL(), request.getConnectionUserName(), request.getConnectionPassword());
-        }
     }
 
     @Override

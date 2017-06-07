@@ -22,13 +22,14 @@ import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.RDSConfigJson;
+import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.ldapconfig.LdapConfigValidator;
+import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
@@ -98,6 +99,9 @@ public class ClusterDecorator implements Decorator<Cluster> {
     @Inject
     private ClusterService clusterService;
 
+    @Inject
+    private RdsConnectionValidator rdsConnectionValidator;
+
     @Override
     public Cluster decorate(Cluster subject, Object... data) {
         if (null == data || data.length != DecorationData.values().length) {
@@ -110,7 +114,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         Set<HostGroupRequest> hostGroupsJsons = (Set<HostGroupRequest>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
         BlueprintRequest requestBlueprint = (BlueprintRequest) data[DecorationData.BLUEPRINT.ordinal()];
         SssdConfigRequest requestSssd = (SssdConfigRequest) data[DecorationData.SSSDCONFIG.ordinal()];
-        Set<RDSConfigJson> requestRdsConfigs = (Set<RDSConfigJson>) data[DecorationData.RDSCONFIG.ordinal()];
+        Set<RDSConfigRequest> requestRdsConfigs = (Set<RDSConfigRequest>) data[DecorationData.RDSCONFIG.ordinal()];
         LdapConfigRequest ldapConfigRequest = (LdapConfigRequest) data[DecorationData.LDAP_CONFIG.ordinal()];
         Set<Long> rdsConfigIds = (Set<Long>) data[DecorationData.RDSCONFIG_ID.ordinal()];
         Long sssdConfigId = (Long) data[DecorationData.SSSDCONFIG_ID.ordinal()];
@@ -222,7 +226,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         }
     }
 
-    private void prepareRds(Cluster subject, IdentityUser user, Set<Long> rdsConfigIds, Set<RDSConfigJson> requestRdsConfigs, Stack stack) {
+    private void prepareRds(Cluster subject, IdentityUser user, Set<Long> rdsConfigIds, Set<RDSConfigRequest> requestRdsConfigs, Stack stack) {
         subject.setRdsConfigs(new HashSet<>());
         if (rdsConfigIds != null && !rdsConfigIds.isEmpty()) {
             for (Long rdsConfigId : rdsConfigIds) {
@@ -231,10 +235,16 @@ public class ClusterDecorator implements Decorator<Cluster> {
             }
         }
         if (requestRdsConfigs != null && !requestRdsConfigs.isEmpty()) {
-            for (RDSConfigJson requestRdsConfig : requestRdsConfigs) {
+            for (RDSConfigRequest requestRdsConfig : requestRdsConfigs) {
+                if (requestRdsConfig.isValidated()) {
+                    rdsConnectionValidator.validateRdsConnection(
+                            requestRdsConfig.getConnectionURL(),
+                            requestRdsConfig.getConnectionUserName(),
+                            requestRdsConfig.getConnectionPassword());
+                }
                 RDSConfig rdsConfig = conversionService.convert(requestRdsConfig, RDSConfig.class);
                 rdsConfig.setPublicInAccount(stack.isPublicInAccount());
-                rdsConfig = rdsConfigService.create(user, rdsConfig);
+                rdsConfig = rdsConfigService.createIfNotExists(user, rdsConfig);
                 subject.getRdsConfigs().add(rdsConfig);
             }
         }
