@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
@@ -17,42 +18,70 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     Stack findOne(@Param("id") Long id);
 
+    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
     Stack findById(@Param("id") Long id);
 
+    @Query("SELECT c FROM Stack c WHERE c.id= :id")
     Stack findByIdLazy(@Param("id") Long id);
 
+    @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.cluster.ambariIp= :ambariIp AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.owner= :user AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<Stack> findForUser(@Param("user") String user);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.hostGroups WHERE ((s.account= :account AND s.publicInAccount= true) OR s.owner= :user) "
+            + "AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<Stack> findPublicInAccountForUser(@Param("user") String user, @Param("account") String account);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "LEFT JOIN FETCH s.cluster c LEFT JOIN FETCH c.hostGroups WHERE s.account= :account AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<Stack> findAllInAccount(@Param("account") String account);
 
+    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
     Stack findOneWithLists(@Param("id") Long id);
 
+    @Query("SELECT distinct c FROM Stack c LEFT JOIN FETCH c.instanceGroups ig WHERE ig.template.id= :id")
     List<Stack> findAllStackForTemplate(@Param("id") Long id);
 
+    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.cluster.id= :id")
     Stack findStackForCluster(@Param("id") Long id);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.id= :id and s.account= :account")
     Stack findByIdInAccount(@Param("id") Long id, @Param("account") String account);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)")
     Stack findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
+    @Query("SELECT t FROM Stack t LEFT JOIN FETCH t.resources LEFT JOIN FETCH t.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE t.owner= :owner and t.name= :name")
     Stack findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
+    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE c.name= :name and c.account= :account")
     Stack findOneByName(@Param("name") String name, @Param("account") String account);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.securityConfig WHERE s.id= :id")
     Stack findByIdWithSecurityConfig(@Param("id") Long id);
 
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED'")
     List<Stack> findAllAlive();
 
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'REQUESTED' "
+            + "AND s.stackStatus.status <> 'CREATE_IN_PROGRESS'")
     List<Stack> findAllAliveAndProvisioned();
 
+    @Query("SELECT s FROM Stack s WHERE s.stackStatus.status IN :statuses")
     List<Stack> findByStatuses(@Param("statuses") List<Status> statuses);
 
-    Set<Long> findStacksWithoutEvents();
-
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.cluster LEFT JOIN FETCH s.credential LEFT JOIN FETCH s.network LEFT JOIN FETCH s.orchestrator "
+            + "LEFT JOIN FETCH s.stackStatus LEFT JOIN FETCH s.securityConfig LEFT JOIN FETCH s.failurePolicy WHERE s.stackStatus.status <> 'DELETE_COMPLETED' "
+            + "AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'")
     Set<Stack> findAliveOnes();
 
     Long countByFlexSubscription(FlexSubscription flexSubscription);

@@ -5,17 +5,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(
-                name = "Container.findContainersInCluster",
-                query = "SELECT c FROM Container c "
-                        + "WHERE c.cluster.id= :clusterId")
-})
 public class Container {
 
     @Id

@@ -7,8 +7,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -20,44 +18,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })
 })
-@NamedQueries({
-        @NamedQuery(
-                name = "Credential.findForUser",
-                query = "SELECT c FROM Credential c "
-                        + "WHERE c.owner= :user"
-                        + " AND c.archived IS FALSE"),
-        @NamedQuery(
-                name = "Credential.findPublicInAccountForUser",
-                query = "SELECT c FROM Credential c "
-                        + "WHERE ((c.account= :account AND c.publicInAccount= true) OR c.owner= :user)"
-                        + " AND c.archived IS FALSE"),
-        @NamedQuery(
-                name = "Credential.findOneByName",
-                query = "SELECT b FROM Credential b "
-                        + "WHERE b.name= :name AND b.account= :account"
-                        + " AND b.archived IS FALSE"),
-        @NamedQuery(
-                name = "Credential.findAllInAccount",
-                query = "SELECT c FROM Credential c "
-                        + "WHERE c.account= :account"
-                        + " AND c.archived IS FALSE"),
-        @NamedQuery(
-                name = "Credential.findByIdInAccount",
-                query = "SELECT c FROM Credential c "
-                        + "WHERE c.id= :id AND c.account= :account"
-                        + " AND c.archived IS FALSE"),
-        @NamedQuery(
-                name = "Credential.findByNameInAccount",
-                query = "SELECT c FROM Credential c "
-                        + "WHERE c.name= :name AND ((c.publicInAccount=true and c.account= :account) OR c.owner= :owner)"
-                        + " AND c.archived IS FALSE"),
-        @NamedQuery(
-                name = "Credential.findByNameInUser",
-                query = "SELECT c FROM Credential c "
-                        + "WHERE c.owner= :owner and c.name= :name"
-                        + " AND c.archived IS FALSE")
-})
-
 public class Credential {
 
     @Id

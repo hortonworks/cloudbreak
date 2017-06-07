@@ -8,8 +8,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -21,28 +19,6 @@ import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 @Entity
 @Table(name = "ldapconfig", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"account", "name"})
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "LdapConfig.findForUser",
-                query = "SELECT c FROM LdapConfig c "
-                        + "WHERE c.owner= :owner"),
-        @NamedQuery(
-                name = "LdapConfig.findPublicInAccountForUser",
-                query = "SELECT c FROM LdapConfig c "
-                        + "WHERE (c.account= :account AND c.publicInAccount= true) "
-                        + "OR c.owner= :owner"),
-        @NamedQuery(
-                name = "LdapConfig.findAllInAccount",
-                query = "SELECT c FROM LdapConfig c "
-                        + "WHERE c.account= :account "),
-        @NamedQuery(
-                name = "LdapConfig.findByNameForUser",
-                query = "SELECT c FROM LdapConfig c "
-                        + "WHERE c.name= :name and c.owner= :owner "),
-        @NamedQuery(
-                name = "LdapConfig.findByNameInAccount",
-                query = "SELECT c FROM LdapConfig c WHERE c.name= :name and c.account= :account")
 })
 public class LdapConfig implements ProvisionEntity {
 

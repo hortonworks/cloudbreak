@@ -59,7 +59,7 @@ public class RdsConfigService {
 
     public Set<RDSConfig> retrieveAccountRdsConfigs(IdentityUser user) {
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return rdsConfigRepository.findAllInAccount(user.getAccount());
+            return rdsConfigRepository.findAllBasedOnAccount(user.getAccount());
         } else {
             return rdsConfigRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
         }
@@ -83,7 +83,7 @@ public class RdsConfigService {
     }
 
     public void delete(String name, IdentityUser user) {
-        RDSConfig rdsConfig = rdsConfigRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        RDSConfig rdsConfig = rdsConfigRepository.findByNameBasedOnAccount(name, user.getAccount(), user.getUserId());
         if (rdsConfig == null) {
             throw new NotFoundException(String.format("RDS configuration '%s' not found.", name));
         }

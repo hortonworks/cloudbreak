@@ -29,8 +29,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -48,33 +46,6 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 @Entity
 @Table(name = "Cluster", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"account", "name"})
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "Cluster.findAllClustersByRDSConfig",
-                query = "SELECT c FROM Cluster c inner join c.rdsConfigs rc "
-                        + "WHERE rc.id= :id"),
-        @NamedQuery(
-                name = "Cluster.findOneWithLists",
-                query = "SELECT c FROM Cluster c "
-                        + "LEFT JOIN FETCH c.hostGroups "
-                        + "LEFT JOIN FETCH c.containers "
-                        + "LEFT JOIN FETCH c.components "
-                        + "LEFT JOIN FETCH c.rdsConfigs "
-                        + "WHERE c.id= :id"),
-        @NamedQuery(
-                name = "Cluster.findByStatuses",
-                query = "SELECT c FROM Cluster c "
-                        + "WHERE c.status IN :statuses"
-        ),
-        @NamedQuery(
-                name = "Cluster.findByNameInAccount",
-                query = "SELECT c FROM Cluster c "
-                        + "WHERE c.name= :name and c.account= :account"),
-        @NamedQuery(
-                name = "Cluster.findAllClustersForConstraintTemplate",
-                query = "SELECT c FROM Cluster c inner join c.hostGroups hg "
-                        + "WHERE hg.constraint.constraintTemplate.id = :id"),
 })
 public class Cluster implements ProvisionEntity {
 

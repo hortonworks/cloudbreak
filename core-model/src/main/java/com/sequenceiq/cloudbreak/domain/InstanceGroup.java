@@ -13,8 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -24,12 +22,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(name = "InstanceGroup.findOneByGroupNameInStack",
-                query = "SELECT i from InstanceGroup i "
-                        + "WHERE i.stack.id = :stackId "
-                        + "AND i.groupName = :groupName")
-})
 public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
 
     @Id

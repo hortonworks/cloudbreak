@@ -9,8 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -22,50 +20,6 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" }),
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "Template.findForUser",
-                query = "SELECT t FROM Template t "
-                        + "WHERE t.owner= :user AND deleted IS NOT TRUE "
-                        + "AND t.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "Template.findPublicInAccountForUser",
-                query = "SELECT t FROM Template t "
-                        + "WHERE ((t.account= :account AND t.publicInAccount= true) "
-                        + "OR t.owner= :user) AND deleted IS NOT TRUE "
-                        + "AND t.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "Template.findAllInAccount",
-                query = "SELECT t FROM Template t "
-                        + "WHERE t.account= :account AND deleted IS NOT TRUE "
-                        + "AND t.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "Template.findOneByName",
-                query = "SELECT t FROM Template t "
-                        + "WHERE t.name= :name and t.account= :account AND deleted IS NOT TRUE "
-                        + "AND t.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "Template.findByIdInAccount",
-                query = "SELECT t FROM Template t "
-                        + "WHERE t.id= :id and t.account= :account AND deleted IS NOT TRUE "
-                        + "AND t.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "Template.findByNameInAccount",
-                query = "SELECT t FROM Template t "
-                        + "WHERE t.name= :name and ((t.account= :account and t.publicInAccount=true) or t.owner= :owner) "
-                        + "AND deleted IS NOT TRUE "
-                        + "AND t.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "Template.findByNameInUser",
-                query = "SELECT t FROM Template t "
-                        + "WHERE t.owner= :owner and t.name= :name AND deleted IS NOT TRUE "
-                        + "AND t.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "Template.findAllDefaultInAccount",
-                query = "SELECT t FROM Template t "
-                        + "WHERE t.account= :account "
-                        + "AND (t.status = 'DEFAULT_DELETED' OR t.status = 'DEFAULT') ")
 })
 public class Template {
 

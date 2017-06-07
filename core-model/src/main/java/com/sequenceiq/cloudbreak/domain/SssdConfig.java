@@ -7,8 +7,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -20,28 +18,6 @@ import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 @Entity
 @Table(name = "sssdconfig", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "SssdConfig.findForUser",
-                query = "SELECT c FROM SssdConfig c "
-                        + "WHERE c.owner= :owner"),
-        @NamedQuery(
-                name = "SssdConfig.findPublicInAccountForUser",
-                query = "SELECT c FROM SssdConfig c "
-                        + "WHERE (c.account= :account AND c.publicInAccount= true) "
-                        + "OR c.owner= :owner"),
-        @NamedQuery(
-                name = "SssdConfig.findAllInAccount",
-                query = "SELECT c FROM SssdConfig c "
-                        + "WHERE c.account= :account "),
-        @NamedQuery(
-                name = "SssdConfig.findByNameForUser",
-                query = "SELECT c FROM SssdConfig c "
-                        + "WHERE c.name= :name and c.owner= :owner "),
-        @NamedQuery(
-                name = "SssdConfig.findByNameInAccount",
-                query = "SELECT c FROM SssdConfig c WHERE c.name= :name and c.account= :account")
 })
 public class SssdConfig implements ProvisionEntity {
 
