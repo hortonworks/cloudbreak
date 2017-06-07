@@ -2,7 +2,7 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
-## [v1.15.0]
+## [v1.16.0]
 
 ### Added
 
