@@ -14,6 +14,8 @@ public class HDPRepo {
 
     private Map<String, String> util;
 
+    private Map<String, String> knox;
+
     private boolean verify = true;
 
     private String hdpVersion;
@@ -32,6 +34,14 @@ public class HDPRepo {
 
     public void setUtil(Map<String, String> util) {
         this.util = util;
+    }
+
+    public Map<String, String> getKnox() {
+        return knox;
+    }
+
+    public void setKnox(Map<String, String> knox) {
+        this.knox = knox;
     }
 
     public boolean isVerify() {
