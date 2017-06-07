@@ -16,7 +16,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -64,6 +63,7 @@ import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.network.NetworkUtils;
+import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
@@ -152,6 +152,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         String ambariIp = stackUtil.extractAmbariIp(source.getStack());
         clusterResponse.setAmbariServerIp(ambariIp);
         clusterResponse.setUserName(source.getUserName());
+        clusterResponse.setExecutorType(source.getExecutorType());
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
         clusterResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups()));
         clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source, ambariIp));

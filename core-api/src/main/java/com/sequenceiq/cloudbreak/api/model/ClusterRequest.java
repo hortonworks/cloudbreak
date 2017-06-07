@@ -124,6 +124,9 @@ public class ClusterRequest {
     @ApiModelProperty(value = ClusterModelDescription.CUSTOM_QUEUE)
     private String customQueue;
 
+    @ApiModelProperty(value = ClusterModelDescription.EXECUTOR_TYPE)
+    private ExecutorType executorType = ExecutorType.DEFAULT;
+
     @ApiModelProperty(value = ClusterModelDescription.CONNECTED_CLUSTER)
     private ConnectedClusterRequest connectedCluster;
 
@@ -374,5 +377,13 @@ public class ClusterRequest {
 
     public void setConnectedCluster(ConnectedClusterRequest connectedCluster) {
         this.connectedCluster = connectedCluster;
+    }
+
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
     }
 }

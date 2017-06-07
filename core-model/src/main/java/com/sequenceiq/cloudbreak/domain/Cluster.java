@@ -38,6 +38,7 @@ import javax.persistence.UniqueConstraint;
 import org.hibernate.annotations.Type;
 
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
+import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -75,6 +76,9 @@ public class Cluster implements ProvisionEntity {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @Enumerated(EnumType.STRING)
+    private ExecutorType executorType;
 
     private Long creationStarted;
 
@@ -516,5 +520,13 @@ public class Cluster implements ProvisionEntity {
 
     public void setComponents(Set<ClusterComponent> components) {
         this.components = components;
+    }
+
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
     }
 }

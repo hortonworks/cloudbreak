@@ -98,6 +98,9 @@ public class ClusterResponse {
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 
+    @ApiModelProperty(value = ClusterModelDescription.EXECUTOR_TYPE)
+    private ExecutorType executorType;
+
     private GatewayJson gateway;
 
     @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
@@ -388,5 +391,13 @@ public class ClusterResponse {
 
     public void setCustomQueue(String customQueue) {
         this.customQueue = customQueue;
+    }
+
+    public ExecutorType getExecutorType() {
+        return executorType;
+    }
+
+    public void setExecutorType(ExecutorType executorType) {
+        this.executorType = executorType;
     }
 }

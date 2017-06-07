@@ -5,6 +5,7 @@ base:
     - java
     - metadata
     - nginx
+    - docker
 
   'roles:kerberos_server_master':
     - match: grain

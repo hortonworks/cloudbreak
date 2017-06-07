@@ -86,6 +86,20 @@ modify_hadoop_env_template:
   cmd.run:
     - name: /opt/javaagent.sh
 
+{% if ambari.is_container_executor %}
+
+/opt/setup_container_executor_server.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/setup_container_executor_server.sh
+    - mode: 744
+
+modify_container_executor_template_server:
+  cmd.run:
+    - name: /opt/setup_container_executor_server.sh
+
+{% endif %}
+
 add_amazon2017_patch_script_server:
   file.managed:
     - name: /tmp/amazon2017.sh

@@ -1,0 +1,2 @@
+docker:
+  enableContainerExecutor: false

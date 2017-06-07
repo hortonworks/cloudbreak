@@ -44,6 +44,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setEmailNeeded(source.getEmailNeeded());
         cluster.setUserName(source.getUserName());
         cluster.setPassword(source.getPassword());
+        cluster.setExecutorType(source.getExecutorType());
         Boolean enableSecurity = source.getEnableSecurity();
         cluster.setSecure(enableSecurity == null ? false : enableSecurity);
         convertKnox(source, cluster);

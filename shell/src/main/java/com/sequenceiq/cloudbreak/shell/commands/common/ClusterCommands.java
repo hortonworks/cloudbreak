@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.CustomContainerRequest;
+import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;
@@ -136,6 +137,7 @@ public class ClusterCommands implements BaseCommands {
                     String ambariDbImage,
             @CliOption(key = "customQueue", help = "Name of the custom queue for yarn orchestrator", mandatory = false,
                     unspecifiedDefaultValue = "default", specifiedDefaultValue = "default") String customQueue,
+            @CliOption(key = "executorType", help = "Executor type of yarn", mandatory = false) String executorType,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
         try {
@@ -204,6 +206,7 @@ public class ClusterCommands implements BaseCommands {
             clusterRequest.setHostGroups(hostGroupList);
             clusterRequest.setBlueprintInputs(new HashSet<>());
             clusterRequest.setCustomQueue(customQueue);
+            clusterRequest.setExecutorType(executorType == null ? ExecutorType.DEFAULT : ExecutorType.CONTAINER);
 
             if (enableKnoxGateway) {
                 // Check if Knox is configured in selected blueprint

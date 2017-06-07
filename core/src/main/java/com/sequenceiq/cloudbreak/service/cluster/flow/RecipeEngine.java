@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
+import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
@@ -76,6 +77,7 @@ public class RecipeEngine {
             configureSssd(stack, null);
             addFsRecipes(stack, hostGroups);
             addSmartSenseRecipe(stack, hostGroups);
+            addContainerExecutorScripts(stack, hostGroups);
             boolean recipesFound = recipesFound(hostGroups);
             if (recipesFound) {
                 orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
@@ -128,6 +130,23 @@ public class RecipeEngine {
                 }
             }
             addHDFSRecipe(cluster, blueprintText, hostGroups);
+        }
+    }
+
+    private void addContainerExecutorScripts(Stack stack, Set<HostGroup> hostGroups) {
+        try {
+            Cluster cluster = stack.getCluster();
+            if (cluster != null && ExecutorType.CONTAINER.equals(cluster.getExecutorType())) {
+                for (HostGroup hostGroup : hostGroups) {
+                    String script = FileReaderUtils.readFileFromClasspath("scripts/configure-container-executor.sh");
+                    RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
+                    Recipe recipe = recipeBuilder.buildRecipes("configure-container-executor",
+                            Collections.singletonList(recipeScript)).get(0);
+                    hostGroup.addRecipe(recipe);
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Cannot configure container executor", e);
         }
     }
 
