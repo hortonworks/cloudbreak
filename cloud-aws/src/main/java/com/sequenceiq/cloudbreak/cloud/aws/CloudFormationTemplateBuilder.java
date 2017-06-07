@@ -38,6 +38,7 @@ public class CloudFormationTemplateBuilder {
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         List<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
         int i = 0;
+        boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
             AwsGroupView groupView = new AwsGroupView(
@@ -52,7 +53,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityId(),
-                    getSubnetIds(context.existingSubnetIds, i, group));
+                    getSubnetIds(context.existingSubnetIds, i, group, multigw));
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
@@ -90,8 +91,8 @@ public class CloudFormationTemplateBuilder {
         }
     }
 
-    private String getSubnetIds(List<String> existingSubnetIds, int i, Group group) {
-        return group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds)
+    private String getSubnetIds(List<String> existingSubnetIds, int i, Group group, boolean multigw) {
+        return (multigw && group.getType() == InstanceGroupType.GATEWAY && !isNullOrEmptyList(existingSubnetIds))
                 ? existingSubnetIds.get(i % existingSubnetIds.size()) : null;
     }
 
