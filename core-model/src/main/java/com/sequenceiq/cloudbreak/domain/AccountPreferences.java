@@ -8,20 +8,12 @@ import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
 
 @Entity
 @Table(name = "account_preferences")
-@NamedQueries({
-        @NamedQuery(
-                name = "AccountPreferences.findByAccount",
-                query = "SELECT ap FROM AccountPreferences ap "
-                        + "WHERE ap.account= :account")
-})
 public class AccountPreferences {
     private static final String INSTANCE_TYPE_SEPARATOR = ",";
 

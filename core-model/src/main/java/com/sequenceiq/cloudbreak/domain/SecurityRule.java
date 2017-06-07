@@ -6,17 +6,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(
-                name = "SecurityGroup.findAllBySecurityGroupId",
-                query = "SELECT r FROM SecurityRule r "
-                        + "WHERE r.securityGroup.id= :securityGroupId")
-})
 public class SecurityRule implements ProvisionEntity {
     private static final String PORT_DELIMITER = ",";
 

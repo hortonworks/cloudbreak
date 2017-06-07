@@ -11,8 +11,6 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -23,61 +21,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 @Entity
 @Table(uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" }),
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "SecurityGroup.findById",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.id= :id"),
-        @NamedQuery(
-                name = "SecurityGroup.findOneById",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.id= :id"),
-        @NamedQuery(
-                name = "SecurityGroup.findByNameForUser",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.name= :name "
-                        + "AND r.owner= :owner "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "SecurityGroup.findByNameInAccount",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.name= :name "
-                        + "AND r.account= :account "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "SecurityGroup.findByName",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.name= :name "),
-        @NamedQuery(
-                name = "SecurityGroup.findForUser",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.owner= :owner "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "SecurityGroup.findPublicInAccountForUser",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE ((r.account= :account AND r.publicInAccount= true) OR r.owner= :owner) "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "SecurityGroup.findAllInAccount",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.account= :account "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "SecurityGroup.findAllDefaultInAccount",
-                query = "SELECT r FROM SecurityGroup r "
-                        + "LEFT JOIN FETCH r.securityRules "
-                        + "WHERE r.account= :account "
-                        + "AND (r.status = 'DEFAULT_DELETED' OR r.status = 'DEFAULT') ")
 })
 public class SecurityGroup {
 

@@ -11,8 +11,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -28,70 +26,6 @@ import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 @Entity
 @Table(name = "RDSConfig", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "account", "name" })
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "RDSConfig.findForUser",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE r.owner= :user "),
-        @NamedQuery(
-                name = "RDSConfig.findPublicInAccountForUser",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE ((r.account= :account AND r.publicInAccount= true) "
-                        + "OR r.owner= :user) "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "RDSConfig.findAllInAccount",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE r.account= :account "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "RDSConfig.findByNameInUser",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE r.owner= :owner and r.name= :name "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "RDSConfig.findOneByName",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE r.name= :name and r.account= :account "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "RDSConfig.findByClusterId",
-                query = "SELECT r FROM RDSConfig r "
-                        + "INNER JOIN r.clusters cluster "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE cluster.id= :clusterId AND "
-                        + "((r.account= :account AND r.publicInAccount= true) OR r.owner= :user)"),
-        @NamedQuery(
-                name = "RDSConfig.findByIdInAccount",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE  r.id= :id and r.account= :account "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "RDSConfig.findById",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE  r.id= :id "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "RDSConfig.findByNameInAccount",
-                query = "SELECT r FROM RDSConfig r "
-                        + "LEFT JOIN FETCH r.clusters "
-                        + "WHERE  r.name= :name and ((r.publicInAccount=true and r.account= :account) or r.owner= :owner) "
-                        + "AND r.status <> 'DEFAULT_DELETED' "),
-        @NamedQuery(
-                name = "RDSConfig.findByClusterIdAndType",
-                query = "SELECT r FROM RDSConfig r "
-                        + "INNER JOIN r.clusters cluster "
-                        + "WHERE cluster.id= :clusterId AND "
-                        + "((r.publicInAccount=true and r.account= :account) or r.owner= :user) "
-                        + "AND r.status <> 'DEFAULT_DELETED' AND r.type= :type")
 })
 public class RDSConfig {
 

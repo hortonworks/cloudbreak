@@ -8,8 +8,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
 import org.hibernate.annotations.Type;
@@ -18,65 +16,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(
-                name = "InstanceMetaData.findHostInStack",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.discoveryFQDN= :hostName "
-                        + "AND i.instanceStatus <> 'TERMINATED' "),
-        @NamedQuery(
-                name = "InstanceMetaData.findUnregisteredHostsInInstanceGroup",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id= :instanceGroupId "
-                        + "AND i.instanceStatus = 'UNREGISTERED'"),
-        @NamedQuery(
-                name = "InstanceMetaData.findUnusedHostsInInstanceGroup",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id= :instanceGroupId "
-                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED')"),
-
-        @NamedQuery(
-                name = "InstanceMetaData.findNotTerminatedForStack",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.instanceStatus <> 'TERMINATED' "),
-        @NamedQuery(
-                name = "InstanceMetaData.findAllInStack",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId"),
-        @NamedQuery(
-                name = "InstanceMetaData.findByInstanceId",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceId= :instanceId AND i.instanceGroup.stack.id= :stackId "),
-        @NamedQuery(
-                name = "InstanceMetaData.findAliveInstancesHostNamesInInstanceGroup",
-                query = "SELECT i.discoveryFQDN FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id = :instanceGroupId "
-                        + "AND i.instanceStatus <> 'TERMINATED' "),
-        @NamedQuery(
-                name = "InstanceMetaData.findAliveInstancesInInstanceGroup",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.id = :instanceGroupId "
-                        + "AND i.instanceStatus <> 'TERMINATED' "),
-        @NamedQuery(
-                name = "InstanceMetaData.findRemovableInstances",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.instanceGroup.groupName= :groupName "
-                        + "AND i.instanceStatus in ('CREATED', 'UNREGISTERED', 'DECOMMISSIONED', 'FAILED', 'STOPPED')"),
-        @NamedQuery(
-                name = "InstanceMetaData.findNotTerminatedByPrivateAddress",
-                query = "SELECT i FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.privateIp= :privateAddress "
-                        + "AND i.instanceStatus <> 'TERMINATED' "),
-        @NamedQuery(
-                name = "InstanceMetaData.getServerCertByStackId",
-                query = "SELECT i.serverCert FROM InstanceMetaData i "
-                        + "WHERE i.instanceGroup.stack.id= :stackId "
-                        + "AND i.instanceMetadataType = 'GATEWAY_PRIMARY'")
-})
 public class InstanceMetaData implements ProvisionEntity {
 
     @Id

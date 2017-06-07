@@ -10,21 +10,9 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(
-                name = "Topology.findAllInAccount",
-                query = "SELECT t FROM Topology t "
-                        + "WHERE t.account= :account AND deleted IS NOT TRUE "),
-        @NamedQuery(
-                name = "Topology.findByIdInAccount",
-                query = "SELECT t FROM Topology t "
-                        + "WHERE t.id= :id and t.account= :account AND deleted IS NOT TRUE "),
-})
 public class Topology {
 
     @Id

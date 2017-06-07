@@ -9,24 +9,12 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(
-                name = "Resource.findByStackIdAndNameAndType",
-                query = "SELECT r FROM Resource r "
-                        + "WHERE r.stack.id = :stackId AND r.resourceName = :name AND r.resourceType = :type"),
-        @NamedQuery(
-                name = "Resource.findByStackIdAndResourceNameOrReference",
-                query = "SELECT r FROM Resource r "
-                        + "WHERE r.stack.id = :stackId AND (r.resourceName = :resource OR r.resourceReference = :resource)")
-})
 public class Resource implements ProvisionEntity {
 
     @Id

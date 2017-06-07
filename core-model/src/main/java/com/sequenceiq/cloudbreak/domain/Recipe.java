@@ -11,8 +11,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -25,31 +23,6 @@ import com.sequenceiq.cloudbreak.common.type.RecipeType;
 @Entity
 @Table(name = "recipe", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"account", "name"})
-})
-@NamedQueries({
-        @NamedQuery(
-                name = "Recipe.findForUser",
-                query = "SELECT r FROM Recipe r "
-                        + "WHERE r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED')"),
-        @NamedQuery(
-                name = "Recipe.findPublicInAccountForUser",
-                query = "SELECT r FROM Recipe r "
-                        + "WHERE (r.account= :account AND r.publicInAccount= true AND r.recipeType NOT IN ('LEGACY','MIGRATED')) "
-                        + "OR (r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED'))"),
-        @NamedQuery(
-                name = "Recipe.findAllInAccount",
-                query = "SELECT r FROM Recipe r "
-                        + "WHERE r.account= :account AND r.recipeType NOT IN ('LEGACY','MIGRATED')"),
-        @NamedQuery(
-                name = "Recipe.findByNameForUser",
-                query = "SELECT r FROM Recipe r "
-                        + "WHERE r.name= :name AND r.owner= :owner AND r.recipeType NOT IN ('LEGACY','MIGRATED')"),
-        @NamedQuery(
-                name = "Recipe.findByNameInAccount",
-                query = "SELECT r FROM Recipe r WHERE r.name= :name AND r.account= :account"),
-        @NamedQuery(
-                name = "Recipe.findByType",
-                query = "SELECT r FROM Recipe r WHERE recipeType= :recipeType"),
 })
 public class Recipe implements ProvisionEntity {
 

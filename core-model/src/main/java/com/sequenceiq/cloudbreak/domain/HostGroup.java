@@ -13,8 +13,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -22,31 +20,6 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(
-                name = "HostGroup.findHostGroupsInCluster",
-                query = "SELECT h FROM HostGroup h "
-                        + "LEFT JOIN FETCH h.hostMetadata "
-                        + "LEFT JOIN FETCH h.recipes "
-                        + "WHERE h.cluster.id= :clusterId"),
-        @NamedQuery(
-                name = "HostGroup.findHostGroupInClusterByName",
-                query = "SELECT h FROM HostGroup h "
-                        + "LEFT JOIN FETCH h.hostMetadata "
-                        + "LEFT JOIN FETCH h.recipes "
-                        + "WHERE h.cluster.id= :clusterId "
-                        + "AND h.name= :hostGroupName"),
-        @NamedQuery(
-                name = "HostGroup.findAllHostGroupsByRecipe",
-                query = "SELECT h FROM HostGroup h "
-                        + "JOIN h.recipes r "
-                        + "WHERE r.id= :recipeId"),
-        @NamedQuery(
-                name = "HostGroup.findHostGroupsByInstanceGroupName",
-                query = "SELECT h FROM HostGroup h "
-                        + "WHERE h.cluster.id= :clusterId "
-                        + "AND h.constraint.instanceGroup.groupName= :instanceGroupName")
-})
 public class HostGroup {
 
     @Id

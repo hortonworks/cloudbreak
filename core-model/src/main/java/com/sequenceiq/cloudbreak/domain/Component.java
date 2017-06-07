@@ -9,8 +9,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.SequenceGenerator;
 
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -18,16 +16,6 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(
-                name = "Component.findComponentByStackIdComponentTypeName",
-                query = "SELECT cv FROM Component cv "
-                        + "WHERE cv.stack.id = :stackId AND cv.componentType = :componentType AND cv.name = :name"),
-        @NamedQuery(
-                name = "Component.findComponentByStackId",
-                query = "SELECT cv FROM Component cv WHERE cv.stack.id = :stackId"
-        )
-})
 public class Component {
 
     @Id
