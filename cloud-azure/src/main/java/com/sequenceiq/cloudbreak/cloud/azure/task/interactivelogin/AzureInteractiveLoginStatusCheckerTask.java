@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.MANAGEMENT_CORE_WINDOWS;
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.XPLAT_CLI_CLIENT_ID;
 
 import java.io.IOException;
 
 import javax.inject.Inject;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
@@ -20,7 +20,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -54,8 +53,6 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     private static final String PASSWORD = "cloudbreak";
 
     private final AzureInteractiveLoginStatusCheckerContext armInteractiveLoginStatusCheckerContext;
-
-    private Client client;
 
     @Inject
     private SubscriptionChecker subscriptionChecker;
@@ -100,7 +97,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
 
                 try {
                     String graphApiAccessToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), GRAPH_WINDOWS);
-                    String managementApiToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), AZURE_MANAGEMENT);
+                    String managementApiToken = createResourceToken(refreshToken, armCredentialView.getTenantId(), MANAGEMENT_CORE_WINDOWS);
                     subscriptionChecker.checkSubscription(armCredentialView.getSubscriptionId(), managementApiToken);
                     tenantChecker.checkTenant(armCredentialView.getTenantId(), managementApiToken);
 
@@ -174,7 +171,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
         Form pollingForm = new Form();
         pollingForm.param("grant_type", "device_code");
         pollingForm.param("client_id", XPLAT_CLI_CLIENT_ID);
-        pollingForm.param("resource", AzureInteractiveLogin.MANAGEMENT_CORE_WINDOWS);
+        pollingForm.param("resource", MANAGEMENT_CORE_WINDOWS);
         pollingForm.param("code", armInteractiveLoginStatusCheckerContext.getDeviceCode());
         return pollingForm;
     }
