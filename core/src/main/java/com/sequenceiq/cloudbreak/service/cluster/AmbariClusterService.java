@@ -739,6 +739,7 @@ public class AmbariClusterService implements ClusterService {
                 hdpRepo.setVerify(hdpRepoUpdate.isVerify());
                 hdpRepo.setStack(hdpRepoUpdate.getStack());
                 hdpRepo.setUtil(hdpRepoUpdate.getUtil());
+                hdpRepo.setKnox(hdpRepoUpdate.getKnox());
                 try {
                     component.setAttributes(new Json(hdpRepo));
                     clusterComponentConfigProvider.store(component);

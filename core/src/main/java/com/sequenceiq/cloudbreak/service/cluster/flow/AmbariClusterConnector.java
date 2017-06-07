@@ -716,8 +716,10 @@ public class AmbariClusterConnector {
                 LOGGER.info("Use specific Ambari repository: {}", hdpRepo);
                 Map<String, String> stackRepo = hdpRepo.getStack();
                 Map<String, String> utilRepo = hdpRepo.getUtil();
+//                Map<String, String> knoxRepo = hdpRepo.getKnox();
                 String stackRepoId = stackRepo.remove(HDPRepo.REPO_ID_TAG);
                 String utilRepoId = utilRepo.remove(HDPRepo.REPO_ID_TAG);
+//                String knoxRepoId = knoxRepo.remove(HDPRepo.REPO_ID_TAG);
                 stackRepo.remove(HDPRepo.MPACK_TAG);
                 String[] typeVersion = stackRepoId.split("-");
                 String stackType = typeVersion[0];
@@ -731,6 +733,9 @@ public class AmbariClusterConnector {
                 for (String os : utilRepo.keySet()) {
                     addRepository(ambariClient, stackType, version, os, utilRepoId, utilRepo.get(os), hdpRepo.isVerify());
                 }
+//                for (String os : knoxRepo.keySet()) {
+//                    addRepository(ambariClient, stackType, version, os, knoxRepoId, knoxRepo.get(os), hdpRepo.isVerify());
+//                }
             } catch (HttpResponseException e) {
                 String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
                 String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", hdpRepo.toString(), exceptionErrorMsg);
