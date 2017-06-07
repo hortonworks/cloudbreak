@@ -7,6 +7,7 @@ base:
     - recipes.init
     - unbound.forwarders
     - datalake.init
+    - docker
 
   'roles:gateway':
     - match: grain

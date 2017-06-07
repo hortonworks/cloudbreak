@@ -464,6 +464,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         enableSecurity: cluster.enableSecurity || false,
                         gateway: cluster.gateway,
                         kerberos: cluster.kerberos,
+                        executorType: cluster.executorType,
                         ldapRequired: cluster.ldapRequired || false,
                         sssdConfigId: cluster.sssdConfigId || null,
                         validateBlueprint: cluster.validateBlueprint,

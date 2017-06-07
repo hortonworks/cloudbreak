@@ -100,6 +100,16 @@
     </div>
 </div>
 
+<div class="form-group" ng-show="showAdvancedOptionForm">
+    <label class="col-sm-3 control-label" for="executortype">{{msg.cluster_form_executor_type}}</label>
+    <div class="col-sm-8">
+        <select class="form-control" id="executorType" ng-model="cluster.executorType">
+            <option value="CONTAINER">Container Executor</option>
+            <option value="DEFAULT">Default Executor</option>
+        </select>
+    </div>
+</div>
+
 <div class="form-group" ng-show="activeCredential && showAdvancedOptionForm && activeCredential.cloudPlatform !== 'BYOS'">
     <label class="col-sm-3 control-label" for="provisionCluster">Provision cluster </label>
     <div class="col-sm-8">

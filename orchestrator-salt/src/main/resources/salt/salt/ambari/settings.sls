@@ -8,6 +8,8 @@
 
 {% set is_predefined_repo = salt['pillar.get']('ambari:repo:predefined') %}
 
+{% set is_container_executor = salt['pillar.get']('docker:enableContainerExecutor') %}
+
 {% set version = salt['pillar.get']('ambari:repo:version') %}
 
 {% set ambari_database = salt['pillar.get']('ambari:database') %}
@@ -21,5 +23,6 @@
     'is_predefined_repo' : is_predefined_repo,
     'version': version,
     'ambari_database': ambari_database,
-    'cluster_domain': cluster_domain
+    'cluster_domain': cluster_domain,
+    'is_container_executor': is_container_executor
 }) %}

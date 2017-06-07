@@ -1308,6 +1308,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 onFailureAction: "DO_NOTHING",
                 bestEffort: "BEST_EFFORT",
                 validateBlueprint: true,
+                executorType: "DEFAULT",
                 gateway: {
                   enableGateway: false,
                   exposedServices: ['ALL']

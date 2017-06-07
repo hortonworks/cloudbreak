@@ -94,6 +94,20 @@ run_amazon2017_sh_agent:
     - require:
       - file: add_amazon2017_patch_script_agent
 
+{% if ambari.is_container_executor %}
+
+/opt/setup_container_executor_agent.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://ambari/scripts/setup_container_executor_agent.sh
+    - mode: 744
+
+modify_container_executor_template_agent:
+  cmd.run:
+    - name: /opt/setup_container_executor_agent.sh
+
+{% endif %}
+
 {% if ambari.is_systemd %}
 
 /etc/systemd/system/ambari-agent.service:

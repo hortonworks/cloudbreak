@@ -21,6 +21,7 @@ import javax.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -125,6 +126,7 @@ public class ClusterHostServiceRunner {
         AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
         servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
         saveLdapPillar(cluster.getLdapConfig(), servicePillar);
+        saveDockerPillar(cluster.getExecutorType(), servicePillar);
         saveHDPPillar(cluster.getId(), servicePillar);
         Map<String, Object> credentials = new HashMap<>();
         credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
@@ -143,6 +145,8 @@ public class ClusterHostServiceRunner {
         }
         return grainProperties;
     }
+
+
 
     /**
      * In order to be able to connect an ephemeral cluster to a datalake, the ephemeral cluster needs to know some of the datalake nameservers to resolve
@@ -209,6 +213,14 @@ public class ClusterHostServiceRunner {
         if (ldapConfig != null) {
             servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapConfig)));
         }
+    }
+
+    private void saveDockerPillar(ExecutorType executorType, Map<String, SaltPillarProperties> servicePillar) {
+        Map<String, Object> dockerMap = new HashMap<>();
+
+        dockerMap.put("enableContainerExecutor", ExecutorType.CONTAINER.equals(executorType) ? true : false);
+
+        servicePillar.put("docker", new SaltPillarProperties("/docker/init.sls", singletonMap("docker", dockerMap)));
     }
 
     private void saveHDPPillar(Long clusterId, Map<String, SaltPillarProperties> servicePillar) {

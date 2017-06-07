@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -373,6 +374,7 @@ public class TestUtil {
         gateway.setEnableGateway(true);
         gateway.setTopologyName("cb");
         cluster.setGateway(gateway);
+        cluster.setExecutorType(ExecutorType.DEFAULT);
         RDSConfig rdsConfig = new RDSConfig();
         Set<RDSConfig> rdsConfigs = new HashSet<>();
         rdsConfigs.add(rdsConfig);

@@ -41,6 +41,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
@@ -86,11 +87,12 @@ import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ContainerExecutorConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosContainerDnResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDomainResolver;
@@ -206,6 +208,9 @@ public class AmbariClusterConnector {
 
     @Inject
     private RDSConfigProvider rdsConfigProvider;
+
+    @Inject
+    private ContainerExecutorConfigProvider containerExecutorConfigProvider;
 
     @Inject
     private AutoRecoveryConfigProvider autoRecoveryConfigProvider;
@@ -351,6 +356,9 @@ public class AmbariClusterConnector {
         if (rdsConfigs != null && !rdsConfigs.isEmpty()) {
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, rdsConfigProvider.getConfigs(rdsConfigs), true);
             blueprintText = blueprintProcessor.removeComponentFromBlueprint("MYSQL_SERVER", blueprintText);
+        }
+        if (ExecutorType.CONTAINER.equals(stack.getCluster().getExecutorType())) {
+            blueprintText = containerExecutorConfigProvider.addToBlueprint(blueprintText);
         }
         blueprintText = autoRecoveryConfigProvider.addToBlueprint(blueprintText);
         return blueprintText;
