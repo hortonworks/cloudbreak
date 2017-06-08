@@ -168,6 +168,12 @@ public-ip-resolver-command() {
             fi
             return
         fi
+
+        #on azure
+        if curl -m 1 -f -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-03-01" &>/dev/null ; then
+            echo -n "curl -H Metadata:true 'http://169.254.169.254/metadata/instance?api-version=2017-03-01' | jq -r '.network.interface[].ipv4.ipaddress[] | select(.publicip != null and .publicip != \"\") | .publicip' | head -1"
+            return
+        fi
     fi
 }
 
