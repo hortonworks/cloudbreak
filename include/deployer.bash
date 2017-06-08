@@ -204,6 +204,8 @@ init-profile() {
         echo "Make backup of your secret, because used for data encryption !!!" | red
         echo "export UAA_DEFAULT_SECRET=$(uuidgen | sed 's/-//g')" >> $CBD_PROFILE
     fi
+
+    provider-and-region-init
 }
 
 load-profile() {
@@ -236,6 +238,40 @@ public-ip-init() {
             echo "echo export PUBLIC_IP=1.2.3.4 >> $CBD_PROFILE" | blue
             _exit 2
         fi
+    fi
+}
+
+provider-and-region-init() {
+    declare desc="Estimate the provider and the region of instance if they are defined in the Profile"
+
+    if ! [ "$CB_INSTANCE_PROVIDER" ] && ! [ "$CB_INSTANCE_REGION" ]; then
+        debug "Provider and region of the instance could not be found, estimating them..."
+        
+        export CB_INSTANCE_PROVIDER="unknown"
+        export CB_INSTANCE_REGION="unknown"
+        
+        if is_linux; then
+            # on gcp
+            if curl -m 1 -f -s -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
+                CB_INSTANCE_PROVIDER="gcp"
+                CB_INSTANCE_REGION=$(curl -m 1 -f -s -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/instance/zone | sed 's/.*\///g')
+            # on amazon
+            elif curl -m 1 -f -s 169.254.169.254/latest/dynamic &>/dev/null ; then
+                CB_INSTANCE_PROVIDER="aws"
+                CB_INSTANCE_REGION=$(curl -m 1 -f -s 169.254.169.254/latest/meta-data/placement/availability-zone)
+            # on openstack
+            elif curl -m 1 -f -s 169.254.169.254/latest &>/dev/null ; then
+                CB_INSTANCE_PROVIDER="openstack"
+                CB_INSTANCE_REGION=$(curl -m 1 -f -s 169.254.169.254/latest/meta-data/placement/availability-zone)
+            #on azure
+            elif curl -m 1 -f -s -H Metadata:true "http://169.254.169.254/metadata/instance?api-version=2017-03-01" &>/dev/null ; then
+                CB_INSTANCE_PROVIDER="azure"
+                CB_INSTANCE_REGION=$(curl -H Metadata:true 'http://169.254.169.254/metadata/instance?api-version=2017-03-01' | jq -r '.compute.location')
+            fi
+        fi
+
+        echo "export CB_INSTANCE_PROVIDER=$CB_INSTANCE_PROVIDER" >> $CBD_PROFILE
+        echo "export CB_INSTANCE_REGION=$CB_INSTANCE_REGION" >> $CBD_PROFILE
     fi
 }
 
