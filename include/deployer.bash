@@ -196,7 +196,7 @@ init-profile() {
     if ! [[ "$UAA_DEFAULT_SECRET" ]]; then
         info "Your secret is auto-generated in $CBD_PROFILE as UAA_DEFAULT_SECRET"
         echo "Make backup of your secret, because used for data encryption !!!" | red
-        echo "export UAA_DEFAULT_SECRET=$(uuidgen | md5)" >> $CBD_PROFILE
+        echo "export UAA_DEFAULT_SECRET=$(uuidgen | sed 's/-//g')" >> $CBD_PROFILE
     fi
 }
 
