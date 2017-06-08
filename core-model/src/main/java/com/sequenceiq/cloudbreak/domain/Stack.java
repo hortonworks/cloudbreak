@@ -145,6 +145,8 @@ public class Stack implements ProvisionEntity {
 
     private String uuid;
 
+    private Long datalakeId;
+
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
     }
@@ -552,5 +554,13 @@ public class Stack implements ProvisionEntity {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Long getDatalakeId() {
+        return datalakeId;
+    }
+
+    public void setDatalakeId(Long datalakeId) {
+        this.datalakeId = datalakeId;
     }
 }

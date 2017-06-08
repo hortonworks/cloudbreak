@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -59,7 +60,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             List<String> hostNames = failedNodes.getValue();
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
             InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
-            if (instanceGroup.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
+            if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 List<InstanceMetaData> primary = instanceMetadataRepository.findAllByInstanceGroup(instanceGroup).stream().filter(
                         imd -> hostNames.contains(imd.getDiscoveryFQDN())
                                 && imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).collect(Collectors.toList());
@@ -73,6 +74,12 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
             if (!event.isRemoveOnly()) {
                 flowChainTriggers.add(new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getStackId(),
                         hostGroupName, hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames)));
+                // we need to update all ephemeral clusters that are connected to a datalake
+                if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())
+                        && !stackService.findClustersConnectedToDatalake(event.getStackId()).isEmpty()) {
+                    flowChainTriggers.add(new EphemeralClustersUpgradeTriggerEvent(FlowChainTriggers.EPHEMERAL_CLUSTERS_UPDATE_TRIGGER_EVENT,
+                            event.getStackId(), event.accepted()));
+                }
             }
         }
         return flowChainTriggers;

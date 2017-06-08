@@ -105,6 +105,18 @@ public class ClusterServiceRunner {
         }
     }
 
+    public void updateSaltState(Long stackId) throws CloudbreakException {
+        Stack stack = stackService.getById(stackId);
+        Orchestrator orchestrator = stack.getOrchestrator();
+        OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
+        if (orchestratorType.containerOrchestrator()) {
+            LOGGER.info("Container orchestrator is not supported for this action.");
+        } else {
+            Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+            hostRunner.runAmbariServices(stack, cluster);
+        }
+    }
+
     public String changePrimaryGateway(Long stackId) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
         Orchestrator orchestrator = stack.getOrchestrator();

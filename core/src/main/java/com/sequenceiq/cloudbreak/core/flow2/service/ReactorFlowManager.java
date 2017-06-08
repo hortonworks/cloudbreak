@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.termination.ClusterTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEv
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -139,6 +141,11 @@ public class ReactorFlowManager {
     public void triggerClusterInstall(Long stackId) {
         String selector = CLUSTER_CREATION_EVENT.event();
         notify(selector, new StackEvent(selector, stackId));
+    }
+
+    public void triggerEphemeralUpdate(Long stackId) {
+        String selector = EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_TRIGGER_EVENT.event();
+        notify(selector, new EphemeralClusterUpdateTriggerEvent(selector, stackId));
     }
 
     public void triggerClusterReInstall(Long stackId) {
