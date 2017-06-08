@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -42,6 +42,9 @@ public class AwsConnector implements CloudConnector {
 
     @Inject
     private AwsTagValidator awsTagValidator;
+
+    @Inject
+    private AwsStackValidator awsStackValidator;
 
     @Inject
     private AwsAuthenticator awsAuthenticator;
@@ -88,7 +91,7 @@ public class AwsConnector implements CloudConnector {
 
     @Override
     public List<Validator> validators() {
-        return Collections.singletonList(awsTagValidator);
+        return Arrays.asList(awsTagValidator, awsStackValidator);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.heat;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnect
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackParameters;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackStackValidator;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackTagValidator;
 
 @Service
@@ -48,6 +49,9 @@ public class OpenStackHeatConnector implements CloudConnector {
 
     @Inject
     private OpenStackTagValidator openStackTagValidator;
+
+    @Inject
+    private OpenStackStackValidator openStackStackValidator;
 
     @Inject
     private OpenStackParameters openStackParameters;
@@ -94,7 +98,7 @@ public class OpenStackHeatConnector implements CloudConnector {
 
     @Override
     public List<Validator> validators() {
-        return Collections.singletonList(openStackTagValidator);
+        return Arrays.asList(openStackTagValidator, openStackStackValidator);
     }
 
     @Override
