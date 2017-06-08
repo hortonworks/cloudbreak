@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 /**
@@ -12,5 +13,5 @@ public interface Validator {
      *
      * @param cloudStack stack
      */
-    void validate(CloudStack cloudStack);
+    void validate(AuthenticatedContext ac, CloudStack cloudStack);
 }

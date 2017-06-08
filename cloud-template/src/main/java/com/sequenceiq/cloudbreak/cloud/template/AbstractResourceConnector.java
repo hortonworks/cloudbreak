@@ -59,20 +59,20 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), null, true);
 
         //network
-        List<CloudResourceStatus> networkStatuses = networkResourceService.buildResources(context, auth, stack.getNetwork(), stack.getCloudSecurity());
-        context.addNetworkResources(getCloudResources(networkStatuses));
+        List<CloudResourceStatus> cloudResourceStatuses = networkResourceService.buildResources(context, auth, stack.getNetwork(), stack.getCloudSecurity());
+        context.addNetworkResources(getCloudResources(cloudResourceStatuses));
 
         //group
         List<CloudResourceStatus> groupStatuses = groupResourceService.buildResources(context, auth, stack.getGroups(), stack.getNetwork(),
                 stack.getCloudSecurity());
-        networkStatuses.addAll(groupStatuses);
+        cloudResourceStatuses.addAll(groupStatuses);
 
         //compute
         List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack.getGroups(), stack.getImage(),
                 stack.getTags(), adjustmentType, threshold);
-        networkStatuses.addAll(computeStatuses);
+        cloudResourceStatuses.addAll(computeStatuses);
 
-        return networkStatuses;
+        return cloudResourceStatuses;
     }
 
     @Override
@@ -84,17 +84,17 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         ResourceBuilderContext context = contextBuilders.get(platform).contextInit(cloudContext, auth, stack.getNetwork(), cloudResources, false);
 
         //compute
-        List<CloudResourceStatus> computeStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
+        List<CloudResourceStatus> cloudResourceStatuses = computeResourceService.deleteResources(context, auth, cloudResources, false);
 
         //group
         List<CloudResourceStatus> groupStatuses = groupResourceService.deleteResources(context, auth, cloudResources, stack.getNetwork(), false);
-        computeStatuses.addAll(groupStatuses);
+        cloudResourceStatuses.addAll(groupStatuses);
 
         //network
         List<CloudResourceStatus> networkStatuses = networkResourceService.deleteResources(context, auth, cloudResources, stack.getNetwork(), false);
-        computeStatuses.addAll(networkStatuses);
+        cloudResourceStatuses.addAll(networkStatuses);
 
-        return computeStatuses;
+        return cloudResourceStatuses;
     }
 
     @Override

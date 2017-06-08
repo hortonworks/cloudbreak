@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.Validator;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
@@ -41,9 +42,10 @@ public class ProvisionValidationHandler implements CloudPlatformEventHandler<Val
         ValidationResult result;
         try {
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
+            AuthenticatedContext ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             CloudStack cloudStack = request.getCloudStack();
             for (Validator v : connector.validators()) {
-                v.validate(cloudStack);
+                v.validate(ac, cloudStack);
             }
             result = new ValidationResult(request);
         } catch (Exception e) {

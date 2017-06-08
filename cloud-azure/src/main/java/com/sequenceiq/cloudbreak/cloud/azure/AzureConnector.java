@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -32,6 +32,9 @@ public class AzureConnector implements CloudConnector {
     private AzureTagValidator azureTagValidator;
 
     @Inject
+    private AzureResourceGroupValidator azureResourceGroupValidator;
+
+    @Inject
     private AzureCredentialConnector azureCredentialConnector;
 
     @Inject
@@ -56,7 +59,7 @@ public class AzureConnector implements CloudConnector {
 
     @Override
     public List<Validator> validators() {
-        return Collections.singletonList(azureTagValidator);
+        return Arrays.asList(azureTagValidator, azureResourceGroupValidator);
     }
 
     public CredentialConnector credentials() {
