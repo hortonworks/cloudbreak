@@ -227,6 +227,10 @@ public class StackService {
         return stack;
     }
 
+    public Set<Stack> findClustersConnectedToDatalake(Long stackId) {
+        return stackRepository.findEphemeralClusters(stackId);
+    }
+
     public Stack getById(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
         if (retStack == null) {

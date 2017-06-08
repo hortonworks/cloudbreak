@@ -101,6 +101,7 @@ public class ReactorFlowManagerTest {
         flowManager.triggerManualRepairFlow(stackId);
         flowManager.triggerStackRepairFlow(stackId, new UnhealthyInstances());
         flowManager.triggerClusterRepairFlow(stackId, new HashMap<>(), true);
+        flowManager.triggerEphemeralUpdate(stackId);
 
         int count = 0;
         for (Method method : flowManager.getClass().getDeclaredMethods()) {

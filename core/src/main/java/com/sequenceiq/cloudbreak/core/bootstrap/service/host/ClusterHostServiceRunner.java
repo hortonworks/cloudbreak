@@ -157,16 +157,13 @@ public class ClusterHostServiceRunner {
      * the custom hostnames.
      */
     private void saveDatalakeNameservers(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
-        Json tags = stack.getTags();
-        if (tags != null && !tags.getMap().isEmpty()) {
-            Integer dataLakeId = (Integer) tags.getMap().get("datalakeId");
-            if (dataLakeId != null) {
-                Stack dataLakeStack = stackRepository.findOneWithLists(Long.valueOf(dataLakeId));
-                String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
-                List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
-                servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                        singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
-            }
+        Long datalakeId = stack.getDatalakeId();
+        if (datalakeId != null) {
+            Stack dataLakeStack = stackRepository.findOneWithLists(datalakeId);
+            String datalakeDomain = dataLakeStack.getGatewayInstanceMetadata().get(0).getDomain();
+            List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
+            servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
+                    singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
         }
     }
 
