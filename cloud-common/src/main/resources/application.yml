@@ -141,8 +141,8 @@ cb:
 
   ambari:
     repo:
-      version: 2.5.0.3-7
-      baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.0.3
+      version: 2.5.1.0
+      baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.1.0
       gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
@@ -166,12 +166,12 @@ cb:
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
             redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
       2.6:
-        version: 2.6.0.3
+        version: 2.6.1.0
         repo:
           stack:
             repoid: HDP-2.6
-            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.0.3
-            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.0.3
+            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.1.0
+            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.1.0
           util:
             repoid: HDP-UTILS-1.1.0.21
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
