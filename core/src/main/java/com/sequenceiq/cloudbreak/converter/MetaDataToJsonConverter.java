@@ -25,6 +25,7 @@ public class MetaDataToJsonConverter extends AbstractConversionServiceAwareConve
         metaDataJson.setDiscoveryFQDN(entity.getDiscoveryFQDN());
         metaDataJson.setInstanceGroup(entity.getInstanceGroup().getGroupName());
         metaDataJson.setInstanceStatus(entity.getInstanceStatus());
+        metaDataJson.setInstanceType(entity.getInstanceMetadataType());
         return metaDataJson;
     }
 }

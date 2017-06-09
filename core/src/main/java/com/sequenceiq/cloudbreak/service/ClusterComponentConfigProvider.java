@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -51,6 +52,16 @@ public class ClusterComponentConfigProvider {
             return component.getAttributes().get(AmbariRepo.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read Ambari repo", e);
+        }
+    }
+
+    public <T> T getComponent(List<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
+        try {
+            Optional<ClusterComponent> comp = components.stream().filter(
+                    c -> c.getComponentType() == componentType).findFirst();
+            return comp.isPresent() ? comp.get().getAttributes().get(clazz) : null;
+        } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read component", e);
         }
     }
 

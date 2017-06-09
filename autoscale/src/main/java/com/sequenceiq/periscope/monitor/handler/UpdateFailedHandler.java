@@ -1,7 +1,9 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.inject.Inject;
@@ -11,6 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.FailureReport;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
+import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.periscope.api.model.ClusterState;
@@ -26,6 +32,8 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateFailedHandler.class);
 
     private static final String DELETE_STATUSES_PREFIX = "DELETE_";
+
+    private static final String AVAILABLE = "AVAILABLE";
 
     private static final int RETRY_THRESHOLD = 5;
 
@@ -50,9 +58,14 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                 CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
                 StackResponse stackResponse = cloudbreakClient.stackEndpoint().get(cluster.getStackId(), new HashSet<>());
                 String stackStatus = stackResponse.getStatus().name();
+                String clusterStatus = stackResponse.getCluster().getStatus();
                 if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
                     clusterService.removeById(id);
                     LOGGER.info("Delete cluster due to failing update attempts and Cloudbreak stack status");
+                } else if (stackStatus.equals(AVAILABLE) && clusterStatus.equals(AVAILABLE)) {
+                    // Ambari server is unreacheable but the stack and cluster statuses are "AVAILABLE"
+                    reportAmbariServerFailure(cluster, stackResponse, cloudbreakClient);
+                    suspendCluster(cluster);
                 } else {
                     suspendCluster(cluster);
                 }
@@ -70,5 +83,19 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         cluster.setState(ClusterState.SUSPENDED);
         clusterService.save(cluster);
         LOGGER.info("Suspend cluster monitoring due to failing update attempts");
+    }
+
+    private void reportAmbariServerFailure(Cluster cluster, StackResponse stackResponse, CloudbreakClient cbClient) {
+        Optional<InstanceMetaDataJson> pgw = stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream()).filter(
+                im -> im.getInstanceType() == InstanceMetadataType.GATEWAY_PRIMARY && im.getInstanceStatus() != InstanceStatus.TERMINATED).findFirst();
+        if (pgw.isPresent()) {
+            FailureReport failureReport = new FailureReport();
+            failureReport.setFailedNodes(Collections.singletonList(pgw.get().getDiscoveryFQDN()));
+            try {
+                cbClient.clusterEndpoint().failureReport(cluster.getStackId(), failureReport);
+            } catch (Exception e) {
+                LOGGER.warn("Exception during failure report", e);
+            }
+        }
     }
 }
