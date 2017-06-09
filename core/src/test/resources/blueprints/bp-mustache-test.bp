@@ -37,6 +37,7 @@
         "admin-properties": {
           "properties": {
             "db_user": "{{{ rangerRds.connectionUserName }}}",
+            "zookeeper_quorum": "{{ zookeeper_quorum }}",
             "db_password": "{{{ rangerRds.connectionPassword }}}",
             "db_name": "{{{ rangerRds.databaseName }}}",
             "db_host": "{{{ rangerRds.connectionHost }}}",
