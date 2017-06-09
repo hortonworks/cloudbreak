@@ -141,7 +141,7 @@ public class AmbariDecommissioner {
 
     @PostConstruct
     public void init() {
-        COMPONENTS_NEED_TO_DECOMMISSION.put("DATANODE", "HDFS");
+        COMPONENTS_NEED_TO_DECOMMISSION.put(DATANODE, "HDFS");
         COMPONENTS_NEED_TO_DECOMMISSION.put("NODEMANAGER", "YARN");
     }
 
@@ -232,7 +232,7 @@ public class AmbariDecommissioner {
                 pollingResult = ambariOperationService.waitForOperations(stack, ambariClient, decommissionRequests, DECOMMISSION_AMBARI_PROGRESS_STATE);
             }
             if (isSuccess(pollingResult)) {
-                pollingResult = waitForDataNodeDecommission(stack, ambariClient);
+                pollingResult = waitForDataNodeDecommission(stack, ambariClient, hostList, runningComponents);
                 if (isSuccess(pollingResult)) {
                     pollingResult = waitForRegionServerDecommission(stack, ambariClient, hostList, runningComponents);
                     if (isSuccess(pollingResult)) {
@@ -442,7 +442,12 @@ public class AmbariDecommissioner {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS, AmbariOperationService.MAX_FAILURE_COUNT);
     }
 
-    private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient) {
+    private PollingResult waitForDataNodeDecommission(Stack stack, AmbariClient ambariClient, List<String> hosts,
+            Map<String, Map<String, String>> runningComponents) {
+        if (hosts.stream().noneMatch(hn -> runningComponents.get(hn).keySet().contains(DATANODE))) {
+            return SUCCESS;
+        }
+
         LOGGER.info("Waiting for DataNodes to move the blocks to other nodes. stack id: {}", stack.getId());
         return ambariOperationService.waitForOperations(stack, ambariClient, dnDecommissionStatusCheckerTask, Collections.emptyMap(),
                 DECOMMISSION_SERVICES_AMBARI_PROGRESS_STATE);
@@ -451,7 +456,7 @@ public class AmbariDecommissioner {
     private PollingResult waitForRegionServerDecommission(Stack stack, AmbariClient ambariClient, List<String> hosts,
             Map<String, Map<String, String>> runningComponents) {
         if (COMPONENTS_NEED_TO_DECOMMISSION.get("HBASE_REGIONSERVER") == null
-                || !hosts.stream().anyMatch(hn -> runningComponents.get(hn).keySet().contains("HBASE_REGIONSERVER"))) {
+                || hosts.stream().noneMatch(hn -> runningComponents.get(hn).keySet().contains("HBASE_REGIONSERVER"))) {
             return SUCCESS;
         }
 
@@ -483,7 +488,7 @@ public class AmbariDecommissioner {
             Function<List<String>, Integer> action;
             if (component.equals("NODEMANAGER")) {
                 action = l -> ambariClient.decommissionNodeManagers(l);
-            } else if (component.equals("DATANODE")) {
+            } else if (component.equals(DATANODE)) {
                 action = l -> ambariClient.decommissionDataNodes(l);
             } else if (component.equals("HBASE_REGIONSERVER")) {
                 action = l -> {
