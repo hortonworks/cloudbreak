@@ -19,7 +19,6 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
@@ -27,11 +26,11 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
-import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.KerberosConfig;
@@ -49,12 +48,9 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 
 @Component
@@ -70,19 +66,10 @@ public class ClusterHostServiceRunner {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private ConversionService conversionService;
-
-    @Inject
-    private ClusterService clusterService;
-
-    @Inject
     private HostGroupRepository hostGroupRepository;
 
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
-
-    @Inject
-    private ComponentConfigProvider componentConfigProvider;
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -94,13 +81,7 @@ public class ClusterHostServiceRunner {
     private ComponentLocatorService componentLocator;
 
     @Inject
-    private BlueprintUtils blueprintUtils;
-
-    @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
-
-    @Inject
-    private HostDiscoveryService hostDiscoveryService;
 
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
@@ -121,6 +102,7 @@ public class ClusterHostServiceRunner {
     private SaltPillarConfig createServicePillar(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig) throws IOException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
+        saveSharedRangerService(stack, servicePillar);
         if (cluster.isSecure()) {
             Map<String, Object> krb = new HashMap<>();
             Map<String, String> kerberosConf = new HashMap<>();
@@ -164,6 +146,23 @@ public class ClusterHostServiceRunner {
             List<String> ipList = dataLakeStack.getGatewayInstanceMetadata().stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
             servicePillar.put("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
                     singletonMap("forwarder-zones", singletonMap(datalakeDomain, singletonMap("nameservers", ipList)))));
+        }
+    }
+
+    private void saveSharedRangerService(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
+        Long datalakeId = stack.getDatalakeId();
+        if (datalakeId != null) {
+            Stack dataLakeStack = stackRepository.findOneWithLists(datalakeId);
+            Cluster dataLakeCluster = dataLakeStack.getCluster();
+            Set<String> groupNames = blueprintProcessor.getHostGroupsWithComponent(dataLakeCluster.getBlueprint().getBlueprintText(), "RANGER_ADMIN");
+            List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());
+            Set<String> hostNames = new HashSet<>();
+            groups.forEach(hg -> hostNames.addAll(hg.getHostMetadata().stream().map(HostMetadata::getHostName).collect(Collectors.toList())));
+            Map<String, Object> rangerMap = new HashMap<>();
+            rangerMap.put("servers", hostNames);
+            rangerMap.put("port", "6080");
+            servicePillar.put("datalake-services", new SaltPillarProperties("/datalake/init.sls",
+                    singletonMap("datalake-services", singletonMap("ranger", rangerMap))));
         }
     }
 
