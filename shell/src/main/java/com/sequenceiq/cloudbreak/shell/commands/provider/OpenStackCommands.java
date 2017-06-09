@@ -131,9 +131,11 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "platformId", help = "Id of a platform the credential belongs to") Long platformId
     ) {
         String keyStoneVersion = null;
+        Map<String, Object> parameters = new HashMap<>();
         if (tenantName != null) {
             keystoneAuthScope = "cb-keystone-v2";
             keyStoneVersion = "cb-keystone-v2";
+            parameters.put("selector", "cb-keystone-v2");
         }
         if (userDomain != null && keystoneAuthScope != null) {
             if (domainName != null) {
@@ -143,12 +145,12 @@ public class OpenStackCommands implements CommandMarker {
             } else {
                 keystoneAuthScope = "cb-keystone-v3-default-scope";
             }
+            parameters.put("selector", keystoneAuthScope);
             keyStoneVersion = "cb-keystone-v3";
         }
         if (keystoneAuthScope == null || keyStoneVersion == null) {
             throw shellContext.exceptionTransformer().transformToRuntimeException("keystoneAuthScope not found for specified parameters");
         }
-        Map<String, Object> parameters = new HashMap<>();
         parameters.put("userName", userName);
         parameters.put("password", password);
         parameters.put("endpoint", endPoint);
