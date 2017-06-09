@@ -1,10 +1,6 @@
 {
   "inputs": [
     {
-      "name":"RANGER_REST_ADDRESS",
-      "referenceConfiguration":"policymgr_external_url"
-    },
-    {
       "name":"REMOTE_CLUSTER_NAME",
       "referenceConfiguration":"cluster_name"
     },
@@ -120,7 +116,7 @@
       },
       {
         "ranger-hive-security":{
-          "ranger.plugin.hive.policy.rest.url": "{{{ RANGER_REST_ADDRESS }}}",
+          "ranger.plugin.hive.policy.rest.url": "http://localhost:6080",
           "ranger.plugin.hive.service.name":"{{{ REMOTE_CLUSTER_NAME }}}_hive"
         }
       },

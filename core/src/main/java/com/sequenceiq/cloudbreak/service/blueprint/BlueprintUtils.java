@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -48,21 +47,6 @@ public class BlueprintUtils {
 
     public JsonNode convertStringToJsonNode(String json) {
         return jsonHelper.createJsonFromString(json);
-    }
-
-    public Boolean containsComponent(Blueprint blueprint, String componentNm) throws IOException {
-        JsonNode blueprintNode = JsonUtil.readTree(blueprint.getBlueprintText());
-        JsonNode hostGroups = blueprintNode.path("host_groups");
-        for (JsonNode hostGroup : hostGroups) {
-            JsonNode components = hostGroup.path("components");
-            for (JsonNode component : components) {
-                String name = component.path("name").asText();
-                if (name.equalsIgnoreCase(componentNm)) {
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     public boolean isBlueprintNamePreConfigured(String blueprintStrings, String[] split) {

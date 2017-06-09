@@ -7,6 +7,7 @@ base:
     - recipes.init
     - consul.init
     - unbound.forwarders
+    - datalake.init
 
   'roles:gateway':
     - match: grain
