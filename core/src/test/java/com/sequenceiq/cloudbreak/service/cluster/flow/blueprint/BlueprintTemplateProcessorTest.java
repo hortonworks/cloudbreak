@@ -57,6 +57,7 @@ public class BlueprintTemplateProcessorTest {
 
         String result = underTest.process(testBlueprint, cluster, cluster.getRdsConfigs());
         Assert.assertTrue(result.contains("testbucket"));
+        Assert.assertTrue(result.contains("{{zookeeper_quorum}}"));
         Assert.assertTrue(result.contains(cluster.getName()));
         Assert.assertTrue(result.contains(cluster.getName()));
     }
