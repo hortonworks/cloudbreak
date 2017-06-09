@@ -271,6 +271,7 @@ public class ModelDescriptions {
         public static final String SECURITYGROUP = "instancegroup related securitygroup";
         public static final String NODE_COUNT = "number of nodes";
         public static final String TEMPLATE_ID = "referenced template id";
+        public static final String INSTANCE_TYPE = "type of the instance";
         public static final String STATUS = "status of the instance";
         public static final String SECURITY_GROUP_ID = "security group resource id for the instance group";
         public static final String METADATA = "metadata of instances";

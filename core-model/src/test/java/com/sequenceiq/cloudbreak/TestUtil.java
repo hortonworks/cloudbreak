@@ -25,6 +25,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
@@ -277,6 +278,7 @@ public class TestUtil {
         instanceMetaData.setId(instanceGroupId + serverNumber);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
+        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.CORE);
         return instanceMetaData;
     }
 

@@ -34,6 +34,9 @@ public class InstanceMetaDataJson implements JsonEntity {
     @ApiModelProperty(InstanceGroupModelDescription.STATUS)
     private InstanceStatus instanceStatus;
 
+    @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_TYPE)
+    private InstanceMetadataType instanceType;
+
     public InstanceMetaDataJson() {
 
     }
@@ -100,5 +103,13 @@ public class InstanceMetaDataJson implements JsonEntity {
 
     public void setInstanceStatus(InstanceStatus instanceStatus) {
         this.instanceStatus = instanceStatus;
+    }
+
+    public void setInstanceType(InstanceMetadataType instanceType) {
+        this.instanceType = instanceType;
+    }
+
+    public InstanceMetadataType getInstanceType() {
+        return instanceType;
     }
 }

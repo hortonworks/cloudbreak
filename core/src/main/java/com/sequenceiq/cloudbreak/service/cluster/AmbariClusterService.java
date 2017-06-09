@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -194,6 +195,9 @@ public class AmbariClusterService implements ClusterService {
         if (Status.CREATE_FAILED.equals(stack.getStatus())) {
             throw new BadRequestException("Stack creation failed, cannot create cluster.");
         }
+        if (isMultipleGateway(stack) && isEmbeddedAmbariDB(components)) {
+            throw new BadRequestException("Cluster with multiple gateways and embedded ambari database are not supported!");
+        }
         for (HostGroup hostGroup : cluster.getHostGroups()) {
             constraintRepository.save(hostGroup.getConstraint());
         }
@@ -222,6 +226,21 @@ public class AmbariClusterService implements ClusterService {
             flowManager.triggerClusterInstall(stack.getId());
         }
         return cluster;
+    }
+
+    private boolean isMultipleGateway(Stack stack) {
+        int gatewayCount = 0;
+        for (InstanceGroup ig : stack.getInstanceGroups()) {
+            if (ig.getInstanceGroupType() == InstanceGroupType.GATEWAY) {
+                gatewayCount += ig.getNodeCount();
+            }
+        }
+        return gatewayCount > 1;
+    }
+
+    private boolean isEmbeddedAmbariDB(List<ClusterComponent> components) {
+        AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getComponent(components, AmbariDatabase.class, ComponentType.AMBARI_DATABASE_DETAILS);
+        return ambariDatabase == null || DatabaseVendor.EMBEDDED.value().equals(ambariDatabase.getVendor());
     }
 
     @Override
@@ -382,6 +401,9 @@ public class AmbariClusterService implements ClusterService {
                 throw new BadRequestException("No metadata information for the node: " + failedNode);
             }
             HostGroup hostGroup = hostMetadata.getHostGroup();
+            if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
+                validateRepair(stack, hostMetadata);
+            }
             String hostGroupName = hostGroup.getName();
             if (hostGroup.getRecoveryMode() == RecoveryMode.AUTO) {
                 List<String> nodeList = autoRecoveryNodesMap.get(hostGroupName);
@@ -421,6 +443,7 @@ public class AmbariClusterService implements ClusterService {
             if (repairedHostGroups.contains(hg.getName()) && hg.getRecoveryMode() == RecoveryMode.MANUAL) {
                 for (HostMetadata hmd : hg.getHostMetadata()) {
                     if (hmd.getHostMetadataState() == HostMetadataState.UNHEALTHY) {
+                        validateRepair(stack, hmd);
                         if (!failedNodeMap.containsKey(hg.getName())) {
                             failedNodeMap.put(hg.getName(), failedNodes);
                         }
@@ -436,6 +459,24 @@ public class AmbariClusterService implements ClusterService {
             LOGGER.info(recoveryMessage);
             eventService.fireCloudbreakEvent(stack.getId(), "RECOVERY", recoveryMessage);
         }
+    }
+
+    private void validateRepair(Stack stack, HostMetadata hostMetadata) {
+        if (isGateway(hostMetadata) && !isMultipleGateway(stack)) {
+            throw new BadRequestException("Ambari server failure cannot be repaired with single gateway!");
+        }
+        if (isGateway(hostMetadata) && withEmbeddedAmbariDB(stack.getCluster())) {
+            throw new BadRequestException("Ambari server failure with embedded database cannot be repaired!");
+        }
+    }
+
+    private boolean isGateway(HostMetadata hostMetadata) {
+        return hostMetadata.getHostGroup().getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY;
+    }
+
+    private boolean withEmbeddedAmbariDB(Cluster cluster) {
+        AmbariDatabase ambariDB = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
+        return ambariDB == null || DatabaseVendor.EMBEDDED.value().equals(ambariDB.getVendor());
     }
 
     private void updateChangedHosts(Cluster cluster, Map<String, HostMetadata> failedHostMetadata, HostMetadataState healthyState,
