@@ -16,10 +16,10 @@ dependencies {
   compile project(':cloud-api')
   compile project(':cloud-reactor')
 
-  compile group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion
-  compile group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: azureSdkVersion
+  compile (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) { exclude group: 'org.slf4j' }
+  compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: azureSdkVersion) { exclude group: 'org.slf4j' }
+  compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile group: 'com.microsoft.azure',         name: 'azure-storage',              version: '5.0.0'
-  compile group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion
   compile group: 'com.microsoft.azure',         name: 'adal4j',                     version: '1.2.0'
   compile (group: 'com.fasterxml.jackson.core', name: 'jackson-databind',           version: jacksonVersion) {
     force = true
