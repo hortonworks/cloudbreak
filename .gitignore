@@ -3,6 +3,7 @@ release
 cbd
 bindata.go
 debug
+cloudbreak-deployer
 Profile*
 .vscode
 *.iml
