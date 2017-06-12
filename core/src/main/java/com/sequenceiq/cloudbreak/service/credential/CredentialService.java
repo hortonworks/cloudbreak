@@ -16,11 +16,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -68,6 +68,16 @@ public class CredentialService {
         Credential credential = credentialRepository.findOne(id);
         if (credential == null) {
             throw new NotFoundException(String.format("Credential '%s' not found.", id));
+        } else {
+            return credential;
+        }
+    }
+
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    public Credential get(String name, String account) {
+        Credential credential = credentialRepository.findOneByName(name, account);
+        if (credential == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found in %s account.", name, account));
         } else {
             return credential;
         }

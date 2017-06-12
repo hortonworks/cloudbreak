@@ -12,12 +12,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
@@ -40,16 +42,23 @@ public class StackParameterService {
     @Inject
     private EventBus eventBus;
 
-    public List<StackParamValidation> getStackParams(StackRequest stackRequest) {
+    public List<StackParamValidation> getStackParams(IdentityUser user, StackRequest stackRequest) {
         LOGGER.debug("Get stack params");
         Long credentialId = stackRequest.getCredentialId();
-        if (credentialId != null || stackRequest.getCredential() != null) {
-            Credential credential = null;
+        if (credentialId != null || stackRequest.getCredential() != null || stackRequest.getCredentialSource() != null) {
+            Credential credential;
             if (credentialId != null) {
                 credential = credentialService.get(credentialId);
-            } else {
+            } else if (stackRequest.getCredential() != null) {
                 credential = conversionService.convert(stackRequest.getCredential(), Credential.class);
+            } else {
+                if (!Strings.isNullOrEmpty(stackRequest.getCredentialSource().getSourceName())) {
+                    credential = credentialService.get(stackRequest.getCredentialSource().getSourceName(), user.getAccount());
+                } else {
+                    credential = credentialService.get(stackRequest.getCredentialSource().getSourceId());
+                }
             }
+
             CloudContext cloudContext = new CloudContext(credential.getId(), stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);

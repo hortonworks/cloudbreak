@@ -229,7 +229,7 @@ public class StackController implements StackEndpoint {
     }
 
     private StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) {
-        stackValidator.validate(stackRequest);
+        stackValidator.validate(user, stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest, stack, user);

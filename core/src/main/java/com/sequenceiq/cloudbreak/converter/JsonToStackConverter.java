@@ -25,7 +25,9 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -42,6 +44,9 @@ import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
 
     @Inject
     private StackParameterService stackParameterService;
@@ -151,7 +156,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         Map<String, String> params = new HashMap<>();
         Map<String, String> userParams = stackRequest.getParameters();
         if (userParams != null) {
-            for (StackParamValidation stackParamValidation : stackParameterService.getStackParams(stackRequest)) {
+            IdentityUser user = authenticatedUserService.getCbUser();
+            for (StackParamValidation stackParamValidation : stackParameterService.getStackParams(user, stackRequest)) {
                 String paramName = stackParamValidation.getName();
                 String value = userParams.get(paramName);
                 if (value != null) {
