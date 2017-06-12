@@ -36,9 +36,6 @@ public class AmbariOperationService {
     private AmbariOperationsStartCheckerTask ambariOperationsStartCheckerTask;
 
     @Inject
-    private AmbariOperationsRequestCheckerTask requestCheckerTask;
-
-    @Inject
     private PollingService<AmbariOperations> operationsPollingService;
 
     public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient,
@@ -53,14 +50,6 @@ public class AmbariOperationService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operations to start. [Operation requests: {}]", operationRequests);
         return waitForOperations(stack, ambariClient, ambariOperationsStartCheckerTask, operationRequests, ambariOperationType);
-    }
-
-    public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient, String requestContext,
-            String desiredOperationStatus, AmbariOperationType ambariOperationType) {
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Waiting for Ambari operation with context {} to reach status: {}", requestContext, desiredOperationStatus);
-        return operationsPollingService.pollWithTimeout(requestCheckerTask, new AmbariOperations(stack, ambariClient, requestContext,
-                desiredOperationStatus, ambariOperationType), AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_AMBARI_OPS, MAX_FAILURE_COUNT);
     }
 
     public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient, StatusCheckerTask<AmbariOperations> task,
