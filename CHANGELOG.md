@@ -2,16 +2,11 @@
 
 The Change Log summarizes the changes in Cloudbreak.
 
-## [v1.16.1]
+## [v1.16.0]
 
 ### Added
 
-- Added support for SmartSense and Flex subscriptions
-
-### Changed
-
-- update HDP version (2.6.0.3 -> 2.6.1.0)
-- update Ambari version (2.5.0.3 -> 2.5.1.0)
+- Added SmartSense and Flex subscription integration
 
 
 ## [v1.15.0]
