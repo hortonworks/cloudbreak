@@ -523,7 +523,7 @@
         {
           "href": "/api/v1/stacks/HDP/versions/2.2/services/HIVE/components/HIVE_SERVER",
           "StackServiceComponents": {
-            "cardinality": "1",
+            "cardinality": "1+",
             "component_category": "MASTER",
             "component_name": "HIVE_SERVER",
             "custom_commands": [],
