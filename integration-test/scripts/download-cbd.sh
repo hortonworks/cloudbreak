@@ -5,7 +5,7 @@
 echo -e "\n\033[1;96m--- download latest cbd\033[0m\n"
 cd $INTEGCB_LOCATION
 
-: ${branch:=exec_to_run}
+: ${branch:=rc-1.16}
 
 circle_url=https://circleci.com/api/v1/project/sequenceiq/cloudbreak-deployer
 latest_build=$(curl -s ${circle_url}/tree/${branch}\?filter=completed\&limit=1 | grep -m 1 build_num | sed 's/[^0-9]*//g')
