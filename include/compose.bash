@@ -317,8 +317,7 @@ smartsense:
     ports:
         - "9000:9000"
     environment:
-        - AWS_ACCOUNT_ID
-        - AWS_INSTANCE_ID
+        - ACCOUNT_ID=$AWS_ACCOUNT_ID
         - CB_VERSION=$(echo $(bin-version))
         - CB_SMARTSENSE_CONFIGURE
         - CB_SMARTSENSE_ID
