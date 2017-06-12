@@ -17,22 +17,17 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.repository.CredentialRepository;
+import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class CredentialSourceDecorator implements Decorator<Credential> {
 
     @Inject
-    private CredentialRepository credentialRepository;
+    private CredentialService credentialService;
 
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
-
-    private enum DecorationData {
-        SOURCE_CREDENTIAL,
-        IDENTITY_USER
-    }
 
     public Credential decorate(Credential credential, Object... data) {
         if (null == data || data.length == 0) {
@@ -41,9 +36,9 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
             CredentialSourceRequest credentialSourceRequest = (CredentialSourceRequest) data[DecorationData.SOURCE_CREDENTIAL.ordinal()];
             IdentityUser identityUser = (IdentityUser) data[DecorationData.IDENTITY_USER.ordinal()];
             if (!Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())) {
-                credential = credentialRepository.findOneByName(credentialSourceRequest.getSourceName(), identityUser.getAccount());
+                credential = credentialService.get(credentialSourceRequest.getSourceName(), identityUser.getAccount());
             } else {
-                credential = credentialRepository.findOne(credentialSourceRequest.getSourceId());
+                credential = credentialService.get(credentialSourceRequest.getSourceId());
             }
 
             if (credential == null) {
@@ -63,5 +58,10 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
             }
         }
         return credential;
+    }
+
+    private enum DecorationData {
+        SOURCE_CREDENTIAL,
+        IDENTITY_USER
     }
 }
