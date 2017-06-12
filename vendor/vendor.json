@@ -1,0 +1,37 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "tUGxc7rfX0cmhOOUDhMuAZ9rWsA=",
+			"path": "github.com/hashicorp/go-version",
+			"revision": "03c5bf6be031b6dd45afec16b1cf94fc8938bc77",
+			"revisionTime": "2017-02-02T08:07:59Z"
+		},
+		{
+			"checksumSHA1": "gEjGS03N1eysvpQ+FCHTxPcbxXc=",
+			"path": "github.com/kardianos/osext",
+			"revision": "ae77be60afb1dcacde03767a8c37337fad28ac14",
+			"revisionTime": "2017-05-10T13:15:34Z"
+		},
+		{
+			"checksumSHA1": "V/quM7+em2ByJbWBLOsEwnY3j/Q=",
+			"path": "github.com/mitchellh/go-homedir",
+			"revision": "b8bc1bf767474819792c23f32d8286a45736f1c6",
+			"revisionTime": "2016-12-03T19:45:07Z"
+		},
+		{
+			"checksumSHA1": "Yg+lLiVSo3tbwB0s0VCbXAOz6sE=",
+			"path": "github.com/progrium/go-basher",
+			"revision": "6a5b35fcdaea1ddfc145720efc903869413629e7",
+			"revisionTime": "2017-02-01T21:50:11Z"
+		},
+		{
+			"checksumSHA1": "h/HMhokbQHTdLUbruoBBTee+NYw=",
+			"path": "github.com/skratchdot/open-golang/open",
+			"revision": "75fb7ed4208cf72d323d7d02fd1a5964a7a9073c",
+			"revisionTime": "2016-03-02T14:40:31Z"
+		}
+	],
+	"rootPath": "github.com/sequenceiq/cloudbreak-deployer"
+}

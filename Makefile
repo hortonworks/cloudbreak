@@ -72,19 +72,24 @@ upload-snapshot: create-snapshot-tgz
 dev: bindata
 	go build -ldflags $(FLAGS) -o /usr/local/bin/$(BINARYNAME)
 
-dev-debug: ## Installs dev version into /usr/local/bin. bash scripts are linked, so changes are effective without new build
+dev-debug: deps-bindata ## Installs dev version into /usr/local/bin. bash scripts are linked, so changes are effective without new build
 	go-bindata -debug=true include .deps/bin
 	go build -ldflags $(FLAGS) -o /usr/local/bin/$(BINARYNAME)
 
-bindata:
+bindata: deps-bindata
 	go-bindata include .deps/bin
 
 install: build ## Installs OS specific binary into: /usr/local/bin
 	install build/$(shell uname -s)/$(BINARYNAME) /usr/local/bin
 
-deps: ## Installs required cli tools (only needed for new envs)
+deps-bindata:
+ifeq ($(shell which go-bindata),)
 	go get -u github.com/jteeuwen/go-bindata/...
+endif
+
+deps: deps-bindata ## Installs required cli tools (only needed for new envs)
 	go get -u github.com/progrium/gh-release/...
+	go get -u github.com/kardianos/govendor
 	go get github.com/progrium/basht
 #	go get github.com/github/hub
 	go get || true
