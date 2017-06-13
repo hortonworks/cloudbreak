@@ -14,6 +14,7 @@ out/
 curl_config_admin_user
 *.suml
 startit.sh
+docker_env.tmp
 build/
 test-output/
 integcb/.deps/

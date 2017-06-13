@@ -1,15 +1,37 @@
 #!/usr/bin/env bash
 
 : ${INTEGCB_LOCATION?"integcb location"}
-
-echo -e "\n\033[1;96m--- download latest cbd\033[0m\n"
 cd $INTEGCB_LOCATION
 
-: ${branch:=rc-2.0}
+os=$(uname)
+latest_tag=$(git tag --points-at HEAD | sort -n | tail -1)
+if ! [[ $latest_tag ]]; then
+    latest_tag=$(git describe --abbrev=0 --tags)
+fi
+state=$(echo $latest_tag | cut -d '-' -f 2)
+if [[ ! $latest_tag || "$state" = *"dev"* ]]; then
+    branch="master"
+else
+    version=$(echo $latest_tag | cut -d '-' -f 1)
+    branch="rc-$(echo $version | cut -d '.' -f 1,2)"
+fi
+echo -e "\n\033[1;96m--- build latest cbd: $branch for $os\033[0m\n"
 
-circle_url=https://circleci.com/api/v1/project/sequenceiq/cloudbreak-deployer
-latest_build=$(curl -s ${circle_url}/tree/${branch}\?filter=completed\&limit=1 | grep -m 1 build_num | sed 's/[^0-9]*//g')
-curl -sL $(curl -s ${circle_url}/${latest_build}/artifacts | grep url | grep -i $(uname) | cut -d\" -f 4) | tar -xz
+rm_flag=""
+if ! [[ "$CIRCLECI" ]]; then
+    rm_flag="--rm"
+fi
 
+docker volume rm cbd-source 2>/dev/null || :
+docker volume create --name cbd-source 1>/dev/null
+docker run $rm_flag --user="0" --entrypoint init.sh -v cbd-source:/var/workspace jpco/git:1.0 https://github.com/sequenceiq/cloudbreak-deployer.git $branch cloudbreak-deployer
+docker run $rm_flag --user="0" -e GOPATH=/usr -v cbd-source:/usr/src/github.com/sequenceiq -w /usr/src/github.com/sequenceiq/cloudbreak-deployer golang:1.8 make bindata
+docker run $rm_flag --user="0" -e GOPATH=/usr -v cbd-source:/usr/src/github.com/sequenceiq -w /usr/src/github.com/sequenceiq/cloudbreak-deployer golang:1.8 make build
+docker run $rm_flag --user="0" -v cbd-source:/var/workspace jpco/git:1.0 cat /var/workspace/cloudbreak-deployer/build/${os}/cbd > cbd
+if [[ $rm_flag ]]; then
+    docker volume rm cbd-source 1>/dev/null || :
+fi
+
+chmod +x cbd
 cbd_version=$(./cbd --version)
 echo -e "$cbd_version"
