@@ -100,3 +100,8 @@ run_amazon2017_sh_server:
     - unless: ls /var/log/amazon2017_server_sh.log
     - require:
       - file: add_amazon2017_patch_script_server
+
+stop-service-registration:
+  service.dead:
+    - enable: False
+    - name: service-registration

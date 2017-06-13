@@ -121,8 +121,6 @@ public class ClusterHostServiceRunner {
         if (ambariRepo != null) {
             servicePillar.put("ambari-repo", new SaltPillarProperties("/ambari/repo.sls", singletonMap("ambari", singletonMap("repo", ambariRepo))));
         }
-        servicePillar.put("consul", new SaltPillarProperties("/consul/init.sls", singletonMap("consul", singletonMap("server",
-                primaryGatewayConfig.getPrivateAddress()))));
         AmbariDatabase ambariDb = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
         servicePillar.put("ambari-database", new SaltPillarProperties("/ambari/database.sls", singletonMap("ambari", singletonMap("database", ambariDb))));
         saveLdapPillar(cluster.getLdapConfig(), servicePillar);

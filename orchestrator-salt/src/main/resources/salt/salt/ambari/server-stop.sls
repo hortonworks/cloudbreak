@@ -37,8 +37,3 @@ stop-ambari-server:
     - name: ambari-server
 
 {% endif %}
-
-stop-service-registration:
-  service.dead:
-    - enable: False
-    - name: service-registration

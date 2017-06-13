@@ -135,10 +135,6 @@ public class SaltStates {
     }
 
     public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
-        // This is slow
-        // String targetIps = "S@" + hostnames.stream().collect(Collectors.joining(" or S@"));
-        //Map<String, String> ipToMinionId = SaltStates.networkInterfaceIP(sc, new Compound(targetIps)).getResultGroupByHost();
-
         SaltAction saltAction = new SaltAction(SaltActionType.STOP);
         for (Map.Entry<String, String> entry : privateIPsByFQDN.entrySet()) {
             Minion minion = new Minion();

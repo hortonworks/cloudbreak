@@ -6,7 +6,7 @@
     - source: salt://unbound/config/01-consul.conf
     - template: jinja
     - context:
-        consul_server_address: {{ consul.server }}
+        consul_server_address: {{ salt['mine.get']('G@roles:ambari_server', 'network.ipaddrs', expr_form = 'compound').values()[0][0] }}
 
 /etc/unbound/conf.d/00-cluster.conf:
   file.managed:
