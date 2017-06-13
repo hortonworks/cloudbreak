@@ -18,7 +18,6 @@
 
 {% set consul = {} %}
 {% do consul.update({
-    'server': salt['pillar.get']('consul:server'),
     'is_server': is_server,
     'node_name': node_name,
     'bootstrap_expect': bootstrap_expect,

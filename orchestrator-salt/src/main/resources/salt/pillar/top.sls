@@ -5,7 +5,6 @@ base:
     - nodes.hosts
     - discovery.init
     - recipes.init
-    - consul.init
     - unbound.forwarders
     - datalake.init
 

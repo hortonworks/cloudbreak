@@ -11,6 +11,18 @@
         bootstrap_expect: {{ consul.bootstrap_expect }}
         retry_join: {{ consul.retry_join }}
 
+/opt/consul/consul_cleanup.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://consul/scripts/consul_cleanup.sh
+    - mode: 755
+
+remove_failing_nodes:
+  cmd.run:
+    - name: /opt/consul/consul_cleanup.sh
+    - watch:
+      - file: /etc/consul.conf
+
 consul:
   service.running:
     - enable: True
