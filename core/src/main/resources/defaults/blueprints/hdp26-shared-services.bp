@@ -72,6 +72,7 @@
           "ranger.usersync.ldap.user.nameattribute": "{{{ ldapConfig.userNameAttribute }}}",
           "ranger.usersync.ldap.user.searchbase": "{{{ ldapConfig.userSearchBase }}}",
           "ranger.usersync.ldap.user.objectclass": "{{{ ldapConfig.userObjectClass }}}",
+          "ranger.usersync.ldap.deltasync": "false",
           "ranger.usersync.group.searchenabled": "true",
           "ranger.usersync.group.memberattributename": "{{{ ldapConfig.groupMemberAttribute }}}",
           "ranger.usersync.group.nameattribute": "{{{ ldapConfig.groupNameAttribute }}}",
