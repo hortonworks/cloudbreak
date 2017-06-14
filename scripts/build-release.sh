@@ -18,6 +18,6 @@ else
   SCOPE=patch
 fi
 
-./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=$SCOPE -Prelease.stage=final --refresh-dependencies --info --stacktrace
+./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=major -Prelease.stage=final --refresh-dependencies --info --stacktrace
 
 echo VERSION=$(git describe --abbrev=0 --tags) > $WORKSPACE/version
