@@ -116,6 +116,22 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
         return toJsonConverter.convert(subscription);
     }
 
+    @Override
+    public void setDefaultInAccount(Long id) {
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(identityUser);
+        FlexSubscription flexSubscription = flexService.findOneById(id);
+        flexService.setDefaultFlexSubscription(flexSubscription.getName(), identityUser);
+    }
+
+    @Override
+    public void setUsedForControllerInAccount(Long id) {
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        MDCBuilder.buildUserMdcContext(identityUser);
+        FlexSubscription flexSubscription = flexService.findOneById(id);
+        flexService.setUsedForControllerFlexSubscription(flexSubscription.getName(), identityUser);
+    }
+
     private FlexSubscriptionResponse createFlexSubscription(FlexSubscriptionRequest json, boolean publicInAccount) {
         IdentityUser identityUser = authenticatedUserService.getCbUser();
         MDCBuilder.buildUserMdcContext(identityUser);

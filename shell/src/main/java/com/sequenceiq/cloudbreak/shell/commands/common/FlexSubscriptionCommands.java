@@ -54,34 +54,34 @@ public class FlexSubscriptionCommands implements CommandMarker {
         }
     }
 
-    @CliAvailabilityIndicator(value = "flex set-default")
+    @CliAvailabilityIndicator(value = { "flex set-default --id", "flex set-default --name" })
     public boolean setDefaultAvailable() {
         return true;
     }
 
-    @CliCommand(value = "flex set-default", help = "Sets the default Flex subscription")
-    public String setDefault(@CliOption(key = "name", mandatory = true) String name) {
-        try {
-            shellContext.cloudbreakClient().flexSubscriptionEndpoint().setDefaultInAccount(name);
-            return String.format("Default Flex subscription changed'", name);
-        } catch (Exception e) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException(e);
-        }
+    @CliCommand(value = "flex set-default --id", help = "Sets the default Flex subscription by id")
+    public String setDefault(@CliOption(key = "", mandatory = true) Long id) {
+        return setDefault(id, null);
     }
 
-    @CliAvailabilityIndicator(value = "flex use-for-controller")
+    @CliCommand(value = "flex set-default --name", help = "Sets the default Flex subscription by name")
+    public String setDefault(@CliOption(key = "", mandatory = true) String name) {
+        return setDefault(null, name);
+    }
+
+    @CliAvailabilityIndicator(value = { "flex use-for-controller --id", "flex use-for-controller --name" })
     public boolean useForControllerAvailable() {
         return true;
     }
 
-    @CliCommand(value = "flex use-for-controller", help = "Sets the Flex subscription for controller node")
-    public String useForController(@CliOption(key = "name", mandatory = true) String name) {
-        try {
-            shellContext.cloudbreakClient().flexSubscriptionEndpoint().setUsedForControllerInAccount(name);
-            return String.format("Flex subscription for controller changed'", name);
-        } catch (Exception e) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException(e);
-        }
+    @CliCommand(value = "flex use-for-controller --id", help = "Sets the Flex subscription for controller node by id")
+    public String useForController(@CliOption(key = "", mandatory = true) Long id) {
+        return usedForController(id, null);
+    }
+
+    @CliCommand(value = "flex use-for-controller --name", help = "Sets the Flex subscription for controller node by name")
+    public String useForController(@CliOption(key = "", mandatory = true) String name) {
+        return usedForController(null, name);
     }
 
     @CliAvailabilityIndicator(value = "flex list")
@@ -169,5 +169,35 @@ public class FlexSubscriptionCommands implements CommandMarker {
     public String showByName(@CliOption(key = "", mandatory = true) String name,
             @CliOption(key = "outputType", help = "OutputType of the response") OutPutType outPutType) throws Exception {
         return show(null, name, outPutType);
+    }
+
+    private String setDefault(Long id, String name) {
+        try {
+            if (id != null) {
+                shellContext.cloudbreakClient().flexSubscriptionEndpoint().setDefaultInAccount(id);
+                return String.format("Default Flex subscription changed to '%s'", id);
+            } else if (name != null) {
+                shellContext.cloudbreakClient().flexSubscriptionEndpoint().setDefaultInAccount(name);
+                return String.format("Default Flex subscription changed to '%s'", name);
+            }
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Neither the id nor the name hasn't been specified");
+        } catch (Exception e) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(e);
+        }
+    }
+
+    private String usedForController(Long id, String name) {
+        try {
+            if (id != null) {
+                shellContext.cloudbreakClient().flexSubscriptionEndpoint().setUsedForControllerInAccount(id);
+                return String.format("Flex subscription for controller changed to '%s'", id);
+            } else if (name != null) {
+                shellContext.cloudbreakClient().flexSubscriptionEndpoint().setUsedForControllerInAccount(name);
+                return String.format("Flex subscription for controller changed to '%s'", name);
+            }
+            throw shellContext.exceptionTransformer().transformToRuntimeException("Neither the id nor the name hasn't been specified");
+        } catch (Exception e) {
+            throw shellContext.exceptionTransformer().transformToRuntimeException(e);
+        }
     }
 }
