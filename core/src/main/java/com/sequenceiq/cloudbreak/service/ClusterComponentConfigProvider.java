@@ -27,13 +27,17 @@ public class ClusterComponentConfigProvider {
     @Inject
     private ClusterComponentRepository componentRepository;
 
+    public ClusterComponent getComponent(Long clusterId, ComponentType componentType) {
+        return getComponent(clusterId, componentType, componentType.name());
+    }
+
     public ClusterComponent getComponent(Long clusterId, ComponentType componentType, String name) {
         return componentRepository.findComponentByClusterIdComponentTypeName(clusterId, componentType, name);
     }
 
     public HDPRepo getHDPRepo(Long clusterId) {
         try {
-            ClusterComponent component = getComponent(clusterId, ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
+            ClusterComponent component = getComponent(clusterId, ComponentType.HDP_REPO_DETAILS);
             if (component == null) {
                 return null;
             }
@@ -45,7 +49,7 @@ public class ClusterComponentConfigProvider {
 
     public AmbariRepo getAmbariRepo(Long clusterId) {
         try {
-            ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
+            ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
             if (component == null) {
                 return null;
             }
@@ -67,7 +71,7 @@ public class ClusterComponentConfigProvider {
 
     public AmbariDatabase getAmbariDatabase(Long clusterId) {
         try {
-            ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_DATABASE_DETAILS, ComponentType.AMBARI_DATABASE_DETAILS.name());
+            ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_DATABASE_DETAILS);
             if (component == null) {
                 return null;
             }

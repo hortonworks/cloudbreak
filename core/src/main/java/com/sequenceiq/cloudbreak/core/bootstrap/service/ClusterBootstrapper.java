@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBa
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.MUNCHAUSEN;
 import static com.sequenceiq.cloudbreak.service.PollingResult.EXIT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
+import static java.util.Collections.singletonMap;
 import static org.apache.commons.lang3.StringUtils.isNoneBlank;
 
 import java.util.ArrayList;
@@ -16,12 +17,14 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
+import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerBootstrapApiCheckerTask;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerClusterAvailabilityCheckerTask;
@@ -33,9 +36,12 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostClusterAvailabi
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.HostOrchestratorResolver;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostBootstrapApiContext;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.context.HostOrchestratorClusterContext;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
@@ -44,6 +50,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
@@ -108,6 +115,9 @@ public class ClusterBootstrapper {
     @Inject
     private HostDiscoveryService hostDiscoveryService;
 
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentProvider;
+
     public void bootstrapMachines(Long stackId) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         String stackOrchestratorType = stack.getOrchestrator().getType();
@@ -149,6 +159,10 @@ public class ClusterBootstrapper {
                 validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
             }
 
+            byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
+            ClusterComponent saltComponent = new ClusterComponent(ComponentType.SALT_STATE,
+                    new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))), stack.getCluster());
+            clusterComponentProvider.store(saltComponent);
             hostOrchestrator.bootstrap(allGatewayConfig, nodes, clusterDeletionBasedModel(stack.getId(), null));
 
             InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
@@ -274,7 +288,8 @@ public class ClusterBootstrapper {
     private void bootstrapNewNodesOnHost(Stack stack, List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes)
             throws CloudbreakException, CloudbreakOrchestratorException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-        Boolean enableKnox = stack.getCluster().getGateway().getEnableGateway();
+        Cluster cluster = stack.getCluster();
+        Boolean enableKnox = cluster.getGateway().getEnableGateway();
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             PollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithTimeoutSingleFailure(
@@ -282,7 +297,15 @@ public class ClusterBootstrapper {
             validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
         }
 
-        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, clusterDeletionBasedModel(stack.getId(), null));
+        byte[] stateZip = null;
+        ClusterComponent stateComponent = clusterComponentProvider.getComponent(cluster.getId(), ComponentType.SALT_STATE);
+        if (stateComponent != null) {
+            String content = (String) stateComponent.getAttributes().getMap().getOrDefault(ComponentType.SALT_STATE.name(), "");
+            if (content.length() != 0) {
+                stateZip = Base64.decodeBase64(content);
+            }
+        }
+        hostOrchestrator.bootstrapNewNodes(allGatewayConfigs, nodes, allNodes, stateZip, clusterDeletionBasedModel(stack.getId(), null));
 
         InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
         GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, primaryGateway, enableKnox);

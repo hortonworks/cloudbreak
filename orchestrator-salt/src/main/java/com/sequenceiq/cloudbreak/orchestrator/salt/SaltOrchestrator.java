@@ -113,14 +113,14 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes,
+    public void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, Set<Node> allNodes, byte[] stateConfigZip,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = allGatewayConfigs.stream().filter(gc -> targets.stream().anyMatch(n -> gc.getPrivateAddress().equals(n.getPrivateIp())))
                 .map(GatewayConfig::getPrivateAddress).collect(Collectors.toSet());
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {
             if (!gatewayTargets.isEmpty()) {
-                uploadSaltConfig(sc, gatewayTargets, exitModel);
+                uploadSaltConfig(sc, gatewayTargets, stateConfigZip, exitModel);
             }
             uploadSignKey(sc, primaryGateway, gatewayTargets, targets.stream().map(Node::getPrivateIp).collect(Collectors.toSet()), exitModel);
             // if there is a new salt master then re-bootstrap all nodes
@@ -324,6 +324,45 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public byte[] getStateConfigZip() throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            ZipOutputStream zout = new ZipOutputStream(baos);
+            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Map<String, List<Resource>> structure = new TreeMap<>();
+            for (Resource resource : resolver.getResources("classpath*:salt/**")) {
+                String path = resource.getURL().getPath();
+                String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf("/") + 1);
+                List<Resource> list = structure.get(dir);
+                if (list == null) {
+                    list = new ArrayList<>();
+                }
+                structure.put(dir, list);
+                if (!path.endsWith("/")) {
+                    list.add(resource);
+                }
+            }
+            for (String dir : structure.keySet()) {
+                zout.putNextEntry(new ZipEntry(dir));
+                for (Resource resource : structure.get(dir)) {
+                    LOGGER.debug("Zip salt entry: {}", resource.getFilename());
+                    zout.putNextEntry(new ZipEntry(dir + resource.getFilename()));
+                    InputStream inputStream = resource.getInputStream();
+                    byte[] bytes = IOUtils.toByteArray(inputStream);
+                    zout.write(bytes);
+                    zout.closeEntry();
+                }
+            }
+            zout.close();
+            baos.close();
+        } catch (IOException e) {
+            LOGGER.error("Failed to zip salt configurations", e);
+            throw new IOException("Failed to zip salt configurations", e);
+        }
+        return baos.toByteArray();
+    }
+
+    @Override
     public void preInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
         executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE);
@@ -438,7 +477,17 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private void uploadSaltConfig(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException, IOException {
-        byte[] byteArray = zipSaltConfig();
+        uploadSaltConfig(saltConnector, targets, null, exitCriteriaModel);
+    }
+
+    private void uploadSaltConfig(SaltConnector saltConnector, Set<String> targets, byte[] stateConfigZip, ExitCriteriaModel exitCriteriaModel)
+            throws CloudbreakOrchestratorFailedException, IOException {
+        byte[] byteArray;
+        if (stateConfigZip == null || stateConfigZip.length == 0) {
+            byteArray = getStateConfigZip();
+        } else {
+            byteArray = stateConfigZip;
+        }
         LOGGER.info("Upload salt.zip to gateways");
         uploadFileToGateways(saltConnector, targets, exitCriteriaModel, "/srv", "salt.zip", byteArray);
     }
@@ -490,43 +539,5 @@ public class SaltOrchestrator implements HostOrchestrator {
             LOGGER.error("Error occurred during file distribute to gateway nodes", e);
             throw new CloudbreakOrchestratorFailedException(e);
         }
-    }
-
-    private byte[] zipSaltConfig() throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            ZipOutputStream zout = new ZipOutputStream(baos);
-            PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-            Map<String, List<Resource>> structure = new TreeMap<>();
-            for (Resource resource : resolver.getResources("classpath*:salt/**")) {
-                String path = resource.getURL().getPath();
-                String dir = path.substring(path.indexOf("/salt") + "/salt".length(), path.lastIndexOf("/") + 1);
-                List<Resource> list = structure.get(dir);
-                if (list == null) {
-                    list = new ArrayList<>();
-                }
-                structure.put(dir, list);
-                if (!path.endsWith("/")) {
-                    list.add(resource);
-                }
-            }
-            for (String dir : structure.keySet()) {
-                zout.putNextEntry(new ZipEntry(dir));
-                for (Resource resource : structure.get(dir)) {
-                    LOGGER.debug("Zip salt entry: {}", resource.getFilename());
-                    zout.putNextEntry(new ZipEntry(dir + resource.getFilename()));
-                    InputStream inputStream = resource.getInputStream();
-                    byte[] bytes = IOUtils.toByteArray(inputStream);
-                    zout.write(bytes);
-                    zout.closeEntry();
-                }
-            }
-            zout.close();
-            baos.close();
-        } catch (IOException e) {
-            LOGGER.error("Failed to zip salt configurations", e);
-            throw new IOException("Failed to zip salt configurations", e);
-        }
-        return baos.toByteArray();
     }
 }

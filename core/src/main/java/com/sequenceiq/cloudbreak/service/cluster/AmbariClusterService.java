@@ -723,14 +723,13 @@ public class AmbariClusterService implements ClusterService {
             AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(cluster.getId());
             if (ambariRepo == null) {
                 try {
-                    clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
+                    clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS,
                             new Json(ambariRepoUpgrade), stack.getCluster()));
                 } catch (JsonProcessingException e) {
                     throw new BadRequestException(String.format("Ambari repo details cannot be saved. %s", ambariRepoUpgrade));
                 }
             } else {
-                ClusterComponent component = clusterComponentConfigProvider
-                        .getComponent(cluster.getId(), ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name());
+                ClusterComponent component = clusterComponentConfigProvider.getComponent(cluster.getId(), ComponentType.AMBARI_REPO_DETAILS);
                 ambariRepo.setBaseUrl(ambariRepoUpgrade.getBaseUrl());
                 ambariRepo.setGpgKeyUrl(ambariRepoUpgrade.getGpgKeyUrl());
                 ambariRepo.setPredefined(false);
@@ -768,14 +767,12 @@ public class AmbariClusterService implements ClusterService {
             HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
             if (hdpRepo == null) {
                 try {
-                    clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
-                            new Json(hdpRepoUpdate), stack.getCluster()));
+                    clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(hdpRepoUpdate), stack.getCluster()));
                 } catch (JsonProcessingException e) {
                     throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", hdpRepoUpdate));
                 }
             } else {
-                ClusterComponent component = clusterComponentConfigProvider
-                        .getComponent(stack.getCluster().getId(), ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
+                ClusterComponent component = clusterComponentConfigProvider.getComponent(stack.getCluster().getId(), ComponentType.HDP_REPO_DETAILS);
                 hdpRepo.setHdpVersion(hdpRepoUpdate.getHdpVersion());
                 hdpRepo.setVerify(hdpRepoUpdate.isVerify());
                 hdpRepo.setStack(hdpRepoUpdate.getStack());
