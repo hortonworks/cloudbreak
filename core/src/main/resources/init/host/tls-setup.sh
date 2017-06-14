@@ -6,9 +6,15 @@ setup_cbclient_cert() {
 }
 
 create_certificates() {
-  echo n | sudo cert-tool -d=/etc/certs -o=gateway -s localhost -s 127.0.0.1 -s ${publicIp}
-  sudo rm /etc/certs/client-key.pem /etc/certs/client.pem /etc/certs/ca-key.pem
-  sudo cp /etc/certs/server.pem /tmp/server.pem
+
+  CBD_CERT_ROOT_PATH=/etc/certs
+
+  sudo cert-tool -d $CBD_CERT_ROOT_PATH ca generate -o=gateway
+  sudo cert-tool -d $CBD_CERT_ROOT_PATH client generate --common-name=${publicIp} -o=gateway
+  sudo mv $CBD_CERT_ROOT_PATH/cert.pem $CBD_CERT_ROOT_PATH/cluster.pem
+  sudo cp /etc/certs/cluster.pem /tmp/cluster.pem
+  sudo mv $CBD_CERT_ROOT_PATH/key.pem $CBD_CERT_ROOT_PATH/cluster-key.pem
+  sudo rm $CBD_CERT_ROOT_PATH/ca-key.pem
 }
 
 start_nginx() {

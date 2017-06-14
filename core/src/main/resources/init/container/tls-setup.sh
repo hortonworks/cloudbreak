@@ -19,12 +19,19 @@ waiting_for_docker() {
 }
 
 create_certificates() {
-  sudo docker run --rm -v /etc/certs:/certs ehazlett/cert-tool:0.0.3 -d /certs -o=gateway -s localhost -s 127.0.0.1 -s ${publicIp}
-  while [ ! -f /etc/certs/server-key.pem ] || [ ! -f /etc/certs/server.pem ]; do
+  CBD_CERT_ROOT_PATH=/etc/certs
+  DOCKER_TAG_CERT_TOOL=0.2.0
+  sudo docker run --rm -v $CBD_CERT_ROOT_PATH:/certs ehazlett/certm:$DOCKER_TAG_CERT_TOOL -d /certs ca generate -o=gateway
+  sudo docker run --rm -v $CBD_CERT_ROOT_PATH:/certs ehazlett/certm:$DOCKER_TAG_CERT_TOOL -d /certs client generate --common-name=${publicIp} -o=gateway
+
+  while [ ! -f $CBD_CERT_ROOT_PATH/key.pem ] || [ ! -f $CBD_CERT_ROOT_PATH/cert.pem ]; do
     sleep 1
   done
-  sudo rm /etc/certs/client-key.pem /etc/certs/client.pem /etc/certs/ca-key.pem
-  sudo cp /etc/certs/server.pem /tmp/server.pem
+
+  sudo mv $CBD_CERT_ROOT_PATH/cert.pem $CBD_CERT_ROOT_PATH/cluster.pem
+  sudo cp /etc/certs/cluster.pem /tmp/cluster.pem
+  sudo mv $CBD_CERT_ROOT_PATH/key.pem $CBD_CERT_ROOT_PATH/cluster-key.pem
+  sudo rm $CBD_CERT_ROOT_PATH/ca-key.pem
 }
 
 start_nginx_container() {
