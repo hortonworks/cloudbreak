@@ -9,7 +9,7 @@ if ! git rev-parse --verify "origin/release-$VERSION" &> /dev/null; then
   echo "branch will be created"
   git checkout -b "release-$VERSION"
   git push -u origin "release-$VERSION"
-  SCOPE=minor
+  SCOPE=major
 else
   echo "branch exists"
   git checkout "release-$VERSION"
