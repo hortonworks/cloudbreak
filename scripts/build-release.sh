@@ -9,7 +9,7 @@ if ! git rev-parse --verify "origin/release-$VERSION" &> /dev/null; then
   echo "branch will be created"
   git checkout -b "release-$VERSION"
   git push -u origin "release-$VERSION"
-  SCOPE=major
+  SCOPE=minor
 else
   echo "branch exists"
   git checkout "release-$VERSION"
@@ -18,6 +18,6 @@ else
   SCOPE=patch
 fi
 
-./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=major -Prelease.stage=final --refresh-dependencies --info --stacktrace
+./gradlew -Penv=jenkins -b build.gradle clean build release uploadArchives -Prelease.scope=$SCOPE -Prelease.stage=final --refresh-dependencies --info --stacktrace
 
 echo VERSION=$(git describe --abbrev=0 --tags) > $WORKSPACE/version
