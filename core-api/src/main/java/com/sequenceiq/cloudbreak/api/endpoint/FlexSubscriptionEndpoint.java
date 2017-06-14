@@ -113,4 +113,17 @@ public interface FlexSubscriptionEndpoint {
             nickname = "getPrivateFlexSubscriptionByName")
     FlexSubscriptionResponse getPrivate(@PathParam(value = "name") String name);
 
+    @PUT
+    @Path("setdefault/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
+            nickname = "putDefaultFlexSubscriptionById")
+    void setDefaultInAccount(@PathParam(value = "id") Long id);
+
+    @PUT
+    @Path("setusedforcontroller/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
+            nickname = "putUsedForControllerFlexSubscriptionById")
+    void setUsedForControllerInAccount(@PathParam(value = "id") Long id);
 }
