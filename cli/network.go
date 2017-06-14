@@ -84,14 +84,22 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 
 	var vpcParams = make(map[string]interface{})
 	vpcParams["vpcId"] = finder(FlVPC.Name)
-	vpcParams["internetGatewayId"] = finder(FlIGW.Name)
+	igw := finder(FlIGW.Name)
+	if len(igw) > 0 {
+		vpcParams["internetGatewayId"] = igw
+	}
 	subnet := finder(FlSubnet.Name)
-
+	if len(subnet) > 0 {
+		vpcParams["subnetId"] = subnet
+	}
 	network := models_cloudbreak.NetworkRequest{
 		Name:          networkName,
 		CloudPlatform: "AWS",
 		Parameters:    vpcParams,
-		SubnetCIDR:    &subnet,
+	}
+	subnetCidr := finder(FlSubnetCidr.Name)
+	if len(subnetCidr) > 0 {
+		network.SubnetCIDR = &subnetCidr
 	}
 
 	resp, err := postNetwork(&networks.PostPublicNetworkParams{Body: &network})

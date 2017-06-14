@@ -167,10 +167,16 @@ var (
 			Name: "network-name",
 		},
 	}
-	FlSubnet = StringFlag{
+	FlSubnetCidr = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name: "subnet-cidr",
+		},
+	}
+	FlSubnet = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "subnet",
 		},
 	}
 	FlVPC = StringFlag{

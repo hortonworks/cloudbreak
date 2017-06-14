@@ -461,7 +461,7 @@ func main() {
 		},
 	}
 
-	// hidden commands
+	// internal commands
 	app.Commands = append(app.Commands, []cli.Command{
 		{
 			Name:   "internal",
@@ -499,13 +499,28 @@ func main() {
 		{
 			Name:  "create-network",
 			Usage: "create a new network",
-			Flags: []cli.Flag{hdc.FlNetworkName, hdc.FlSubnet, hdc.FlVPC, hdc.FlIGW,
+			Flags: []cli.Flag{hdc.FlNetworkName, hdc.FlSubnetCidr, hdc.FlVPC, hdc.FlIGW,
 				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
 			Before: ConfigRead,
 			Hidden: true,
 			Action: hdc.CreateNetworkCommand,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlNetworkName, hdc.FlSubnet, hdc.FlVPC, hdc.FlIGW,
+				for _, f := range []cli.Flag{hdc.FlNetworkName, hdc.FlSubnetCidr, hdc.FlVPC, hdc.FlIGW,
+					hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:  "create-network-existing",
+			Usage: "create a new network",
+			Flags: []cli.Flag{hdc.FlNetworkName, hdc.FlSubnet, hdc.FlVPC,
+				hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Hidden: true,
+			Action: hdc.CreateNetworkCommand,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlNetworkName, hdc.FlSubnet, hdc.FlVPC,
 					hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}

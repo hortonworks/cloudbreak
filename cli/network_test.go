@@ -88,6 +88,8 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 			return "igw"
 		case FlSubnet.Name:
 			return "subnet"
+		case FlSubnetCidr.Name:
+			return "subnet-cidr"
 		default:
 			return ""
 		}
@@ -110,11 +112,12 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 	expectedParams := make(map[string]interface{})
 	expectedParams["vpcId"] = finder(FlVPC.Name)
 	expectedParams["internetGatewayId"] = finder(FlIGW.Name)
+	expectedParams["subnetId"] = finder(FlSubnet.Name)
 	if !reflect.DeepEqual(actual.Parameters, expectedParams) {
 		t.Errorf("params not match %s == %s", expectedParams, actual.Parameters)
 	}
-	if *actual.SubnetCIDR != finder(FlSubnet.Name) {
-		t.Errorf("subnet not match %s == %s", finder(FlSubnet.Name), *actual.SubnetCIDR)
+	if *actual.SubnetCIDR != finder(FlSubnetCidr.Name) {
+		t.Errorf("subnet not match %s == %s", finder(FlSubnetCidr.Name), *actual.SubnetCIDR)
 	}
 }
 
