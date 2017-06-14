@@ -275,12 +275,10 @@ public class ClusterController implements ClusterEndpoint {
                 ambariRepoDetailsJson = new AmbariRepoDetailsJson();
             }
             AmbariRepo ambariRepo = conversionService.convert(ambariRepoDetailsJson, AmbariRepo.class);
-            ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(), new Json(ambariRepo),
-                    cluster);
+            ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, new Json(ambariRepo), cluster);
             components.add(component);
-        }  else {
-            ClusterComponent ambariRepo = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, ComponentType.AMBARI_REPO_DETAILS.name(),
-                    stackAmbariRepoConfig.getAttributes(), cluster);
+        } else {
+            ClusterComponent ambariRepo = new ClusterComponent(ComponentType.AMBARI_REPO_DETAILS, stackAmbariRepoConfig.getAttributes(), cluster);
             components.add(ambariRepo);
         }
         return components;
@@ -294,17 +292,14 @@ public class ClusterController implements ClusterEndpoint {
             AmbariStackDetailsJson ambariStackDetailsJson = request.getAmbariStackDetails();
             if (ambariStackDetailsJson != null) {
                 HDPRepo hdpRepo = conversionService.convert(ambariStackDetailsJson, HDPRepo.class);
-                ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(), new Json(hdpRepo),
-                        cluster);
+                ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(hdpRepo), cluster);
                 components.add(component);
             } else {
-                ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
-                        new Json(defaultHDPInfo(request).getRepo()), cluster);
+                ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(defaultHDPInfo(request).getRepo()), cluster);
                 components.add(hdpRepoComponent);
             }
         } else {
-            ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name(),
-                    stackHdpRepoConfig.getAttributes(), cluster);
+            ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackHdpRepoConfig.getAttributes(), cluster);
             components.add(hdpRepoComponent);
         }
         return components;
@@ -322,7 +317,7 @@ public class ClusterController implements ClusterEndpoint {
             }
             if (root != null) {
                 String blueprintHdpVersion = blueprintUtils.getBlueprintHdpVersion(root);
-                for (Map.Entry<String, DefaultHDPInfo> entry: defaultHDPInfos.getEntries().entrySet()) {
+                for (Map.Entry<String, DefaultHDPInfo> entry : defaultHDPInfos.getEntries().entrySet()) {
                     if (entry.getKey().equals(blueprintHdpVersion)) {
                         return entry.getValue();
                     }
@@ -341,8 +336,7 @@ public class ClusterController implements ClusterEndpoint {
             ambariRepoDetailsJson = new AmbariDatabaseDetailsJson();
         }
         AmbariDatabase ambariDatabase = conversionService.convert(ambariRepoDetailsJson, AmbariDatabase.class);
-        ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_DATABASE_DETAILS, ComponentType.AMBARI_DATABASE_DETAILS.name(),
-                new Json(ambariDatabase), cluster);
+        ClusterComponent component = new ClusterComponent(ComponentType.AMBARI_DATABASE_DETAILS, new Json(ambariDatabase), cluster);
         components.add(component);
         return components;
     }

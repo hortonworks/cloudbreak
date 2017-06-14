@@ -37,7 +37,10 @@ public class ClusterComponent {
     private Cluster cluster;
 
     public ClusterComponent() {
+    }
 
+    public ClusterComponent(ComponentType componentType, Json attributes, Cluster cluster) {
+        this(componentType, componentType.name(), attributes, cluster);
     }
 
     public ClusterComponent(ComponentType componentType, String name, Json attributes, Cluster cluster) {

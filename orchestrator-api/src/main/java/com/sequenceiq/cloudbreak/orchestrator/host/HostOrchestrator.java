@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.host;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -20,7 +21,7 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void bootstrap(List<GatewayConfig> allGatewayConfigs, Set<Node> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
-    void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes,
+    void bootstrapNewNodes(List<GatewayConfig> allGatewayConfigs, Set<Node> nodes, Set<Node> allNodes, byte[] stateConfigZip,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
@@ -44,4 +45,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+
+    byte[] getStateConfigZip() throws IOException;
 }
