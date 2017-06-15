@@ -12,9 +12,9 @@ public class AdlsFileSystemConfiguration extends FileSystemConfiguration {
 
     public static final String SUBSCRIPTION_ID = "subscriptionId";
 
-    public static final String CLIENT_ID = "clientId";
-
     public static final String TENANT_ID = "tenantId";
+
+    public static final String ACCESS_KEY = "accessKey";
 
     @NotNull
     @Pattern(regexp = "^[a-z0-9]{3,24}$",
@@ -24,7 +24,6 @@ public class AdlsFileSystemConfiguration extends FileSystemConfiguration {
     @NotNull
     private String tenantId;
 
-    @NotNull
     private String clientId;
 
     private String credential;

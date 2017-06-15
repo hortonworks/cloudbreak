@@ -544,7 +544,9 @@ public class AmbariClusterConnector {
         // we have to lookup secret key from the credential because it is not stored in client side
         if (fsConfiguration instanceof AdlsFileSystemConfiguration) {
             String credential = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
+            String clientId = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.ACCESS_KEY));
             ((AdlsFileSystemConfiguration) fsConfiguration).setCredential(credential);
+            ((AdlsFileSystemConfiguration) fsConfiguration).setClientId(clientId);
         }
     }
 
