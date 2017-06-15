@@ -107,7 +107,6 @@ public class AwsSetup implements Setup {
         verifySpotInstances(stack);
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-        validateImageOptIn(awsCredentialView, region, stack.getImage().getImageName());
         if (awsClient.roleBasedCredential(awsCredentialView) && awsInstanceProfileView.isCreateInstanceProfile()) {
             validateInstanceProfileCreation(awsCredentialView);
         }
@@ -124,6 +123,7 @@ public class AwsSetup implements Setup {
             }
 
         }
+        validateImageOptIn(awsCredentialView, region, stack.getImage().getImageName(), awsNetworkView);
         validateExistingKeyPair(ac, credentialView, region);
         LOGGER.debug("setup has been executed");
     }
@@ -140,7 +140,7 @@ public class AwsSetup implements Setup {
         }
     }
 
-    private void validateImageOptIn(AwsCredentialView credentialView, String region, String imageName) {
+    private void validateImageOptIn(AwsCredentialView credentialView, String region, String imageName, AwsNetworkView awsNetworkView) {
         try {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
             RunInstancesRequest request = new RunInstancesRequest()
@@ -148,6 +148,10 @@ public class AwsSetup implements Setup {
                     .withMaxCount(1)
                     .withImageId(imageName)
                     .withInstanceType(InstanceType.M3Xlarge);
+            String existingSubnet = awsNetworkView.getExistingSubnet();
+            if (awsNetworkView.isExistingVPC() && StringUtils.isNoneEmpty(existingSubnet)) {
+                request = request.withSubnetId(existingSubnet);
+            }
             amazonEC2Client.dryRun(request);
             LOGGER.info("Dry run succeeded, AMI '{}' is safe to launch.", imageName);
         } catch (AmazonServiceException e) {
