@@ -161,7 +161,7 @@ public class AzureSetup implements Setup {
         Map<String, Object> credentialAttributes = credential.getParameters();
         String clientSecret = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
         String subscriptionId = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.SUBSCRIPTION_ID));
-        String clientId = fileSystem.getStringParameter(AdlsFileSystemConfiguration.CLIENT_ID);
+        String clientId =  String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.ACCESS_KEY));
         String tenantId = fileSystem.getStringParameter(AdlsFileSystemConfiguration.TENANT_ID);
         String accountName = fileSystem.getStringParameter(FileSystemConfiguration.ACCOUNT_NAME);
 
