@@ -202,7 +202,7 @@
 <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
     <label class="col-sm-3 control-label" for="azureAvailabilitySetsEnabled">{{msg.cluster_form_enable_availabilitysets_label}} <i class="fa fa-question-circle" popover-placement="top" popover={{msg.cluster_form_availabilitysets_popup}} popover-trigger="mouseenter"></i></label>
     <div class="col-sm-8">
-        <input type="checkbox" id="azureAvailabilitySetsEnabled" ng-model="cluster.parameters.azureAvailabilitySetsEnabled" name="azureAvailabilitySetsEnabled">
+        <input type="checkbox" id="azureAvailabilitySetsEnabled" ng-model="cluster.parameters.azureAvailabilitySetsEnabled" ng-change="removeAvailabilitySetsIfDisabled()" name="azureAvailabilitySetsEnabled">
     </div>
 </div>
 
