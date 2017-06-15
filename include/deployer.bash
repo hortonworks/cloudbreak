@@ -513,7 +513,7 @@ _exit() {
 }
 
 is_command_needs_profile() {
-    [[ ' '"aws azure bash-complete doctor help init machine version update delete"' ' != *" $1 "* ]]
+    [[ ' '"aws azure bash-complete help init machine version update delete"' ' != *" $1 "* ]]
 }
 
 main() {
@@ -570,7 +570,6 @@ main() {
     cmd-export-ns db "Db operations namespace"
     cmd-export db-dump
     cmd-export db-list-dumps
-    cmd-export db-init-volume-from-dump
     cmd-export db-restore-volume-from-dump
     
     cmd-export cbd-update update

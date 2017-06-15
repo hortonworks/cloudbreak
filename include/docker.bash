@@ -5,7 +5,7 @@ docker-check-docker-machine() {
         _exit 127
     fi
     if [[ "$(docker-machine status $DOCKER_MACHINE)" == "Running" ]]; then
-      if [[ "$(docker-machine active)" == "$DOCKER_MACHINE" ]]; then
+      if [[ "$DOCKER_HOST" = *"$(docker-machine ip $DOCKER_MACHINE)"* ]]; then
           info "docker-machine env init: OK"
       else
           error "docker-machine env is not set correctly, please run:"
