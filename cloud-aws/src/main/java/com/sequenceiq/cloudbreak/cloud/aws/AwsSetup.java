@@ -20,14 +20,11 @@ import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcAttributeRequest;
-import com.amazonaws.services.ec2.model.DescribeVpcAttributeResult;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.VpcAttributeName;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.AttachedPolicy;
 import com.amazonaws.services.identitymanagement.model.GetPolicyRequest;
@@ -115,7 +112,6 @@ public class AwsSetup implements Setup {
         if (awsNetworkView.isExistingVPC()) {
             try {
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
-                validateExistingVpc(awsNetworkView, amazonEC2Client);
                 validateExistingIGW(awsNetworkView, amazonEC2Client);
                 validateExistingSubnet(awsNetworkView, amazonEC2Client);
             } catch (AmazonServiceException e) {
@@ -243,29 +239,6 @@ public class AwsSetup implements Setup {
             return true;
         }
         return false;
-    }
-
-    private void validateExistingVpc(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
-        DescribeVpcAttributeRequest describeVpcAttributeRequest = new DescribeVpcAttributeRequest();
-        describeVpcAttributeRequest.withVpcId(awsNetworkView.getExistingVPC());
-        boolean dnsSupported = isDnsSupported(amazonEC2Client, describeVpcAttributeRequest);
-        boolean hostnameSupported = checkHostnameSupport(amazonEC2Client, describeVpcAttributeRequest);
-
-        if (!dnsSupported || !hostnameSupported) {
-            throw new CloudConnectorException("Please enable both DNS resolution and DNS hostnames in existing VPC: " + awsNetworkView.getExistingVPC());
-        }
-    }
-
-    private boolean isDnsSupported(AmazonEC2Client amazonEC2Client, DescribeVpcAttributeRequest describeVpcAttributeRequest) {
-        describeVpcAttributeRequest.withAttribute(VpcAttributeName.EnableDnsSupport);
-        DescribeVpcAttributeResult describeVpcAttributeResult = amazonEC2Client.describeVpcAttribute(describeVpcAttributeRequest);
-        return describeVpcAttributeResult.getEnableDnsSupport();
-    }
-
-    private boolean checkHostnameSupport(AmazonEC2Client amazonEC2Client, DescribeVpcAttributeRequest describeVpcAttributeRequest) {
-        describeVpcAttributeRequest.withAttribute(VpcAttributeName.EnableDnsHostnames);
-        DescribeVpcAttributeResult describeVpcAttributeResult = amazonEC2Client.describeVpcAttribute(describeVpcAttributeRequest);
-        return describeVpcAttributeResult.getEnableDnsHostnames();
     }
 
     private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
