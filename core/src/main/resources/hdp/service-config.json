@@ -2,6 +2,10 @@
   "services": [
     {
       "name": "YARN",
+      "related_services": [
+        "APP_TIMELINE_SERVER",
+        "NODEMANAGER"
+      ],
       "configurations": [
         {
           "type": "yarn-site",
@@ -29,6 +33,12 @@
     },
     {
       "name": "S3",
+      "related_services": [
+        "DATANODE",
+        "HDFS_CLIENT",
+        "NAMENODE",
+        "NODEMANAGER"
+      ],
       "configurations": [
         {
           "type": "core-site",
@@ -45,6 +55,11 @@
     },
     {
       "name": "HDFS",
+      "related_services": [
+        "DATANODE",
+        "NAMENODE",
+        "JOURNALNODE"
+      ],
       "configurations": [
         {
           "type": "hdfs-site",
@@ -77,6 +92,12 @@
     },
     {
       "name": "HBASE",
+      "related_services": [
+        "HBASE_CLIENT",
+        "HBASE_MASTER",
+        "HBASE_REGIONSERVER",
+        "PHOENIX_QUERY_SERVER"
+      ],
       "configurations": [
         {
           "type": "hbase-site",
@@ -93,6 +114,12 @@
     },
     {
       "name": "STORM",
+      "related_services": [
+        "DRPC_SERVER",
+        "NIMBUS",
+        "STORM_UI_SERVER",
+        "SUPERVISOR"
+      ],
       "configurations": [
         {
           "type": "storm-site",
@@ -109,6 +136,10 @@
     },
     {
       "name": "OOZIE",
+      "related_services": [
+        "OOZIE_CLIENT",
+        "OOZIE_SERVER"
+      ],
       "configurations": [
         {
           "type": "oozie-env",
@@ -125,6 +156,10 @@
     },
     {
       "name": "ZOOKEEPER",
+      "related_services": [
+        "ZOOKEEPER_CLIENT",
+        "ZOOKEEPER_SERVER"
+      ],
       "configurations": [
         {
           "type": "zoo.cfg",
@@ -141,6 +176,10 @@
     },
     {
       "name": "FALCON",
+      "related_services": [
+        "FALCON_CLIENT",
+        "FALCON_SERVER"
+      ],
       "configurations": [
         {
           "type": "falcon-startup.properties",
@@ -188,6 +227,10 @@
     },
     {
       "name": "ATLAS",
+      "related_services": [
+        "ATLAS_CLIENT",
+        "ATLAS_SERVER"
+      ],
       "configurations": [
         {
           "type": "application-properties",
@@ -220,6 +263,11 @@
     },
     {
       "name": "METRICS",
+      "related_services": [
+        "METRICS_COLLECTOR",
+        "METRICS_GRAFANA",
+        "METRICS_MONITOR"
+      ],
       "configurations": [
         {
           "type": "ams-site",
@@ -252,6 +300,10 @@
     },
     {
       "name": "INFRA",
+      "related_services": [
+        "INFRA_SOLR",
+        "INFRA_SOLR_CLIENT"
+      ],
       "configurations": [
         {
           "type": "infra-solr-env",
