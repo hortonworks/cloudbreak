@@ -302,8 +302,8 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, Set<Node> allNodes,
-            ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException {
+    public void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = allGatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst().get();
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = new SaltConnector(primaryGateway, restDebug)) {

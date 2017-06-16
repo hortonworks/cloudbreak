@@ -21,6 +21,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -83,14 +84,17 @@ public class RecipeEngine {
         }
     }
 
-    public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaData) throws CloudbreakException {
+    public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaDatas, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
-            Set<HostGroup> hostGroups = Collections.singleton(hostGroup);
-            configureSssd(stack, metaData);
-            addFsRecipes(stack, hostGroups);
-            boolean recipesFound = recipesFound(hostGroups);
+            Set<HostGroup> hgs = Collections.singleton(hostGroup);
+            configureSssd(stack, metaDatas);
+            addFsRecipes(stack, hgs);
+            boolean recipesFound = recipesFound(hgs);
             if (recipesFound) {
+                if (hostGroup.getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
+                    orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
+                }
                 orchestratorRecipeExecutor.preInstall(stack);
             }
         }
