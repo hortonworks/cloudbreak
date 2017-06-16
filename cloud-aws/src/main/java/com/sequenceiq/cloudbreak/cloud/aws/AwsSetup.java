@@ -13,20 +13,18 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AmazonEC2Exception;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysRequest;
 import com.amazonaws.services.ec2.model.DescribeInternetGatewaysResult;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.DescribeKeyPairsResult;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
-import com.amazonaws.services.ec2.model.DescribeVpcAttributeRequest;
-import com.amazonaws.services.ec2.model.DescribeVpcAttributeResult;
 import com.amazonaws.services.ec2.model.InstanceType;
 import com.amazonaws.services.ec2.model.InternetGateway;
 import com.amazonaws.services.ec2.model.InternetGatewayAttachment;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.Subnet;
-import com.amazonaws.services.ec2.model.VpcAttributeName;
 import com.amazonaws.services.identitymanagement.AmazonIdentityManagement;
 import com.amazonaws.services.identitymanagement.model.AttachedPolicy;
 import com.amazonaws.services.identitymanagement.model.GetPolicyRequest;
@@ -113,7 +111,6 @@ public class AwsSetup implements Setup {
         if (awsNetworkView.isExistingVPC()) {
             try {
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, region);
-                validateExistingVpc(awsNetworkView, amazonEC2Client);
                 validateExistingIGW(awsNetworkView, amazonEC2Client);
                 validateExistingSubnet(awsNetworkView, amazonEC2Client);
             } catch (AmazonServiceException e) {
@@ -154,19 +151,23 @@ public class AwsSetup implements Setup {
             }
             amazonEC2Client.dryRun(request);
             LOGGER.info("Dry run succeeded, AMI '{}' is safe to launch.", imageName);
-        } catch (AmazonServiceException e) {
-            String errorMessage = e.getErrorMessage();
-            if (e.getErrorCode().equals("OptInRequired")) {
-                int marketplaceLinkIndex = errorMessage.indexOf(MARKETPLACE_HTTP_LINK);
-                if (marketplaceLinkIndex != -1) {
-                    errorMessage = IMAGE_OPT_IN_REQUIRED_MSG + " " + LINK_TO_MARKETPLACE_MSG + errorMessage.substring(marketplaceLinkIndex);
-                } else {
-                    errorMessage = IMAGE_OPT_IN_REQUIRED_MSG;
+        } catch (AmazonClientException ex) {
+            if (ex.getCause() != null && (ex.getCause() instanceof AmazonEC2Exception)) {
+                AmazonEC2Exception e = (AmazonEC2Exception) ex.getCause();
+                String errorMessage = e.getErrorMessage();
+                if (e.getErrorCode().equals("OptInRequired")) {
+                    int marketplaceLinkIndex = errorMessage.indexOf(MARKETPLACE_HTTP_LINK);
+                    if (marketplaceLinkIndex != -1) {
+                        errorMessage = IMAGE_OPT_IN_REQUIRED_MSG + " " + LINK_TO_MARKETPLACE_MSG + errorMessage.substring(marketplaceLinkIndex);
+                    } else {
+                        errorMessage = IMAGE_OPT_IN_REQUIRED_MSG;
+                    }
+                    throw new CloudConnectorException(errorMessage, e);
                 }
-                throw new CloudConnectorException(errorMessage, e);
-            } else {
-                LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), e);
             }
+            LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), ex);
+        } catch (Exception e) {
+            LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), e);
         }
     }
 
@@ -242,29 +243,6 @@ public class AwsSetup implements Setup {
             return true;
         }
         return false;
-    }
-
-    private void validateExistingVpc(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
-        DescribeVpcAttributeRequest describeVpcAttributeRequest = new DescribeVpcAttributeRequest();
-        describeVpcAttributeRequest.withVpcId(awsNetworkView.getExistingVPC());
-        boolean dnsSupported = isDnsSupported(amazonEC2Client, describeVpcAttributeRequest);
-        boolean hostnameSupported = checkHostnameSupport(amazonEC2Client, describeVpcAttributeRequest);
-
-        if (!dnsSupported || !hostnameSupported) {
-            throw new CloudConnectorException("Please enable both DNS resolution and DNS hostnames in existing VPC: " + awsNetworkView.getExistingVPC());
-        }
-    }
-
-    private boolean isDnsSupported(AmazonEC2Client amazonEC2Client, DescribeVpcAttributeRequest describeVpcAttributeRequest) {
-        describeVpcAttributeRequest.withAttribute(VpcAttributeName.EnableDnsSupport);
-        DescribeVpcAttributeResult describeVpcAttributeResult = amazonEC2Client.describeVpcAttribute(describeVpcAttributeRequest);
-        return describeVpcAttributeResult.getEnableDnsSupport();
-    }
-
-    private boolean checkHostnameSupport(AmazonEC2Client amazonEC2Client, DescribeVpcAttributeRequest describeVpcAttributeRequest) {
-        describeVpcAttributeRequest.withAttribute(VpcAttributeName.EnableDnsHostnames);
-        DescribeVpcAttributeResult describeVpcAttributeResult = amazonEC2Client.describeVpcAttribute(describeVpcAttributeRequest);
-        return describeVpcAttributeResult.getEnableDnsHostnames();
     }
 
     private void validateExistingSubnet(AwsNetworkView awsNetworkView, AmazonEC2Client amazonEC2Client) {
