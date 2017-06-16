@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public interface HostRecipeExecutor {
 
-    void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+    void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException;
 
     void preInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException;

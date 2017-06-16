@@ -56,8 +56,7 @@ public class OrchestratorRecipeExecutor {
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         recipesEvent(stack.getId(), stack.getStatus(), recipeMap);
         try {
-            hostOrchestrator.uploadRecipes(allGatewayConfigs, recipeMap, collectNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.uploadRecipes(allGatewayConfigs, recipeMap, clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }

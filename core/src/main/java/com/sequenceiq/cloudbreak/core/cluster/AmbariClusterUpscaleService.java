@@ -110,8 +110,9 @@ public class AmbariClusterUpscaleService {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start executing pre recipes");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+        Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
-        recipeEngine.executeUpscalePreInstall(stack, hostGroup, hostMetadata);
+        recipeEngine.executeUpscalePreInstall(stack, hostGroup, hostMetadata, hostGroups);
     }
 
     public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
