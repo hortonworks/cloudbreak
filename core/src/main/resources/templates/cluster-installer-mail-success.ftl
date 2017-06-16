@@ -168,9 +168,11 @@
                                                         <tr>
                                                             <td style="padding: 13px 29px; font-size: 17px; line-height: 17px; font-family: Arial, Helvetica, sans-serif; text-align: center; color: #ffffff;">
                                                                 <#if hwx_cloud>
-                                                                <a style="color: white; text-decoration: none;" href="https://${server}">Go to Hortonworks Data Cloud</a>
-                                                                <#else>
-                                                                <a style="color: white; text-decoration: none;" href="http://${server}:8080">Access your cluster</a>
+                                                                <a style="color: white; text-decoration: none;" href="https://${server}/${clusterName}/services/ambari/">Go to Hortonworks Data Cloud</a>
+                                                                <#elseif gatewayEnabled >
+                                                                <a style="color: white; text-decoration: none;" href="https://${server}:8443/${clusterName}/services/ambari/">Access your cluster</a>
+                                                                 <#else>
+                                                                <a style="color: white; text-decoration: none;" href="https://${server}/">Access your cluster</a>
                                                                 </#if>
                                                             </td>
                                                         </tr>

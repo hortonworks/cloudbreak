@@ -131,10 +131,10 @@ public class EmailSenderService {
     }
 
     @Async
-    public void sendProvisioningSuccessEmail(String owner, String email, String ambariServer, String clusterName) {
+    public void sendProvisioningSuccessEmail(String owner, String email, String ambariServer, String clusterName, Boolean gatewayEnabled) {
         IdentityUser user = userDetailsService.getDetails(owner, UserFilterField.USERID);
         sendEmail(user, email, successClusterMailTemplatePath, String.format(CLUSTER_READY_SUBJECT, clusterName), getEmailModel(user.getGivenName(),
-                ambariServer, State.PROVISIONING_SUCCESS, clusterName));
+                ambariServer, State.PROVISIONING_SUCCESS, clusterName, gatewayEnabled));
     }
 
     @Async
@@ -226,6 +226,10 @@ public class EmailSenderService {
     }
 
     private Map<String, Object> getEmailModel(String name, String server, State state, String clusterName) {
+        return getEmailModel(name, server, state, clusterName, false);
+    }
+
+    private Map<String, Object> getEmailModel(String name, String server, State state, String clusterName, Boolean gatewayEnabled) {
         Map<String, Object> model = new HashMap<>();
         model.put("status", state.status);
         model.put("name", name);
@@ -235,6 +239,7 @@ public class EmailSenderService {
         model.put("clusterName", clusterName);
         model.put("hwx_cloud", isHwxCloud());
         model.put("server", isHwxCloud() ? cloudAddress : server);
+        model.put("gatewayEnabled", gatewayEnabled);
         return model;
     }
 

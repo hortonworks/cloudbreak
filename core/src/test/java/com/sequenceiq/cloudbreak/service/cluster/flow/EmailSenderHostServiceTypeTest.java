@@ -159,7 +159,7 @@ public class EmailSenderHostServiceTypeTest {
         String content = getFileContent("mail/cluster-installer-mail-success").replaceAll("\\n", "");
         String subject = String.format("%s cluster installation", NAME_OF_THE_CLUSTER);
         //WHEN
-        emailSenderService.sendProvisioningSuccessEmail("test@example.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        emailSenderService.sendProvisioningSuccessEmail("test@example.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER, false);
 
         //THEN
         greenMail.waitForIncomingEmail(5000, 1);
@@ -174,7 +174,7 @@ public class EmailSenderHostServiceTypeTest {
     public void testSendProvisioningSuccessEmailSmtp() throws IOException, MessagingException {
         //GIVEN
         String subject = "Your cluster is ready";
-        emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER);
+        emailSenderService.sendProvisioningSuccessEmail("xxx@alma.com", "xxx", "123.123.123.123", NAME_OF_THE_CLUSTER, false);
 
         //THEN
         greenMail.waitForIncomingEmail(5000, 1);
