@@ -10,7 +10,7 @@ var sessionStore = new connect.middleware.session.MemoryStore();
 var cookieParser = require('cookie-parser')(sessionSecret);
 var sessionSocketIo = require('session.socket.io');
 var connectSid = 'uluwatu.sid';
-var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser);
+var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser, connectSid);
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
@@ -25,17 +25,18 @@ app.engine('html', cons.underscore);
 
 app.set('views', './app')
 app.set('view engine', 'html')
-app.use(express.static(path.join(__dirname, 'app/static')));
+app.set('trust proxy', true)
+app.use(express.static(path.join(__dirname, 'app/static'), {  maxAge: 3600000 }));
 app.use(cookieParser);
-var session = express.session({
+var session = session({
     name: connectSid,
     genid: function(req) {
-        return uid(30);
+      return uid(30);
     },
     secret: sessionSecret,
     resave: true,
     saveUninitialized: true,
-    cookie: {},
+    cookie: { secure: true },
     store: sessionStore
 });
 app.use(session);
@@ -133,6 +134,14 @@ function waitingForAddressesAndContinue() {
     } else {
         process.exit(1);
     }
+}
+
+function addDefaultHeaders(res) {
+    res.set({
+        'X-Frame-Options': 'SAMEORIGIN',
+        'X-Content-Type-Options': 'nosniff',
+        'X-XSS-Protection': '1;mode=block'
+    })
 }
 
 function continueInit() {
@@ -235,6 +244,7 @@ function continueInit() {
     // main page ===================================================================
 
     app.get('/', function(req, res) {
+        addDefaultHeaders(res)
         if (config.subscriptionAddress == null && process.env.ULU_SUBSCRIBE_TO_NOTIFICATIONS == "true") {
             console.log('<<<<Subscribe for notifications.');
             subscribe()

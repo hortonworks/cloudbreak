@@ -64,6 +64,14 @@ function debugHeaders(req) {
     }
 }
 
+function addDefaultHeaders(res) {
+    res.set({
+        'X-Frame-Options': 'SAMEORIGIN',
+        'X-Content-Type-Options': 'nosniff',
+        'X-XSS-Protection': '1;mode=block'
+    })
+}
+
 function getBasePath(req) {
     if (req.headers['x-forwarded-for']  !== undefined) {
         if (process.env.SL_BASE_PATH !== undefined) {
@@ -81,7 +89,8 @@ function continueInit() {
 
     app.set('views', './app')
     app.set('view engine', 'html')
-    app.use(express.static(path.join(__dirname, 'public')));
+    app.set('trust proxy', true)
+    app.use(express.static(path.join(__dirname, 'public'), {  maxAge: '1h' }));
     app.use(favicon(path.join(__dirname, 'public', 'img', 'favicon.ico')));
     app.use(session({
         name: 'sultans.sid',
@@ -91,7 +100,7 @@ function continueInit() {
         secret: uid(30),
         resave: true,
         saveUninitialized: true,
-        cookie: {}
+        cookie: { secure: true }
     }))
     app.use(bodyParser.urlencoded({
         extended: false
@@ -111,20 +120,21 @@ function continueInit() {
     // login.html
     app.get('/', function(req, res) {
         debugHeaders(req)
+        addDefaultHeaders(res)
         var logout = req.query.logout
         if (logout != null && logout == 'true') {
             req.session.destroy(function() {
                 res.clearCookie('sultans.sid', {
                     path: '/'
                 });
-                res.cookie('source', req.query.source);
+                res.cookie('source', req.query.source, { httpOnly: true, secure: true });
                 res.render('login', {
                     basePath: getBasePath(req),
                     errorMessage: ""
                 });
             })
         } else {
-            res.cookie('source', req.query.source);
+            res.cookie('source', req.query.source, { httpOnly: true, secure: true });
             res.render('login', {
                 basePath: getBasePath(req),
                 errorMessage: ""
@@ -133,6 +143,7 @@ function continueInit() {
     });
 
     app.get('/dashboard', function(req, res) {
+        addDefaultHeaders(res)
         res.render('dashboard', {
             basePath: getBasePath(req),
             cloudbreakAddress: process.env.SL_CB_ADDRESS
@@ -160,6 +171,7 @@ function continueInit() {
 
     // reset.html
     app.get('/reset/:resetToken', function(req, res) {
+        addDefaultHeaders(res)
         res.render('reset', {
             basePath: getBasePath(req)
         })
@@ -177,6 +189,7 @@ function continueInit() {
     }
 
     app.post('/', function(req, res) {
+        addDefaultHeaders(res)
         getCrsfToken('/login', req, res, function (csrfToken) {
             var username = req.body.email
             var password = req.body.password
