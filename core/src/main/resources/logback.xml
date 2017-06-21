@@ -12,6 +12,8 @@
         <appender-ref ref="STDOUT"/>
     </logger>
 
+    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
