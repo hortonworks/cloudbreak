@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.MANAGE
 import static com.sequenceiq.cloudbreak.cloud.azure.AzureInteractiveLogin.XPLAT_CLI_CLIENT_ID;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
@@ -49,8 +50,6 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     private static final String LOGIN_MICROSOFTONLINE_OAUTH2 = LOGIN_MICROSOFTONLINE + "common/oauth2";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureInteractiveLoginStatusCheckerTask.class);
-
-    private static final String PASSWORD = "cloudbreak";
 
     private final AzureInteractiveLoginStatusCheckerContext armInteractiveLoginStatusCheckerContext;
 
@@ -101,7 +100,8 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     subscriptionChecker.checkSubscription(armCredentialView.getSubscriptionId(), managementApiToken);
                     tenantChecker.checkTenant(armCredentialView.getTenantId(), managementApiToken);
 
-                    String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId());
+                    String secretKey = UUID.randomUUID().toString();
+                    String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId(), secretKey);
                     sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
                     String principalObjectId = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
                     sendStatusMessage(extendedCloudCredential, "Principal created for application");
@@ -112,7 +112,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     sendStatusMessage(extendedCloudCredential, "Role assigned for principal");
 
                     extendedCloudCredential.putParameter("accessKey", appId);
-                    extendedCloudCredential.putParameter("secretKey", PASSWORD);
+                    extendedCloudCredential.putParameter("secretKey", secretKey);
 
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);
