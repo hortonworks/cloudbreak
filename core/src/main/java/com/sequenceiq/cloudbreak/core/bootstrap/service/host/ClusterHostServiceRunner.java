@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -89,9 +89,9 @@ public class ClusterHostServiceRunner {
             Set<Node> nodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, primaryGatewayConfig);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            hostOrchestrator.runService(gatewayConfigs, nodes, saltPillarConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, primaryGatewayConfig, gatewayConfigs);
+            hostOrchestrator.runService(gatewayConfigs, nodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {
@@ -99,7 +99,8 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private SaltPillarConfig createServicePillar(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig) throws IOException {
+    private SaltConfig createSaltConfig(Stack stack, Cluster cluster, GatewayConfig primaryGatewayConfig, List<GatewayConfig> gatewayConfigs)
+            throws IOException {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         saveDatalakeNameservers(stack, servicePillar);
         saveSharedRangerService(stack, servicePillar);
@@ -129,7 +130,18 @@ public class ClusterHostServiceRunner {
         credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
         credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
-        return new SaltPillarConfig(servicePillar);
+
+        return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
+    }
+
+    private Map<String, Map<String, String>> createGrainProperties(List<GatewayConfig> gatewayConfigs) {
+        Map<String, Map<String, String>> grainProperties = new HashMap<>();
+        for (GatewayConfig gatewayConfig : gatewayConfigs) {
+            Map<String, String> hostGrain = new HashMap<>();
+            hostGrain.put("gateway-address", gatewayConfig.getPublicAddress());
+            grainProperties.put(gatewayConfig.getPrivateAddress(), hostGrain);
+        }
+        return grainProperties;
     }
 
     /**
@@ -213,9 +225,9 @@ public class ClusterHostServiceRunner {
             candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
             Set<Node> allNodes = collectNodes(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
-            SaltPillarConfig saltPillarConfig = createServicePillar(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack));
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-            hostOrchestrator.runService(gatewayConfigs, allNodes, saltPillarConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
+            SaltConfig saltConfig = createSaltConfig(stack, cluster, gatewayConfigService.getPrimaryGatewayConfig(stack), gatewayConfigs);
+            hostOrchestrator.runService(gatewayConfigs, allNodes, saltConfig, clusterDeletionBasedModel(stack.getId(), cluster.getId()));
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
         } catch (CloudbreakOrchestratorException | IOException e) {

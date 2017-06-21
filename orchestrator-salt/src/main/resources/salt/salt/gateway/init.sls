@@ -20,7 +20,7 @@ knox-master-secret:
 
 knox-create-cert:
   cmd.run:
-    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-cert --hostname {{ salt['pillar.get']('gateway:address') }}
+    - name: /usr/hdp/current/knox-server/bin/knoxcli.sh create-cert --hostname {{ salt['grains.get']('gateway-address')[0] }}
     - user: knox
     - creates: /usr/hdp/current/knox-server/data/security/keystores/gateway.jks
 

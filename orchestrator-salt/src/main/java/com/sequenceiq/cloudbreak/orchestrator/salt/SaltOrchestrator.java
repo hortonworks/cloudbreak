@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
-import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
@@ -136,7 +136,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void runService(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltPillarConfig pillarConfig, ExitCriteriaModel exitModel)
+    public void runService(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorException {
         LOGGER.info("Run Services on nodes: {}", allNodes);
         GatewayConfig primaryGateway = getPrimaryGatewayConfig(allGateway);
@@ -148,7 +148,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             Future<Boolean> saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
             saltPillarRunnerFuture.get();
 
-            for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
+            for (Map.Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
                 PillarSave pillarSave = new PillarSave(sc, gatewayTargets, propertiesEntry.getValue());
                 saltPillarRunner = runner(pillarSave, exitCriteria, exitModel);
                 saltPillarRunnerFuture = getParallelOrchestratorComponentRunner().submit(saltPillarRunner);
@@ -172,7 +172,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             // ambari agent
             runSaltCommand(sc, new GrainAddRunner(all, allNodes, "ambari_agent"), exitModel);
             // kerberos
-            if (pillarConfig.getServicePillarConfig().containsKey("kerberos")) {
+            if (saltConfig.getServicePillarConfig().containsKey("kerberos")) {
                 runSaltCommand(sc, new GrainAddRunner(server, allNodes, "kerberos_server_master"), exitModel);
                 if (!standbyServers.isEmpty()) {
                     runSaltCommand(sc, new GrainAddRunner(standbyServers, allNodes, "kerberos_server_slave"), exitModel);
@@ -183,6 +183,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 runSaltCommand(sc, new GrainAddRunner(gatewayTargets, allNodes, "smartsense"), exitModel);
                 runSaltCommand(sc, new GrainAddRunner(all, allNodes, "smartsense_agent_update"), exitModel);
             }
+            uploadGrains(allNodes, saltConfig.getGrainsProperties(), exitModel, sc);
 
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitModel);
             runSaltCommand(sc, new MineUpdateRunner(gatewayTargets, allNodes), exitModel);
@@ -195,6 +196,18 @@ public class SaltOrchestrator implements HostOrchestrator {
             throw new CloudbreakOrchestratorFailedException(e);
         }
         LOGGER.info("Run services on nodes finished: {}", allNodes);
+    }
+
+    private void uploadGrains(Set<Node> allNodes, Map<String, Map<String, String>> grainsProperties, ExitCriteriaModel exitModel, SaltConnector sc)
+            throws ExecutionException, InterruptedException {
+        if (!grainsProperties.isEmpty()) {
+            for (Map.Entry<String, Map<String, String>> hostGrains : grainsProperties.entrySet()) {
+                for (Map.Entry<String, String> hostGrain : hostGrains.getValue().entrySet()) {
+                    runSaltCommand(sc, new GrainAddRunner(Collections.singleton(hostGrains.getKey()), allNodes, hostGrain.getKey(), hostGrain.getValue(),
+                            Compound.CompoundType.IP), exitModel);
+                }
+            }
+        }
     }
 
     public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
@@ -253,7 +266,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltPillarConfig pillarConfig,
+    public void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             for (Map.Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
