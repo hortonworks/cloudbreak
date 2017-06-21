@@ -90,7 +90,7 @@
     </gateway>
 
     {% if ('WEBHDFS' in salt['pillar.get']('gateway:exposed')) and ('NAMENODE' in salt['pillar.get']('gateway:location')) -%}
-    <!-- curl -iku {{ salt['pillar.get']('ambari:username') }}:{{ salt['pillar.get']('ambari:password') }} -X GET 'https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/webhdfs/v1/?op=LISTSTATUS' -->
+    <!-- curl -iku {{ salt['pillar.get']('ambari:username') }}:{{ salt['pillar.get']('ambari:password') }} -X GET 'https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/webhdfs/v1/?op=LISTSTATUS' -->
     <service>
         <role>WEBHDFS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
@@ -125,44 +125,44 @@
     {%- endif %}
 
     {% if ('HIVE' in salt['pillar.get']('gateway:exposed')) and ('HIVE_SERVER' in salt['pillar.get']('gateway:location')) -%}
-    <!-- beeline -u "jdbc:hive2://{{ salt['pillar.get']('gateway:address') }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
+    <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
-    <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['pillar.get']('gateway:address') }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
+    <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
 
     <service>
         <role>HIVE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVE_SERVER'] -%}
-        <url>http://{{ salt['grains.get']('fqdn') }}:10001/cliservice</url>
+        <url>http://{{ hostloc }}:10001/cliservice</url>
         {%- endfor %}
     </service>
     {%- endif %}
 
     {% if ('HIVE_INTERACTIVE' in salt['pillar.get']('gateway:exposed')) and ('HIVE_SERVER_INTERACTIVE' in salt['pillar.get']('gateway:location')) -%}
-    <!-- beeline -u "jdbc:hive2://{{ salt['pillar.get']('gateway:address') }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
+    <!-- beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/usr/hdp/current/knox-server/data/security/keystores/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
     <!-- beeline -u "jdbc:hive2://localhost:10001/;transportMode=http;httpPath=cliservice" -d org.apache.hive.jdbc.HiveDriver -n hive -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
-    <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['pillar.get']('gateway:address') }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
+    <!-- docker run -ti -v $(pwd):/cert akanto/beeline -u "jdbc:hive2://{{ salt['grains.get']('gateway-address')[0] }}:8443/;ssl=true;sslTrustStore=/cert/gateway.jks;trustStorePassword={{ salt['pillar.get']('gateway:password') }};transportMode=http;httpPath=gateway/hdc/hive" -d org.apache.hive.jdbc.HiveDriver -n {{ salt['pillar.get']('gateway:username') }} -p {{ salt['pillar.get']('gateway:password') }} -e "show databases;" -->
 
     <service>
         <role>HIVE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVE_SERVER_INTERACTIVE'] -%}
-        <url>http://{{ salt['grains.get']('fqdn') }}:10501/cliservice</url>
+        <url>http://{{ hostloc }}:10501/cliservice</url>
         {%- endfor %}
     </service>
     {%- endif %}
 
     <!-- UI -->
     {% if ('HDFSUI' in salt['pillar.get']('gateway:exposed')) and ('NAMENODE' in salt['pillar.get']('gateway:location')) -%}
-    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/hdfs/ -->
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/hdfs/ -->
     <service>
         <role>HDFSUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>http://{{ salt['grains.get']('fqdn') }}:50070</url>
+        <url>http://{{ hostloc }}:50070</url>
         {%- endfor %}
     </service>
     {%- endif %}
 
     {% if 'AMBARIUI' in salt['pillar.get']('gateway:exposed') -%}
-    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/ambari/ -->
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/ambari/ -->
 
     <service>
         <role>AMBARIUI</role>
@@ -171,7 +171,7 @@
     {%- endif %}
 
     {% if ('YARNUI' in salt['pillar.get']('gateway:exposed')) and ('RESOURCEMANAGER' in salt['pillar.get']('gateway:location')) -%}
-    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/yarn/ -->
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/yarn/ -->
 
     <service>
         <role>YARNUI</role>
@@ -182,7 +182,7 @@
     {%- endif %}
 
     {% if ('JOBHISTORYUI' in salt['pillar.get']('gateway:exposed')) and ('HISTORYSERVER' in salt['pillar.get']('gateway:location')) -%}
-    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/jobhistory/ -->
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/jobhistory/ -->
 
     <service>
         <role>JOBHISTORYUI</role>
@@ -193,7 +193,7 @@
     {%- endif %}
 
     {% if ('SPARKHISTORYUI' in salt['pillar.get']('gateway:exposed')) and ('SPARK_JOBHISTORYSERVER' in salt['pillar.get']('gateway:location')) -%}
-    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/sparkhistory/ -->
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/sparkhistory/ -->
 
     <service>
         <role>SPARKHISTORYUI</role>
@@ -204,7 +204,7 @@
     {%- endif %}
 
     {% if ('ZEPPELINUI' in salt['pillar.get']('gateway:exposed')) and ('ZEPPELIN_MASTER' in salt['pillar.get']('gateway:location')) -%}
-    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/zeppelin/ -->
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/zeppelin/ -->
 
     <service>
         <role>ZEPPELINUI</role>
@@ -215,7 +215,7 @@
     {%- endif %}
 
     {% if ('RANGERUI' in salt['pillar.get']('gateway:exposed')) and ('RANGER_ADMIN' in salt['pillar.get']('gateway:location')) -%}
-    <!-- https://{{ salt['pillar.get']('gateway:address') }}:8443/gateway/hdc/ranger/ -->
+    <!-- https://{{ salt['grains.get']('gateway-address')[0] }}:8443/gateway/hdc/ranger/ -->
 
     <service>
         <role>RANGERUI</role>
