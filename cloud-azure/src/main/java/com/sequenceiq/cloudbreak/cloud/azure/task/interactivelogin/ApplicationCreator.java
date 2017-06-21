@@ -36,8 +36,8 @@ public class ApplicationCreator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationCreator.class);
 
-    public String createApplication(String accessToken, String tenantId) throws InteractiveLoginException {
-        Response response = createApplicationWithGraph(accessToken, tenantId);
+    public String createApplication(String accessToken, String tenantId, String secret) throws InteractiveLoginException {
+        Response response = createApplicationWithGraph(accessToken, tenantId, secret);
 
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             String application = response.readEntity(String.class);
@@ -61,7 +61,7 @@ public class ApplicationCreator {
 
     }
 
-    private Response createApplicationWithGraph(String accessToken, String tenantId) {
+    private Response createApplicationWithGraph(String accessToken, String tenantId, String secret) {
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(GRAPH_WINDOWS + tenantId);
         Invocation.Builder request = resource.path("/applications").queryParam("api-version", GRAPH_API_VERSION).request();
@@ -81,7 +81,7 @@ public class ApplicationCreator {
         JsonArray passwordCredentials = new JsonArray();
         JsonObject password = new JsonObject();
         password.addProperty("keyId", UUID.randomUUID().toString());
-        password.addProperty("value", "cloudbreak");
+        password.addProperty("value", secret);
         password.addProperty("startDate", LocalDateTime.now().minusDays(1).toString());
         password.addProperty("endDate", LocalDateTime.now().plusYears(CREDENTIAL_END_YEAR).toString());
         passwordCredentials.add(password);
