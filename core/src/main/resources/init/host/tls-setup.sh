@@ -9,8 +9,8 @@ create_certificates() {
 
   CBD_CERT_ROOT_PATH=/etc/certs
 
-  sudo cert-tool -d $CBD_CERT_ROOT_PATH ca generate -o=gateway
-  sudo cert-tool -d $CBD_CERT_ROOT_PATH client generate --common-name=${publicIp} -o=gateway
+  sudo cert-tool -d $CBD_CERT_ROOT_PATH ca generate -o=gateway --overwrite
+  sudo cert-tool -d $CBD_CERT_ROOT_PATH client generate --common-name=${publicIp} -o=gateway --overwrite
   sudo mv $CBD_CERT_ROOT_PATH/cert.pem $CBD_CERT_ROOT_PATH/cluster.pem
   sudo cp /etc/certs/cluster.pem /tmp/cluster.pem
   sudo mv $CBD_CERT_ROOT_PATH/key.pem $CBD_CERT_ROOT_PATH/cluster-key.pem
