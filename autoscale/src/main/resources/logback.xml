@@ -26,6 +26,7 @@
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
         <level value="INFO"/>
     </logger>
+    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
     </root>
