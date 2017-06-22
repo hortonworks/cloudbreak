@@ -524,13 +524,13 @@ main() {
     cbd-find-root
     start-time-init
 	color-init
+    deps-init
+    deps-require sed
     if is_command_needs_profile $1; then
         init-profile
         load-profile
         public-ip-init
     fi
-    deps-init
-    deps-require sed
 
     create-temp-dir
     circle-init
