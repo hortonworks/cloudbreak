@@ -71,8 +71,12 @@ consul-recursors() {
 
     local nameservers=$(sed -n "/^nameserver/ s/^.*nameserver[^0-9]*//p;" $resolvConf)
     debug "nameservers on host:\n$nameservers"
-    debug bridge=$bridge
-    echo "$nameservers" | grep -v "$bridge\|$dockerIP" | sed -n '{s/^/ -recursor /;H;}; $ {x;s/[\n\r]//g;p}'
+    if [[ "$nameservers" ]]; then
+        debug bridge=$bridge
+        echo "$nameservers" | grep -v "$bridge\|$dockerIP" | sed -n '{s/^/ -recursor /;H;}; $ {x;s/[\n\r]//g;p}'
+    else
+        echo
+    fi
 }
 
 cloudbreak-conf-consul() {
@@ -80,7 +84,7 @@ cloudbreak-conf-consul() {
 
     env-import DOCKER_CONSUL_OPTIONS ""
     if ! [[ $DOCKER_CONSUL_OPTIONS =~ .*recursor.* ]]; then
-        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(cat /etc/resolv.conf) ${BRIDGE_IP} $(docker-ip))"
+        DOCKER_CONSUL_OPTIONS="$DOCKER_CONSUL_OPTIONS $(consul-recursors <(cat /etc/resolv.conf 2>/dev/null || echo) ${BRIDGE_IP} $(docker-ip))"
     fi
     debug "DOCKER_CONSUL_OPTIONS=$DOCKER_CONSUL_OPTIONS"
     cloudbreakConfConsulExecuted=1
