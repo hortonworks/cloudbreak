@@ -5,7 +5,13 @@ var log = log4javascript.getLogger("flexController-logger");
 angular.module('uluwatuControllers').controller('flexController', ['$scope', '$rootScope', '$filter', '$base64', 'AccountFlex', 'GlobalFlex', 'AccountDefaultFlex', 'AccountUsedForControllerFlex', 'SmartSense',
     function($scope, $rootScope, $filter, $base64, AccountFlex, GlobalFlex, AccountDefaultFlex, AccountUsedForControllerFlex, SmartSense) {
 
-        $rootScope.smartSenseSubscription = SmartSense.get();
+        $rootScope.smartSenseSubscription = null;
+        SmartSense.get().$promise.then(function(success) {
+                $rootScope.smartSenseSubscription = success;
+            }, function(error) {
+                $rootScope.smartSenseSubscription = null;
+            }
+        );
         $rootScope.flexs = AccountFlex.query();
 
         $scope.flex = {}
