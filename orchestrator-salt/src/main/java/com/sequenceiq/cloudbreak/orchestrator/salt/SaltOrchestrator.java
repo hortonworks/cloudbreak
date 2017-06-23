@@ -208,6 +208,12 @@ public class SaltOrchestrator implements HostOrchestrator {
             Set<String> server = Collections.singleton(ambariServerAddress);
             runSaltCommand(sc, new GrainAddRunner(server, allNodes, "ambari_server"), exitCriteriaModel);
             runSaltCommand(sc, new GrainRemoveRunner(server, allNodes, "roles", "ambari_server_standby", Compound.CompoundType.IP), exitCriteriaModel);
+            // add ambari_server_standby role to the standby servers and remove ambari_server role from them.
+            Set<String> standByServers = allGatewayConfigs.stream()
+                    .filter(gwc -> !gwc.getHostname().equals(newPrimaryGateway.getHostname()) && !gwc.getHostname().equals(formerGateway.getHostname()))
+                    .map(gwc -> gwc.getPrivateAddress()).collect(Collectors.toSet());
+            runSaltCommand(sc, new GrainAddRunner(standByServers, allNodes, "ambari_server_standby"), exitCriteriaModel);
+            runSaltCommand(sc, new GrainRemoveRunner(standByServers, allNodes, "roles", "ambari_server", Compound.CompoundType.IP), exitCriteriaModel);
 
             // remove minion key from all remaining gateway nodes
             for (GatewayConfig gatewayConfig : allGatewayConfigs) {

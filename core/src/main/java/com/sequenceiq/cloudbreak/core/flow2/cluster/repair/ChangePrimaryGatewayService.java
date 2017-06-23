@@ -1,9 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.repair;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
+
 import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Component;
 
@@ -11,6 +16,8 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
+import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -49,11 +56,16 @@ public class ChangePrimaryGatewayService {
     @Inject
     private StackUtil stackUtil;
 
+    @Inject
+    private FlowMessageService flowMessageService;
+
     public void changePrimaryGatewayStarted(Stack stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_GATEWAY_CHANGE, UPDATE_IN_PROGRESS.name());
     }
 
+    @Transactional
     public void primaryGatewayChanged(Stack stack, String newPrimaryGatewayFQDN) throws CloudbreakException {
         Set<InstanceMetaData> imds = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         Optional<InstanceMetaData> formerPrimaryGateway =
@@ -81,10 +93,13 @@ public class ChangePrimaryGatewayService {
     public void ambariServerStarted(Stack stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway succesfully changed.");
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, AVAILABLE.name(),
+                stackUtil.extractAmbariIp(stack));
     }
 
     public void changePrimaryGatewayFailed(Stack stack, Exception exception) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_FAILED);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + exception.getMessage());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_GATEWAY_CHANGE_FAILED, UPDATE_FAILED.name(), exception.getMessage());
     }
 }
