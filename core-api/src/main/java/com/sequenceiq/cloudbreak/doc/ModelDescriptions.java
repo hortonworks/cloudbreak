@@ -115,6 +115,7 @@ public class ModelDescriptions {
         public static final String HARDWARE_INFO_RESPONSE = "hardware information where pairing hostmetadata with instancemetadata";
         public static final String USAGES = "usage information for a specific stack";
         public static final String EVENTS = "related events for a cloudbreak stack";
+        public static final String MULTIPLE_GATEWAY = "multiple gateway mode is enabled or not";
     }
 
     public static class ClusterModelDescription {

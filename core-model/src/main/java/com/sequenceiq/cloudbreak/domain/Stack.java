@@ -147,6 +147,8 @@ public class Stack implements ProvisionEntity {
 
     private Long datalakeId;
 
+    private Boolean multiGateway = Boolean.FALSE;
+
     public Set<InstanceGroup> getInstanceGroups() {
         return instanceGroups;
     }
@@ -562,5 +564,13 @@ public class Stack implements ProvisionEntity {
 
     public void setDatalakeId(Long datalakeId) {
         this.datalakeId = datalakeId;
+    }
+
+    public Boolean getMultiGateway() {
+        return multiGateway;
+    }
+
+    public void setMultiGateway(Boolean multiGateway) {
+        this.multiGateway = multiGateway;
     }
 }

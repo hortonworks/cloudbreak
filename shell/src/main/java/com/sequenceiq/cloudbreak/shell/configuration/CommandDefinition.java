@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.shell.commands.common.BlueprintCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.ClusterCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.DatabaseCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.FlexSubscriptionCommands;
+import com.sequenceiq.cloudbreak.shell.commands.common.GatewayCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.HostGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.LdapConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
@@ -64,6 +65,11 @@ public class CommandDefinition {
     @Bean
     BasicCommands basicCommands() {
         return new BasicCommands(shellContext);
+    }
+
+    @Bean
+    GatewayCommands gatewayCommands() {
+        return new GatewayCommands(shellContext);
     }
 
     @Bean

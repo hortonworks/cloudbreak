@@ -60,6 +60,9 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
 
+    @ApiModelProperty(StackModelDescription.MULTIPLE_GATEWAY)
+    private Boolean multiGateway = Boolean.FALSE;
+
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
     }
@@ -164,5 +167,13 @@ public abstract class StackBase implements JsonEntity {
 
     public void setTags(Map<String, Object> tags) {
         this.tags = tags;
+    }
+
+    public Boolean getMultiGateway() {
+        return multiGateway;
+    }
+
+    public void setMultiGateway(Boolean multiGateway) {
+        this.multiGateway = multiGateway;
     }
 }
