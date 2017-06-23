@@ -41,7 +41,7 @@
     {
       "streamline-common": {
         "streamline.storage.type": "postgresql",
-        "streamline.storage.connector.connectURI": "jdbc:postgresql://hdfcb.c7gylf8fr81g.us-west-2.rds.amazonaws.com:5432/streamline",
+        "streamline.storage.connector.connectURI": "jdbc:postgresql://changemeplease:5432/streamline",
         "streamline.storage.connector.password": "streamline",
         "registry.url" : "http://localhost:7788/api/v1"
       }
@@ -49,7 +49,7 @@
     {
       "registry-common": {
         "registry.storage.type": "postgresql",
-        "registry.storage.connector.connectURI": "jdbc:postgresql://hdfcb.c7gylf8fr81g.us-west-2.rds.amazonaws.com:5432/registry",
+        "registry.storage.connector.connectURI": "jdbc:postgresql://changemeplease:5432/registry",
         "registry.storage.connector.password": "registry"
       }
     }
