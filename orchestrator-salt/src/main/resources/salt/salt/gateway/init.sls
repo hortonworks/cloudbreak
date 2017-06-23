@@ -174,3 +174,12 @@ start-knox-gateway:
     - name: knox-gateway
 
 {% endif %}
+
+{% if 'HDF' in salt['pillar.get']('hdp:stack:repoid') %}
+
+/etc/knox/conf.hdf:
+  file.copy:
+    - source: /etc/knox/conf
+    - preserve: True
+
+{% endif %}

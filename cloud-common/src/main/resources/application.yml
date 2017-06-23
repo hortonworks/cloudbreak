@@ -142,8 +142,8 @@ cb:
   ambari:
     repo:
       version: 2.5.1.0-159
-      baseurl: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.1.0-159
-      gpgkey: http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.5.1.0-159/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+      baseurl: http://public-repo-1.hortonworks.com/ambari/centos6/2.x/updates/2.5.1.0
+      gpgkey: http://public-repo-1.hortonworks.com/ambari/centos6/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
     database:
       vendor: embedded
       host: localhost
@@ -180,21 +180,21 @@ cb:
   hdf:
     entries:
       3.0:
-        version: 3.0.0.0-345
+        version: 3.0.0.0-453
         repo:
           stack:
             repoid: HDF-3.0
-            redhat6: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos6/3.x/BUILDS/3.0.0.0-345
-            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos7/3.x/BUILDS/3.0.0.0-345
-            mpack: http://s3.amazonaws.com/dev.hortonworks.com/HDF/centos6/3.x/BUILDS/3.0.0.0-345/tars/hdf_ambari_mp/hdf-ambari-mpack-3.0.0.0-345.tar.gz
+            redhat6: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0
+            redhat7: http://public-repo-1.hortonworks.com/HDF/centos7/3.x/updates/3.0.0.0
+            mpack: http://public-repo-1.hortonworks.com/HDF/centos6/3.x/updates/3.0.0.0/tars/hdf_ambari_mp/hdf-ambari-mpack-3.0.0.0-453.tar.gz
           util:
             repoid: HDP-UTILS-1.1.0.21
             redhat6: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos6
             redhat7: http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/centos7
           knox:
             repoid: KNOX-HDP-2.6
-            redhat6: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos6/2.x/BUILDS/2.6.1.0-128
-            redhat7: http://s3.amazonaws.com/dev.hortonworks.com/HDP/centos7/2.x/BUILDS/2.6.1.0-128
+            redhat6: http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.6.1.0
+            redhat7: http://public-repo-1.hortonworks.com/HDP/centos7/2.x/updates/2.6.1.0
 
 
   smartsense.configure: false
