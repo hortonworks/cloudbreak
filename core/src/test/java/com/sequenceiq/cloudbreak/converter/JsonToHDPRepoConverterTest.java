@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.Collections;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -20,7 +22,7 @@ public class JsonToHDPRepoConverterTest extends AbstractJsonConverterTest<Ambari
         // WHEN
         HDPRepo result = underTest.convert(getRequest("stack/ambari-stack-details.json"));
         // THEN
-        assertAllFieldsNotNull(result);
+        assertAllFieldsNotNull(result, Collections.singletonList("knox"));
     }
 
     @Override
