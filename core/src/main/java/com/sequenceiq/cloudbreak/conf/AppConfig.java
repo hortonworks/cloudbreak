@@ -11,12 +11,17 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.ws.rs.client.Client;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.env.YamlPropertySourceLoader;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,6 +35,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.filter.GenericFilterBean;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Maps;
@@ -45,6 +51,7 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
+import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProvider;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -90,6 +97,9 @@ public class AppConfig implements ResourceLoaderAware {
     private boolean certificateValidation;
 
     @Inject
+    private StackUnderOperationService stackUnderOperationService;
+
+    @Inject
     private List<ContainerOrchestrator> containerOrchestrators;
 
     @Inject
@@ -132,6 +142,21 @@ public class AppConfig implements ResourceLoaderAware {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public FilterRegistrationBean turnOnStackUnderOperationService() {
+        FilterRegistrationBean registration = new FilterRegistrationBean();
+        registration.setFilter(new GenericFilterBean() {
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+            stackUnderOperationService.on();
+            chain.doFilter(request, response);
+            stackUnderOperationService.off();
+            }
+        });
+        registration.addUrlPatterns("/*");
+        return registration;
     }
 
     @Bean
