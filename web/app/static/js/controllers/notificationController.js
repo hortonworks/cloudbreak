@@ -133,6 +133,8 @@ angular.module('uluwatuControllers').controller('notificationController', ['$sco
                     case "INTERACTIVE_CREDENTIAL_STATUS":
                         handleInteractiveCredentialStatus(notification);
                         break;
+                    default:
+                        addNotificationToGlobalEvents(notification);
                 }
             }
 
