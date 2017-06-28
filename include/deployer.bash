@@ -570,6 +570,7 @@ main() {
     cmd-export-ns db "Db operations namespace"
     cmd-export db-dump
     cmd-export db-list-dumps
+    cmd-export db-set-dump
     cmd-export db-restore-volume-from-dump
     
     cmd-export cbd-update update

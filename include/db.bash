@@ -17,10 +17,34 @@ db-getpostgres-image-version() {
 
 }
 
+db-set-dump() {
+    declare desc="sets an sql dump as latest"
+    declare dbName=${1:? required: dbName}
+    declare name=${2:? required: name}
+
+    local volDir="/dump"
+    local dumpDir="$volDir/$dbName/${name}"
+    local latestDir="$volDir/$dbName/latest"
+
+    docker run --rm \
+        -v $DB_DUMP_VOLUME:$volDir \
+        alpine:$DOCKER_TAG_ALPINE \
+        ls $dumpDir \
+            | debug-cat
+
+    debug "create latest simlink $latestDir -> $dumpDir"
+    docker run --rm \
+        -v $DB_DUMP_VOLUME:$volDir \
+        alpine:$DOCKER_TAG_ALPINE \
+        sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir" 2>&1 \
+            | debug-cat
+}
+
 db-dump() {
     declare desc="creates an sql dump from the db volume"
     declare dbVolume=${1:? required: dbVolume}
     declare dbName=${2:-postgres}
+    declare name=${3}
 
     if ! ( [[ $dbVolume =~ ^/ ]] || docker volume inspect $dbVolume &>/dev/null ); then
         error "docker volume $dbVolume doesnt exists"
@@ -34,17 +58,17 @@ db-dump() {
         _exit 1
     fi
 
+    local volDir="/dump"
     local contName=cbreak_dump
     docker rm -f $contName &>/dev/null || :
 
     docker run -d \
         --name $contName \
         -v $dbVolume:/var/lib/postgresql/data \
-        -v $DB_DUMP_VOLUME:/dump \
+        -v $DB_DUMP_VOLUME:$volDir \
         postgres:$(db-getpostgres-image-version $dbVolume) | debug-cat
 
     local timeStamp=$(date "+%Y%m%d_%H%M")
-    local volDir="/dump"
     if [[ "$dbName" == "postgres" ]] ; then
         volDir+="/${dbVolume##*/}"
     else
@@ -63,6 +87,12 @@ db-dump() {
 
     debug "create latest simlink $latestDir -> $dumpDir"
     docker exec $contName sh -xc "rm -f $latestDir && ln -s $dumpDir $latestDir" 2>&1 | debug-cat
+
+    if [[ "$name" ]]; then
+        local nameDir="$volDir/$name"
+        debug "create named simlink $nameDir -> $dumpDir"
+        docker exec $contName sh -xc "rm -f $nameDir && ln -s $dumpDir $nameDir" 2>&1 | debug-cat
+    fi
 
     db-stop-database $contName
 }
@@ -177,9 +207,10 @@ db-restore-volume-from-dump() {
 }
 
 db-list-dumps() {
+    declare desc="creates an sql dump from the db volume"
     docker run $REMOVE_CONTAINER \
         -v $DB_DUMP_VOLUME:/dump \
         alpine:$DOCKER_TAG_ALPINE \
-          find /dump -name \*.sql -exec ls -lh {} \;
+          find /dump -follow -name \*.sql -exec ls -lh {} \; | tr ' ' '~' | cut -d'~' -f 22,18
 }
 
