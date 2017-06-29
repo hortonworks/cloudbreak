@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.io.IOException;
 
+import javax.annotation.PostConstruct;
 import javax.ws.rs.ApplicationPath;
 
 import org.glassfish.jersey.server.ResourceConfig;
@@ -44,21 +45,23 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @Component
 public class EndpointConfig extends ResourceConfig {
 
+    private static final String VERSION_UNAVAILABLE = "unspecified";
+
     @Value("${info.app.version:}")
     private String cbVersion;
 
     public EndpointConfig() throws IOException {
         registerEndpoints();
         registerExceptionMappers();
-        registerSwagger();
     }
 
+    @PostConstruct
     private void registerSwagger() throws IOException {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("Cloudbreak API");
         swaggerConfig.setDescription(FileReaderUtils.readFileFromClasspath("swagger/cloudbreak-introduction"));
         if (Strings.isNullOrEmpty(cbVersion)) {
-            swaggerConfig.setVersion("1.9.0");
+            swaggerConfig.setVersion(VERSION_UNAVAILABLE);
         } else {
             swaggerConfig.setVersion(cbVersion);
         }
