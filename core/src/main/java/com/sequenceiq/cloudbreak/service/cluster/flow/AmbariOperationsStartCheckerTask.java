@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
-import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationsStatusCheckerTask.COMPLETED;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationsStatusCheckerTask.FAILED;
 import static com.sequenceiq.cloudbreak.service.cluster.flow.AmbariOperationsStatusCheckerTask.PENDING;
 
@@ -45,7 +44,7 @@ public class AmbariOperationsStartCheckerTask extends ClusterBasedStatusCheckerT
                             request.getValue()));
                 }
             }
-            allInProgress = allInProgress && PENDING.compareTo(installProgress) != 0 && COMPLETED.compareTo(installProgress) != 0;
+            allInProgress = allInProgress && PENDING.compareTo(installProgress) != 0;
         }
         return allInProgress;
     }
