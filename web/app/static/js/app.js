@@ -220,8 +220,11 @@ cloudbreakApp.config(['$routeProvider', '$locationProvider', function($routeProv
 });
 
 cloudbreakApp.run(function($rootScope, $http) {
+        $http.get('cb/info').then(function (info) {
+            $rootScope.version = info.data.app.version;
+        });
         $http.get('messages.properties').then(function(messages) {
-            $rootScope.msg = messages.data
+            $rootScope.msg = messages.data;
             $rootScope.titleStatus = {
                 "REQUESTED": $rootScope.msg.title_requested,
                 "CREATE_IN_PROGRESS": $rootScope.msg.title_create_in_progress,
