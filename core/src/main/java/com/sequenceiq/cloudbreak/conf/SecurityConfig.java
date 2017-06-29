@@ -73,10 +73,17 @@ public class SecurityConfig {
         @Inject
         private ScimAccountGroupReaderFilter scimAccountGroupReaderFilter;
 
-        @Bean
-        PBEStringCleanablePasswordEncryptor encryptor() {
+        @Bean("PBEStringCleanablePasswordEncryptor")
+        public PBEStringCleanablePasswordEncryptor encryptor() {
             StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
             encryptor.setPassword(clientSecret);
+            return encryptor;
+        }
+
+        @Bean("LegacyPBEStringCleanablePasswordEncryptor")
+        public PBEStringCleanablePasswordEncryptor legacyEncryptor() {
+            StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+            encryptor.setPassword("cbsecret2015");
             return encryptor;
         }
 
