@@ -9,6 +9,8 @@ import java.util.Map;
 import javax.inject.Inject;
 
 import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -27,7 +29,12 @@ public class CredentialDefinitionService {
     private ResourceDefinitionService definitionService;
 
     @Inject
+    @Qualifier("PBEStringCleanablePasswordEncryptor")
     private PBEStringCleanablePasswordEncryptor encryptor;
+
+    @Inject
+    @Qualifier("LegacyPBEStringCleanablePasswordEncryptor")
+    private PBEStringCleanablePasswordEncryptor legacyEncryptor;
 
     public Map<String, Object> processProperties(Platform cloudPlatform, Map<String, Object> properties) {
         return processValues(getDefinition(cloudPlatform), properties, false);
@@ -85,7 +92,15 @@ public class CredentialDefinitionService {
             String key = value.getName();
             String property = getProperty(properties, key, isOptional(value));
             if (property != null && !property.isEmpty() && isEncrypted(value)) {
-                property = revert ? encryptor.decrypt(property) : encryptor.encrypt(property);
+                if (revert) {
+                    try {
+                        property = encryptor.decrypt(property);
+                    } catch (EncryptionOperationNotPossibleException e) {
+                        property = legacyEncryptor.decrypt(property);
+                    }
+                } else {
+                    property = encryptor.encrypt(property);
+                }
             }
             processed.put(key, property);
         }
