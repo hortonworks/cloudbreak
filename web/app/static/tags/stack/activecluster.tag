@@ -56,9 +56,21 @@
                                 </div>
                             </div>
                             <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_cb_version">{{msg.cb_version}}: </label>
+                                <div class="col-sm-9">
+                                    <p id="sl_cb_version" class="form-control-static">{{activeCluster.cloudbreakDetails.version}}</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label class="col-sm-3 control-label" for="sl_cloudPlatform">{{msg.active_cluster_platform_label}}</label>
                                 <div class="col-sm-9">
                                     <p id="sl_cloudPlatform" class="form-control-static">{{activeCluster.cloudPlatform}}</p>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label" for="sl_image_name">{{msg.image_name}}: </label>
+                                <div class="col-sm-9">
+                                    <p id="sl_image_name" class="form-control-static">{{activeCluster.image.imageName}}</p>
                                 </div>
                             </div>
                             <div class="form-group" ng-show="activeCluster.copyState && activeCluster.copyState!=100 && (activeCluster.status != 'AVAILABLE' || activeCluster.status != 'DELETE_IN_PROGRESS' || activeCluster.status != 'CREATE_FAILED')">
