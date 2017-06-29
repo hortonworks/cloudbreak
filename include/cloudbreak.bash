@@ -158,7 +158,7 @@ cloudbreak-conf-cert() {
     declare desc="Declares cloudbreak cert config"
     env-import CBD_CERT_ROOT_PATH "${PWD}/certs"
 
-    env-import CBD_TRAEFIK_TLS "/certs/client.pem,/certs/client-key.pem"
+    env-import CBD_TRAEFIK_TLS "/certs/traefik/client.pem,/certs/traefik/client-key.pem"
 }
 
 cloudbreak-delete-dbs() {
@@ -402,6 +402,9 @@ cloudbreak-generate-cert() {
       mv "${CBD_CERT_ROOT_PATH}/ca-key.pem" "${CBD_CERT_ROOT_PATH}/client-ca-key.pem"
       debug "Certificates successfully generated."
     fi
+    mkdir -p "${CBD_CERT_ROOT_PATH}/traefik"
+    cp "${CBD_CERT_ROOT_PATH}/client.pem" "${CBD_CERT_ROOT_PATH}/traefik/client.pem"
+    cp "${CBD_CERT_ROOT_PATH}/client-key.pem" "${CBD_CERT_ROOT_PATH}/traefik/client-key.pem"
 }
 
 generate_uaa_check_diff() {
