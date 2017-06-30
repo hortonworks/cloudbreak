@@ -59,6 +59,50 @@
     {
       "name": "Canada Central",
       "zones": [ "Canada Central" ]
+    },
+    {
+      "name": "Australia East",
+      "zones": [ "Australia East" ]
+    },
+    {
+      "name": "Australia South East",
+      "zones": [ "Australia South East" ]
+    },
+    {
+      "name": "Central India",
+      "zones": [ "Central India" ]
+    },
+    {
+      "name": "Korea Central",
+      "zones": [ "Korea Central" ]
+    },
+    {
+      "name": "Korea South",
+      "zones": [ "Korea South" ]
+    },
+    {
+      "name": "South India",
+      "zones": [ "South India" ]
+    },
+    {
+      "name": "UK South",
+      "zones": [ "UK South" ]
+    },
+    {
+      "name": "West Central US",
+      "zones": [ "West Central US" ]
+    },
+    {
+      "name": "UK West",
+      "zones": [ "UK West" ]
+    },
+    {
+      "name": "West US 2",
+      "zones": [ "West US 2" ]
+    },
+    {
+      "name": "West India",
+      "zones": [ "West India" ]
     }
   ]
 }

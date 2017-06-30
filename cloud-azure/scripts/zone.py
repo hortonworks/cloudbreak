@@ -3,7 +3,7 @@ import subprocess
 
 items = []
 
-with open('./src/main/resources/definitions/arm-zone.json') as data_file:
+with open('./src/main/resources/definitions/azure-zone.json') as data_file:
     regionData = json.load(data_file)
 
 for region in regionData["items"]:
@@ -11,7 +11,7 @@ for region in regionData["items"]:
     out, err = p.communicate()
     regionVmTypes = json.loads(out)
     dict = {}
-    dict["region"] = region["name"]
+    dict["zone"] = region["name"]
     vmTypes = []
     dict["vmTypes"] = vmTypes
     dict["defaultVmType"] = "Standard_A6"
@@ -22,5 +22,5 @@ for region in regionData["items"]:
 outputDict = {}
 outputDict["items"] = items
 
-with open("./src/main/resources/definitions/arm-zone-vm.json", 'w') as outfile:
+with open("./src/main/resources/definitions/azure-zone-vm.json", 'w') as outfile:
     json.dump(outputDict, outfile, indent=2)
