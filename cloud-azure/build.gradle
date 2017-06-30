@@ -17,6 +17,10 @@ dependencies {
   compile project(':cloud-reactor')
 
   compile (group: 'com.microsoft.azure',         name: 'azure',                      version: azureSdkVersion) { exclude group: 'org.slf4j' }
+  compile (group: 'com.microsoft.azure',         name: 'azure-client-authentication',version: azureSdkVersion) {
+    force = true
+    exclude group: 'org.slf4j'
+  }
   compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-datalake-store',  version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile (group: 'com.microsoft.azure',         name: 'azure-mgmt-sql',             version: azureSdkVersion) { exclude group: 'org.slf4j' }
   compile group: 'com.microsoft.azure',         name: 'azure-storage',              version: '5.0.0'
