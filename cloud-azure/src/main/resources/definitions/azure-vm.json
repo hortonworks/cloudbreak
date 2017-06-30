@@ -899,6 +899,924 @@
           "Cpu": "16"
         }
       }
+    },
+    {
+      "value": "Standard_DS2_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 8
+          }
+        ],
+        "properties": {
+          "Memory": "7",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_DS3_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "14",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_DS4_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "56",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_DS11_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 8
+          }
+        ],
+        "properties": {
+          "Memory": "14",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_DS12_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "28",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_DS13_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "56",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_DS14_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "114",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_D2_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 8
+          }
+        ],
+        "properties": {
+          "Memory": "7",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_D3_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "14",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_D4_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "28",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_D5_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "56",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_D11_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 8
+          }
+        ],
+        "properties": {
+          "Memory": "14",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_D12_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "28",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_D13_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "56",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_D14_v2_Promo",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "112",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_F1",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 4
+          }
+        ],
+        "properties": {
+          "Memory": "2",
+          "Cpu": "1"
+        }
+      }
+    },
+    {
+      "value": "Standard_F2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 8
+          }
+        ],
+        "properties": {
+          "Memory": "4",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_F4",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "8",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_F8",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "16",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_F16",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "32",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_H16mr",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "229.3",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_H16r",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "114.6",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_H16m",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "229.3",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_H8m",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "114.6",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_H16",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "114.6",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_H8",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "56",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_L4s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "32",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_L8s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "64",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_L16s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "128",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_L32s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "256",
+          "Cpu": "32"
+        }
+      }
+    },
+    {
+      "value": "Standard_F1s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 4
+          }
+        ],
+        "properties": {
+          "Memory": "2",
+          "Cpu": "1"
+        }
+      }
+    },
+    {
+      "value": "Standard_F2s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 8
+          }
+        ],
+        "properties": {
+          "Memory": "4",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_F4s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "8",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_F8s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 32
+          }
+        ],
+        "properties": {
+          "Memory": "16",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_F16s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "32",
+          "Cpu": "16"
+        }
+      }
+    },
+    {
+      "value": "Standard_A1_v2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 2
+          }
+        ],
+        "properties": {
+          "Memory": "2",
+          "Cpu": "1"
+        }
+      }
+    },
+    {
+      "value": "Standard_A2m_v2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 4
+          }
+        ],
+        "properties": {
+          "Memory": "16",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_A2_v2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 4
+          }
+        ],
+        "properties": {
+          "Memory": "4",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_A4m_v2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 4
+          }
+        ],
+        "properties": {
+          "Memory": "4",
+          "Cpu": "2"
+        }
+      }
+    },
+    {
+      "value": "Standard_A4_v2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 8
+          }
+        ],
+        "properties": {
+          "Memory": "8",
+          "Cpu": "4"
+        }
+      }
+    },
+    {
+      "value": "Standard_A8m_v2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "64",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_A8_v2",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 16
+          }
+        ],
+        "properties": {
+          "Memory": "16",
+          "Cpu": "8"
+        }
+      }
+    },
+    {
+      "value": "Standard_M128s",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "2048",
+          "Cpu": "128"
+        }
+      }
+    },
+    {
+      "value": "Standard_M64ms",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "1792",
+          "Cpu": "64"
+        }
+      }
+    },
+    {
+      "value": "Standard_NC6",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          }
+        ],
+        "properties": {
+          "Memory": "57.3",
+          "Cpu": "6"
+        }
+      }
+    },
+    {
+      "value": "Standard_NC12",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 48
+          }
+        ],
+        "properties": {
+          "Memory": "114.6",
+          "Cpu": "12"
+        }
+      }
+    },
+    {
+      "value": "Standard_NC24",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "229.3",
+          "Cpu": "24"
+        }
+      }
+    },
+    {
+      "value": "Standard_NC24r",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "229.3",
+          "Cpu": "24"
+        }
+      }
+    },
+    {
+      "value": "Standard_NV6",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 24
+          }
+        ],
+        "properties": {
+          "Memory": "57.3",
+          "Cpu": "6"
+        }
+      }
+    },
+    {
+      "value": "Standard_NV12",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 48
+          }
+        ],
+        "properties": {
+          "Memory": "114.6",
+          "Cpu": "12"
+        }
+      }
+    },
+    {
+      "value": "Standard_NV24",
+      "meta": {
+        "configs": [
+          {
+            "volumeParameterType": "MAGNETIC",
+            "minimumSize": 10,
+            "maximumSize": 1023,
+            "minimumNumber": 1,
+            "maximumNumber": 64
+          }
+        ],
+        "properties": {
+          "Memory": "229.3",
+          "Cpu": "24"
+        }
+      }
     }
   ]
 }
