@@ -290,6 +290,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setHdpVersion(hdpVersion);
             stackRequest.setImageCatalog(imageCatalog);
             stackRequest.setCustomImage(customImage);
+            stackRequest.setMultiGateway(shellContext.isMultipleGatewayEnabled());
             OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
             orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);

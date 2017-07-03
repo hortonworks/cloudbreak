@@ -93,6 +93,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         }
 
         stack.setUuid(UUID.randomUUID().toString());
+        stack.setMultiGateway(source.getMultiGateway());
         validateCustomImage(source);
         return stack;
     }
@@ -176,10 +177,10 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         boolean gatewaySpecified = false;
         for (InstanceGroup instanceGroup : convertedSet) {
             instanceGroup.setStack(stack);
-            if (!gatewaySpecified) {
-                if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
-                    gatewaySpecified = true;
-                }
+            if (!source.getMultiGateway() && gatewaySpecified && InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                throw new BadRequestException("Only 1 Ambari server can be specified");
+            } else if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
+                gatewaySpecified = true;
             }
         }
         boolean containerOrchestrator = false;

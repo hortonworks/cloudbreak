@@ -95,15 +95,17 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
             Long parsedsecurityGroupId = Longs.tryParse(securityGroupId);
             if (parsedTemplateId != null && parsedsecurityGroupId != null) {
                 if (ambariServer) {
-                    boolean ambariSpecified = shellContext.getInstanceGroups().values()
-                            .stream().filter(e -> e.getType().equals("GATEWAY")).findAny().isPresent();
-                    if (ambariSpecified) {
-                        for (Map.Entry<String, InstanceGroupEntry> stringInstanceGroupEntryEntry : shellContext.getInstanceGroups().entrySet()) {
-                            shellContext.getInstanceGroups().get(stringInstanceGroupEntryEntry.getKey()).setType("CORE");
+                    if (!shellContext.isMultipleGatewayEnabled()) {
+                        boolean ambariSpecified = shellContext.getInstanceGroups().values()
+                                .stream().filter(e -> e.getType().equals("GATEWAY")).findAny().isPresent();
+                        if (ambariSpecified) {
+                            for (Map.Entry<String, InstanceGroupEntry> stringInstanceGroupEntryEntry : shellContext.getInstanceGroups().entrySet()) {
+                                shellContext.getInstanceGroups().get(stringInstanceGroupEntryEntry.getKey()).setType("CORE");
+                            }
                         }
-                    }
-                    if (nodeCount != 1) {
-                        throw shellContext.exceptionTransformer().transformToRuntimeException("Allowed node count for Ambari server: 1");
+                        if (nodeCount != 1) {
+                            throw shellContext.exceptionTransformer().transformToRuntimeException("Allowed node count for Ambari server: 1");
+                        }
                     }
                     shellContext.putInstanceGroup(instanceGroup.getName(),
                             new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "GATEWAY", parameters));

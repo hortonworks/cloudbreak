@@ -116,6 +116,8 @@ public class ShellContext {
 
     private SmartSenseSubscriptionJson smartSenseSubscription;
 
+    private boolean multipleGatewayEnabled;
+
     @Inject
     private CloudbreakClient cloudbreakClient;
 
@@ -807,6 +809,14 @@ public class ShellContext {
 
     public void resetSmartSenseSubscription() {
         smartSenseSubscription = null;
+    }
+
+    public boolean isMultipleGatewayEnabled() {
+        return multipleGatewayEnabled;
+    }
+
+    public void setMultipleGatewayEnabled(boolean multipleGatewayEnabled) {
+        this.multipleGatewayEnabled = multipleGatewayEnabled;
     }
 
     private enum PropertyKey {
