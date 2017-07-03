@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
 public interface CloudbreakEventService {
@@ -12,4 +13,6 @@ public interface CloudbreakEventService {
     CloudbreakEvent createStackEvent(CloudbreakEventData eventData);
 
     List<CloudbreakEvent> cloudbreakEvents(String user, Long since);
+
+    List<CloudbreakEvent> cloudbreakEventsForStack(IdentityUser user, Long stackId);
 }

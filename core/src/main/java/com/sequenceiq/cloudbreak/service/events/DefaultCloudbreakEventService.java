@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.events;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
@@ -12,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -91,6 +93,16 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
             events = eventRepository.findAll(Specifications
                     .where(CloudbreakEventSpecifications.eventsForUser(owner))
                     .and(CloudbreakEventSpecifications.eventsSince(since)));
+        }
+        return null != events ? events : Collections.EMPTY_LIST;
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<CloudbreakEvent> cloudbreakEventsForStack(IdentityUser owner, Long stackId) {
+        List<CloudbreakEvent> events = new ArrayList<>();
+        if (stackId != null) {
+            events = eventRepository.findCloudbreakEventsForStack(owner.getUserId(), stackId);
         }
         return null != events ? events : Collections.EMPTY_LIST;
     }
