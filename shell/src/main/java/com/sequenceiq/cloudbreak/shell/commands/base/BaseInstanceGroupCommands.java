@@ -94,23 +94,8 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
             Long parsedTemplateId = Longs.tryParse(templateId);
             Long parsedsecurityGroupId = Longs.tryParse(securityGroupId);
             if (parsedTemplateId != null && parsedsecurityGroupId != null) {
-                if (ambariServer) {
-                    boolean ambariSpecified = shellContext.getInstanceGroups().values()
-                            .stream().filter(e -> e.getType().equals("GATEWAY")).findAny().isPresent();
-                    if (ambariSpecified) {
-                        for (Map.Entry<String, InstanceGroupEntry> stringInstanceGroupEntryEntry : shellContext.getInstanceGroups().entrySet()) {
-                            shellContext.getInstanceGroups().get(stringInstanceGroupEntryEntry.getKey()).setType("CORE");
-                        }
-                    }
-                    if (nodeCount != 1) {
-                        throw shellContext.exceptionTransformer().transformToRuntimeException("Allowed node count for Ambari server: 1");
-                    }
-                    shellContext.putInstanceGroup(instanceGroup.getName(),
-                            new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "GATEWAY", parameters));
-                } else {
-                    shellContext.putInstanceGroup(instanceGroup.getName(),
-                            new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, "CORE", parameters));
-                }
+                shellContext.putInstanceGroup(instanceGroup.getName(),
+                        new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, ambariServer ? "GATEWAY" : "CORE", parameters));
                 shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<>(), RecoveryMode.MANUAL));
                 if (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
                         && shellContext.getActiveHostGroups().size() != 0) {
