@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
+import com.microsoft.azure.credentials.AzureTokenCredentials;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.AvailabilitySet;
 import com.microsoft.azure.management.compute.PowerState;
@@ -74,7 +75,7 @@ public class AzureClient {
     }
 
     private void connect() throws IOException {
-        ApplicationTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, secretKey, AzureEnvironment.AZURE)
+        AzureTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, secretKey, AzureEnvironment.AZURE)
                 .withDefaultSubscriptionId(subscriptionId);
         azure = Azure
                 .configure()
