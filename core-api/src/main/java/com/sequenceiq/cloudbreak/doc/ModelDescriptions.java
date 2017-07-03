@@ -110,6 +110,7 @@ public class ModelDescriptions {
         public static final String NETWORK = "stack related network";
         public static final String FLEX_ID = "id of the related flex subscription";
         public static final String SOURCE_CREDENTIAL = "source credential object for cloning";
+        public static final String CLUSTER_REQUEST = "cluster request object on stack";
         public static final String FLEX_SUBSCRIPTION = "the related flex subscription";
         public static final String NODE_COUNT = "node count of the stack";
         public static final String HARDWARE_INFO_RESPONSE = "hardware information where pairing hostmetadata with instancemetadata";

@@ -39,7 +39,7 @@ public class StackValidationRequest implements JsonEntity {
     private Long credentialId;
 
     @ApiModelProperty(value = StackModelDescription.CREDENTIAL_NAME)
-    private Long credentialName;
+    private String credentialName;
 
     @ApiModelProperty(value = StackModelDescription.CREDENTIAL)
     private CredentialRequest credential;
@@ -126,11 +126,11 @@ public class StackValidationRequest implements JsonEntity {
         this.credential = credential;
     }
 
-    public Long getCredentialName() {
+    public String getCredentialName() {
         return credentialName;
     }
 
-    public void setCredentialName(Long credentialName) {
+    public void setCredentialName(String credentialName) {
         this.credentialName = credentialName;
     }
 }

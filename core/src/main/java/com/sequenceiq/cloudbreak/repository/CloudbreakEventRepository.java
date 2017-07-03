@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 @EntityType(entityClass = CloudbreakEvent.class)
 public interface CloudbreakEventRepository extends PagingAndSortingRepository<CloudbreakEvent, Long>, JpaSpecificationExecutor {
 
-    @Query("SELECT cbe FROM CloudbreakEvent cbe WHERE cbe.stackId= :stackId")
-    List<CloudbreakEvent> findCloudbreakEventsForStack(@Param("stackId") Long stackId);
+    @Query("SELECT cbe FROM CloudbreakEvent cbe WHERE cbe.stackId= :stackId AND cbe.owner= :owner")
+    List<CloudbreakEvent> findCloudbreakEventsForStack(@Param("owner") String owner, @Param("stackId") Long stackId);
 
 }

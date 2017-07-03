@@ -28,7 +28,7 @@ public class StackResponseEventProvider implements ResponseProvider {
 
     @Override
     public StackResponse providerEntriesToStackResponse(Stack stack, StackResponse stackResponse) {
-        List<CloudbreakEvent> cloudbreakEventsForStack = cloudbreakEventRepository.findCloudbreakEventsForStack(stack.getId());
+        List<CloudbreakEvent> cloudbreakEventsForStack = cloudbreakEventRepository.findCloudbreakEventsForStack(stack.getOwner(), stack.getId());
         List<CloudbreakEventsJson> convertedCloudbreakEventsForStack = (List<CloudbreakEventsJson>) conversionService
                 .convert(cloudbreakEventsForStack,
                         TypeDescriptor.forObject(cloudbreakEventsForStack),
