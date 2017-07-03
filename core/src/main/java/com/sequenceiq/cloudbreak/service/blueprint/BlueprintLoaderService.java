@@ -54,7 +54,7 @@ public class BlueprintLoaderService {
                 LOGGER.info("Adding default blueprint '{}' for user '{}'", blueprintStrings, user.getUsername());
                 try {
                     BlueprintRequest blueprintJson = new BlueprintRequest();
-                    blueprintJson.setName(split[0]);
+                    blueprintJson.setName(split[0].trim());
                     blueprintJson.setDescription(split[0]);
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));
                     blueprintJson.setAmbariBlueprint(blueprintUtils.convertStringToJsonNode(jsonNode.get("blueprint").toString()));
@@ -81,6 +81,7 @@ public class BlueprintLoaderService {
     private List<String> getDefaultBlueprintNames(IdentityUser user) {
         return blueprintRepository.findAllDefaultInAccount(user.getAccount()).stream()
                 .map(bp -> bp.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(bp.getName()) : bp.getName())
+                .map(x -> toString().trim())
                 .collect(Collectors.toList());
     }
 }
