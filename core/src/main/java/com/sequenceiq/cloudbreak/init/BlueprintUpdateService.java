@@ -42,7 +42,7 @@ public class BlueprintUpdateService implements ApplicationListener<ContextRefres
                     String bpDefaultText = blueprintUtils.readDefaultBlueprintFromFile(split);
                     LOGGER.info("Updating default blueprint with name '{}'.", split[0]);
                     for (Blueprint blueprint : allBlueprint) {
-                        if (blueprint.getName().equals(split[0]) && blueprint.getStatus().equals(ResourceStatus.DEFAULT)) {
+                        if (blueprint.getName().trim().equals(split[0].trim()) && blueprint.getStatus().equals(ResourceStatus.DEFAULT)) {
                             readAndUpdateBlueprint(bpDefaultText, blueprint);
                         }
                     }
@@ -66,6 +66,7 @@ public class BlueprintUpdateService implements ApplicationListener<ContextRefres
         blueprint.setBlueprintText(blueprintText.toString());
         blueprint.setHostGroupCount(blueprintUtils.countHostGroups(blueprintText));
         blueprint.setBlueprintName(blueprintUtils.getBlueprintName(blueprintText));
+        blueprint.setName(blueprint.getName().trim());
         blueprintRepository.save(blueprint);
     }
 }

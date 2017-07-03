@@ -124,7 +124,7 @@
         "ranger-hive-audit": {
           "xasecure.audit.is.enabled": "true",
           "xasecure.audit.destination.hdfs": "true",
-          "xasecure.audit.destination.hdfs.dir":"s3a:/{{{ S3_BUCKET }}}/{{{ REMOTE_CLUSTER_NAME }}}/apps/ranger/audit/{{cluster_name}}",
+          "xasecure.audit.destination.hdfs.dir":"s3a://{{{ S3_BUCKET }}}/{{{ REMOTE_CLUSTER_NAME }}}/apps/ranger/audit/{{cluster_name}}",
           "xasecure.audit.destination.solr": "true",
           "xasecure.audit.destination.solr.zookeepers": "{{{ SOLR_ZOOKEPERS_URL }}}"
         }

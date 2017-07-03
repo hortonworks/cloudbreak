@@ -289,9 +289,9 @@
               "directory": "hbase-tmp"
             },
             {
-              "name": "hbase.rootdir",
+              "name": "hbase.wal.dir",
               "prefix": "file://",
-              "directory": "hbase"
+              "directory": "hbase/wal"
             }
           ],
           "host": []
