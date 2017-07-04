@@ -8,6 +8,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Version;
 
 @Entity
 public class FlowLog {
@@ -43,6 +44,11 @@ public class FlowLog {
 
     @Column(nullable = false)
     private Boolean finalized = Boolean.FALSE;
+
+    private String cloudbreakNodeId;
+
+    @Version
+    private Long version;
 
     public FlowLog() {
 
@@ -158,5 +164,25 @@ public class FlowLog {
 
     public void setFinalized(Boolean finalized) {
         this.finalized = finalized;
+    }
+
+    public String getCloudbreakNodeId() {
+        return cloudbreakNodeId;
+    }
+
+    public void setCloudbreakNodeId(String cloudbreakNodeId) {
+        this.cloudbreakNodeId = cloudbreakNodeId;
+    }
+
+    public void setVariables(String variables) {
+        this.variables = variables;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

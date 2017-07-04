@@ -20,6 +20,7 @@
     <suppress checks=".*" files="PrometheusResponse.java"/>
     <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java|MetadataSetupService.java"/>
     <suppress checks="ModifierOrderCheck" files="EncryptedJsonToString.java"/>
+    <suppress checks="TrailingComment" files="HeartbeatServiceTest.java"/>
 
 
     <!-- suppressing checks in application runner classes -->
