@@ -17,6 +17,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -41,6 +43,9 @@ import com.sequenceiq.cloudbreak.service.usages.UsageService;
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupService.class);
+
+    @Value("${cb.instance.uuid:}")
+    private String uuid;
 
     @Inject
     private StackRepository stackRepository;
@@ -75,9 +80,9 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     public void onApplicationEvent(ContextRefreshedEvent event) {
         List<Long> stackIdsUnderOperation = restartDistruptedFlows();
         usageService.fixUsages();
-        List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
-        List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
-        triggerSyncs(stacksToSync, clustersToSync);
+//        List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
+//        List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
+//        triggerSyncs(stacksToSync, clustersToSync);
     }
 
     private List<Stack> resetStackStatus(List<Long> excludeStackIds) {
@@ -126,10 +131,14 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         for (Object[] flow : runningFlows) {
             LOGGER.info(logMessage, flow[0]);
             try {
-                flow2Handler.restartFlow((String) flow[0]);
-                stackIds.add((Long) flow[1]);
+                String flowId = (String) flow[0];
+                FlowLog flowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
+                if (flowLog.getCloudbreakNodeId().equalsIgnoreCase(uuid)) {
+                    flow2Handler.restartFlow(flowId);
+                    stackIds.add((Long) flow[1]);
+                }
             } catch (Exception e) {
-                LOGGER.error(String.format("Failed torestart flow %s on stack %s", flow[0].toString(), flow[1].toString()), e);
+                LOGGER.error(String.format("Failed to restart flow %s on stack %s", flow[0].toString(), flow[1].toString()), e);
                 flowLogService.terminate((Long) flow[1], (String) flow[0]);
             }
         }
