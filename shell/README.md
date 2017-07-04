@@ -549,7 +549,7 @@ For the full list of available commands please check below. Please note that all
     * blueprint select - Select the blueprint by its id or name
     * blueprint show - Shows the blueprint by its id or name
     * cluster create - Create a new cluster based on a blueprint and optionally a recipe
-    * cluster fileSystem --ADLS - Set Windows Azure Data Lake Storage filesystem on cluster
+    * cluster fileSystem --ADLS - Set Azure Data Lake Store filesystem on cluster
     * cluster fileSystem --GCS - Set GCS fileSystem on cluster
     * cluster fileSystem --WASB - Set Windows Azure Blob Storage filesystem on cluster
     * cluster node --ADD - Add new nodes to the cluster

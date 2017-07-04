@@ -229,7 +229,7 @@ public class AzureCommands implements CommandMarker {
         return "Windows Azure Blob Storage filesystem configured";
     }
 
-    @CliCommand(value = "cluster fileSystem --ADLS", help = "Set Windows Azure Data Lake Storage filesystem on cluster")
+    @CliCommand(value = "cluster fileSystem --ADLS", help = "Set Azure Data Lake Store filesystem on cluster")
     public String setAdlsFileSystem(
             //@CliOption(key = "defaultFileSystem", mandatory = false, specifiedDefaultValue = "false", unspecifiedDefaultValue = "false",
             //        help = "Use as default filesystem") Boolean defaultFileSystem,
@@ -262,7 +262,7 @@ public class AzureCommands implements CommandMarker {
                     .transformToRuntimeException("One or more required parameters for ADLS are not set!");
         }
         shellContext.setFileSystemParameters(props);
-        return "Windows Azure Data Lake Storage filesystem configured";
+        return "Azure Data Lake Store filesystem configured";
     }
 
     @CliCommand(value = "platform create --AZURE", help = "Create a new Azure platform configuration")
