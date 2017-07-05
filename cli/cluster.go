@@ -136,11 +136,11 @@ func CreateCluster(c *cli.Context) error {
 	defer timeTrack(time.Now(), "create cluster")
 	skeleton := assembleClusterSkeleton(c)
 
-	if err := skeleton.Validate(); err != nil {
+	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+
+	if err := skeleton.Validate(cbClient); err != nil {
 		logErrorAndExit(err)
 	}
-
-	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
 	stackId := createClusterImpl(skeleton,
 		createMasterTemplateRequest,
@@ -501,7 +501,11 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 func ValidateCreateClusterSkeleton(c *cli.Context) error {
 	skeleton := assembleClusterSkeleton(c)
-	return skeleton.Validate()
+	if skeleton.FlexSubscription != nil && len(skeleton.FlexSubscription.Name) > 0 {
+		cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+		return skeleton.Validate(cbClient)
+	}
+	return skeleton.Validate(nil)
 }
 
 func RepairCluster(c *cli.Context) error {

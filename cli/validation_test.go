@@ -9,7 +9,7 @@ import (
 func TestClusterSkeletonValidateAllMissing(t *testing.T) {
 	skeleton := ClusterSkeleton{}
 
-	errors := skeleton.Validate()
+	errors := skeleton.Validate(nil)
 
 	if errors == nil {
 		t.Error("errors couldn't be nil")
@@ -21,7 +21,7 @@ func TestClusterSkeletonValidateAllMissing(t *testing.T) {
 func TestClusterSkeletonValidateInstanceCountIsZero(t *testing.T) {
 	skeleton := ClusterSkeleton{ClusterSkeletonBase: ClusterSkeletonBase{Worker: InstanceConfig{InstanceCount: -1}}}
 
-	errors := skeleton.Validate()
+	errors := skeleton.Validate(nil)
 
 	if errors == nil {
 		t.Error("errors couldn't be nil")
@@ -47,7 +47,7 @@ func TestClusterSkeletonValidateAllGood(t *testing.T) {
 		},
 	}
 
-	errors := skeleton.Validate()
+	errors := skeleton.Validate(nil)
 
 	if errors != nil {
 		t.Errorf("validation went fail: %s", errors.Error())
@@ -194,7 +194,7 @@ func TestInvalidHDPVersion(t *testing.T) {
 		},
 	}
 
-	errors := skeleton.Validate()
+	errors := skeleton.Validate(nil)
 
 	if errors == nil {
 		t.Error("validation should fail for HDP version")
@@ -216,7 +216,7 @@ func TestInvalidHDPVersionSimpleNumber(t *testing.T) {
 		},
 	}
 
-	errors := skeleton.Validate()
+	errors := skeleton.Validate(nil)
 
 	if errors == nil {
 		t.Error("validation should fail for HDP version")
@@ -238,7 +238,7 @@ func TestInvalidHDPVersionForNonNumber(t *testing.T) {
 		},
 	}
 
-	errors := skeleton.Validate()
+	errors := skeleton.Validate(nil)
 
 	if errors == nil {
 		t.Error("validation should fail for HDP version")

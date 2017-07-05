@@ -156,11 +156,12 @@ func main() {
 				},
 				{
 					Name:   "validate-cli-skeleton",
-					Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlAmbariPasswordOptional},
+					Flags:  []cli.Flag{hdc.FlInputJson, hdc.FlAmbariPasswordOptional, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+					Before: ConfigRead,
 					Action: hdc.ValidateCreateClusterSkeleton,
 					Usage:  "validate the input json",
 					BashComplete: func(c *cli.Context) {
-						for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlAmbariPasswordOptional} {
+						for _, f := range []cli.Flag{hdc.FlInputJson, hdc.FlAmbariPasswordOptional, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 							printFlagCompletion(f)
 						}
 					},
