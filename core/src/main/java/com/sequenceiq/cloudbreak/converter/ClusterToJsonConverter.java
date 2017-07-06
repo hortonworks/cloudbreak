@@ -277,6 +277,8 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 return ambariViewProvider.provideViewInformation(ambariClient, source);
             } catch (CloudbreakSecuritySetupException e) {
                 LOGGER.error("Unable to setup ambari client tls configs: ", e);
+            } catch (Exception ex) {
+                LOGGER.error("Unable to provide view definition on cluster with name {} and id {}: ", source.getName(), source.getId(), ex);
             }
         }
         return source;
