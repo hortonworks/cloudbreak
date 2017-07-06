@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -65,6 +67,10 @@ public class HdpInfoSearchService {
                 .filter(p -> p.getAmbariInfo().getHdp().stream().anyMatch(hdp -> hdp.getVersion().startsWith(hdpVersion)))
                 .filter(p -> p.getAmbariInfo().getHdp().stream().anyMatch(hdp -> hdp.getImages().containsKey(platform)))
                 .collect(Collectors.toList());
+        if (!StringUtils.isEmpty(cbVersion) && cbVersion.contains("dev")) {
+            List<AmbariCatalog> filteredCatalogs = cloudbreakVerionPrefixMatch(extractCbVersion(cbVersion), ambariCatalogs);
+            ambariCatalogs = filteredCatalogs.size() > 0 ? filteredCatalogs : ambariCatalogs;
+        }
         Collections.sort(ambariCatalogs, new VersionComparator());
         LOGGER.info("Prefix matched Ambari versions: {}. Ambari search prefix: {}", ambariCatalogs, ambariVersion);
         return ambariCatalogs;
@@ -94,6 +100,21 @@ public class HdpInfoSearchService {
             return null;
         }
         return hdpInfos.get(hdpInfos.size() - 1);
+    }
+
+    private List<AmbariCatalog> cloudbreakVerionPrefixMatch(String cbVersion, List<AmbariCatalog> ambariCatalogs) {
+        return ambariCatalogs.stream()
+                .filter(p -> p.getAmbariInfo().getCbVersions().stream().anyMatch(cb -> cb.startsWith(cbVersion)))
+                .collect(Collectors.toList());
+    }
+
+    // E.g. 2.1.0-dev.62 --> 2.1.0
+    private String extractCbVersion(String cbVersion) {
+        Matcher matcher = Pattern.compile("^\\d+\\.\\d+\\.\\d+").matcher(cbVersion);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
+        return cbVersion;
     }
 
     private HDPInfo prefixSearch(CloudbreakImageCatalog imageCatalog, String platform, String cbVersion, String ambariVersion, String hdpVersion) {
