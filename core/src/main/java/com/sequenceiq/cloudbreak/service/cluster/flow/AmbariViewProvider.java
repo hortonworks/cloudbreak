@@ -30,7 +30,7 @@ public class AmbariViewProvider {
             List<String> viewDefinitions = (List<String>) ambariClient.getViewDefinitions();
 
             Map<String, Object> obj = cluster.getAttributes().getMap();
-            if (obj == null) {
+            if (obj == null || obj.isEmpty()) {
                 obj = new HashMap<>();
             }
             obj.put(VIEW_DEFINITIONS.name(), viewDefinitions);
