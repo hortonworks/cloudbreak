@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
+import static org.springframework.util.StringUtils.isEmpty;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -9,9 +13,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -116,10 +122,40 @@ public interface PlatformParameters {
      */
     TagSpecification tagSpecification();
 
+    String getDefaultRegionsConfigString();
+
+    String getDefaultRegionString();
+
+    String platforName();
+
     default <S extends StringType, O> Map<S, O> sortMap(Map<S, O> unsortMap) {
         Map<S, O> treeMap = new TreeMap<>((o1, o2) -> o2.value().compareTo(o1.value()));
         treeMap.putAll(unsortMap);
         return treeMap;
+    }
+
+    default Region getRegionByName(String name) {
+        for (Region region : regions().types()) {
+            if (name.equals(region.value())) {
+                return region;
+            }
+        }
+        return null;
+    }
+
+    default Region getDefaultRegion() {
+        Map<Platform, Region> regions = Maps.newHashMap();
+        if (isNoneEmpty(getDefaultRegionsConfigString())) {
+            for (String entry : getDefaultRegionsConfigString().split(",")) {
+                String[] keyValue = entry.split(":");
+                regions.put(platform(keyValue[0]), Region.region(keyValue[1]));
+            }
+            Region platformRegion = regions.get(platforName());
+            if (platformRegion != null && !isEmpty(platformRegion.value())) {
+                return getRegionByName(platformRegion.value());
+            }
+        }
+        return getRegionByName(getDefaultRegionString());
     }
 
     default <T extends StringType> T nthElement(Collection<T> data, int n) {
