@@ -379,7 +379,7 @@ cloudbreak:
           #- SERVICE_CHECK_HTTP=/info
         - "http_proxy=$CB_HTTP_PROXY"
         - "https_proxy=$CB_HTTPS_PROXY"
-        - CB_JAVA_OPTS
+        - 'CB_JAVA_OPTS=$(escape-string-compose-yaml $CB_JAVA_OPTS \')'
         - "CB_CLIENT_ID=$UAA_CLOUDBREAK_ID"
         - 'CB_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_CLOUDBREAK_SECRET \')'
         - CB_BLUEPRINT_DEFAULTS
@@ -572,7 +572,7 @@ periscope:
         - PERISCOPE_DB_SCHEMA_NAME
         - SERVICE_NAME=periscope
           #- SERVICE_CHECK_HTTP=/info
-        - CB_JAVA_OPTS
+        - 'CB_JAVA_OPTS=$(escape-string-compose-yaml $CB_JAVA_OPTS \')'
         - PERISCOPE_CLIENT_ID=$UAA_PERISCOPE_ID
         - 'PERISCOPE_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_PERISCOPE_SECRET \')'
         - PERISCOPE_HOSTNAME_RESOLUTION=public
