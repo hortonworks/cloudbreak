@@ -54,6 +54,9 @@ public class OpenStackParameters implements PlatformParameters {
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("vd", START_LABEL);
 
+    @Value("${cb.platform.default.regions:}")
+    private String defaultRegions;
+
     @Value("${cb.openstack.regions:}")
     private String openstackRegionDefinition;
 
@@ -81,7 +84,7 @@ public class OpenStackParameters implements PlatformParameters {
         }
         LOGGER.info("Zone definition for OpenStack: {}", zone);
         this.regions = readRegions(zone);
-        this.defaultRegion = nthElement(this.regions.keySet(), 0);
+        this.defaultRegion = getDefaultRegion();
     }
 
     @Override
@@ -153,6 +156,21 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public TagSpecification tagSpecification() {
         return tagSpecification;
+    }
+
+    @Override
+    public String getDefaultRegionsConfigString() {
+        return defaultRegions;
+    }
+
+    @Override
+    public String getDefaultRegionString() {
+        return nthElement(regions.keySet(), 0).value();
+    }
+
+    @Override
+    public String platforName() {
+        return OpenStackConstants.OPENSTACK_PLATFORM.value();
     }
 
     @Override

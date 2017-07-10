@@ -35,6 +35,9 @@ import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 @Service
 public class BYOSPlatformParameters implements PlatformParameters {
 
+    @Value("${cb.platform.default.regions:}")
+    private String defaultRegions;
+
     @Value("${cb.byos.regions:}")
     private String byosRegionDefinition;
 
@@ -54,7 +57,7 @@ public class BYOSPlatformParameters implements PlatformParameters {
             zone = byosRegionDefinition;
         }
         this.regions = readRegions(zone);
-        this.defaultRegion = nthElement(this.regions.keySet(), 0);
+        this.defaultRegion = getDefaultRegion();
     }
 
     @Override
@@ -119,5 +122,20 @@ public class BYOSPlatformParameters implements PlatformParameters {
     @Override
     public TagSpecification tagSpecification() {
         return null;
+    }
+
+    @Override
+    public String getDefaultRegionsConfigString() {
+        return defaultRegions;
+    }
+
+    @Override
+    public String getDefaultRegionString() {
+        return nthElement(regions.keySet(), 0).value();
+    }
+
+    @Override
+    public String platforName() {
+        return BYOSConstants.BYOS_PLATFORM.value();
     }
 }
