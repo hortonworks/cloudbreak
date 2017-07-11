@@ -14,6 +14,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -79,6 +80,9 @@ public class MockPlatformParameters implements PlatformParameters {
 
     private static final String[] USA_AVAILABILITY_ZONES = {"usa-a", "usa-b", "usa-c"};
 
+    @Value("${cb.platform.default.regions:}")
+    private String defaultRegions;
+
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
@@ -91,7 +95,7 @@ public class MockPlatformParameters implements PlatformParameters {
     public void init() {
         this.regions = readRegionsMock();
         this.vmTypes = readVmTypes();
-        this.defaultRegion = this.regions.keySet().iterator().next();
+        this.defaultRegion = getDefaultRegion();
         this.defaultVmType = this.vmTypes.get(this.vmTypes.keySet().iterator().next()).get(0);
     }
 
@@ -213,6 +217,21 @@ public class MockPlatformParameters implements PlatformParameters {
     @Override
     public TagSpecification tagSpecification() {
         return null;
+    }
+
+    @Override
+    public String getDefaultRegionsConfigString() {
+        return defaultRegions;
+    }
+
+    @Override
+    public String getDefaultRegionString() {
+        return regions.keySet().iterator().next().value();
+    }
+
+    @Override
+    public String platforName() {
+        return MockConstants.MOCK;
     }
 
     private enum MockDiskType {

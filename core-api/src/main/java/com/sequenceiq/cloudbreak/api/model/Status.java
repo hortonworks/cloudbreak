@@ -36,4 +36,8 @@ public enum Status {
     public String normalizedStatusName() {
         return name().replaceAll("_", " ").toLowerCase();
     }
+
+    public Boolean isStopPhaseActive() {
+        return name().contains("STOP");
+    }
 }
