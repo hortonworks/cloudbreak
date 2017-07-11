@@ -102,7 +102,7 @@ cbd-update-release() {
     if [[ ${binver} != ${lastver} ]]; then
         debug upgrade needed |yellow
 
-        local url=https://github.com/sequenceiq/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
+        local url=https://github.com/hortonworks/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
         info "Updating $SELF_EXECUTABLE from url: $url"
         curl -Ls $url | tar -zx -C $TEMP_DIR
         mv $TEMP_DIR/cbd $SELF_EXECUTABLE
@@ -116,7 +116,7 @@ cbd-update-snap() {
     declare desc="Updates itself, from CircleCI branch artifact"
     declare branch=${1:?branch name is required}
 
-    url=$(cci-latest sequenceiq/cloudbreak-deployer $branch)
+    url=$(cci-latest hortonworks/cloudbreak-deployer $branch)
     info "Update $SELF_EXECUTABLE from: $url"
     curl -Ls $url | tar -zx -C $TEMP_DIR
     mv $TEMP_DIR/cbd $SELF_EXECUTABLE
@@ -124,8 +124,8 @@ cbd-update-snap() {
 }
 
 latest-version() {
-  #curl -Ls https://raw.githubusercontent.com/sequenceiq/cloudbreak-deployer/master/VERSION
-  curl -I https://github.com/sequenceiq/cloudbreak-deployer/releases/latest 2>&1 \
+  #curl -Ls https://raw.githubusercontent.com/hortonworks/cloudbreak-deployer/master/VERSION
+  curl -I https://github.com/hortonworks/cloudbreak-deployer/releases/latest 2>&1 \
       |sed -n "s/^Location:.*tag.v\([0-9\.]*\).*/\1/p"
 }
 

@@ -8,7 +8,7 @@ Use these steps to set up your local development environment, IDEA, command line
 
 Before setting up your development environment on OSX, you must install Docker and Boot2docker.
 
-The simplest way to prepare your working environment is to start Cloudbreak on your local machine using the Cloudbreak Deployer. The latest version of the Cloudbreak Deployer is available in [this github repository](https://github.com/sequenceiq/cloudbreak-deployer).
+The simplest way to prepare your working environment is to start Cloudbreak on your local machine using the Cloudbreak Deployer. The latest version of the Cloudbreak Deployer is available in [this github repository](https://github.com/hortonworks/cloudbreak-deployer).
 
 **Step 1:** Create a _sandbox_ directory which will store the necessary configuration files and dependencies of the Cloudbreak Deployer. This directory must be created outside of your cloned Cloudbreak git repository. For example:
 ```
@@ -23,7 +23,7 @@ cbd init
 cbd start  
 ```  
 
-**Step 3:** If Cloudbreak starts correctly, Cloudbreak application will be available at https://192.168.59.103. For more details and config parameters, check the documentation for [Cloudbreak Deployer](https://github.com/sequenceiq/cloudbreak-deployer).
+**Step 3:** If Cloudbreak starts correctly, Cloudbreak application will be available at https://192.168.59.103. For more details and config parameters, check the documentation for [Cloudbreak Deployer](https://github.com/hortonworks/cloudbreak-deployer).
 
 **Step 4:** Note that the deployer has generated a `certs` directory under `cbd-local` directory. You will need it later to set up the IDEA.
 
@@ -43,7 +43,7 @@ cbd util local-dev
 
 **Step 1:** Import Cloudbreak into IDEA as a gradle project. 
 
-**Step 2:**: Import the proper code formatter. To do this, use the __File -> Import Settings...__ menu and select the `idea_settings.jar` located in the `config` directory in the Cloudbreak [github repository](https://github.com/sequenceiq/cloudbreak-deployer).
+**Step 2:**: Import the proper code formatter. To do this, use the __File -> Import Settings...__ menu and select the `idea_settings.jar` located in the `config` directory in the Cloudbreak [github repository](https://github.com/hortonworks/cloudbreak-deployer).
 
 **Step 3:** To launch the Cloudbreak application, execute the `com.sequenceiq.cloudbreak.CloudbreakApplication` class with VM options:
 ```
@@ -200,7 +200,7 @@ If you want to test the binary CircleCI build from your branch named `fix-someth
 
 ```
 branch=fix-something
-circle_url=https://circleci.com/api/v1/project/sequenceiq/cloudbreak-deployer
+circle_url=https://circleci.com/api/v1/project/hortonworks/cloudbreak-deployer
 circle_token=[CIRCLE_TOKEN]
 latest_build=$(curl -s -G -d circle-token=${circle_token} ${circle_url}/tree/${branch}?filter=completed\&limit=1 | grep -m 1 build_num | sed 's/[^0-9]*//g')
 curl -sL $(curl -s -G -d circle-token=${circle_token} ${circle_url}/${latest_build}/artifacts | grep url | grep -i $(uname) | cut -d\" -f 4) | tar -xz -C $(dirname $(which cbd))
@@ -234,7 +234,7 @@ make tests
 
 ### Release Process for the Clodbreak Deployer Tool
 
-The master branch is always built on [CircleCI](https://circleci.com/gh/sequenceiq/cloudbreak-deployer).
+The master branch is always built on [CircleCI](https://circleci.com/gh/hortonworks/cloudbreak-deployer).
 
 When you want to create a new release, run:
 
@@ -255,7 +255,7 @@ The `make release-next-ver` performs the following steps:
 
 ### Acceptance
 
-Now you should test this release. You can update to it by running `curl -L -s https://github.com/sequenceiq/cloudbreak-deployer/archive/release-x.y.z.tar.gz | tar -xz -C $(dirname $(which cbd))`. Comment with LGTM (Looking Good To Me).
+Now you should test this release. You can update to it by running `curl -L -s https://github.com/hortonworks/cloudbreak-deployer/archive/release-x.y.z.tar.gz | tar -xz -C $(dirname $(which cbd))`. Comment with LGTM (Looking Good To Me).
 
 Once the PR is merged, CircleCI will:
 
