@@ -259,6 +259,6 @@ Now you should test this release. You can update to it by running `curl -L -s ht
 
 Once the PR is merged, CircleCI will:
 
-* Create a new release on [GitHub releases tab](https://github.com/sequenceiq/cloudbreak-deployer/releases), with the
+* Create a new release on [GitHub releases tab](https://github.com/hortonworks/cloudbreak-deployer/releases), with the
  help of [gh-release](https://github.com/progrium/gh-release).
 * Create the git tag with `v` prefix like: `v0.0.3`.

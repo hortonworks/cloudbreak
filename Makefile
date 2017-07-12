@@ -145,7 +145,7 @@ upload-tagged: prepare-release
 
 release: upload-release
 	gh-release checksums sha256
-	gh-release create sequenceiq/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
+	gh-release create hortonworks/$(NAME) $(VERSION) $(GIT_BRANCH) v$(VERSION)
 
 release-next-ver: deps
 	./release-next-ver.sh

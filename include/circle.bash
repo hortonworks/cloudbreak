@@ -31,7 +31,7 @@ cci-latest-org() {
 
     local latest=$(circle "project/$user/$project/tree/$branch?filter=completed&limit=1" |jq .[0].build_num)
     if ! [ "$latest" -gt 0 ] 2>/dev/null ; then 
-        error "No artifact found for branch: '$branch' at https://circleci.com/gh/sequenceiq/cloudbreak-deployer"
+        error "No artifact found for branch: '$branch' at https://circleci.com/gh/hortonworks/cloudbreak-deployer"
         _exit 1
     fi
     debug latest build: $latest
