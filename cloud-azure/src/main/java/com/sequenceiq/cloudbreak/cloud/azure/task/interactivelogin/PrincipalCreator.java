@@ -19,8 +19,10 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
+import com.microsoft.azure.management.graphrbac.implementation.ServicePrincipalInner;
 
 /**
  * Created by perdos on 10/18/16.
@@ -31,16 +33,19 @@ public class PrincipalCreator {
     private static final Logger LOGGER = LoggerFactory.getLogger(PrincipalCreator.class);
 
     @Retryable(value = InteractiveLoginException.class, maxAttempts = 15, backoff = @Backoff(delay = 1000))
-    public String createServicePrincipal(String accessToken, String appId, String tenantId) throws InteractiveLoginException {
+    public ServicePrincipalInner createServicePrincipal(String accessToken, String appId, String tenantId) throws InteractiveLoginException {
         Response response = createServicePrincipalWithGraph(accessToken, appId, tenantId);
 
         if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
             String principal = response.readEntity(String.class);
 
             try {
-                String objectId = new ObjectMapper().readTree(principal).get("objectId").asText();
+                ObjectMapper objectMapper = new ObjectMapper();
+                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                ServicePrincipalInner sp = objectMapper.readValue(principal, ServicePrincipalInner.class);
+                String objectId = sp.objectId();
                 LOGGER.info("Service principal created with objectId: " + objectId);
-                return objectId;
+                return sp;
             } catch (IOException e) {
                 throw new IllegalStateException(e);
             }
