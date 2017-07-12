@@ -40,6 +40,8 @@
         <input class="form-control" type="text" name="adlsaccountname" id="adlsaccountname" ng-model="cluster.fileSystem.properties.accountName" ng-pattern="/^[a-z0-9]{3,24}$/" ng-minlength="3" ng-maxlength="24" ng-required="cluster.fileSystem.type == 'ADLS'">
         <div class="help-block" ng-show="clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_adls_account_name_warning}}
         </div>
+        <div class="help-block" ng-show="cluster.fileSystem.properties.accountName"><i class="fa fa-warning"></i> {{printAdlsAclWarning()}} Check the Azure Portal <a href="https://portal.azure.com/#blade/Microsoft_Azure_DataLakeStore/WebHdfsFolderBlade/endpoint/{{cluster.fileSystem.properties.accountName}}.azuredatalakestore.net/path/%2F">here</a> and the documentation <a href="https://docs.microsoft.com/en-us/azure/data-lake-store/data-lake-store-access-control">here</a>
+        </div>
     </div>
 </div>
 <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'GCP') && cluster.fileSystem.type == 'GCS'">

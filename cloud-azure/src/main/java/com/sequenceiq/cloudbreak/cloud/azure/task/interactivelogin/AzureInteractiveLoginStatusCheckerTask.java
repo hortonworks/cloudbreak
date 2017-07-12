@@ -21,6 +21,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.azure.management.graphrbac.implementation.ServicePrincipalInner;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureInteractiveLoginStatusCheckerContext;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -103,8 +104,15 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
                     String secretKey = UUID.randomUUID().toString();
                     String appId = applicationCreator.createApplication(graphApiAccessToken, armCredentialView.getTenantId(), secretKey);
                     sendStatusMessage(extendedCloudCredential, "Cloudbreak application created");
-                    String principalObjectId = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
-                    sendStatusMessage(extendedCloudCredential, "Principal created for application");
+                    ServicePrincipalInner sp = principalCreator.createServicePrincipal(graphApiAccessToken, appId, armCredentialView.getTenantId());
+                    String principalObjectId =  sp.objectId();
+                    String notification = new StringBuilder("Principal created for application!")
+                            .append(" Name: ")
+                            .append(sp.displayName())
+                            .append(", AppId: ")
+                            .append(sp.appId())
+                            .toString();
+                    sendStatusMessage(extendedCloudCredential, notification);
                     String roleName = armCredentialView.getRoleName();
                     String roleType = armCredentialView.getRoleType();
                     String roleId = azureRoleManager.handleRoleOperations(managementApiToken, armCredentialView.getSubscriptionId(), roleName, roleType);
@@ -113,6 +121,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
 
                     extendedCloudCredential.putParameter("accessKey", appId);
                     extendedCloudCredential.putParameter("secretKey", secretKey);
+                    extendedCloudCredential.putParameter("spDisplayName", sp.displayName());
 
                     armInteractiveLoginStatusCheckerContext.getCredentialNotifier().createCredential(getAuthenticatedContext().getCloudContext(),
                             extendedCloudCredential);

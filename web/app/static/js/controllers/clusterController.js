@@ -1660,5 +1660,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
             return hasError;
         }
+
+        $scope.printAdlsAclWarning = function() {
+            if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform == 'AZURE') {
+                var appId = $rootScope.activeCredential.parameters.accessKey;
+                var displayName = $rootScope.activeCredential.parameters.spDisplayName;
+                var spId = displayName != undefined ? "[ Name: " + displayName + ", AppId: " + appId + " ]" : "[ AppId: " + appId + " ]";
+                var message = "Service principal " + spId + " will be configured to access ADLS, but ACL-s should be set manually!";
+                return message;
+            }
+            return "";
+        }
+
     }
 ]);
