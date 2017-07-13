@@ -22,8 +22,8 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
         }
         try {
             SubnetUtils.SubnetInfo info = new SubnetUtils(value).getInfo();
-            int addr = toInt(info.getAddress());
-            int lowerAddr = toInt(info.getLowAddress()) - 1;
+            long addr = toLong(info.getAddress());
+            long lowerAddr = toLong(info.getLowAddress()) - 1;
             if (addr != lowerAddr) {
                 return false;
             }
@@ -36,8 +36,8 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
         }
     }
 
-    private int toInt(String addr) {
-        return Integer.parseInt(addr.replace(".", ""));
+    private long toLong(String addr) {
+        return Long.parseLong(addr.replace(".", ""));
     }
 
     private static class Ip implements Comparable<Ip> {
