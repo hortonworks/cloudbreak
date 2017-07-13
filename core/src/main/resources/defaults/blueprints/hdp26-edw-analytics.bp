@@ -25,8 +25,7 @@
     "configurations": [
       {
         "hive-interactive-env": {
-          "enable_hive_interactive": "true",
-          "llap_queue_capacity": "75"
+          "enable_hive_interactive": "true"
         }
       },
       {
