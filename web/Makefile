@@ -1,4 +1,4 @@
-IMAGE = hortonworks/cloudbreak-web
+IMAGE = hortonworks/cb-web
 VERSION ?= $(shell git  describe --tags --abbrev=0)
 UNAME = $(shell uname)
 
