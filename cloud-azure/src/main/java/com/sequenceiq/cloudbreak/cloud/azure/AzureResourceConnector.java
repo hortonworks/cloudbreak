@@ -300,12 +300,14 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             try {
                 deallocateVirtualMachine(client, stackName, instanceId);
                 deleteVirtualMachine(client, stackName, instanceId);
-                deleteNetworkInterfaces(client, stackName, (List<String>) instanceResources.get(NETWORK_INTERFACES_NAMES));
-                deletePublicIps(client, stackName, (List<String>) instanceResources.get(PUBLIC_ADDRESS_NAME));
-                deleteDisk((List<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES), client, resourceGroupName,
-                        (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
-                if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
-                    azureStorage.deleteStorage(ac, client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
+                if (instanceResources != null) {
+                    deleteNetworkInterfaces(client, stackName, (List<String>) instanceResources.get(NETWORK_INTERFACES_NAMES));
+                    deletePublicIps(client, stackName, (List<String>) instanceResources.get(PUBLIC_ADDRESS_NAME));
+                    deleteDisk((List<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES), client, resourceGroupName,
+                            (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
+                    if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
+                        azureStorage.deleteStorage(ac, client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
+                    }
                 }
             } catch (CloudConnectorException e) {
                 throw e;

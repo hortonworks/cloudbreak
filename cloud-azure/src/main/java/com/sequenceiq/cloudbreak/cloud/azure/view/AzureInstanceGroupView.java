@@ -56,4 +56,14 @@ public class AzureInstanceGroupView {
     public String getCompressedName() {
         return compressedName;
     }
+
+    /**
+     * needed because of Freemarker template generating (1.6 -> 1.16 compatibility)
+     *
+     * @return name of the instance group
+     */
+    @Override
+    public String toString() {
+        return name;
+    }
 }
