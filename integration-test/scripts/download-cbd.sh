@@ -7,7 +7,7 @@ cd $INTEGCB_LOCATION
 
 : ${branch:=rc-1.16}
 
-circle_url=https://circleci.com/api/v1/project/sequenceiq/cloudbreak-deployer
+circle_url=https://circleci.com/api/v1/project/hortonworks/cloudbreak-deployer
 latest_build=$(curl -s ${circle_url}/tree/${branch}\?filter=completed\&limit=1 | grep -m 1 build_num | sed 's/[^0-9]*//g')
 curl -sL $(curl -s ${circle_url}/${latest_build}/artifacts | grep url | grep -i $(uname) | cut -d\" -f 4) | tar -xz
 
