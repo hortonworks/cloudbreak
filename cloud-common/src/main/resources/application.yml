@@ -130,7 +130,9 @@ cb:
   eventbus.threadpool.core.size: 100
   cloud.api.executorservice.pool.size: 40
 
-  platform.default.variants: OPENSTACK:HEAT
+  platform.default:
+    variants: OPENSTACK:HEAT
+    regions: AWS:eu-west-1,AZURE:North Europe,GCP:europe-west1
 
   gcp:
     hostkey.verify: false

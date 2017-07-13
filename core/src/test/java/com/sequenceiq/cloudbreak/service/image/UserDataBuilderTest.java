@@ -121,6 +121,21 @@ public class UserDataBuilderTest {
             }
 
             @Override
+            public String getDefaultRegionsConfigString() {
+                return "TEST";
+            }
+
+            @Override
+            public String getDefaultRegionString() {
+                return "TEST";
+            }
+
+            @Override
+            public String platforName() {
+                return "TEST";
+            }
+
+            @Override
             public VmTypes vmTypes(Boolean extended) {
                 return new VmTypes(new ArrayList<>(), VmType.vmType(""));
             }

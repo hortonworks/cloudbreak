@@ -65,15 +65,19 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private static final int START_LABEL = 98;
 
-    private static final int DEFAULT_REGION_TYPE_POSITION = 4;
-
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
+
+    @Value("${cb.platform.default.regions:}")
+    private String defaultRegions;
 
     @Value("${cb.arm.vm.parameter.definition.path:}")
     private String armVmParameterDefinitionPath;
 
     @Value("${cb.arm.zone.parameter.definition.path:}")
     private String armZoneParameterDefinitionPath;
+
+    @Value("${cb.arm.zone.parameter.default:North Europe}")
+    private String armZoneParameterDefault;
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -101,7 +105,7 @@ public class AzurePlatformParameters implements PlatformParameters {
     public void init() {
         this.regions = readRegions(resourceDefinition("zone"));
         readVmTypes();
-        this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
+        this.defaultRegion = getDefaultRegion();
         this.defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
     }
 
@@ -281,5 +285,20 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public TagSpecification tagSpecification() {
         return tagSpecification;
+    }
+
+    @Override
+    public String getDefaultRegionsConfigString() {
+        return defaultRegions;
+    }
+
+    @Override
+    public String getDefaultRegionString() {
+        return armZoneParameterDefault;
+    }
+
+    @Override
+    public String platforName() {
+        return AzureConstants.PLATFORM.value();
     }
 }

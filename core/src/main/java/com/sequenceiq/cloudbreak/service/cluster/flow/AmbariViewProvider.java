@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -30,7 +31,7 @@ public class AmbariViewProvider {
             List<String> viewDefinitions = (List<String>) ambariClient.getViewDefinitions();
 
             Map<String, Object> obj = cluster.getAttributes().getMap();
-            if (obj == null) {
+            if (obj == null || obj.isEmpty()) {
                 obj = new HashMap<>();
             }
             obj.put(VIEW_DEFINITIONS.name(), viewDefinitions);
@@ -44,6 +45,23 @@ public class AmbariViewProvider {
 
     public boolean isViewDefinitionNotProvided(Cluster cluster) {
         Object viewDefinitions = cluster.getAttributes().getMap().get(VIEW_DEFINITIONS.name());
+        Object legacyViewDefinitions = cluster.getAttributes().getMap().get("viewDefinitions");
+
+        if (legacyViewDefinitions != null && (viewDefinitions == null || ((List<String>) viewDefinitions).isEmpty())) {
+            Map<String, Object> obj = cluster.getAttributes().getMap();
+            if (obj == null || obj.isEmpty()) {
+                obj = new HashMap<>();
+            }
+            obj.put(VIEW_DEFINITIONS.name(), legacyViewDefinitions);
+            try {
+                cluster.setAttributes(new Json(obj));
+            } catch (JsonProcessingException e) {
+                return true;
+            }
+            cluster = clusterRepository.save(cluster);
+            viewDefinitions = cluster.getAttributes().getMap().get(VIEW_DEFINITIONS.name());
+            return ((List<String>) viewDefinitions).isEmpty();
+        }
         if (viewDefinitions != null) {
             return ((List<String>) viewDefinitions).isEmpty();
         }

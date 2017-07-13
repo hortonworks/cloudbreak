@@ -27,7 +27,6 @@ import com.google.api.client.util.Lists;
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionView;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionWrapper;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionView;
@@ -44,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
+import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
-    private static final int DEFAULT_REGION_TYPE_POSITION = 2;
 
     private static final int DEFAULT_VM_TYPE_POSITION = 14;
 
@@ -67,11 +66,17 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
 
+    @Value("${cb.platform.default.regions:}")
+    private String defaultRegions;
+
     @Value("${cb.gcp.vm.parameter.definition.path:}")
     private String gcpVmParameterDefinitionPath;
 
     @Value("${cb.gcp.zone.parameter.definition.path:}")
     private String gcpZoneParameterDefinitionPath;
+
+    @Value("${cb.gcp.zone.parameter.default:europe-west1}")
+    private String gcpZoneParameterDefault;
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -98,7 +103,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         this.regions = readRegionsGcp();
         this.vmTypes = readVmTypes();
 
-        this.defaultRegion = nthElement(this.regions.keySet(), DEFAULT_REGION_TYPE_POSITION);
+        this.defaultRegion = getDefaultRegion();
         this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
         initDefaultVmTypes();
     }
@@ -277,6 +282,21 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public TagSpecification tagSpecification() {
         return tagSpecification;
+    }
+
+    @Override
+    public String getDefaultRegionsConfigString() {
+        return defaultRegions;
+    }
+
+    @Override
+    public String getDefaultRegionString() {
+        return gcpZoneParameterDefault;
+    }
+
+    @Override
+    public String platforName() {
+        return GcpConstants.GCP_PLATFORM.value();
     }
 
     private VmType defaultVirtualMachine() {
