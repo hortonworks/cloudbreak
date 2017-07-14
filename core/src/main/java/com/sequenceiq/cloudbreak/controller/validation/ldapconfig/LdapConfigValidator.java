@@ -9,7 +9,7 @@ import javax.naming.directory.InitialDirContext;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.api.model.LdapValidationRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
@@ -26,7 +26,7 @@ public class LdapConfigValidator {
         }
     }
 
-    public void validateLdapConnection(LdapConfigRequest request) {
+    public void validateLdapConnection(LdapValidationRequest request) {
         if (request != null) {
             validateLdapConnection(request.getProtocol(),
                     request.getServerHost(),

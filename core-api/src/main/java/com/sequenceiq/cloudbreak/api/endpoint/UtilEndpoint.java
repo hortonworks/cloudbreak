@@ -14,8 +14,8 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
-import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
+import com.sequenceiq.cloudbreak.api.model.LdapValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
@@ -49,7 +49,7 @@ public interface UtilEndpoint {
     @Path("ldap")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON, nickname = "testLdapConnectionUtil")
-    LdapTestResult testLdapConnection(@Valid LdapConfigRequest ldapConfigRequest);
+    LdapTestResult testLdapConnection(@Valid LdapValidationRequest ldapValidationRequest);
 
     @GET
     @Path("ldap/{id}")
