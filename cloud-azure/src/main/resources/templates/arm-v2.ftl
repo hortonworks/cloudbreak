@@ -103,8 +103,13 @@
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
-                "apiVersion": "2016-03-30",
+                "apiVersion": "2017-03-30",
                 "location": "[resourceGroup().location]",
+                <#if group.managedDisk == true>
+                "sku": {
+                    "name": "Aligned"
+                },
+                </#if>
                 "properties": {
                     "platformFaultDomainCount": "[variables('${group.compressedName}AsFaultDomainCount')]",
                     "platformUpdateDomainCount": "[variables('${group.compressedName}AsUpdateDomainCount')]"

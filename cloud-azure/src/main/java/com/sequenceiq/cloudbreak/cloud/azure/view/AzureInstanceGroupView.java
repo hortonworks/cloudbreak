@@ -12,6 +12,8 @@ public class AzureInstanceGroupView {
 
     private String availabilitySetName;
 
+    private boolean managedDisk;
+
     public AzureInstanceGroupView(String name) {
         this.name = name;
         this.compressedName = name.replaceAll("_", "");
@@ -51,6 +53,14 @@ public class AzureInstanceGroupView {
 
     public void setAvailabilitySetName(String availabilitySetName) {
         this.availabilitySetName = availabilitySetName;
+    }
+
+    public boolean isManagedDisk() {
+        return managedDisk;
+    }
+
+    public void setManagedDisk(boolean managedDisk) {
+        this.managedDisk = managedDisk;
     }
 
     public String getCompressedName() {
