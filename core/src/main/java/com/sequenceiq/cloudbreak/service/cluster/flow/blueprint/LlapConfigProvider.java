@@ -15,13 +15,15 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 public class LlapConfigProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(LlapConfigProvider.class);
 
+    private static final double PERCENTAGE_OF_LLAP_NODES = 0.75;
+
     @Inject
     private BlueprintProcessor blueprintProcessor;
 
     public String addToBlueprint(Stack stack, String blueprintText) {
         if (blueprintProcessor.componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE", blueprintText)) {
             LOGGER.info("Hive server interactive exists in Blueprint");
-            List<BlueprintConfigurationEntry> configs = getConfigs(stack.getFullNodeCount() - 1);
+            List<BlueprintConfigurationEntry> configs = getConfigs((int) (stack.getFullNodeCount() * PERCENTAGE_OF_LLAP_NODES));
             blueprintText = blueprintProcessor.addConfigEntries(blueprintText, configs, false);
         }
         return blueprintText;
