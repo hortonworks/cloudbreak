@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
-import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
+import com.sequenceiq.cloudbreak.api.model.LdapValidationRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSBuildRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
@@ -95,10 +95,10 @@ public class UtilController implements UtilEndpoint {
     }
 
     @Override
-    public LdapTestResult testLdapConnection(@Valid LdapConfigRequest ldapConfig) {
+    public LdapTestResult testLdapConnection(@Valid LdapValidationRequest ldapValidationRequest) {
         LdapTestResult ldapTestResult = new LdapTestResult();
         try {
-            ldapConfigValidator.validateLdapConnection(ldapConfig);
+            ldapConfigValidator.validateLdapConnection(ldapValidationRequest);
             ldapTestResult.setConnectionResult(CONNECTED);
         } catch (BadRequestException e) {
             ldapTestResult.setConnectionResult(e.getMessage());
