@@ -88,6 +88,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigu
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
@@ -203,6 +204,9 @@ public class AmbariClusterConnector {
 
     @Inject
     private DruidSupersetConfigProvider druidSupersetConfigProvider;
+
+    @Inject
+    private LlapConfigProvider llapConfigProvider;
 
     @Inject
     private RDSConfigProvider rdsConfigProvider;
@@ -342,6 +346,8 @@ public class AmbariClusterConnector {
         blueprintText = smartSenseConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = zeppelinConfigProvider.addToBlueprint(stack, blueprintText);
         blueprintText = druidSupersetConfigProvider.addToBlueprint(stack, blueprintText);
+        // quick fix: this should be configured by StackAdvisor, but that's not working as of now
+        blueprintText = llapConfigProvider.addToBlueprint(stack, blueprintText);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
             if (hdpRepo != null && hdpRepo.getHdpVersion() != null) {
@@ -912,6 +918,11 @@ public class AmbariClusterConnector {
         try {
             Cluster cluster = stack.getCluster();
             String blueprintName = cluster.getBlueprint().getBlueprintName();
+            // In case If we changed the blueprintName field we need to query the blueprint name information from ambari
+            Map<String, String> blueprintsMap = ambariClient.getBlueprintsMap();
+            if (blueprintsMap.entrySet().size() != 0) {
+                blueprintName = blueprintsMap.keySet().iterator().next();
+            }
             return singletonMap("UPSCALE_REQUEST", ambariClient.addHostsWithBlueprint(blueprintName, hostGroup, hosts));
         } catch (HttpResponseException e) {
             if ("Conflict".equals(e.getMessage())) {

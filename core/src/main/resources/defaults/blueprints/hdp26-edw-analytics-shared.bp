@@ -51,7 +51,6 @@
       {
         "hive-interactive-env": {
           "enable_hive_interactive": "true",
-          "llap_queue_capacity": "75",
           "hive_security_authorization": "Ranger"
         }
       },
