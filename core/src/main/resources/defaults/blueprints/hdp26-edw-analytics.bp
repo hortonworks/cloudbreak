@@ -83,9 +83,6 @@
             "name": "HIVE_METASTORE"
           },
           {
-            "name": "HIVE_SERVER"
-          },
-          {
             "name": "HIVE_SERVER_INTERACTIVE"
           },
           {
