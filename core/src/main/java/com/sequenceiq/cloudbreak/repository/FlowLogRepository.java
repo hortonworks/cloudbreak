@@ -20,7 +20,7 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
             + "AND fl.flowType != 'com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig'")
     Set<String> findAllRunningNonTerminationFlowIdsByStackId(@Param("stackId") Long stackId);
 
-    @Query("SELECT DISTINCT fl.flowId, fl.stackId FROM FlowLog fl WHERE fl.finalized IS NULL OR fl.finalized = false")
+    @Query("SELECT DISTINCT fl.flowId, fl.stackId, fl.cloudbreakNodeId FROM FlowLog fl WHERE fl.finalized IS NULL OR fl.finalized = false")
     List<Object[]> findAllNonFinalized();
 
     @Modifying
@@ -30,6 +30,7 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("SELECT fl FROM FlowLog fl WHERE fl.cloudbreakNodeId = :cloudbreakNodeId AND (fl.finalized IS NULL OR fl.finalized = false)")
     Set<FlowLog> findAllByCloudbreakNodeId(@Param("cloudbreakNodeId") String cloudbreakNodeId);
 
-    Set<FlowLog> findAllByFlowId(String flowId);
+    @Query("SELECT fl FROM FlowLog fl WHERE fl.cloudbreakNodeId IS NULL AND (fl.finalized IS NULL OR fl.finalized = false)")
+    Set<FlowLog> findAllUnassigned();
 
 }

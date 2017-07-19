@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
@@ -46,9 +47,6 @@ public class SmartSenseConfigProvider {
     @Value("${cb.smartsense.configure:false}")
     private boolean configureSmartSense;
 
-    @Value("${cb.instance.uuid:}")
-    private String parentUuid;
-
     @Value("${cb.product.id:cloudbreak}")
     private String productId;
 
@@ -57,6 +55,9 @@ public class SmartSenseConfigProvider {
 
     @Value("${info.app.version:}")
     private String cbVersion;
+
+    @Inject
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Inject
     private BlueprintProcessor blueprintProcessor;
@@ -130,9 +131,9 @@ public class SmartSenseConfigProvider {
 
         HSTMetadataInstanceInfoJson instanceInfoJson = new HSTMetadataInstanceInfoJson(
                 stack.getFlexSubscription() != null ? stack.getFlexSubscription().getSubscriptionId() : "",
-                stack.getUuid(),
                 clusterName,
-                parentUuid);
+                stack.getUuid(),
+                cloudbreakNodeConfig.getId());
         HSTMetadataJson productInfo = new HSTMetadataJson(clustersComponentId, instanceInfoJson, productId, cbVersion);
         try {
             Json productInfoJson = new Json(productInfo);

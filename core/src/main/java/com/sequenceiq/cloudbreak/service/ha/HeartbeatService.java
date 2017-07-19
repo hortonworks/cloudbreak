@@ -9,10 +9,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -39,8 +37,8 @@ public class HeartbeatService {
 
     private static final int HEARTBEAT_THRESHOLD_RATE = 2 * HEARTBEAT_RATE;
 
-    @Value("${cb.instance.uuid:}")
-    private String uuid;
+    @Inject
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Inject
     private CloudbreakNodeRepository cloudbreakNodeRepository;
@@ -62,10 +60,10 @@ public class HeartbeatService {
 
     @Scheduled(fixedRate = HEARTBEAT_RATE)
     public void heartbeat() {
-        if (StringUtils.isNoneBlank(uuid)) {
-            CloudbreakNode self = cloudbreakNodeRepository.findOne(uuid);
+        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+            CloudbreakNode self = cloudbreakNodeRepository.findOne(cloudbreakNodeConfig.getId());
             if (self == null) {
-                self = new CloudbreakNode(uuid);
+                self = new CloudbreakNode(cloudbreakNodeConfig.getId());
             }
             self.setLastUpdated(clock.getCurrentTime());
             cloudbreakNodeRepository.save(self);
@@ -74,51 +72,52 @@ public class HeartbeatService {
 
     @Scheduled(fixedRate = FLOW_DISTRIBUTION_RATE, initialDelay = HEARTBEAT_RATE)
     public void scheduledFlowDistribution() {
-        try {
-            distributeFlows();
-        } catch (OptimisticLockingFailureException e) {
-            LOGGER.error("Failed to distribute the flowLogs across the active nodes", e);
-        }
-
-        Set<String> allMyFlows = flowLogRepository.findAllByCloudbreakNodeId(uuid).stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toSet());
-        Set<String> newFlows = allMyFlows.stream().filter(f -> runningFlows.get(f) == null).collect(Collectors.toSet());
-        for (String flow : newFlows) {
+        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
             try {
-                flow2Handler.restartFlow(flow);
-            } catch (Exception e) {
-                LOGGER.error(String.format("Failed to restart flow: %s", flow), e);
+                distributeFlows();
+            } catch (OptimisticLockingFailureException e) {
+                LOGGER.error("Failed to distribute the flowLogs across the active nodes", e);
+            }
+
+            String nodeId = cloudbreakNodeConfig.getId();
+            Set<String> allMyFlows = flowLogRepository.findAllByCloudbreakNodeId(nodeId).stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toSet());
+            Set<String> newFlows = allMyFlows.stream().filter(f -> runningFlows.get(f) == null).collect(Collectors.toSet());
+            for (String flow : newFlows) {
+                try {
+                    flow2Handler.restartFlow(flow);
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Failed to restart flow: %s", flow), e);
+                }
             }
         }
     }
 
     @Transactional
     public void distributeFlows() {
-        if (StringUtils.isNoneBlank(uuid)) {
-            List<CloudbreakNode> cloudbreakNodes = Lists.newArrayList(cloudbreakNodeRepository.findAll());
-            long currentTimeMillis = clock.getCurrentTime();
-            List<CloudbreakNode> failedNodes = cloudbreakNodes.stream()
-                    .filter(cb -> currentTimeMillis - cb.getLastUpdated() > HEARTBEAT_THRESHOLD_RATE).collect(Collectors.toList());
-            List<CloudbreakNode> activeNodes = cloudbreakNodes.stream().filter(c -> !failedNodes.contains(c)).collect(Collectors.toList());
-            LOGGER.info("Active CB nodes: ({})[{}], failed CB nodes: ({})[{}]", activeNodes.size(), activeNodes, failedNodes.size(), failedNodes);
+        List<CloudbreakNode> cloudbreakNodes = Lists.newArrayList(cloudbreakNodeRepository.findAll());
+        long currentTimeMillis = clock.getCurrentTime();
+        List<CloudbreakNode> failedNodes = cloudbreakNodes.stream()
+                .filter(cb -> currentTimeMillis - cb.getLastUpdated() > HEARTBEAT_THRESHOLD_RATE).collect(Collectors.toList());
+        List<CloudbreakNode> activeNodes = cloudbreakNodes.stream().filter(c -> !failedNodes.contains(c)).collect(Collectors.toList());
+        LOGGER.info("Active CB nodes: ({})[{}], failed CB nodes: ({})[{}]", activeNodes.size(), activeNodes, failedNodes.size(), failedNodes);
 
-            List<FlowLog> flowLogs = failedNodes.stream()
-                    .map(node -> flowLogRepository.findAllByCloudbreakNodeId(node.getUuid()))
-                    .flatMap(Set::stream)
-                    .collect(Collectors.toList());
+        List<FlowLog> flowLogs = failedNodes.stream()
+                .map(node -> flowLogRepository.findAllByCloudbreakNodeId(node.getUuid()))
+                .flatMap(Set::stream)
+                .collect(Collectors.toList());
 
-            if (!flowLogs.isEmpty()) {
-                List<String> flowIds = flowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
-                Map<CloudbreakNode, List<String>> flowDistribution = flowDistributor.distribute(flowIds, activeNodes);
-                List<FlowLog> updatedFlowLogs = new ArrayList<>();
-                for (CloudbreakNode node : flowDistribution.keySet()) {
-                    flowDistribution.get(node).forEach(flowId ->
-                            flowLogs.stream().filter(flowLog -> flowLog.getFlowId().equalsIgnoreCase(flowId)).forEach(flowLog -> {
-                                flowLog.setCloudbreakNodeId(node.getUuid());
-                                updatedFlowLogs.add(flowLog);
-                            }));
-                }
-                flowLogRepository.save(updatedFlowLogs);
+        if (!flowLogs.isEmpty()) {
+            List<String> flowIds = flowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
+            Map<CloudbreakNode, List<String>> flowDistribution = flowDistributor.distribute(flowIds, activeNodes);
+            List<FlowLog> updatedFlowLogs = new ArrayList<>();
+            for (CloudbreakNode node : flowDistribution.keySet()) {
+                flowDistribution.get(node).forEach(flowId ->
+                        flowLogs.stream().filter(flowLog -> flowLog.getFlowId().equalsIgnoreCase(flowId)).forEach(flowLog -> {
+                            flowLog.setCloudbreakNodeId(node.getUuid());
+                            updatedFlowLogs.add(flowLog);
+                        }));
             }
+            flowLogRepository.save(updatedFlowLogs);
         }
     }
 
