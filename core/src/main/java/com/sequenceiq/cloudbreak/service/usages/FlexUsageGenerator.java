@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
+import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
@@ -66,8 +67,8 @@ public class FlexUsageGenerator {
     @Inject
     private FlexSubscriptionRepository flexSubscriptionRepository;
 
-    @Value("${cb.instance.uuid:}")
-    private String parentUuid;
+    @Inject
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Value("${cb.instance.provider:on-prem}")
     private String cbInstanceProvider;
@@ -112,6 +113,7 @@ public class FlexUsageGenerator {
     private FlexUsageControllerJson getFlexUsageControllerJson(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
         Optional<SmartSenseSubscription> smartSenseSubscriptionOptional = smartSenseSubscriptionService.getDefault();
         FlexUsageControllerJson controllerJson = new FlexUsageControllerJson();
+        String parentUuid = cloudbreakNodeConfig.getId();
         controllerJson.setGuid(parentUuid);
         controllerJson.setInstanceId(parentUuid);
         controllerJson.setProvider(cbInstanceProvider);
@@ -156,7 +158,7 @@ public class FlexUsageGenerator {
 
     private FlexUsageCbdInstanceJson getFlexUsageCbdInstance(Long fromDate) {
         FlexUsageCbdInstanceJson cbdComponentInstance = new FlexUsageCbdInstanceJson();
-        cbdComponentInstance.setGuid(parentUuid);
+        cbdComponentInstance.setGuid(cloudbreakNodeConfig.getId());
         cbdComponentInstance.setPeakUsage(1);
         cbdComponentInstance.setProvider(cbInstanceProvider);
         cbdComponentInstance.setRegion(cbInstanceRegion);

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.init;
 
-import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.model.Status.START_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.model.Status.UPDATE_IN_PROGRESS;
@@ -14,17 +13,19 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.controller.FlowsAlreadyRunningException;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -38,14 +39,15 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
+import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupService.class);
 
-    @Value("${cb.instance.uuid:}")
-    private String uuid;
+    @Inject
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Inject
     private StackRepository stackRepository;
@@ -78,16 +80,17 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private Flow2Handler flow2Handler;
 
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        List<Long> stackIdsUnderOperation = restartDistruptedFlows();
+        List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
+        stackIdsUnderOperation.addAll(restartMyAssignedDisruptedFlows());
+        stackIdsUnderOperation.addAll(excludeStacksByFlowAssignment());
         usageService.fixUsages();
-//        List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
-//        List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
-//        triggerSyncs(stacksToSync, clustersToSync);
+        List<Stack> stacksToSync = resetStackStatus(stackIdsUnderOperation);
+        List<Cluster> clustersToSync = resetClusterStatus(stacksToSync, stackIdsUnderOperation);
+        triggerSyncs(stacksToSync, clustersToSync);
     }
 
     private List<Stack> resetStackStatus(List<Long> excludeStackIds) {
-        return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS,
-                STOP_IN_PROGRESS, AVAILABLE))
+        return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
                 .map(s -> {
                     if (!WAIT_FOR_SYNC.equals(s.getStatus())) {
@@ -124,22 +127,75 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         return stackIds.contains(cluster.getStack().getId());
     }
 
-    private List<Long> restartDistruptedFlows() {
+    /**
+     * Exclude all stacks that have active flows and assigned to Cb nodes.
+     */
+    private List<Long> excludeStacksByFlowAssignment() {
+        List<Long> exclusion = new ArrayList<>();
+        List<Object[]> allNonFinalized = flowLogRepository.findAllNonFinalized();
+        allNonFinalized.stream().filter(o -> o[2] != null).forEach(o -> exclusion.add((Long) o[1]));
+        return exclusion;
+    }
+
+    /**
+     * If there are flow logs that do not have a Cloudbreak node id associated with it, we'll assigne a node to it (and let the node specific logic
+     * to restart the flow). Otherwise we're going to restart the flow without association.
+     */
+    private List<Long> restartOrUpdateUnassignedDisruptedFlows() {
         List<Long> stackIds = new ArrayList<>();
-        List<Object[]> runningFlows = flowLogRepository.findAllNonFinalized();
-        String logMessage = "Restarting flow {}";
-        for (Object[] flow : runningFlows) {
-            LOGGER.info(logMessage, flow[0]);
-            try {
-                String flowId = (String) flow[0];
-                FlowLog flowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
-                if (flowLog.getCloudbreakNodeId().equalsIgnoreCase(uuid)) {
-                    flow2Handler.restartFlow(flowId);
-                    stackIds.add((Long) flow[1]);
+        Set<FlowLog> unassignedFlowLogs = flowLogRepository.findAllUnassigned();
+        if (!unassignedFlowLogs.isEmpty()) {
+            if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+                try {
+                    updateUnassignedFlows(unassignedFlowLogs, cloudbreakNodeConfig.getId());
+                } catch (OptimisticLockingFailureException e) {
+                    LOGGER.error("Failed to update the flow logs with node id. Maybe another node is already running them?", e);
                 }
-            } catch (Exception e) {
-                LOGGER.error(String.format("Failed to restart flow %s on stack %s", flow[0].toString(), flow[1].toString()), e);
-                flowLogService.terminate((Long) flow[1], (String) flow[0]);
+            } else {
+                List<String> flowIds = unassignedFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
+                for (String flowId : flowIds) {
+                    Long stackId = unassignedFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getStackId).findAny().get();
+                    try {
+                        flow2Handler.restartFlow(flowId);
+                        stackIds.add(stackId);
+                    } catch (Exception e) {
+                        LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
+                        flowLogService.terminate(stackId, flowId);
+                    }
+                }
+            }
+        }
+        return stackIds;
+    }
+
+    @Transactional
+    private void updateUnassignedFlows(Set<FlowLog> flowLogs, String nodeId) {
+        if (flowLogs != null && !flowLogs.isEmpty() && nodeId != null) {
+            for (FlowLog flowLog : flowLogs) {
+                flowLog.setCloudbreakNodeId(nodeId);
+            }
+            flowLogRepository.save(flowLogs);
+        }
+    }
+
+    /**
+     * It restarts all the disrupted flows that are assigned to this node.
+     */
+    private List<Long> restartMyAssignedDisruptedFlows() {
+        List<Long> stackIds = new ArrayList<>();
+        if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+            Set<FlowLog> myFlowLogs = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+            List<String> flowIds = myFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
+            for (String flowId : flowIds) {
+                Long stackId = myFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getStackId).findAny().get();
+                LOGGER.info("Restarting flow {}", flowId);
+                try {
+                    flow2Handler.restartFlow(flowId);
+                    stackIds.add(stackId);
+                } catch (Exception e) {
+                    LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
+                    flowLogService.terminate(stackId, flowId);
+                }
             }
         }
         return stackIds;
@@ -150,17 +206,21 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     private void triggerSyncs(List<Stack> stacksToSync, List<Cluster> clustersToSync) {
-        for (Stack stack : stacksToSync) {
-            LOGGER.info("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
-            fireEvent(stack);
-            flowManager.triggerFullSync(stack.getId());
-        }
+        try {
+            for (Stack stack : stacksToSync) {
+                LOGGER.info("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());
+                fireEvent(stack);
+                flowManager.triggerFullSync(stack.getId());
+            }
 
-        for (Cluster cluster : clustersToSync) {
-            Stack stack = cluster.getStack();
-            LOGGER.info("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
-            fireEvent(stack);
-            flowManager.triggerClusterSync(stack.getId());
+            for (Cluster cluster : clustersToSync) {
+                Stack stack = cluster.getStack();
+                LOGGER.info("Triggering sync on cluster [name: {}, id: {}].", cluster.getName(), cluster.getId());
+                fireEvent(stack);
+                flowManager.triggerClusterSync(stack.getId());
+            }
+        } catch (OptimisticLockingFailureException | FlowsAlreadyRunningException e) {
+            LOGGER.error("Cannot trigger sync on stacks. Maybe another node is already syncing them?", e);
         }
     }
 

@@ -28,7 +28,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.dao.OptimisticLockingFailureException;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
@@ -36,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
+import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 
@@ -50,6 +50,9 @@ public class HeartbeatServiceTest {
 
     @InjectMocks
     private HeartbeatService heartbeatService;
+
+    @Mock
+    private CloudbreakNodeConfig cloudbreakNodeConfig;
 
     @Mock
     private CloudbreakNodeRepository cloudbreakNodeRepository;
@@ -77,7 +80,8 @@ public class HeartbeatServiceTest {
 
     @Before
     public void init() {
-        ReflectionTestUtils.setField(heartbeatService, "uuid", MY_ID);
+        when(cloudbreakNodeConfig.isNodeIdSpecified()).thenReturn(true);
+        when(cloudbreakNodeConfig.getId()).thenReturn(MY_ID);
     }
 
     @Test
