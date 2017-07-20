@@ -52,6 +52,9 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     @Query("SELECT distinct c FROM Stack c LEFT JOIN FETCH c.instanceGroups ig WHERE ig.template.id= :id")
     List<Stack> findAllStackForTemplate(@Param("id") Long id);
 
+    @Query("SELECT distinct c FROM Stack c WHERE c.stackStatus.status= 'DELETE_IN_PROGRESS'")
+    List<Stack> findAllWhereDeleteInProgress();
+
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.cluster.id= :id")
     Stack findStackForCluster(@Param("id") Long id);
 

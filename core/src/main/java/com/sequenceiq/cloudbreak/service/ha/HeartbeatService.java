@@ -11,11 +11,15 @@ import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
@@ -23,19 +27,15 @@ import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @Service
 public class HeartbeatService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatService.class);
 
-    private static final int HEARTBEAT_RATE = 30_000;
-
-    private static final int FLOW_RESTART_RATE = 10_000;
-
-    private static final int FLOW_DISTRIBUTION_RATE = 35_000;
-
-    private static final int HEARTBEAT_THRESHOLD_RATE = 2 * HEARTBEAT_RATE;
+    @Value("${cb.ha.heartbeat.threshold:70000}")
+    private Integer HEARTBEAT_THRESHOLD_RATE;
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
@@ -58,19 +58,45 @@ public class HeartbeatService {
     @Inject
     private FlowRegister runningFlows;
 
-    @Scheduled(fixedRate = HEARTBEAT_RATE)
+    @Inject
+    private InMemoryStateStoreCleanupService inMemoryStateStoreCleanupService;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
+
+    @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
-            CloudbreakNode self = cloudbreakNodeRepository.findOne(cloudbreakNodeConfig.getId());
-            if (self == null) {
-                self = new CloudbreakNode(cloudbreakNodeConfig.getId());
+            try {
+                retryService.testWith2SecDelayMax5Times(() -> {
+                    try {
+                        CloudbreakNode self = cloudbreakNodeRepository.findOne(cloudbreakNodeConfig.getId());
+                        if (self == null) {
+                            self = new CloudbreakNode(cloudbreakNodeConfig.getId());
+                        }
+                        self.setLastUpdated(clock.getCurrentTime());
+                        cloudbreakNodeRepository.save(self);
+
+                        return Boolean.TRUE;
+                    } catch (Exception ex) {
+                        LOGGER.error(ex.getMessage());
+                        throw new Retry.ActionWentFail(ex.getMessage());
+                    }
+                });
+            } catch (Retry.ActionWentFail af) {
+                LOGGER.info(String.format("The update operation of the cloudbreak node alive time failed five times for node %s: %s",
+                        cloudbreakNodeConfig.getId(), af.getMessage()));
+                Set<FlowLog> allByCloudbreakNodeId = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+                for (FlowLog flowLog : allByCloudbreakNodeId) {
+                    InMemoryStateStore.putStack(flowLog.getStackId(), PollGroup.CANCELLED);
+                }
             }
-            self.setLastUpdated(clock.getCurrentTime());
-            cloudbreakNodeRepository.save(self);
+            inMemoryStateStoreCleanupService.cleanupStacksWhichAreDeleteInProgressOnOtherCloudbreakNodes();
         }
     }
 
-    @Scheduled(fixedRate = FLOW_DISTRIBUTION_RATE, initialDelay = HEARTBEAT_RATE)
+    @Scheduled(cron = "${cb.ha.flow.distribution.rate:0/35 * * * * *}")
     public void scheduledFlowDistribution() {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
             try {
