@@ -19,6 +19,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.service.ha.InMemoryStateStoreCleanupService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -39,6 +40,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Inject
     private FlowRegister runningFlows;
+
+    @Inject
+    private InMemoryStateStoreCleanupService inMemoryStateStoreCleanupService;
 
     private Class<P> payloadClass;
 
@@ -62,6 +66,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
         C flowContext = null;
         try {
+            inMemoryStateStoreCleanupService.cleanupStackWhichAreDeleteInProgressOnOtherCloudbreakNodes(payload.getStackId());
             Map<Object, Object> variables = context.getExtendedState().getVariables();
             prepareExecution(payload, variables);
             flowContext = createFlowContext(flowId, context, payload);

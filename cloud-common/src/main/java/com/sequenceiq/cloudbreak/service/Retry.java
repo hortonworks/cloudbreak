@@ -7,5 +7,12 @@ public interface Retry {
     Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail;
 
     class ActionWentFail extends RuntimeException {
+        public ActionWentFail() {
+            super();
+        }
+
+        public ActionWentFail(String message) {
+            super(message);
+        }
     }
 }
