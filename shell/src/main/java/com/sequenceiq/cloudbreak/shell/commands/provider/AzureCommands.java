@@ -202,15 +202,18 @@ public class AzureCommands implements CommandMarker {
     public String createTemplate(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "type of the VM") AzureInstanceType instanceType,
-            @CliOption(key = "volumeType", help = "volumeType of the template") AzureVolumeType volumeType,
+            @CliOption(key = "volumeType", mandatory = true, help = "volumeType of the template") AzureVolumeType volumeType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
-            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
+            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId,
+            @CliOption(key = "managedDisk", help = "flag if the disks will be managed",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean managedDisk
     ) {
         Map<String, Object> parameters = new HashMap<>();
+        parameters.put("managedDisk", managedDisk);
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType.getName(), publicInAccount, description,
                 parameters, platformId, PLATFORM);
     }
