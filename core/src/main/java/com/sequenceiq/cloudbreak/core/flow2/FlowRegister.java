@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
@@ -28,5 +29,9 @@ public class FlowRegister {
     public Flow remove(String flowId) {
         Pair<Flow, String> pair = runningFlows.remove(flowId);
         return pair == null ? null : pair.getLeft();
+    }
+
+    public Set<String> getRunningFlowIds() {
+        return runningFlows.keySet();
     }
 }

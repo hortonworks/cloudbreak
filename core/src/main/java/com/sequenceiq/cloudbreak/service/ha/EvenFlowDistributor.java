@@ -31,6 +31,7 @@ public class EvenFlowDistributor implements FlowDistributor {
             result.computeIfAbsent(nodes.get(i), k -> new ArrayList<>()).add(flow);
             i++;
         }
+        LOGGER.info("Result of flow distribution: {}", result);
         return result;
     }
 }

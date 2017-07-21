@@ -55,14 +55,10 @@ public class StackUpdater {
         return stackRepository.save(stack);
     }
 
-    public void removeStackResources(List<Resource> resources) {
-        resourceRepository.delete(resources);
-    }
-
-    public Stack updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
+    public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
         securityConfig = securityConfigRepository.save(securityConfig);
         stack.setSecurityConfig(securityConfig);
-        return stackRepository.save(stack);
+        stackRepository.save(stack);
     }
 
     private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
@@ -73,6 +69,9 @@ public class StackUpdater {
             InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(status));
             if (Status.DELETE_COMPLETED.equals(status)) {
                 InMemoryStateStore.deleteStack(stackId);
+                if (stack.getCluster() != null) {
+                    InMemoryStateStore.deleteCluster(stack.getCluster().getId());
+                }
             }
             stack = stackRepository.save(stack);
         }

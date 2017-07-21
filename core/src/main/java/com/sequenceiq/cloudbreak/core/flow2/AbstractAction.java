@@ -19,7 +19,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.service.ha.InMemoryStateStoreCleanupService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -40,9 +39,6 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Inject
     private FlowRegister runningFlows;
-
-    @Inject
-    private InMemoryStateStoreCleanupService inMemoryStateStoreCleanupService;
 
     private Class<P> payloadClass;
 

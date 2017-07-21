@@ -61,6 +61,7 @@ public class FlowLogService {
     private FlowLog finalize(Long stackId, String flowId, String state) {
         flowLogRepository.finalizeByFlowId(flowId);
         FlowLog flowLog = new FlowLog(stackId, flowId, state, Boolean.TRUE);
+        flowLog.setCloudbreakNodeId(cloudbreakNodeConfig.getId());
         return flowLogRepository.save(flowLog);
     }
 
