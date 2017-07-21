@@ -66,7 +66,6 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
         C flowContext = null;
         try {
-            inMemoryStateStoreCleanupService.cleanupStackWhichAreDeleteInProgressOnOtherCloudbreakNodes(payload.getStackId());
             Map<Object, Object> variables = context.getExtendedState().getVariables();
             prepareExecution(payload, variables);
             flowContext = createFlowContext(flowId, context, payload);

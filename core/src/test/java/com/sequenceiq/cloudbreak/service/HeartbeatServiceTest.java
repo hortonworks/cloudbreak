@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyCollection;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,8 +19,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -28,7 +32,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
@@ -38,6 +45,7 @@ import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.ha.FlowDistributor;
 import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
+import com.sequenceiq.cloudbreak.service.ha.InMemoryStateStoreCleanupService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HeartbeatServiceTest {
@@ -72,6 +80,9 @@ public class HeartbeatServiceTest {
     @Mock
     private FlowRegister runningFlows;
 
+    @Mock
+    private InMemoryStateStoreCleanupService inMemoryStateStoreCleanupService;
+
     @Captor
     private ArgumentCaptor<String> stringCaptor;
 
@@ -82,10 +93,11 @@ public class HeartbeatServiceTest {
     public void init() {
         when(cloudbreakNodeConfig.isNodeIdSpecified()).thenReturn(true);
         when(cloudbreakNodeConfig.getId()).thenReturn(MY_ID);
+        ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70000);
     }
 
     @Test
-    public void testOneNodeTakesAllFlows() {
+    public void testWhenOneOfTheNodesDiesAndOneNodeTakesAllFlows() {
         List<CloudbreakNode> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000); // myself
         // set all nodes to failed except myself
@@ -220,6 +232,73 @@ public class HeartbeatServiceTest {
         for (FlowLog flowLog : myNewFlowLogs) {
             assertTrue(allFlowIds.contains(flowLog.getFlowId()));
         }
+    }
+
+    @Test
+    public void testHeartbeatWhenEverytingWorks() {
+        class TestRetry implements Retry {
+
+            @Override
+            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail {
+                return Boolean.TRUE;
+            }
+        }
+
+        Set<FlowLog> flowLogs = new HashSet<>(getFlowLogs(2, 5000));
+
+        ReflectionTestUtils.setField(heartbeatService, "retryService", new TestRetry());
+        doNothing().when(inMemoryStateStoreCleanupService).cleanupStacksWhichAreDeleteInProgressOnOtherCloudbreakNodes();
+
+        // Mock InMemoryStateStore for check method execution success
+        Set<Long> myStackIds = flowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
+        for (Long myStackId : myStackIds) {
+            InMemoryStateStore.putStack(myStackId, PollGroup.POLLABLE);
+        }
+
+        heartbeatService.heartbeat();
+
+        // In case of exception the instance should terminate the flows which are in running state
+        for (Long myStackId : myStackIds) {
+            Assert.assertEquals(PollGroup.POLLABLE, InMemoryStateStore.getStack(myStackId));
+        }
+        verify(inMemoryStateStoreCleanupService, times(1)).cleanupStacksWhichAreDeleteInProgressOnOtherCloudbreakNodes();
+        // There was no action on InMemoryStateStore
+        verify(flowLogRepository, times(0)).findAllByCloudbreakNodeId(anyString());
+    }
+
+    @Test
+    public void testHeartbeatWhenInstanceCanNotReachTheDatabase() {
+        class TestRetryWithFail implements Retry {
+
+            @Override
+            public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail {
+                throw new Retry.ActionWentFail("Test failed");
+            }
+        }
+
+        Set<FlowLog> flowLogs = new HashSet<>(getFlowLogs(2, 5000));
+
+        // When the cloudbreak instance can not reach the db
+        ReflectionTestUtils.setField(heartbeatService, "retryService", new TestRetryWithFail());
+        doNothing().when(inMemoryStateStoreCleanupService).cleanupStacksWhichAreDeleteInProgressOnOtherCloudbreakNodes();
+        when(flowLogRepository.findAllByCloudbreakNodeId(anyString())).thenReturn(flowLogs);
+
+        // Mock InMemoryStateStore for check method execution success
+        Set<Long> myStackIds = flowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
+        for (Long myStackId : myStackIds) {
+            InMemoryStateStore.putStack(myStackId, PollGroup.POLLABLE);
+        }
+
+        heartbeatService.heartbeat();
+
+        // In case of exception the instance should terminate the flows which are in running state
+        for (Long myStackId : myStackIds) {
+            Assert.assertEquals(PollGroup.CANCELLED, InMemoryStateStore.getStack(myStackId));
+        }
+        // The hearthbeat method should call always the flow cleanup only one time
+        verify(inMemoryStateStoreCleanupService, times(1)).cleanupStacksWhichAreDeleteInProgressOnOtherCloudbreakNodes();
+        // There was action on InMemoryStateStore
+        verify(flowLogRepository, times(1)).findAllByCloudbreakNodeId(anyString());
     }
 
     private List<CloudbreakNode> getClusterNodes() {

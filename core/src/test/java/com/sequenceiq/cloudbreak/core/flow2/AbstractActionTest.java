@@ -30,6 +30,7 @@ import org.springframework.statemachine.config.common.annotation.ObjectPostProce
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.service.ha.InMemoryStateStoreCleanupService;
 
 import reactor.bus.EventBus;
 
@@ -45,6 +46,9 @@ public class AbstractActionTest {
 
     @Mock
     private FlowRegister runningFlows;
+
+    @Mock
+    private InMemoryStateStoreCleanupService inMemoryStateStoreCleanupService;
 
     @Mock
     private Flow flow;
