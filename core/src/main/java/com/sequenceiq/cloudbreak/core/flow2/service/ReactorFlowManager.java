@@ -231,7 +231,7 @@ public class ReactorFlowManager {
         notify(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, new ClusterRepairTriggerEvent(stackId, failedNodesMap, removeOnly));
     }
 
-    private void cancelRunningFlows(Long stackId) {
+    public void cancelRunningFlows(Long stackId) {
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
         reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(cancelEvent, Flow2Handler.FLOW_CANCEL));
     }

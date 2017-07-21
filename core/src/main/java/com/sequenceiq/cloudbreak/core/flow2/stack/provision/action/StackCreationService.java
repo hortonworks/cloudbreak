@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
@@ -93,9 +92,6 @@ public class StackCreationService {
 
     @Inject
     private CloudbreakMessagesService messagesService;
-
-    @Inject
-    private CloudbreakEventService cloudbreakEventService;
 
     @Inject
     private ServiceProviderConnectorAdapter connector;

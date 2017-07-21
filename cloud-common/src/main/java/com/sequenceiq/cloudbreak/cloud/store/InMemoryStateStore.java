@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.store;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
@@ -17,6 +18,14 @@ public final class InMemoryStateStore {
 
     public static PollGroup getStack(Long key) {
         return STACK_STATE_STORE.get(key);
+    }
+
+    public static Set<Long> getAllStackId() {
+        return STACK_STATE_STORE.keySet();
+    }
+
+    public static Set<Long> getAllClusterId() {
+        return CLUSTER_STATE_STORE.keySet();
     }
 
     public static void putStack(Long key, PollGroup value) {

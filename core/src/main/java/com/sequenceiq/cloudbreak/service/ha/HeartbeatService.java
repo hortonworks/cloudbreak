@@ -18,14 +18,19 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
+import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
+import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.Retry;
 
@@ -34,7 +39,7 @@ public class HeartbeatService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatService.class);
 
-    @Value("${cb.ha.heartbeat.threshold:70000}")
+    @Value("${cb.ha.heartbeat.threshold:60000}")
     private Integer heartbeatThresholdRate;
 
     @Inject
@@ -59,7 +64,13 @@ public class HeartbeatService {
     private FlowRegister runningFlows;
 
     @Inject
-    private InMemoryStateStoreCleanupService inMemoryStateStoreCleanupService;
+    private FlowChains flowChains;
+
+    @Inject
+    private StackRepository stackRepository;
+
+    @Inject
+    private ReactorFlowManager reactorFlowManager;
 
     @Inject
     @Qualifier("DefaultRetryService")
@@ -68,32 +79,44 @@ public class HeartbeatService {
     @Scheduled(cron = "${cb.ha.heartbeat.rate:0/30 * * * * *}")
     public void heartbeat() {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+            String nodeId = cloudbreakNodeConfig.getId();
             try {
                 retryService.testWith2SecDelayMax5Times(() -> {
                     try {
-                        CloudbreakNode self = cloudbreakNodeRepository.findOne(cloudbreakNodeConfig.getId());
+                        CloudbreakNode self = cloudbreakNodeRepository.findOne(nodeId);
                         if (self == null) {
-                            self = new CloudbreakNode(cloudbreakNodeConfig.getId());
+                            self = new CloudbreakNode(nodeId);
                         }
                         self.setLastUpdated(clock.getCurrentTime());
                         cloudbreakNodeRepository.save(self);
-
-                        return Boolean.TRUE;
+                        return true;
                     } catch (Exception e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
                         throw new Retry.ActionWentFail(e.getMessage());
                     }
                 });
             } catch (Retry.ActionWentFail af) {
-                LOGGER.error(String.format("The update operation of the cloudbreak node alive time failed five times for node %s: %s",
-                        cloudbreakNodeConfig.getId(), af.getMessage()));
-                Set<FlowLog> myFlowLogs = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
-                Set<Long> myStackIds = myFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
-                for (Long stackId : myStackIds) {
-                    InMemoryStateStore.putStack(stackId, PollGroup.CANCELLED);
+                LOGGER.error(String.format("Failed to update the heartbeat timestamp 5 times for node %s: %s", nodeId, af.getMessage()));
+                cancelFlowsWithoutDbUpdate();
+            }
+
+            // query all stacks that have a running flow on this node
+            Set<Long> stackIds = InMemoryStateStore.getAllStackId();
+            if (!stackIds.isEmpty()) {
+                List<Object[]> stackStatuses = stackRepository.findStackStatuses(stackIds);
+                for (Object[] ss : stackStatuses) {
+                    if (Status.DELETE_IN_PROGRESS.equals(ss[1]) || Status.DELETE_COMPLETED.equals(ss[1])) {
+                        Long stackId = (Long) ss[0];
+                        Set<String> runningFlowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+                        if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
+                            cancelRunningFlow(stackId);
+                        } else {
+                            cleanupInMemoryStore(stackId);
+                        }
+                    }
                 }
             }
-            inMemoryStateStoreCleanupService.cleanupStacksWhichAreDeleteInProgressOnOtherCloudbreakNodes();
+
         }
     }
 
@@ -103,7 +126,7 @@ public class HeartbeatService {
             try {
                 distributeFlows();
             } catch (OptimisticLockingFailureException e) {
-                LOGGER.error("Failed to distribute the flowLogs across the active nodes", e);
+                LOGGER.error("Failed to distribute the flow logs across the active nodes, somebody might have already done it..", e);
             }
 
             String nodeId = cloudbreakNodeConfig.getId();
@@ -145,6 +168,41 @@ public class HeartbeatService {
                         }));
             }
             flowLogRepository.save(updatedFlowLogs);
+        }
+    }
+
+    private boolean hasRunningNonTerminationFlowOnThisNode(Set<String> runningFlowIds) {
+        return runningFlowIds.stream().anyMatch(id -> runningFlows.getFlowChainId(id) != null);
+    }
+
+    private void cancelFlowsWithoutDbUpdate() {
+        for (Long stackId : InMemoryStateStore.getAllStackId()) {
+            InMemoryStateStore.putStack(stackId, PollGroup.CANCELLED);
+        }
+        for (Long clusterId : InMemoryStateStore.getAllClusterId()) {
+            InMemoryStateStore.putStack(clusterId, PollGroup.CANCELLED);
+        }
+        for (String id : runningFlows.getRunningFlowIds()) {
+            String flowChainId = runningFlows.getFlowChainId(id);
+            if (flowChainId != null) {
+                flowChains.removeFullFlowChain(flowChainId);
+            }
+            runningFlows.remove(id);
+        }
+    }
+
+    private void cancelRunningFlow(Long stackId) {
+        LOGGER.info("Cancel all running non-terminating flow for stack: {}", stackId);
+        InMemoryStateStore.putStack(stackId, PollGroup.CANCELLED);
+        reactorFlowManager.cancelRunningFlows(stackId);
+    }
+
+    private void cleanupInMemoryStore(Long stackId) {
+        LOGGER.info("All running flows has been canceled for stack: {}. Remove id from memory store.", stackId);
+        Stack stack = stackRepository.findOne(stackId);
+        InMemoryStateStore.deleteStack(stackId);
+        if (stack.getCluster() != null) {
+            InMemoryStateStore.deleteCluster(stack.getCluster().getId());
         }
     }
 

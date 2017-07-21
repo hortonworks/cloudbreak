@@ -146,8 +146,6 @@ public class ClusterHostServiceRunner {
         return grainProperties;
     }
 
-
-
     /**
      * In order to be able to connect an ephemeral cluster to a datalake, the ephemeral cluster needs to know some of the datalake nameservers to resolve
      * the custom hostnames.
