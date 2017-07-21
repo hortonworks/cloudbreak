@@ -8,7 +8,6 @@ public interface Retry {
 
     class ActionWentFail extends RuntimeException {
         public ActionWentFail() {
-            super();
         }
 
         public ActionWentFail(String message) {

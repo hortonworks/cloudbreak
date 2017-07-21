@@ -35,7 +35,7 @@ public class HeartbeatService {
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatService.class);
 
     @Value("${cb.ha.heartbeat.threshold:70000}")
-    private Integer HEARTBEAT_THRESHOLD_RATE;
+    private Integer heartbeatThresholdRate;
 
     @Inject
     private CloudbreakNodeConfig cloudbreakNodeConfig;
@@ -79,17 +79,18 @@ public class HeartbeatService {
                         cloudbreakNodeRepository.save(self);
 
                         return Boolean.TRUE;
-                    } catch (Exception ex) {
-                        LOGGER.error(ex.getMessage());
-                        throw new Retry.ActionWentFail(ex.getMessage());
+                    } catch (Exception e) {
+                        LOGGER.error("Failed to update the heartbeat timestamp", e);
+                        throw new Retry.ActionWentFail(e.getMessage());
                     }
                 });
             } catch (Retry.ActionWentFail af) {
-                LOGGER.info(String.format("The update operation of the cloudbreak node alive time failed five times for node %s: %s",
+                LOGGER.error(String.format("The update operation of the cloudbreak node alive time failed five times for node %s: %s",
                         cloudbreakNodeConfig.getId(), af.getMessage()));
-                Set<FlowLog> allByCloudbreakNodeId = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
-                for (FlowLog flowLog : allByCloudbreakNodeId) {
-                    InMemoryStateStore.putStack(flowLog.getStackId(), PollGroup.CANCELLED);
+                Set<FlowLog> myFlowLogs = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+                Set<Long> myStackIds = myFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
+                for (Long stackId : myStackIds) {
+                    InMemoryStateStore.putStack(stackId, PollGroup.CANCELLED);
                 }
             }
             inMemoryStateStoreCleanupService.cleanupStacksWhichAreDeleteInProgressOnOtherCloudbreakNodes();
@@ -123,7 +124,7 @@ public class HeartbeatService {
         List<CloudbreakNode> cloudbreakNodes = Lists.newArrayList(cloudbreakNodeRepository.findAll());
         long currentTimeMillis = clock.getCurrentTime();
         List<CloudbreakNode> failedNodes = cloudbreakNodes.stream()
-                .filter(cb -> currentTimeMillis - cb.getLastUpdated() > HEARTBEAT_THRESHOLD_RATE).collect(Collectors.toList());
+                .filter(cb -> currentTimeMillis - cb.getLastUpdated() > heartbeatThresholdRate).collect(Collectors.toList());
         List<CloudbreakNode> activeNodes = cloudbreakNodes.stream().filter(c -> !failedNodes.contains(c)).collect(Collectors.toList());
         LOGGER.info("Active CB nodes: ({})[{}], failed CB nodes: ({})[{}]", activeNodes.size(), activeNodes, failedNodes.size(), failedNodes);
 
