@@ -365,8 +365,9 @@ public class AzureClient {
     public String getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
         String imageName = vhdName + "-" + region.toLowerCase().replaceAll("\\s", "");
-        Optional<VirtualMachineCustomImage> virtualMachineCustomImage = getCustomImageList(resourceGroup).stream()
-                .filter(customImage -> customImage.name().equals(imageName) && customImage.region().name().equals(region)).findFirst();
+        PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
+        Optional<VirtualMachineCustomImage> virtualMachineCustomImage = customImageList.stream()
+                .filter(customImage -> customImage.name().equals(imageName) && customImage.region().label().equals(region)).findFirst();
         if (virtualMachineCustomImage.isPresent()) {
             LOGGER.info("custom image found in '{}' resource group with name '{}'", resourceGroup, imageName);
             return virtualMachineCustomImage.get().id();
