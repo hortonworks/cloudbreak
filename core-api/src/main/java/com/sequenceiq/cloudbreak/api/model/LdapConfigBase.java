@@ -14,11 +14,6 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public abstract class LdapConfigBase implements JsonEntity {
 
-    @Size(max = 100, min = 1, message = "The length of the ldap config's name has to be in range of 1 to 100")
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
-    private String name;
-
     @Size(max = 1000)
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     private String description;
@@ -67,14 +62,6 @@ public abstract class LdapConfigBase implements JsonEntity {
 
     @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
     private String groupMemberAttribute;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getDescription() {
         return description;

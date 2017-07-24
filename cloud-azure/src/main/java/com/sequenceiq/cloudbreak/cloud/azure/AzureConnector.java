@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
@@ -49,6 +50,9 @@ public class AzureConnector implements CloudConnector {
     @Inject
     private AzurePlatformParameters azurePlatformParameters;
 
+    @Inject
+    private AzurePlatformResources azurePlatformResources;
+
     public Authenticator authentication() {
         return azureAuthenticator;
     }
@@ -80,6 +84,11 @@ public class AzureConnector implements CloudConnector {
 
     public PlatformParameters parameters() {
         return azurePlatformParameters;
+    }
+
+    @Override
+    public PlatformResources platformResources() {
+        return azurePlatformResources;
     }
 
     public Platform platform() {

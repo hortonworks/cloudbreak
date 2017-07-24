@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
@@ -36,6 +37,9 @@ public class GcpConnector implements CloudConnector {
 
     @Inject
     private GcpResourceConnector resourceConnector;
+
+    @Inject
+    private GcpPlatformResources gcpPlatformResources;
 
     @Inject
     private GcpCredentialConnector gcpCredentialConnector;
@@ -84,6 +88,11 @@ public class GcpConnector implements CloudConnector {
     @Override
     public PlatformParameters parameters() {
         return gcpPlatformParameters;
+    }
+
+    @Override
+    public PlatformResources platformResources() {
+        return gcpPlatformResources;
     }
 
     @Override

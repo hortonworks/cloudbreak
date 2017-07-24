@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -14,8 +15,12 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupsResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
@@ -143,4 +148,27 @@ public interface ConnectorEndpoint {
     @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_SPECIALS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getSpecialProperties")
     Map<String, Boolean> getSpecialProperties();
+
+    @POST
+    @Path(value = "networks")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_NETWORKS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getPlatformNetworks")
+    PlatformNetworksResponse getCloudNetworks(PlatformResourceRequestJson resourceRequestJson);
+
+    @POST
+    @Path(value = "sshkeys")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_SSHKEYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getPlatformSShKeys")
+    PlatformSshKeysResponse getCloudSshKeys(PlatformResourceRequestJson resourceRequestJson);
+
+    @POST
+    @Path(value = "securitygroups")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.ConnectorOpDescription.GET_SECURITYGROUPS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getPlatformSecurityGroups")
+    PlatformSecurityGroupsResponse getSecurityGroups(PlatformResourceRequestJson resourceRequestJson);
+
+
 }

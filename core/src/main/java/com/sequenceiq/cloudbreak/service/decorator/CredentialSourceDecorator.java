@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
-import java.util.Date;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -14,9 +13,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.CredentialSourceRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
@@ -24,6 +25,9 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Autowired
     @Qualifier("conversionService")
@@ -49,7 +53,7 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
                     map.put(stringObjectEntry.getKey(), stringObjectEntry.getValue().toString());
                 }
                 credential.setId(null);
-                credential.setName(String.format("%s%s", "c", new Date().getTime()));
+                credential.setName(missingResourceNameGenerator.generateName(APIResourceType.CREDENTIAL));
                 try {
                     credential.setAttributes(new Json(map));
                 } catch (JsonProcessingException e) {

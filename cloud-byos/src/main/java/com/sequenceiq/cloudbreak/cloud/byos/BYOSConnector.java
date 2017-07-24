@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
@@ -36,6 +37,9 @@ public class BYOSConnector implements CloudConnector {
 
     @Inject
     private BYOSPlatformParameters byosPlatformParameters;
+
+    @Inject
+    private BYOSPlatformResources byosPlatformResources;
 
     @Inject
     private BYOSSetup byosSetup;
@@ -84,6 +88,11 @@ public class BYOSConnector implements CloudConnector {
     @Override
     public PlatformParameters parameters() {
         return platformParameters;
+    }
+
+    @Override
+    public PlatformResources platformResources() {
+        return byosPlatformResources;
     }
 
     @Override

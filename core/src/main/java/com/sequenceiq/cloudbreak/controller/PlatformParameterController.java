@@ -14,8 +14,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupsResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
@@ -23,6 +27,9 @@ import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
 import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
@@ -30,6 +37,8 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component
@@ -41,6 +50,9 @@ public class PlatformParameterController implements ConnectorEndpoint {
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
+
+    @Autowired
+    private AuthenticatedUserService authenticatedUserService;
 
     @Override
     public Map<String, JsonEntity> getPlatforms(Boolean extended) {
@@ -167,6 +179,40 @@ public class PlatformParameterController implements ConnectorEndpoint {
     @Override
     public Map<String, Boolean> getSpecialProperties() {
         return cloudParameterService.getSpecialParameters().getSpecialParameters();
+    }
+
+    @Override
+    public PlatformNetworksResponse getCloudNetworks(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+        CloudNetworks cloudNetworks = cloudParameterService.getCloudNetworks(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudNetworks, PlatformNetworksResponse.class);
+    }
+
+    @Override
+    public PlatformSshKeysResponse getCloudSshKeys(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+        CloudSshKeys cloudSshKeys = cloudParameterService.getCloudSshKeys(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudSshKeys, PlatformSshKeysResponse.class);
+
+    }
+
+    @Override
+    public PlatformSecurityGroupsResponse getSecurityGroups(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+        CloudSecurityGroups securityGroups = cloudParameterService.getSecurityGroups(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
+    }
+
+    private PlatformResourceRequestJson prepareAccountAndOwner(PlatformResourceRequestJson resourceRequestJson, IdentityUser user) {
+        resourceRequestJson.setAccount(user.getAccount());
+        resourceRequestJson.setOwner(user.getUserId());
+        return resourceRequestJson;
     }
 
 }

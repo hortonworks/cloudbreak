@@ -8,6 +8,10 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class TemplateResponse extends TemplateBase {
+
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    private String name;
+
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
@@ -19,6 +23,14 @@ public class TemplateResponse extends TemplateBase {
 
     @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_SIZE, required = true)
     private Integer volumeSize;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Long getId() {
         return id;

@@ -6,6 +6,7 @@ import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -28,6 +29,8 @@ import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkInterfaces;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
+import com.microsoft.azure.management.network.NetworkSecurityGroups;
+import com.microsoft.azure.management.network.Networks;
 import com.microsoft.azure.management.network.PublicIPAddress;
 import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
@@ -92,6 +95,10 @@ public class AzureClient {
 
     public ResourceGroups getResourceGroups() {
         return azure.resourceGroups();
+    }
+
+    public Networks getNetworks() {
+        return azure.networks();
     }
 
     public boolean resourceGroupExists(String name) {
@@ -425,8 +432,16 @@ public class AzureClient {
         return azure.networks().getByResourceGroup(resourceGroup, virtualNetwork).subnets().get(subnet);
     }
 
+    public Map<String, Subnet> getSubnets(String resourceGroup, String virtualNetwork) {
+        return azure.networks().getByResourceGroup(resourceGroup, virtualNetwork).subnets();
+    }
+
     public NetworkSecurityGroup getSecurityGroupProperties(String resourceGroup, String securityGroup) {
         return azure.networkSecurityGroups().getByResourceGroup(resourceGroup, securityGroup);
+    }
+
+    public NetworkSecurityGroups getSecurityGroups() {
+        return azure.networkSecurityGroups();
     }
 
     public LoadBalancer getLoadBalancer(String name, String loadBalancerName) {

@@ -32,7 +32,7 @@ public class OpenStackClient {
 
     public AuthenticatedContext createAuthenticatedContext(CloudContext cloudContext, CloudCredential cloudCredential) {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
-        createAccess(authenticatedContext);
+        createAccessOrToken(authenticatedContext);
         return authenticatedContext;
     }
 
@@ -44,6 +44,18 @@ public class OpenStackClient {
             return OSFactory.clientFromAccess(access, Facing.value(facing));
         } else {
             Token token = authenticatedContext.getParameter(Token.class);
+            return OSFactory.clientFromToken(token, Facing.value(facing));
+        }
+    }
+
+    public OSClient createOSClient(CloudCredential cloudCredential) {
+        String facing = cloudCredential.getStringParameter(FACING);
+
+        if (isV2Keystone(cloudCredential)) {
+            Access access = createAccess(cloudCredential);
+            return OSFactory.clientFromAccess(access, Facing.value(facing));
+        } else {
+            Token token = createToken(cloudCredential);
             return OSFactory.clientFromToken(token, Facing.value(facing));
         }
     }
@@ -60,41 +72,70 @@ public class OpenStackClient {
         return osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2);
     }
 
+    public boolean isV2Keystone(CloudCredential cloudCredential) {
+        KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
+        return osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2);
+    }
+
+    public KeystoneCredentialView createKeystoneCredential(CloudCredential cloudCredential) {
+        return new KeystoneCredentialView(cloudCredential);
+    }
+
     public KeystoneCredentialView createKeystoneCredential(AuthenticatedContext authenticatedContext) {
         return new KeystoneCredentialView(authenticatedContext);
     }
 
-    private void createAccess(AuthenticatedContext authenticatedContext) {
-        KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext);
-        if (osCredential.getVersion().equals(KeystoneCredentialView.CB_KEYSTONE_V2)) {
+    private Access createAccess(CloudCredential cloudCredential) {
+        KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
+
+        if (KeystoneCredentialView.CB_KEYSTONE_V2.equals(osCredential.getVersion())) {
             Access access = OSFactory.builderV2().endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword())
                     .tenantName(osCredential.getTenantName())
                     .authenticate()
                     .getAccess();
-            authenticatedContext.putParameter(Access.class, access);
-        } else if (osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE)) {
+            return access;
+        }
+        return null;
+    }
+
+    private Token createToken(CloudCredential cloudCredential) {
+        KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
+
+        if (KeystoneCredentialView.CB_KEYSTONE_V3_DEFAULT_SCOPE.equals(osCredential.getScope())) {
             Token token = OSFactory.builderV3().endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .authenticate()
                     .getToken();
-            authenticatedContext.putParameter(Token.class, token);
-        } else if (osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE)) {
+            return token;
+        } else if (KeystoneCredentialView.CB_KEYSTONE_V3_DOMAIN_SCOPE.equals(osCredential.getScope())) {
             Token token = OSFactory.builderV3().endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
                     .authenticate()
                     .getToken();
-            authenticatedContext.putParameter(Token.class, token);
-        } else if (osCredential.getScope().equals(KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE)) {
+            return token;
+        } else if (KeystoneCredentialView.CB_KEYSTONE_V3_PROJECT_SCOPE.equals(osCredential.getScope())) {
             Token token = OSFactory.builderV3().endpoint(osCredential.getEndpoint())
                     .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                     .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
                     .authenticate()
                     .getToken();
-            authenticatedContext.putParameter(Token.class, token);
-        } else {
+            return token;
+        }
+        return null;
+    }
+
+    private void createAccessOrToken(AuthenticatedContext authenticatedContext) {
+        Access access = createAccess(authenticatedContext.getCloudCredential());
+        Token token = createToken(authenticatedContext.getCloudCredential());
+
+        if (token == null && access == null) {
             throw new CloudConnectorException("Unsupported keystone version");
+        } else if (token != null) {
+            authenticatedContext.putParameter(Token.class, token);
+        } else if (access != null) {
+            authenticatedContext.putParameter(Access.class, access);
         }
     }
 

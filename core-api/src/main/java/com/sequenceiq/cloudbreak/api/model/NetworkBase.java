@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -15,12 +14,6 @@ import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class NetworkBase implements JsonEntity {
-    @Size(max = 100, min = 1, message = "The length of the network's name has to be in range of 1 to 100")
-    @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "The network's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
-    @NotNull
-    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
-    private String name;
 
     @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
@@ -39,14 +32,6 @@ public abstract class NetworkBase implements JsonEntity {
 
     @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getDescription() {
         return description;

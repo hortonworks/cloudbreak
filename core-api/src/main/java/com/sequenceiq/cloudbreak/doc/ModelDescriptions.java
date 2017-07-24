@@ -63,6 +63,13 @@ public class ModelDescriptions {
         public static final String VERSION = "version of the Cloudbreak that provisioned the stack";
     }
 
+    public static class PlatformResourceRequestModelDescription {
+        public static final String CREDENTIAL_ID = "credential resource id for the request";
+        public static final String CREDENTIAL_NAME = "credential resource name for the request";
+        public static final String REGION = "Related region";
+        public static final String FILTER = "filter for resources";
+    }
+
     public static class StackModelDescription {
         public static final String STACK_ID = "id of the stack";
         public static final String IMAGE = "image of the stack";

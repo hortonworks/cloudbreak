@@ -16,6 +16,9 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityGroupResponse extends SecurityGroupBase {
 
+    @ApiModelProperty(value = ModelDescriptions.NAME)
+    private String name;
+
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
 
@@ -32,6 +35,14 @@ public class SecurityGroupResponse extends SecurityGroupBase {
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     @NotNull
     private boolean publicInAccount;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public List<SecurityRuleResponse> getSecurityRules() {
         return securityRules;
