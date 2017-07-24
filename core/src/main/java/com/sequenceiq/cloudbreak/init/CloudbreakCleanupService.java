@@ -80,7 +80,6 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private Flow2Handler flow2Handler;
 
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        // TODO do not restart if delete in progress on other node
         List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
         stackIdsUnderOperation.addAll(restartMyAssignedDisruptedFlows());
         stackIdsUnderOperation.addAll(excludeStacksByFlowAssignment());

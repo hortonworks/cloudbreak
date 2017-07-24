@@ -1,4 +1,4 @@
--- // CloudbreakNode table
+-- // CLOUD-84194 cloudbreak node table and flow association
 -- Migration SQL that makes the change goes here.
 
 CREATE TABLE cloudbreaknode (
@@ -13,7 +13,6 @@ ALTER TABLE flowlog ADD COLUMN version BIGINT;
 
 -- //@UNDO
 -- SQL to undo the change goes here.
-
 
 DROP TABLE cloudbreaknode;
 
