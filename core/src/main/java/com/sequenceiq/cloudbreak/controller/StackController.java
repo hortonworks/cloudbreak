@@ -233,6 +233,8 @@ public class StackController implements StackEndpoint {
     }
 
     private StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
+        stackRequest.setAccount(user.getAccount());
+        stackRequest.setOwner(user.getUserId());
         stackValidator.validate(user, stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);

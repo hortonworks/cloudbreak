@@ -107,6 +107,7 @@ public class ModelDescriptions {
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String TAGS = "stack related tags";
         public static final String CREDENTIAL = "stack related credential";
+        public static final String FILESYSTEM = "cluster related filesystem";
         public static final String NETWORK = "stack related network";
         public static final String FLEX_ID = "id of the related flex subscription";
         public static final String SOURCE_CREDENTIAL = "source credential object for cloning";
