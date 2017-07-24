@@ -33,12 +33,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
-import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
-import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.repository.CloudbreakNodeRepository;
@@ -82,13 +83,7 @@ public class HeartbeatServiceTest {
     private FlowRegister runningFlows;
 
     @Mock
-    private FlowChains flowChains;
-
-    @Mock
     private StackRepository stackRepository;
-
-    @Mock
-    private ReactorFlowManager reactorFlowManager;
 
     @Captor
     private ArgumentCaptor<String> stringCaptor;
@@ -138,6 +133,134 @@ public class HeartbeatServiceTest {
         when(flowLogRepository.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
 
         when(runningFlows.get(any())).thenReturn(null);
+
+        heartbeatService.scheduledFlowDistribution();
+
+        verify(flowLogRepository).save(flowLogListCaptor.capture());
+        List<FlowLog> updatedFlows = flowLogListCaptor.getValue();
+        assertEquals(myNewFlowLogs.size(), updatedFlows.size());
+        for (FlowLog updatedFlow : updatedFlows) {
+            assertEquals(MY_ID, updatedFlow.getCloudbreakNodeId());
+        }
+
+        verify(flow2Handler, times(5)).restartFlow(stringCaptor.capture());
+        List<String> allFlowIds = stringCaptor.getAllValues();
+        assertEquals(5, allFlowIds.size());
+        for (String flowId : suspendedFlows) {
+            assertTrue(allFlowIds.contains(flowId));
+        }
+    }
+
+    @Test
+    public void testOneNodeTakesAllFlowsWithInvalidFlows() {
+        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        clusterNodes.get(0).setLastUpdated(200_000); // myself
+        // set all nodes to failed except myself
+        for (int i = 1; i < clusterNodes.size(); i++) {
+            CloudbreakNode node = clusterNodes.get(i);
+            node.setLastUpdated(50_000);
+        }
+        when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
+        when(clock.getCurrentTime()).thenReturn(200_000L);
+
+        // all flows that need to be re-distributed
+        List<String> suspendedFlows = new ArrayList<>();
+
+        List<FlowLog> node1FlowLogs = getFlowLogs(2, 5000);
+        suspendedFlows.addAll(node1FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
+        when(flowLogRepository.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(new HashSet<>(node1FlowLogs));
+
+        Set<FlowLog> node2FlowLogs = new HashSet<>(getFlowLogs(3, 3000));
+        suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
+        when(flowLogRepository.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs);
+
+        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
+                addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(1), suspendedFlows.get(2),
+                        suspendedFlows.get(3), suspendedFlows.get(4)));
+        when(flowDistributor.distribute(any(), any())).thenReturn(distribution);
+
+        Set<FlowLog> myNewFlowLogs = new HashSet<>();
+        myNewFlowLogs.addAll(node1FlowLogs);
+        myNewFlowLogs.addAll(node2FlowLogs);
+        when(flowLogRepository.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
+
+        when(runningFlows.get(any())).thenReturn(null);
+
+        List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toList());
+        List<Object[]> statusResponse = new ArrayList<>();
+        statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
+        statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
+        when(stackRepository.findStackStatuses(any())).thenReturn(statusResponse);
+
+        List<FlowLog> invalidFlowLogs = myNewFlowLogs.stream()
+                .filter(fl -> fl.getStackId().equals(stackIds.get(0)) || fl.getStackId().equals(stackIds.get(2))).collect(Collectors.toList());
+
+        heartbeatService.scheduledFlowDistribution();
+
+        verify(flowLogRepository).save(flowLogListCaptor.capture());
+        List<FlowLog> updatedFlows = flowLogListCaptor.getValue();
+        assertEquals(myNewFlowLogs.size(), updatedFlows.size());
+        for (FlowLog updatedFlow : updatedFlows) {
+            if (invalidFlowLogs.contains(updatedFlow)) {
+                assertTrue(updatedFlow.getFinalized());
+                assertEquals(null, updatedFlow.getCloudbreakNodeId());
+            } else {
+                assertEquals(MY_ID, updatedFlow.getCloudbreakNodeId());
+            }
+        }
+
+        verify(flow2Handler, times(5)).restartFlow(stringCaptor.capture());
+        List<String> allFlowIds = stringCaptor.getAllValues();
+        assertEquals(5, allFlowIds.size());
+        for (String flowId : suspendedFlows) {
+            assertTrue(allFlowIds.contains(flowId));
+        }
+    }
+
+    @Test
+    public void testOneNodeTakesAllFlowsWithTerminationFlowShouldBeDistributed() {
+        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        clusterNodes.get(0).setLastUpdated(200_000); // myself
+        // set all nodes to failed except myself
+        for (int i = 1; i < clusterNodes.size(); i++) {
+            CloudbreakNode node = clusterNodes.get(i);
+            node.setLastUpdated(50_000);
+        }
+        when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
+        when(clock.getCurrentTime()).thenReturn(200_000L);
+
+        // all flows that need to be re-distributed
+        List<String> suspendedFlows = new ArrayList<>();
+
+        List<FlowLog> node1FlowLogs = getFlowLogs(2, 5000);
+        node1FlowLogs.forEach(fl -> fl.setFlowType(StackTerminationFlowConfig.class));
+        suspendedFlows.addAll(node1FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
+        when(flowLogRepository.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(new HashSet<>(node1FlowLogs));
+
+        Set<FlowLog> node2FlowLogs = new HashSet<>(getFlowLogs(3, 3000));
+        node2FlowLogs.forEach(fl -> fl.setFlowType(StackTerminationFlowConfig.class));
+        suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
+        when(flowLogRepository.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs);
+
+        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
+                addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(1), suspendedFlows.get(2),
+                        suspendedFlows.get(3), suspendedFlows.get(4)));
+        when(flowDistributor.distribute(any(), any())).thenReturn(distribution);
+
+        Set<FlowLog> myNewFlowLogs = new HashSet<>();
+        myNewFlowLogs.addAll(node1FlowLogs);
+        myNewFlowLogs.addAll(node2FlowLogs);
+        when(flowLogRepository.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
+
+        when(runningFlows.get(any())).thenReturn(null);
+
+        List<Long> stackIds = myNewFlowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toList());
+        List<Object[]> statusResponse = new ArrayList<>();
+        statusResponse.add(new Object[]{stackIds.get(0), Status.DELETE_IN_PROGRESS});
+        statusResponse.add(new Object[]{stackIds.get(2), Status.DELETE_IN_PROGRESS});
+        when(stackRepository.findStackStatuses(any())).thenReturn(statusResponse);
 
         heartbeatService.scheduledFlowDistribution();
 
@@ -312,10 +435,12 @@ public class HeartbeatServiceTest {
         List<FlowLog> flows = new ArrayList<>();
         Random random = new Random(System.currentTimeMillis());
         int flowId = random.nextInt(5000) + from;
-        long stackId = random.nextLong();
+        long stackId = random.nextInt(5000) + from;
         for (int i = 0; i < flowCount; i++) {
             for (int j = 0; j < random.nextInt(99) + 1; j++) {
-                flows.add(new FlowLog(stackId + i, "" + flowId + i, "RUNNING", false));
+                FlowLog flowLog = new FlowLog(stackId + i, "" + flowId + i, "RUNNING", false);
+                flowLog.setFlowType(StackCreationFlowConfig.class);
+                flows.add(flowLog);
             }
         }
         return flows;

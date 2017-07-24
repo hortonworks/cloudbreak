@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.ha;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -25,6 +28,7 @@ import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
+import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.domain.CloudbreakNode;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -38,6 +42,8 @@ import com.sequenceiq.cloudbreak.service.Retry;
 public class HeartbeatService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatService.class);
+
+    private static final List DELETE_STATUSES = Arrays.asList(Status.DELETE_IN_PROGRESS, Status.DELETE_COMPLETED, Status.DELETE_FAILED);
 
     @Value("${cb.ha.heartbeat.threshold:60000}")
     private Integer heartbeatThresholdRate;
@@ -97,26 +103,10 @@ public class HeartbeatService {
                 });
             } catch (Retry.ActionWentFail af) {
                 LOGGER.error(String.format("Failed to update the heartbeat timestamp 5 times for node %s: %s", nodeId, af.getMessage()));
-                cancelFlowsWithoutDbUpdate();
+                cancelEveryFlowWithoutDbUpdate();
             }
 
-            // query all stacks that have a running flow on this node
-            Set<Long> stackIds = InMemoryStateStore.getAllStackId();
-            if (!stackIds.isEmpty()) {
-                List<Object[]> stackStatuses = stackRepository.findStackStatuses(stackIds);
-                for (Object[] ss : stackStatuses) {
-                    if (Status.DELETE_IN_PROGRESS.equals(ss[1]) || Status.DELETE_COMPLETED.equals(ss[1])) {
-                        Long stackId = (Long) ss[0];
-                        Set<String> runningFlowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
-                        if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
-                            cancelRunningFlow(stackId);
-                        } else {
-                            cleanupInMemoryStore(stackId);
-                        }
-                    }
-                }
-            }
-
+            cancelInvalidFlows();
         }
     }
 
@@ -151,18 +141,23 @@ public class HeartbeatService {
         List<CloudbreakNode> activeNodes = cloudbreakNodes.stream().filter(c -> !failedNodes.contains(c)).collect(Collectors.toList());
         LOGGER.info("Active CB nodes: ({})[{}], failed CB nodes: ({})[{}]", activeNodes.size(), activeNodes, failedNodes.size(), failedNodes);
 
-        List<FlowLog> flowLogs = failedNodes.stream()
+        List<FlowLog> failedFlowLogs = failedNodes.stream()
                 .map(node -> flowLogRepository.findAllByCloudbreakNodeId(node.getUuid()))
                 .flatMap(Set::stream)
                 .collect(Collectors.toList());
 
-        if (!flowLogs.isEmpty()) {
-            List<String> flowIds = flowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
-            Map<CloudbreakNode, List<String>> flowDistribution = flowDistributor.distribute(flowIds, activeNodes);
+        if (!failedFlowLogs.isEmpty()) {
+            LOGGER.info("The following flows will be distributed across the active nodes: {}", getFlowIds(failedFlowLogs));
             List<FlowLog> updatedFlowLogs = new ArrayList<>();
+            List<FlowLog> invalidFlows = getInvalidFlows(failedFlowLogs);
+            invalidFlows.forEach(fl -> fl.setFinalized(true));
+            updatedFlowLogs.addAll(invalidFlows);
+            failedFlowLogs.removeAll(invalidFlows);
+            LOGGER.info("The following flows have been filtered out from distribution: {}", getFlowIds(invalidFlows));
+            Map<CloudbreakNode, List<String>> flowDistribution = flowDistributor.distribute(getFlowIds(failedFlowLogs), activeNodes);
             for (CloudbreakNode node : flowDistribution.keySet()) {
                 flowDistribution.get(node).forEach(flowId ->
-                        flowLogs.stream().filter(flowLog -> flowLog.getFlowId().equalsIgnoreCase(flowId)).forEach(flowLog -> {
+                        failedFlowLogs.stream().filter(flowLog -> flowLog.getFlowId().equalsIgnoreCase(flowId)).forEach(flowLog -> {
                             flowLog.setCloudbreakNodeId(node.getUuid());
                             updatedFlowLogs.add(flowLog);
                         }));
@@ -171,11 +166,52 @@ public class HeartbeatService {
         }
     }
 
+    /**
+     * Query all stacks that have a running flow on this node and if there is a termination flow on any of the nodes
+     * cancel the non-terminating flows on this node for that stack
+     */
+    private void cancelInvalidFlows() {
+        Set<Long> stackIds = InMemoryStateStore.getAllStackId();
+        if (!stackIds.isEmpty()) {
+            List<Object[]> stackStatuses = stackRepository.findStackStatuses(stackIds);
+            for (Object[] ss : stackStatuses) {
+                if (DELETE_STATUSES.contains(ss[1])) {
+                    Long stackId = (Long) ss[0];
+                    Set<String> runningFlowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
+                    if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
+                        cancelRunningFlow(stackId);
+                    } else {
+                        cleanupInMemoryStore(stackId);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Returns all the FlowLogs that have a termination flow running on any of the nodes for the same stack.
+     * This is required as we don't want to distribute flows that will be terminated anyways.
+     */
+    private List<FlowLog> getInvalidFlows(List<FlowLog> flowLogs) {
+        Set<Long> stackIds = flowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
+        if (!stackIds.isEmpty()) {
+            Set<Long> deletingStackIds = stackRepository.findStackStatuses(stackIds).stream()
+                    .filter(ss -> DELETE_STATUSES.contains(ss[1])).map(ss -> (Long) ss[0]).collect(Collectors.toSet());
+            if (!deletingStackIds.isEmpty()) {
+                return flowLogs.stream()
+                        .filter(fl -> deletingStackIds.contains(fl.getStackId()))
+                        .filter(fl -> !fl.getFlowType().equals(StackTerminationFlowConfig.class))
+                        .collect(Collectors.toList());
+            }
+        }
+        return Collections.emptyList();
+    }
+
     private boolean hasRunningNonTerminationFlowOnThisNode(Set<String> runningFlowIds) {
         return runningFlowIds.stream().anyMatch(id -> runningFlows.getFlowChainId(id) != null);
     }
 
-    private void cancelFlowsWithoutDbUpdate() {
+    private void cancelEveryFlowWithoutDbUpdate() {
         for (Long stackId : InMemoryStateStore.getAllStackId()) {
             InMemoryStateStore.putStack(stackId, PollGroup.CANCELLED);
         }
@@ -204,6 +240,10 @@ public class HeartbeatService {
         if (stack.getCluster() != null) {
             InMemoryStateStore.deleteCluster(stack.getCluster().getId());
         }
+    }
+
+    private List<String> getFlowIds(Collection<FlowLog> flowLogCollection) {
+        return flowLogCollection.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
     }
 
 }
