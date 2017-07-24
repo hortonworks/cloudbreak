@@ -16,10 +16,6 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class RDSConfigJson {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.NAME, required = true)
-    private String name;
-
-    @NotNull
     @Pattern(regexp = "^jdbc:postgresql://[-\\w\\.]*:\\d{1,5}/?\\w*", message = "Connection URL is not valid")
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_URL, required = true)
     private String connectionURL;
@@ -40,14 +36,6 @@ public abstract class RDSConfigJson {
 
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDS_PROPERTIES)
     private Set<RdsConfigPropertyJson> properties = new HashSet<>();
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     public String getConnectionURL() {
         return connectionURL;

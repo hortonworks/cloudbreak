@@ -243,6 +243,11 @@ public class OperationDescriptions {
         public static final String GET_TAG_SPECIFICATIONS = "retrive tag specifications";
         public static final String GET_SPECIALS = "retrive special properties";
         public static final String GET_IMAGE_R_BY_TYPE = "retrive images by type";
+        public static final String GET_NETWORKS = "retrive network properties";
+        public static final String GET_SECURITYGROUPS = "retrive securitygroups properties";
+        public static final String GET_SSHKEYS = "retrive sshkeys properties";
+
+
     }
 
     public static class SettingsOpDescription {

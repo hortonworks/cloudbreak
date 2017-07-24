@@ -65,4 +65,11 @@ public interface CloudConnector extends CloudPlatformAware {
      */
     PlatformParameters parameters();
 
+    /**
+     * Access to the {@link PlatformResources} object.
+     *
+     * @return the {@link PlatformResources} object
+     */
+    PlatformResources platformResources();
+
 }

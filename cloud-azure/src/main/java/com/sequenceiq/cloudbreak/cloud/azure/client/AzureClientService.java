@@ -19,7 +19,7 @@ public class AzureClientService {
         return authenticatedContext;
     }
 
-    private AzureClient getClient(CloudCredential cloudCredential) throws IOException {
+    public AzureClient getClient(CloudCredential cloudCredential) throws IOException {
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         return new AzureClient(azureCredentialView.getTenantId(), azureCredentialView.getAccessKey(),
                 azureCredentialView.getSecretKey(), azureCredentialView.getSubscriptionId());

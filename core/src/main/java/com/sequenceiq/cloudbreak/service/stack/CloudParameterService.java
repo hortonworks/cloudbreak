@@ -18,16 +18,26 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
+import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
@@ -36,6 +46,8 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
 import reactor.bus.Event;
@@ -50,6 +62,9 @@ public class CloudParameterService {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
     public PlatformVariants getPlatformVariants() {
         LOGGER.debug("Get platform variants");
@@ -188,6 +203,68 @@ public class CloudParameterService {
             return res.getPlatformParameters();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting platform parameters", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public CloudNetworks getCloudNetworks(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform cloudnetworks");
+
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformNetworksRequest getPlatformNetworksRequest =
+                new GetPlatformNetworksRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformNetworksRequest.selector(), Event.wrap(getPlatformNetworksRequest));
+        try {
+            GetPlatformNetworksResult res = getPlatformNetworksRequest.await();
+            LOGGER.info("Platform networks types result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform networks", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudNetworks();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform networks", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public CloudSshKeys getCloudSshKeys(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform sshkeys");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformSshKeysRequest getPlatformSshKeysRequest =
+                new GetPlatformSshKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformSshKeysRequest.selector(), Event.wrap(getPlatformSshKeysRequest));
+        try {
+            GetPlatformSshKeysResult res = getPlatformSshKeysRequest.await();
+            LOGGER.info("Platform sshkeys types result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform sshkeys", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudSshKeys();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform sshkeys", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public CloudSecurityGroups getSecurityGroups(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform securitygroups");
+
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformSecurityGroupsRequest getPlatformSecurityGroupsRequest =
+                new GetPlatformSecurityGroupsRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformSecurityGroupsRequest.selector(), Event.wrap(getPlatformSecurityGroupsRequest));
+        try {
+            GetPlatformSecurityGroupsResult res = getPlatformSecurityGroupsRequest.await();
+            LOGGER.info("Platform securitygroups types result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform securitygroups", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudSecurityGroups();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform securitygroups", e);
             throw new OperationException(e);
         }
     }

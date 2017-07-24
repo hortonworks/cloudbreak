@@ -10,6 +10,10 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("BlueprintResponse")
 public class BlueprintResponse extends BlueprintBase {
+
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    private String name;
+
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
 
@@ -47,6 +51,14 @@ public class BlueprintResponse extends BlueprintBase {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     @JsonProperty("public")

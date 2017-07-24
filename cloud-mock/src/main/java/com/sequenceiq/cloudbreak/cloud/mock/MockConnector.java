@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
@@ -33,6 +34,9 @@ public class MockConnector implements CloudConnector {
 
     @Inject
     private MockResourceConnector mockResourceConnector;
+
+    @Inject
+    private MockPlatformResources mockPlatformResources;
 
     @Inject
     private MockInstanceConnector mockInstanceConnector;
@@ -81,6 +85,11 @@ public class MockConnector implements CloudConnector {
     @Override
     public PlatformParameters parameters() {
         return mockPlatformParameters;
+    }
+
+    @Override
+    public PlatformResources platformResources() {
+        return mockPlatformResources;
     }
 
     @Override

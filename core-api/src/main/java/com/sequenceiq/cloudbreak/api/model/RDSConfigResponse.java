@@ -10,6 +10,9 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class RDSConfigResponse extends RDSConfigJson {
 
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.NAME, required = true)
+    private String name;
+
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
 
@@ -21,6 +24,14 @@ public class RDSConfigResponse extends RDSConfigJson {
 
     @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public Long getId() {
         return id;

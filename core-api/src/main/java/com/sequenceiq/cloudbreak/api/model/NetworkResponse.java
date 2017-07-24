@@ -14,6 +14,9 @@ public class NetworkResponse extends NetworkBase {
     @ApiModelProperty(value = ModelDescriptions.ID)
     private Long id;
 
+    @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
+    private String name;
+
     @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 
@@ -37,4 +40,11 @@ public class NetworkResponse extends NetworkBase {
         this.id = id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

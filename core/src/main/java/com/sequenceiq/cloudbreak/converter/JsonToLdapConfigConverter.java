@@ -1,18 +1,30 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
+import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 
 @Component
 public class JsonToLdapConfigConverter extends AbstractConversionServiceAwareConverter<LdapConfigRequest, LdapConfig> {
 
+    @Inject
+    private MissingResourceNameGenerator missingResourceNameGenerator;
+
     @Override
     public LdapConfig convert(LdapConfigRequest json) {
         LdapConfig config = new LdapConfig();
-        config.setName(json.getName());
+        if (Strings.isNullOrEmpty(json.getName())) {
+            config.setName(missingResourceNameGenerator.generateName(APIResourceType.LDAP_CONFIG));
+        } else {
+            config.setName(json.getName());
+        }
         config.setDescription(json.getDescription());
         config.setBindDn(json.getBindDn());
         config.setBindPassword(json.getBindPassword());

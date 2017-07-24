@@ -12,6 +12,9 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RDSConfigRequest extends RDSConfigJson {
 
+    @ApiModelProperty(value = ModelDescriptions.RDSConfig.NAME, required = true)
+    private String name;
+
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.USERNAME, required = true)
     private String connectionUserName;
@@ -19,6 +22,14 @@ public class RDSConfigRequest extends RDSConfigJson {
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.PASSWORD, required = true)
     private String connectionPassword;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getConnectionUserName() {
         return connectionUserName;

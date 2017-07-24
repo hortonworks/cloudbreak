@@ -6,22 +6,25 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
-import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
-import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
-import com.sequenceiq.cloudbreak.domain.json.Json;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.converter.util.URLUtils;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintInputParameters;
+import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -34,6 +37,9 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
 
     @Inject
     private BlueprintUtils blueprintUtils;
+
+    @Inject
+    private MissingResourceNameGenerator missingResourceNameGenerator;
 
     @Override
     public Blueprint convert(BlueprintRequest json) {
@@ -51,7 +57,11 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
             blueprint.setBlueprintText(json.getAmbariBlueprint());
         }
         validateBlueprint(blueprint.getBlueprintText());
-        blueprint.setName(json.getName());
+        if (Strings.isNullOrEmpty(json.getName())) {
+            blueprint.setName(missingResourceNameGenerator.generateName(APIResourceType.BLUEPRINT));
+        } else {
+            blueprint.setName(json.getName());
+        }
         blueprint.setDescription(json.getDescription());
         blueprint.setStatus(ResourceStatus.USER_MANAGED);
         prepareBlueprintInputs(json, blueprint);

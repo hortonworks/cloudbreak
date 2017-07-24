@@ -25,6 +25,11 @@ public class KeystoneCredentialView {
         this.cloudCredential = authenticatedContext.getCloudCredential();
     }
 
+    public KeystoneCredentialView(CloudCredential cloudCredential) {
+        this.stackName = "";
+        this.cloudCredential = cloudCredential;
+    }
+
     public String getKeyPairName() {
         return String.format("%s-%s-%s-%s", CB_KEYPAIR_NAME, getStackName(), deleteWhitespace(getName().toLowerCase()), cloudCredential.getId());
     }

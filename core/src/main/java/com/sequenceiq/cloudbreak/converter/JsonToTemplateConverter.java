@@ -7,11 +7,14 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
 @Component
@@ -19,10 +22,17 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
     @Inject
     private TopologyService topologyService;
 
+    @Inject
+    private MissingResourceNameGenerator missingResourceNameGenerator;
+
     @Override
     public Template convert(TemplateRequest source) {
         Template template = new Template();
-        template.setName(source.getName());
+        if (Strings.isNullOrEmpty(source.getName())) {
+            template.setName(missingResourceNameGenerator.generateName(APIResourceType.TEMPLATE));
+        } else {
+            template.setName(source.getName());
+        }
         template.setDescription(source.getDescription());
         template.setStatus(ResourceStatus.USER_MANAGED);
         template.setVolumeCount(source.getVolumeCount());

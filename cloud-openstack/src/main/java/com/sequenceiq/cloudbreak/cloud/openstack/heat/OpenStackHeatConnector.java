@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackCredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackParameters;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackStackValidator;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackTagValidator;
@@ -46,6 +48,9 @@ public class OpenStackHeatConnector implements CloudConnector {
 
     @Inject
     private OpenStackSetup openStackSetup;
+
+    @Inject
+    private OpenStackPlatformResources openStackPlatformResources;
 
     @Inject
     private OpenStackTagValidator openStackTagValidator;
@@ -89,6 +94,11 @@ public class OpenStackHeatConnector implements CloudConnector {
     @Override
     public PlatformParameters parameters() {
         return openStackParameters;
+    }
+
+    @Override
+    public PlatformResources platformResources() {
+        return openStackPlatformResources;
     }
 
     @Override
