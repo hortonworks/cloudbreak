@@ -64,7 +64,7 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
             validateCredential(stackValidationRequest.getCredentialId(), stackValidationRequest.getCredential(), stackValidation);
         } catch (AccessDeniedException e) {
             throw new AccessDeniedException(
-                    String.format("Access to network '%s' is denied or network doesn't exist.", stackValidationRequest.getNetworkId()), e);
+                    String.format("Access to credential '%s' is denied or credential doesn't exist.", stackValidationRequest.getCredentialId()), e);
         }
         try {
             validateNetwork(stackValidationRequest.getNetworkId(), stackValidationRequest.getNetwork(), stackValidation);
