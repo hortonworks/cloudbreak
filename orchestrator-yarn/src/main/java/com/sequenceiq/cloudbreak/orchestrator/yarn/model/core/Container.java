@@ -16,6 +16,10 @@ public class Container {
 
     private Resource resource;
 
+    private Artifact artifact;
+
+    private boolean privilegedContainer;
+
     private String launchTime;
 
     private String bareHost;
@@ -68,6 +72,22 @@ public class Container {
 
     public void setResource(Resource resource) {
         this.resource = resource;
+    }
+
+    public Artifact getArtifact() {
+        return artifact;
+    }
+
+    public void setArtifact(Artifact artifact) {
+        this.artifact = artifact;
+    }
+
+    public boolean isPrivilegedContainer() {
+        return privilegedContainer;
+    }
+
+    public void setPrivilegedContainer(boolean privilegedContainer) {
+        this.privilegedContainer = privilegedContainer;
     }
 
     @JsonProperty("launch_time")
