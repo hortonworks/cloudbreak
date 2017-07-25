@@ -124,16 +124,16 @@ func ListLdapsImpl(getLdaps func(*ldap.GetPublicsLdapParams) (*ldap.GetPublicsLd
 		row := &Ldap{
 			Name:                 l.Name,
 			Server:               fmt.Sprintf("%s://%s:%d", *l.Protocol, l.ServerHost, l.ServerPort),
-			Domain:               *l.Domain,
+			Domain:               SafeStringConvert(l.Domain),
 			BindDn:               l.BindDn,
-			DirectoryType:        *l.DirectoryType,
+			DirectoryType:        SafeStringConvert(l.DirectoryType),
 			UserSearchBase:       l.UserSearchBase,
-			UserNameAttribute:    *l.UserNameAttribute,
-			UserObjectClass:      *l.UserObjectClass,
-			GroupMemberAttribute: *l.GroupMemberAttribute,
-			GroupNameAttribute:   *l.GroupNameAttribute,
-			GroupObjectClass:     *l.GroupObjectClass,
-			GroupSearchBase:      *l.GroupSearchBase,
+			UserNameAttribute:    SafeStringConvert(l.UserNameAttribute),
+			UserObjectClass:      SafeStringConvert(l.UserObjectClass),
+			GroupMemberAttribute: SafeStringConvert(l.GroupMemberAttribute),
+			GroupNameAttribute:   SafeStringConvert(l.GroupNameAttribute),
+			GroupObjectClass:     SafeStringConvert(l.GroupObjectClass),
+			GroupSearchBase:      SafeStringConvert(l.GroupSearchBase),
 		}
 		tableRows = append(tableRows, row)
 	}
