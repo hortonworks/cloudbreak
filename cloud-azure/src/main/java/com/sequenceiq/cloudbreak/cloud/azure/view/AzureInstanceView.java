@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -73,13 +72,6 @@ public class AzureInstanceView {
      */
     public String getFlavor() {
         return instanceTemplate.getFlavor();
-    }
-
-    /**
-     * Used in freemarker template.
-     */
-    public boolean isBootDiagnosticsEnabled() {
-        return AzureDiskType.LOCALLY_REDUNDANT.equals(AzureDiskType.getByValue(instanceTemplate.getVolumeType()));
     }
 
     public InstanceGroupType getType() {
