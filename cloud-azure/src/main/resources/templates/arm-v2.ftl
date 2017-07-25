@@ -369,7 +369,7 @@
                                }
                            ]
                        }
-                       <#if instance.bootDiagnosticsEnabled>
+                       <#if instance.managedDisk == false>
                        ,"diagnosticsProfile": {
                          "bootDiagnostics": {
                            "enabled": true,
