@@ -22,7 +22,7 @@ include 'shell'
 include 'autoscale'
 include 'auth'
 include 'web'
+include 'autoscale-api'
 
 rootProject.name = 'cloudbreak'
-include 'autoscale-api'
 
