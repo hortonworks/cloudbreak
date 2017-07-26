@@ -9,3 +9,6 @@ Profile*
 *.iml
 .idea
 .deps
+*.yaml
+*.yml
+*.log
