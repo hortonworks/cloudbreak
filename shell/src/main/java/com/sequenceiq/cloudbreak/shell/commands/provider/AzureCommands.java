@@ -258,9 +258,8 @@ public class AzureCommands implements CommandMarker {
         props.put("accountName", accountName);
         props.put("tenantId", tenantId);
         props.put("clientId", accessKey);
-        props.put("credential", secretKey);
 
-        if (accountName == null || tenantId == null || accessKey == null || secretKey == null) {
+        if (accountName == null || tenantId == null || accessKey == null) {
             throw shellContext.exceptionTransformer()
                     .transformToRuntimeException("One or more required parameters for ADLS are not set!");
         }
