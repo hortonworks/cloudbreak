@@ -133,7 +133,7 @@ public class SmartSenseConfigProvider {
                 stack.getFlexSubscription() != null ? stack.getFlexSubscription().getSubscriptionId() : "",
                 clusterName,
                 stack.getUuid(),
-                cloudbreakNodeConfig.getId());
+                cloudbreakNodeConfig.getInstanceUUID());
         HSTMetadataJson productInfo = new HSTMetadataJson(clustersComponentId, instanceInfoJson, productId, cbVersion);
         try {
             Json productInfoJson = new Json(productInfo);

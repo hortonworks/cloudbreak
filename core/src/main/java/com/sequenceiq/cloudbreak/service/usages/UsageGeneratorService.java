@@ -39,7 +39,7 @@ public class UsageGeneratorService {
     public CloudbreakUsage createFullClosed(CloudbreakUsage usage, Date day) {
         CloudbreakUsage newUsage = new CloudbreakUsage();
         newUsage.setStackUuid(usage.getStackUuid());
-        newUsage.setParentUuid(cloudbreakNodeConfig.getId());
+        newUsage.setParentUuid(cloudbreakNodeConfig.getInstanceUUID());
         newUsage.setOwner(usage.getOwner());
         newUsage.setAccount(usage.getAccount());
         newUsage.setProvider(usage.getProvider());
@@ -67,7 +67,7 @@ public class UsageGeneratorService {
     public CloudbreakUsage createNewFromUsage(CloudbreakUsage usage) {
         CloudbreakUsage newUsage = new CloudbreakUsage();
         newUsage.setStackUuid(usage.getStackUuid());
-        newUsage.setParentUuid(cloudbreakNodeConfig.getId());
+        newUsage.setParentUuid(cloudbreakNodeConfig.getInstanceUUID());
         newUsage.setOwner(usage.getOwner());
         newUsage.setAccount(usage.getAccount());
         newUsage.setProvider(usage.getProvider());
@@ -95,7 +95,7 @@ public class UsageGeneratorService {
     public CloudbreakUsage openNewUsage(Stack stack, String instanceType, Integer instanceNum, String groupName, Temporal started) {
         CloudbreakUsage usage = new CloudbreakUsage();
         usage.setStackUuid(stack.getUuid());
-        usage.setParentUuid(cloudbreakNodeConfig.getId());
+        usage.setParentUuid(cloudbreakNodeConfig.getInstanceUUID());
         usage.setOwner(stack.getOwner());
         usage.setAccount(stack.getAccount());
         usage.setProvider(stack.cloudPlatform());

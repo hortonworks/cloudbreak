@@ -113,7 +113,7 @@ public class FlexUsageGenerator {
     private FlexUsageControllerJson getFlexUsageControllerJson(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage) {
         Optional<SmartSenseSubscription> smartSenseSubscriptionOptional = smartSenseSubscriptionService.getDefault();
         FlexUsageControllerJson controllerJson = new FlexUsageControllerJson();
-        String parentUuid = cloudbreakNodeConfig.getId();
+        String parentUuid = cloudbreakNodeConfig.getInstanceUUID();
         controllerJson.setGuid(parentUuid);
         controllerJson.setInstanceId(parentUuid);
         controllerJson.setProvider(cbInstanceProvider);
@@ -158,7 +158,7 @@ public class FlexUsageGenerator {
 
     private FlexUsageCbdInstanceJson getFlexUsageCbdInstance(Long fromDate) {
         FlexUsageCbdInstanceJson cbdComponentInstance = new FlexUsageCbdInstanceJson();
-        cbdComponentInstance.setGuid(cloudbreakNodeConfig.getId());
+        cbdComponentInstance.setGuid(cloudbreakNodeConfig.getInstanceUUID());
         cbdComponentInstance.setPeakUsage(1);
         cbdComponentInstance.setProvider(cbInstanceProvider);
         cbdComponentInstance.setRegion(cbInstanceRegion);

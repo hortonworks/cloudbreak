@@ -7,8 +7,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class CloudbreakNodeConfig {
 
-    @Value("${cb.instance.uuid:}")
+    @Value("${cb.instance.node.uuid:}")
     private String id;
+
+    @Value("${cb.instance.uuid:}")
+    private String instanceUUID;
 
     public String getId() {
         return isNodeIdSpecified() ? id : null;
@@ -17,4 +20,9 @@ public class CloudbreakNodeConfig {
     public boolean isNodeIdSpecified() {
         return StringUtils.isNoneBlank(id);
     }
+
+    public String getInstanceUUID() {
+        return instanceUUID;
+    }
+
 }
