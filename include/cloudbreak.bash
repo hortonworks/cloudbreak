@@ -244,6 +244,7 @@ cloudbreak-conf-defaults() {
     env-import CB_MAX_SALT_RECIPE_EXECUTION_RETRY 90
 
     env-import CB_INSTANCE_UUID
+    env-import CB_INSTANCE_NODE_UUID
     env-validate CB_INSTANCE_UUID *" "* "space"
 
     env-import CB_SMARTSENSE_ID ""
