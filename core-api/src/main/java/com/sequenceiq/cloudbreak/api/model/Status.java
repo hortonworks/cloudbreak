@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.Arrays;
-import java.util.List;
 
 public enum Status {
     REQUESTED,
@@ -24,20 +23,12 @@ public enum Status {
     STOP_FAILED,
     WAIT_FOR_SYNC;
 
-    public static List<Status> stopStatusesForUpdate() {
-        return Arrays.asList(START_FAILED, START_IN_PROGRESS, START_REQUESTED);
+    public boolean isRemovableStatus() {
+        return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_IN_PROGRESS, DELETE_FAILED,
+                DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(Status.valueOf(name()));
     }
 
-    public static List<Status> availableStatusesForUpdate() {
-        return Arrays.asList(REQUESTED, CREATE_IN_PROGRESS, UPDATE_IN_PROGRESS, UPDATE_REQUESTED,
-                UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, STOP_REQUESTED, STOP_IN_PROGRESS, STOP_FAILED);
-    }
-
-    public String normalizedStatusName() {
-        return name().replaceAll("_", " ").toLowerCase();
-    }
-
-    public Boolean isStopPhaseActive() {
+    public boolean isStopPhaseActive() {
         return name().contains("STOP");
     }
 }

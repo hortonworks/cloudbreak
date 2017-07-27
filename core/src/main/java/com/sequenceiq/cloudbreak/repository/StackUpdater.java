@@ -66,12 +66,13 @@ public class StackUpdater {
         Status status = detailedStatus.getStatus();
         if (!stack.isDeleteCompleted()) {
             stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
-            InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(status));
-            if (Status.DELETE_COMPLETED.equals(status)) {
+            if (status.isRemovableStatus()) {
                 InMemoryStateStore.deleteStack(stackId);
-                if (stack.getCluster() != null) {
+                if (stack.getCluster() != null && stack.getCluster().getStatus().isRemovableStatus()) {
                     InMemoryStateStore.deleteCluster(stack.getCluster().getId());
                 }
+            } else {
+                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(status));
             }
             stack = stackRepository.save(stack);
         }
