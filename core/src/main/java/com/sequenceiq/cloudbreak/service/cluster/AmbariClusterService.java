@@ -557,9 +557,16 @@ public class AmbariClusterService implements ClusterService {
             cluster.setStatus(status);
             cluster.setStatusReason(statusReason);
             cluster = clusterRepository.save(cluster);
-            InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(status));
-            if (InMemoryStateStore.getStack(stackId) == null) {
-                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
+            if (status.isRemovableStatus()) {
+                InMemoryStateStore.deleteCluster(cluster.getId());
+                if (stack.getStatus().isRemovableStatus()) {
+                    InMemoryStateStore.deleteStack(cluster.getStack().getId());
+                }
+            } else {
+                InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(status));
+                if (InMemoryStateStore.getStack(stackId) == null) {
+                    InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
+                }
             }
         }
         return cluster;
