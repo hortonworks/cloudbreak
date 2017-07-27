@@ -91,6 +91,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.clearWasb = function () {
             $scope.cluster.fileSystem.properties.accountKey = "";
+            $scope.cluster.fileSystem.properties.secure = false;
         };
 
         $scope.showWizardActualElement = function(element) {
@@ -955,6 +956,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.fileSystem.properties = {};
                     $scope.cluster.fileSystem.properties.tenantId = $rootScope.activeCredential.parameters.tenantId;
                     $scope.cluster.fileSystem.properties.clientId = $rootScope.activeCredential.parameters.accessKey;
+                    $scope.cluster.fileSystem.properties.secure = false;
                     $scope.cluster.relocateDocker = true;
                     $scope.cluster.parameters.persistentStorage = "cbstore";
                     $scope.cluster.parameters.attachedStorageOption = "SINGLE";

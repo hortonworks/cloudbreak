@@ -23,6 +23,7 @@ public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<W
         List<BlueprintConfigurationEntry> bpConfigs = new ArrayList<>();
         String accountName = fsConfig.getAccountName();
         String accountKey = fsConfig.getAccountKey();
+        bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasbs.impl", "org.apache.hadoop.fs.azure.Wasbs"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.wasb.impl", "org.apache.hadoop.fs.azure.Wasb"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.azure.account.key." + accountName + ".blob.core.windows.net", accountKey));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.azure.selfthrottling.read.factor", "1.0"));
@@ -32,7 +33,8 @@ public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<W
 
     @Override
     public String getDefaultFsValue(WasbFileSystemConfiguration fsConfig) {
-        return "wasb://" + fsConfig.getProperty(STORAGE_CONTAINER) + "@" + fsConfig.getAccountName() + ".blob.core.windows.net";
+        String protocol = fsConfig.isSecure() ? "wasbs://" : "wasb://";
+        return protocol + fsConfig.getProperty(STORAGE_CONTAINER) + "@" + fsConfig.getAccountName() + ".blob.core.windows.net";
     }
 
     @Override

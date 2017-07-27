@@ -17,6 +17,9 @@ public class WasbFileSystemConfiguration extends FileSystemConfiguration {
             message = "Must be the base64 encoded representation of 64 random bytes.")
     private String accountKey;
 
+    @NotNull
+    private boolean secure;
+
     public String getAccountName() {
         return accountName;
     }
@@ -31,5 +34,13 @@ public class WasbFileSystemConfiguration extends FileSystemConfiguration {
 
     public void setAccountKey(String accountKey) {
         this.accountKey = accountKey;
+    }
+
+    public boolean isSecure() {
+        return secure;
+    }
+
+    public void setSecure(boolean secure) {
+        this.secure = secure;
     }
 }
