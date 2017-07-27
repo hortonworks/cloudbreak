@@ -123,7 +123,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     Flow flow;
                     lock.lock();
                     try {
-                        if (!acceptFlow(key, payload)) {
+                        if (!isFlowAcceptable(key, payload)) {
                             LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
                             return;
                         }
@@ -131,6 +131,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flow = flowConfig.createFlow(flowId);
                         flow.initialize();
                         flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
+                        acceptFlow(payload);
                     } finally {
                         lock.unlock();
                     }
@@ -150,18 +151,24 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private boolean acceptFlow(String key, Payload payload) {
+    private boolean isFlowAcceptable(String key, Payload payload) {
         if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
             Acceptable acceptable = (Acceptable) payload;
             if (!ALLOWED_PARALLEL_FLOWS.contains(key) && isOtherFlowRunning(payload.getStackId())) {
                 acceptable.accepted().accept(Boolean.FALSE);
                 return false;
             }
+        }
+        return true;
+    }
+
+    private void acceptFlow(Payload payload) {
+        if (payload instanceof Acceptable && ((Acceptable) payload).accepted() != null) {
+            Acceptable acceptable = (Acceptable) payload;
             if (!acceptable.accepted().isComplete()) {
                 acceptable.accepted().accept(Boolean.TRUE);
             }
         }
-        return true;
     }
 
     private boolean isOtherFlowRunning(Long stackId) {
