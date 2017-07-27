@@ -217,6 +217,10 @@ public class AzureCommands implements CommandMarker {
     ) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("managedDisk", managedDisk);
+        if (managedDisk && !"Standard_LRS".equals(volumeType.getName())) {
+            throw shellContext.exceptionTransformer()
+                    .transformToRuntimeException("Only Standard_LRS supported for managed disks!");
+        }
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType.getName(), publicInAccount, description,
                 parameters, platformId, PLATFORM);
     }
