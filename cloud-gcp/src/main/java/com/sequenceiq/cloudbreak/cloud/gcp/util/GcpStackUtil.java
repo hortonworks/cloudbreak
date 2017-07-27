@@ -185,7 +185,10 @@ public final class GcpStackUtil {
     }
 
     public static String getImageName(String image) {
-        return getTarName(image).replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
+        if (image.contains("/")) {
+            return getTarName(image).replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
+        }
+        return image.trim();
     }
 
     public static String getAmbariImage(String projectId, String image) {
