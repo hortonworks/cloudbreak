@@ -30,7 +30,10 @@ public class LdapView {
     private String domain;
 
     public LdapView(LdapConfig ldapConfig) {
-        this.connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost() + ":" + ldapConfig.getServerPort();
+        this.connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost();
+        if (ldapConfig.getServerPort() != null) {
+            this.connectionURL =  this.connectionURL + ":" + ldapConfig.getServerPort();
+        }
         this.bindDn = ldapConfig.getBindDn();
         this.bindPassword = ldapConfig.getBindPassword();
         this.directoryType = ldapConfig.getDirectoryType();

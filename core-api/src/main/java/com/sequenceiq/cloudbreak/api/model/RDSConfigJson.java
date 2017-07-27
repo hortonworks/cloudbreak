@@ -20,7 +20,7 @@ public abstract class RDSConfigJson {
     private String name;
 
     @NotNull
-    @Pattern(regexp = "^jdbc:postgresql://[-\\w\\.]*:?\\d*/?\\w*", message = "Connection URL is not valid")
+    @Pattern(regexp = "^jdbc:postgresql://[-\\w\\.]*:\\d{1,5}/?\\w*", message = "Connection URL is not valid")
     @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_URL, required = true)
     private String connectionURL;
 
