@@ -70,7 +70,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -79,11 +78,9 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.service.image.ImageNameUtil;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Service
@@ -117,9 +114,6 @@ public class StackService {
     private TlsSecurityService tlsSecurityService;
 
     @Inject
-    private TerminationService terminationService;
-
-    @Inject
     private ReactorFlowManager flowManager;
 
     @Inject
@@ -129,9 +123,6 @@ public class StackService {
     private NetworkConfigurationValidator networkConfigurationValidator;
 
     @Inject
-    private SecurityRuleRepository securityRuleRepository;
-
-    @Inject
     private CloudbreakEventService eventService;
 
     @Inject
@@ -139,9 +130,6 @@ public class StackService {
 
     @Inject
     private ServiceProviderConnectorAdapter connector;
-
-    @Inject
-    private ImageNameUtil imageNameUtil;
 
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
@@ -397,19 +385,19 @@ public class StackService {
         }
         switch (status) {
             case SYNC:
-                sync(stack, status, false);
+                sync(stack, false);
                 break;
             case FULL_SYNC:
-                sync(stack, status, true);
+                sync(stack, true);
                 break;
             case REPAIR_FAILED_NODES:
                 repairFailedNodes(stack);
                 break;
             case STOPPED:
-                stop(stack, cluster, status);
+                stop(stack, cluster);
                 break;
             case STARTED:
-                start(stack, cluster, status);
+                start(stack, cluster);
                 break;
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
@@ -431,7 +419,7 @@ public class StackService {
         flowManager.triggerManualRepairFlow(stack.getId());
     }
 
-    private void sync(Stack stack, StatusRequest statusRequest, boolean full) {
+    private void sync(Stack stack, boolean full) {
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
                 flowManager.triggerFullSync(stack.getId());
@@ -443,7 +431,7 @@ public class StackService {
         }
     }
 
-    private void stop(Stack stack, Cluster cluster, StatusRequest statusRequest) {
+    private void stop(Stack stack, Cluster cluster) {
         if (cluster != null && cluster.isStopInProgress()) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
             String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
@@ -470,7 +458,7 @@ public class StackService {
         }
     }
 
-    private void start(Stack stack, Cluster cluster, StatusRequest statusRequest) {
+    private void start(Stack stack, Cluster cluster) {
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.info(statusDesc);
