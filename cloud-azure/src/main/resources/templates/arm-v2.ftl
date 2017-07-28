@@ -103,8 +103,13 @@
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
-                "apiVersion": "2016-03-30",
+                "apiVersion": "2017-03-30",
                 "location": "[resourceGroup().location]",
+                <#if group.managedDisk == true>
+                "sku": {
+                    "name": "Aligned"
+                },
+                </#if>
                 "properties": {
                     "platformFaultDomainCount": "[variables('${group.compressedName}AsFaultDomainCount')]",
                     "platformUpdateDomainCount": "[variables('${group.compressedName}AsUpdateDomainCount')]"
@@ -272,7 +277,7 @@
                    }
                  },
                  {
-                   "apiVersion": "2015-06-15",
+                   "apiVersion": "2016-04-30-preview",
                    "type": "Microsoft.Compute/virtualMachines",
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
@@ -323,25 +328,34 @@
                        },
                        "storageProfile": {
                            "osDisk" : {
-                               "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
-                               "osType" : "linux",
+                               <#if instance.managedDisk == false>
                                "image" : {
-                                   "uri" : "[variables('userImageName')]"
+                                    "uri" : "[variables('userImageName')]"
                                },
                                "vhd" : {
-                                   "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
+                                    "uri" : "[concat(variables('osDiskVhdName'), '${instance.instanceId}','.vhd')]"
                                },
+                               </#if>
+                               "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
+                               "osType" : "linux",
                                "createOption": "FromImage"
                            },
+                           <#if instance.managedDisk == true>
+                           "imageReference": {
+                               "id": "${customImageId}"
+                           },
+                           </#if>
                            "dataDisks": [
                            <#list instance.volumes as volume>
                                {
                                    "name": "[concat('datadisk', '${instance.instanceId}', '${volume_index}')]",
                                    "diskSizeGB": ${volume.size},
                                    "lun":  ${volume_index},
+                                   <#if instance.managedDisk == false>
                                    "vhd": {
-                                       "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '${volume_index}', '.vhd')]"
+                                        "Uri": "[concat('${instance.attachedDiskStorageUrl}',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'datadisk','${instance.instanceId}', '${volume_index}', '.vhd')]"
                                    },
+                                   </#if>
                                    "caching": "None",
                                    "createOption": "Empty"
                                } <#if (volume_index + 1) != instance.volumes?size>,</#if>
@@ -355,7 +369,7 @@
                                }
                            ]
                        }
-                       <#if instance.bootDiagnosticsEnabled>
+                       <#if instance.managedDisk == false>
                        ,"diagnosticsProfile": {
                          "bootDiagnostics": {
                            "enabled": true,

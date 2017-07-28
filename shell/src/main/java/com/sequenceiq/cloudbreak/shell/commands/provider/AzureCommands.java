@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.springframework.shell.core.CommandMarker;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -46,6 +47,8 @@ public class AzureCommands implements CommandMarker {
     public static final String PLATFORM = "AZURE";
 
     public static final String SALT = "SALT";
+
+    private static final String AVAILABILITY_SET_PATTERN = "^[a-zA-Z0-9-_]{3,80}$";
 
     private ShellContext shellContext;
 
@@ -202,15 +205,22 @@ public class AzureCommands implements CommandMarker {
     public String createTemplate(
             @CliOption(key = "name", mandatory = true, help = "Name of the template") String name,
             @CliOption(key = "instanceType", mandatory = true, help = "type of the VM") AzureInstanceType instanceType,
-            @CliOption(key = "volumeType", help = "volumeType of the template") AzureVolumeType volumeType,
+            @CliOption(key = "volumeType", mandatory = true, help = "volumeType of the template") AzureVolumeType volumeType,
             @CliOption(key = "volumeCount", mandatory = true, help = "volumeCount of the template") Integer volumeCount,
             @CliOption(key = "volumeSize", mandatory = true, help = "volumeSize(GB) of the template") Integer volumeSize,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
-            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId
+            @CliOption(key = "platformId", help = "Id of a platform the template belongs to") Long platformId,
+            @CliOption(key = "managedDisk", help = "flag if the disks will be managed",
+                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean managedDisk
     ) {
         Map<String, Object> parameters = new HashMap<>();
+        parameters.put("managedDisk", managedDisk);
+        if (managedDisk && !"Standard_LRS".equals(volumeType.getName())) {
+            throw shellContext.exceptionTransformer()
+                    .transformToRuntimeException("Only Standard_LRS supported for managed disks!");
+        }
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volumeType.getName(), publicInAccount, description,
                 parameters, platformId, PLATFORM);
     }
@@ -255,9 +265,8 @@ public class AzureCommands implements CommandMarker {
         props.put("accountName", accountName);
         props.put("tenantId", tenantId);
         props.put("clientId", accessKey);
-        props.put("credential", secretKey);
 
-        if (accountName == null || tenantId == null || accessKey == null || secretKey == null) {
+        if (accountName == null || tenantId == null || accessKey == null) {
             throw shellContext.exceptionTransformer()
                     .transformToRuntimeException("One or more required parameters for ADLS are not set!");
         }
@@ -287,6 +296,10 @@ public class AzureCommands implements CommandMarker {
                     || platformFaultDomainCount.number() < AvailabilitySetFaultDomainNumber.TWO.number()) {
                 throw shellContext.exceptionTransformer()
                         .transformToRuntimeException("The number of fault domains must be between 2 and 3!");
+            }
+            if (!Pattern.compile(AVAILABILITY_SET_PATTERN).matcher(name).matches()) {
+                throw shellContext.exceptionTransformer()
+                        .transformToRuntimeException("Availability set name invalid, it can contain only alphanumeric, underscore and hyphen characters!");
             }
             AvailabilitySetEntry as = new AvailabilitySetEntry();
             as.setName(name);

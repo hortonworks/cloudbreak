@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -35,8 +34,10 @@ public class AzureInstanceView {
 
     private String availabilitySetName;
 
+    private boolean managedDisk;
+
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
-            String attachedDiskStorageType, String groupName, String availabilitySetName) {
+            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk) {
         this.instance = instance;
         this.instanceTemplate = instance.getTemplate();
         this.stackNamePrefixLength = stackNamePrefixLength;
@@ -46,6 +47,7 @@ public class AzureInstanceView {
         this.groupName = groupName;
         this.stackName = stackName;
         this.availabilitySetName = availabilitySetName;
+        this.managedDisk = managedDisk;
     }
 
     /**
@@ -70,13 +72,6 @@ public class AzureInstanceView {
      */
     public String getFlavor() {
         return instanceTemplate.getFlavor();
-    }
-
-    /**
-     * Used in freemarker template.
-     */
-    public boolean isBootDiagnosticsEnabled() {
-        return AzureDiskType.LOCALLY_REDUNDANT.equals(AzureDiskType.getByValue(instanceTemplate.getVolumeType()));
     }
 
     public InstanceGroupType getType() {
@@ -104,6 +99,10 @@ public class AzureInstanceView {
 
     public String getGroupName() {
         return groupName;
+    }
+
+    public boolean isManagedDisk() {
+        return managedDisk;
     }
 
     public String getAttachedDiskStorageName() {

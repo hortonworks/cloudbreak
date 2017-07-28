@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
@@ -553,9 +554,14 @@ public class AmbariClusterConnector {
 
     private void decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
         fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
+        Map<String, String> fileSystemProperties = stack.getCluster().getFileSystem().getProperties();
         if (CloudConstants.AZURE.equals(stack.getPlatformVariant())) {
             String resourceGroupName = stack.getResourceByType(ResourceType.ARM_TEMPLATE).getResourceName();
             fsConfiguration.addProperty(FileSystemConfiguration.RESOURCE_GROUP_NAME, resourceGroupName);
+        }
+        if (fsConfiguration instanceof WasbFileSystemConfiguration) {
+            String secureWasb = fileSystemProperties.getOrDefault("secure", "false");
+            fsConfiguration.addProperty("secure", secureWasb);
         }
         // we have to lookup secret key from the credential because it is not stored in client side
         if (fsConfiguration instanceof AdlsFileSystemConfiguration) {

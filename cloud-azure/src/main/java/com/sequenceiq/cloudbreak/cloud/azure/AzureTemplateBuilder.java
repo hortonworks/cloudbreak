@@ -15,11 +15,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -49,10 +49,12 @@ public class AzureTemplateBuilder {
     @Inject
     private AzureStorage azureStorage;
 
-    public String build(String stackName, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext, CloudStack cloudStack) {
+    public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
+            CloudStack cloudStack) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
             String imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
+
             Network network = cloudStack.getNetwork();
             Map<String, Object> model = new HashMap<>();
             model.put("credential", armCredentialView);
@@ -61,6 +63,7 @@ public class AzureTemplateBuilder {
                     azureStorage.getArmAttachedStorageOption(cloudStack.getParameters()));
             AzureSecurityView armSecurityView = new AzureSecurityView(cloudStack.getGroups());
 
+            model.put("customImageId", customImageId);
             model.put("storage_account_name", rootDiskStorage);
             model.put("image_storage_container_name", AzureStorage.IMAGES);
             model.put("storage_container_name", azureStorage.getDiskContainerName(cloudContext));

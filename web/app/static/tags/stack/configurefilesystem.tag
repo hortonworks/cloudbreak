@@ -31,7 +31,7 @@
         </div>
     </div>
 </div>
-  <div class="form-group" ng-class="{ 'has-error': clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'ADLS'">
+<div class="form-group" ng-class="{ 'has-error': clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid }" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'ADLS'">
     <label class="col-sm-3 control-label" for="adlsaccountname">{{msg.filesystem_adls_account_name_label}}
         <i class="fa fa-question-circle" popover-placement="top" popover={{msg.filesystem_adls_account_name_label_popover}} popover-trigger="mouseenter"></i>
     </label>
@@ -39,6 +39,8 @@
     <div class="col-sm-8">
         <input class="form-control" type="text" name="adlsaccountname" id="adlsaccountname" ng-model="cluster.fileSystem.properties.accountName" ng-pattern="/^[a-z0-9]{3,24}$/" ng-minlength="3" ng-maxlength="24" ng-required="cluster.fileSystem.type == 'ADLS'">
         <div class="help-block" ng-show="clusterCreationForm.adlsaccountname.$dirty && clusterCreationForm.adlsaccountname.$invalid"><i class="fa fa-warning"></i> {{msg.filesystem_adls_account_name_warning}}
+        </div>
+        <div class="help-block" ng-show="cluster.fileSystem.properties.accountName"><i class="fa fa-warning"></i> {{printAdlsAclWarning()}} Check the Azure Portal <a href="https://portal.azure.com/#blade/Microsoft_Azure_DataLakeStore/WebHdfsFolderBlade/endpoint/{{cluster.fileSystem.properties.accountName}}.azuredatalakestore.net/path/%2F">here</a> and the documentation <a href="https://docs.microsoft.com/en-us/azure/data-lake-store/data-lake-store-access-control">here</a>
         </div>
     </div>
 </div>
@@ -76,6 +78,12 @@
     <label class="col-sm-3 control-label" for="asdefaultfs">{{msg.filesystem_default_fs}}</label>
     <div class="col-sm-8">
         <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">
+    </div>
+</div>
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'WASB' && cluster.fileSystem.defaultFs">
+    <label class="col-sm-3 control-label" for="wasbsecure">{{msg.filesystem_wasb_secure_label}}</label>
+    <div class="col-sm-8">
+        <select name="wasbsecure" id="wasbsecure" ng-model="cluster.fileSystem.properties.secure" ng-options="(item?'wasbs':'wasb') for item in [true, false]"></select>
     </div>
 </div>
 <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE' && cluster.orchestrator.type !== 'SALT'">

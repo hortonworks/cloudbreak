@@ -91,6 +91,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
 
         $scope.clearWasb = function () {
             $scope.cluster.fileSystem.properties.accountKey = "";
+            $scope.cluster.fileSystem.properties.secure = false;
         };
 
         $scope.showWizardActualElement = function(element) {
@@ -955,6 +956,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.fileSystem.properties = {};
                     $scope.cluster.fileSystem.properties.tenantId = $rootScope.activeCredential.parameters.tenantId;
                     $scope.cluster.fileSystem.properties.clientId = $rootScope.activeCredential.parameters.accessKey;
+                    $scope.cluster.fileSystem.properties.secure = false;
                     $scope.cluster.relocateDocker = true;
                     $scope.cluster.parameters.persistentStorage = "cbstore";
                     $scope.cluster.parameters.attachedStorageOption = "SINGLE";
@@ -1661,5 +1663,17 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             });
             return hasError;
         }
+
+        $scope.printAdlsAclWarning = function() {
+            if ($rootScope.activeCredential && $rootScope.activeCredential.cloudPlatform == 'AZURE') {
+                var appId = $rootScope.activeCredential.parameters.accessKey;
+                var displayName = $rootScope.activeCredential.parameters.spDisplayName;
+                var spId = displayName != undefined ? "[ Name: " + displayName + ", AppId: " + appId + " ]" : "[ AppId: " + appId + " ]";
+                var message = "Service principal " + spId + " will be configured to access ADLS, but ACL-s should be set manually!";
+                return message;
+            }
+            return "";
+        }
+
     }
 ]);

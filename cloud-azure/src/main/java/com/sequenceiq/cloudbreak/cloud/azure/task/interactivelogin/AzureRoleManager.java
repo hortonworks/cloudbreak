@@ -212,7 +212,13 @@ public class AzureRoleManager {
         properties.setAssignableScopes(Arrays.asList("/subscriptions/" + subscriptionId));
         properties.setType("CustomRole");
         AzurePermission permission = new AzurePermission();
-        permission.setActions(Arrays.asList("Microsoft.Compute/*", "Microsoft.Network/*", "Microsoft.Storage/*", "Microsoft.Resources/*"));
+        permission.setActions(Arrays.asList(
+                "Microsoft.Authorization/*/read",
+                "Microsoft.DataLakeStore/accounts/read",
+                "Microsoft.Compute/*",
+                "Microsoft.Network/*",
+                "Microsoft.Storage/*",
+                "Microsoft.Resources/*"));
         properties.setPermissions(Arrays.asList(permission));
         role.setProperties(properties);
         return role;
@@ -228,12 +234,16 @@ public class AzureRoleManager {
         }
         if (actions.contains("*")) {
             if (!notActions.contains("Microsoft.Compute/*")
+                    && !notActions.contains("Microsoft.Authorization/*/read")
+                    && !notActions.contains("Microsoft.DataLakeStore/accounts/read")
                     && !notActions.contains("Microsoft.Network/*")
                     && !notActions.contains("Microsoft.Storage/*")
                     && !notActions.contains("Microsoft.Resources/*")) {
                 return true;
             }
         } else if (actions.contains("Microsoft.Compute/*")
+                && actions.contains("Microsoft.Authorization/*/read")
+                && actions.contains("Microsoft.DataLakeStore/accounts/read")
                 && actions.contains("Microsoft.Network/*")
                 && actions.contains("Microsoft.Storage/*")
                 && actions.contains("Microsoft.Resources/*")) {

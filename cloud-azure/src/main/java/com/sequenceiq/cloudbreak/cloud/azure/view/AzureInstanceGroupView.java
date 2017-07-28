@@ -12,6 +12,8 @@ public class AzureInstanceGroupView {
 
     private String availabilitySetName;
 
+    private boolean managedDisk;
+
     public AzureInstanceGroupView(String name) {
         this.name = name;
         this.compressedName = name.replaceAll("_", "");
@@ -53,7 +55,25 @@ public class AzureInstanceGroupView {
         this.availabilitySetName = availabilitySetName;
     }
 
+    public boolean isManagedDisk() {
+        return managedDisk;
+    }
+
+    public void setManagedDisk(boolean managedDisk) {
+        this.managedDisk = managedDisk;
+    }
+
     public String getCompressedName() {
         return compressedName;
+    }
+
+    /**
+     * needed because of Freemarker template generating (1.6 -> 1.16 compatibility)
+     *
+     * @return name of the instance group
+     */
+    @Override
+    public String toString() {
+        return name;
     }
 }

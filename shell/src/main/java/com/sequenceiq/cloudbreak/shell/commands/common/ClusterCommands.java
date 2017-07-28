@@ -232,6 +232,30 @@ public class ClusterCommands implements BaseCommands {
                 }
             }
 
+            if (enableKnoxGateway) {
+                // Check if Knox is configured in selected blueprint
+                List<InstanceGroupEntry> gatewayIgList = shellContext.getInstanceGroups().values()
+                        .stream()
+                        .filter(e -> e.getType().equals("GATEWAY")).collect(Collectors.toList());
+                List<String> gatewayIgNameList = new ArrayList<>();
+
+                for (Map.Entry<String, InstanceGroupEntry> entry : shellContext.getInstanceGroups().entrySet()) {
+                    for (InstanceGroupEntry gatewayIg : gatewayIgList) {
+                        if (Objects.equals(gatewayIg, entry.getValue())) {
+                            gatewayIgNameList.add(entry.getKey());
+                        }
+                    }
+                }
+                Map<String, List<String>> componentMap = getComponentMap(shellContext.getBlueprintText());
+
+                for (String gatewayIgName : gatewayIgNameList) {
+                    if (componentMap.get(gatewayIgName).contains("KNOX_GATEWAY")) {
+                        throw shellContext.exceptionTransformer().transformToRuntimeException(
+                                "Please select another blueprint! Knox gateway is enabled but it is present in the blueprint's gateway hostgroup as well.");
+                    }
+                }
+            }
+
             GatewayJson gateway = new GatewayJson();
             gateway.setEnableGateway(enableKnoxGateway);
             gateway.setExposedServices(ImmutableList.of(ExposedService.ALL.name()));
