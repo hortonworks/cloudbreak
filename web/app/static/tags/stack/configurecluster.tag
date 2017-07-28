@@ -215,7 +215,7 @@
 
                     <div class="col-md-4 input-group" >
                         <span class="input-group-addon">AS name</span>
-                        <input type="text" class="form-control" id="asname{{$index}}" name="asname{{$index}}" required ng-model="as.name" ng-maxlength="80" ng-minlength="3" ng-pattern="/^[a-zA-Z0-9-_]{3,80}$/" ng-required="true" placeholder="(REQUIRED) Name of availabilty set">
+                        <input type="text" class="form-control" id="asname{{$index}}" name="asname{{$index}}" required ng-model="as.name" ng-maxlength="80" ng-minlength="3" ng-pattern="/^[a-zA-Z0-9][a-zA-Z0-9-_.]{1,78}[a-zA-Z0-9_]$/" ng-required="true" placeholder="(REQUIRED) Name of availabilty set">
                     </div>
                     <div class="col-md-offset-1 col-md-4 input-group">
                         <span class="input-group-addon">Fault domain count</span>
