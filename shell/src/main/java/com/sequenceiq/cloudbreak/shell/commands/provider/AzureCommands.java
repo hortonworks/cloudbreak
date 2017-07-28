@@ -48,7 +48,7 @@ public class AzureCommands implements CommandMarker {
 
     public static final String SALT = "SALT";
 
-    private static final String AVAILABILITY_SET_PATTERN = "^[a-zA-Z0-9-_]{3,80}$";
+    private static final String AVAILABILITY_SET_PATTERN = "^[a-zA-Z0-9][a-zA-Z0-9-_.]{1,78}[a-zA-Z0-9_]$";
 
     private ShellContext shellContext;
 
