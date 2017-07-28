@@ -83,8 +83,6 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public ClusterResponse get(Long stackId) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.get(stackId);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
@@ -93,8 +91,6 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public AutoscaleClusterResponse getForAutoscale(Long stackId) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getForAutoscale(stackId);
         AutoscaleClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stackId, AutoscaleClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stackId);
@@ -104,7 +100,6 @@ public class ClusterController implements ClusterEndpoint {
     @Override
     public ClusterResponse getPrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPrivateStack(name, user);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
@@ -114,7 +109,6 @@ public class ClusterController implements ClusterEndpoint {
     @Override
     public ClusterResponse getPublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getPublicStack(name, user);
         ClusterResponse cluster = clusterService.retrieveClusterForCurrentUser(stack.getId(), ClusterResponse.class);
         String clusterJson = clusterService.getClusterJson(stack.getAmbariIp(), stack.getId());
@@ -160,8 +154,6 @@ public class ClusterController implements ClusterEndpoint {
 
     @Override
     public ConfigsResponse getConfigs(Long stackId, ConfigsRequest requests) throws Exception {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return clusterService.retrieveOutputs(stackId, requests.getRequests());
     }
 

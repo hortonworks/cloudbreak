@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SssdConfig;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 
 @Component
@@ -32,21 +31,18 @@ public class SssdConfigController implements SssdConfigEndpoint {
     @Override
     public SssdConfigResponse postPrivate(SssdConfigRequest sssdConfigRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, sssdConfigRequest, false);
     }
 
     @Override
     public SssdConfigResponse postPublic(SssdConfigRequest sssdConfigRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createConfig(user, sssdConfigRequest, true);
     }
 
     @Override
     public Set<SssdConfigResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<SssdConfig> configs = sssdConfigService.retrievePrivateConfigs(user);
         return toJsonSet(configs);
     }
@@ -54,7 +50,6 @@ public class SssdConfigController implements SssdConfigEndpoint {
     @Override
     public Set<SssdConfigResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<SssdConfig> configs = sssdConfigService.retrieveAccountConfigs(user);
         return toJsonSet(configs);
     }
@@ -62,7 +57,6 @@ public class SssdConfigController implements SssdConfigEndpoint {
     @Override
     public SssdConfigResponse getPrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         SssdConfig config = sssdConfigService.getPrivateConfig(name, user);
         return conversionService.convert(config, SssdConfigResponse.class);
     }
@@ -70,37 +64,30 @@ public class SssdConfigController implements SssdConfigEndpoint {
     @Override
     public SssdConfigResponse getPublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         SssdConfig config = sssdConfigService.getPublicConfig(name, user);
         return conversionService.convert(config, SssdConfigResponse.class);
     }
 
     @Override
     public SssdConfigResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         SssdConfig config = sssdConfigService.get(id);
         return conversionService.convert(config, SssdConfigResponse.class);
     }
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         sssdConfigService.delete(id);
     }
 
     @Override
     public void deletePublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         sssdConfigService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         sssdConfigService.delete(name, user);
     }
 

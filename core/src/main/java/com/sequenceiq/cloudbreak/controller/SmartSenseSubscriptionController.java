@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.JsonToSmartSenseSubscriptionConverter;
 import com.sequenceiq.cloudbreak.converter.SmartSenseSubscriptionToJsonConverter;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.smartsense.SmartSenseSubscriptionService;
 
 @Component
@@ -34,7 +33,6 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     @Override
     public SmartSenseSubscriptionJson get() {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(cbUser);
         SmartSenseSubscription subscription = smartSenseSubService.getDefault(cbUser);
         if (subscription == null) {
             throw new NotFoundException("SmartSense subscription not found");
@@ -51,21 +49,18 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
     @Override
     public void delete(Long id) {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(cbUser);
         smartSenseSubService.delete(id);
     }
 
     @Override
     public void deletePublic(String subscriptionId) {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(cbUser);
         smartSenseSubService.delete(subscriptionId, cbUser);
     }
 
     @Override
     public void deletePrivate(String subscriptionId) {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(cbUser);
         smartSenseSubService.delete(subscriptionId, cbUser);
     }
 
