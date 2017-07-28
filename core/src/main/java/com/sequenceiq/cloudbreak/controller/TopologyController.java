@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.model.TopologyRequest;
 import com.sequenceiq.cloudbreak.api.model.TopologyResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Topology;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.TopologyRepository;
 import com.sequenceiq.cloudbreak.service.topology.TopologyService;
 
@@ -36,7 +35,6 @@ public class TopologyController implements TopologyEndpoint {
     @Override
     public Set<TopologyResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<Topology> stacks = topologyRepository.findAllInAccount(user.getAccount());
 
         return convert(stacks);
@@ -57,7 +55,6 @@ public class TopologyController implements TopologyEndpoint {
     @Override
     public TopologyResponse postPublic(TopologyRequest topologyRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Topology topology = conversionService.convert(topologyRequest, Topology.class);
         topology = topologyService.create(user, topology);
         return conversionService.convert(topology, TopologyResponse.class);
@@ -66,14 +63,11 @@ public class TopologyController implements TopologyEndpoint {
     @Override
     public void delete(Long id, Boolean forced) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         topologyService.delete(id, user);
     }
 
     @Override
     public TopologyResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Topology topology = topologyService.get(id);
         return convert(topology);
     }

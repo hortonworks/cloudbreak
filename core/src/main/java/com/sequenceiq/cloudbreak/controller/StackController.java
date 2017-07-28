@@ -87,63 +87,53 @@ public class StackController implements StackEndpoint {
     @Override
     public StackResponse postPrivate(StackRequest stackRequest) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, false);
     }
 
     @Override
     public StackResponse postPublic(StackRequest stackRequest) throws Exception {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createStack(user, stackRequest, true);
     }
 
     @Override
     public Set<StackResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return stackService.retrievePrivateStacks(user);
     }
 
     @Override
     public Set<StackResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return stackService.retrieveAccountStacks(user);
     }
 
     @Override
     public StackResponse get(Long id, Set<String> entries) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return stackService.getJsonById(id, entries);
     }
 
     @Override
     public StackResponse getPrivate(String name, Set<String> entries) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return stackService.getPrivateStackJsonByName(name, user, entries);
     }
 
     @Override
     public StackResponse getPublic(String name, Set<String> entries) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return stackService.getPublicStackJsonByName(name, user, entries);
     }
 
     @Override
     public Map<String, Object> status(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return conversionService.convert(stackService.get(id), Map.class);
     }
 
     @Override
     public void delete(Long id, Boolean forced, Boolean deleteDependencies) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         if (forced) {
             stackService.forceDelete(id, user, deleteDependencies);
         } else {
@@ -154,7 +144,6 @@ public class StackController implements StackEndpoint {
     @Override
     public void deletePrivate(String name, Boolean forced, Boolean deleteDependencies) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         if (forced) {
             stackService.forceDelete(name, user, deleteDependencies);
         } else {
@@ -165,7 +154,6 @@ public class StackController implements StackEndpoint {
     @Override
     public void deletePublic(String name, Boolean forced, Boolean deleteDependencies) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         if (forced) {
             stackService.forceDelete(name, user, deleteDependencies);
         } else {
@@ -175,8 +163,6 @@ public class StackController implements StackEndpoint {
 
     @Override
     public Response put(Long id, UpdateStackJson updateRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
         if (updateRequest.getStatus() != null) {
@@ -209,8 +195,6 @@ public class StackController implements StackEndpoint {
 
     @Override
     public Response validate(StackValidationRequest request) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
         stackService.validateStack(stackValidation);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
@@ -221,7 +205,6 @@ public class StackController implements StackEndpoint {
     @Override
     public Response deleteInstance(Long stackId, String instanceId) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildMdcContext(user);
         stackService.removeInstance(user, stackId, instanceId);
         return Response.status(Response.Status.ACCEPTED).build();
     }

@@ -9,12 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
-import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
-import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
+import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
 import com.sequenceiq.cloudbreak.facade.CloudbreakUsagesFacade;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 public class CloudbreakUsageController implements UsageEndpoint {
@@ -33,8 +32,6 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String accountId,
             String cloud,
             String zone) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(accountId).setOwner(userId)
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         return cloudbreakUsagesFacade.getUsagesFor(params);
@@ -47,7 +44,6 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String cloud,
             String zone) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(userId)
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         return cloudbreakUsagesFacade.getUsagesFor(params);
@@ -60,7 +56,6 @@ public class CloudbreakUsageController implements UsageEndpoint {
             String cloud,
             String zone) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         CbUsageFilterParameters params = new CbUsageFilterParameters.Builder().setAccount(user.getAccount()).setOwner(user.getUserId())
                 .setSince(since).setCloud(cloud).setRegion(zone).setFilterEndDate(filterEndDate).build();
         return cloudbreakUsagesFacade.getUsagesFor(params);

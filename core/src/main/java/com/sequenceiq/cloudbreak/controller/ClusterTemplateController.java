@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.clustertemplate.ClusterTemplateService;
 
 @Component
@@ -32,21 +31,18 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
     @Override
     public ClusterTemplateResponse postPrivate(ClusterTemplateRequest clusterTemplateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createClusterTemplateRequest(user, clusterTemplateRequest, false);
     }
 
     @Override
     public ClusterTemplateResponse postPublic(ClusterTemplateRequest clusterTemplateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createClusterTemplateRequest(user, clusterTemplateRequest, true);
     }
 
     @Override
     public Set<ClusterTemplateResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<ClusterTemplate> clusterTemplates = clusterTemplateService.retrievePrivateClusterTemplates(user);
         return toJsonList(clusterTemplates);
     }
@@ -54,7 +50,6 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
     @Override
     public ClusterTemplateResponse getPrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         ClusterTemplate clusterTemplate = clusterTemplateService.getPrivateClusterTemplate(name, user);
         return conversionService.convert(clusterTemplate, ClusterTemplateResponse.class);
     }
@@ -69,7 +64,6 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
     @Override
     public Set<ClusterTemplateResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<ClusterTemplate> clusterTemplates = clusterTemplateService.retrieveAccountClusterTemplates(user);
         return toJsonList(clusterTemplates);
     }
@@ -77,7 +71,6 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
     @Override
     public ClusterTemplateResponse get(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         ClusterTemplate clusterTemplate = clusterTemplateService.get(id);
         return conversionService.convert(clusterTemplate, ClusterTemplateResponse.class);
     }
@@ -85,21 +78,18 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
     @Override
     public void delete(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         clusterTemplateService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         clusterTemplateService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         clusterTemplateService.delete(name, user);
     }
 

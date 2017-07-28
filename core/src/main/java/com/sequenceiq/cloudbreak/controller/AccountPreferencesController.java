@@ -12,10 +12,9 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.AccountPreferencesEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.account.ScheduledAccountPreferencesValidator;
 
@@ -38,7 +37,6 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     @Override
     public AccountPreferencesJson get() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         AccountPreferences preferences = service.getOneByAccount(user);
         return convert(preferences);
     }
@@ -46,14 +44,12 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     @Override
     public AccountPreferencesJson put(AccountPreferencesJson updateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return convert(service.saveOne(user, convert(updateRequest)));
     }
 
     @Override
     public AccountPreferencesJson post(AccountPreferencesJson updateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return convert(service.saveOne(user, convert(updateRequest)));
     }
 
@@ -65,7 +61,6 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
     @Override
     public Response validate() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             validator.validate();
         }

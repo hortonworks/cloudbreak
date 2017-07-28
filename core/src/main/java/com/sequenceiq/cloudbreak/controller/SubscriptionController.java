@@ -7,9 +7,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SubscriptionRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Subscription;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.subscription.SubscriptionService;
 
 @Component
@@ -22,8 +20,6 @@ public class SubscriptionController implements SubscriptionEndpoint {
     private AuthenticatedUserService authenticatedUserService;
 
     public IdJson subscribe(SubscriptionRequest subscriptionRequest) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Subscription subscription = new Subscription(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(),
                 subscriptionRequest.getEndpointUrl());
         return new IdJson(subscriptionService.subscribe(subscription));

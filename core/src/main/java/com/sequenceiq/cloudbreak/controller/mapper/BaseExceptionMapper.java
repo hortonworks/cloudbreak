@@ -7,14 +7,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapper<E> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseExceptionMapper.class);
 
     public Response toResponse(E exception) {
-        MDCBuilder.buildMdcContext();
         LOGGER.error(getErrorMessage(exception), exception);
         return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
     }

@@ -11,9 +11,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
@@ -36,21 +35,18 @@ public class BlueprintController implements BlueprintEndpoint {
     @Override
     public BlueprintResponse postPrivate(BlueprintRequest blueprintRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createBlueprint(user, blueprintRequest, false);
     }
 
     @Override
     public BlueprintResponse postPublic(BlueprintRequest blueprintRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createBlueprint(user, blueprintRequest, true);
     }
 
     @Override
     public Set<BlueprintResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
         if (blueprints.isEmpty()) {
             blueprints = blueprintLoaderService.loadBlueprints(user);
@@ -61,7 +57,6 @@ public class BlueprintController implements BlueprintEndpoint {
     @Override
     public BlueprintResponse getPrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Blueprint blueprint = blueprintService.getPrivateBlueprint(name, user);
         return conversionService.convert(blueprint, BlueprintResponse.class);
     }
@@ -76,7 +71,6 @@ public class BlueprintController implements BlueprintEndpoint {
     @Override
     public Set<BlueprintResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         blueprintLoaderService.loadBlueprints(user);
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
         return toJsonList(blueprints);
@@ -85,7 +79,6 @@ public class BlueprintController implements BlueprintEndpoint {
     @Override
     public BlueprintResponse get(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Blueprint blueprint = blueprintService.get(id);
         return conversionService.convert(blueprint, BlueprintResponse.class);
     }
@@ -93,21 +86,18 @@ public class BlueprintController implements BlueprintEndpoint {
     @Override
     public void delete(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         blueprintService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         blueprintService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         blueprintService.delete(name, user);
     }
 

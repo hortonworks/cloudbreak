@@ -12,10 +12,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
-import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.template.DefaultTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
@@ -44,21 +43,18 @@ public class TemplateController implements TemplateEndpoint {
     @Override
     public TemplateResponse postPrivate(TemplateRequest templateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createTemplate(user, templateRequest, false);
     }
 
     @Override
     public TemplateResponse postPublic(TemplateRequest templateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createTemplate(user, templateRequest, true);
     }
 
     @Override
     public Set<TemplateResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         defaultTemplateLoaderService.createDefaultTemplates(user);
         Set<Template> templates = templateService.retrievePrivateTemplates(user);
         return convert(templates);
@@ -67,7 +63,6 @@ public class TemplateController implements TemplateEndpoint {
     @Override
     public Set<TemplateResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         defaultTemplateLoaderService.createDefaultTemplates(user);
         Set<Template> templates = templateService.retrieveAccountTemplates(user);
         return convert(templates);
@@ -75,8 +70,6 @@ public class TemplateController implements TemplateEndpoint {
 
     @Override
     public TemplateResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Template template = templateService.get(id);
         return convert(template);
     }
@@ -84,7 +77,6 @@ public class TemplateController implements TemplateEndpoint {
     @Override
     public TemplateResponse getPrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Template template = templateService.getPrivateTemplate(name, user);
         return convert(template);
     }
@@ -92,7 +84,6 @@ public class TemplateController implements TemplateEndpoint {
     @Override
     public TemplateResponse getPublic(@PathVariable String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Template template = templateService.getPublicTemplate(name, user);
         return convert(template);
     }
@@ -100,21 +91,18 @@ public class TemplateController implements TemplateEndpoint {
     @Override
     public void delete(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         templateService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         templateService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         templateService.delete(name, user);
     }
 

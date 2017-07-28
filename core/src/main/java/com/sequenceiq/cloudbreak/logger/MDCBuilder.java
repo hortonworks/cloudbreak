@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.logger;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import org.slf4j.MDC;
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
@@ -42,13 +44,25 @@ public class MDCBuilder {
         }
     }
 
-    private static String getFieldValue(Object o, String field) {
+    public static void buildMdcContextFromMap(Map<String, String> map) {
+        cleanupMdc();
+        map.entrySet().stream().forEach(e -> MDC.put(e.getKey(), e.getValue()));
+    }
+
+    static String getFieldValue(Object o, String field) {
         try {
-            Field privateStringField = o.getClass().getDeclaredField(field);
+            Field privateStringField = ReflectionUtils.findField(o.getClass(), field);
             privateStringField.setAccessible(true);
             return privateStringField.get(o).toString();
         } catch (Exception e) {
             return "undefined";
         }
+    }
+
+    private static void cleanupMdc() {
+        MDC.remove(LoggerContextKey.OWNER_ID.toString());
+        MDC.remove(LoggerContextKey.RESOURCE_ID.toString());
+        MDC.remove(LoggerContextKey.RESOURCE_NAME.toString());
+        MDC.remove(LoggerContextKey.RESOURCE_TYPE.toString());
     }
 }

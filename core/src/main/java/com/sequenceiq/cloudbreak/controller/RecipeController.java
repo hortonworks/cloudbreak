@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
 @Component
@@ -32,21 +31,18 @@ public class RecipeController implements RecipeEndpoint {
     @Override
     public RecipeResponse postPublic(RecipeRequest recipeRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createRecipe(user, recipeRequest, true);
     }
 
     @Override
     public RecipeResponse postPrivate(RecipeRequest recipeRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createRecipe(user, recipeRequest, false);
     }
 
     @Override
     public Set<RecipeResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<Recipe> recipes = recipeService.retrievePrivateRecipes(user);
         return toJsonSet(recipes);
     }
@@ -54,7 +50,6 @@ public class RecipeController implements RecipeEndpoint {
     @Override
     public Set<RecipeResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<Recipe> recipes = recipeService.retrieveAccountRecipes(user);
         return toJsonSet(recipes);
     }
@@ -69,7 +64,6 @@ public class RecipeController implements RecipeEndpoint {
     @Override
     public RecipeResponse getPublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Recipe recipe = recipeService.getPublicRecipe(name, user);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
@@ -77,7 +71,6 @@ public class RecipeController implements RecipeEndpoint {
     @Override
     public RecipeResponse get(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Recipe recipe = recipeService.get(id);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
@@ -85,21 +78,18 @@ public class RecipeController implements RecipeEndpoint {
     @Override
     public void delete(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         recipeService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         recipeService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         recipeService.delete(name, user);
     }
 

@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintTemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.constraint.ConstraintTemplateService;
 
 @Component
@@ -32,21 +31,18 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
     @Override
     public ConstraintTemplateResponse postPrivate(ConstraintTemplateRequest constraintTemplateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createConstraintTemplate(user, constraintTemplateRequest, false);
     }
 
     @Override
     public ConstraintTemplateResponse postPublic(ConstraintTemplateRequest constraintTemplateRequest) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         return createConstraintTemplate(user, constraintTemplateRequest, true);
     }
 
     @Override
     public Set<ConstraintTemplateResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<ConstraintTemplate> constraintTemplates = constraintTemplateService.retrievePrivateConstraintTemplates(user);
         return convert(constraintTemplates);
     }
@@ -54,7 +50,6 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
     @Override
     public Set<ConstraintTemplateResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         Set<ConstraintTemplate> templates = constraintTemplateService.retrieveAccountConstraintTemplates(user);
         return convert(templates);
     }
@@ -62,7 +57,6 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
     @Override
     public ConstraintTemplateResponse get(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         ConstraintTemplate template = constraintTemplateService.get(id);
         return convert(template);
     }
@@ -70,7 +64,6 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
     @Override
     public ConstraintTemplateResponse getPrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         ConstraintTemplate template = constraintTemplateService.getPrivateTemplate(name, user);
         return convert(template);
     }
@@ -78,7 +71,6 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
     @Override
     public ConstraintTemplateResponse getPublic(@PathVariable String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         ConstraintTemplate template = constraintTemplateService.getPublicTemplate(name, user);
         return convert(template);
     }
@@ -86,21 +78,18 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
     @Override
     public void delete(Long id) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         constraintTemplateService.delete(id, user);
     }
 
     @Override
     public void deletePublic(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         constraintTemplateService.delete(name, user);
     }
 
     @Override
     public void deletePrivate(String name) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        MDCBuilder.buildUserMdcContext(user);
         constraintTemplateService.delete(name, user);
     }
 
