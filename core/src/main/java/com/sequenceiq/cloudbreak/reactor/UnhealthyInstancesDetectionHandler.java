@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.UnhealthyInstancesDetectionResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.CandidateUnhealthyInstanceSelector;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstancesFinalizer;
@@ -22,7 +24,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class UnhealthyInstancesDetectionHandler implements ClusterEventHandler<UnhealthyInstancesDetectionRequest> {
+public class UnhealthyInstancesDetectionHandler implements ReactorEventHandler<UnhealthyInstancesDetectionRequest> {
 
     private static final Logger LOG = LoggerFactory.getLogger(UnhealthyInstancesDetectionHandler.class);
 
@@ -39,8 +41,8 @@ public class UnhealthyInstancesDetectionHandler implements ClusterEventHandler<U
     private UnhealthyInstancesFinalizer unhealthyInstancesFinalizer;
 
     @Override
-    public Class<UnhealthyInstancesDetectionRequest> type() {
-        return UnhealthyInstancesDetectionRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(UnhealthyInstancesDetectionRequest.class);
     }
 
     @Override

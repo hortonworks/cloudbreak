@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -83,7 +82,6 @@ public class ClusterDownscaleService {
             hostGroupService.save(hostGroup);
         });
         if (!BYOS.equals(stack.cloudPlatform())) {
-            MDCBuilder.buildMdcContext(stack);
             LOGGER.info("Start updating metadata");
             for (String hostName : hostNames) {
                 stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);

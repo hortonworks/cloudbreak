@@ -7,9 +7,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -17,7 +18,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class DecommissionHandler implements ClusterEventHandler<DecommissionRequest> {
+public class DecommissionHandler implements ReactorEventHandler<DecommissionRequest> {
 
     @Inject
     private EventBus eventBus;
@@ -29,8 +30,8 @@ public class DecommissionHandler implements ClusterEventHandler<DecommissionRequ
     private AmbariDecommissioner ambariDecommissioner;
 
     @Override
-    public Class<DecommissionRequest> type() {
-        return DecommissionRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(DecommissionRequest.class);
     }
 
     @Override
@@ -39,7 +40,6 @@ public class DecommissionHandler implements ClusterEventHandler<DecommissionRequ
         DecommissionResult result;
         try {
             Stack stack = stackService.getById(request.getStackId());
-            MDCBuilder.buildMdcContext(stack);
             Set<String> hostNames = ambariDecommissioner.decommissionAmbariNodes(stack, request.getHostGroupName(), request.getHostNames());
             result = new DecommissionResult(request, hostNames);
         } catch (Exception e) {

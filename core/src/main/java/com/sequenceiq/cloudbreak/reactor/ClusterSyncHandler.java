@@ -6,8 +6,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterSyncResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.status.AmbariClusterStatusUpdater;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
@@ -18,7 +20,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ClusterSyncHandler implements ClusterEventHandler<ClusterSyncRequest> {
+public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncRequest> {
     @Inject
     private StackService stackService;
 
@@ -38,8 +40,8 @@ public class ClusterSyncHandler implements ClusterEventHandler<ClusterSyncReques
     private StackUtil stackUtil;
 
     @Override
-    public Class<ClusterSyncRequest> type() {
-        return ClusterSyncRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(ClusterSyncRequest.class);
     }
 
     @Override

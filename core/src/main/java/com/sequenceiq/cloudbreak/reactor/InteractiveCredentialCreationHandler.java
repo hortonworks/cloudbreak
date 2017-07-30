@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.mapper.DuplicatedKeyValueExceptionMapper;
 import com.sequenceiq.cloudbreak.converter.spi.ExtendedCloudCredentialToCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
@@ -19,7 +21,7 @@ import reactor.bus.Event;
  * Created by perdos on 9/23/16.
  */
 @Component
-public class InteractiveCredentialCreationHandler implements ClusterEventHandler<InteractiveCredentialCreationRequest> {
+public class InteractiveCredentialCreationHandler implements ReactorEventHandler<InteractiveCredentialCreationRequest> {
 
     @Inject
     private CredentialService credentialService;
@@ -28,8 +30,8 @@ public class InteractiveCredentialCreationHandler implements ClusterEventHandler
     private ExtendedCloudCredentialToCredentialConverter extendedCloudCredentialToCredentialConverter;
 
     @Override
-    public Class<InteractiveCredentialCreationRequest> type() {
-        return InteractiveCredentialCreationRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(InteractiveCredentialCreationRequest.class);
     }
 
     @Override

@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -34,7 +33,6 @@ public class ClusterUpgradeService {
     private StackUtil stackUtil;
 
     public void upgradeCluster(Stack stack, Cluster cluster) {
-        MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_UPGRADE, Status.UPDATE_IN_PROGRESS.name());
     }
@@ -47,7 +45,6 @@ public class ClusterUpgradeService {
 
     public void handleUpgradeClusterFailure(Stack stack, String errorReason) {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(cluster);
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_FAILED, errorReason);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_UPGRADE_FAILED, Status.UPDATE_FAILED.name(), errorReason);

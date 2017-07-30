@@ -20,7 +20,6 @@ import reactor.bus.EventBus;
 
 @Component
 public class ReactorEventHandlerInitializer {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(ReactorEventHandlerInitializer.class);
 
     @Resource

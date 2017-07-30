@@ -7,9 +7,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariDecommissioner;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -17,7 +18,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class CollectDownscaleCandidatesHandler implements ClusterEventHandler<CollectDownscaleCandidatesRequest> {
+public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<CollectDownscaleCandidatesRequest> {
 
     @Inject
     private EventBus eventBus;
@@ -29,8 +30,8 @@ public class CollectDownscaleCandidatesHandler implements ClusterEventHandler<Co
     private AmbariDecommissioner ambariDecommissioner;
 
     @Override
-    public Class<CollectDownscaleCandidatesRequest> type() {
-        return CollectDownscaleCandidatesRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(CollectDownscaleCandidatesRequest.class);
     }
 
     @Override
@@ -39,7 +40,6 @@ public class CollectDownscaleCandidatesHandler implements ClusterEventHandler<Co
         CollectDownscaleCandidatesResult result;
         try {
             Stack stack = stackService.getById(request.getStackId());
-            MDCBuilder.buildMdcContext(stack);
             Set<String> hostNames;
             if (request.getHostNames() == null) {
                 hostNames = ambariDecommissioner.collectDownscaleCandidates(stack, request.getHostGroupName(), request.getScalingAdjustment());

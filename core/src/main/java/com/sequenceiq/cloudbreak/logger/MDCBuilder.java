@@ -5,7 +5,9 @@ import java.util.Map;
 
 import org.slf4j.MDC;
 import org.springframework.util.ReflectionUtils;
+import org.springframework.util.StringUtils;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 public class MDCBuilder {
@@ -32,10 +34,11 @@ public class MDCBuilder {
         }
     }
 
-    public static void buildMdcContext(String stackId, String stackName, String ownerId) {
+    public static void buildMdcContext(String stackId, String stackName, String ownerId, String type) {
         MDC.put(LoggerContextKey.OWNER_ID.toString(), ownerId);
         MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stackId);
         MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), stackName);
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), type);
     }
 
     public static void buildUserMdcContext(IdentityUser user) {
@@ -47,6 +50,22 @@ public class MDCBuilder {
     public static void buildMdcContextFromMap(Map<String, String> map) {
         cleanupMdc();
         map.entrySet().stream().forEach(e -> MDC.put(e.getKey(), e.getValue()));
+    }
+
+    public static Map<String, String> getMdcContextMap() {
+        Map<String, String> result = Maps.newHashMap();
+        for (LoggerContextKey lck : LoggerContextKey.values()) {
+            putIfExist(result, lck);
+        }
+        return result;
+    }
+
+    private static void putIfExist(Map<String, String> map, LoggerContextKey lck) {
+        String lckStr = lck.toString();
+        String mdcParam = MDC.get(lckStr);
+        if (!StringUtils.isEmpty(mdcParam)) {
+            map.put(lckStr, mdcParam);
+        }
     }
 
     static String getFieldValue(Object o, String field) {
