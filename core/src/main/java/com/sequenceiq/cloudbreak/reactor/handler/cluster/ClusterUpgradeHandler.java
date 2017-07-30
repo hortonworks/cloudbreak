@@ -5,16 +5,17 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterUpgradeService;
-import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterUpgradeResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ClusterUpgradeHandler implements ClusterEventHandler<ClusterUpgradeRequest> {
+public class ClusterUpgradeHandler implements ReactorEventHandler<ClusterUpgradeRequest> {
     @Inject
     private AmbariClusterUpgradeService ambariClusterUpgradeService;
 
@@ -25,8 +26,8 @@ public class ClusterUpgradeHandler implements ClusterEventHandler<ClusterUpgrade
     private EventBus eventBus;
 
     @Override
-    public Class<ClusterUpgradeRequest> type() {
-        return ClusterUpgradeRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(ClusterUpgradeRequest.class);
     }
 
     @Override

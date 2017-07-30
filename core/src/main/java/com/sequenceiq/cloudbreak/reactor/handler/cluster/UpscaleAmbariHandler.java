@@ -5,15 +5,16 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.cluster.AmbariClusterUpscaleService;
-import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class UpscaleAmbariHandler implements ClusterEventHandler<UpscaleAmbariRequest> {
+public class UpscaleAmbariHandler implements ReactorEventHandler<UpscaleAmbariRequest> {
 
     @Inject
     private EventBus eventBus;
@@ -22,8 +23,8 @@ public class UpscaleAmbariHandler implements ClusterEventHandler<UpscaleAmbariRe
     private AmbariClusterUpscaleService clusterUpscaleService;
 
     @Override
-    public Class<UpscaleAmbariRequest> type() {
-        return UpscaleAmbariRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(UpscaleAmbariRequest.class);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2;
 
 import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_CHAIN_ID;
 import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.FLOW_ID;
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.MDC_CONTEXT_ID;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +20,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -116,6 +118,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
         if (flowChainId != null) {
             headers.put(FLOW_CHAIN_ID, flowChainId);
         }
+        headers.put(MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
         eventBus.notify(selector, new Event<>(new Event.Headers(headers), payload));
     }
 

@@ -4,16 +4,17 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.stack.flow.HostMetadataSetup;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ExtendHostMetadataHandler implements ClusterEventHandler<ExtendHostMetadataRequest> {
+public class ExtendHostMetadataHandler implements ReactorEventHandler<ExtendHostMetadataRequest> {
     @Inject
     private EventBus eventBus;
 
@@ -21,8 +22,8 @@ public class ExtendHostMetadataHandler implements ClusterEventHandler<ExtendHost
     private HostMetadataSetup hostMetadataSetup;
 
     @Override
-    public Class<ExtendHostMetadataRequest> type() {
-        return ExtendHostMetadataRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(ExtendHostMetadataRequest.class);
     }
 
     @Override

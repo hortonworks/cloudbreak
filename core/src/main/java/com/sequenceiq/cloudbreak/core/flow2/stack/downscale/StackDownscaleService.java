@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
@@ -48,7 +47,6 @@ public class StackDownscaleService {
 
     public void startStackDownscale(StackScalingFlowContext context, StackDownscaleTriggerEvent stackDownscaleTriggerEvent) {
         LOGGER.debug("Downscaling of stack ", context.getStack().getId());
-        MDCBuilder.buildMdcContext(context.getStack());
         stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
         Set<String> hostNames = stackDownscaleTriggerEvent.getHostNames();
         Object msgParam = hostNames == null || hostNames.isEmpty() ? Math.abs(stackDownscaleTriggerEvent.getAdjustment()) : hostNames;

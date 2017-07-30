@@ -5,9 +5,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.reactor.ClusterEventHandler;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterStopResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -15,7 +16,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ClusterStopHandler implements ClusterEventHandler<ClusterStopRequest> {
+public class ClusterStopHandler implements ReactorEventHandler<ClusterStopRequest> {
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
 
@@ -26,8 +27,8 @@ public class ClusterStopHandler implements ClusterEventHandler<ClusterStopReques
     private EventBus eventBus;
 
     @Override
-    public Class<ClusterStopRequest> type() {
-        return ClusterStopRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(ClusterStopRequest.class);
     }
 
     @Override

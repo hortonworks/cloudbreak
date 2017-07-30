@@ -5,8 +5,10 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ClusterCredentialChangeResult;
+import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -14,7 +16,7 @@ import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class ClusterCredentialChangeHandler implements ClusterEventHandler<ClusterCredentialChangeRequest> {
+public class ClusterCredentialChangeHandler implements ReactorEventHandler<ClusterCredentialChangeRequest> {
     @Inject
     private AmbariClusterConnector ambariClusterConnector;
 
@@ -25,8 +27,8 @@ public class ClusterCredentialChangeHandler implements ClusterEventHandler<Clust
     private EventBus eventBus;
 
     @Override
-    public Class<ClusterCredentialChangeRequest> type() {
-        return ClusterCredentialChangeRequest.class;
+    public String selector() {
+        return EventSelectorUtil.selector(ClusterCredentialChangeRequest.class);
     }
 
     @Override

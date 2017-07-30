@@ -51,7 +51,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -131,7 +130,6 @@ public class StackCreationService {
 
     public void startProvisioning(StackContext context) {
         Stack stack = context.getStack();
-        MDCBuilder.buildMdcContext(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CREATING_INFRASTRUCTURE, "Creating infrastructure");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_PROVISIONING, CREATE_IN_PROGRESS.name());
         instanceMetadataService.saveInstanceRequests(stack, context.getCloudStack().getGroups());
@@ -223,7 +221,6 @@ public class StackCreationService {
     }
 
     public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.error("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {

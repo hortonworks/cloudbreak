@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
@@ -40,14 +39,12 @@ public class AmbariOperationService {
 
     public PollingResult waitForOperations(Stack stack, AmbariClient ambariClient,
             Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType) {
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operations to finish. [Operation requests: {}]", operationRequests);
         return waitForOperations(stack, ambariClient, ambariOperationsStatusCheckerTask, operationRequests, ambariOperationType);
     }
 
     public PollingResult waitForOperationsToStart(Stack stack, AmbariClient ambariClient,
             Map<String, Integer> operationRequests, AmbariOperationType ambariOperationType) {
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Waiting for Ambari operations to start. [Operation requests: {}]", operationRequests);
         return waitForOperations(stack, ambariClient, ambariOperationsStartCheckerTask, operationRequests, ambariOperationType);
     }

@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariClusterConnector;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeEngine;
@@ -69,7 +68,6 @@ public class AmbariClusterUpscaleService {
 
     public void upscaleAmbari(Long stackId, String hostGroupName, Integer scalingAdjustment) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start adding cluster containers");
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
@@ -107,7 +105,6 @@ public class AmbariClusterUpscaleService {
 
     public void executePreRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start executing pre recipes");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostGroup> hostGroups = hostGroupService.getByCluster(stack.getCluster().getId());
@@ -117,7 +114,6 @@ public class AmbariClusterUpscaleService {
 
     public void installServicesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start installing Ambari services");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
@@ -126,7 +122,6 @@ public class AmbariClusterUpscaleService {
 
     public void executePostRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getById(stackId);
-        MDCBuilder.buildMdcContext(stack);
         LOGGER.info("Start executing post recipes");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());

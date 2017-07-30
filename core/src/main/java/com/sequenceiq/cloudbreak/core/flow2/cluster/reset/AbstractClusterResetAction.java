@@ -31,7 +31,7 @@ public abstract class AbstractClusterResetAction<P extends Payload> extends Abst
     protected ClusterContext createFlowContext(String flowId, StateContext<ClusterResetState, ClusterResetEvent> stateContext, P payload) {
         Stack stack = stackService.getById(payload.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
-        MDCBuilder.buildMdcContext(stack);
+        MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
         return new ClusterContext(flowId, stack, cluster);
     }
 

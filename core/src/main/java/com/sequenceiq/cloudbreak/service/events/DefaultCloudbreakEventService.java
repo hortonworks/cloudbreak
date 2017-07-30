@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.service.events;
 
+import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.MDC_CONTEXT_ID;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -17,6 +21,7 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -52,7 +57,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
         LOGGER.info("Firing Cloudbreak event: {}", eventData);
-        Event reactorEvent = Event.wrap(eventData);
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
+        Event reactorEvent = new Event(new Event.Headers(headers), eventData);
         reactor.notify(CLOUDBREAK_EVENT, reactorEvent);
     }
 
@@ -60,7 +67,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
         InstanceGroupEventData eventData = new InstanceGroupEventData(stackId, eventType, eventMessage, instanceGroupName);
         LOGGER.info("Fireing cloudbreak event: {}", eventData);
-        Event reactorEvent = Event.wrap(eventData);
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
+        Event reactorEvent = new Event(new Event.Headers(headers), eventData);
         reactor.notify(CLOUDBREAK_EVENT, reactorEvent);
     }
 
