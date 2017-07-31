@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 
 @Component
@@ -55,7 +56,8 @@ public class ControllerLogContextAspects {
         String controllerClassName = target.getClass().getSimpleName();
         String resourceType = controllerClassName.substring(0, controllerClassName.indexOf("Controller"));
         result.put(LoggerContextKey.RESOURCE_TYPE.toString(), resourceType);
-        result.put(LoggerContextKey.OWNER_ID.toString(), authenticatedUserService.getCbUser().getUserId());
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
+        result.put(LoggerContextKey.OWNER_ID.toString(), cbUser != null ? cbUser.getUserId() : "undefined");
         return result;
     }
 }
