@@ -282,6 +282,9 @@
                    "name": "[concat(parameters('vmNamePrefix'), '${instance.instanceId}')]",
                    "location": "[parameters('region')]",
                    "dependsOn": [
+                    <#if instance.availabilitySetName?? && instance.availabilitySetName?has_content>
+                       "[concat('Microsoft.Compute/availabilitySets/', '${instance.availabilitySetName}')]",
+                    </#if>
                        "[concat('Microsoft.Network/networkInterfaces/', parameters('nicNamePrefix'), '${instance.instanceId}')]"
                    ],
                    <#if userDefinedTags?? && userDefinedTags?has_content>
