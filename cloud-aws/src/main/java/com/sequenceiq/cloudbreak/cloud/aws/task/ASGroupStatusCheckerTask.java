@@ -43,6 +43,8 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
 
     private static final String CANCELLED = "Cancelled";
 
+    private static final String FAILED = "Failed";
+
     private static final String WAIT_FOR_SPOT_INSTANCES_STATUS_CODE = "WaitingForSpotInstanceId";
 
     private static final String SPOT_ID_PATTERN = "sir-[a-z0-9]{8}";
@@ -90,11 +92,8 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
                 activities = activities.stream().filter(activity -> activity.getStartTime().after(latestActivity.get().getStartTime()))
                         .collect(Collectors.toList());
             }
-            for (Activity activity : activities) {
-                if (activity.getProgress().equals(COMPLETED) && CANCELLED.equals(activity.getStatusCode())) {
-                    throw new CloudConnectorException(activity.getStatusMessage());
-                }
-            }
+            updateLatestActivity(activities);
+            checkFailedActivities(activities);
             return false;
         }
         List<DescribeInstanceStatusResult> describeInstanceStatusResultList = new ArrayList<>();
@@ -123,6 +122,20 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
             }
         }
         return true;
+    }
+
+    private void updateLatestActivity(List<Activity> activities) {
+        if (activities.size() > 0) {
+            this.latestActivity = Optional.ofNullable(activities.get(0));
+        }
+    }
+
+    private void checkFailedActivities(List<Activity> activities) {
+        for (Activity activity : activities) {
+            if (activity.getProgress().equals(COMPLETED) && (CANCELLED.equals(activity.getStatusCode()) || FAILED.equals(activity.getStatusCode()))) {
+                throw new CloudConnectorException(activity.getStatusMessage());
+            }
+        }
     }
 
     private void checkForSpotRequest(Activity activity, AmazonEC2Client amazonEC2Client) {
