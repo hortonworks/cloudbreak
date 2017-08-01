@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
@@ -22,7 +21,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
@@ -45,9 +43,6 @@ public class DependecyDeletionService {
 
     @Inject
     private SssdConfigRepository sssdConfigRepository;
-
-    @Inject
-    private LdapConfigRepository ldapConfigRepository;
 
     @Inject
     private RecipeRepository recipeRepository;
@@ -73,7 +68,6 @@ public class DependecyDeletionService {
             Cluster cluster = stack.getCluster();
             deleteBlueprint(cluster.getBlueprint());
             deleteSssd(cluster.getSssdConfig());
-            deleteLdap(cluster.getLdapConfig());
             Set<HostGroup> hostGroupsInCluster = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
             for (HostGroup hostGroup : hostGroupsInCluster) {
                 hostGroup.getRecipes().forEach(this::deleteRecipe);
@@ -138,16 +132,6 @@ public class DependecyDeletionService {
             }
         } catch (Exception ex) {
             LOGGER.warn("Could not delete sssdConfig {} which is associated with the stack: {}", sssdConfig, ex.getMessage());
-        }
-    }
-
-    private void deleteLdap(LdapConfig ldapConfig) {
-        try {
-            if (ldapConfig != null) {
-                ldapConfigRepository.delete(ldapConfig);
-            }
-        } catch (Exception ex) {
-            LOGGER.warn("Could not delete ldapConfig {} which is associated with the stack: {}", ldapConfig, ex.getMessage());
         }
     }
 
