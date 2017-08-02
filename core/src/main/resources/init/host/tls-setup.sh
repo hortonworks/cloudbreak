@@ -5,12 +5,18 @@ setup_cbclient_cert() {
   sudo cp /tmp/cb-client.pem /etc/certs
 }
 
-create_certificates() {
+create_certificates_cert_tool() {
+  echo n | sudo cert-tool -d=/etc/certs -o=gateway -s localhost -s 127.0.0.1 -s ${publicIp}
+  sudo rm /etc/certs/client-key.pem /etc/certs/client.pem /etc/certs/ca-key.pem
+  sudo cp /etc/certs/server.pem /tmp/server.pem
+}
+
+create_certificates_certm() {
 
   CBD_CERT_ROOT_PATH=/etc/certs
 
-  sudo cert-tool -d $CBD_CERT_ROOT_PATH ca generate -o=gateway --overwrite
-  sudo cert-tool -d $CBD_CERT_ROOT_PATH client generate --common-name=${publicIp} -o=gateway --overwrite
+  sudo certm -d $CBD_CERT_ROOT_PATH ca generate -o=gateway --overwrite
+  sudo certm -d $CBD_CERT_ROOT_PATH client generate --common-name=${publicIp} -o=gateway --overwrite
   sudo mv $CBD_CERT_ROOT_PATH/cert.pem $CBD_CERT_ROOT_PATH/cluster.pem
   sudo cp /etc/certs/cluster.pem /tmp/cluster.pem
   sudo mv $CBD_CERT_ROOT_PATH/key.pem $CBD_CERT_ROOT_PATH/cluster-key.pem
@@ -27,7 +33,14 @@ start_nginx() {
 
 setup_tls() {
   setup_cbclient_cert
-  create_certificates
+  if [[ -f /sbin/certm ]]
+  then
+    echo "certm exists on the fs"
+    create_certificates_certm
+  else
+    echo "cert-tool exists on the fs (backward compatibility)"
+    create_certificates_cert_tool
+  fi
   start_nginx
 }
 
