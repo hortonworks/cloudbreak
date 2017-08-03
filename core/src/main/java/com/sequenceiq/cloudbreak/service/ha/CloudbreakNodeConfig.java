@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class CloudbreakNodeConfig {
 
-    @Value("${cb.instance.node.uuid:}")
+    @Value("${cb.instance.node.id:}")
     private String id;
 
     @Value("${cb.instance.uuid:}")
