@@ -108,6 +108,10 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         }
         stackJson.setCreated(source.getCreated());
         stackJson.setGatewayPort(source.getGatewayPort());
+        stackJson.setCustomDomain(source.getCustomDomain());
+        stackJson.setCustomHostname(source.getCustomHostname());
+        stackJson.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
+        stackJson.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
         addNodeCount(source, stackJson);
         putSubnetIdIntoResponse(source, stackJson);
         putVpcIdIntoResponse(source, stackJson);

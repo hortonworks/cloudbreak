@@ -317,7 +317,13 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "instanceProfile", help = "instance profile which will attached to the instance", specifiedDefaultValue = "false")
                     String instanceProfile,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout,
+            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack", mandatory = false) String customDomain,
+            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack", mandatory = false) String customHostname,
+            @CliOption(key = "clusterNameAsSubdomain", help = "Using the cluster name for subdomain", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "true", mandatory = false) boolean clusterNameAsSubdomain,
+            @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
+            specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
 
         Map<String, String> params = new HashMap<>();
         if (dedicatedInstances != null) {
@@ -335,7 +341,8 @@ public class AwsCommands implements CommandMarker {
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
-                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout);
+                ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
+                customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }
 
 }

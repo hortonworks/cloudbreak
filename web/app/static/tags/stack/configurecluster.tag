@@ -287,6 +287,35 @@
     </div>
 </div>
 
+<div class="form-group" ng-show="showAdvancedOptionForm" ng-class="{ 'has-error': clusterCreationForm.cl_customDomain.$dirty && clusterCreationForm.cl_customDomain.$invalid }">
+    <label class="col-sm-3 control-label" for="cl_customDomain">{{msg.cluster_form_custom_domain_label}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="cl_customDomain" class="form-control" id="cl_customDomain" placeholder="{{$root.settings.domain.defaultCustomDomain}}" ng-model="cluster.customDomain" ng-pattern="/^[a-z.][.a-z0-9]*[.a-z0-9]$/" ng-minlength="5" ng-maxlength="255">
+        <div class="help-block" ng-show="clusterCreationForm.cl_customDomain.$dirty && clusterCreationForm.cl_customDomain.$invalid"><i class="fa fa-warning"></i> {{msg.custom_domain_invalid}}
+        </div>
+    </div>
+</div>
+<div class="form-group" ng-show="showAdvancedOptionForm">
+    <label class="col-sm-3 control-label" for="clusterNameAsSubdomain">{{msg.cluster_form_subdomain_label}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" id="clusterNameAsSubdomain" ng-model="cluster.clusterNameAsSubdomain" name="clusterNameAsSubdomain">
+    </div>
+</div>
+<div class="form-group" ng-show="showAdvancedOptionForm">
+    <label class="col-sm-3 control-label" for="useHostgroupAsHostname">{{msg.cluster_form_hostgroup_hostname_label}}</label>
+    <div class="col-sm-8">
+        <input type="checkbox" id="useHostgroupAsHostname" ng-model="cluster.hostgroupNameAsHostname" name="useHostgroupAsHostname">
+    </div>
+</div>
+<div class="form-group" ng-show="showAdvancedOptionForm && !cluster.hostgroupNameAsHostname" ng-class="{ 'has-error': clusterCreationForm.cl_customHostname.$dirty && clusterCreationForm.cl_customHostname.$invalid }">
+    <label class="col-sm-3 control-label" for="cl_customHostname">{{msg.cluster_form_custom_hostname_label}}</label>
+    <div class="col-sm-8">
+        <input type="text" name="cl_customHostname" class="form-control" id="cl_customHostname" placeholder="{{msg.cluster_form_custom_hostname_placeholder}}" ng-model="cluster.customHostname" ng-pattern="/^[a-z][-a-z0-9]*[a-z0-9]$/" ng-minlength="5" ng-maxlength="100">
+        <div class="help-block" ng-show="clusterCreationForm.cl_customHostname.$dirty && clusterCreationForm.cl_customHostname.$invalid"><i class="fa fa-warning"></i> {{msg.custom_hostname_invalid}}
+        </div>
+    </div>
+</div>
+
 <div class="form-group">
     <div class="col-sm-11">
         <div class="btn-group btn-group-justified" role="group" style="padding-top: 40px" aria-label="...">

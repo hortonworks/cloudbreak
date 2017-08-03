@@ -91,6 +91,10 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         if (source.getNetwork() != null) {
             stack.setNetwork(getConversionService().convert(source.getNetwork(), Network.class));
         }
+        stack.setCustomDomain(source.getCustomDomain());
+        stack.setCustomHostname(source.getCustomHostname());
+        stack.setClusterNameAsSubdomain(source.isClusterNameAsSubdomain());
+        stack.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
 
         stack.setUuid(UUID.randomUUID().toString());
         validateCustomImage(source);

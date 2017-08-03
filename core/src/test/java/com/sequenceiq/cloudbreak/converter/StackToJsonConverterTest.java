@@ -193,6 +193,10 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         stack.setParameters(new HashMap<>());
         stack.setCloudPlatform("OPENSTACK");
         stack.setGatewayPort(9443);
+        stack.setCustomDomain("custom.domain");
+        stack.setCustomHostname("hostname");
+        stack.setHostgroupNameAsHostname(false);
+        stack.setClusterNameAsSubdomain(false);
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);
         stack.setResources(Collections.singleton(s3ArnResource));
         return stack;

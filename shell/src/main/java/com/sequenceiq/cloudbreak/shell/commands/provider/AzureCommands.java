@@ -407,7 +407,13 @@ public class AzureCommands implements CommandMarker {
             String persistentStorage,
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout,
+            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack", mandatory = false) String customDomain,
+            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack", mandatory = false) String customHostname,
+            @CliOption(key = "clusterNameAsSubdomain", help = "Using the cluster name for subdomain", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "true", mandatory = false) boolean clusterNameAsSubdomain,
+            @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
 
             orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
             if (SALT.equals(orchestratorType.getName())) {
@@ -436,6 +442,6 @@ public class AzureCommands implements CommandMarker {
             }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params,
-                TagParser.parseTagsIntoMap(tags), customImage, timeout);
+                TagParser.parseTagsIntoMap(tags), customImage, timeout, customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }
 }

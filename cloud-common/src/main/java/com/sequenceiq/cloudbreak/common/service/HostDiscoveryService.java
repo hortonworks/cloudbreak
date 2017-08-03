@@ -14,41 +14,62 @@ public class HostDiscoveryService {
     @Value("${cb.host.discovery.custom.domain:}")
     private String customDomain;
 
-    @Value("${cb.host.discovery.custom.hostname.enabled:}")
-    private Boolean enabledCustomHostNames;
-
     /*
      * Determines the cluster domain. If the 'cb.host.discovery.custom.domain' variable is not
      * defined it returns null. Null means we're going to use the cloud provider's default domain.
      * If 'cb.host.discovery.custom.hostname.enabled' is set to true the domain will have a sub-domain as well
      * to be able to connect multiple clusters by hostname.
      */
-    public String determineDomain(String subDomain) {
-        subDomain = subDomain == null ? "" : subDomain;
-        if (enabledCustomHostNames == null || !enabledCustomHostNames) {
-            subDomain = "";
-        }
-        String domainName = null;
-        if (StringUtils.isNoneBlank(customDomain)) {
-            if (customDomain.startsWith(".")) {
-                domainName = subDomain + customDomain;
+    public String determineDomain(String domain, String subDomain, boolean useSubDomain) {
+        String result = null;
+        String domainName = getCustomDomainName(domain);
+        if (StringUtils.isNoneBlank(domainName)) {
+            String sub = getSubDomain(subDomain, useSubDomain);
+            if (domainName.startsWith(".")) {
+                result = sub + domainName;
             } else {
-                domainName = subDomain + "." + customDomain;
+                result = sub + "." + domainName;
             }
-            LOGGER.info("Custom domain defined: {}", domainName);
+            LOGGER.info("Custom domain defined: {}", result);
 
         }
-        return domainName;
+        return result;
+    }
+
+    private String getCustomDomainName(String domain) {
+        if (StringUtils.isNoneBlank(domain)) {
+            return domain;
+        }
+        if (StringUtils.isNoneBlank(customDomain)) {
+            return customDomain;
+        }
+        return null;
+    }
+
+    private String getSubDomain(String subDomain, boolean useSubDomain) {
+        String result = subDomain == null ? "" : subDomain;
+        if (!useSubDomain) {
+            result = "";
+        }
+        return result;
     }
 
     /*
      * It generates a hostname based on the instance group name and the node's private id
      * if the 'cb.host.discovery.custom.hostname.enabled' is set to true. Otherwise returns empty string.
      */
-    public String generateHostname(String instanceGroupName, long privateId) {
-        if (enabledCustomHostNames == null || !enabledCustomHostNames) {
+    public String generateHostname(String customHostname, String instanceGroupName, long privateId, boolean useInstanceGroupName) {
+        if (StringUtils.isBlank(customHostname) && !useInstanceGroupName) {
             return "";
         }
-        return instanceGroupName.replaceAll("_", "") + privateId;
+        return getHostname(customHostname, instanceGroupName).replaceAll("_", "") + privateId;
     }
+
+    private String getHostname(String customHostname, String instanceGroupName) {
+        if (StringUtils.isNoneBlank(customHostname)) {
+            return customHostname;
+        }
+        return instanceGroupName;
+    }
+
 }

@@ -96,7 +96,7 @@ public class SaltOrchestratorTest {
         PowerMockito.whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
         parallelOrchestratorComponentRunner = mock(ParallelOrchestratorComponentRunner.class);
         when(parallelOrchestratorComponentRunner.submit(any())).thenReturn(CompletableFuture.completedFuture(true));
-        when(hostDiscoveryService.determineDomain("test")).thenReturn(".example.com");
+        when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
         exitCriteria = mock(ExitCriteria.class);
         exitCriteriaModel = mock(ExitCriteriaModel.class);
     }

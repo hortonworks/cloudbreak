@@ -138,12 +138,13 @@ public class ClusterBootstrapper {
     @SuppressWarnings("unchecked")
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();
-        String domain = hostDiscoveryService.determineDomain(stack.getName());
+        String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
         for (InstanceMetaData im : stack.getRunningInstanceMetaData()) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.warn("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
             } else {
-                String generatedHostName = hostDiscoveryService.generateHostname(im.getInstanceGroupName(), im.getPrivateId());
+                String generatedHostName = hostDiscoveryService.generateHostname(stack.getCustomHostname(), im.getInstanceGroupName(),
+                        im.getPrivateId(), stack.isHostgroupNameAsHostname());
                 nodes.add(new Node(im.getPrivateIp(), im.getPublicIpWrapper(), generatedHostName, domain, im.getInstanceGroupName()));
             }
         }
@@ -254,7 +255,7 @@ public class ClusterBootstrapper {
                 .filter(im -> im.getPrivateIp() != null && im.getPublicIpWrapper() != null).collect(Collectors.toSet());
         String clusterDomain = metaDataSet.stream().filter(im -> isNoneBlank(im.getDiscoveryFQDN())).findAny().get().getDomain();
         for (InstanceMetaData im : metaDataSet) {
-            Node node = createNode(im, clusterDomain);
+            Node node = createNode(stack.getCustomHostname(), im, clusterDomain, stack.isHostgroupNameAsHostname());
             if (upscaleCandidateAddresses.contains(im.getPrivateIp())) {
                 // use the hostname of the node we're recovering instead of generating a new one
                 // but only when we would have generated a hostname, otherwise use the cloud provider's default mechanism
@@ -370,12 +371,12 @@ public class ClusterBootstrapper {
      * Even if the domain has changed keep the rest of the nodes domain.
      * Note: if we recovered a node the private id is not the same as it is in the hostname
      */
-    private Node createNode(InstanceMetaData im, String domain) {
+    private Node createNode(String customHostname, InstanceMetaData im, String domain, boolean hostgroupAsHostname) {
         String discoveryFQDN = im.getDiscoveryFQDN();
         if (isNoneBlank(discoveryFQDN)) {
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), im.getShortHostname(), domain, im.getInstanceGroupName());
         } else {
-            String hostname = hostDiscoveryService.generateHostname(im.getInstanceGroupName(), im.getPrivateId());
+            String hostname = hostDiscoveryService.generateHostname(customHostname, im.getInstanceGroupName(), im.getPrivateId(), hostgroupAsHostname);
             return new Node(im.getPrivateIp(), im.getPublicIpWrapper(), hostname, domain, im.getInstanceGroupName());
         }
     }
