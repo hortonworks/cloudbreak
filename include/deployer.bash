@@ -199,9 +199,9 @@ init-profile() {
         echo "export CB_INSTANCE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')" >> $CBD_PROFILE
     fi
 
-    if ! [[ "$CB_INSTANCE_NODE_UUID" ]]; then
+    if ! [[ "$CB_INSTANCE_NODE_ID" ]]; then
         debug "Instance node UUID not found, let's generate one"
-        echo "export CB_INSTANCE_NODE_UUID=$(uuidgen | tr '[:upper:]' '[:lower:]')" >> $CBD_PROFILE
+        echo "export CB_INSTANCE_NODE_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')" >> $CBD_PROFILE
     fi 
 
     if ! [[ "$UAA_DEFAULT_SECRET" ]]; then
