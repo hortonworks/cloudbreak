@@ -16,6 +16,7 @@ public class ClusterConverter extends AbstractConverter<ClusterJson, Cluster> {
         json.setHost(source.getHost());
         json.setPort(source.getPort());
         json.setState(source.getState().name());
+        json.setAutoscalingEnabled(source.isAutoscalingEnabled());
         return json;
     }
 

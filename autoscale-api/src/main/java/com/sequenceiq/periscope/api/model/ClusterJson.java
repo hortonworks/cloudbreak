@@ -23,6 +23,9 @@ public class ClusterJson implements Json {
     @ApiModelProperty(ClusterJsonProperties.STACKID)
     private Long stackId;
 
+    @ApiModelProperty(ClusterJsonProperties.AUTOSCALING_ENABLED)
+    private boolean autoscalingEnabled;
+
     public ClusterJson() {
     }
 
@@ -64,5 +67,13 @@ public class ClusterJson implements Json {
 
     public void setStackId(Long stackId) {
         this.stackId = stackId;
+    }
+
+    public boolean isAutoscalingEnabled() {
+        return autoscalingEnabled;
+    }
+
+    public void setAutoscalingEnabled(boolean autoscalingEnabled) {
+        this.autoscalingEnabled = autoscalingEnabled;
     }
 }

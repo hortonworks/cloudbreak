@@ -1,5 +1,8 @@
 package com.sequenceiq.periscope.rest.controller;
 
+import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
+import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
+
 import java.util.List;
 
 import javax.inject.Inject;
@@ -8,11 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.periscope.api.model.AmbariJson;
 import com.sequenceiq.periscope.api.model.ClusterJson;
-import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.domain.Ambari;
@@ -106,22 +109,24 @@ public class ClusterController implements ClusterEndpoint {
 
     private ClusterJson setCluster(PeriscopeUser user, AmbariJson json, Long clusterId) {
         Ambari ambari = ambariConverter.convert(json);
-        boolean access = clusterSecurityService.hasAccess(user, ambari, json.getStackId());
+        Long stackId = json.getStackId();
+        boolean access = clusterSecurityService.hasAccess(user, ambari, stackId);
         if (!access) {
             String host = ambari.getHost();
             LOGGER.info("Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
             throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
         } else {
             Cluster cluster;
-            if (json.getStackId() != null && ClusterState.PENDING.equals(json.getClusterState())) {
-                AmbariStack ambariStack = new AmbariStack(ambari, json.getStackId(), null);
-                cluster = clusterService.create(user, ambariStack, json.getClusterState());
+            boolean enableAutoscaling = json.isEnableAutoscaling();
+            if (!hasAmbariConnectionDetailsSpecified(json)) {
+                AmbariStack ambariStack = new AmbariStack(ambari, stackId, null);
+                cluster = clusterService.create(user, ambariStack, PENDING, enableAutoscaling);
             } else {
                 AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);
                 if (clusterId == null) {
-                    cluster = clusterService.create(user, resolvedAmbari, null);
+                    cluster = clusterService.create(user, resolvedAmbari, RUNNING, enableAutoscaling);
                 } else {
-                    cluster = clusterService.update(clusterId, resolvedAmbari);
+                    cluster = clusterService.update(clusterId, resolvedAmbari, enableAutoscaling);
                 }
             }
             createHistoryAndNotification(cluster);
@@ -129,9 +134,14 @@ public class ClusterController implements ClusterEndpoint {
         }
     }
 
+    private boolean hasAmbariConnectionDetailsSpecified(AmbariJson json) {
+        return !StringUtils.isEmpty(json.getHost())
+                && !StringUtils.isEmpty(json.getPort());
+    }
+
     private void createHistoryAndNotification(Cluster cluster) {
         History history;
-        if (ClusterState.RUNNING.equals(cluster.getState())) {
+        if (cluster.isAutoscalingEnabled()) {
             history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
         } else {
             history = historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", 0, cluster);

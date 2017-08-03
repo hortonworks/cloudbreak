@@ -83,14 +83,14 @@ public class ClusterCreationEvaluator implements Runnable {
             if (PENDING.equals(cluster.getState()) || SUSPENDED.equals(cluster.getState())) {
                 ambariHealthCheck(cluster.getUser(), resolvedAmbari);
                 LOGGER.info("Update cluster and set it's state to 'RUNNING' for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
-                cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING);
+                cluster = clusterService.update(cluster.getId(), resolvedAmbari, false, RUNNING, cluster.isAutoscalingEnabled());
                 sendNotification = true;
             }
         } else {
             LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
             PeriscopeUser user = new PeriscopeUser(stack.getOwner(), null, stack.getAccount());
             ambariHealthCheck(user, resolvedAmbari);
-            cluster = clusterService.create(user, resolvedAmbari, null);
+            cluster = clusterService.create(user, resolvedAmbari, null, false);
             sendNotification = true;
         }
         if (sendNotification) {

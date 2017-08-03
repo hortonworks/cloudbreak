@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.api.model;
 
+import javax.validation.constraints.NotNull;
+
 import com.sequenceiq.periscope.doc.ApiDescription.AmbariJsonProperties;
 
 import io.swagger.annotations.ApiModel;
@@ -21,25 +23,26 @@ public class AmbariJson implements Json {
     private String pass;
 
     @ApiModelProperty(AmbariJsonProperties.STACK_ID)
+    @NotNull
     private Long stackId;
 
-    @ApiModelProperty(AmbariJsonProperties.CLUSTER_STATE)
-    private ClusterState clusterState;
+    @ApiModelProperty(AmbariJsonProperties.ENABLE_AUTOSCALING)
+    private boolean enableAutoscaling;
 
     public AmbariJson() {
     }
 
     public AmbariJson(String host, String port, String user, String pass) {
-        this(host, port, user, pass, null, null);
+        this(host, port, user, pass, null, false);
     }
 
-    public AmbariJson(String host, String port, String user, String pass, Long stackId, ClusterState clusterState) {
+    public AmbariJson(String host, String port, String user, String pass, Long stackId, boolean enableAutoscaling) {
         this.host = host;
         this.port = port;
         this.user = user;
         this.pass = pass;
         this.stackId = stackId;
-        this.clusterState = clusterState;
+        this.enableAutoscaling = enableAutoscaling;
     }
 
     public String getHost() {
@@ -82,11 +85,11 @@ public class AmbariJson implements Json {
         this.stackId = stackId;
     }
 
-    public ClusterState getClusterState() {
-        return clusterState;
+    public boolean isEnableAutoscaling() {
+        return enableAutoscaling;
     }
 
-    public void setClusterState(ClusterState clusterState) {
-        this.clusterState = clusterState;
+    public void setEnableAutoscaling(boolean enableAutoscaling) {
+        this.enableAutoscaling = enableAutoscaling;
     }
 }

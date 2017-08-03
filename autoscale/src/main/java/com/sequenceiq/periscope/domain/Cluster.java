@@ -79,6 +79,9 @@ public class Cluster {
     @Column(name = "last_scaling_activity")
     private volatile long lastScalingActivity;
 
+    @Column(name = "autoscaling_enabled")
+    private boolean autoscalingEnabled;
+
     public Cluster() {
     }
 
@@ -234,6 +237,14 @@ public class Cluster {
 
     public void addPrometheusAlert(PrometheusAlert alert) {
         this.prometheusAlerts.add(alert);
+    }
+
+    public boolean isAutoscalingEnabled() {
+        return autoscalingEnabled;
+    }
+
+    public void setAutoscalingEnabled(boolean autoscalingEnabled) {
+        this.autoscalingEnabled = autoscalingEnabled;
     }
 }
 

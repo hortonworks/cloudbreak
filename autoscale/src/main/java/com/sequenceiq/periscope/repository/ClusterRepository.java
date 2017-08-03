@@ -19,4 +19,6 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     List<Cluster> findAllByUser(@Param("id") String id);
 
     List<Cluster> findAllByState(@Param("state") ClusterState state);
+
+    List<Cluster> findByStateAndAutoscalingEnabled(ClusterState state, boolean autoscalingEnabled);
 }
