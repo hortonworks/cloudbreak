@@ -166,6 +166,8 @@ public class AutoscaleClient {
 
         private boolean secure = true;
 
+        private boolean ignorePreValidation;
+
         public AutoscaleClientBuilder(String autoscaleAddress, String identityServerAddress, String clientId) {
             this.autoscaleAddress = autoscaleAddress;
             this.identityServerAddress = identityServerAddress;
@@ -193,8 +195,13 @@ public class AutoscaleClient {
             return this;
         }
 
+        public AutoscaleClientBuilder withIgnorePreValidation(boolean ignorePreValidation) {
+            this.ignorePreValidation = ignorePreValidation;
+            return this;
+        }
+
         public AutoscaleClient build() {
-            ConfigKey configKey = new ConfigKey(secure, debug);
+            ConfigKey configKey = new ConfigKey(secure, debug, ignorePreValidation);
             if (secret != null) {
                 return new AutoscaleClient(autoscaleAddress, identityServerAddress, secret, clientId, configKey);
             } else {

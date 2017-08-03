@@ -77,7 +77,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.recipe.execution.retry:90}")
     private int maxRetryRecipe;
 
-    @Value("${rest.debug:false}")
+    @Value("${rest.debug}")
     private boolean restDebug;
 
     @Value("${cb.smartsense.configure:false}")

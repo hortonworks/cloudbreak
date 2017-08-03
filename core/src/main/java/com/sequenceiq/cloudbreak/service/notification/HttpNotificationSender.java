@@ -24,7 +24,7 @@ public class HttpNotificationSender implements NotificationSender {
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
-    private Client restClient = RestClientUtil.get(new ConfigKey(false, false));
+    private Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
 
     @Override
     public void send(Notification notification) {

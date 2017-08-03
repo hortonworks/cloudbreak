@@ -10,19 +10,21 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.ws.rs.client.Client;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.client.AccessToken;
+import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -42,8 +44,14 @@ public class CachedUserDetailsService {
     @Named("identityServerUrl")
     private String identityServerUrl;
 
-    @Inject
-    private Client restClient;
+    @Value("${rest.debug}")
+    private boolean restDebug;
+
+    @Value("${cert.validation}")
+    private boolean certificateValidation;
+
+    @Value("${cert.ignorePreValidation}")
+    private boolean ignorePreValidation;
 
     @Inject
     private IdentityClient identityClient;
@@ -52,7 +60,8 @@ public class CachedUserDetailsService {
 
     @PostConstruct
     public void init() {
-        identityWebTarget = restClient.target(identityServerUrl).path("Users");
+        ConfigKey configKey = new ConfigKey(certificateValidation, restDebug, ignorePreValidation);
+        identityWebTarget = RestClientUtil.get(configKey).target(identityServerUrl).path("Users");
     }
 
     @Cacheable(cacheNames = "userCache", key = "#username")

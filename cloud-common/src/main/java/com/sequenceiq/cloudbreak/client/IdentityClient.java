@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.client;
 
 import static javax.ws.rs.core.Response.Status.fromStatusCode;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,6 +18,9 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.oauth2.common.exceptions.InvalidTokenException;
+import org.springframework.util.Assert;
 
 public class IdentityClient {
 
@@ -30,14 +34,22 @@ public class IdentityClient {
 
     private final WebTarget authorizeWebTarget;
 
+    private final WebTarget checkTokenWebTarget;
+
     private final WebTarget tokenWebTarget;
+
+    private final ConfigKey configKey;
+
+    private String tokenName = "token";
 
     public IdentityClient(String identityServerAddress, String clientId, ConfigKey configKey) {
         this.identityServerAddress = identityServerAddress;
         this.clientId = clientId;
+        this.configKey = configKey;
         WebTarget identityWebTarget = RestClientUtil.get(configKey).target(identityServerAddress);
         authorizeWebTarget = identityWebTarget.path("/oauth/authorize").queryParam("response_type", "token").queryParam("client_id", clientId);
         tokenWebTarget = identityWebTarget.path("/oauth/token").queryParam("grant_type", "client_credentials");
+        checkTokenWebTarget = identityWebTarget.path("/check_token");
         LOGGER.info("IdentityClient has been created. identity: {}, clientId: {}, configKey: {}", identityServerAddress, clientId, configKey);
     }
 
@@ -89,4 +101,24 @@ public class IdentityClient {
         }
     }
 
+    // Based on this implementation org.springframework.security.oauth2.provider.token.RemoteTokenServices because we need specific headers
+    public Map<String, Object> loadAuthentication(String accessToken, String clientSecret) throws AuthenticationException, InvalidTokenException {
+        MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+        formData.add(tokenName, accessToken);
+        MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
+        headers.add("Authorization", "Basic " + Base64.encodeBase64String((clientId + ":" + clientSecret).getBytes()));
+        Map<String, Object> response = checkTokenWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+                .headers(headers).post(Entity.form(formData), Map.class);
+
+        if (response.containsKey("error")) {
+            throw new InvalidTokenException(accessToken);
+        }
+
+        Assert.state(response.containsKey("client_id"), "Client id must be present in response from auth server");
+        return response;
+    }
+
+    public Map<String, Object> readAccessToken(String accessToken) {
+        throw new UnsupportedOperationException("Not supported: read access token");
+    }
 }

@@ -51,7 +51,12 @@ public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTe
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
         AutoscaleClient autoscaleClient = new AutoscaleClient.AutoscaleClientBuilder(periscopeServer + autoscaleRootContextPath,
-                        identity, "cloudbreak_shell").withCertificateValidation(false).withDebug(true).withCredential(user, password).build();
+                        identity, "cloudbreak_shell")
+                .withCertificateValidation(false)
+                .withDebug(true)
+                .withCredential(user, password)
+                .withIgnorePreValidation(false)
+                .build();
 
         itContext.putContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT, autoscaleClient);
     }
