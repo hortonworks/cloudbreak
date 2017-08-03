@@ -14,8 +14,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -24,11 +22,6 @@ import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.model.AmbariStack;
 
 @Entity
-@NamedQueries({
-        @NamedQuery(name = "Cluster.findAllByUser", query = "SELECT c FROM Cluster c WHERE c.user.id= :id"),
-        @NamedQuery(name = "Cluster.find", query = "SELECT c FROM Cluster c WHERE c.id= :id"),
-        @NamedQuery(name = "Cluster.findAllByState", query = "SELECT c FROM Cluster c WHERE c.state= :state")
-})
 public class Cluster {
 
     private static final int DEFAULT_MIN_SIZE = 3;

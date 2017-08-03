@@ -14,11 +14,11 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
     @PostAuthorize("hasPermission(returnObject,'read')")
     Cluster findOne(@Param("id") Long id);
 
-    Cluster find(@Param("id") Long id);
+    Cluster findById(Long id);
 
-    List<Cluster> findAllByUser(@Param("id") String id);
+    List<Cluster> findByUserId(String id);
 
-    List<Cluster> findAllByState(@Param("state") ClusterState state);
+    List<Cluster> findByState(ClusterState state);
 
     List<Cluster> findByStateAndAutoscalingEnabled(ClusterState state, boolean autoscalingEnabled);
 }

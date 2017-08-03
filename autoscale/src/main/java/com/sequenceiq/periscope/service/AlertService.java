@@ -95,7 +95,7 @@ public class AlertService {
 
     public void deleteMetricAlert(long clusterId, long alertId) {
         metricAlertRepository.findByCluster(alertId, clusterId);
-        Cluster cluster = clusterRepository.find(clusterId);
+        Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setMetricAlerts(removeMetricAlert(cluster, alertId));
         metricAlertRepository.delete(alertId);
         clusterRepository.save(cluster);
@@ -237,7 +237,7 @@ public class AlertService {
 
     public void deletePrometheusAlert(long clusterId, long alertId) {
         PrometheusAlert alert = prometheusAlertRepository.findByCluster(alertId, clusterId);
-        Cluster cluster = clusterRepository.find(clusterId);
+        Cluster cluster = clusterRepository.findById(clusterId);
         consulKeyValueService.deleteAlert(cluster, alert);
         Set<PrometheusAlert> alerts = cluster.getPrometheusAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
         cluster.setPrometheusAlerts(alerts);

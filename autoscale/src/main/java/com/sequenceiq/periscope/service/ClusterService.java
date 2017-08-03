@@ -86,7 +86,7 @@ public class ClusterService {
     }
 
     public List<Cluster> findAllByUser(PeriscopeUser user) {
-        return clusterRepository.findAllByUser(user.getId());
+        return clusterRepository.findByUserId(user.getId());
     }
 
     public Cluster findOneById(long clusterId) {
@@ -98,7 +98,7 @@ public class ClusterService {
     }
 
     public Cluster find(long clusterId) {
-        return clusterRepository.find(clusterId);
+        return clusterRepository.findById(clusterId);
     }
 
     public void removeOne(long clusterId) {
@@ -136,7 +136,7 @@ public class ClusterService {
     }
 
     public List<Cluster> findAll(ClusterState state) {
-        return clusterRepository.findAllByState(state);
+        return clusterRepository.findByState(state);
     }
 
     public List<Cluster> findAll() {
