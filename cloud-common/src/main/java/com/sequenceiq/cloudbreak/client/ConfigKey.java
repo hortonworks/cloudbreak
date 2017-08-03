@@ -15,12 +15,6 @@ public class ConfigKey {
 
     private final boolean ignorePreValidation;
 
-    public ConfigKey(boolean secure, boolean debug) {
-        this.secure = secure;
-        this.debug = debug;
-        this.ignorePreValidation = false;
-    }
-
     public ConfigKey(boolean secure, boolean debug, boolean ignorePreValidation) {
         this.secure = secure;
         this.debug = debug;

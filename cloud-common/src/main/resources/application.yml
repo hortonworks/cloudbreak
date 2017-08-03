@@ -11,6 +11,12 @@ spring:
   datasource:
     maxActive: 30
 
+rest:
+  debug: false
+cert:
+  validation: true
+  ignorePreValidation: false
+
 cb:
   publicip:
   etc.config.dir: /etc/cloudbreak
@@ -28,6 +34,7 @@ cb:
 
   cert:
     dir: /certs/
+
 
   tls:
     private.key.file: client-key.pem

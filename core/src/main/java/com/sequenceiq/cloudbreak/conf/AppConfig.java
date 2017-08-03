@@ -90,11 +90,14 @@ public class AppConfig implements ResourceLoaderAware {
     @Value("${cb.client.id}")
     private String clientId;
 
-    @Value("${rest.debug:false}")
+    @Value("${rest.debug}")
     private boolean restDebug;
 
-    @Value("${cert.validation:true}")
+    @Value("${cert.validation}")
     private boolean certificateValidation;
+
+    @Value("${cert.ignorePreValidation}")
+    private boolean ignorePreValidation;
 
     @Inject
     private StackUnderOperationService stackUnderOperationService;
@@ -234,12 +237,12 @@ public class AppConfig implements ResourceLoaderAware {
 
     @Bean
     public IdentityClient identityClient() {
-        return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug));
+        return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
     @Bean
     public Client restClient() {
-        return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug));
+        return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
     @Bean

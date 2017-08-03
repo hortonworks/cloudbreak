@@ -47,11 +47,14 @@ public class AppConfig implements AsyncConfigurer {
     @Named("identityServerUrl")
     private String identityServerUrl;
 
-    @Value("${rest.debug:false}")
+    @Value("${rest.debug}")
     private boolean restDebug;
 
-    @Value("${cert.validation:true}")
+    @Value("${cert.validation}")
     private boolean certificateValidation;
+
+    @Value("${cert.ignorePreValidation}")
+    private boolean ignorePreValidation;
 
     @Bean
     public ThreadPoolExecutorFactoryBean getThreadPoolExecutorFactoryBean() {
@@ -73,12 +76,12 @@ public class AppConfig implements AsyncConfigurer {
 
     @Bean
     public IdentityClient identityClient() {
-        return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug));
+        return new IdentityClient(identityServerUrl, clientId, new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
     @Bean
     public Client restClient() {
-        return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug));
+        return RestClientUtil.get(new ConfigKey(certificateValidation, restDebug, ignorePreValidation));
     }
 
     @Override

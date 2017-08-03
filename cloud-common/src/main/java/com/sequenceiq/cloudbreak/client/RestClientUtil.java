@@ -38,7 +38,7 @@ public class RestClientUtil {
     }
 
     public static synchronized Client get() {
-        return get(new ConfigKey(false, false));
+        return get(new ConfigKey(false, false, false));
     }
 
     public static synchronized Client get(ConfigKey configKey) {

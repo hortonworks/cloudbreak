@@ -4,6 +4,11 @@ server:
 cb:
   server:
     contextPath: "/cb"
+rest:
+  debug: false
+cert:
+  validation: true
+  ignorePreValidation: false
 
 spring:
   cloud:
