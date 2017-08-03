@@ -41,7 +41,6 @@ public class AmbariAgentHealthMonitor extends AbstractMonitor implements Monitor
     public void execute(JobExecutionContext context) throws JobExecutionException {
         evalContext(context);
         List<Cluster> clustersToRecover = getClusterService().findAll(ClusterState.RUNNING);
-        clustersToRecover.addAll(getClusterService().findAll(ClusterState.DISABLED));
         for (Cluster cluster : clustersToRecover) {
             EvaluatorExecutor evaluatorExecutor = getApplicationContext().getBean(getEvaluatorType().getSimpleName(), EvaluatorExecutor.class);
             evaluatorExecutor.setContext(getContext(cluster));

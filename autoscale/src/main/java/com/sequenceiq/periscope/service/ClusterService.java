@@ -38,10 +38,11 @@ public class ClusterService {
     @Inject
     private AlertService alertService;
 
-    public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
+    public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState, boolean enableAutoscaling) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
         validateClusterUniqueness(stack);
         Cluster cluster = new Cluster(periscopeUser, stack);
+        cluster.setAutoscalingEnabled(enableAutoscaling);
         if (clusterState != null) {
             cluster.setState(clusterState);
         }
@@ -55,14 +56,15 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster update(long clusterId, AmbariStack stack) {
-        return update(clusterId, stack, true, null);
+    public Cluster update(long clusterId, AmbariStack stack, boolean enableAutoscaling) {
+        return update(clusterId, stack, true, null, enableAutoscaling);
     }
 
-    public Cluster update(long clusterId, AmbariStack stack, boolean withPermissionCheck, ClusterState clusterState) {
+    public Cluster update(long clusterId, AmbariStack stack, boolean withPermissionCheck, ClusterState clusterState, boolean enableAutoscaling) {
         Cluster cluster = withPermissionCheck ? findOneById(clusterId) : find(clusterId);
         ClusterState newState = clusterState != null ? clusterState : cluster.getState();
         cluster.setState(newState);
+        cluster.setAutoscalingEnabled(enableAutoscaling);
         cluster.update(stack);
         SecurityConfig sSecConf = stack.getSecurityConfig();
         if (sSecConf != null) {
@@ -139,6 +141,10 @@ public class ClusterService {
 
     public List<Cluster> findAll() {
         return Lists.newArrayList(clusterRepository.findAll());
+    }
+
+    public List<Cluster> findAll(ClusterState state, boolean autoscalingEnabled) {
+        return clusterRepository.findByStateAndAutoscalingEnabled(state, autoscalingEnabled);
     }
 
     private PeriscopeUser createUserIfAbsent(PeriscopeUser user) {

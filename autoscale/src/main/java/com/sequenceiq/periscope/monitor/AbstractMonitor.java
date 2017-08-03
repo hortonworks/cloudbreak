@@ -23,7 +23,7 @@ public abstract class AbstractMonitor implements Monitor {
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         evalContext(context);
-        for (Cluster cluster : clusterService.findAll(ClusterState.RUNNING)) {
+        for (Cluster cluster : clusterService.findAll(ClusterState.RUNNING, true)) {
             EvaluatorExecutor evaluatorExecutor = applicationContext.getBean(getEvaluatorType().getSimpleName(), EvaluatorExecutor.class);
             evaluatorExecutor.setContext(getContext(cluster));
             executorService.submit(evaluatorExecutor);

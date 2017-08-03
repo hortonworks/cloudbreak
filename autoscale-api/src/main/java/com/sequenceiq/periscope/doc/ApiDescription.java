@@ -95,7 +95,7 @@ public class ApiDescription {
         public static final String USERNAME = "Ambari server username";
         public static final String PASSWORD = "Ambari server password";
         public static final String STACK_ID = "Id of the stack in Cloudbreak";
-        public static final String CLUSTER_STATE = "Initial state of the cluster";
+        public static final String ENABLE_AUTOSCALING = "Enable or Disable the Autoscaling feature set on the underlying Periscope cluster";
     }
 
     public static class ScalingConfigurationJsonProperties {
@@ -149,6 +149,7 @@ public class ApiDescription {
         public static final String PORT = "Port of the Ambari server";
         public static final String STATE = "State of the cluster";
         public static final String STACKID = "Id of the stack in cloudbreak";
+        public static final String AUTOSCALING_ENABLED = "Indicate that the Autoscaling feature set is enabled or disabled on the underlying Periscope cluster";
     }
 
     public static class HistoryJsonProperties {
