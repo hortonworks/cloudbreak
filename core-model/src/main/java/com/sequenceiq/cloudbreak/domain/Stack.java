@@ -81,6 +81,14 @@ public class Stack implements ProvisionEntity {
 
     private int consulServers;
 
+    private String customDomain;
+
+    private String customHostname;
+
+    private boolean hostgroupNameAsHostname;
+
+    private boolean clusterNameAsSubdomain;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
@@ -562,5 +570,37 @@ public class Stack implements ProvisionEntity {
 
     public void setDatalakeId(Long datalakeId) {
         this.datalakeId = datalakeId;
+    }
+
+    public String getCustomDomain() {
+        return customDomain;
+    }
+
+    public void setCustomDomain(String customDomain) {
+        this.customDomain = customDomain;
+    }
+
+    public String getCustomHostname() {
+        return customHostname;
+    }
+
+    public void setCustomHostname(String customHostname) {
+        this.customHostname = customHostname;
+    }
+
+    public boolean isHostgroupNameAsHostname() {
+        return hostgroupNameAsHostname;
+    }
+
+    public void setHostgroupNameAsHostname(boolean hostgroupNameAsHostname) {
+        this.hostgroupNameAsHostname = hostgroupNameAsHostname;
+    }
+
+    public boolean isClusterNameAsSubdomain() {
+        return clusterNameAsSubdomain;
+    }
+
+    public void setClusterNameAsSubdomain(boolean clusterNameAsSubdomain) {
+        this.clusterNameAsSubdomain = clusterNameAsSubdomain;
     }
 }

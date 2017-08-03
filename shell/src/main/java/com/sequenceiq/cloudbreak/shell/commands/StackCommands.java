@@ -30,7 +30,11 @@ public interface StackCommands {
             Map<String, String> params,
             Map<String, String> userDefinedTags,
             String customImage,
-            Long timeout);
+            Long timeout,
+            String customDomain,
+            String customHostname,
+            boolean clusterNameAsSubdomain,
+            boolean hostgroupNameAsHostname);
 
     StackResponse create(StackRequest stackRequest,
             Boolean publicInAccount,

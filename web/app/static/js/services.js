@@ -434,7 +434,11 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         },
                         platformVariant: cluster.platformVariant,
                         customImage: cluster.customImage == true ? cluster.imageId : null,
-                        flexId: cluster.flexId || null
+                        flexId: cluster.flexId || null,
+                        customDomain: cluster.customDomain || null,
+                        customHostname: cluster.customHostname || null,
+                        clusterNameAsSubdomain: cluster.clusterNameAsSubdomain || false,
+                        hostgroupNameAsHostname: cluster.hostgroupNameAsHostname || false
                     }
                     if (cluster.public) {
                         AccountStack.save(stack, function(result) {

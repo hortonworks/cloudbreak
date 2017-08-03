@@ -117,6 +117,10 @@ public class ModelDescriptions {
         public static final String HARDWARE_INFO_RESPONSE = "hardware information where pairing hostmetadata with instancemetadata";
         public static final String USAGES = "usage information for a specific stack";
         public static final String EVENTS = "related events for a cloudbreak stack";
+        public static final String CUSTOM_DOMAIN = "custom domain name for the nodes in the stack";
+        public static final String CUSTOM_HOSTNAME = "custom hostname for nodes in the stack";
+        public static final String CLUSTER_NAME_AS_SUBDOMAIN = "using the cluster name to create subdomain";
+        public static final String HOSTGROUP_NAME_AS_HOSTNAME = "using the hostgroup names to create hostnames";
     }
 
     public static class ClusterModelDescription {

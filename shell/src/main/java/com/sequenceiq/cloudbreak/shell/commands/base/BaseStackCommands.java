@@ -261,7 +261,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, boolean publicInAccount, OnFailureAction onFailureAction,
             AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, boolean wait, PlatformVariant platformVariant, String orchestrator,
             String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params, Map<String, String> userDefinedTags,
-            String customImage, Long timeout) {
+            String customImage, Long timeout, String customDomain, String customHostname, boolean clusterNameAsSubdomain, boolean hostgroupNameAsHostname) {
         try {
             validateNetwork();
             validateRegion(region);
@@ -290,6 +290,10 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setHdpVersion(hdpVersion);
             stackRequest.setImageCatalog(imageCatalog);
             stackRequest.setCustomImage(customImage);
+            stackRequest.setCustomDomain(customDomain);
+            stackRequest.setCustomHostname(customHostname);
+            stackRequest.setClusterNameAsSubdomain(clusterNameAsSubdomain);
+            stackRequest.setHostgroupNameAsHostname(hostgroupNameAsHostname);
             OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
             orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);

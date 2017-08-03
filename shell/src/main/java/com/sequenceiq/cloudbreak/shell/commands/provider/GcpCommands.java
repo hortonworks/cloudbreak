@@ -315,7 +315,13 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout,
+            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack", mandatory = false) String customDomain,
+            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack", mandatory = false) String customHostname,
+            @CliOption(key = "clusterNameAsSubdomain", help = "Using the cluster name for subdomain", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "true", mandatory = false) boolean clusterNameAsSubdomain,
+            @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
         Map<String, String> params = new HashMap<>();
         if (availabilityZone == null) {
             Collection<String> availabilityZonesByRegion = shellContext.getAvailabilityZonesByRegion(shellContext.getActiveCloudPlatform(), region.getName());
@@ -326,6 +332,7 @@ public class GcpCommands implements CommandMarker {
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion,
-                hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout);
+                hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
+                customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }
 }

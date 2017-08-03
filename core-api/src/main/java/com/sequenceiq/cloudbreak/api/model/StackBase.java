@@ -60,6 +60,18 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.TAGS)
     private Map<String, Object> tags = new HashMap<>();
 
+    @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN)
+    private String customDomain;
+
+    @ApiModelProperty(StackModelDescription.CUSTOM_HOSTNAME)
+    private String customHostname;
+
+    @ApiModelProperty(StackModelDescription.CLUSTER_NAME_AS_SUBDOMAIN)
+    private boolean clusterNameAsSubdomain;
+
+    @ApiModelProperty(StackModelDescription.HOSTGROUP_NAME_AS_HOSTNAME)
+    private boolean hostgroupNameAsHostname;
+
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
     }
@@ -164,5 +176,37 @@ public abstract class StackBase implements JsonEntity {
 
     public void setTags(Map<String, Object> tags) {
         this.tags = tags;
+    }
+
+    public String getCustomDomain() {
+        return customDomain;
+    }
+
+    public void setCustomDomain(String customDomain) {
+        this.customDomain = customDomain;
+    }
+
+    public String getCustomHostname() {
+        return customHostname;
+    }
+
+    public void setCustomHostname(String customHostname) {
+        this.customHostname = customHostname;
+    }
+
+    public boolean isClusterNameAsSubdomain() {
+        return clusterNameAsSubdomain;
+    }
+
+    public void setClusterNameAsSubdomain(boolean clusterNameAsSubdomain) {
+        this.clusterNameAsSubdomain = clusterNameAsSubdomain;
+    }
+
+    public boolean isHostgroupNameAsHostname() {
+        return hostgroupNameAsHostname;
+    }
+
+    public void setHostgroupNameAsHostname(boolean hostgroupNameAsHostname) {
+        this.hostgroupNameAsHostname = hostgroupNameAsHostname;
     }
 }
