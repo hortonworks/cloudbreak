@@ -233,7 +233,6 @@ cloudbreak-conf-defaults() {
     env-import ADDRESS_RESOLVING_TIMEOUT 120000
     env-import CB_UI_MAX_WAIT 400
     env-import CB_HOST_DISCOVERY_CUSTOM_DOMAIN ""
-    env-import CB_HOST_DISCOVERY_CUSTOM_HOSTNAME_ENABLED "false"
     env-import CB_SMARTSENSE_CONFIGURE "false"
     env-import TRAEFIK_MAX_IDLE_CONNECTION 100
     env-import DEFAULT_INBOUND_ACCESS_IP ""
