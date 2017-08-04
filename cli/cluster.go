@@ -162,7 +162,6 @@ func CreateCluster(c *cli.Context) error {
 		asClient.addScalingPolicy,
 		cbClient.GetLdapByName,
 		cbClient.GetClusterByName,
-		cbClient.GetClusterConfig,
 		cbClient.GetFlexSubscriptionByName)
 
 	cbClient.waitForClusterToFinish(stackId, c)
@@ -189,19 +188,25 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64,
 	getLdapConfig func(string) *models_cloudbreak.LdapConfigResponse,
 	getCluster func(name string) *models_cloudbreak.StackResponse,
-	getClusterConfig func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput,
 	getFlexSubscriptionByName func(name string) *models_cloudbreak.FlexSubscriptionResponse) int64 {
 
 	blueprint := getBlueprint(skeleton.ClusterType)
 	dataLake := false
+	hostGroupAndSubDomainHostname := false
 	var connectedClusterRequest *models_cloudbreak.ConnectedClusterRequest = nil
 	bpName := blueprint.BlueprintName
-	if bpName != nil && (*bpName == "hdp26-shared-services" || *bpName == "hdp26-shared-services-ha") {
+	if bpName != nil && *bpName == "hdp26-shared-services" {
 		dataLake = true
+	}
+	if bpName != nil && *bpName == "hdp26-shared-services-ha" {
+		dataLake = true
+		hostGroupAndSubDomainHostname = true
+	}
+	if dataLake {
 		convertClusterInputs(&skeleton)
 	} else if len(skeleton.SharedClusterName) > 0 {
 		log.Infof("[CreateStack] ephemeral cluster name: %s", skeleton.ClusterName)
-		fillSharedParameters(&skeleton, getBlueprint, getCluster, getClusterConfig)
+		fillSharedParameters(&skeleton, getBlueprint, getCluster)
 		connectedClusterRequest = &models_cloudbreak.ConnectedClusterRequest{SourceClusterName: &skeleton.SharedClusterName}
 	}
 
@@ -276,19 +281,21 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		stackReq := models_cloudbreak.StackRequest{
-			Name:             skeleton.ClusterName,
-			CredentialSource: credReq,
-			FailurePolicy:    &models_cloudbreak.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
-			OnFailureAction:  &failureAction,
-			InstanceGroups:   instanceGroups,
-			Parameters:       stackParameters,
-			CloudPlatform:    &platform,
-			PlatformVariant:  &platform,
-			Network:          createNetworkRequest(skeleton, getNetwork),
-			AmbariVersion:    &ambariVersion,
-			HdpVersion:       &skeleton.HDPVersion,
-			Orchestrator:     &orchestrator,
-			Tags:             tags,
+			Name:                    skeleton.ClusterName,
+			CredentialSource:        credReq,
+			FailurePolicy:           &models_cloudbreak.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
+			OnFailureAction:         &failureAction,
+			InstanceGroups:          instanceGroups,
+			Parameters:              stackParameters,
+			CloudPlatform:           &platform,
+			PlatformVariant:         &platform,
+			Network:                 createNetworkRequest(skeleton, getNetwork),
+			AmbariVersion:           &ambariVersion,
+			HdpVersion:              &skeleton.HDPVersion,
+			Orchestrator:            &orchestrator,
+			HostgroupNameAsHostname: &hostGroupAndSubDomainHostname,
+			ClusterNameAsSubdomain:  &hostGroupAndSubDomainHostname,
+			Tags: tags,
 		}
 
 		// flex subscription
@@ -659,8 +666,7 @@ func putToClusterInput(skeleton *ClusterSkeleton, key string, value string) {
 
 func fillSharedParameters(skeleton *ClusterSkeleton,
 	getBlueprint func(string) *models_cloudbreak.BlueprintResponse,
-	getCluster func(string) *models_cloudbreak.StackResponse,
-	getClusterConfig func(int64, []*models_cloudbreak.BlueprintParameter) []*models_cloudbreak.BlueprintInput) {
+	getCluster func(string) *models_cloudbreak.StackResponse) {
 
 	stack := getCluster(skeleton.SharedClusterName)
 	if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
