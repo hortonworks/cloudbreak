@@ -34,9 +34,9 @@ type StackValidationRequest struct {
 
 	/* credential resource name for the stack
 	 */
-	CredentialName *int64 `json:"credentialName,omitempty"`
+	CredentialName *string `json:"credentialName,omitempty"`
 
-	/* file system
+	/* cluster related filesystem
 	 */
 	FileSystem *FileSystem `json:"fileSystem,omitempty"`
 

@@ -46,7 +46,7 @@ func NewGetFullClusterOK() *GetFullClusterOK {
 successful operation
 */
 type GetFullClusterOK struct {
-	Payload *models_cloudbreak.ClusterFullResponse
+	Payload *models_cloudbreak.AutoscaleClusterResponse
 }
 
 func (o *GetFullClusterOK) Error() string {
@@ -55,7 +55,7 @@ func (o *GetFullClusterOK) Error() string {
 
 func (o *GetFullClusterOK) readResponse(response client.Response, consumer httpkit.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(models_cloudbreak.ClusterFullResponse)
+	o.Payload = new(models_cloudbreak.AutoscaleClusterResponse)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {

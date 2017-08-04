@@ -39,6 +39,10 @@ type InstanceMetaData struct {
 	 */
 	InstanceStatus *string `json:"instanceStatus,omitempty"`
 
+	/* type of the instance
+	 */
+	InstanceType *string `json:"instanceType,omitempty"`
+
 	/* private ip of the insctance
 	 */
 	PrivateIP *string `json:"privateIp,omitempty"`
@@ -57,6 +61,11 @@ func (m *InstanceMetaData) Validate(formats strfmt.Registry) error {
 	var res []error
 
 	if err := m.validateInstanceStatus(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateInstanceType(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -92,6 +101,37 @@ func (m *InstanceMetaData) validateInstanceStatus(formats strfmt.Registry) error
 	}
 
 	if err := m.validateInstanceStatusEnum("instanceStatus", "body", *m.InstanceStatus); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var instanceMetaDataTypeInstanceTypePropEnum []interface{}
+
+func (m *InstanceMetaData) validateInstanceTypeEnum(path, location string, value string) error {
+	if instanceMetaDataTypeInstanceTypePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["GATEWAY","GATEWAY_PRIMARY","CORE"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			instanceMetaDataTypeInstanceTypePropEnum = append(instanceMetaDataTypeInstanceTypePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, instanceMetaDataTypeInstanceTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *InstanceMetaData) validateInstanceType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.InstanceType) { // not required
+		return nil
+	}
+
+	if err := m.validateInstanceTypeEnum("instanceType", "body", *m.InstanceType); err != nil {
 		return err
 	}
 

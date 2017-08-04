@@ -86,6 +86,10 @@ type AutoscaleClusterResponse struct {
 	 */
 	EnableShipyard *bool `json:"enableShipyard,omitempty"`
 
+	/* executor type of cluster
+	 */
+	ExecutorType *string `json:"executorType,omitempty"`
+
 	/* gateway
 	 */
 	Gateway *GatewayJSON `json:"gateway,omitempty"`
@@ -183,6 +187,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 		res = append(res, err)
 	}
 
+	if err := m.validateExecutorType(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
 	if err := m.validateHostGroups(formats); err != nil {
 		// prop
 		res = append(res, err)
@@ -258,6 +267,37 @@ func (m *AutoscaleClusterResponse) validateConfigStrategy(formats strfmt.Registr
 	}
 
 	if err := m.validateConfigStrategyEnum("configStrategy", "body", *m.ConfigStrategy); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+var autoscaleClusterResponseTypeExecutorTypePropEnum []interface{}
+
+func (m *AutoscaleClusterResponse) validateExecutorTypeEnum(path, location string, value string) error {
+	if autoscaleClusterResponseTypeExecutorTypePropEnum == nil {
+		var res []string
+		if err := json.Unmarshal([]byte(`["CONTAINER","DEFAULT"]`), &res); err != nil {
+			return err
+		}
+		for _, v := range res {
+			autoscaleClusterResponseTypeExecutorTypePropEnum = append(autoscaleClusterResponseTypeExecutorTypePropEnum, v)
+		}
+	}
+	if err := validate.Enum(path, location, value, autoscaleClusterResponseTypeExecutorTypePropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateExecutorType(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.ExecutorType) { // not required
+		return nil
+	}
+
+	if err := m.validateExecutorTypeEnum("executorType", "body", *m.ExecutorType); err != nil {
 		return err
 	}
 

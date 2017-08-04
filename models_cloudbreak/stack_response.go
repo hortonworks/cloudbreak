@@ -53,6 +53,10 @@ type StackResponse struct {
 	 */
 	Cluster *ClusterResponse `json:"cluster,omitempty"`
 
+	/* using the cluster name to create subdomain
+	 */
+	ClusterNameAsSubdomain *bool `json:"clusterNameAsSubdomain,omitempty"`
+
 	/* creation time of the stack in long
 	 */
 	Created *int64 `json:"created,omitempty"`
@@ -64,6 +68,14 @@ type StackResponse struct {
 	/* credential resource id for the stack
 	 */
 	CredentialID *int64 `json:"credentialId,omitempty"`
+
+	/* custom domain name for the nodes in the stack
+	 */
+	CustomDomain *string `json:"customDomain,omitempty"`
+
+	/* custom hostname for nodes in the stack
+	 */
+	CustomHostname *string `json:"customHostname,omitempty"`
 
 	/* failure policy in case of failures
 	 */
@@ -86,6 +98,10 @@ type StackResponse struct {
 	/* specific version of HDP
 	 */
 	HdpVersion *string `json:"hdpVersion,omitempty"`
+
+	/* using the hostgroup names to create hostnames
+	 */
+	HostgroupNameAsHostname *bool `json:"hostgroupNameAsHostname,omitempty"`
 
 	/* id of the stack
 	 */

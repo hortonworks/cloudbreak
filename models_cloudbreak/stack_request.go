@@ -33,6 +33,14 @@ type StackRequest struct {
 	*/
 	CloudPlatform *string `json:"cloudPlatform,omitempty"`
 
+	/* using the cluster name to create subdomain
+	 */
+	ClusterNameAsSubdomain *bool `json:"clusterNameAsSubdomain,omitempty"`
+
+	/* cluster request object on stack
+	 */
+	ClusterRequest *ClusterRequest `json:"clusterRequest,omitempty"`
+
 	/* stack related credential
 	 */
 	Credential *CredentialRequest `json:"credential,omitempty"`
@@ -44,6 +52,14 @@ type StackRequest struct {
 	/* source credential object for cloning
 	 */
 	CredentialSource *CredentialSourceRequest `json:"credentialSource,omitempty"`
+
+	/* custom domain name for the nodes in the stack
+	 */
+	CustomDomain *string `json:"customDomain,omitempty"`
+
+	/* custom hostname for nodes in the stack
+	 */
+	CustomHostname *string `json:"customHostname,omitempty"`
 
 	/* custom image for the cluster
 	 */
@@ -60,6 +76,10 @@ type StackRequest struct {
 	/* specific version of HDP
 	 */
 	HdpVersion *string `json:"hdpVersion,omitempty"`
+
+	/* using the hostgroup names to create hostnames
+	 */
+	HostgroupNameAsHostname *bool `json:"hostgroupNameAsHostname,omitempty"`
 
 	/* custom image catalog URL
 	 */

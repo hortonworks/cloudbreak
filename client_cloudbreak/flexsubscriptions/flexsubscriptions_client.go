@@ -293,6 +293,33 @@ func (a *Client) PostPublicFlexSubscription(params *PostPublicFlexSubscriptionPa
 }
 
 /*
+PutDefaultFlexSubscriptionByID sets the account default flag on the flex subscription
+
+Flex subscriptions could be configured.
+*/
+func (a *Client) PutDefaultFlexSubscriptionByID(params *PutDefaultFlexSubscriptionByIDParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutDefaultFlexSubscriptionByIDParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "putDefaultFlexSubscriptionById",
+		Method:             "PUT",
+		PathPattern:        "/flexsubscriptions/setdefault/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutDefaultFlexSubscriptionByIDReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
 PutPublicDefaultFlexSubscriptionByName sets the account default flag on the flex subscription
 
 Flex subscriptions could be configured.
@@ -339,6 +366,33 @@ func (a *Client) PutPublicUsedForControllerFlexSubscriptionByName(params *PutPub
 		Schemes:            []string{"http", "https"},
 		Params:             params,
 		Reader:             &PutPublicUsedForControllerFlexSubscriptionByNameReader{formats: a.formats},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+/*
+PutUsedForControllerFlexSubscriptionByID sets the account used for controller flag on the flex subscription
+
+Flex subscriptions could be configured.
+*/
+func (a *Client) PutUsedForControllerFlexSubscriptionByID(params *PutUsedForControllerFlexSubscriptionByIDParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutUsedForControllerFlexSubscriptionByIDParams()
+	}
+
+	_, err := a.transport.Submit(&client.Operation{
+		ID:                 "putUsedForControllerFlexSubscriptionById",
+		Method:             "PUT",
+		PathPattern:        "/flexsubscriptions/setusedforcontroller/{id}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutUsedForControllerFlexSubscriptionByIDReader{formats: a.formats},
 	})
 	if err != nil {
 		return err

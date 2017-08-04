@@ -25,11 +25,11 @@ for the test ldap connection util operation typically these are written to a htt
 type TestLdapConnectionUtilParams struct {
 
 	/*Body*/
-	Body *models_cloudbreak.LdapConfigRequest
+	Body *models_cloudbreak.LdapValidationRequest
 }
 
 // WithBody adds the body to the test ldap connection util params
-func (o *TestLdapConnectionUtilParams) WithBody(body *models_cloudbreak.LdapConfigRequest) *TestLdapConnectionUtilParams {
+func (o *TestLdapConnectionUtilParams) WithBody(body *models_cloudbreak.LdapValidationRequest) *TestLdapConnectionUtilParams {
 	o.Body = body
 	return o
 }
@@ -40,7 +40,7 @@ func (o *TestLdapConnectionUtilParams) WriteToRequest(r client.Request, reg strf
 	var res []error
 
 	if o.Body == nil {
-		o.Body = new(models_cloudbreak.LdapConfigRequest)
+		o.Body = new(models_cloudbreak.LdapValidationRequest)
 	}
 
 	if err := r.SetBodyParam(o.Body); err != nil {
