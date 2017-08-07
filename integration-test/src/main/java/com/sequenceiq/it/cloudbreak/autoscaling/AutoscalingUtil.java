@@ -23,12 +23,11 @@ import com.sequenceiq.periscope.api.endpoint.PolicyEndpoint;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.AlertOperator;
 import com.sequenceiq.periscope.api.model.AlertState;
+import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
 import com.sequenceiq.periscope.api.model.ClusterJson;
-import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
 import com.sequenceiq.periscope.api.model.ScalingConfigurationJson;
 import com.sequenceiq.periscope.api.model.ScalingPolicyJson;
-import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.client.AutoscaleClient;
 
 
@@ -166,10 +165,10 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
         alertEndpoint.deletePrometheusAlarm(clusterId, alertId);
     }
 
-    static void switchAutoscaling(AutoscaleClient autoscaleClient, Long clusterId, ClusterState state) {
+    static void switchAutoscaling(AutoscaleClient autoscaleClient, Long clusterId, boolean enableAutoscaling) {
         ClusterEndpoint clusterEndpoint = autoscaleClient.clusterEndpoint();
-        StateJson stateJson = new StateJson();
-        stateJson.setState(state);
-        clusterEndpoint.setState(clusterId, stateJson);
+        ClusterAutoscaleState json = new ClusterAutoscaleState();
+        json.setEnableAutoscaling(enableAutoscaling);
+        clusterEndpoint.setAutoscaleState(clusterId, json);
     }
 }

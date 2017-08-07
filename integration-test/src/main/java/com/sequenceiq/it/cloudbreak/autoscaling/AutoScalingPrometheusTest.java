@@ -52,6 +52,7 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
 
         // WHEN
         AutoscalingUtil.configureAutoScaling(autoscaleClient, clusterId, cooldown, clusterMinSize, clusterMaxSize);
+        AutoscalingUtil.switchAutoscaling(autoscaleClient, clusterId, true);
         AutoscalingUtil.createPrometheusAlert(autoscaleClient, clusterId, policyName, operator, alertRuleName, period, threshold);
         Long alertId = AutoscalingUtil.getAlertId(autoscaleClient, clusterId, policyName);
         AutoscalingUtil.setAlertsToContext(itContext, clusterId, alertId);
