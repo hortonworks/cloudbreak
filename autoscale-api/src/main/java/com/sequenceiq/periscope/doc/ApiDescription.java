@@ -83,6 +83,7 @@ public class ApiDescription {
         public static final String CLUSTER_GET_ALL = "retrieve all cluster";
         public static final String CLUSTER_DELETE = "delete cluster";
         public static final String CLUSTER_SET_STATE = "set cluster state";
+        public static final String CLUSTER_SET_AUTOSCALE_STATE = "set cluster's autoscale feature state";
     }
 
     public static class ClusterNotes {
@@ -115,6 +116,10 @@ public class ApiDescription {
 
     public static class StateJsonProperties {
         public static final String STATE = "State of the cluster";
+    }
+
+    public static class ClusterAutoscaleState {
+        public static final String ENABLE_AUTOSCALING = "field to switch on or off autoscaling feature";
     }
 
     public static class TimeAlertJsonProperties {

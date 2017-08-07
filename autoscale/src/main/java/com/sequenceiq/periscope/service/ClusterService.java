@@ -135,6 +135,13 @@ public class ClusterService {
         return clusterRepository.save(cluster);
     }
 
+    public Cluster setAutoscaleState(Long clusterId, boolean enableAutoscaling) {
+        Cluster cluster = findOneById(clusterId);
+        cluster.setAutoscalingEnabled(enableAutoscaling);
+        addPrometheusAlertsToConsul(cluster);
+        return clusterRepository.save(cluster);
+    }
+
     public List<Cluster> findAll(ClusterState state) {
         return clusterRepository.findByState(state);
     }
@@ -177,5 +184,4 @@ public class ClusterService {
             throw new BadRequestException("Cluster exists for the same Cloudbreak stack id and Ambari host.");
         }
     }
-
 }

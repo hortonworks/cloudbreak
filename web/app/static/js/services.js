@@ -549,6 +549,17 @@ uluwatuServices.factory('PeriscopeClusterState', ['$resource',
     }
 ]);
 
+uluwatuServices.factory('PeriscopeClusterAutoscaleState', ['$resource',
+    function($resource) {
+        return $resource('periscope/clusters/:id/autoscale', null, {
+            'save': {
+                method: 'POST',
+                isArray: false,
+            }
+        });
+    }
+]);
+
 uluwatuServices.factory('MetricAlert', ['$resource',
     function($resource) {
         return $resource('periscope/clusters/:id/alerts/metric/:alertId', null, {

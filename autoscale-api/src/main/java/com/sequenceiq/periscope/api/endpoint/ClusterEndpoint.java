@@ -16,6 +16,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.periscope.api.model.AmbariJson;
+import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
 import com.sequenceiq.periscope.api.model.ClusterJson;
 import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.doc.ApiDescription;
@@ -63,4 +64,9 @@ public interface ClusterEndpoint {
     @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_SET_STATE, produces = JSON, notes = ClusterNotes.NOTES)
     ClusterJson setState(@PathParam(value = "clusterId") Long clusterId, StateJson stateJson);
 
+    @POST
+    @Path("{clusterId}/autoscale")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_SET_AUTOSCALE_STATE, produces = JSON, notes = ClusterNotes.NOTES)
+    ClusterJson setAutoscaleState(@PathParam(value = "clusterId") Long clusterId, ClusterAutoscaleState autoscaleState);
 }
