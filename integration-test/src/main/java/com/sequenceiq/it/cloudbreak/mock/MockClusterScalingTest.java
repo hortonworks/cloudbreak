@@ -283,9 +283,9 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         get(AMBARI_API_ROOT + "/clusters/:cluster/hosts/:hostname/host_components/*", new AmbariComponentStatusOnHostResponse());
         get(AMBARI_API_ROOT + "/clusters/" + clusterName + "/configurations/service_config_versions", new AmbariServiceConfigResponse(mockServerAddress, port),
                 gson()::toJson);
-        get(AMBARI_API_ROOT + "/blueprints/*", (request, response) -> {
+        get(AMBARI_API_ROOT + "/blueprints/:blueprintname", (request, response) -> {
             response.type("text/plain");
-            return responseFromJsonFile("blueprint/hdp-small-default.bp");
+            return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
         });
         get(AMBARI_API_ROOT + "/clusters/:clusterName/hosts/:internalhostname", (request, response) -> {
             response.type("text/plain");
