@@ -15,6 +15,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.periscope.api.model.AmbariJson;
+import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
 import com.sequenceiq.periscope.api.model.ClusterJson;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
@@ -99,6 +100,15 @@ public class ClusterController implements ClusterEndpoint {
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
         MDCBuilder.buildMdcContext(user, clusterId);
         Cluster cluster = clusterService.setState(clusterId, stateJson.getState());
+        createHistoryAndNotification(cluster);
+        return createClusterJsonResponse(cluster);
+    }
+
+    @Override
+    public ClusterJson setAutoscaleState(Long clusterId, ClusterAutoscaleState autoscaleState) {
+        PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
+        MDCBuilder.buildMdcContext(user, clusterId);
+        Cluster cluster = clusterService.setAutoscaleState(clusterId, autoscaleState.isEnableAutoscaling());
         createHistoryAndNotification(cluster);
         return createClusterJsonResponse(cluster);
     }

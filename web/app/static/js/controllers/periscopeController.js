@@ -3,9 +3,10 @@
 var log = log4javascript.getLogger("periscopeController-logger");
 
 angular.module('uluwatuControllers').controller('periscopeController', ['$scope', '$rootScope', '$filter', 'PeriscopeCluster', 'MetricAlert',
-    'TimeAlert', 'ScalingPolicy', 'Cluster', 'PeriscopeClusterScalingConfiguration', 'MetricDefinitions', 'PeriscopeClusterScalingHistory', 'ErrorHandler',
+    'TimeAlert', 'ScalingPolicy', 'Cluster', 'PeriscopeClusterScalingConfiguration', 'MetricDefinitions', 'PeriscopeClusterScalingHistory',
+    'ErrorHandler', 'PeriscopeClusterAutoscaleState',
     function($scope, $rootScope, $filter, PeriscopeCluster, MetricAlert, TimeAlert, ScalingPolicy, Cluster,
-        PeriscopeClusterScalingConfiguration, MetricDefinitions, PeriscopeClusterScalingHistory, ErrorHandler) {
+        PeriscopeClusterScalingConfiguration, MetricDefinitions, PeriscopeClusterScalingHistory, ErrorHandler, PeriscopeClusterAutoscaleState) {
         $rootScope.periscopeClusters = PeriscopeCluster.query();
         $scope.alerts = [];
         $scope.policies = {};
@@ -170,11 +171,10 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             var periCluster = $filter('filter')($rootScope.periscopeClusters, function(value, index) {
                 return value.stackId == uluCluster.id;
             }, true)[0];
-            var ambariJson = createAmbariJsonFromUluwatuCluster(uluCluster);
-            ambariJson.enableAutoscaling = false;
-            PeriscopeCluster.update({
-                id: periCluster.id
-            }, ambariJson, function(success) {
+            var autoscaleStateJson = {
+              "enableAutoscaling": false
+            };
+            PeriscopeClusterAutoscaleState.save({id: periCluster.id}, autoscaleStateJson, function(success) {
                 periCluster.autoscalingEnabled = false;
                 disableAutoScalingPolicies();
             }, function(error) {
@@ -342,11 +342,10 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
                         return value.stackId == uluCluster.id;
                     }, true)[0];
                     if (periCluster != undefined) {
-                        //update ambari ip after start
-                        var ambariJson = createAmbariJsonFromUluwatuCluster(uluCluster);
-                        PeriscopeCluster.update({
-                            id: periCluster.id
-                        }, ambariJson, function(success) {
+                        var autoscaleStateJson = {
+                          "enableAutoscaling": true
+                        };
+                        PeriscopeClusterAutoscaleState.save({id: periCluster.id}, autoscaleStateJson, function(success) {
                             periCluster.host = uluCluster.cluster.ambariServerIp;
                             periCluster.autoscalingEnabled = true;
                             if (isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
