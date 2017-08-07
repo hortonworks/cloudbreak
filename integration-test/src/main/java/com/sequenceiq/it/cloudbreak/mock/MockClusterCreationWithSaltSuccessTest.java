@@ -179,7 +179,10 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         post(AMBARI_API_ROOT + "/clusters/:cluster", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), gson()::toJson);
         get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), gson()::toJson);
-        get(AMBARI_API_ROOT + "/blueprints/*", (request, response) -> responseFromJsonFile("blueprint/hdp-small-default.bp"));
+        get(AMBARI_API_ROOT + "/blueprints/:blueprintname", (request, response) -> {
+            response.type("text/plain");
+            return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
+        });
         post(AMBARI_API_ROOT + "/blueprints/*", new EmptyAmbariResponse());
         put(AMBARI_API_ROOT + "/users/admin", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());

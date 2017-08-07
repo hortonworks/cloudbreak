@@ -1,7 +1,7 @@
 name: Mock_salt_scaling
 parameters: {
   cloudProvider: MOCK,
-  blueprintName: hdp-small-default
+  blueprintName: "Data Science: Apache Spark 1.6, Apache Zeppelin 0.6.0"
 }
 
 tests:
@@ -38,36 +38,36 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 
-  - name: create gateway template
+  - name: create master template
     parameters:
-      mockName: it-mock-smoke-gateway-scaling-salt
+      mockName: it-mock-smoke-master-scaling-salt
       mockInstanceType: small
       volumeType: ssd
       volumeCount: 1
       volumeSize: 10
-      templateAdditions: "host_group_master_1,1,GATEWAY"
+      templateAdditions: "master,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
-  - name: create master template
+  - name: create worker template
     parameters:
-      mockName: it-mock-some-master-scaling-salt
+      mockName: it-mock-smoke-worker-scaling-salt
       mockInstanceType: large
       volumeType: ephemeral
       volumeCount: 2
       volumeSize: 40
-      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "worker,200"
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
-  - name: create slave template
+  - name: create compute template
     parameters:
-      mockName: it-mock-smoke-slave-scaling-salt
+      mockName: it-mock-smoke-compute-scaling-salt
       mockInstanceType: large
       volumeType: magnetic
       volumeCount: 3
       volumeSize: 200
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,300"
+      templateAdditions: "compute,300"
     classes:
       - com.sequenceiq.it.cloudbreak.mock.MockTemplateCreationTest
 
@@ -88,28 +88,28 @@ tests:
 
   - name: upscale1
     parameters:
-      instanceGroup: host_group_slave_1
+      instanceGroup: worker
       scalingAdjustment: 600
     classes:
         - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
 
   - name: downscale1
     parameters:
-      instanceGroup: host_group_slave_1
+      instanceGroup: worker
       scalingAdjustment: -150
     classes:
         - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
 
   - name: upscale2
     parameters:
-      instanceGroup: host_group_slave_1
+      instanceGroup: worker
       scalingAdjustment: 400
     classes:
         - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
 
   - name: upscale3
     parameters:
-      instanceGroup: host_group_slave_1
+      instanceGroup: worker
       scalingAdjustment: 1000
     classes:
         - com.sequenceiq.it.cloudbreak.mock.MockClusterScalingTest
