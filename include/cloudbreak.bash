@@ -227,8 +227,12 @@ cloudbreak-conf-uaa() {
 cloudbreak-conf-defaults() {
     env-import PUBLIC_IP
 
-    env-import CB_BLUEPRINT_DEFAULTS "hdp-small-default;hdp-spark-cluster;hdp-streaming-cluster"
-    env-import CB_TEMPLATE_DEFAULTS "minviable-gcp,minviable-azure,minviable-aws"
+    if [[ ! -z "$CB_BLUEPRINT_DEFAULTS"  ]]; then
+        env-import CB_BLUEPRINT_DEFAULTS
+    fi;
+    if [[ ! -z "$CB_TEMPLATE_DEFAULTS" ]]; then
+        env-import CB_TEMPLATE_DEFAULTS
+    fi;
     env-import CB_LOCAL_DEV_BIND_ADDR "192.168.59.3"
     env-import ADDRESS_RESOLVING_TIMEOUT 120000
     env-import CB_UI_MAX_WAIT 400
