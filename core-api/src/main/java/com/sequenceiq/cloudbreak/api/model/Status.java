@@ -24,7 +24,7 @@ public enum Status {
     WAIT_FOR_SYNC;
 
     public boolean isRemovableStatus() {
-        return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_IN_PROGRESS, DELETE_FAILED,
+        return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
                 DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(Status.valueOf(name()));
     }
 
