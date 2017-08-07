@@ -31,11 +31,11 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_UAA 3.6.5
     env-import DOCKER_TAG_AMBASSADOR 0.5.0
     env-import DOCKER_TAG_CERT_TOOL 0.2.0
-    env-import DOCKER_TAG_PERISCOPE 2.1.0-dev.106
-    env-import DOCKER_TAG_CLOUDBREAK 2.1.0-dev.106
-    env-import DOCKER_TAG_ULUWATU 2.1.0-dev.106
-    env-import DOCKER_TAG_SULTANS 2.1.0-dev.106
-    env-import DOCKER_TAG_CLOUDBREAK_SHELL 2.1.0-dev.106
+    env-import DOCKER_TAG_PERISCOPE 1.16.3-rc.7
+    env-import DOCKER_TAG_CLOUDBREAK 1.16.3-rc.7
+    env-import DOCKER_TAG_ULUWATU 1.16.3-rc.7
+    env-import DOCKER_TAG_SULTANS 1.16.3-rc.7
+    env-import DOCKER_TAG_CLOUDBREAK_SHELL 1.16.3-rc.7
     env-import DOCKER_TAG_POSTGRES 9.6.1-alpine
 
     env-import DOCKER_TAG_CBD_SMARTSENSE 0.10.0
@@ -673,7 +673,7 @@ util-local-dev() {
 util-get-usage() {
     declare desc="Generate Flex related usages."
 
-    cloudbreak-conf-uaa
+    cloudbreak-config
 
     local USAGE_PATH="usages/flex/daily"
 
@@ -692,7 +692,7 @@ util-get-usage() {
 
     local CRED="$UAA_FLEX_USAGE_CLIENT_ID:$UAA_FLEX_USAGE_CLIENT_SECRET"
     local CRED_BASE64="$(echo -n "${CRED}"|base64|tr -d '\n')"
-    local TOKEN=$(curl -sX POST -H "Authorization: Basic $CRED_BASE64" "${PUBLIC_IP}:${UAA_PORT}/oauth/token?grant_type=client_credentials" | jq '.access_token' -r)
-    local USAGE=$(curl -sX GET -H "Authorization: Bearer $TOKEN" "${PUBLIC_IP}:8080/cb/api/v1/${USAGE_PATH}")
+    local TOKEN=$(curl -sX POST -H "Authorization: Basic $CRED_BASE64" "${PRIVATE_IP}:${UAA_PORT}/oauth/token?grant_type=client_credentials" | jq '.access_token' -r)
+    local USAGE=$(curl -sX GET -H "Authorization: Bearer $TOKEN" "${PRIVATE_IP}:8080/cb/api/v1/${USAGE_PATH}")
     echo ${USAGE#*=}
 }
