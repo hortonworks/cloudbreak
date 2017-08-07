@@ -1,7 +1,7 @@
 name: Gcp_simple_smoketest_cred
 parameters:
   cloudProvider: GCP
-  blueprintName: hdp-small-default
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init
@@ -23,29 +23,29 @@ tests:
       volumeType: pd-standard
       volumeCount: 1
       volumeSize: 30
-      templateAdditions: "host_group_master_1,1,GATEWAY"
+      templateAdditions: "master,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
-  - name: create master template
+  - name: create worker template
     parameters:
-      gcpName: it-gcp-credandsmoke-master
+      gcpName: it-gcp-credandsmoke-worker
       gcpInstanceType: n1-highmem-8
       volumeType: pd-standard
       volumeCount: 2
       volumeSize: 100
-      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "worker,3;"
     classes:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 
-  - name: create slave template
+  - name: create compute template
     parameters:
-      gcpName: it-gcp-credandsmoke-slave
+      gcpName: it-gcp-credandsmoke-compute
       gcpInstanceType: n1-highcpu-4
       volumeType: pd-ssd
       volumeCount: 3
       volumeSize: 500
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+      templateAdditions: "compute,1"
     classes:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
 

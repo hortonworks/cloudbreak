@@ -1,7 +1,7 @@
 name: Aws_full_smoketest_cred
 parameters:
   cloudProvider: AWS
-  blueprintName: hdp-small-default
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init
@@ -30,29 +30,29 @@ tests:
       awsVolumeType: standard
       awsVolumeCount: 1
       awsVolumeSize: 30
-      templateAdditions: "host_group_master_1,1,GATEWAY"
+      templateAdditions: "master,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
-  - name: create master template
+  - name: create worker template
     parameters:
-      awsTemplateName: it-aws-credandsmoke-master-ssud
+      awsTemplateName: it-aws-credandsmoke-worker-ssud
       awsInstanceType: c3.xlarge
-      awsVolumeType: gp2
+      awsVolumeType: ephemeral
       awsVolumeCount: 2
-      awsVolumeSize: 100
-      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+      awsVolumeSize: 40
+      templateAdditions: "worker,3;"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
-  - name: create slave template
+  - name: create compute template
     parameters:
-      awsTemplateName: it-aws-credandsmoke-slave-ssud
+      awsTemplateName: it-aws-credandsmoke-compute-ssud
       awsInstanceType: r3.large
       awsVolumeType: gp2
       awsVolumeCount: 3
       awsVolumeSize: 200
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+      templateAdditions: "compute,1"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
@@ -77,7 +77,7 @@ tests:
 
   - name: upscale stack, upscale cluster
     parameters:
-     instanceGroup: host_group_slave_1
+     instanceGroup: worker
      scalingAdjustment: 3
     classes:
       - com.sequenceiq.it.cloudbreak.scaling.StackScalingTest
@@ -85,7 +85,7 @@ tests:
 
   - name: downscale cluster, downscale stack
     parameters:
-     instanceGroup: host_group_slave_1
+     instanceGroup: worker
      scalingAdjustment: -2
     classes:
       - com.sequenceiq.it.cloudbreak.scaling.ClusterScalingTest
