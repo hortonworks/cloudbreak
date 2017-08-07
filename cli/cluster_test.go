@@ -102,7 +102,7 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	createBlueprintRequest := func(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse) *models_cloudbreak.BlueprintRequest {
 		return &models_cloudbreak.BlueprintRequest{Name: "blueprint"}
 	}
-	addAutoscalingCluster := func(stackId int64) int64 {
+	addAutoscalingCluster := func(stackId int64, autoscalingEnabled bool) int64 {
 		return stackId
 	}
 	setScalingConfigurations := func(int64, AutoscalingConfiguration) {

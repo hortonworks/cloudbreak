@@ -4,10 +4,7 @@ package models_autoscale
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"encoding/json"
-
 	strfmt "github.com/go-swagger/go-swagger/strfmt"
-	"github.com/go-swagger/go-swagger/swag"
 
 	"github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
@@ -19,9 +16,9 @@ swagger:model AmbariConnectionDetails
 */
 type AmbariConnectionDetails struct {
 
-	/* Initial state of the cluster
+	/* Enable or Disable the Autoscaling feature set on the underlying Periscope cluster
 	 */
-	ClusterState *string `json:"clusterState,omitempty"`
+	EnableAutoscaling *bool `json:"enableAutoscaling,omitempty"`
 
 	/* Ambari server host address
 	 */
@@ -36,8 +33,10 @@ type AmbariConnectionDetails struct {
 	Port *string `json:"port,omitempty"`
 
 	/* Id of the stack in Cloudbreak
-	 */
-	StackID *int64 `json:"stackId,omitempty"`
+
+	Required: true
+	*/
+	StackID int64 `json:"stackId"`
 
 	/* Ambari server username
 	 */
@@ -48,7 +47,7 @@ type AmbariConnectionDetails struct {
 func (m *AmbariConnectionDetails) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateClusterState(formats); err != nil {
+	if err := m.validateStackID(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -59,31 +58,9 @@ func (m *AmbariConnectionDetails) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-var ambariConnectionDetailsTypeClusterStatePropEnum []interface{}
+func (m *AmbariConnectionDetails) validateStackID(formats strfmt.Registry) error {
 
-func (m *AmbariConnectionDetails) validateClusterStateEnum(path, location string, value string) error {
-	if ambariConnectionDetailsTypeClusterStatePropEnum == nil {
-		var res []string
-		if err := json.Unmarshal([]byte(`["RUNNING","SUSPENDED","PENDING"]`), &res); err != nil {
-			return err
-		}
-		for _, v := range res {
-			ambariConnectionDetailsTypeClusterStatePropEnum = append(ambariConnectionDetailsTypeClusterStatePropEnum, v)
-		}
-	}
-	if err := validate.Enum(path, location, value, ambariConnectionDetailsTypeClusterStatePropEnum); err != nil {
-		return err
-	}
-	return nil
-}
-
-func (m *AmbariConnectionDetails) validateClusterState(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.ClusterState) { // not required
-		return nil
-	}
-
-	if err := m.validateClusterStateEnum("clusterState", "body", *m.ClusterState); err != nil {
+	if err := validate.Required("stackId", "body", int64(m.StackID)); err != nil {
 		return err
 	}
 

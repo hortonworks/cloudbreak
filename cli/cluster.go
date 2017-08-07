@@ -182,7 +182,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	postStack func(*stacks.PostPrivateStackParams) (*stacks.PostPrivateStackOK, error),
 	getRdsConfig func(string) models_cloudbreak.RDSConfigResponse,
 	postCluster func(*cluster.PostClusterParams) (*cluster.PostClusterOK, error),
-	createBaseAutoscalingCluster func(stackId int64) int64,
+	createBaseAutoscalingCluster func(stackId int64, enableAutoscaling bool) int64,
 	setScalingConfigurations func(int64, AutoscalingConfiguration),
 	addPrometheusAlert func(int64, AutoscalingPolicy) int64,
 	addScalingPolicy func(int64, AutoscalingPolicy, int64) int64,
@@ -489,8 +489,9 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	// create autoscaling policies
 
 	func() {
-		if skeleton.Autoscaling != nil && (len(skeleton.Autoscaling.Policies) > 0 || skeleton.Configurations != nil) {
-			asClusterId := createBaseAutoscalingCluster(stackId)
+		if skeleton.Autoscaling != nil {
+			log.Infof("[CreateCluster] create autoscaling cluster with autoscaling state: %t", skeleton.Autoscaling.AutoscalingEnabled)
+			asClusterId := createBaseAutoscalingCluster(stackId, skeleton.Autoscaling.AutoscalingEnabled)
 
 			if skeleton.Autoscaling.Configuration != nil {
 				setScalingConfigurations(asClusterId, *skeleton.Autoscaling.Configuration)

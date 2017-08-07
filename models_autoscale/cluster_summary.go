@@ -11,6 +11,10 @@ swagger:model ClusterSummary
 */
 type ClusterSummary struct {
 
+	/* Indicate that the Autoscaling feature set is enabled or disabled on the underlying Periscope cluster
+	 */
+	AutoscalingEnabled *bool `json:"autoscalingEnabled,omitempty"`
+
 	/* Host address of the ambari server
 	 */
 	Host *string `json:"host,omitempty"`

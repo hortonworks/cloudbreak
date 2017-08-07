@@ -92,7 +92,7 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		log.Warn(err)
-		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
+		asClusterId = asClient.createBaseAutoscalingCluster(clusterId, true)
 	}
 
 	alertId := asClient.addPrometheusAlert(asClusterId, policy)
@@ -165,7 +165,7 @@ func ConfigureAutoscaling(c *cli.Context) error {
 	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		log.Warn(err)
-		asClusterId = asClient.createBaseAutoscalingCluster(clusterId)
+		asClusterId = asClient.createBaseAutoscalingCluster(clusterId, true)
 	}
 
 	configureAutoscalingImpl(clusterName, asClusterId, cooldown, minClusterSize, maxClusterSize, asClient.AutoScaling.Configurations.SetScalingConfiguration)
@@ -203,11 +203,11 @@ func DisableAutoscalingPolicy(c *cli.Context) error {
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	setClusterState(clusterName,
-		"DISABLED",
+	setClusterAutoscaleState(clusterName,
+		false,
 		cbClient.GetClusterByName,
 		asClient.getAutoscalingClusterIdByStackId,
-		asClient.AutoScaling.Clusters.SetState)
+		asClient.AutoScaling.Clusters.SetAutoscaleState)
 
 	return nil
 }
@@ -223,11 +223,11 @@ func EnableAutoscalingPolicy(c *cli.Context) error {
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	setClusterState(clusterName,
-		"RUNNING",
+	setClusterAutoscaleState(clusterName,
+		true,
 		cbClient.GetClusterByName,
 		asClient.getAutoscalingClusterIdByStackId,
-		asClient.AutoScaling.Clusters.SetState)
+		asClient.AutoScaling.Clusters.SetAutoscaleState)
 
 	return nil
 }
@@ -251,6 +251,30 @@ func setClusterState(clusterName string, state string,
 	}
 
 	log.Infof("[setClusterState] cluster: %s state set %s", clusterName, *resp.Payload.State)
+}
+
+func setClusterAutoscaleState(clusterName string, autoscaleState bool,
+	getCluster func(string) *models_cloudbreak.StackResponse,
+	getAsCluster func(string, int64) (int64, error),
+	setAutoscaleState func(params *clusters.SetAutoscaleStateParams) (*clusters.SetAutoscaleStateOK, error)) {
+
+	log.Infof("[setClusterAutoscaleState] set cluster: %s Autoscale state to %t", clusterName, autoscaleState)
+	clusterId := *getCluster(clusterName).ID
+	asClusterId, err := getAsCluster(clusterName, clusterId)
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	resp, err := setAutoscaleState(
+		&clusters.SetAutoscaleStateParams{
+			ClusterID: asClusterId,
+			Body:      &models_autoscale.ClusterAutoscaleState{EnableAutoscaling: &autoscaleState}})
+
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
+	log.Infof("[setClusterAutoscaleState] cluster: %s Autoscale state was set to %t", clusterName, *resp.Payload.AutoscalingEnabled)
 }
 
 func (autosScaling *Autoscaling) getAlertByName(name string, asClusterId int64) *models_autoscale.PromhetheusAlert {
@@ -337,14 +361,10 @@ func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int6
 	}
 
 	log.Infof("[getAutoscaling] autoscaling state: %s for cluster: %s", *asCluster.State, clusterName)
-	autoscalingEnabled := false
-	if *asCluster.State == "RUNNING" {
-		autoscalingEnabled = true
-	}
 
 	scaleConfig := autosScaling.getConfiguration(asClusterId)
 	skeleton := AutoscalingSkeletonResult{}
-	skeleton.Enabled = autoscalingEnabled
+	skeleton.AutoscalingEnabled = *asCluster.AutoscalingEnabled
 	skeleton.Policies = policyList
 	skeleton.Configuration = scaleConfig
 
@@ -418,16 +438,15 @@ func (autosScaling *Autoscaling) getAlertDefinitions() []*models_autoscale.Alert
 	return alertDefinitions.Payload
 }
 
-func (autosScaling *Autoscaling) createBaseAutoscalingCluster(stackId int64) int64 {
+func (autosScaling *Autoscaling) createBaseAutoscalingCluster(stackId int64, enableAutoscaling bool) int64 {
 	defer timeTrack(time.Now(), "create base autoscaling cluster")
 
 	log.Infof("[createBaseAutoscalingCluster] add cluster to autoscaling, id: %d", stackId)
-	state := "PENDING"
 	resp, err := autosScaling.AutoScaling.Clusters.AddCluster(
 		&clusters.AddClusterParams{
 			Body: &models_autoscale.AmbariConnectionDetails{
-				ClusterState: &state,
-				StackID:      &stackId,
+				EnableAutoscaling: &enableAutoscaling,
+				StackID:           stackId,
 			}})
 
 	if err != nil {

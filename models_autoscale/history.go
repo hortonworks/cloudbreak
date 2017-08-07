@@ -178,7 +178,7 @@ var historyTypeScalingStatusPropEnum []interface{}
 func (m *History) validateScalingStatusEnum(path, location string, value string) error {
 	if historyTypeScalingStatusPropEnum == nil {
 		var res []string
-		if err := json.Unmarshal([]byte(`["FAILED","SUCCESS"]`), &res); err != nil {
+		if err := json.Unmarshal([]byte(`["FAILED","SUCCESS","ENABLED","DISABLED"]`), &res); err != nil {
 			return err
 		}
 		for _, v := range res {

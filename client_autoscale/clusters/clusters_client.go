@@ -158,6 +158,33 @@ func (a *Client) ModifyCluster(params *ModifyClusterParams) (*ModifyClusterOK, e
 }
 
 /*
+SetAutoscaleState sets cluster s autoscale feature state
+
+Ambari cluster.
+*/
+func (a *Client) SetAutoscaleState(params *SetAutoscaleStateParams) (*SetAutoscaleStateOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewSetAutoscaleStateParams()
+	}
+
+	result, err := a.transport.Submit(&client.Operation{
+		ID:                 "setAutoscaleState",
+		Method:             "POST",
+		PathPattern:        "/clusters/{clusterId}/autoscale",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &SetAutoscaleStateReader{formats: a.formats},
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*SetAutoscaleStateOK), nil
+}
+
+/*
 SetState sets cluster state
 
 Ambari cluster.
