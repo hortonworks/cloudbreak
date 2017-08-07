@@ -112,7 +112,17 @@ function resolveError(err) {
 retryingResolve('http', 'ULU_PERISCOPE_SERVICEID', 'ULU_PERISCOPE_ADDRESS', 'periscopeAddress', setResolvedAddress, resolveError);
 retryingResolve('http', 'ULU_IDENTITY_SERVICEID', 'ULU_IDENTITY_ADDRESS', 'identityServerAddress', setResolvedAddress, resolveError);
 retryingResolve('http', 'ULU_CLOUDBREAK_SERVICEID', 'ULU_CLOUDBREAK_ADDRESS', 'cloudbreakAddress', setResolvedAddress, resolveError);
-retryingResolve(null, null, 'ULU_SULTANS_ADDRESS', 'sultansRedirectAddress', setResolvedAddress, resolveError);
+
+if (process.env['ULU_SULTANS_REDIRECT_URI']) {
+    var slRedirectAddress = process.env['ULU_SULTANS_REDIRECT_URI']
+    if (slRedirectAddress.slice(-1) !== '/') {
+            slRedirectAddress += '/';
+    }
+    setResolvedAddress('sultansRedirectAddress', slRedirectAddress)
+} else {
+    retryingResolve(null, null, 'ULU_SULTANS_ADDRESS', 'sultansRedirectAddress', setResolvedAddress, resolveError);
+}
+
 if (process.env['ULU_SULTANS_SERVICEID']) {
     retryingResolve('http', 'ULU_SULTANS_SERVICEID', null, 'sultansAddress', setResolvedAddress, resolveError);
 } else {
