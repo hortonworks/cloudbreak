@@ -1,7 +1,7 @@
 name: Aws_simple_smokettest_cred_spot
 parameters:
   cloudProvider: AWS
-  blueprintName: hdp-small-default
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init
@@ -23,31 +23,31 @@ tests:
       awsVolumeType: standard
       awsVolumeCount: 1
       awsVolumeSize: 30
-      templateAdditions: "host_group_master_1,1,GATEWAY"
+      templateAdditions: "master,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
-  - name: create master template
+  - name: create worker template
     parameters:
-      awsTemplateName: it-aws-credandsmoke-master-spot
+      awsTemplateName: it-aws-credandsmoke-worker-spot
       awsInstanceType: c3.xlarge
       awsVolumeType: ephemeral
       awsVolumeCount: 2
       awsVolumeSize: 40
       awsSpotPrice: 0.2
-      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "worker,3;"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
-  - name: create slave template
+  - name: create compute template
     parameters:
-      awsTemplateName: it-aws-credandsmoke-slave-spot
+      awsTemplateName: it-aws-credandsmoke-compute
       awsInstanceType: r3.large
       awsVolumeType: gp2
       awsVolumeCount: 3
       awsVolumeSize: 200
       awsSpotPrice: 0.2
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+      templateAdditions: "compute,1"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
@@ -63,13 +63,13 @@ tests:
   - name: check spot instances after cluster creation
     parameters:
       region: EU_WEST_1
-      hostGroupToCheck: host_group_master_2,host_group_client_1,host_group_slave_1
+      hostGroupToCheck: worker,compute
     classes:
       - com.sequenceiq.it.cloudbreak.AwsCheckSpotInstance
 
   - name: upscale stack and cluster
     parameters:
-     instanceGroup: host_group_slave_1
+     instanceGroup: worker
      scalingAdjustment: 1
     classes:
       - com.sequenceiq.it.cloudbreak.scaling.StackAndClusterUpscaleTest
@@ -77,14 +77,14 @@ tests:
   - name: check spot instances after upscale
     parameters:
       region: EU_WEST_1
-      hostGroupToCheck: host_group_master_2,host_group_client_1,host_group_slave_1
+      hostGroupToCheck: worker,compute
       scalingAdjustment: 1
     classes:
       - com.sequenceiq.it.cloudbreak.AwsCheckSpotInstance
 
   - name: downscale cluster and stack
     parameters:
-     instanceGroup: host_group_slave_1
+     instanceGroup: worker
      scalingAdjustment: -1
     classes:
       - com.sequenceiq.it.cloudbreak.scaling.ClusterAndStackDownscaleTest
@@ -92,7 +92,7 @@ tests:
   - name: check spot instances after downscale
     parameters:
       region: EU_WEST_1
-      hostGroupToCheck: host_group_master_2,host_group_client_1,host_group_slave_1
+      hostGroupToCheck: worker,compute
       scalingAdjustment: -1
     classes:
       - com.sequenceiq.it.cloudbreak.AwsCheckSpotInstance

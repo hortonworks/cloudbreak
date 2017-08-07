@@ -1,7 +1,7 @@
 name: OpenStack_recipe_simple_smoketest_cred
 parameters:
   cloudProvider: OPENSTACK
-  blueprintName: hdp-small-default
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init
@@ -33,41 +33,40 @@ tests:
 
   - name: create gateway template
     parameters:
-      templateName: it-openstack-credandsmoke-gateway-recipe
+      templateName: it-openstack-credandsmoke-gateway-rec
       instanceType: m1.large
       volumeCount: 1
       volumeSize: 10
-      templateAdditions: "host_group_master_1,1,GATEWAY"
+      templateAdditions: "master,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
 
-  - name: create master template
+  - name: create worker template
     parameters:
-      templateName: it-openstack-credandsmoke-master-recipe
+      templateName: it-openstack-credandsmoke-worker-rec
       instanceType: m1.large
       volumeCount: 2
       volumeSize: 10
-      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "worker,3;"
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
 
-  - name: create slave template
+  - name: create compute template
     parameters:
-      templateName: it-openstack-credandsmoke-slave-recipe
+      templateName: it-openstack-credandsmoke-compute-rec
       instanceType: m1.large
       volumeCount: 3
       volumeSize: 10
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+      templateAdditions: "compute,1"
     classes:
       - com.sequenceiq.it.cloudbreak.OpenStackTemplateCreationTest
-
 
   - name: create cluster
     parameters:
       stackName: it-openstack-cred-recipe
       region: local
       clusterName: it-openstack-cred-recipe
-      runRecipesOnHosts: "host_group_master_1,host_group_master_2,host_group_master_3,host_group_slave_1,host_group_client_1"
+      runRecipesOnHosts: "master,worker,compute"
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
@@ -75,7 +74,7 @@ tests:
 
   - name: upscale stack, upscale cluster
     parameters:
-     instanceGroup: host_group_slave_1
+     instanceGroup: worker
      scalingAdjustment: 1
     classes:
       - com.sequenceiq.it.cloudbreak.scaling.StackScalingTest
@@ -83,8 +82,8 @@ tests:
 
   - name: count recipe results
     parameters:
-      searchRecipesOnHosts: "host_group_master_1,host_group_master_2,host_group_master_3,host_group_slave_1,host_group_client_1"
+      searchRecipesOnHosts: "master,worker,compute"
       lookingFor: "/pre-install-file,/post-install-file"
-      require: 16
+      require: 12
     classes:
       - com.sequenceiq.it.cloudbreak.recipes.CountRecipeResultsTest

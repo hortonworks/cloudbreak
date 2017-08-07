@@ -1,7 +1,7 @@
 name: Aws_simple_smokettest_cred-manualrecovery
 parameters:
   cloudProvider: AWS
-  blueprintName: hdp-small-default
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
   region: eu-west-1
 
 tests:
@@ -25,30 +25,30 @@ tests:
       awsVolumeType: standard
       awsVolumeCount: 1
       awsVolumeSize: 30
-      templateAdditions: "host_group_master_1,1,GATEWAY"
+      templateAdditions: "master,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
-  - name: create master template
+  - name: create worker template
     parameters:
-      awsTemplateName: it-aws-credandsmoke-master-mr
+      awsTemplateName: it-aws-credandsmoke-worker-mr
       awsInstanceType: c3.xlarge
       awsVolumeType: ephemeral
       awsVolumeCount: 2
       awsVolumeSize: 40
-      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "worker,3;"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
-  - name: create slave template
+  - name: create compute template
     parameters:
-      awsTemplateName: it-aws-credandsmoke-slave-mr
+      awsTemplateName: it-aws-credandsmoke-compute-mr
       awsInstanceType: r3.large
       awsVolumeType: gp2
       awsVolumeCount: 3
       awsVolumeSize: 200
       awsSpotPrice: 0.2
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+      templateAdditions: "compute,1"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
 
@@ -62,13 +62,13 @@ tests:
 
   - name: manual recovery with repair
     parameters:
-      hostGroup: host_group_slave_1
+      hostGroup: compute
     classes:
       - com.sequenceiq.it.cloudbreak.recovery.ManualRecoveryTest
 
   - name: manual recovery with remove only
     parameters:
-      hostGroup: host_group_slave_1
+      hostGroup: compute
       removedInstanceCount: 1
       removeOnly: True
     classes:

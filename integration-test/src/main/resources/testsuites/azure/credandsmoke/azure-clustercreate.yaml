@@ -1,7 +1,7 @@
 name: Azure_simple_smoketest_cred
 parameters:
   cloudProvider: AZURE
-  blueprintName: hdp-small-default
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init
@@ -22,27 +22,27 @@ tests:
       azureVmType: Standard_D4
       azureVolumeCount: 1
       azureVolumeSize: 50
-      templateAdditions: "host_group_master_1,1,GATEWAY"
+      templateAdditions: "master,1,GATEWAY"
     classes:
       - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
 
-  - name: create master template
+  - name: create worker template
     parameters:
-      azureTemplateName: it-azurerm-credandsmoke-master
+      azureTemplateName: it-azurerm-credandsmoke-worker
       azureVmType: Standard_D4
       azureVolumeCount: 1
       azureVolumeSize: 100
-      templateAdditions: "host_group_master_2,1;host_group_master_3,1"
+      templateAdditions: "worker,3;"
     classes:
       - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
 
-  - name: create slave template
+  - name: create compute template
     parameters:
-      azureTemplateName: it-azurerm-credandsmoke-slave
+      azureTemplateName: it-azurerm-credandsmoke-compute
       azureVmType: Standard_D11
       azureVolumeCount: 1
       azureVolumeSize: 200
-      templateAdditions: "host_group_client_1,1;host_group_slave_1,3"
+      templateAdditions: "compute,1"
     classes:
       - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
 
