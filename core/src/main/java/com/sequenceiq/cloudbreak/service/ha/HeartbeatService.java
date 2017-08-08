@@ -113,10 +113,17 @@ public class HeartbeatService {
     @Scheduled(cron = "${cb.ha.flow.distribution.rate:0/35 * * * * *}")
     public void scheduledFlowDistribution() {
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
+            List<CloudbreakNode> failedNodes = Collections.emptyList();
             try {
-                distributeFlows();
+                failedNodes = distributeFlows();
             } catch (OptimisticLockingFailureException e) {
                 LOGGER.error("Failed to distribute the flow logs across the active nodes, somebody might have already done it..", e);
+            }
+
+            try {
+                cleanupNodes(failedNodes);
+            } catch (Exception e) {
+                LOGGER.error("Failed to cleanup the nodes, somebody might have already done it..", e);
             }
 
             String nodeId = cloudbreakNodeConfig.getId();
@@ -133,11 +140,11 @@ public class HeartbeatService {
     }
 
     @Transactional
-    public void distributeFlows() {
+    public List<CloudbreakNode> distributeFlows() {
         List<CloudbreakNode> cloudbreakNodes = Lists.newArrayList(cloudbreakNodeRepository.findAll());
         long currentTimeMillis = clock.getCurrentTime();
         List<CloudbreakNode> failedNodes = cloudbreakNodes.stream()
-                .filter(cb -> currentTimeMillis - cb.getLastUpdated() > heartbeatThresholdRate).collect(Collectors.toList());
+                .filter(node -> currentTimeMillis - node.getLastUpdated() > heartbeatThresholdRate).collect(Collectors.toList());
         List<CloudbreakNode> activeNodes = cloudbreakNodes.stream().filter(c -> !failedNodes.contains(c)).collect(Collectors.toList());
         LOGGER.info("Active CB nodes: ({})[{}], failed CB nodes: ({})[{}]", activeNodes.size(), activeNodes, failedNodes.size(), failedNodes);
 
@@ -164,6 +171,22 @@ public class HeartbeatService {
             }
             flowLogRepository.save(updatedFlowLogs);
         }
+        return failedNodes;
+    }
+
+    /**
+     * Remove the node reference from the DB for those nodes that are failing and does not have any assigned flows.
+     */
+    @Transactional
+    public void cleanupNodes(List<CloudbreakNode> failedNodes) {
+        if (failedNodes != null && !failedNodes.isEmpty()) {
+            LOGGER.info("Cleanup node candidates: {}", failedNodes);
+            List<CloudbreakNode> cleanupNodes = failedNodes.stream()
+                    .filter(node -> flowLogRepository.findAllByCloudbreakNodeId(node.getUuid()).isEmpty())
+                    .collect(Collectors.toList());
+            LOGGER.info("Cleanup nodes from the DB: {}", cleanupNodes);
+            cloudbreakNodeRepository.delete(cleanupNodes);
+        }
     }
 
     /**
@@ -173,12 +196,14 @@ public class HeartbeatService {
     private void cancelInvalidFlows() {
         Set<Long> stackIds = InMemoryStateStore.getAllStackId();
         if (!stackIds.isEmpty()) {
+            LOGGER.info("Check if there are termination flows for the following stack ids: {}", stackIds);
             List<Object[]> stackStatuses = stackRepository.findStackStatuses(stackIds);
             for (Object[] ss : stackStatuses) {
                 if (DELETE_STATUSES.contains(ss[1])) {
                     Long stackId = (Long) ss[0];
                     Set<String> runningFlowIds = flowLogRepository.findAllRunningNonTerminationFlowIdsByStackId(stackId);
                     if (hasRunningNonTerminationFlowOnThisNode(runningFlowIds)) {
+                        LOGGER.info("Found termination flow on a different node for stack: {}", stackId);
                         cancelRunningFlow(stackId);
                     } else {
                         cleanupInMemoryStore(stackId);

@@ -152,6 +152,59 @@ public class HeartbeatServiceTest {
     }
 
     @Test
+    public void testOneNodeTakesAllFlowsWithCleanup() {
+        List<CloudbreakNode> clusterNodes = getClusterNodes();
+        clusterNodes.get(0).setLastUpdated(200_000); // myself
+        // set all nodes to failed except myself
+        for (int i = 1; i < clusterNodes.size(); i++) {
+            CloudbreakNode node = clusterNodes.get(i);
+            node.setLastUpdated(50_000);
+        }
+        when(cloudbreakNodeRepository.findAll()).thenReturn(clusterNodes);
+        when(clock.getCurrentTime()).thenReturn(200_000L);
+
+        // all flows that need to be re-distributed
+        List<String> suspendedFlows = new ArrayList<>();
+
+        List<FlowLog> node1FlowLogs = getFlowLogs(2, 5000);
+        suspendedFlows.addAll(node1FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
+        when(flowLogRepository.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(new HashSet<>(node1FlowLogs)).thenReturn(Collections.emptySet());
+
+        Set<FlowLog> node2FlowLogs = new HashSet<>(getFlowLogs(3, 3000));
+        suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
+        when(flowLogRepository.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs).thenReturn(Collections.emptySet());
+
+        Map<CloudbreakNode, List<String>> distribution = new HashMap<>();
+        distribution.computeIfAbsent(clusterNodes.get(0), v -> new ArrayList<>()).
+                addAll(Arrays.asList(suspendedFlows.get(0), suspendedFlows.get(1), suspendedFlows.get(2),
+                        suspendedFlows.get(3), suspendedFlows.get(4)));
+        when(flowDistributor.distribute(any(), any())).thenReturn(distribution);
+
+        Set<FlowLog> myNewFlowLogs = new HashSet<>();
+        myNewFlowLogs.addAll(node1FlowLogs);
+        myNewFlowLogs.addAll(node2FlowLogs);
+        when(flowLogRepository.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
+
+        when(runningFlows.get(any())).thenReturn(null);
+
+        heartbeatService.scheduledFlowDistribution();
+
+        verify(flowLogRepository).save(flowLogListCaptor.capture());
+        List<FlowLog> updatedFlows = flowLogListCaptor.getValue();
+        assertEquals(myNewFlowLogs.size(), updatedFlows.size());
+        for (FlowLog updatedFlow : updatedFlows) {
+            assertEquals(MY_ID, updatedFlow.getCloudbreakNodeId());
+        }
+
+        verify(flow2Handler, times(5)).restartFlow(stringCaptor.capture());
+        List<String> allFlowIds = stringCaptor.getAllValues();
+        assertEquals(5, allFlowIds.size());
+        for (String flowId : suspendedFlows) {
+            assertTrue(allFlowIds.contains(flowId));
+        }
+    }
+
+    @Test
     public void testOneNodeTakesAllFlowsWithInvalidFlows() {
         List<CloudbreakNode> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000); // myself
