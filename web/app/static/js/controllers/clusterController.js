@@ -1521,9 +1521,11 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         $scope.changeAmbariServer = function(instanceGroup) {
             angular.forEach($scope.cluster.instanceGroups, function(ig) {
                 if (ig.group === instanceGroup.group) {
-                    ig.type = 'GATEWAY'
-                } else {
-                    ig.type = 'CORE'
+                    if (ig.type === 'CORE') {
+                        ig.type = 'GATEWAY';
+                    } else if (ig.type === 'GATEWAY') {
+                        ig.type = 'CORE';
+                    }
                 }
             });
             $scope.showBlueprintKnoxError();
