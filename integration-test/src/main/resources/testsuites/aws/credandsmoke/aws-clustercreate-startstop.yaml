@@ -30,10 +30,10 @@ tests:
   - name: create worker template
     parameters:
       awsTemplateName: it-aws-credandsmoke-worker-ss
-      awsInstanceType: c3.xlarge
-      awsVolumeType: ephemeral
-      awsVolumeCount: 2
-      awsVolumeSize: 40
+      awsInstanceType: r3.large
+      awsVolumeType: gp2
+      awsVolumeCount: 3
+      awsVolumeSize: 200
       templateAdditions: "worker,3;"
     classes:
       - com.sequenceiq.it.cloudbreak.AwsTemplateCreationTest
