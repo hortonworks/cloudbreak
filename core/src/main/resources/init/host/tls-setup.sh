@@ -8,7 +8,7 @@ setup_cbclient_cert() {
 create_certificates() {
   echo n | sudo cert-tool -d=/etc/certs -o=gateway -s localhost -s 127.0.0.1 -s ${publicIp}
   sudo rm /etc/certs/client-key.pem /etc/certs/client.pem /etc/certs/ca-key.pem
-  sudo cp /etc/certs/server.pem /tmp/server.pem
+  sudo chmod 644 /etc/certs/server.pem
 }
 
 start_nginx() {

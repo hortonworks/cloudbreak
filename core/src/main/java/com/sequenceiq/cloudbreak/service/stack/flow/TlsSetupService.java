@@ -236,7 +236,7 @@ public class TlsSetupService {
         long stackId = stack.getId();
         String serverCertDir = tlsSecurityService.createServerCertDir(stackId, gwInstance);
         LOGGER.info("Server cert directory is created at: " + serverCertDir);
-        ssh.newSCPFileTransfer().download("/tmp/server.pem", serverCertDir + "/ca.pem");
+        ssh.newSCPFileTransfer().download("/etc/certs/server.pem", serverCertDir + "/ca.pem");
         InstanceMetaData metaData = instanceMetaDataRepository.findOne(gwInstance.getId());
         metaData.setServerCert(BaseEncoding.base64().encode(tlsSecurityService.readServerCert(stackId, gwInstance).getBytes()));
         instanceMetaDataRepository.save(metaData);
