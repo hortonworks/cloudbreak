@@ -215,15 +215,15 @@ public class AmbariClusterService implements ClusterService {
         try {
             cluster = clusterRepository.save(cluster);
             clusterComponentConfigProvider.store(components, cluster);
-            InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(cluster.getStatus()));
-            if (InMemoryStateStore.getStack(stackId) == null) {
-                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
-            }
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.CLUSTER, cluster.getName(), ex);
         }
         if (stack.isAvailable()) {
             flowManager.triggerClusterInstall(stack.getId());
+            InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(cluster.getStatus()));
+            if (InMemoryStateStore.getStack(stackId) == null) {
+                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
+            }
         }
         return cluster;
     }
