@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
@@ -40,6 +41,7 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
+import com.sequenceiq.cloudbreak.service.ha.HeartbeatService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
@@ -79,7 +81,11 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private Flow2Handler flow2Handler;
 
+    @Inject
+    private HeartbeatService heartbeatService;
+
     public void onApplicationEvent(ContextRefreshedEvent event) {
+        heartbeatService.heartbeat();
         List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
         stackIdsUnderOperation.addAll(restartMyAssignedDisruptedFlows());
         stackIdsUnderOperation.addAll(excludeStacksByFlowAssignment());
@@ -92,13 +98,12 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private List<Stack> resetStackStatus(List<Long> excludeStackIds) {
         return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
-                .map(s -> {
+                .peek(s -> {
                     if (!WAIT_FOR_SYNC.equals(s.getStatus())) {
                         loggingStatusChange("Stack", s.getId(), s.getStatus(), WAIT_FOR_SYNC);
                         stackUpdater.updateStackStatus(s.getId(), DetailedStackStatus.WAIT_FOR_SYNC, s.getStatusReason());
                     }
                     cleanInstanceMetaData(instanceMetaDataRepository.findAllInStack(s.getId()));
-                    return s;
                 }).collect(Collectors.toList());
     }
 
@@ -114,11 +119,10 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private List<Cluster> resetClusterStatus(List<Stack> stacksToSync, List<Long> excludeStackIds) {
         return clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
-                .map(c -> {
+                .peek(c -> {
                     loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);
                     c.setStatus(WAIT_FOR_SYNC);
                     clusterRepository.save(c);
-                    return c;
                 }).filter(c -> !stackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
     }
 
@@ -184,7 +188,13 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     private List<Long> restartMyAssignedDisruptedFlows() {
         List<Long> stackIds = new ArrayList<>();
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
-            Set<FlowLog> myFlowLogs = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+            Set<FlowLog> myFlowLogs;
+            try {
+                myFlowLogs = getMyFlowLogs();
+            } catch (ConcurrencyFailureException e) {
+                LOGGER.error("Cannot restart my flows, they have been re-distributed to other nodes", e);
+                return stackIds;
+            }
             List<String> flowIds = myFlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
             for (String flowId : flowIds) {
                 Long stackId = myFlowLogs.stream().filter(f -> f.getFlowId().equalsIgnoreCase(flowId)).map(FlowLog::getStackId).findAny().get();
@@ -199,6 +209,17 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
             }
         }
         return stackIds;
+    }
+
+    /**
+     * Retrieves my assigned flow logs and updates the version lock to avoid concurrency issues.
+     */
+    @Transactional
+    private Set<FlowLog> getMyFlowLogs() {
+        Set<FlowLog> myFlowLogs = flowLogRepository.findAllByCloudbreakNodeId(cloudbreakNodeConfig.getId());
+        myFlowLogs.forEach(fl -> fl.setCreated(fl.getCreated() + 1));
+        flowLogRepository.save(myFlowLogs);
+        return myFlowLogs;
     }
 
     private void loggingStatusChange(String type, Long id, Status status, Status deleteFailed) {
