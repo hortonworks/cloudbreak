@@ -24,7 +24,7 @@ cloudbreak-conf-tags() {
 
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_HAVEGED 1.1.0
-    env-import DOCKER_TAG_TRAEFIK v1.2.0
+    env-import DOCKER_TAG_TRAEFIK v1.3.5
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTFIX latest
@@ -291,6 +291,8 @@ cloudbreak-conf-ui() {
     env-import ULU_HWX_CLOUD_DEFAULT_SUBNET_ID ""
     env-import ULU_HWX_CLOUD_REGISTRATION_URL ""
     env-import HWX_DOC_LINK ""
+    env-import ULU_NODE_TLS_REJECT_UNAUTHORIZED "0"
+    env-import SL_NODE_TLS_REJECT_UNAUTHORIZED "0"
     env-import ULU_SUBSCRIBE_TO_NOTIFICATIONS "false"
     env-import HWX_CLOUD_ENABLE_GOVERNANCE_AND_SECURITY "false"
 }

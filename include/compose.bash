@@ -352,7 +352,7 @@ commondb:
 identity:
     labels:
       - traefik.port=8080
-      - traefik.frontend.rule=PathPrefix:/identity/oauth;PathPrefixStrip:/identity
+      - traefik.frontend.rule=PathPrefix:/identity/check_token,/identity/oauth,/identity/Users,/identity/login.do,/identity/Groups;PathPrefixStrip:/identity
       - traefik.backend=identity-backend
       - traefik.frontend.priority=10
     ports:
@@ -495,6 +495,7 @@ sultans:
         - SL_ADDRESS=$ULU_SULTANS_ADDRESS
         - SL_HWX_CLOUD_DEFAULT_REGION=$ULU_HWX_CLOUD_DEFAULT_REGION
         - SL_ADDRESS_RESOLVING_TIMEOUT
+        - NODE_TLS_REJECT_UNAUTHORIZED=$SL_NODE_TLS_REJECT_UNAUTHORIZED
         - SL_UAA_SERVICEID=identity.service.consul
         - SL_DISPLAY_TERMS_AND_SERVICES=$HWX_DISPLAY_TERMS_AND_CONDITIONS
     labels:
@@ -521,7 +522,7 @@ uluwatu:
         - ULU_OAUTH_CLIENT_ID=$UAA_ULUWATU_ID
         - 'ULU_OAUTH_CLIENT_SECRET=$(escape-string-compose-yaml $UAA_ULUWATU_SECRET \')'
         - ULU_HOST_ADDRESS
-        - NODE_TLS_REJECT_UNAUTHORIZED=0
+        - NODE_TLS_REJECT_UNAUTHORIZED=$ULU_NODE_TLS_REJECT_UNAUTHORIZED
         - ULU_HWX_CLOUD_DEFAULT_CREDENTIAL
         - ULU_HWX_CLOUD_DEFAULT_REGION
         - ULU_HWX_CLOUD_DEFAULT_SSH_KEY
