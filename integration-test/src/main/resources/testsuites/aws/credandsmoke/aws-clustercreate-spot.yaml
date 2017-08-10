@@ -41,7 +41,7 @@ tests:
 
   - name: create compute template
     parameters:
-      awsTemplateName: it-aws-credandsmoke-compute
+      awsTemplateName: it-aws-credandsmoke-compute-spot
       awsInstanceType: r3.large
       awsVolumeType: gp2
       awsVolumeCount: 3

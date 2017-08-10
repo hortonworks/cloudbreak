@@ -18,14 +18,14 @@ tests:
 
   - name: create security group
     parameters:
-      name: it-restricted-ambari-azure
+      name: it-restricted-ambari-azure-ssud
       provider: AZURE
     classes:
       - com.sequenceiq.it.cloudbreak.SecurityGroupCreationTest
 
   - name: create gateway template
     parameters:
-      azureTemplateName: it-azurerm-credandsmoke-gateway
+      azureTemplateName: it-azurerm-credandsmoke-gateway-ssud
       azureVmType: Standard_D4
       azureVolumeCount: 1
       azureVolumeSize: 50
@@ -35,7 +35,7 @@ tests:
 
   - name: create worker template
     parameters:
-      azureTemplateName: it-azurerm-credandsmoke-worker
+      azureTemplateName: it-azurerm-credandsmoke-worker-ssud
       azureVmType: Standard_D4
       azureVolumeCount: 1
       azureVolumeSize: 100
@@ -45,7 +45,7 @@ tests:
 
   - name: create compute template
     parameters:
-      azureTemplateName: it-azurerm-credandsmoke-compute
+      azureTemplateName: it-azurerm-credandsmoke-compute-ssud
       azureVmType: Standard_D11
       azureVolumeCount: 1
       azureVolumeSize: 200
@@ -55,9 +55,9 @@ tests:
 
   - name: create cluster
     parameters:
-      stackName: it-azure-cred
+      stackName: it-azure-cred-ssud
       region: North Europe
-      clusterName: it-azure-cred
+      clusterName: it-azure-cred-ssud
       persistentStorage: cbstore
       sleepTime: 60000
     classes:

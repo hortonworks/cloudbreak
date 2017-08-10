@@ -25,7 +25,7 @@ tests:
 
   - name: create gateway template
     parameters:
-      templateName: it-openstack-credandsmoke-gateway-ssud
+      templateName: it-oskerb-credandsmoke-gateway-ssud
       instanceType: m1.large
       volumeCount: 1
       volumeSize: 10
@@ -35,7 +35,7 @@ tests:
 
   - name: create worker template
     parameters:
-      templateName: it-openstack-credandsmoke-worker-ssud
+      templateName: it-oskerb-credandsmoke-worker-ssud
       instanceType: m1.large
       volumeCount: 2
       volumeSize: 10
@@ -45,7 +45,7 @@ tests:
 
   - name: create compute template
     parameters:
-      templateName: it-openstack-credandsmoke-compute-ssud
+      templateName: it-oskerb-credandsmoke-compute-ssud
       instanceType: m1.large
       volumeCount: 3
       volumeSize: 10
