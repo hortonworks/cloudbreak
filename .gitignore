@@ -43,3 +43,5 @@ node_modules/
 npm-debug.log
 start-local.sh
 cloudbreak.log
+cloudbreak-log/
+autoscale-log/
