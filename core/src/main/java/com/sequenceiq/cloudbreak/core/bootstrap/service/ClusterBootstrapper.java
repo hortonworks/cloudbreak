@@ -160,10 +160,13 @@ public class ClusterBootstrapper {
                 validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
             }
 
-            byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
-            ClusterComponent saltComponent = new ClusterComponent(ComponentType.SALT_STATE,
-                    new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))), stack.getCluster());
-            clusterComponentProvider.store(saltComponent);
+            ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
+            if (saltComponent == null) {
+                byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
+                saltComponent = new ClusterComponent(ComponentType.SALT_STATE,
+                        new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))), stack.getCluster());
+                clusterComponentProvider.store(saltComponent);
+            }
             hostOrchestrator.bootstrap(allGatewayConfig, nodes, clusterDeletionBasedModel(stack.getId(), null));
 
             InstanceMetaData primaryGateway = stack.getPrimaryGatewayInstance();
