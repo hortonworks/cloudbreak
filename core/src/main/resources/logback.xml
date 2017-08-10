@@ -2,44 +2,41 @@
 
 <configuration scan="true" scanPeriod="30 seconds">
 
+    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="com.sequenceiq" level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </logger>
-
-    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
-
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </root>
-
-    <appender name="OWNER_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
-        <discriminator>
-            <key>owner</key>
-            <defaultValue>spring</defaultValue>
+    <appender name="CB_NODEID_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator class="com.sequenceiq.cloudbreak.logger.UniqueIdDiscriminator" >
         </discriminator>
         <sift>
-            <appender name="FILE-${owner}" class="ch.qos.logback.core.FileAppender">
-                <file>owners_log/${owner}.log</file>
-                <append>false</append>
-                <encoder>
-                    <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
+            <appender name="FILE-${nodeid}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>cloudbreak-log/cloudbreak-${nodeid}.log</file>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [type:%X{resourceType:-springLog}] [id:%X{resourceId:-}] [name:%X{resourceName:-}] %msg%n</pattern>
                 </encoder>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <FileNamePattern>cloudbreak-log/cloudbreak-${nodeid}-%d{yyyy-MM-dd}.log</FileNamePattern>
+                </rollingPolicy>
+                <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                    <MaxFileSize>30MB</MaxFileSize>
+                </triggeringPolicy>
             </appender>
         </sift>
     </appender>
 
-    <logger name="com.sequenceiq" level="DEBUG" additivity="false">
-        <appender-ref ref="OWNER_BASED"/>
-    </logger>
-
-    <root level="INFO">
-        <appender-ref ref="OWNER_BASED"/>
+    <root level="${CB_LOG_LEVEL:-INFO}">
+        <appender-ref ref="CB_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
     </root>
+
+    <logger name="com.sequenceiq" level="${CB_LOG_LEVEL:-INFO}" additivity="false">
+        <appender-ref ref="CB_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </logger>
 
 </configuration>

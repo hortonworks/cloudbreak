@@ -2,33 +2,60 @@
 
 <configuration scan="true" scanPeriod="30 seconds">
 
+    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="com.sequenceiq" level="INFO" additivity="false">
+    <appender name="PERISCOPE_NODEID_BASED" class="ch.qos.logback.classic.sift.SiftingAppender">
+        <discriminator class="com.sequenceiq.periscope.logger.UniqueIdDiscriminator" >
+        </discriminator>
+        <sift>
+            <appender name="FILE-${nodeid}" class="ch.qos.logback.core.rolling.RollingFileAppender">
+                <file>autoscale-log/autoscale-${nodeid}.log</file>
+                <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+                    <pattern>%date{ISO8601} [%thread] %method:%line %-5level %logger{5} - [instance:${nodeid}] [owner:%X{owner:-spring}] [id:%X{resourceId:-}] [cb-stack-id:%X{cbStack:-}] %msg%n</pattern>
+                </encoder>
+                <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                    <FileNamePattern>cloudbreak-log/cloudbreak-${nodeid}-%d{yyyy-MM-dd}.log</FileNamePattern>
+                </rollingPolicy>
+                <triggeringPolicy class="ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy">
+                    <MaxFileSize>30MB</MaxFileSize>
+                </triggeringPolicy>
+            </appender>
+        </sift>
+    </appender>
+
+    <root level="${PERISCOPE_LOG_LEVEL:-INFO}">
+        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
+        <appender-ref ref="STDOUT"/>
+    </root>
+
+    <logger name="com.sequenceiq" level="${PERISCOPE_LOG_LEVEL:-INFO}" additivity="false">
+        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
-    <logger name="org.hibernate.type" level="INFO">
+    <logger name="org.hibernate.type" level="${PERISCOPE_LOG_LEVEL:-INFO}">
+        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
-    <logger name="org.hibernate" level="INFO">
+    <logger name="org.hibernate" level="${PERISCOPE_LOG_LEVEL:-INFO}">
+        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
-    <logger name="org.hibernate.SQL" level="INFO">
+    <logger name="org.hibernate.SQL" level="${PERISCOPE_LOG_LEVEL:-INFO}">
+        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
-    <logger name="sql-log" level="INFO">
+    <logger name="sql-log" level="${PERISCOPE_LOG_LEVEL:-INFO}">
+        <appender-ref ref="PERISCOPE_NODEID_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
-        <level value="INFO"/>
+        <level value="${PERISCOPE_LOG_LEVEL:-INFO}"/>
     </logger>
-    <logger name="org.springframework.boot.autoconfigure.security.AuthenticationManagerConfiguration" level="ERROR"/>
-    <root level="INFO">
-        <appender-ref ref="STDOUT"/>
-    </root>
 
 </configuration>
