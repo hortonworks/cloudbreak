@@ -8,6 +8,7 @@ cloudbreak-config() {
   cloudbreak-conf-cert
   cloudbreak-conf-db
   cloudbreak-conf-defaults
+  cloudbreak-conf-autscale
   cloudbreak-conf-uaa
   cloudbreak-conf-smtp
   cloudbreak-conf-cloud-provider
@@ -24,7 +25,7 @@ cloudbreak-conf-tags() {
 
     env-import DOCKER_TAG_ALPINE 3.1
     env-import DOCKER_TAG_HAVEGED 1.1.0
-    env-import DOCKER_TAG_TRAEFIK v1.3.5
+    env-import DOCKER_TAG_TRAEFIK v1.3.5-alpine
     env-import DOCKER_TAG_CONSUL 0.5
     env-import DOCKER_TAG_REGISTRATOR v5
     env-import DOCKER_TAG_POSTFIX latest
@@ -245,12 +246,17 @@ cloudbreak-conf-defaults() {
     env-import CB_ENABLE_CUSTOM_IMAGE "false"
     env-import CB_MAX_SALT_NEW_SERVICE_RETRY 90
     env-import CB_MAX_SALT_RECIPE_EXECUTION_RETRY 90
+    env-import CB_LOG_LEVEL "INFO"
 
     env-import CB_INSTANCE_UUID
     env-import CB_INSTANCE_NODE_ID
     env-validate CB_INSTANCE_UUID *" "* "space"
 
     env-import CB_SMARTSENSE_ID ""
+}
+
+cloudbreak-conf-autscale() {
+    env-import PERISCOPE_LOG_LEVEL "INFO"
 }
 
 cloudbreak-conf-cloud-provider() {

@@ -3,7 +3,7 @@ compose-init() {
         echo "* removing old docker-compose binary" | yellow
         rm -f .deps/bin/docker-compose
     fi
-    deps-require docker-compose 1.9.0
+    deps-require docker-compose 1.13.0
     env-import CB_COMPOSE_PROJECT cbreak
     env-import COMPOSE_HTTP_TIMEOUT 120
     env-import CBD_LOG_NAME cbreak
@@ -226,6 +226,7 @@ traefik:
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./certs/traefik:/certs/traefik
+        - ./logs/traefik:/opt/traefik/log/
     image: traefik:$DOCKER_TAG_TRAEFIK
     restart: on-failure
     command: --debug --web --InsecureSkipVerify=true \
@@ -233,6 +234,8 @@ traefik:
         --entryPoints='Name:http Address::80 Redirect.EntryPoint:https' \
         --entryPoints='Name:https Address::443 TLS:$CBD_TRAEFIK_TLS' \
         --maxidleconnsperhost=$TRAEFIK_MAX_IDLE_CONNECTION \
+        --traefikLogsFile=/opt/traefik/log/traefik.log \
+        --accessLogsFile=/opt/traefik/log/access.log \
         --docker \
         --consul --consul.endpoint=consul:8500
 haveged:
@@ -369,6 +372,7 @@ identity:
     dns: $PRIVATE_IP
     volumes:
       - ./uaa.yml:/uaa/uaa.yml
+      - ./logs/identity:/tomcat/logs/
     image: hortonworks/cloudbreak-uaa:$DOCKER_TAG_UAA
 
 cloudbreak:
@@ -460,6 +464,7 @@ cloudbreak:
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
         - /dev/urandom:/dev/random
+        - ./logs/cloudbreak:/cloudbreak-log
         - ./etc/:/etc/cloudbreak
     dns: $PRIVATE_IP
     links:
@@ -591,6 +596,7 @@ periscope:
         - PERISCOPE_IDENTITY_SERVICEID=identity.service.consul
         - PERISCOPE_SCHEMA_SCRIPTS_LOCATION
         - PERISCOPE_SCHEMA_MIGRATION_AUTO
+        - PERISCOPE_INSTANCE_NODE_ID=$CB_INSTANCE_NODE_ID
         - REST_DEBUG
         - CERT_VALIDATION
         - CB_DEFAULT_SUBSCRIPTION_ADDRESS
@@ -604,6 +610,7 @@ periscope:
     dns: $PRIVATE_IP
     volumes:
         - "$CBD_CERT_ROOT_PATH:/certs"
+        - ./logs/autoscale:/autoscale-log
         - /dev/urandom:/dev/random
     image: $DOCKER_IMAGE_CLOUDBREAK_PERISCOPE:$DOCKER_TAG_PERISCOPE
 
