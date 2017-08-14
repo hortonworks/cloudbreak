@@ -6,9 +6,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,7 +59,6 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.SyncGrainsRunn
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
 public class SaltOrchestrator implements HostOrchestrator {
@@ -512,30 +508,22 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private void uploadSignKey(SaltConnector saltConnector, GatewayConfig gateway, Set<String> gatewayTargets,
-            Set<String> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException, IOException {
+            Set<String> targets, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
         try {
             String saltSignPrivateKey = gateway.getSaltSignPrivateKey();
             if (!gatewayTargets.isEmpty() && saltSignPrivateKey != null) {
-                Path privateKeyPath = Paths.get(saltSignPrivateKey);
-                if (!Files.exists(privateKeyPath)) {
-                    return;
-                }
-                String privateKeyContent = FileReaderUtils.readFileFromPath(privateKeyPath);
                 LOGGER.info("Upload master_sign.pem to gateways");
-                uploadFileToGateways(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master_sign.pem", privateKeyContent.getBytes());
+                byte[] privateKeyContent = saltSignPrivateKey.getBytes();
+                uploadFileToGateways(saltConnector, gatewayTargets, exitCriteriaModel, "/etc/salt/pki/master", "master_sign.pem", privateKeyContent);
             }
 
             String saltSignPublicKey = gateway.getSaltSignPublicKey();
             if (!targets.isEmpty() && saltSignPublicKey != null) {
-                Path publicKeyPath = Paths.get(saltSignPublicKey);
-                if (!Files.exists(publicKeyPath)) {
-                    return;
-                }
-                String publicKeyContent = FileReaderUtils.readFileFromPath(publicKeyPath);
+                byte[] publicKeyContent = saltSignPublicKey.getBytes();
                 LOGGER.info("Upload master_sign.pub to nodes: " + targets);
-                uploadFileToGateways(saltConnector, targets, exitCriteriaModel, "/etc/salt/pki/minion", "master_sign.pub", publicKeyContent.getBytes());
+                uploadFileToGateways(saltConnector, targets, exitCriteriaModel, "/etc/salt/pki/minion", "master_sign.pub", publicKeyContent);
             }
-        } catch (IOException | SecurityException se) {
+        } catch (SecurityException se) {
             throw new CloudbreakOrchestratorFailedException("Failed to read salt sign key: " + se.getMessage());
         }
     }

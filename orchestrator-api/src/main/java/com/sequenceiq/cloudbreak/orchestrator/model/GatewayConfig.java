@@ -11,8 +11,6 @@ public class GatewayConfig {
 
     private final String hostname;
 
-    private final String certificateDir;
-
     private final String serverCert;
 
     private final String clientCert;
@@ -36,19 +34,18 @@ public class GatewayConfig {
     private final String saltSignPublicKey;
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
-            Integer gatewayPort, String certificateDir, Boolean knoxGatewayEnabled) {
-        this(connectionAddress, publicAddress, privateAddress, null, gatewayPort, certificateDir,
+            Integer gatewayPort, Boolean knoxGatewayEnabled) {
+        this(connectionAddress, publicAddress, privateAddress, null, gatewayPort,
                 null, null, null, null, null, null, knoxGatewayEnabled, true, null, null);
     }
 
     public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
-            Integer gatewayPort, String certificateDir, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
+            Integer gatewayPort, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
             String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltSignPrivateKey, String saltSignPublicKey) {
         this.connectionAddress = connectionAddress;
         this.publicAddress = publicAddress;
         this.privateAddress = privateAddress;
         this.hostname = hostname;
-        this.certificateDir = certificateDir;
         this.gatewayPort = gatewayPort;
         this.serverCert = serverCert;
         this.clientCert = clientCert;
@@ -76,14 +73,6 @@ public class GatewayConfig {
 
     public String getHostname() {
         return hostname;
-    }
-
-    public String getCertificateDir() {
-        return certificateDir;
-    }
-
-    public Integer getGatewayPort() {
-        return gatewayPort;
     }
 
     public String getGatewayUrl() {

@@ -1,15 +1,18 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.io.IOException;
+import java.security.KeyPair;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.StackBasedStatusCheckerTask;
 
 import net.schmizz.sshj.SSHClient;
+import net.schmizz.sshj.userauth.keyprovider.KeyPairWrapper;
 
 @Component
 public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskContext> {
@@ -28,9 +31,9 @@ public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskCo
                 LOGGER.info("Connecting with ssh to: {}, user: {} with password", sshCheckerTaskContext.getPublicIp(), user);
                 ssh.authPassword(user, sshCheckerTaskContext.getStack().getCredential().getLoginPassword());
             } else {
-                LOGGER.info("Connecting with ssh to: {}, user: {}, privatekey: {}", sshCheckerTaskContext.getPublicIp(), user, sshCheckerTaskContext
-                        .getSshPrivateFileLocation());
-                ssh.authPublickey(user, sshCheckerTaskContext.getSshPrivateFileLocation());
+                LOGGER.info("Connecting with ssh to: {}, user: {}", sshCheckerTaskContext.getPublicIp(), user);
+                KeyPair keyPair = KeyStoreUtil.loadPrivateKey(sshCheckerTaskContext.getSshPrivateKey());
+                ssh.authPublickey(user, new KeyPairWrapper(keyPair));
             }
             ret = true;
         } catch (Exception e) {

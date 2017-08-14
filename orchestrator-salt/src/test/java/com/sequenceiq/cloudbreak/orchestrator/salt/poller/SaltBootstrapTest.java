@@ -42,7 +42,7 @@ public class SaltBootstrapTest {
     public void setUp() {
         saltConnector = mock(SaltConnector.class);
         gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43",
-                "10-0-0-1.example.com", 9443, "certDir", "serverCert", "clientCert", "clientKey",
+                "10-0-0-1.example.com", 9443, "serverCert", "clientCert", "clientKey",
                 "saltpasswd", "saltbootpassword", "signkey", false, true, null, null);
 
         GenericResponse response = new GenericResponse();

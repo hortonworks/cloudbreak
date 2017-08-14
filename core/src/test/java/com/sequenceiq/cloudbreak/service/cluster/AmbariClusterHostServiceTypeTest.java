@@ -109,7 +109,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackService.findLazy(anyLong())).thenReturn(stack);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
-        given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", 8443, "/tmp", "/tmp"));
+        given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", "", "/tmp", "/tmp"));
     }
 
     @Test(expected = BadRequestException.class)

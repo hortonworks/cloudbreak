@@ -10,6 +10,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.apache.commons.codec.binary.Base64;
 import org.hibernate.annotations.Type;
 
 @Entity
@@ -70,7 +71,7 @@ public class SecurityConfig implements ProvisionEntity {
     }
 
     public String getClientKey() {
-        return clientKey;
+        return clientKey == null ? null : new String(Base64.decodeBase64(clientKey));
     }
 
     public void setClientKey(String clientKey) {
@@ -78,7 +79,7 @@ public class SecurityConfig implements ProvisionEntity {
     }
 
     public String getClientCert() {
-        return clientCert;
+        return clientCert == null ? null : new String(Base64.decodeBase64(clientCert));
     }
 
     public void setClientCert(String clientCert) {
@@ -86,7 +87,7 @@ public class SecurityConfig implements ProvisionEntity {
     }
 
     public String getCloudbreakSshPublicKey() {
-        return cloudbreakSshPublicKey;
+        return cloudbreakSshPublicKey == null ? null : new String(Base64.decodeBase64(cloudbreakSshPublicKey));
     }
 
     public void setCloudbreakSshPublicKey(String cloudbreakSshPublicKey) {
@@ -94,7 +95,7 @@ public class SecurityConfig implements ProvisionEntity {
     }
 
     public String getCloudbreakSshPrivateKey() {
-        return cloudbreakSshPrivateKey;
+        return cloudbreakSshPrivateKey == null ? null : new String(Base64.decodeBase64(cloudbreakSshPrivateKey));
     }
 
     public void setCloudbreakSshPrivateKey(String cloudbreakSshPrivateKey) {
@@ -142,7 +143,7 @@ public class SecurityConfig implements ProvisionEntity {
     }
 
     public String getSaltSignPublicKey() {
-        return saltSignPublicKey;
+        return saltSignPublicKey == null ? null : new String(Base64.decodeBase64(saltSignPublicKey));
     }
 
     public void setSaltSignPublicKey(String saltSignPublicKey) {
@@ -150,7 +151,7 @@ public class SecurityConfig implements ProvisionEntity {
     }
 
     public String getSaltSignPrivateKey() {
-        return saltSignPrivateKey;
+        return saltSignPrivateKey == null ? null : new String(Base64.decodeBase64(saltSignPrivateKey));
     }
 
     public void setSaltSignPrivateKey(String saltSignPrivateKey) {

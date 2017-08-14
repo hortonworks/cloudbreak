@@ -3,9 +3,12 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.security.KeyPair;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
+import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
@@ -28,12 +32,8 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingService;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import freemarker.template.Configuration;
@@ -42,6 +42,8 @@ import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
 import net.schmizz.sshj.transport.verification.HostKeyVerifier;
+import net.schmizz.sshj.userauth.keyprovider.KeyPairWrapper;
+import net.schmizz.sshj.xfer.InMemoryDestFile;
 import net.schmizz.sshj.xfer.InMemorySourceFile;
 
 @Component
@@ -54,18 +56,6 @@ public class TlsSetupService {
     private static final int SSH_POLLING_INTERVAL = 5000;
 
     private static final int SSH_MAX_ATTEMPTS_FOR_HOSTS = 100;
-
-    @Inject
-    private ServiceProviderConnectorAdapter connector;
-
-    @Inject
-    private SecurityConfigRepository securityConfigRepository;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
-
-    @Inject
-    private StackRepository stackRepository;
 
     @Inject
     private PollingService<SshCheckerTaskContext> sshCheckerTaskContextPollingService;
@@ -100,11 +90,11 @@ public class TlsSetupService {
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
         try {
             waitForSsh(stack, publicIp, sshPort, hostKeyVerifier, user);
-            String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
-            setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
+            String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKey();
+            setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack.getCredential());
             uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
             executeTlsSetupScript(ssh);
-            downloadAndSavePrivateKey(stack, ssh, gwInstance);
+            downloadAndSavePrivateKey(ssh, gwInstance);
         } catch (IOException e) {
             throw new CloudbreakException("Failed to setup TLS through temporary SSH.", e);
         } catch (TemplateException e) {
@@ -121,9 +111,9 @@ public class TlsSetupService {
     public void removeTemporarySShKey(Stack stack, String publicIp, int sshPort, String user, Set<String> sshFingerprints) throws CloudbreakException {
         SSHClient ssh = new SSHClient();
         try {
-            String privateKeyLocation = tlsSecurityService.getSshPrivateFileLocation(stack.getId());
+            String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKey();
             HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
-            prepareSshConnection(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKeyLocation, stack.getCredential());
+            prepareSshConnection(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack.getCredential());
             removeTemporarySShKey(ssh, user, stack.getCredential());
         } catch (IOException e) {
             LOGGER.info("Unable to delete temporary SSH key for stack {}", stack.getId());
@@ -139,28 +129,33 @@ public class TlsSetupService {
     private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user) throws CloudbreakSecuritySetupException {
         sshCheckerTaskContextPollingService.pollWithTimeoutSingleFailure(
                 sshCheckerTask,
-                new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, tlsSecurityService.getSshPrivateFileLocation(stack.getId())),
-                SSH_POLLING_INTERVAL,
-                SSH_MAX_ATTEMPTS_FOR_HOSTS);
+                new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, stack.getSecurityConfig().getCloudbreakSshPrivateKey()),
+                SSH_POLLING_INTERVAL, SSH_MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private void setupTemporarySsh(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation,
-            Credential credential) throws IOException {
+    private void setupTemporarySsh(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user,
+            String privateKey, Credential credential) throws IOException, CloudbreakException {
         LOGGER.info("Setting up temporary ssh...");
-        prepareSshConnection(ssh, ip, port, hostKeyVerifier, user, privateKeyLocation, credential);
+        prepareSshConnection(ssh, ip, port, hostKeyVerifier, user, privateKey, credential);
         String remoteTlsCertificatePath = "/tmp/cb-client.pem";
         ssh.newSCPFileTransfer().upload(tlsCertificatePath, remoteTlsCertificatePath);
         LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
-    private void prepareSshConnection(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user, String privateKeyLocation,
-            Credential credential) throws IOException {
+    private void prepareSshConnection(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user,
+            String privateKeyString, Credential credential) throws CloudbreakException, IOException {
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, port);
         if (credential.passwordAuthenticationRequired()) {
             ssh.authPassword(user, credential.getLoginPassword());
         } else {
-            ssh.authPublickey(user, privateKeyLocation);
+            try {
+                KeyPair keyPair = KeyStoreUtil.loadPrivateKey(privateKeyString);
+                KeyPairWrapper keyPairWrapper = new KeyPairWrapper(keyPair);
+                ssh.authPublickey(user, keyPairWrapper);
+            } catch (Exception e) {
+                throw new CloudbreakException("Couldn't prepare SSH connection", e);
+            }
         }
     }
 
@@ -232,13 +227,18 @@ public class TlsSetupService {
         }
     }
 
-    private void downloadAndSavePrivateKey(Stack stack, SSHClient ssh, InstanceMetaData gwInstance) throws IOException, CloudbreakSecuritySetupException {
-        long stackId = stack.getId();
-        String serverCertDir = tlsSecurityService.createServerCertDir(stackId, gwInstance);
-        LOGGER.info("Server cert directory is created at: " + serverCertDir);
-        ssh.newSCPFileTransfer().download("/tmp/cluster.pem", serverCertDir + "/ca.pem");
+    private void downloadAndSavePrivateKey(SSHClient ssh, InstanceMetaData gwInstance) throws IOException, CloudbreakSecuritySetupException {
+        ByteArrayOutputStream cert = new ByteArrayOutputStream();
+        ssh.newSCPFileTransfer().download("/tmp/cluster.pem", new InMemoryDestFile() {
+
+            @Override
+            public OutputStream getOutputStream() throws IOException {
+                return cert;
+            }
+        });
+        cert.close();
         InstanceMetaData metaData = instanceMetaDataRepository.findOne(gwInstance.getId());
-        metaData.setServerCert(BaseEncoding.base64().encode(tlsSecurityService.readServerCert(stackId, gwInstance).getBytes()));
+        metaData.setServerCert(BaseEncoding.base64().encode(cert.toByteArray()));
         instanceMetaDataRepository.save(metaData);
     }
 

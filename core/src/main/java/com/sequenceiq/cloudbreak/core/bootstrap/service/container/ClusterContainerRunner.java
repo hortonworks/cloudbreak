@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 
@@ -74,9 +73,6 @@ public class ClusterContainerRunner {
 
     @Inject
     private ConversionService conversionService;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private ContainerConstraintFactory constraintFactory;
@@ -111,7 +107,6 @@ public class ClusterContainerRunner {
         Orchestrator orchestrator = stack.getOrchestrator();
         Map<String, Object> map = new HashMap<>();
         map.putAll(orchestrator.getAttributes().getMap());
-        map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
@@ -224,7 +219,6 @@ public class ClusterContainerRunner {
         Orchestrator orchestrator = stack.getOrchestrator();
         Map<String, Object> map = new HashMap<>();
         map.putAll(orchestrator.getAttributes().getMap());
-        map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();

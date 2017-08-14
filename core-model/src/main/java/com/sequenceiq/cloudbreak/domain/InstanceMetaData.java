@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
+import org.apache.commons.codec.binary.Base64;
 import org.hibernate.annotations.Type;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
@@ -223,7 +224,7 @@ public class InstanceMetaData implements ProvisionEntity {
     }
 
     public String getServerCert() {
-        return serverCert;
+        return serverCert == null ? null : new String(Base64.decodeBase64(serverCert));
     }
 
     public void setServerCert(String serverCert) {
