@@ -30,6 +30,7 @@ import org.springframework.statemachine.config.common.annotation.ObjectPostProce
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 
 import reactor.bus.EventBus;
 
@@ -48,6 +49,9 @@ public class AbstractActionTest {
 
     @Mock
     private Flow flow;
+
+    @Mock
+    private ErrorHandlerAwareFlowEventFactory reactorEventFactory;
 
     private StateMachine<State, Event> stateMachine;
 

@@ -35,10 +35,10 @@ public class MDCBuilder {
     }
 
     public static void buildMdcContext(String stackId, String stackName, String ownerId, String type) {
-        MDC.put(LoggerContextKey.OWNER_ID.toString(), ownerId);
-        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), stackId);
-        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), stackName);
-        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), type);
+        MDC.put(LoggerContextKey.OWNER_ID.toString(), StringUtils.isEmpty(ownerId) ? "" : ownerId);
+        MDC.put(LoggerContextKey.RESOURCE_ID.toString(), StringUtils.isEmpty(stackId) ? "" : stackId);
+        MDC.put(LoggerContextKey.RESOURCE_NAME.toString(), StringUtils.isEmpty(stackName) ? "" : stackName);
+        MDC.put(LoggerContextKey.RESOURCE_TYPE.toString(), StringUtils.isEmpty(type) ? "" : type);
     }
 
     public static void buildUserMdcContext(IdentityUser user) {
@@ -49,7 +49,9 @@ public class MDCBuilder {
 
     public static void buildMdcContextFromMap(Map<String, String> map) {
         cleanupMdc();
-        map.entrySet().stream().forEach(e -> MDC.put(e.getKey(), e.getValue()));
+        if (map != null) {
+            map.entrySet().stream().forEach(e -> MDC.put(e.getKey(), e.getValue()));
+        }
     }
 
     public static Map<String, String> getMdcContextMap() {

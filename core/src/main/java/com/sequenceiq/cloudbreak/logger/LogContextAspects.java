@@ -57,9 +57,7 @@ public class LogContextAspects {
         Event<CloudPlatformRequest> event = (Event<CloudPlatformRequest>) joinPoint.getArgs()[0];
         CloudPlatformRequest cloudPlatformRequest = event.getData();
         CloudContext cloudContext = cloudPlatformRequest.getCloudContext();
-        if (cloudContext != null) {
-            MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner(), "STACK");
-        }
+        buildMdcContext(cloudContext, event);
         LOGGER.info("A CloudPlatformEventHandler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
@@ -79,9 +77,7 @@ public class LogContextAspects {
     public void buildLogContextForPersistenceHandler(JoinPoint joinPoint) {
         Event<ResourceNotification> event = (Event<ResourceNotification>) joinPoint.getArgs()[0];
         CloudContext cloudContext = event.getData().getCloudContext();
-        if (cloudContext != null) {
-            MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner(), "STACK");
-        }
+        buildMdcContext(cloudContext, event);
         LOGGER.debug("A Resource persistence handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
@@ -99,5 +95,17 @@ public class LogContextAspects {
         CloudContext cloudContext = pollTask.getAuthenticatedContext().getCloudContext();
         MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner(), "STACK");
         LOGGER.debug("A PollTask's 'call' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
+    }
+
+    private void buildMdcContext(CloudContext cloudContext, Event<?> event) {
+        if (cloudContext != null) {
+            MDCBuilder.buildMdcContext(stringValue(cloudContext.getId()), stringValue(cloudContext.getName()), stringValue(cloudContext.getOwner()), "STACK");
+        } else {
+            MDCBuilder.buildMdcContextFromMap(event.getHeaders().get(Flow2Handler.MDC_CONTEXT_ID));
+        }
+    }
+
+    private String stringValue(Object object) {
+        return object == null ? "" : object.toString();
     }
 }

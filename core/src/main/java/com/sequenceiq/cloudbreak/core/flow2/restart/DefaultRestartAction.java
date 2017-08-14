@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component("DefaultRestartAction")
@@ -32,6 +31,6 @@ public class DefaultRestartAction implements RestartAction {
         if (flowChainId != null) {
             headers.put(FLOW_CHAIN_ID, flowChainId);
         }
-        eventBus.notify(event, eventFactory.createEvent(new Event.Headers(headers), payload));
+        eventBus.notify(event, eventFactory.createEventWithErrHandler(headers, payload));
     }
 }

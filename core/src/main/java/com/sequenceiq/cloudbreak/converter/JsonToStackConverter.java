@@ -86,6 +86,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         if (sourceTags != null && sourceTags.get("datalakeId") != null) {
             stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
         }
+        stack.setOwner(source.getOwner());
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED.getStatus(), "", DetailedStackStatus.PROVISION_REQUESTED));
