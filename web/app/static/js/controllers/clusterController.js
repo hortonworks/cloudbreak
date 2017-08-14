@@ -1624,9 +1624,20 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             return result;
         }
 
-
         $scope.getUserDefinedTags = function() {
-            return ($rootScope.activeCluster.tags && $rootScope.activeCluster.tags.userDefined) ? $rootScope.activeCluster.tags.userDefined : [];
+            var userDefined, defaultTags, tags;
+            if ($rootScope.activeCluster.tags && $rootScope.activeCluster.tags.userDefined) {
+                userDefined = $rootScope.activeCluster.tags.userDefined;
+            } else {
+                userDefined = {}
+            }
+            if ($rootScope.activeCluster.tags && $rootScope.activeCluster.tags.defaultTags) {
+                defaultTags = $rootScope.activeCluster.tags.defaultTags
+            } else {
+                defaultTags = {}
+            }
+            tags = Object.assign({}, userDefined, defaultTags)
+            return (tags) ? tags : [];
         }
 
         $scope.escapeRegex = function() {

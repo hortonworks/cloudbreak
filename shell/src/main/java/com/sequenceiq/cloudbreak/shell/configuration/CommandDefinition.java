@@ -5,6 +5,8 @@ import javax.inject.Inject;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.sequenceiq.cloudbreak.shell.commands.AccountPreferencesCommands;
+import com.sequenceiq.cloudbreak.shell.commands.base.BaseAccountPreferencesCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseCredentialCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseInstanceGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseNetworkCommands;
@@ -159,5 +161,10 @@ public class CommandDefinition {
     public MarathonCommands marathonCommands() {
         return new MarathonCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
                 baseTemplateCommands(), basePlatformCommands(), stackCommands());
+    }
+
+    @Bean
+    public AccountPreferencesCommands accountPreferencesCommands() {
+        return new BaseAccountPreferencesCommands(shellContext);
     }
 }

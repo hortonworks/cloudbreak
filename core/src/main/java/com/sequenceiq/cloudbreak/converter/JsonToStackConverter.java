@@ -4,6 +4,7 @@ import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,9 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
@@ -31,6 +35,7 @@ import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -39,11 +44,14 @@ import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 @Component
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(JsonToStackConverter.class);
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -56,6 +64,9 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;
+
+    @Inject
+    private AccountPreferencesService accountPreferencesService;
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -71,7 +82,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         setPlatform(source);
         stack.setCloudPlatform(source.getCloudPlatform());
         Map<String, Object> sourceTags = source.getTags();
-        stack.setTags(getTags(sourceTags));
+        stack.setTags(getTags(mergeTags(sourceTags, getDefaultTags(source.getAccount()))));
         if (sourceTags != null && sourceTags.get("datalakeId") != null) {
             stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
         }
@@ -115,6 +126,25 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         } catch (Exception e) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
+    }
+
+    private Object getDefaultTags(String account) {
+        Object result = new HashMap<String, String>();
+        try {
+            AccountPreferences pref = accountPreferencesService.getByAccount(account);
+            if (pref != null && pref.getDefaultTags() != null && StringUtils.isNoneBlank(pref.getDefaultTags().getValue())) {
+                result = pref.getDefaultTags().get(Map.class);
+            }
+        } catch (IOException e) {
+            LOGGER.debug("Exception during reading default tags.", e);
+        }
+        return result;
+    }
+
+    private Map<String, Object> mergeTags(Map<String, Object> tags, Object defaultTags) {
+        Map<String, Object> result = new HashMap<>(tags);
+        result.put("defaultTags", defaultTags);
+        return result;
     }
 
     private String getRegion(StackRequest source) {
