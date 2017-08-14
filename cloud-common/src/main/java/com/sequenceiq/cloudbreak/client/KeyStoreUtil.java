@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.client;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyStore;
@@ -24,12 +23,12 @@ import org.bouncycastle.openssl.PEMParser;
 public class KeyStoreUtil {
 
     private KeyStoreUtil() throws IllegalAccessException {
-        throw new IllegalAccessException("KeyStoreUtil could not be initalized");
+        throw new IllegalAccessException("KeyStoreUtil could not be initialized");
     }
 
-    public static KeyStore createKeyStore(final String clientCertPath, String clientKeyPath) throws Exception {
-        KeyPair keyPair = loadPrivateKey(clientKeyPath);
-        Certificate privateCertificate = loadCertificate(clientCertPath);
+    public static KeyStore createKeyStore(final String clientCert, String clientKey) throws Exception {
+        KeyPair keyPair = loadPrivateKey(clientKey);
+        Certificate privateCertificate = loadCertificate(clientCert);
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(null);
@@ -39,13 +38,12 @@ public class KeyStoreUtil {
         return keyStore;
     }
 
-    public static KeyStore createTrustStore(final String serverCertPath) throws Exception {
-        File serverCertFile = new File(serverCertPath);
-        BufferedReader reader = null;
+    public static KeyStore createTrustStore(final String serverCert) throws Exception {
+        Reader reader = null;
         PEMParser pemParser = null;
 
         try {
-            reader = new BufferedReader(new FileReader(serverCertFile));
+            reader = new StringReader(serverCert);
             pemParser = new PEMParser(reader);
             X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
             Certificate caCertificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
@@ -66,13 +64,12 @@ public class KeyStoreUtil {
         }
     }
 
-    private static Certificate loadCertificate(final String certPath) throws IOException, CertificateException {
-        File certificate = new File(certPath);
-        BufferedReader reader = null;
+    private static Certificate loadCertificate(final String cert) throws IOException, CertificateException {
+        Reader reader = null;
         PEMParser pemParser = null;
 
         try {
-            reader = new BufferedReader(new FileReader(certificate));
+            reader = new StringReader(cert);
             pemParser = new PEMParser(reader);
             X509CertificateHolder certificateHolder = (X509CertificateHolder) pemParser.readObject();
             return new JcaX509CertificateConverter().getCertificate(certificateHolder);
@@ -88,13 +85,12 @@ public class KeyStoreUtil {
 
     }
 
-    private static KeyPair loadPrivateKey(final String clientKeyPath) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
-        File privateKeyFile = new File(clientKeyPath);
-        BufferedReader reader = null;
+    public static KeyPair loadPrivateKey(final String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+        Reader reader = null;
         PEMParser pemParser = null;
 
         try {
-            reader = new BufferedReader(new FileReader(privateKeyFile));
+            reader = new StringReader(clientKey);
             pemParser = new PEMParser(reader);
 
             PEMKeyPair pemKeyPair = (PEMKeyPair) pemParser.readObject();

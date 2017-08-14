@@ -82,7 +82,6 @@ import com.sequenceiq.cloudbreak.repository.FileSystemRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.KerberosConfigRepository;
-import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
@@ -173,9 +172,6 @@ public class AmbariClusterService implements ClusterService {
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -271,7 +267,7 @@ public class AmbariClusterService implements ClusterService {
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setAmbariIp(ambariClientConfig.getApiAddress());
         cluster = clusterRepository.save(cluster);
-        LOGGER.info("Updated cluster: [ambariIp: '{}', certDir: '{}'].", ambariClientConfig.getApiAddress(), ambariClientConfig.getCertDir());
+        LOGGER.info("Updated cluster: [ambariIp: '{}'].", ambariClientConfig.getApiAddress());
         return cluster;
     }
 

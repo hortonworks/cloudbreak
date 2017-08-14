@@ -407,7 +407,6 @@ public class AmbariDecommissioner {
         Orchestrator orchestrator = stack.getOrchestrator();
         Map<String, Object> map = new HashMap<>();
         map.putAll(orchestrator.getAttributes().getMap());
-        map.put("certificateDir", tlsSecurityService.prepareCertDir(stack.getId()));
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         try {
             if (orchestratorType.containerOrchestrator()) {

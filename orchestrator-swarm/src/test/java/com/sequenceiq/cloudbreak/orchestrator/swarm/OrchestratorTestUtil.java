@@ -25,7 +25,7 @@ public class OrchestratorTestUtil {
     }
 
     public static GatewayConfig gatewayConfig() {
-        return new GatewayConfig("11.0.0.0", "12.0.0.0", "11.0.0.0", 8443, "/tmp/certs", false);
+        return new GatewayConfig("11.0.0.0", "12.0.0.0", "11.0.0.0", 8443, false);
     }
 
     public static ContainerOrchestratorCluster containerOrchestratorCluster(GatewayConfig gatewayConfig, Set<Node> nodes) {

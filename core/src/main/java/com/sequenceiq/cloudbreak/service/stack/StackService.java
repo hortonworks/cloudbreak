@@ -308,8 +308,7 @@ public class StackService {
             instanceGroupRepository.save(savedStack.getInstanceGroups());
 
             if (!BYOS.equals(savedStack.cloudPlatform())) {
-                tlsSecurityService.copyClientKeys(stack.getId());
-                SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys(stack.getId());
+                SecurityConfig securityConfig = tlsSecurityService.storeSSHKeys();
                 securityConfig.setSaltPassword(PasswordUtil.generatePassword());
                 securityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
                 securityConfig.setKnoxMasterSecret(PasswordUtil.generatePassword());

@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
@@ -53,7 +52,6 @@ public class GatewayConfigService {
 
     private SaltClientConfig getSaltClientConfig(Stack stack) {
         SecurityConfig securityConfig = stack.getSecurityConfig();
-        return new SaltClientConfig(securityConfig.getSaltPassword(), securityConfig.getSaltBootPassword(),
-                new String(BaseEncoding.base64().decode(securityConfig.getCloudbreakSshPrivateKey())));
+        return new SaltClientConfig(securityConfig.getSaltPassword(), securityConfig.getSaltBootPassword(), securityConfig.getCloudbreakSshPrivateKey());
     }
 }

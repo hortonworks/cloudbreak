@@ -115,7 +115,7 @@ public class ClusterBootstrapperErrorHandlerTest {
         });
 
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
-                new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, "/cert/1", false), prepareNodes(stack));
+                new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, false), prepareNodes(stack));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class ClusterBootstrapperErrorHandlerTest {
             }
         });
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
-                new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, "/cert/1", false), prepareNodes(stack));
+                new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, false), prepareNodes(stack));
 
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         verify(instanceGroupRepository, times(3)).save(any(InstanceGroup.class));

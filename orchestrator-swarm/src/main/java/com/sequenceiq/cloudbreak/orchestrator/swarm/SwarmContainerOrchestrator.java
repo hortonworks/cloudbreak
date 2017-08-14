@@ -213,7 +213,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
         LOGGER.info("Checking if Swarm manager is available and if the agents are registered.");
         List<String> privateAddresses = new ArrayList<>();
         try {
-            DockerClientConfig swarmClientConfig = getSwarmClientConfig(gatewayConfig.getGatewayUrl(), gatewayConfig.getCertificateDir());
+            DockerClientConfig swarmClientConfig = getSwarmClientConfig(gatewayConfig.getGatewayUrl(), null);
             DockerClient swarmManagerClient = DockerClientBuilder.getInstance(swarmClientConfig)
                     .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl())
                     .build();
@@ -402,7 +402,7 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     private DockerClientConfig getDockerClientConfig(GatewayConfig gatewayConfig) {
         return DockerClientConfig.createDefaultConfigBuilder()
-                .withDockerCertPath(gatewayConfig.getCertificateDir())
+//                .withDockerCertPath(gatewayConfig.getCertificateDir())
                 .withVersion("1.18")
                 .withUri(gatewayConfig.getGatewayUrl() + "/docker")
                 .build();
@@ -416,13 +416,13 @@ public class SwarmContainerOrchestrator extends SimpleContainerOrchestrator {
 
     @VisibleForTesting
     DockerClient swarmClient(GatewayConfig gatewayConfig) {
-        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayConfig.getGatewayUrl(), gatewayConfig.getCertificateDir()))
+        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayConfig.getGatewayUrl(), ""))
                 .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl().withReadTimeout(READ_TIMEOUT)).build();
     }
 
     DockerClient swarmClient(OrchestrationCredential cred) {
         String gatewayUrl = "https://" + cred.getApiEndpoint();
-        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayUrl, (String) cred.getProperties().get("certificateDir")))
+        return DockerClientBuilder.getInstance(getSwarmClientConfig(gatewayUrl, null))
                 .withDockerCmdExecFactory(new DockerCmdExecFactoryImpl().withReadTimeout(READ_TIMEOUT))
                 .build();
     }

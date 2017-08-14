@@ -1,15 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
 public class HttpClientConfig {
-    private static final String DEFAULT_PRIVATE_KEY_NAME = "/key.pem";
-
-    private static final String DEFAULT_CLIENT_CERT_NAME = "/cert.pem";
-
-    private static final String DEFAULT_SERVER_CERT_NAME = "/ca.pem";
-
     private String apiAddress;
-
-    private Integer apiPort;
 
     private String serverCert;
 
@@ -17,27 +9,23 @@ public class HttpClientConfig {
 
     private String clientKey;
 
-    public HttpClientConfig(String apiAddress, Integer apiPort) {
+    public HttpClientConfig(String apiAddress) {
         this.apiAddress = apiAddress;
-        this.apiPort = apiPort;
     }
 
-    public HttpClientConfig(String apiAddress, Integer apiPort, String certDir, String serverCertDir) {
+    public HttpClientConfig(String apiAddress, String serverCert, String clientCert, String clientKey) {
         this.apiAddress = apiAddress;
-        this.apiPort = apiPort;
-        if (certDir != null) {
-            this.serverCert = serverCertDir + DEFAULT_SERVER_CERT_NAME;
-            this.clientCert = certDir + DEFAULT_CLIENT_CERT_NAME;
-            this.clientKey = certDir + DEFAULT_PRIVATE_KEY_NAME;
-        }
+        this.serverCert = serverCert;
+        this.clientCert = clientCert;
+        this.clientKey = clientKey;
     }
 
     public String getApiAddress() {
         return apiAddress;
     }
 
-    public Integer getApiPort() {
-        return apiPort;
+    public String getServerCert() {
+        return serverCert;
     }
 
     public String getClientCert() {
@@ -46,16 +34,5 @@ public class HttpClientConfig {
 
     public String getClientKey() {
         return clientKey;
-    }
-
-    public String getServerCert() {
-        return serverCert;
-    }
-
-    public String getCertDir() {
-        if (clientCert != null) {
-            return clientCert.substring(0, clientCert.indexOf(DEFAULT_CLIENT_CERT_NAME));
-        }
-        return null;
     }
 }

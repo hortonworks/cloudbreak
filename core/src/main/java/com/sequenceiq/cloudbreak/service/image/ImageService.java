@@ -15,7 +15,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
@@ -30,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 
 @Service
 @Transactional
@@ -50,9 +48,6 @@ public class ImageService {
     @Inject
     private ComponentConfigProvider componentConfigProvider;
 
-    @Inject
-    private TlsSecurityService tlsSecurityService;
-
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         return componentConfigProvider.getImage(stackId);
     }
@@ -64,8 +59,8 @@ public class ImageService {
             Platform platform = platform(stack.cloudPlatform());
             String platformString = platform(stack.cloudPlatform()).value().toLowerCase();
             String imageName = imageNameUtil.determineImageName(platformString, stack.getRegion(), ambariVersion, hdpVersion, customImage);
-            String cbPrivKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPrivateKey()));
-            String cbSshKey = new String(BaseEncoding.base64().decode(stack.getSecurityConfig().getCloudbreakSshPublicKey()));
+            String cbPrivKey = stack.getSecurityConfig().getCloudbreakSshPrivateKey();
+            String cbSshKey = stack.getSecurityConfig().getCloudbreakSshPublicKey();
             byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(cbPrivKey);
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();

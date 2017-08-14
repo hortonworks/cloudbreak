@@ -40,9 +40,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.ConstraintRepository;
 import com.sequenceiq.cloudbreak.repository.ContainerRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationFailedException;
 
@@ -64,9 +62,6 @@ public class ClusterTerminationService {
     private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
-
-    @Inject
     private ConstraintRepository constraintRepository;
 
     @Inject
@@ -74,9 +69,6 @@ public class ClusterTerminationService {
 
     @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private ComponentConfigProvider componentConfigProvider;
@@ -97,7 +89,6 @@ public class ClusterTerminationService {
             try {
                 Map<String, Object> map = new HashMap<>();
                 map.putAll(orchestrator.getAttributes().getMap());
-                map.put("certificateDir", tlsSecurityService.prepareCertDir(cluster.getStack().getId()));
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
                 Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
                 List<ContainerInfo> containerInfo = containers.stream()
@@ -105,7 +96,7 @@ public class ClusterTerminationService {
                 containerOrchestrator.deleteContainer(containerInfo, credential);
                 containerRepository.delete(containers);
                 deleteClusterHostGroupsWithItsMetadata(cluster);
-            } catch (CloudbreakException | CloudbreakOrchestratorException e) {
+            } catch (CloudbreakOrchestratorException e) {
                 throw new TerminationFailedException(String.format("Failed to delete containers of cluster (id:'%s',name:'%s').",
                         cluster.getId(), cluster.getName()), e);
             }

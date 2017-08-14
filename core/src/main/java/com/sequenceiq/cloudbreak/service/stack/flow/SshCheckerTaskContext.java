@@ -15,15 +15,15 @@ public class SshCheckerTaskContext extends StackContext {
 
     private String user;
 
-    private String sshPrivateFileLocation;
+    private String sshPrivateKey;
 
-    public SshCheckerTaskContext(Stack stack, HostKeyVerifier hostKeyVerifier, String publicIp, int sshPort, String user, String sshPrivateFileLocation) {
+    public SshCheckerTaskContext(Stack stack, HostKeyVerifier hostKeyVerifier, String publicIp, int sshPort, String user, String sshPrivateKey) {
         super(stack);
         this.hostKeyVerifier = hostKeyVerifier;
         this.publicIp = publicIp;
         this.sshPort = sshPort;
         this.user = user;
-        this.sshPrivateFileLocation = sshPrivateFileLocation;
+        this.sshPrivateKey = sshPrivateKey;
     }
 
     public HostKeyVerifier getHostKeyVerifier() {
@@ -38,8 +38,8 @@ public class SshCheckerTaskContext extends StackContext {
         return sshPort;
     }
 
-    public String getSshPrivateFileLocation() {
-        return sshPrivateFileLocation;
+    public String getSshPrivateKey() {
+        return sshPrivateKey;
     }
 
     public String getUser() {

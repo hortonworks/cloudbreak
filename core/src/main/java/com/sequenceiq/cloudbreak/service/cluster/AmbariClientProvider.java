@@ -26,7 +26,7 @@ public class AmbariClientProvider {
      * set this session otherwise the client cannot modify any resources.
      *
      * @param clientConfig HTTP client config
-     * @param httpsPort port number@param cluster Cloudbreak cluster
+     * @param httpsPort    port number@param cluster Cloudbreak cluster
      * @return client
      */
     public AmbariClient getAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, Cluster cluster) {
@@ -68,10 +68,9 @@ public class AmbariClientProvider {
                     + clientConfig.getApiAddress() + ":" + HTTP_PORT);
             return new AmbariClient(clientConfig.getApiAddress(), HTTP_PORT, "admin", "admin");
         }
-        LOGGER.info(String.format("Creating Ambari client with default credentials with 2-way-ssl to connect to host:port: %s:%s certificates: %s, %s, %s",
-                clientConfig.getApiAddress(), httpsPort, clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert()));
+        LOGGER.info(String.format("Creating Ambari client with default "
+                + "credentials with 2-way-ssl to connect to host:port: %s:%s", clientConfig.getApiAddress(), httpsPort));
         return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
-                "admin", "admin",
-                clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
+                "admin", "admin", clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
     }
 }
