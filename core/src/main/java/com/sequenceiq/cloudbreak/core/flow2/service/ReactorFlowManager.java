@@ -155,7 +155,7 @@ public class ReactorFlowManager {
 
     public void triggerClusterUpgrade(Long stackId) {
         String selector = FlowChainTriggers.CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        reactor.notify(selector, eventFactory.createEvent(new StackEvent(selector, stackId), selector));
+        reactor.notify(selector, eventFactory.createEventWithErrHandler(new StackEvent(selector, stackId)));
     }
 
     public void triggerClusterCredentialReplace(Long stackId, String userName, String password) {
@@ -233,11 +233,11 @@ public class ReactorFlowManager {
 
     public void cancelRunningFlows(Long stackId) {
         StackEvent cancelEvent = new StackEvent(Flow2Handler.FLOW_CANCEL, stackId);
-        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEvent(cancelEvent, Flow2Handler.FLOW_CANCEL));
+        reactor.notify(Flow2Handler.FLOW_CANCEL, eventFactory.createEventWithErrHandler(cancelEvent));
     }
 
     private void notify(String selector, Acceptable acceptable) {
-        Event<Acceptable> event = eventFactory.createEvent(acceptable);
+        Event<Acceptable> event = eventFactory.createEventWithErrHandler(acceptable);
         reactor.notify(selector, event);
         try {
             Boolean accepted = true;

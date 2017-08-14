@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
+
+import com.google.common.collect.Maps;
 
 import reactor.bus.Event;
 
@@ -10,22 +14,24 @@ import reactor.bus.Event;
  * Event factory that registers an error handler into the event.
  */
 @Service
-public class ErrorHandlerAwareFlowEventFactory implements FlowEventFactory<Object> {
+public class ErrorHandlerAwareFlowEventFactory {
 
     @Inject
     private CloudbreakErrorHandler errorHandler;
 
-    @Override
-    public Event<Object> createEvent(Object payLoad, String eventKey) {
-        return createEvent(null, payLoad);
+    public <P> Event<P> createEventWithErrHandler(P payLoad) {
+        return createEventWithErrHandler(Maps.newHashMap(), payLoad);
     }
 
-    public Event<Object> createEvent(Event.Headers headers, Object payLoad) {
-        return new Event<>(headers, payLoad, errorHandler);
+    public <P> Event<P> createEventWithErrHandler(Map<String, Object> headers, P payLoad) {
+        return new Event<>(new Event.Headers(headers), payLoad, errorHandler);
     }
 
-    @Override
     public <P> Event<P> createEvent(P payLoad) {
-        return new Event<>(null, payLoad, errorHandler);
+        return createEvent(Maps.newHashMap(), payLoad);
+    }
+
+    public <P> Event<P> createEvent(Map<String, Object> headers, P payLoad) {
+        return new Event<>(new Event.Headers(headers), payLoad);
     }
 }

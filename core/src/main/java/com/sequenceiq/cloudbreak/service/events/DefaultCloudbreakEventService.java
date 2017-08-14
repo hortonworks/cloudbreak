@@ -1,13 +1,9 @@
 package com.sequenceiq.cloudbreak.service.events;
 
-import static com.sequenceiq.cloudbreak.core.flow2.Flow2Handler.MDC_CONTEXT_ID;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -18,15 +14,14 @@ import org.springframework.data.jpa.domain.Specifications;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selectors;
 
@@ -43,6 +38,9 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private CloudbreakEventRepository eventRepository;
 
     @Inject
+    private ErrorHandlerAwareFlowEventFactory eventFactory;
+
+    @Inject
     private EventBus reactor;
 
     @Inject
@@ -57,20 +55,14 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
         CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
         LOGGER.info("Firing Cloudbreak event: {}", eventData);
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
-        Event reactorEvent = new Event(new Event.Headers(headers), eventData);
-        reactor.notify(CLOUDBREAK_EVENT, reactorEvent);
+        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 
     @Override
     public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
         InstanceGroupEventData eventData = new InstanceGroupEventData(stackId, eventType, eventMessage, instanceGroupName);
-        LOGGER.info("Fireing cloudbreak event: {}", eventData);
-        Map<String, Object> headers = new HashMap<>();
-        headers.put(MDC_CONTEXT_ID, MDCBuilder.getMdcContextMap());
-        Event reactorEvent = new Event(new Event.Headers(headers), eventData);
-        reactor.notify(CLOUDBREAK_EVENT, reactorEvent);
+        LOGGER.info("Firing cloudbreak event: {}", eventData);
+        reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 
     @Override

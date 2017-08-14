@@ -59,7 +59,7 @@ public class StackParameterService {
                 }
             }
 
-            CloudContext cloudContext = new CloudContext(credential.getId(), stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
+            CloudContext cloudContext = new CloudContext(null, stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
             eventBus.notify(getStackParamValidationRequest.selector(), Event.wrap(getStackParamValidationRequest));
