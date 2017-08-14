@@ -465,7 +465,6 @@ Here is the list of all the available options:
 | --kerberosPrincipal | string | Kerberos principal (e.g. admin/admin) |
 | --kerberosRealm | string | Kerberos realm (e.g. custom.com)|
 | --kerberosUrl | string | Kerberos url (e.g. 10.0.0.4) |
-| --ldapRequired | boolean | Start and configure LDAP authentication support for Ambari hosts |
 | --os | string | Stack OS to select package manager, default is RedHat | 
 | --password | string | Password of the Ambari server (default is 'admin') |
 | --stack | string | Stack definition name (e.g. HDP) |

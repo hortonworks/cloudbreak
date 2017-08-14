@@ -145,9 +145,6 @@ public class ModelDescriptions {
         public static final String EMAIL_NEEDED = "send email about the result of the cluster installation";
         public static final String SERVICE_ENDPOINT_MAP = "most important services in the cluster";
         public static final String CONFIG_STRATEGY = "config recommendation strategy";
-        public static final String LDAP_REQUIRED = "flag for default LDAP support";
-        public static final String SSSDCONFIG_ID = "SSSD config id for the cluster";
-        public static final String SSSDCONFIG = "SSSD config for the cluster";
         public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
         public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
@@ -264,18 +261,6 @@ public class ModelDescriptions {
         public static final String CONTENT = "content of recipe";
         public static final String TYPE = "type of recipe";
         public static final String RECIPE_URI = "recipe uri";
-    }
-
-    public static class SssdConfigModelDescription {
-        public static final String PROVIDER_TYPE = "provider type";
-        public static final String URL = "comma-separated list of URIs of the LDAP servers";
-        public static final String SCHEMA = "schema of the database";
-        public static final String BASE_SEARCH = "search base of the database";
-        public static final String TLS_REQUCERT = "TLS behavior of the connection";
-        public static final String AD_SERVER = "comma-separated list of IP addresses or hostnames of the AD servers";
-        public static final String KERBEROS_SERVER = "comma-separated list of IP addresses or hostnames of the Kerberos servers";
-        public static final String KERBEROS_REALM = "name of the Kerberos realm";
-        public static final String CONFIGURATION = "custom configuration";
     }
 
     public static class InstanceGroupModelDescription {

@@ -62,7 +62,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             kerberosConfig.setKerberosContainerDn(kerberos.getContainerDn());
         }
         cluster.setKerberosConfig(kerberosConfig);
-        cluster.setLdapRequired(source.getLdapRequired());
         cluster.setConfigStrategy(source.getConfigStrategy());
         cluster.setEnableShipyard(source.getEnableShipyard());
         cluster.setEmailTo(source.getEmailTo());

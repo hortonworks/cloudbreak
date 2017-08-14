@@ -122,8 +122,6 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "kerberosLdapUrl", mandatory = false, help = "Kerberos ldap url (e.g. ldaps://acme.com)") String kerberosLdapUrl,
             @CliOption(key = "kerberosContainerDn", mandatory = false, help = "Kerberos container dn (e.g. ou=ambaritest,dc=WWW,dc=ACME,dc=COM)")
                     String kerberosContainerDn,
-            @CliOption(key = "ldapRequired", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true",
-                    help = "Start and configure LDAP authentication support for Ambari hosts") Boolean ldapRequired,
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
             @CliOption(key = "enableShipyard", help = "Run shipyard in cluster",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableShipyard,
@@ -309,10 +307,6 @@ public class ClusterCommands implements BaseCommands {
                 kerberosRequest.setContainerDn(kerberosContainerDn);
             }
             clusterRequest.setKerberos(kerberosRequest);
-            clusterRequest.setLdapRequired(ldapRequired);
-            if (shellContext.getSssdConfigId() != null) {
-                clusterRequest.setSssdConfigId(Long.valueOf(shellContext.getSssdConfigId()));
-            }
             if (shellContext.getRdsConfigId() != null) {
                 if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
                     throw shellContext.exceptionTransformer().transformToRuntimeException(

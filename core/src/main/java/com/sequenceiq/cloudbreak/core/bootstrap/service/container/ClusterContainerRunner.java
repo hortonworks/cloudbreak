@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.A
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.CONSUL_WATCH;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.HAVEGED;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.KERBEROS;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.LDAP;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.LOGROTATE;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.REGISTRATOR;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.SHIPYARD;
@@ -150,12 +149,6 @@ public class ClusterContainerRunner {
                         cluster.getId().toString());
                 containers.put(KERBEROS.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, KERBEROS), credential,
                         kerberosServerConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-            }
-
-            if (cluster.isLdapRequired()) {
-                ContainerConstraint ldapConstraint = constraintFactory.getLdapConstraint(ambariServerHost);
-                containers.put(LDAP.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, LDAP), credential, ldapConstraint,
-                        clusterDeletionBasedModel(stack.getId(), cluster.getId())));
             }
 
             if (SWARM.equals(orchestrator.getType()) && cluster.getEnableShipyard()) {

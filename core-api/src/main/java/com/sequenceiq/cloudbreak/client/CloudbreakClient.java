@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.RdsConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SmartSenseSubscriptionEndpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.SssdConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
@@ -92,8 +91,6 @@ public class CloudbreakClient {
     private EndpointWrapper<NetworkEndpoint> networkEndpoint;
 
     private EndpointWrapper<RecipeEndpoint> recipeEndpoint;
-
-    private EndpointWrapper<SssdConfigEndpoint> sssdConfigEndpoint;
 
     private EndpointWrapper<RdsConfigEndpoint> rdsConfigEndpoint;
 
@@ -177,7 +174,6 @@ public class CloudbreakClient {
         this.subscriptionEndpoint = newResource(this.subscriptionEndpoint, SubscriptionEndpoint.class, headers);
         this.networkEndpoint = newResource(this.networkEndpoint, NetworkEndpoint.class, headers);
         this.recipeEndpoint = newResource(this.recipeEndpoint, RecipeEndpoint.class, headers);
-        this.sssdConfigEndpoint = newResource(this.sssdConfigEndpoint, SssdConfigEndpoint.class, headers);
         this.rdsConfigEndpoint = newResource(this.rdsConfigEndpoint, RdsConfigEndpoint.class, headers);
         this.accountPreferencesEndpoint = newResource(this.accountPreferencesEndpoint, AccountPreferencesEndpoint.class, headers);
         this.blueprintEndpoint = newResource(this.blueprintEndpoint, BlueprintEndpoint.class, headers);
@@ -254,11 +250,6 @@ public class CloudbreakClient {
     public RecipeEndpoint recipeEndpoint() {
         refresh();
         return recipeEndpoint.getEndpointProxy();
-    }
-
-    public SssdConfigEndpoint sssdConfigEndpoint() {
-        refresh();
-        return sssdConfigEndpoint.getEndpointProxy();
     }
 
     public RdsConfigEndpoint rdsConfigEndpoint() {

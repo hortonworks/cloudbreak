@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.decorator.ClusterDecorator;
-import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
@@ -65,9 +64,6 @@ public class ClusterCreationSetupService {
 
     @Autowired
     private ClusterDecorator clusterDecorator;
-
-    @Autowired
-    private SssdConfigService sssdConfigService;
 
     @Autowired
     private ClusterService clusterService;
@@ -105,12 +101,9 @@ public class ClusterCreationSetupService {
         Cluster cluster = conversionService.convert(request, Cluster.class);
         cluster = clusterDecorator.decorate(cluster, stack.getId(), user,
                 request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
-                request.getSssdConfigId(), request.getRdsConfigIds(), request.getLdapConfigId(),
-                request.getBlueprint(), request.getSssdConfig(), request.getRdsConfigJsons(),
+                request.getRdsConfigIds(), request.getLdapConfigId(),
+                request.getBlueprint(), request.getRdsConfigJsons(),
                 request.getLdapConfig(), request.getConnectedCluster());
-        if (cluster.isLdapRequired() && cluster.getSssdConfig() == null) {
-            cluster.setSssdConfig(sssdConfigService.getDefaultSssdConfig(user));
-        }
         List<ClusterComponent> components = new ArrayList<>();
         components = addAmbariRepoConfig(stack.getId(), components, request, cluster);
         components = addHDPRepoConfig(stack.getId(), components, request, cluster);

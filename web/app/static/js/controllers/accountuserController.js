@@ -175,10 +175,6 @@ angular.module('uluwatuControllers').controller('accountuserController', ['$scop
                         write: false,
                         read: true
                     },
-                    sssdconfigs: {
-                        write: false,
-                        read: true
-                    },
                     platforms: {
                         write: false,
                         read: true

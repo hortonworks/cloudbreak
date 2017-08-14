@@ -588,30 +588,12 @@ public class ShellContext {
         return rdsConfigs;
     }
 
-    public boolean isSssdConfigAccessible() {
-        return isPropertyAvailable(PropertyKey.SSSDCONFIG_ACCESSIBLE);
-    }
-
-    public void setSssdConfigAccessible() {
-        addProperty(PropertyKey.SSSDCONFIG_ACCESSIBLE, ACCESSIBLE);
-    }
-
-    public void addSssdConfig(String id) {
-        addProperty(PropertyKey.SSSDCONFIG_ID, id);
-        setSssdConfigAccessible();
-    }
-
     public void addRdsConfig(String rdsConfigId) {
         addProperty(PropertyKey.RDSCONFIG_ID, rdsConfigId);
-        setSssdConfigAccessible();
     }
 
     public void setRdsConfigAccessible() {
         addProperty(PropertyKey.RDSCONFIG_ACCESSIBLE, ACCESSIBLE);
-    }
-
-    public String getSssdConfigId() {
-        return getLastPropertyValue(PropertyKey.SSSDCONFIG_ID);
     }
 
     public String getRdsConfigId() {
@@ -628,7 +610,6 @@ public class ShellContext {
 
     public void addLdapConfig(String id) {
         addProperty(PropertyKey.LDAPCONFIG_ID, id);
-        setSssdConfigAccessible();
     }
 
     public String getLdapConfigId() {
@@ -819,8 +800,6 @@ public class ShellContext {
         BLUEPRINT_ACCESSIBLE,
         STACK_ACCESSIBLE,
         RECIPE_ACCESSIBLE,
-        SSSDCONFIG_ACCESSIBLE,
-        SSSDCONFIG_ID,
         RDSCONFIG_ACCESSIBLE,
         RDSCONFIG_ID,
         RDSCONFIG_NAME,

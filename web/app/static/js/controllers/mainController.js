@@ -58,18 +58,6 @@ angular.module('uluwatuControllers')
                         value: 'Url'
                     }]
                 },
-                'SSSDCONFIG_TYPE': {
-                    content_types: [{
-                        key: 'TEXT',
-                        value: 'Text'
-                    }, {
-                        key: 'FILE',
-                        value: 'File'
-                    }, {
-                        key: 'PARAMS',
-                        value: 'Parameters'
-                    }]
-                },
                 'BLUEPRINT_TYPE': [{
                     key: 'TEXT',
                     value: 'Text'

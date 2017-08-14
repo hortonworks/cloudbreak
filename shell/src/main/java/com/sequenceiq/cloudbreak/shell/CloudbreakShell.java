@@ -182,7 +182,6 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         initBlueprintAccessibility();
         initStackAccessibility();
         initRecipeAccessibility();
-        initSssdConfigAccessibility();
         initRdsConfigAccessibility();
         Set<NetworkResponse> publics = cloudbreakClient.networkEndpoint().getPublics();
         for (NetworkResponse network : publics) {
@@ -219,12 +218,6 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     private void initRecipeAccessibility() {
         if (!cloudbreakClient.recipeEndpoint().getPublics().isEmpty()) {
             context.setRecipeAccessible();
-        }
-    }
-
-    private void initSssdConfigAccessibility() {
-        if (!cloudbreakClient.sssdConfigEndpoint().getPublics().isEmpty()) {
-            context.setSssdConfigAccessible();
         }
     }
 

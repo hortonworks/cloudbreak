@@ -110,12 +110,7 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private KerberosConfig kerberosConfig;
 
-    private Boolean ldapRequired;
-
     private Boolean enableShipyard;
-
-    @ManyToOne
-    private SssdConfig sssdConfig;
 
     @Column(nullable = false)
     private Boolean emailNeeded;
@@ -292,22 +287,6 @@ public class Cluster implements ProvisionEntity {
 
     public boolean isSecure() {
         return secure == null ? false : secure;
-    }
-
-    public Boolean isLdapRequired() {
-        return ldapRequired == null ? false : ldapRequired;
-    }
-
-    public void setLdapRequired(Boolean ldapRequired) {
-        this.ldapRequired = ldapRequired;
-    }
-
-    public SssdConfig getSssdConfig() {
-        return sssdConfig;
-    }
-
-    public void setSssdConfig(SssdConfig sssdConfig) {
-        this.sssdConfig = sssdConfig;
     }
 
     public Set<RDSConfig> getRdsConfigs() {

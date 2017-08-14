@@ -11,7 +11,6 @@ public class ControllerDescription {
     public static final String CLUSTER_DESCRIPTION = "Operations on clusters";
     public static final String CLUSTER_TEMPLATE_DESCRIPTION = "Operations on clusters templates";
     public static final String RECIPE_DESCRIPTION = "Operations on recipes";
-    public static final String SSSDCONFIG_DESCRIPTION = "Operations on SSSD configs";
     public static final String USAGES_DESCRIPTION = "Operations on usages";
     public static final String EVENT_DESCRIPTION = "Operations on events";
     public static final String NETWORK_DESCRIPTION = "Operations on networks";

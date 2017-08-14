@@ -43,15 +43,6 @@
         "cb-keystone-v3-default-scope": "Default",
         "cb-keystone-v3-domain-scope": "Domain"
     },
-    "sssd" : {
-        "ACTIVE_DIRECTORY": "Active Directory",
-        "AD": "Active Directory",
-        "NEVER": "Never",
-        "ALLOW": "Allow",
-        "TRY": "Try",
-        "DEMAND": "Demand",
-        "HARD": "Hard"
-    },
     "database" : {
       "POSTGRES" : "PostgreSQL",
       "MYSQL" : "MySQL",

@@ -57,15 +57,6 @@ public class ClusterResponse {
 
     private boolean secure;
 
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
-    private Boolean ldapRequired = false;
-
-    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
-    private Long sssdConfigId;
-
-    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG)
-    private SssdConfigResponse sssdConfig;
-
     private Set<HostGroupResponse> hostGroups = new HashSet<>();
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
@@ -216,22 +207,6 @@ public class ClusterResponse {
         this.secure = secure;
     }
 
-    public Boolean getLdapRequired() {
-        return ldapRequired;
-    }
-
-    public void setLdapRequired(Boolean ldapRequired) {
-        this.ldapRequired = ldapRequired;
-    }
-
-    public Long getSssdConfigId() {
-        return sssdConfigId;
-    }
-
-    public void setSssdConfigId(Long sssdConfigId) {
-        this.sssdConfigId = sssdConfigId;
-    }
-
     public String getAmbariServerIp() {
         return ambariServerIp;
     }
@@ -311,14 +286,6 @@ public class ClusterResponse {
 
     public void setBlueprintCustomProperties(JsonNode blueprintCustomProperties) {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
-    }
-
-    public SssdConfigResponse getSssdConfig() {
-        return sssdConfig;
-    }
-
-    public void setSssdConfig(SssdConfigResponse sssdConfig) {
-        this.sssdConfig = sssdConfig;
     }
 
     public Set<RDSConfigResponse> getRdsConfigs() {

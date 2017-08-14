@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -32,7 +30,6 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
-import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
@@ -45,8 +42,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class RecipeEngine {
 
     public static final Set<String> DEFAULT_RECIPES =  Sets.newHashSet("hdfs-home", "smartsense-capture-schedule");
-
-    private static final String SSSD_CONFIG = "sssd-config-";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 
@@ -74,7 +69,6 @@ public class RecipeEngine {
     public void executePreInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
-            configureSssd(stack, null);
             addFsRecipes(stack, hostGroups);
             addSmartSenseRecipe(stack, hostGroups);
             addContainerExecutorScripts(stack, hostGroups);
@@ -90,7 +84,6 @@ public class RecipeEngine {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             Set<HostGroup> hgs = Collections.singleton(hostGroup);
-            configureSssd(stack, metaDatas);
             addFsRecipes(stack, hgs);
             boolean recipesFound = recipesFound(hgs);
             if (recipesFound) {
@@ -173,27 +166,6 @@ public class RecipeEngine {
     private FileSystemConfiguration getFileSystemConfiguration(FileSystem fs) throws IOException {
         String json = JsonUtil.writeValueAsString(fs.getProperties());
         return (FileSystemConfiguration) JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
-    }
-
-    private void configureSssd(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
-        if (stack.getCluster().getSssdConfig() != null) {
-            List<String> sssdPayload = generateSssdRecipePayload(stack);
-            throw new IllegalStateException("implementation required");
-        }
-    }
-
-    private List<String> generateSssdRecipePayload(Stack stack) throws CloudbreakSecuritySetupException {
-        SssdConfig config = stack.getCluster().getSssdConfig();
-        List<String> payload;
-        if (config.getConfiguration() != null) {
-            String configName = SSSD_CONFIG + config.getId();
-            payload = Collections.singletonList(configName);
-        } else {
-            payload = Arrays.asList("-", config.getProviderType().getType(), config.getUrl(), config.getSchema().getRepresentation(),
-                    config.getBaseSearch(), config.getTlsReqcert().getRepresentation(), config.getAdServer(),
-                    config.getKerberosServer(), config.getKerberosRealm());
-        }
-        return payload;
     }
 
     private boolean recipesFound(Set<HostGroup> hostGroups) {
