@@ -90,7 +90,7 @@ public class TlsSetupService {
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
         try {
             waitForSsh(stack, publicIp, sshPort, hostKeyVerifier, user);
-            String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKey();
+            String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded();
             setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack.getCredential());
             uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
             executeTlsSetupScript(ssh);
@@ -111,7 +111,7 @@ public class TlsSetupService {
     public void removeTemporarySShKey(Stack stack, String publicIp, int sshPort, String user, Set<String> sshFingerprints) throws CloudbreakException {
         SSHClient ssh = new SSHClient();
         try {
-            String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKey();
+            String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded();
             HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
             prepareSshConnection(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack.getCredential());
             removeTemporarySShKey(ssh, user, stack.getCredential());
@@ -129,7 +129,7 @@ public class TlsSetupService {
     private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user) throws CloudbreakSecuritySetupException {
         sshCheckerTaskContextPollingService.pollWithTimeoutSingleFailure(
                 sshCheckerTask,
-                new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, stack.getSecurityConfig().getCloudbreakSshPrivateKey()),
+                new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded()),
                 SSH_POLLING_INTERVAL, SSH_MAX_ATTEMPTS_FOR_HOSTS);
     }
 
@@ -150,7 +150,7 @@ public class TlsSetupService {
             ssh.authPassword(user, credential.getLoginPassword());
         } else {
             try {
-                KeyPair keyPair = KeyStoreUtil.loadPrivateKey(privateKeyString);
+                KeyPair keyPair = KeyStoreUtil.createKeyPair(privateKeyString);
                 KeyPairWrapper keyPairWrapper = new KeyPairWrapper(keyPair);
                 ssh.authPublickey(user, keyPairWrapper);
             } catch (Exception e) {

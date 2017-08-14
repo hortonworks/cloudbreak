@@ -93,7 +93,9 @@ public class ModelDescriptions {
         public static final String AMBARI_IP = "public ambari ip of the stack";
         public static final String AMBARI_URL = "public ambari url";
         public static final String NETWORK_ID = "network resource id for the stack";
-        public static final String CERTIFICATE = "certificate used by the gateway";
+        public static final String CERTIFICATE = "server certificate used by the gateway";
+        public static final String CLIENT_KEY = "client key used by the gateway";
+        public static final String CLIENT_CERT = "client certificate used by the gateway";
         public static final String CLUSTER_STATUS = "status of the cluster";
         public static final String PLATFORM_VARIANT = "cloud provider api variant";
         public static final String ORCHESTRATOR = "the details of the container orchestrator api to use";

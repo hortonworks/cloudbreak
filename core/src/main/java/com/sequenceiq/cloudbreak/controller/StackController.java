@@ -179,7 +179,7 @@ public class StackController implements StackEndpoint {
 
     @Override
     public CertificateResponse getCertificate(Long stackId) {
-        return new CertificateResponse(tlsSecurityService.getCertificate(stackId));
+        return tlsSecurityService.getCertificates(stackId);
     }
 
     @Override

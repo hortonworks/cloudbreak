@@ -11,6 +11,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.apache.commons.codec.binary.Base64;
 
 @Entity
 @Table(name = "SecurityConfig")
@@ -53,28 +54,16 @@ public class SecurityConfig {
         this.id = id;
     }
 
-    public byte[] getClientKey() {
-        return clientKey;
+    public String getClientKeyDecoded() {
+        return clientKey == null ? null : new String(Base64.decodeBase64(clientKey));
     }
 
-    public void setClientKey(byte[] clientKey) {
-        this.clientKey = clientKey;
+    public String getClientCertDecoded() {
+        return clientCert == null ? null : new String(Base64.decodeBase64(clientCert));
     }
 
-    public byte[] getClientCert() {
-        return clientCert;
-    }
-
-    public void setClientCert(byte[] clientCert) {
-        this.clientCert = clientCert;
-    }
-
-    public byte[] getServerCert() {
-        return serverCert;
-    }
-
-    public void setServerCert(byte[] serverCert) {
-        this.serverCert = serverCert;
+    public String getServerCertDecoded() {
+        return serverCert == null ? null : new String(Base64.decodeBase64(serverCert));
     }
 
     public Cluster getCluster() {
@@ -83,6 +72,30 @@ public class SecurityConfig {
 
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
+    }
+
+    public byte[] getClientKey() {
+        return clientKey;
+    }
+
+    public byte[] getClientCert() {
+        return clientCert;
+    }
+
+    public byte[] getServerCert() {
+        return serverCert;
+    }
+
+    public void setClientKey(byte[] clientKey) {
+        this.clientKey = clientKey;
+    }
+
+    public void setClientCert(byte[] clientCert) {
+        this.clientCert = clientCert;
+    }
+
+    public void setServerCert(byte[] serverCert) {
+        this.serverCert = serverCert;
     }
 
     public void update(SecurityConfig updatedConfig) {

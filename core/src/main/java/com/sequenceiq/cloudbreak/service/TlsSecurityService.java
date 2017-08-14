@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
+import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -8,7 +9,6 @@ import java.nio.file.Paths;
 
 import javax.inject.Inject;
 
-import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +18,7 @@ import com.google.common.io.BaseEncoding;
 import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.KeyPair;
+import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
@@ -117,7 +118,7 @@ public class TlsSecurityService {
                 gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
                 saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
                 knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-                securityConfig.getSaltSignPrivateKey(), securityConfig.getSaltSignPublicKey());
+                securityConfig.getSaltSignPrivateKeyDecoded(), securityConfig.getSaltSignPublicKeyDecoded());
     }
 
     public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
@@ -137,17 +138,24 @@ public class TlsSecurityService {
         if (!BYOS.equals(stack.cloudPlatform())) {
             SecurityConfig securityConfig = stack.getSecurityConfig();
             return new HttpClientConfig(apiAddress,
-                    gateway.getServerCert(), securityConfig.getClientCert(), securityConfig.getClientKey());
+                    gateway.getServerCert(), securityConfig.getClientCertDecoded(), securityConfig.getClientKeyDecoded());
         } else {
             return new HttpClientConfig(apiAddress);
         }
     }
 
-    public byte[] getCertificate(Long id) {
-        String cert = instanceMetaDataRepository.getServerCertByStackId(id);
-        if (cert == null) {
-            throw new NotFoundException("Stack doesn't exist, or certificate was not found for stack.");
+    public CertificateResponse getCertificates(Long stackId) {
+        Stack stack = stackRepository.findOneWithLists(stackId);
+        if (stack == null) {
+            throw new NotFoundException("Stack doesn't exist.");
         }
-        return Base64.decodeBase64(cert);
+        String serverCert = instanceMetaDataRepository.getServerCertByStackId(stackId);
+        if (serverCert == null) {
+            throw new NotFoundException("Server certificate was not found.");
+        }
+        SecurityConfig securityConfig = stack.getSecurityConfig();
+        return new CertificateResponse(decodeBase64(serverCert),
+                securityConfig.getClientKeyDecoded().getBytes(), securityConfig.getClientCertDecoded().getBytes());
     }
+
 }

@@ -59,8 +59,8 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
             MDCBuilder.buildMdcContext(cluster);
 
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
-            Client client = RestClientUtil.createClient(tlsConfig.getServerCertPath(),
-                    tlsConfig.getClientCertPath(), tlsConfig.getClientKeyPath(), true, PrometheusEvaluator.class);
+            Client client = RestClientUtil.createClient(tlsConfig.getServerCert(),
+                    tlsConfig.getClientCert(), tlsConfig.getClientKey(), true, PrometheusEvaluator.class);
             String prometheusAddress = String.format("https://%s:%s/prometheus", cluster.getAmbari().getHost(), cluster.getPort());
             WebTarget target = client.target(prometheusAddress);
 

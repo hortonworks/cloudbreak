@@ -70,7 +70,7 @@ public class SecurityConfig implements ProvisionEntity {
         this.id = id;
     }
 
-    public String getClientKey() {
+    public String getClientKeyDecoded() {
         return clientKey == null ? null : new String(Base64.decodeBase64(clientKey));
     }
 
@@ -78,7 +78,7 @@ public class SecurityConfig implements ProvisionEntity {
         this.clientKey = clientKey;
     }
 
-    public String getClientCert() {
+    public String getClientCertDecoded() {
         return clientCert == null ? null : new String(Base64.decodeBase64(clientCert));
     }
 
@@ -86,7 +86,7 @@ public class SecurityConfig implements ProvisionEntity {
         this.clientCert = clientCert;
     }
 
-    public String getCloudbreakSshPublicKey() {
+    public String getCloudbreakSshPublicKeyDecoded() {
         return cloudbreakSshPublicKey == null ? null : new String(Base64.decodeBase64(cloudbreakSshPublicKey));
     }
 
@@ -94,7 +94,7 @@ public class SecurityConfig implements ProvisionEntity {
         this.cloudbreakSshPublicKey = cloudbreakSshPublicKey;
     }
 
-    public String getCloudbreakSshPrivateKey() {
+    public String getCloudbreakSshPrivateKeyDecoded() {
         return cloudbreakSshPrivateKey == null ? null : new String(Base64.decodeBase64(cloudbreakSshPrivateKey));
     }
 
@@ -142,7 +142,7 @@ public class SecurityConfig implements ProvisionEntity {
         this.usePrivateIpToTls = usePrivateIpToTls;
     }
 
-    public String getSaltSignPublicKey() {
+    public String getSaltSignPublicKeyDecoded() {
         return saltSignPublicKey == null ? null : new String(Base64.decodeBase64(saltSignPublicKey));
     }
 
@@ -150,7 +150,7 @@ public class SecurityConfig implements ProvisionEntity {
         this.saltSignPublicKey = saltSignPublicKey;
     }
 
-    public String getSaltSignPrivateKey() {
+    public String getSaltSignPrivateKeyDecoded() {
         return saltSignPrivateKey == null ? null : new String(Base64.decodeBase64(saltSignPrivateKey));
     }
 
