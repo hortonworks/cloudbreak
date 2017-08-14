@@ -17,13 +17,8 @@ public class AmbariClientProvider {
     public AmbariClient createAmbariClient(Cluster cluster) {
         if (cluster.getStackId() != null) {
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
-            return new AmbariClient(cluster.getHost(),
-                    cluster.getPort(),
-                    cluster.getAmbariUser(),
-                    cluster.getAmbariPass(),
-                    tlsConfig.getClientCertPath(),
-                    tlsConfig.getClientKeyPath(),
-                    tlsConfig.getServerCertPath());
+            return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(), cluster.getAmbariPass(),
+                    tlsConfig.getClientCert(), tlsConfig.getClientKey(), tlsConfig.getServerCert());
         } else {
             return new AmbariClient(cluster.getHost(), cluster.getPort(), cluster.getAmbariUser(), cluster.getAmbariPass());
         }

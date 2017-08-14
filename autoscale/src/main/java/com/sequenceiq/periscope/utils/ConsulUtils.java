@@ -1,26 +1,25 @@
 package com.sequenceiq.periscope.utils;
 
 import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
+import javax.net.ssl.SSLContext;
+
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.config.Registry;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.ConsulRawClient;
-import com.ecwid.consul.v1.OperationException;
-import com.ecwid.consul.v1.QueryParams;
-import com.ecwid.consul.v1.agent.model.Member;
-import com.ecwid.consul.v1.catalog.model.CatalogService;
-import com.ecwid.consul.v1.event.model.Event;
-import com.ecwid.consul.v1.event.model.EventParams;
-import com.ecwid.consul.v1.kv.model.GetValue;
-import com.ecwid.consul.v1.kv.model.PutParams;
+import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 
 public final class ConsulUtils {
@@ -29,198 +28,48 @@ public final class ConsulUtils {
 
     private static final int DEFAULT_TIMEOUT_MS = 5000;
 
-    private static final int ALIVE_STATUS = 1;
+    private static final int MAX_CONNECTION = 1000;
 
-    private static final int LEFT_STATUS = 3;
+    private static final int MAX_ROUTE = 500;
 
     private ConsulUtils() {
         throw new IllegalStateException();
     }
 
-    public static List<CatalogService> getService(List<ConsulClient> clients, String serviceName) {
-        for (ConsulClient consul : clients) {
-            List<CatalogService> service = getService(consul, serviceName);
-            if (!service.isEmpty()) {
-                return service;
-            }
-        }
-        return Collections.emptyList();
+    public static ConsulClient createClient(String apiAddress, String apiPort, TlsConfiguration tlsConfiguration) throws Exception {
+        return createClient(apiAddress, Integer.valueOf(apiPort), tlsConfiguration);
     }
 
-    public static List<CatalogService> getService(ConsulClient client, String serviceName) {
-        try {
-            return client.getCatalogService(serviceName, QueryParams.DEFAULT).getValue();
-        } catch (Exception e) {
-            return Collections.emptyList();
-        }
-    }
-
-    public static Map<String, String> getAliveMembers(List<ConsulClient> clients) {
-        return getMembers(clients, ALIVE_STATUS);
-    }
-
-    public static Map<String, String> getLeftMembers(List<ConsulClient> clients) {
-        return getMembers(clients, LEFT_STATUS);
-    }
-
-    public static Map<String, String> getMembers(List<ConsulClient> clients, int status) {
-        for (ConsulClient client : clients) {
-            Map<String, String> members = getMembers(client, status);
-            if (!members.isEmpty()) {
-                return members;
-            }
-        }
-        return Collections.emptyMap();
-    }
-
-    public static Map<String, String> getMembers(ConsulClient client, int status) {
-        try {
-            Map<String, String> result = new HashMap<>();
-            List<Member> members = client.getAgentMembers().getValue();
-            for (Member member : members) {
-                if (member.getStatus() == status) {
-                    result.put(member.getAddress(), member.getName());
-                }
-            }
-            return result;
-        } catch (Exception e) {
-            return Collections.emptyMap();
-        }
-    }
-
-    public static String fireEvent(List<ConsulClient> clients, String event, String payload, EventParams eventParams, QueryParams queryParams) {
-        for (ConsulClient client : clients) {
-            String eventId = fireEvent(client, event, payload, eventParams, queryParams);
-            if (eventId != null) {
-                return eventId;
-            }
-        }
-        return null;
-    }
-
-    public static String fireEvent(ConsulClient client, String event, String payload, EventParams eventParams, QueryParams queryParams) {
-        try {
-            Event response = client.eventFire(event, payload, eventParams, queryParams).getValue();
-            return response.getId();
-        } catch (OperationException e) {
-            LOGGER.info("Failed to fire Consul event '{}'. Status code: {}, Message: {}", event, e.getStatusCode(), e.getStatusMessage());
-            return null;
-        } catch (Exception e) {
-            LOGGER.info("Failed to fire Consul event '{}'. Message: {}", event, e.getMessage());
-            return null;
-        }
-    }
-
-    public static String getKVValue(List<ConsulClient> clients, String key, QueryParams queryParams) {
-        for (ConsulClient client : clients) {
-            String value = getKVValue(client, key, queryParams);
-            if (value != null) {
-                return value;
-            }
-        }
-        return null;
-    }
-
-    public static String getKVValue(ConsulClient client, String key, QueryParams queryParams) {
-        try {
-            GetValue getValue = client.getKVValue(key, queryParams).getValue();
-            return getValue == null ? null : new String(Base64.decodeBase64(getValue.getValue()));
-        } catch (OperationException e) {
-            LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Status code: {}, Message: {}", key, e.getStatusCode(), e.getStatusMessage());
-            return null;
-        } catch (Exception e) {
-            LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Error message: {}", key, e.getMessage());
-            return null;
-        }
-    }
-
-    public static boolean putKVValue(List<ConsulClient> clients, String key, String value, PutParams putParams) {
-        for (ConsulClient client : clients) {
-            boolean result = putKVValue(client, key, value, putParams);
-            if (result) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static Boolean putKVValue(ConsulClient client, String key, String value, PutParams putParams) {
-        try {
-            return client.setKVValue(key, value, putParams).getValue();
-        } catch (OperationException e) {
-            LOGGER.info("Failed to put entry '{}' in Consul's key-value store. Status code: {}, Message: {}", key, e.getStatusCode(), e.getStatusMessage());
-            return false;
-        } catch (Exception e) {
-            LOGGER.info("Failed to put entry '{}' in Consul's key-value store. Error message: {}", key, e.getMessage());
-            return false;
-        }
-    }
-
-    public static ConsulClient createClient(String apiAddress, String apiPort, TlsConfiguration tlsConfiguration) {
-        return createClient(apiAddress, Integer.valueOf(apiPort), tlsConfiguration, DEFAULT_TIMEOUT_MS);
-    }
-
-    public static ConsulClient createClient(String apiAddress, int apiPort, TlsConfiguration tlsConfiguration, int timeout) {
-        ConsulRawClient rawClient = new ConsulRawClient("https://" + apiAddress, apiPort,
-                tlsConfiguration.getClientCertPath(),
-                tlsConfiguration.getClientKeyPath(),
-                tlsConfiguration.getServerCertPath(),
-                timeout);
+    public static ConsulClient createClient(String apiAddress, int apiPort, TlsConfiguration tlsConfiguration) throws Exception {
+        HttpClient httpClient = createHttpClient(tlsConfiguration.getClientCert(), tlsConfiguration.getClientKey(), tlsConfiguration.getServerCert());
+        ConsulRawClient rawClient = new ConsulRawClient("https://" + apiAddress + ":" + apiPort, httpClient);
         Field agentAddress = ReflectionUtils.findField(ConsulRawClient.class, "agentAddress");
         ReflectionUtils.makeAccessible(agentAddress);
         ReflectionUtils.setField(agentAddress, rawClient, "https://" + apiAddress + ":" + apiPort + "/consul");
         return new ConsulClient(rawClient);
     }
 
-    public static void agentForceLeave(List<ConsulClient> clients, String nodeName) {
-        for (ConsulClient client : clients) {
-            try {
-                client.agentForceLeave(nodeName);
-            } catch (Exception e) {
-                return;
-            }
-        }
+    private static HttpClient createHttpClient(String clientCert, String clientKey, String serverCert) throws Exception {
+        SSLContext sslContext = org.apache.http.ssl.SSLContexts.custom()
+                .loadTrustMaterial(KeyStoreUtil.createTrustStore(serverCert), null)
+                .loadKeyMaterial(KeyStoreUtil.createKeyStore(clientCert, clientKey), "consul".toCharArray())
+                .build();
+        PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(setupSchemeRegistry(sslContext));
+        connectionManager.setMaxTotal(MAX_CONNECTION);
+        connectionManager.setDefaultMaxPerRoute(MAX_ROUTE);
+        RequestConfig.Builder requestBuilder = RequestConfig.custom()
+                .setConnectTimeout(DEFAULT_TIMEOUT_MS).setConnectionRequestTimeout(DEFAULT_TIMEOUT_MS).setSocketTimeout(DEFAULT_TIMEOUT_MS);
+        return HttpClientBuilder.create().setConnectionManager(connectionManager).setDefaultRequestConfig(requestBuilder.build()).build();
     }
 
-    public static int getConsulServerCount(int nodeCount) {
-        if (nodeCount < ConsulServers.SINGLE_NODE_COUNT_LOW.getMax()) {
-            return ConsulServers.SINGLE_NODE_COUNT_LOW.getConsulServerCount();
-        } else if (nodeCount < ConsulServers.NODE_COUNT_LOW.getMax()) {
-            return ConsulServers.NODE_COUNT_LOW.getConsulServerCount();
-        } else if (nodeCount < ConsulServers.NODE_COUNT_MEDIUM.getMax()) {
-            return ConsulServers.NODE_COUNT_MEDIUM.getConsulServerCount();
-        } else {
-            return ConsulServers.NODE_COUNT_HIGH.getConsulServerCount();
+    private static Registry<ConnectionSocketFactory> setupSchemeRegistry(SSLContext sslContext) {
+        RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.create();
+        registryBuilder.register("http", PlainConnectionSocketFactory.getSocketFactory());
+        if (sslContext != null) {
+            registryBuilder.register("https", new SSLConnectionSocketFactory(sslContext));
         }
+        return registryBuilder.build();
     }
 
-    public enum ConsulServers {
-        SINGLE_NODE_COUNT_LOW(1, 2, 1),
-        NODE_COUNT_LOW(3, 1000, 3),
-        NODE_COUNT_MEDIUM(1001, 5000, 5),
-        NODE_COUNT_HIGH(5001, 100_000, 7);
-
-        private final int min;
-        private final int max;
-        private final int consulServerCount;
-
-        ConsulServers(int min, int max, int consulServerCount) {
-            this.min = min;
-            this.max = max;
-            this.consulServerCount = consulServerCount;
-        }
-
-        public int getMin() {
-            return min;
-        }
-
-        public int getMax() {
-            return max;
-        }
-
-        public int getConsulServerCount() {
-            return consulServerCount;
-        }
-    }
 }
 

@@ -27,8 +27,8 @@ public class KeyStoreUtil {
     }
 
     public static KeyStore createKeyStore(final String clientCert, String clientKey) throws Exception {
-        KeyPair keyPair = loadPrivateKey(clientKey);
-        Certificate privateCertificate = loadCertificate(clientCert);
+        KeyPair keyPair = createKeyPair(clientKey);
+        Certificate privateCertificate = convertCertificate(clientCert);
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(null);
@@ -64,7 +64,7 @@ public class KeyStoreUtil {
         }
     }
 
-    private static Certificate loadCertificate(final String cert) throws IOException, CertificateException {
+    private static Certificate convertCertificate(final String cert) throws IOException, CertificateException {
         Reader reader = null;
         PEMParser pemParser = null;
 
@@ -85,7 +85,7 @@ public class KeyStoreUtil {
 
     }
 
-    public static KeyPair loadPrivateKey(final String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public static KeyPair createKeyPair(final String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         Reader reader = null;
         PEMParser pemParser = null;
 

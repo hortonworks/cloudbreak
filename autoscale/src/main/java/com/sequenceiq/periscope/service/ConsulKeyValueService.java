@@ -5,7 +5,6 @@ import static com.sequenceiq.periscope.api.model.ClusterState.RUNNING;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.ecwid.consul.v1.ConsulClient;
@@ -21,9 +20,6 @@ public class ConsulKeyValueService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConsulKeyValueService.class);
 
     private static final String DEFAULT_ALERTING_CONSUL_KEY_PATH = "rules/alerting/";
-
-    @Value("${periscope.alerts.consul.key.path:" + DEFAULT_ALERTING_CONSUL_KEY_PATH + "}")
-    private String alertsKeyPath;
 
     @Autowired
     private TlsSecurityService tlsSecurityService;
@@ -44,7 +40,7 @@ public class ConsulKeyValueService {
         return alert;
     }
 
-    public PrometheusAlert deleteAlert(Cluster cluster, PrometheusAlert alert) {
+    public void deleteAlert(Cluster cluster, PrometheusAlert alert) {
         Ambari ambari = cluster.getAmbari();
         try {
             TlsConfiguration tlsConfig = tlsSecurityService.getConfiguration(cluster);
@@ -55,7 +51,6 @@ public class ConsulKeyValueService {
         } catch (Exception e) {
             LOGGER.warn("Alert could not be deleted from Consul KV store:", e);
         }
-        return alert;
     }
 
     private String getKeyNameForAlert(PrometheusAlert alert) {

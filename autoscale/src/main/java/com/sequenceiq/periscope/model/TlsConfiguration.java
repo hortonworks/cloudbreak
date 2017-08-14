@@ -2,27 +2,27 @@ package com.sequenceiq.periscope.model;
 
 public class TlsConfiguration {
 
-    private String clientKeyPath;
+    private String clientKey;
 
-    private String clientCertPath;
+    private String clientCert;
 
-    private String serverCertPath;
+    private String serverCert;
 
-    public TlsConfiguration(String clientKeyPath, String clientCertPath, String serverCertPath) {
-        this.clientKeyPath = clientKeyPath;
-        this.clientCertPath = clientCertPath;
-        this.serverCertPath = serverCertPath;
+    public TlsConfiguration(String clientKey, String clientCert, String serverCert) {
+        this.clientKey = clientKey;
+        this.clientCert = clientCert;
+        this.serverCert = serverCert;
     }
 
-    public String getClientKeyPath() {
-        return clientKeyPath;
+    public String getClientKey() {
+        return clientKey;
     }
 
-    public String getClientCertPath() {
-        return clientCertPath;
+    public String getClientCert() {
+        return clientCert;
     }
 
-    public String getServerCertPath() {
-        return serverCertPath;
+    public String getServerCert() {
+        return serverCert;
     }
 }

@@ -32,7 +32,7 @@ public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskCo
                 ssh.authPassword(user, sshCheckerTaskContext.getStack().getCredential().getLoginPassword());
             } else {
                 LOGGER.info("Connecting with ssh to: {}, user: {}", sshCheckerTaskContext.getPublicIp(), user);
-                KeyPair keyPair = KeyStoreUtil.loadPrivateKey(sshCheckerTaskContext.getSshPrivateKey());
+                KeyPair keyPair = KeyStoreUtil.createKeyPair(sshCheckerTaskContext.getSshPrivateKey());
                 ssh.authPublickey(user, new KeyPairWrapper(keyPair));
             }
             ret = true;

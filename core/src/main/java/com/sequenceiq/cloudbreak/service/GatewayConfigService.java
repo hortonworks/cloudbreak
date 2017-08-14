@@ -52,6 +52,6 @@ public class GatewayConfigService {
 
     private SaltClientConfig getSaltClientConfig(Stack stack) {
         SecurityConfig securityConfig = stack.getSecurityConfig();
-        return new SaltClientConfig(securityConfig.getSaltPassword(), securityConfig.getSaltBootPassword(), securityConfig.getCloudbreakSshPrivateKey());
+        return new SaltClientConfig(securityConfig.getSaltPassword(), securityConfig.getSaltBootPassword(), securityConfig.getCloudbreakSshPrivateKeyDecoded());
     }
 }
