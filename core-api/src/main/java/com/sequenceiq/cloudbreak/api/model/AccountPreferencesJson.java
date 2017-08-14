@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.model;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.Min;
@@ -44,6 +45,9 @@ public class AccountPreferencesJson implements JsonEntity {
 
     @ApiModelProperty(AccountPreferencesModelDescription.PLATFORMS)
     private String platforms;
+
+    @ApiModelProperty(AccountPreferencesModelDescription.DEFAULT_TAGS)
+    private Map<String, String> defaultTags;
 
     public Long getMaxNumberOfClusters() {
         return maxNumberOfClusters;
@@ -99,5 +103,13 @@ public class AccountPreferencesJson implements JsonEntity {
 
     public void setPlatforms(String platforms) {
         this.platforms = platforms;
+    }
+
+    public Map<String, String> getDefaultTags() {
+        return defaultTags;
+    }
+
+    public void setDefaultTags(Map<String, String> defaultTags) {
+        this.defaultTags = defaultTags;
     }
 }

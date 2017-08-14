@@ -368,6 +368,7 @@ public class ModelDescriptions {
         public static final String CLUSTER_TIME_TO_LIVE = "lifecycle of the cluster in hours (0 for immortal clusters)";
         public static final String ACCOUNT_TIME_TO_LIVE = "lifecycle of the account and its clusters in hours (0 for immortal account)";
         public static final String PLATFORMS = "list of the cloudplatforms visible on the UI";
+        public static final String DEFAULT_TAGS = "default tags for the resources created";
     }
 
     public static class LdapConfigModelDescription {

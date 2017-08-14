@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.converter;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Component
 public class JsonToAccountPreferencesConverter extends AbstractConversionServiceAwareConverter<AccountPreferencesJson, AccountPreferences> {
@@ -24,7 +28,19 @@ public class JsonToAccountPreferencesConverter extends AbstractConversionService
         target.setUserTimeToLive(source.getUserTimeToLive() * HOUR_IN_MS);
         target.setMaxNumberOfClustersPerUser(source.getMaxNumberOfClustersPerUser());
         target.setPlatforms(source.getPlatforms());
+        target.setDefaultTags(getTags(source.getDefaultTags()));
         return target;
+    }
+
+    private Json getTags(Map<String, String> tags) {
+        try {
+            if (tags == null || tags.isEmpty()) {
+                return new Json(new HashMap<>());
+            }
+            return new Json(tags);
+        } catch (Exception e) {
+            throw new BadRequestException("Failed to convert dynamic tags.");
+        }
     }
 
 }

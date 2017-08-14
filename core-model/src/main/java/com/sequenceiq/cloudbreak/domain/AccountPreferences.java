@@ -6,11 +6,15 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang3.StringUtils;
+
+import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
 @Table(name = "account_preferences")
@@ -36,6 +40,10 @@ public class AccountPreferences {
 
     @Column(columnDefinition = "TEXT")
     private String platforms;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json defaultTags;
 
     public String getAccount() {
         return account;
@@ -108,5 +116,13 @@ public class AccountPreferences {
 
     public void setPlatforms(String platforms) {
         this.platforms = platforms;
+    }
+
+    public Json getDefaultTags() {
+        return defaultTags;
+    }
+
+    public void setDefaultTags(Json defaultTags) {
+        this.defaultTags = defaultTags;
     }
 }

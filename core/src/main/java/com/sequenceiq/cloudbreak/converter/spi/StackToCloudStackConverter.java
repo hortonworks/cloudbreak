@@ -87,8 +87,12 @@ public class StackToCloudStackConverter {
         try {
             if (stack.getTags() != null) {
                 Map<String, String> userDefined = (Map<String, String>) stack.getTags().get(Map.class).get("userDefined");
+                Map<String, String> defaultTags = (Map<String, String>) stack.getTags().get(Map.class).get("defaultTags");
                 if (userDefined != null) {
-                    result = userDefined;
+                    result.putAll(userDefined);
+                }
+                if (defaultTags != null) {
+                    result.putAll(defaultTags);
                 }
             }
         } catch (IOException e) {

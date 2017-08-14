@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
@@ -51,6 +52,9 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
 
     @Mock
     private AuthenticatedUserService authenticatedUserService;
+
+    @Mock
+    private AccountPreferencesService accountPreferencesService;
 
     @Before
     public void setUp() {
