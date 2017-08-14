@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.GcsFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
@@ -23,8 +24,8 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScrip
 public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<GcsFileSystemConfiguration> {
 
     @Override
-    protected List<FileSystemScriptConfig> getScriptConfigs(GcsFileSystemConfiguration fsConfig) {
-        String privateKey = getPrivateKey(fsConfig);
+    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential, GcsFileSystemConfiguration fsConfig) {
+        String privateKey = getPrivateKey(credential);
         Map<String, String> properties = Collections.singletonMap("P12KEY", privateKey);
         List<FileSystemScriptConfig> fsScriptConfigs = new ArrayList<>();
         fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", PRE_INSTALL, ALL_NODES, properties));
@@ -33,8 +34,8 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
         return fsScriptConfigs;
     }
 
-    private String getPrivateKey(GcsFileSystemConfiguration fsConfig) {
-        return fsConfig.getPrivateKeyEncoded();
+    private String getPrivateKey(Credential credential) {
+        return credential.getAttributes().getMap().get("serviceAccountPrivateKey").toString();
     }
 
     @Override

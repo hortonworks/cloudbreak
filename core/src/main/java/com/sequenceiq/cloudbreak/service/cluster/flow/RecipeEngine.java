@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
@@ -118,7 +119,7 @@ public class RecipeEngine {
             FileSystem fs = cluster.getFileSystem();
             if (fs != null) {
                 try {
-                    addFsRecipesToHostGroups(hostGroups, blueprintText, fs);
+                    addFsRecipesToHostGroups(stack.getCredential(), hostGroups, blueprintText, fs);
                 } catch (IOException e) {
                     throw new CloudbreakException("can not add FS recipes to host groups", e);
                 }
@@ -127,11 +128,11 @@ public class RecipeEngine {
         }
     }
 
-    private void addFsRecipesToHostGroups(Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) throws IOException {
+    private void addFsRecipesToHostGroups(Credential credential, Set<HostGroup> hostGroups, String blueprintText, FileSystem fs) throws IOException {
         String scriptName = fs.getType().toLowerCase();
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
         FileSystemConfiguration fsConfiguration = getFileSystemConfiguration(fs);
-        List<RecipeScript> recipeScripts = fsConfigurator.getScripts(fsConfiguration);
+        List<RecipeScript> recipeScripts = fsConfigurator.getScripts(credential, fsConfiguration);
         List<Recipe> fsRecipes = recipeBuilder.buildRecipes(scriptName, recipeScripts);
         for (int i = 0; i < fsRecipes.size(); i++) {
             RecipeScript recipeScript = recipeScripts.get(i);

@@ -2,15 +2,15 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import javax.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class GcsFileSystemConfiguration extends FileSystemConfiguration {
     @NotNull
     private String projectId;
 
     @NotNull
     private String serviceAccountEmail;
-
-    @NotNull
-    private String privateKeyEncoded;
 
     @NotNull
     private String defaultBucketName;
@@ -29,14 +29,6 @@ public class GcsFileSystemConfiguration extends FileSystemConfiguration {
 
     public void setServiceAccountEmail(String serviceAccountEmail) {
         this.serviceAccountEmail = serviceAccountEmail;
-    }
-
-    public String getPrivateKeyEncoded() {
-        return privateKeyEncoded;
-    }
-
-    public void setPrivateKeyEncoded(String privateKeyEncoded) {
-        this.privateKeyEncoded = privateKeyEncoded;
     }
 
     public String getDefaultBucketName() {

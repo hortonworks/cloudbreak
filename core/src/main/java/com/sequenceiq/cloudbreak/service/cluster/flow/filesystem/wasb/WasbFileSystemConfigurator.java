@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
@@ -43,7 +44,7 @@ public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<W
     }
 
     @Override
-    protected List<FileSystemScriptConfig> getScriptConfigs(WasbFileSystemConfiguration fsConfig) {
+    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential, WasbFileSystemConfiguration fsConfig) {
         return new ArrayList<>();
     }
 
