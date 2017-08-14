@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
-import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
@@ -24,7 +23,6 @@ import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.repository.SssdConfigRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
@@ -40,9 +38,6 @@ public class DependecyDeletionService {
 
     @Inject
     private BlueprintRepository blueprintRepository;
-
-    @Inject
-    private SssdConfigRepository sssdConfigRepository;
 
     @Inject
     private RecipeRepository recipeRepository;
@@ -67,7 +62,6 @@ public class DependecyDeletionService {
         if (stack.getCluster() != null) {
             Cluster cluster = stack.getCluster();
             deleteBlueprint(cluster.getBlueprint());
-            deleteSssd(cluster.getSssdConfig());
             Set<HostGroup> hostGroupsInCluster = hostGroupRepository.findHostGroupsInCluster(cluster.getId());
             for (HostGroup hostGroup : hostGroupsInCluster) {
                 hostGroup.getRecipes().forEach(this::deleteRecipe);
@@ -122,16 +116,6 @@ public class DependecyDeletionService {
             }
         } catch (Exception ex) {
             LOGGER.warn("Could not delete blueprint {} which is associated with the stack: {}", blueprint, ex.getMessage());
-        }
-    }
-
-    private void deleteSssd(SssdConfig sssdConfig) {
-        try {
-            if (sssdConfig != null) {
-                sssdConfigRepository.delete(sssdConfig);
-            }
-        } catch (Exception ex) {
-            LOGGER.warn("Could not delete sssdConfig {} which is associated with the stack: {}", sssdConfig, ex.getMessage());
         }
     }
 

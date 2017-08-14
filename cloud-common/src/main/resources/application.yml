@@ -97,7 +97,6 @@ cb:
       logrotate: sequenceiq/logrotate:v0.5.1
       munchausen: sequenceiq/munchausen:0.6.0
       haveged: sequenceiq/haveged:1.0
-      ldap: sequenceiq/docker-ldap:1.0
       shipyard: shipyard/shipyard:v3.0.0
       shipyard.db: rethinkdb:2.2.4
       certs: ehazlett/cert-tool:0.0.3
@@ -107,13 +106,6 @@ cb:
       swarm: swarm:1.1.0
     env:
       ldap: SLAPD_PASSWORD=cloudbreak|SLAPD_BINDUSER=ambari-qa|SLAPD_BINDPWD=cloudbreak|SLAPD_BINDGROUP=hadoop
-
-  sssd:
-    name: cloudbreak-default-ldap
-    type: LDAP
-    url: ldap://ldap.service.consul
-    schema: RFC2307
-    base: dc=nodomain
 
   arm:
     template.path: templates/arm-v2.ftl

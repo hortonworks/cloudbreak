@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -48,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.cluster.flow.AmbariViewProvider;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
@@ -127,7 +124,7 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
         // THEN
         assertEquals(1L, (long) result.getId());
         assertAllFieldsNotNull(result, Lists.newArrayList("cluster", "ambariStackDetails", "rdsConfigId", "blueprintCustomProperties",
-                "blueprint", "sssdConfig", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers",
+                "blueprint", "rdsConfigs", "ldapConfig", "exposedKnoxServices", "customContainers",
                 "ambariRepoDetailsJson", "ambariDatabaseDetails"));
     }
 
@@ -169,19 +166,15 @@ public class ClusterToJsonConverterTest extends AbstractEntityConverterTest<Clus
     public Cluster createSource() {
         Stack stack = TestUtil.stack();
         Blueprint blueprint = TestUtil.blueprint();
-        SssdConfig config = TestUtil.sssdConfigs(1).iterator().next();
-        Cluster cluster = TestUtil.cluster(blueprint, config, stack, 1L);
+        Cluster cluster = TestUtil.cluster(blueprint, stack, 1L);
         stack.setCluster(cluster);
         return cluster;
     }
 
     private void mockAll() throws IOException {
-        when(ambariViewProvider.provideViewInformation(any(AmbariClient.class), any(Cluster.class))).thenAnswer(new Answer<Cluster>() {
-            @Override
-            public Cluster answer(InvocationOnMock invocation) throws Throwable {
-                Object[] args = invocation.getArguments();
-                return (Cluster) args[1];
-            }
+        when(ambariViewProvider.provideViewInformation(any(AmbariClient.class), any(Cluster.class))).thenAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return args[1];
         });
         given(ambariViewProvider.isViewDefinitionNotProvided(any(Cluster.class))).willReturn(false);
         given(blueprintValidator.getHostGroupNode(any(Blueprint.class))).willReturn(jsonNode);

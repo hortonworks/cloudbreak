@@ -8,7 +8,6 @@ public enum APIResourceType {
     CLUSTER("cl"),
     CREDENTIAL("c"),
     RECIPE("hrec"),
-    SSSDCONFIG("sssd"),
     NETWORK("n"),
     TOPOLOGY("tp"),
     SECURITY_GROUP("sg"),

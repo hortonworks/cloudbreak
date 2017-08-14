@@ -38,7 +38,7 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         Cluster result = underTest.convert(getRequest("stack/cluster.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "fileSystem", "sssdConfig", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
+                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
     }
 
     @Test
@@ -49,7 +49,7 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         Cluster result = underTest.convert(getRequest("stack/cluster-with-file-system.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "sssdConfig", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
+                "ambariStackDetails", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
     }
 
     @Test
@@ -59,7 +59,7 @@ public class JsonToClusterConverterTest extends AbstractJsonConverterTest<Cluste
         Cluster result = underTest.convert(getRequest("stack/cluster-no-gateway.json"));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "ambariIp",
-                "ambariStackDetails", "fileSystem", "sssdConfig", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
+                "ambariStackDetails", "fileSystem", "certDir", "rdsConfigs", "ldapConfig", "attributes", "blueprintCustomProperties"));
 
         assertAllFieldsNotNull(result.getGateway(), Arrays.asList("id", "ssoProvider", "signKey", "signPub", "signCert"));
     }

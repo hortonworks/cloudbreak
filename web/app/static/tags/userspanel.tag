@@ -83,12 +83,6 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <th scope="row">{{msg.account_details_sssdconfigs}}</th>
-                                                    <td class="is-visible">
-                                                        <input type="checkbox" name="sssdch1" ng-model="invite.scopes.sssdconfigs.write">
-                                                    </td>
-                                                </tr>
-                                                <tr>
                                                     <th scope="row">{{msg.account_details_cloudplatforms}}</th>
                                                     <td class="is-visible">
                                                         <input type="checkbox" name="pch1" ng-model="invite.scopes.platforms.write">
@@ -194,12 +188,6 @@
                                                         </td>
                                                     </tr>
                                                     <tr>
-                                                        <th scope="row">{{msg.account_details_sssdconfigs}}</th>
-                                                        <td class="is-visible">
-                                                            <input type="checkbox" disabled name="stgch1" ng-checked="isWriteScope('sssdconfigs', actualuser.groups)">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
                                                         <th scope="row">{{msg.account_details_cloudplatforms}}</th>
                                                         <td class="is-visible">
                                                             <input type="checkbox" disabled name="stgch1" ng-checked="isWriteScope('platforms', actualuser.groups)">
@@ -288,12 +276,6 @@
                                                         <th scope="row">{{msg.account_details_securitygroups}}</th>
                                                         <td class="is-visible">
                                                             <input type="checkbox" disabled name="stgch1" ng-checked="isWriteScope('securitygroups', actualuser.groups)">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th scope="row">{{msg.account_details_sssdconfigs}}</th>
-                                                        <td class="is-visible">
-                                                            <input type="checkbox" disabled name="stgch1" ng-checked="isWriteScope('sssdconfigs', actualuser.groups)">
                                                         </td>
                                                     </tr>
                                                     <tr>

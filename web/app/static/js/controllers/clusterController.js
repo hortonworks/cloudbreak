@@ -1323,8 +1323,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 ambariStackDetails: {},
                 orchestrator: {},
                 configStrategy: $scope.configStrategies[1],
-                ldapRequired: false,
-                sssdConfigId: null,
                 enableShipyard: false,
                 customImage: false,
                 customContainer: false,
@@ -1332,9 +1330,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 customQueueId: "default",
                 userDefinedTags: [],
                 azureAvailabilitySets: []
-            };
-            $scope.selectSssd = {
-                show: false
             };
             $scope.actualRegex = "";
             setSecurity();

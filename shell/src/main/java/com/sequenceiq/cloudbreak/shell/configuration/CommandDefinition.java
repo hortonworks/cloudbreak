@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.shell.commands.common.LdapConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RdsConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
 import com.sequenceiq.cloudbreak.shell.commands.common.SmartSenseSubscriptionCommands;
-import com.sequenceiq.cloudbreak.shell.commands.common.SssdConfigCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AwsCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AzureCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.GcpCommands;
@@ -79,11 +78,6 @@ public class CommandDefinition {
     @Bean
     BaseSecurityGroupCommands baseSecurityGroupCommands() {
         return new BaseSecurityGroupCommands(shellContext);
-    }
-
-    @Bean
-    SssdConfigCommands sssdConfigCommands() {
-        return new SssdConfigCommands(shellContext);
     }
 
     @Bean

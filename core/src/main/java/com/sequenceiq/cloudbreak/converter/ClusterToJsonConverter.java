@@ -39,7 +39,6 @@ import com.sequenceiq.cloudbreak.api.model.HostGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
-import com.sequenceiq.cloudbreak.api.model.SssdConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -136,10 +135,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setHoursUp(0);
             clusterResponse.setMinutesUp(0);
         }
-        clusterResponse.setLdapRequired(source.isLdapRequired());
-        if (source.getSssdConfig() != null) {
-            clusterResponse.setSssdConfigId(source.getSssdConfig().getId());
-        }
         Set<RDSConfig> rdsConfigs = source.getRdsConfigs();
         convertRdsIds(clusterResponse, rdsConfigs);
         if (source.getLdapConfig() != null) {
@@ -163,7 +158,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
         convertRdsConfigs(source, clusterResponse);
         clusterResponse.setBlueprint(getConversionService().convert(source.getBlueprint(), BlueprintResponse.class));
-        clusterResponse.setSssdConfig(getConversionService().convert(source.getSssdConfig(), SssdConfigResponse.class));
         convertKnox(source, clusterResponse);
         convertCustomQueue(source, clusterResponse);
         if (source.getBlueprintCustomProperties() != null) {

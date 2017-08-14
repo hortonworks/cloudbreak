@@ -83,7 +83,7 @@ public class RdsConfigCommands implements BaseCommands {
                     return String.format("RDS config has been selected, name: %s", name);
                 }
             }
-            return "No SSSD config specified (select a config by --id or --name)";
+            return "No RDS config specified (select a config by --id or --name)";
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
         }

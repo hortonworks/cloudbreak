@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.A
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.CONSUL_WATCH;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.HAVEGED;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.KERBEROS;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.LDAP;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.LOGROTATE;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.REGISTRATOR;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.SHIPYARD;
@@ -61,8 +60,6 @@ public class ContainerConstraintFactory {
     private static final int SHIPYARD_DB_CONTAINER_PORT = 8080;
 
     private static final int SHIPYARD_DB_EXPOSED_PORT = 7071;
-
-    private static final int LDAP_PORT = 389;
 
     private static final int REGISTRATOR_RESYNC_SECONDS = 60;
 
@@ -131,29 +128,6 @@ public class ContainerConstraintFactory {
                 .withNamePrefix(createContainerInstanceName(HAVEGED.getName(), clusterName, identifier))
                 .instances(1)
                 .addHosts(ImmutableList.of(gatewayHostname))
-                .build();
-    }
-
-    public ContainerConstraint getLdapConstraint(String gatewayHostname) {
-        Map<String, String> env = new HashMap<>();
-        env.put("SERVICE_NAME", LDAP.getName());
-        env.put("NAMESERVER_IP", "127.0.0.1");
-        for (String ldapEnv : ldapEnvs) {
-            String[] envValue = ldapEnv.split("=");
-            if (envValue.length == 2) {
-                env.put(envValue[0], envValue[1]);
-            } else {
-                throw new RuntimeException(String.format("Could not be parse LDAP parameter from value: '%s'!", ldapEnv));
-            }
-        }
-
-        return new ContainerConstraint.Builder()
-                .withNamePrefix(LDAP.getName())
-                .instances(1)
-                .networkMode(HOST_NETWORK_MODE)
-                .tcpPortBinding(new TcpPortBinding(LDAP_PORT, "0.0.0.0", LDAP_PORT))
-                .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(env)
                 .build();
     }
 

@@ -60,9 +60,6 @@ public class ContainerConfigService {
     @Value("${cb.docker.container.haveged:}")
     private String havegedImageName;
 
-    @Value("${cb.docker.container.ldap:}")
-    private String ldapImageName;
-
     @Value("${cb.docker.container.shipyard:}")
     private String shipyardImageName;
 
@@ -125,9 +122,6 @@ public class ContainerConfigService {
                     break;
                 case HAVEGED:
                     config = new ContainerConfigBuilder.Builder(havegedImageName, customQueue).build();
-                    break;
-                case LDAP:
-                    config = new ContainerConfigBuilder.Builder(ldapImageName, customQueue).build();
                     break;
                 case SHIPYARD:
                     config = new ContainerConfigBuilder.Builder(shipyardImageName, customQueue).build();

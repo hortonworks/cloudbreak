@@ -65,15 +65,6 @@ public class ClusterRequest {
 
     private KerberosRequest kerberos;
 
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_REQUIRED)
-    private Boolean ldapRequired = Boolean.FALSE;
-
-    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG_ID)
-    private Long sssdConfigId;
-
-    @ApiModelProperty(value = ClusterModelDescription.SSSDCONFIG)
-    private SssdConfigRequest sssdConfig;
-
     @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
 
@@ -184,22 +175,6 @@ public class ClusterRequest {
 
     public void setGateway(GatewayJson gateway) {
         this.gateway = gateway;
-    }
-
-    public Boolean getLdapRequired() {
-        return ldapRequired;
-    }
-
-    public void setLdapRequired(Boolean ldapRequired) {
-        this.ldapRequired = ldapRequired;
-    }
-
-    public Long getSssdConfigId() {
-        return sssdConfigId;
-    }
-
-    public void setSssdConfigId(Long sssdConfigId) {
-        this.sssdConfigId = sssdConfigId;
     }
 
     public boolean getValidateBlueprint() {
@@ -329,14 +304,6 @@ public class ClusterRequest {
 
     public void setKerberos(KerberosRequest kerberos) {
         this.kerberos = kerberos;
-    }
-
-    public SssdConfigRequest getSssdConfig() {
-        return sssdConfig;
-    }
-
-    public void setSssdConfig(SssdConfigRequest sssdConfig) {
-        this.sssdConfig = sssdConfig;
     }
 
     public LdapConfigRequest getLdapConfig() {

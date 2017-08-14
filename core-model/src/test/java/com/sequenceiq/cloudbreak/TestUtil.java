@@ -29,9 +29,6 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
-import com.sequenceiq.cloudbreak.api.model.SssdProviderType;
-import com.sequenceiq.cloudbreak.api.model.SssdSchemaType;
-import com.sequenceiq.cloudbreak.api.model.SssdTlsReqcertType;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.common.type.RecipeType;
@@ -60,7 +57,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
-import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -352,10 +348,6 @@ public class TestUtil {
     }
 
     public static Cluster cluster(Blueprint blueprint, Stack stack, Long id) {
-        return cluster(blueprint, null, stack, id);
-    }
-
-    public static Cluster cluster(Blueprint blueprint, SssdConfig sssdConfig, Stack stack, Long id) {
         Cluster cluster = new Cluster();
         cluster.setAmbariIp("50.51.52.100");
         cluster.setStack(stack);
@@ -368,7 +360,6 @@ public class TestUtil {
         cluster.setStatusReason("statusReason");
         cluster.setUserName("admin");
         cluster.setPassword("admin");
-        cluster.setSssdConfig(sssdConfig);
         cluster.setEnableShipyard(true);
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(true);
@@ -449,28 +440,6 @@ public class TestUtil {
             recipes.add(recipe);
         }
         return recipes;
-    }
-
-    public static Set<SssdConfig> sssdConfigs(int count) {
-        Set<SssdConfig> configs = new HashSet<>();
-        for (int i = 0; i < count; i++) {
-            SssdConfig config = new SssdConfig();
-            config.setId((long) i);
-            config.setName("config-" + (i + 1));
-            config.setDescription("description");
-            config.setProviderType(SssdProviderType.LDAP);
-            config.setUrl("ldap://ldap.domain");
-            config.setSchema(SssdSchemaType.RFC2307);
-            config.setBaseSearch("dc=domain");
-            config.setTlsReqcert(SssdTlsReqcertType.NEVER);
-            config.setAdServer("ad.domain");
-            config.setKerberosServer("kerberos.domain");
-            config.setKerberosRealm("KERBEROS_DOMAIN");
-            config.setConfiguration("");
-            config.setPublicInAccount(true);
-            configs.add(config);
-        }
-        return configs;
     }
 
     public static LdapConfig ldapConfig() {

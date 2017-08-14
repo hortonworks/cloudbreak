@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
-import com.sequenceiq.cloudbreak.api.model.SssdConfigRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -38,14 +37,12 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.domain.SssdConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
-import com.sequenceiq.cloudbreak.service.sssdconfig.SssdConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -59,11 +56,9 @@ public class ClusterDecorator implements Decorator<Cluster> {
         BLUEPRINT_ID,
         HOSTGROUP_JSONS,
         VALIDATE_BLUEPRINT,
-        SSSDCONFIG_ID,
         RDSCONFIG_ID,
         LDAP_CONFIG_ID,
         BLUEPRINT,
-        SSSDCONFIG,
         RDSCONFIG,
         LDAP_CONFIG,
         CONNECTED_CLUSTER;
@@ -83,9 +78,6 @@ public class ClusterDecorator implements Decorator<Cluster> {
 
     @Inject
     private HostGroupDecorator hostGroupDecorator;
-
-    @Inject
-    private SssdConfigService sssdConfigService;
 
     @Inject
     private RdsConfigService rdsConfigService;
@@ -113,11 +105,9 @@ public class ClusterDecorator implements Decorator<Cluster> {
         Long ldapConfigId = (Long) data[DecorationData.LDAP_CONFIG_ID.ordinal()];
         Set<HostGroupRequest> hostGroupsJsons = (Set<HostGroupRequest>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
         BlueprintRequest requestBlueprint = (BlueprintRequest) data[DecorationData.BLUEPRINT.ordinal()];
-        SssdConfigRequest requestSssd = (SssdConfigRequest) data[DecorationData.SSSDCONFIG.ordinal()];
         Set<RDSConfigRequest> requestRdsConfigs = (Set<RDSConfigRequest>) data[DecorationData.RDSCONFIG.ordinal()];
         LdapConfigRequest ldapConfigRequest = (LdapConfigRequest) data[DecorationData.LDAP_CONFIG.ordinal()];
         Set<Long> rdsConfigIds = (Set<Long>) data[DecorationData.RDSCONFIG_ID.ordinal()];
-        Long sssdConfigId = (Long) data[DecorationData.SSSDCONFIG_ID.ordinal()];
         ConnectedClusterRequest connectedClusterRequest = (ConnectedClusterRequest) data[DecorationData.CONNECTED_CLUSTER.ordinal()];
 
         Stack stack = stackService.getById(stackId);
@@ -144,7 +134,6 @@ public class ClusterDecorator implements Decorator<Cluster> {
             blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stack.getInstanceGroups());
         }
         subject.setTopologyValidation(validate);
-        prepareSssd(subject, user, sssdConfigId, requestSssd, stack);
         prepareRds(subject, user, rdsConfigIds, requestRdsConfigs, stack);
         prepareLdap(subject, user, ldapConfigId, ldapConfigRequest, stack);
         prepareConnectedClusterParameters(subject, user, connectedClusterRequest);
@@ -198,18 +187,6 @@ public class ClusterDecorator implements Decorator<Cluster> {
                 LOGGER.error("Could not propagate cluster input parameters: {}", e);
                 throw new BadRequestException("Could not propagate cluster input parameters: " + e.getMessage());
             }
-        }
-    }
-
-    private void prepareSssd(Cluster subject, IdentityUser user, Long sssdConfigId, SssdConfigRequest requestSssd, Stack stack) {
-        if (sssdConfigId != null) {
-            SssdConfig config = sssdConfigService.get(sssdConfigId);
-            subject.setSssdConfig(config);
-        } else if (requestSssd != null) {
-            SssdConfig sssdConfig = conversionService.convert(requestSssd, SssdConfig.class);
-            sssdConfig.setPublicInAccount(stack.isPublicInAccount());
-            sssdConfig = sssdConfigService.create(user, sssdConfig);
-            subject.setSssdConfig(sssdConfig);
         }
     }
 

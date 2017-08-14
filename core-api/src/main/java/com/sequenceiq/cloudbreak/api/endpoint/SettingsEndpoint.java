@@ -36,13 +36,6 @@ public interface SettingsEndpoint {
     Map<String, Object> getRecipeSettings();
 
     @GET
-    @Path("sssd")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.SettingsOpDescription.GET_SSSD_SETTINGS, produces = ContentType.JSON, notes = Notes.SETTINGS_NOTES,
-            nickname = "getSssdConfigSettings")
-    Map<String, Object> getSssdConfigSettings();
-
-    @GET
     @Path("database")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.SettingsOpDescription.GET_DATABASE_SETTINGS, produces = ContentType.JSON, notes = Notes.SETTINGS_NOTES,
