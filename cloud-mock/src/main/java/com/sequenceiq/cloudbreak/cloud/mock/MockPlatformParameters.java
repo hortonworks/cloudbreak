@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -200,8 +200,8 @@ public class MockPlatformParameters implements PlatformParameters {
 
     @Override
     public PlatformOrchestrator orchestratorParams() {
-        return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT), orchestrator(OrchestratorConstants.SWARM)),
-                orchestrator(OrchestratorConstants.SWARM));
+        return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
+                orchestrator(OrchestratorConstants.SALT));
     }
 
     @Override

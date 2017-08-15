@@ -4,15 +4,6 @@ import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.CONSUL_WATCH;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.HAVEGED;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.KERBEROS;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.LOGROTATE;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.REGISTRATOR;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.SHIPYARD;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.SHIPYARD_DB;
-import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.DOMAIN_REALM;
-import static com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration.REALM;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,21 +19,19 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
-import com.sequenceiq.cloudbreak.orchestrator.security.KerberosConfiguration;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.stack.connector.VolumeUtils;
 
 @Component
 public class ContainerConstraintFactory {
+
     private static final String CONTAINER_VOLUME_PATH = "/var/log";
 
     private static final String HADOOP_MOUNT_DIR = "/hadoopfs";
@@ -53,20 +42,7 @@ public class ContainerConstraintFactory {
 
     private static final int AMBARI_PORT = 8080;
 
-    private static final int SHIPYARD_CONTAINER_PORT = 8080;
-
-    private static final int SHIPYARD_EXPOSED_PORT = 7070;
-
-    private static final int SHIPYARD_DB_CONTAINER_PORT = 8080;
-
-    private static final int SHIPYARD_DB_EXPOSED_PORT = 7071;
-
-    private static final int REGISTRATOR_RESYNC_SECONDS = 60;
-
     private static final String HOSTNAME_SEPARATOR = "|";
-
-    @Value("#{'${cb.docker.env.ldap}'.split('\\|')}")
-    private List<String> ldapEnvs;
 
     @Value("#{'${cb.byos.dfs.data.dir}'.split(',')}")
     private List<String> byosDfsDataDirs;
@@ -76,20 +52,6 @@ public class ContainerConstraintFactory {
 
     @Inject
     private HostGroupRepository hostGroupRepository;
-
-    public ContainerConstraint getRegistratorConstraint(String gatewayHostname, String clusterName, String gatewayPrivateIp, String identifier) {
-        return new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(REGISTRATOR.getName(), clusterName, identifier))
-                .networkMode(HOST_NETWORK_MODE)
-                .instances(1)
-                .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/tmp/docker.sock"))
-                .addHosts(ImmutableList.of(gatewayHostname))
-                .cmd(new String[]{
-                        "-ip", gatewayPrivateIp,
-                        "-resync", Integer.toString(REGISTRATOR_RESYNC_SECONDS),
-                        String.format("consul://%s:8500", gatewayPrivateIp)})
-                .build();
-    }
 
     public ContainerConstraint getAmbariServerDbConstraint(String gatewayHostname, String clusterName, String identifier) {
         ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
@@ -121,61 +83,6 @@ public class ContainerConstraintFactory {
         }
         builder.cmd(new String[]{env});
         return builder.build();
-    }
-
-    public ContainerConstraint getHavegedConstraint(String gatewayHostname, String clusterName, String identifier) {
-        return new ContainerConstraint.Builder()
-                .withNamePrefix(createContainerInstanceName(HAVEGED.getName(), clusterName, identifier))
-                .instances(1)
-                .addHosts(ImmutableList.of(gatewayHostname))
-                .build();
-    }
-
-    public ContainerConstraint getKerberosServerConstraint(Cluster cluster, String gatewayHostname, String identifier) {
-        KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-        KerberosConfiguration kerberosConf = new KerberosConfiguration(kerberosConfig.getKerberosMasterKey(), kerberosConfig.getKerberosAdmin(),
-                kerberosConfig.getKerberosPassword());
-
-        Map<String, String> env = new HashMap<>();
-        env.put("SERVICE_NAME", KERBEROS.getName());
-        env.put("NAMESERVER_IP", "127.0.0.1");
-        env.put("REALM", REALM);
-        env.put("DOMAIN_REALM", DOMAIN_REALM);
-        env.put("KERB_MASTER_KEY", kerberosConf.getMasterKey());
-        env.put("KERB_ADMIN_USER", kerberosConf.getUser());
-        env.put("KERB_ADMIN_PASS", kerberosConf.getPassword());
-
-        return new ContainerConstraint.Builder()
-                .withName(createContainerInstanceName(KERBEROS.getName(), cluster.getName(), identifier))
-                .instances(1)
-                .networkMode(HOST_NETWORK_MODE)
-                .addVolumeBindings(ImmutableMap.of("/var/log/kerberos-container", CONTAINER_VOLUME_PATH, "/etc/krb5.conf", "/etc/krb5.conf"))
-                .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(env)
-                .build();
-    }
-
-    public ContainerConstraint getShipyardDbConstraint(String gatewayHostname) {
-        return new ContainerConstraint.Builder()
-                .withName(SHIPYARD_DB.getName())
-                .instances(1)
-                .tcpPortBinding(new TcpPortBinding(SHIPYARD_DB_CONTAINER_PORT, "0.0.0.0", SHIPYARD_DB_EXPOSED_PORT))
-                .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(ImmutableMap.of("SERVICE_NAME", SHIPYARD_DB.getName()))
-                .build();
-    }
-
-    public ContainerConstraint getShipyardConstraint(String gatewayHostname) {
-        return new ContainerConstraint.Builder()
-                .withName(SHIPYARD.getName())
-                .instances(1)
-                .tcpPortBinding(new TcpPortBinding(SHIPYARD_CONTAINER_PORT, "0.0.0.0", SHIPYARD_EXPOSED_PORT))
-                .addHosts(ImmutableList.of(gatewayHostname))
-                .addEnv(ImmutableMap.of("SERVICE_NAME", SHIPYARD.getName()))
-                .addLink("swarm-manager", "swarm")
-                .addLink(SHIPYARD_DB.getName(), "rethinkdb")
-                .cmd(new String[]{"server", "-d", "tcp://swarm:3376"})
-                .build();
     }
 
     public ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform,
@@ -249,25 +156,6 @@ public class ContainerConstraintFactory {
             constraints.add(ImmutableList.of("hostname", "UNLIKE", sb.toString()));
         }
         return constraints;
-    }
-
-    public ContainerConstraint getConsulWatchConstraint(List<String> hosts) {
-        return new ContainerConstraint.Builder()
-                .withNamePrefix(CONSUL_WATCH.getName())
-                .addEnv(ImmutableMap.of("CONSUL_HOST", "127.0.0.1"))
-                .networkMode(HOST_NETWORK_MODE)
-                .addVolumeBindings(ImmutableMap.of("/var/run/docker.sock", "/var/run/docker.sock"))
-                .addHosts(hosts)
-                .build();
-    }
-
-    public ContainerConstraint getLogrotateConstraint(List<String> hosts) {
-        return new ContainerConstraint.Builder()
-                .withNamePrefix(LOGROTATE.getName())
-                .networkMode(HOST_NETWORK_MODE)
-                .addVolumeBindings(ImmutableMap.of("/var/lib/docker/containers", "/var/lib/docker/containers"))
-                .addHosts(hosts)
-                .build();
     }
 
     private List<String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {

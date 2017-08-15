@@ -164,7 +164,6 @@ public class TestUtil {
         stack.setCreated(123L);
         stack.setCloudPlatform(credential.cloudPlatform());
         stack.setOrchestrator(orchestrator());
-        stack.setRelocateDocker(true);
         switch (credential.cloudPlatform()) {
             case AWS:
                 stack.setInstanceGroups(generateAwsInstanceGroups(3));
@@ -360,7 +359,6 @@ public class TestUtil {
         cluster.setStatusReason("statusReason");
         cluster.setUserName("admin");
         cluster.setPassword("admin");
-        cluster.setEnableShipyard(true);
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(true);
         gateway.setTopologyName("cb");

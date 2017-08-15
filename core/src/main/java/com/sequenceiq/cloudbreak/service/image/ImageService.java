@@ -65,7 +65,7 @@ public class ImageService {
             String sshUser = stack.getCredential().getLoginUserName();
             String publicSssKey = stack.getCredential().getPublicKey();
             Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, cbSshKeyDer, cbSshKey, sshUser, params,
-                    stack.getRelocateDocker() == null ? false : stack.getRelocateDocker(), stack.getSecurityConfig().getSaltBootPassword());
+                    stack.getSecurityConfig().getSaltBootPassword());
             HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(platformString, ambariVersion, hdpVersion, imageCatalog);
             if (hdpInfo != null) {
                 String specificImage = imageNameUtil.determineImageName(hdpInfo, platformString, stack.getRegion(), customImage);

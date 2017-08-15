@@ -100,9 +100,6 @@ public class ClusterRequest {
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
 
-    @ApiModelProperty(value = ClusterModelDescription.ENABLE_SHIPYARD)
-    private Boolean enableShipyard = Boolean.FALSE;
-
     @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
@@ -263,14 +260,6 @@ public class ClusterRequest {
 
     public void setConfigStrategy(ConfigStrategy configStrategy) {
         this.configStrategy = configStrategy;
-    }
-
-    public Boolean getEnableShipyard() {
-        return enableShipyard;
-    }
-
-    public void setEnableShipyard(Boolean enableShipyard) {
-        this.enableShipyard = enableShipyard;
     }
 
     public String getEmailTo() {

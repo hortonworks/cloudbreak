@@ -26,11 +26,9 @@ import static com.sequenceiq.cloudbreak.api.model.ExposedService.RANGER;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.RESOURCEMANAGER_IPC;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.RESOURCEMANAGER_SCHEDULER;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.RESOURCEMANAGER_WEB;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.SHIPYARD;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.SPARK_HISTORY_SERVER;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.SSH;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.STORM;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.SWARM;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ZEPPELIN_UI;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ZEPPELIN_WEB_SOCKET;
 
@@ -39,9 +37,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import com.google.common.base.Optional;
+import com.sequenceiq.cloudbreak.api.model.EndpointRule;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.Port;
-import com.sequenceiq.cloudbreak.api.model.EndpointRule;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -81,8 +79,6 @@ public final class NetworkUtils {
         ports.add(new Port(RANGER, "6080", "tcp"));
         ports.add(new Port(KIBANA, "3080", "tcp"));
         ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
-        ports.add(new Port(SWARM, "3376", "tcp"));
-        ports.add(new Port(SHIPYARD, "7070", "tcp"));
         ports.add(new Port(DRUID_SUPERSET, "9088", "tcp"));
     }
 

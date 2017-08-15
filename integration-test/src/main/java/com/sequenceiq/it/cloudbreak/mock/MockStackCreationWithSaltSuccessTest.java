@@ -11,8 +11,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ResourceLoader;
 import org.testng.Assert;
@@ -38,8 +36,6 @@ import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
 
 public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockStackCreationWithSaltSuccessTest.class);
-
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;
 
@@ -60,7 +56,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             "mockPort", "sshPort"})
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("") String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("SWARM") String orchestrator,
+            @Optional("") String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("SALT") String orchestrator,
             @Optional("9443") int mockPort, @Optional("2020") int sshPort)
             throws Exception {
         // GIVEN

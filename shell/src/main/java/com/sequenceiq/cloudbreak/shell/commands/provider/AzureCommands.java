@@ -399,7 +399,6 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "threshold", help = "threshold of failure") Long threshold,
             @CliOption(key = "diskPerStorage", help = "disk per Storage Account on Azure") Integer diskPerStorage,
             @CliOption(key = "platformVariant", help = "select platform variant version") PlatformVariant platformVariant,
-            @CliOption(key = "relocateDocker", help = "relocate docker in startup time") Boolean relocateDocker,
             @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "orchestrator", help = "select orchestrator variant version") ArmOrchestratorType orchestratorType,
             @CliOption(key = "attachedStorageType", help = "type of the storage creation") ArmAttachedStorageOption attachedStorageOption,
@@ -416,15 +415,6 @@ public class AzureCommands implements CommandMarker {
                     specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
 
             orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
-            if (SALT.equals(orchestratorType.getName())) {
-                relocateDocker = relocateDocker == null ? false : relocateDocker;
-                if (relocateDocker) {
-                    throw shellContext.exceptionTransformer()
-                            .transformToRuntimeException("Relocate docker could not be 'yes' if you are not using containers in the cluster");
-                }
-            } else {
-                relocateDocker = relocateDocker == null ? true : relocateDocker;
-            }
             Map<String, String> params = new HashMap<>();
 
             if (diskPerStorage != null) {
@@ -441,7 +431,7 @@ public class AzureCommands implements CommandMarker {
                 params.put("persistentStorage", "cbstore");
             }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                relocateDocker, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params,
+                wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params,
                 TagParser.parseTagsIntoMap(tags), customImage, timeout, customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }
 }

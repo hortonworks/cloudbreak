@@ -63,7 +63,6 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         }
         cluster.setKerberosConfig(kerberosConfig);
         cluster.setConfigStrategy(source.getConfigStrategy());
-        cluster.setEnableShipyard(source.getEnableShipyard());
         cluster.setEmailTo(source.getEmailTo());
         FileSystemBase fileSystem = source.getFileSystem();
         cluster.setCloudbreakAmbariPassword(PasswordUtil.generatePassword());

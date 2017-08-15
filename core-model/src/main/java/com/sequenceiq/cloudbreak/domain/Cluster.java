@@ -110,8 +110,6 @@ public class Cluster implements ProvisionEntity {
     @ManyToOne
     private KerberosConfig kerberosConfig;
 
-    private Boolean enableShipyard;
-
     @Column(nullable = false)
     private Boolean emailNeeded;
 
@@ -375,14 +373,6 @@ public class Cluster implements ProvisionEntity {
 
     public void setSecure(Boolean secure) {
         this.secure = secure;
-    }
-
-    public Boolean getEnableShipyard() {
-        return enableShipyard;
-    }
-
-    public void setEnableShipyard(Boolean enableShipyard) {
-        this.enableShipyard = enableShipyard;
     }
 
     public boolean isClusterReadyForStart() {

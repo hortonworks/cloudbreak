@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -62,7 +61,7 @@ public class UserDataBuilderTest {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
         Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(Platform.platform("AZURE"), "ssh-rsa public", "priv-key".getBytes(),
-                "ssh-rsa test", "cloudbreak", getPlatformParameters(), true, "pass");
+                "ssh-rsa test", "cloudbreak", getPlatformParameters(), "pass");
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));
     }
@@ -101,7 +100,7 @@ public class UserDataBuilderTest {
 
             @Override
             public PlatformOrchestrator orchestratorParams() {
-                return new PlatformOrchestrator(Arrays.asList(orchestrator(OrchestratorConstants.SALT), orchestrator(OrchestratorConstants.SWARM)),
+                return new PlatformOrchestrator(Collections.singleton(orchestrator(OrchestratorConstants.SALT)),
                         orchestrator(OrchestratorConstants.SALT));
             }
 

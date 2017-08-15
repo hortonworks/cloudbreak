@@ -329,7 +329,7 @@ public class OpenStackCommands implements CommandMarker {
                     specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
         Map<String, String> params = new HashMap<>();
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
+                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
                 ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
                 customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }

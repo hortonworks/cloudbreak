@@ -19,7 +19,6 @@ public interface StackCommands {
             OnFailureAction onFailureAction,
             AdjustmentType adjustmentType,
             Long threshold,
-            Boolean relocateDocker,
             boolean wait,
             PlatformVariant platformVariant,
             String orchestrator,

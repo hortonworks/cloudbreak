@@ -407,7 +407,6 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         instanceGroups: cluster.instanceGroups,
                         parameters: cluster.parameters,
                         networkId: cluster.networkId,
-                        relocateDocker: cluster.relocateDocker,
                         securityGroupId: cluster.securityGroupId,
                         availabilityZone: cluster.availabilityZone || null,
                         orchestrator: cluster.orchestrator || null,
@@ -442,7 +441,6 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                     var cbCluster = {
                         name: cluster.name,
                         blueprintId: cluster.blueprintId,
-                        enableShipyard: cluster.enableShipyard,
                         emailNeeded: cluster.email,
                         hostGroups: cluster.hostGroups,
                         password: cluster.password,

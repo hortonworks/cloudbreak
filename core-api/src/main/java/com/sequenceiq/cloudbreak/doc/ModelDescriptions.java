@@ -35,7 +35,7 @@ public class ModelDescriptions {
     }
 
     public static class OrchestratorModelDescription {
-        public static final String TYPE = "type of the orchestrator (Swarm or Marathon)";
+        public static final String TYPE = "type of the orchestrator";
         public static final String PARAMETERS = "orchestrator specific parameters, like authentication details";
         public static final String ENDPOINT = "endpoint for the container orchestration api";
     }
@@ -100,7 +100,6 @@ public class ModelDescriptions {
         public static final String PLATFORM_VARIANT = "cloud provider api variant";
         public static final String ORCHESTRATOR = "the details of the container orchestrator api to use";
         public static final String STACK_TEMPLATE = "freemarker template for the stack";
-        public static final String RELOCATE_DOCKER = "relocate the docker service in startup time";
         public static final String CREATED = "creation time of the stack in long";
         public static final String GATEWAY_PORT = "port of the gateway secured proxy";
         public static final String AMBARI_VERSION = "specific version of ambari";
@@ -147,7 +146,6 @@ public class ModelDescriptions {
         public static final String EMAIL_NEEDED = "send email about the result of the cluster installation";
         public static final String SERVICE_ENDPOINT_MAP = "most important services in the cluster";
         public static final String CONFIG_STRATEGY = "config recommendation strategy";
-        public static final String ENABLE_SHIPYARD = "shipyard service enabled in the cluster";
         public static final String BLUEPRINT_INPUTS = "blueprint inputs in the cluster";
         public static final String BLUEPRINT_CUSTOM_PROPERTIES = "blueprint custom properties";
         public static final String CUSTOM_CONTAINERS = "custom containers";

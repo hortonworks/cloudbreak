@@ -12,7 +12,6 @@ export LAZY_FORMAT_DISK_LIMIT=12
 export IS_GATEWAY=false
 export TMP_SSH_KEY="ssh-rsa test"
 export PUBLIC_SSH_KEY="ssh-rsa public"
-export RELOCATE_DOCKER=true
 export SSH_USER=cloudbreak
 export SALT_BOOT_PASSWORD=pass
 export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=

@@ -142,8 +142,6 @@ public class Stack implements ProvisionEntity {
 
     private Long created;
 
-    private Boolean relocateDocker;
-
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json tags;
@@ -337,14 +335,6 @@ public class Stack implements ProvisionEntity {
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
-    }
-
-    public Boolean getRelocateDocker() {
-        return relocateDocker;
-    }
-
-    public void setRelocateDocker(Boolean relocateDocker) {
-        this.relocateDocker = relocateDocker;
     }
 
     public List<Resource> getResourcesByType(ResourceType resourceType) {

@@ -454,7 +454,6 @@ Here is the list of all the available options:
 | --description | string | Description of the blueprint |
 | --enableKnoxGateway | boolean | Enable Knox Gateway |
 | --enableSecurity | boolean | Kerberos security status |
-| --enableShipyard | boolean | Run shipyard in cluster |
 | --hdpVersion | string | Compatible HDP version for the jdbc configuration for HIVE metastore |
 | --kerberosAdmin | string | Kerberos admin name |
 | --kerberosContainerDn | string | Kerberos container dn (e.g. ou=ambaritest,dc=WWW,dc=ACME,dc=COM) |

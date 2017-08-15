@@ -34,10 +34,10 @@ public class UserDataBuilder {
     private Configuration freemarkerConfiguration;
 
     Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, byte[] cbSshKeyDer, String cbSshKey, String sshUser,
-            PlatformParameters parameters, Boolean relocate, String saltBootPassword) {
+            PlatformParameters parameters, String saltBootPassword) {
         Map<InstanceGroupType, String> result = new HashMap<>();
         for (InstanceGroupType type : InstanceGroupType.values()) {
-            String userData = build(type, cloudPlatform, pubKey, cbSshKey, cbSshKeyDer, sshUser, parameters, relocate, saltBootPassword);
+            String userData = build(type, cloudPlatform, pubKey, cbSshKey, cbSshKeyDer, sshUser, parameters, saltBootPassword);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, userData);
         }
@@ -46,7 +46,7 @@ public class UserDataBuilder {
     }
 
     private String build(InstanceGroupType type, Platform cloudPlatform, String publicSssKey, String cbSshKey, byte[] cbSshKeyDer, String sshUser,
-            PlatformParameters params, Boolean relocate, String saltBootPassword) {
+            PlatformParameters params, String saltBootPassword) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
         model.put("platformDiskPrefix", params.scriptParams().getDiskPrefix());
@@ -57,7 +57,6 @@ public class UserDataBuilder {
         model.put("sshUser", sshUser);
         model.put("publicSshKey", publicSssKey);
         model.put("customUserData", userDataBuilderParams.getCustomData());
-        model.put("relocateDocker", relocate);
         model.put("saltBootPassword", saltBootPassword);
         return build(model);
     }

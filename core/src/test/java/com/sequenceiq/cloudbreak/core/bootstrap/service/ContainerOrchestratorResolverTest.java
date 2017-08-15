@@ -30,7 +30,7 @@ public class ContainerOrchestratorResolverTest {
         map.put(testTwoMockContainerOrchestrator.name(), testTwoMockContainerOrchestrator);
         ReflectionTestUtils.setField(underTest, "containerOrchestrators", map);
 
-        ContainerOrchestrator containerOrchestrator = underTest.get("SWARM");
+        ContainerOrchestrator containerOrchestrator = underTest.get("YARN");
         assertNotNull(containerOrchestrator);
     }
 
@@ -49,7 +49,7 @@ public class ContainerOrchestratorResolverTest {
     class TestOneMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
         public String name() {
-            return "SWARM";
+            return "YARN";
         }
     }
 
