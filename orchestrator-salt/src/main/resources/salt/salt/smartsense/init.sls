@@ -28,4 +28,4 @@ disable-hst-gateway:
 
 enable-hst:
   cmd.run:
-    - name: chkconfig hst on
+    - name: chkconfig hst off

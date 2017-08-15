@@ -22,3 +22,7 @@ disable-hst-gateway-on-agent:
 disable-hst:
   cmd.run:
     - name: chkconfig hst off
+
+reset-hst-agent:
+    cmd.run:
+      - name: hst reset-agent -q

@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -38,7 +39,7 @@ public class SmartSenseConfigProvider {
 
     private static final String HST_AGENT_COMPONENT = "HST_AGENT";
 
-    private static final String NAMENODE_COMPONENT = "NAMENODE";
+    private static final String RESOURCEMANAGER_COMPONENT = "RESOURCEMANAGER";
 
     private static final int SMART_SENSE_CLUSTER_NAME_MAX_LENGTH = 64;
 
@@ -95,23 +96,25 @@ public class SmartSenseConfigProvider {
         if (!blueprintProcessor.componentExistsInBlueprint(HST_SERVER_COMPONENT, blueprintText)) {
             String aHostGroupName = hostGroupNames.stream().findFirst().get();
             String finalBlueprintText = blueprintText;
-            if (blueprintProcessor.componentExistsInBlueprint(NAMENODE_COMPONENT, blueprintText)) {
+            boolean singleNodeGatewayFound = false;
+            for (HostGroup hostGroup : hostGroups) {
+                InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
+                if (instanceGroup != null && GATEWAY.equals(instanceGroup.getInstanceGroupType()) && instanceGroup.getNodeCount().equals(1)) {
+                    aHostGroupName = hostGroup.getName();
+                    singleNodeGatewayFound = true;
+                    break;
+                }
+            }
+
+            if (!singleNodeGatewayFound && blueprintProcessor.componentExistsInBlueprint(RESOURCEMANAGER_COMPONENT, blueprintText)) {
                 Optional<String> hostGroupNameOfNameNode = hostGroupNames
                         .stream()
-                        .filter(hostGroupName -> blueprintProcessor.getComponentsInHostGroup(finalBlueprintText, hostGroupName).contains(NAMENODE_COMPONENT))
+                        .filter(hGName -> blueprintProcessor.getComponentsInHostGroup(finalBlueprintText, hGName).contains(RESOURCEMANAGER_COMPONENT))
                         .findFirst();
                 if (hostGroupNameOfNameNode.isPresent()) {
                     aHostGroupName = hostGroupNameOfNameNode.get();
                 }
 
-            } else {
-                for (HostGroup hostGroup : hostGroups) {
-                    if (hostGroup.getConstraint().getInstanceGroup() != null
-                            && GATEWAY.equals(hostGroup.getConstraint().getInstanceGroup().getInstanceGroupType())) {
-                        aHostGroupName = hostGroup.getName();
-                        break;
-                    }
-                }
             }
             LOGGER.info("Adding '{}' component to '{}' hosgroup in the Blueprint.", HST_SERVER_COMPONENT, aHostGroupName);
             blueprintText = blueprintProcessor.addComponentToHostgroups(HST_SERVER_COMPONENT, Collections.singletonList(aHostGroupName), blueprintText);
