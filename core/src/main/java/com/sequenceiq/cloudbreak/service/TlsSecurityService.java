@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.security.KeyPair;
 
 import javax.inject.Inject;
 
@@ -15,12 +15,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
-import com.jcraft.jsch.JSch;
-import com.jcraft.jsch.JSchException;
-import com.jcraft.jsch.KeyPair;
 import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
@@ -37,13 +35,6 @@ public class TlsSecurityService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
 
-    private static final String SSH_PUBLIC_KEY_COMMENT = "cloudbreak";
-
-    private static final int DEFAULT_KEY_SIZE = 2048;
-
-    @Value("${cb.cert.dir:}")
-    private String certDir;
-
     @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
     private String clientCert;
 
@@ -57,15 +48,11 @@ public class TlsSecurityService {
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
     public SecurityConfig storeSSHKeys() throws CloudbreakSecuritySetupException {
-        try {
-            SecurityConfig securityConfig = new SecurityConfig();
-            generateTempSshKeypair(securityConfig);
-            generateSaltSignKeypair(securityConfig);
-            copyClientKeys(securityConfig);
-            return securityConfig;
-        } catch (IOException | JSchException e) {
-            throw new CloudbreakSecuritySetupException("Failed to setup SSH key pairs.", e);
-        }
+        SecurityConfig securityConfig = new SecurityConfig();
+        copyClientKeys(securityConfig);
+        generateTempSshKeypair(securityConfig);
+        generateSaltSignKeypair(securityConfig);
+        return securityConfig;
     }
 
     private void copyClientKeys(SecurityConfig securityConfig) throws CloudbreakSecuritySetupException {
@@ -78,34 +65,20 @@ public class TlsSecurityService {
         }
     }
 
-    public void generateTempSshKeypair(SecurityConfig securityConfig) throws JSchException, IOException {
-        ByteArrayOutputStream privateKey = new ByteArrayOutputStream();
-        ByteArrayOutputStream publicKey = new ByteArrayOutputStream();
-        generateSshKeypair(privateKey, publicKey);
-        privateKey.close();
-        publicKey.close();
-        securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(privateKey.toByteArray()));
-        securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(publicKey.toByteArray()));
+    public void generateTempSshKeypair(SecurityConfig securityConfig) {
+        KeyPair keyPair = PkiUtil.generateKeypair();
+        String privateKey = PkiUtil.convert(keyPair.getPrivate());
+        String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
+        securityConfig.setCloudbreakSshPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
+        securityConfig.setCloudbreakSshPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
     }
 
-    public void generateSaltSignKeypair(SecurityConfig securityConfig) throws JSchException, IOException {
-        ByteArrayOutputStream privateKey = new ByteArrayOutputStream();
-        ByteArrayOutputStream publicKey = new ByteArrayOutputStream();
-        generateSshKeypair(privateKey, publicKey);
-        privateKey.close();
-        publicKey.close();
-        securityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(privateKey.toByteArray()));
-        securityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.toByteArray()));
-    }
-
-    private void generateSshKeypair(ByteArrayOutputStream privateKey, ByteArrayOutputStream publicKey) throws JSchException, IOException {
-        LOGGER.info("Generating SSH keypair.");
-        JSch jsch = new JSch();
-        KeyPair keyPair = KeyPair.genKeyPair(jsch, KeyPair.RSA, DEFAULT_KEY_SIZE);
-        keyPair.writePrivateKey(privateKey);
-        keyPair.writePublicKey(publicKey, SSH_PUBLIC_KEY_COMMENT);
-        keyPair.dispose();
-        LOGGER.info("Generated SSH keypair, Fingerprint: {}", keyPair.getFingerPrint());
+    public void generateSaltSignKeypair(SecurityConfig securityConfig) {
+        KeyPair keyPair = PkiUtil.generateKeypair();
+        String privateKey = PkiUtil.convert(keyPair.getPrivate());
+        String publicKey = PkiUtil.convertOpenSshPublicKey(keyPair.getPublic());
+        securityConfig.setSaltSignPublicKey(BaseEncoding.base64().encode(publicKey.getBytes()));
+        securityConfig.setSaltSignPrivateKey(BaseEncoding.base64().encode(privateKey.getBytes()));
     }
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,

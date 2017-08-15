@@ -18,7 +18,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
@@ -30,6 +29,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
+import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -75,9 +75,6 @@ public class TlsSetupService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
-    private String tlsCertificatePath;
-
     public void setupTls(Stack stack, InstanceMetaData gwInstance, String user, Set<String> sshFingerprints) throws CloudbreakException {
         String publicIp = gatewayConfigService.getGatewayIp(stack, gwInstance);
         int sshPort = gwInstance.getSshPort();
@@ -90,8 +87,8 @@ public class TlsSetupService {
         HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
         try {
             waitForSsh(stack, publicIp, sshPort, hostKeyVerifier, user);
-            String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded();
-            setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack.getCredential());
+            SecurityConfig securityConfig = stack.getSecurityConfig();
+            setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, securityConfig, stack.getCredential());
             uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
             executeTlsSetupScript(ssh);
             downloadAndSavePrivateKey(ssh, gwInstance);
@@ -134,11 +131,11 @@ public class TlsSetupService {
     }
 
     private void setupTemporarySsh(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user,
-            String privateKey, Credential credential) throws IOException, CloudbreakException {
+            SecurityConfig securityConfig, Credential credential) throws IOException, CloudbreakException {
         LOGGER.info("Setting up temporary ssh...");
-        prepareSshConnection(ssh, ip, port, hostKeyVerifier, user, privateKey, credential);
+        prepareSshConnection(ssh, ip, port, hostKeyVerifier, user, securityConfig.getCloudbreakSshPrivateKeyDecoded(), credential);
         String remoteTlsCertificatePath = "/tmp/cb-client.pem";
-        ssh.newSCPFileTransfer().upload(tlsCertificatePath, remoteTlsCertificatePath);
+        ssh.newSCPFileTransfer().upload(uploadParameterFile(securityConfig.getClientCertDecoded(), "client.pem"), remoteTlsCertificatePath);
         LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
