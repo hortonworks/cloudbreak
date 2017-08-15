@@ -83,7 +83,6 @@ dependencies {
     compile project(':cloud-reactor-api')
     compile project(':cloud-reactor')
 
-    runtime project(':orchestrator-swarm')
     runtime project(':orchestrator-marathon')
     runtime project(':orchestrator-salt')
     runtime project(':orchestrator-yarn')

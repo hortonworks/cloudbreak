@@ -331,7 +331,7 @@ public class GcpCommands implements CommandMarker {
             availabilityZone = new StackAvailabilityZone(availabilityZonesByRegion.iterator().next());
         }
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                false, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion,
+                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion,
                 hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
                 customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }

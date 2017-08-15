@@ -86,12 +86,6 @@
         <select name="wasbsecure" id="wasbsecure" ng-model="cluster.fileSystem.properties.secure" ng-options="(item?'wasbs':'wasb') for item in [true, false]"></select>
     </div>
 </div>
-<div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE' && cluster.orchestrator.type !== 'SALT'">
-    <label class="col-sm-3 control-label" for="relocateDocker">{{msg.relocate_docker_label}}</label>
-    <div class="col-sm-8">
-        <input type="checkbox" id="relocateDocker" ng-model="cluster.relocateDocker" name="relocateDocker">
-    </div>
-</div>
 <div class="form-group" ng-show="showAdvancedOptionForm && activeCredential.cloudPlatform == 'AZURE'">
     <label class="col-sm-3 control-label" for="attachedstoragetype">{{msg.attached_storage_type}}</label>
     <div class="col-sm-8">

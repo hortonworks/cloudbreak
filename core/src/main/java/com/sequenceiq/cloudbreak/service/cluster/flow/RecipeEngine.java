@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SALT;
-import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -111,7 +110,7 @@ public class RecipeEngine {
 
     private void addFsRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         String orchestrator = stack.getOrchestrator().getType();
-        if (SWARM.equals(orchestrator) || SALT.equals(orchestrator)) {
+        if (SALT.equals(orchestrator)) {
             Cluster cluster = stack.getCluster();
             String blueprintText = cluster.getBlueprint().getBlueprintText();
             FileSystem fs = cluster.getFileSystem();

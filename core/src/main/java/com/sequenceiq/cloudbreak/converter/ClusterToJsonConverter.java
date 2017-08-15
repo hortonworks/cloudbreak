@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.SHIPYARD;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
@@ -16,7 +15,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -153,7 +151,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         clusterResponse.setAmbariServerUrl(getAmbariServerUrl(source, ambariIp));
         clusterResponse.setServiceEndPoints(prepareServiceEndpointsMap(source, ambariIp));
         clusterResponse.setBlueprintInputs(convertBlueprintInputs(source.getBlueprintInputs()));
-        clusterResponse.setEnableShipyard(source.getEnableShipyard());
         clusterResponse.setConfigStrategy(source.getConfigStrategy());
         clusterResponse.setLdapConfig(getConversionService().convert(source.getLdapConfig(), LdapConfigResponse.class));
         convertRdsConfigs(source, clusterResponse);
@@ -314,11 +311,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     private Map<String, String> prepareServiceEndpointsMap(Cluster cluster, String ambariIp) {
         Set<HostGroup> hostGroups = cluster.getHostGroups();
         Blueprint blueprint = cluster.getBlueprint();
-        Boolean shipyardEnabled = cluster.getEnableShipyard();
 
         Map<String, String> result = new HashMap<>();
         List<Port> ports = NetworkUtils.getPorts(Optional.absent());
-        collectPortsOfAdditionalServices(result, ambariIp, shipyardEnabled);
         try {
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
             Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);
@@ -343,13 +338,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             return result;
         }
         return result;
-    }
-
-    private void collectPortsOfAdditionalServices(Map<String, String> result, String ambariIp, Boolean shipyardEnabled) {
-        if (BooleanUtils.isTrue(shipyardEnabled)) {
-            Port shipyardPort = NetworkUtils.getPortByServiceName(SHIPYARD);
-            result.put(shipyardPort.getName(), String.format("%s:%s%s", ambariIp, shipyardPort.getPort(), shipyardPort.getExposedService().getPostFix()));
-        }
     }
 
     private void collectServicePorts(Map<String, String> result, List<Port> ports, String ambariIp, String serviceAddress,

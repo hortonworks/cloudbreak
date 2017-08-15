@@ -123,8 +123,6 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "kerberosContainerDn", mandatory = false, help = "Kerberos container dn (e.g. ou=ambaritest,dc=WWW,dc=ACME,dc=COM)")
                     String kerberosContainerDn,
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
-            @CliOption(key = "enableShipyard", help = "Run shipyard in cluster",
-                    unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableShipyard,
             @CliOption(key = "enableKnoxGateway", help = "Enable Knox Gateway",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableKnoxGateway,
             @CliOption(key = "ambariServerImage", help = "Name of the ambari server image in case of BYOS orchestrator", mandatory = false)
@@ -170,7 +168,6 @@ public class ClusterCommands implements BaseCommands {
             }
 
             ClusterRequest clusterRequest = new ClusterRequest();
-            clusterRequest.setEnableShipyard(enableShipyard);
             if (shellContext.isMarathonMode() || shellContext.isYarnMode()) {
                 CustomContainerRequest customContainerRequest = new CustomContainerRequest();
                 Map<String, String> images = new HashMap<>();

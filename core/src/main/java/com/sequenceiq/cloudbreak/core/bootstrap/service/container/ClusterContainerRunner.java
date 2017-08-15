@@ -1,17 +1,9 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.container;
 
-import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_AGENT;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_DB;
 import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.AMBARI_SERVER;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.CONSUL_WATCH;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.HAVEGED;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.KERBEROS;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.LOGROTATE;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.REGISTRATOR;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.SHIPYARD;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.SHIPYARD_DB;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -114,13 +106,6 @@ public class ClusterContainerRunner {
         String gatewayHostname = getGatewayHostName(stack);
 
         try {
-            if (SWARM.equals(orchestrator.getType())) {
-                ContainerConstraint registratorConstraint = constraintFactory.getRegistratorConstraint(gatewayHostname, cluster.getName(),
-                        getGatewayPrivateIp(stack), cluster.getId().toString());
-                containers.put(REGISTRATOR.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, REGISTRATOR), credential,
-                        registratorConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-            }
-
             ContainerConstraint ambariServerDbConstraint = constraintFactory.getAmbariServerDbConstraint(gatewayHostname,
                     cluster.getName(), cluster.getId().toString());
             List<ContainerInfo> dbContainer = containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_DB), credential,
@@ -135,27 +120,6 @@ public class ClusterContainerRunner {
             containers.put(AMBARI_SERVER.name(), ambariServerContainer);
             String ambariServerHost = ambariServerContainer.get(0).getHost();
 
-            if (cluster.isSecure()) {
-                ContainerConstraint havegedConstraint = constraintFactory.getHavegedConstraint(gatewayHostname, cluster.getName(), cluster.getId().toString());
-                containers.put(HAVEGED.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, HAVEGED), credential, havegedConstraint,
-                        clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-
-                ContainerConstraint kerberosServerConstraint = constraintFactory.getKerberosServerConstraint(cluster, gatewayHostname,
-                        cluster.getId().toString());
-                containers.put(KERBEROS.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, KERBEROS), credential,
-                        kerberosServerConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-            }
-
-            if (SWARM.equals(orchestrator.getType()) && cluster.getEnableShipyard()) {
-                ContainerConstraint shipyardDbConstraint = constraintFactory.getShipyardDbConstraint(ambariServerHost);
-                containers.put(SHIPYARD_DB.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD_DB), credential,
-                        shipyardDbConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-
-                ContainerConstraint shipyardConstraint = constraintFactory.getShipyardConstraint(ambariServerHost);
-                containers.put(SHIPYARD.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, SHIPYARD), credential, shipyardConstraint,
-                        clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-            }
-
             List<String> hostBlackList = new ArrayList<>();
             for (HostGroup hostGroup : hostGroupRepository.findHostGroupsInCluster(stack.getCluster().getId())) {
                 ContainerConstraint ambariAgentConstraint = constraintFactory.getAmbariAgentConstraint(ambariServerHost, null, cloudPlatform, hostGroup,
@@ -166,16 +130,6 @@ public class ClusterContainerRunner {
                 hostBlackList.addAll(getHostsFromContainerInfo(containerInfos));
             }
 
-            if (SWARM.equals(orchestrator.getType())) {
-                List<String> hosts = getHosts(stack);
-                ContainerConstraint consulWatchConstraint = constraintFactory.getConsulWatchConstraint(hosts);
-                containers.put(CONSUL_WATCH.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, CONSUL_WATCH), credential,
-                        consulWatchConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-
-                ContainerConstraint logrotateConstraint = constraintFactory.getLogrotateConstraint(hosts);
-                containers.put(LOGROTATE.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, LOGROTATE), credential,
-                        logrotateConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-            }
             return saveContainers(containers, cluster);
         } catch (CloudbreakOrchestratorException ex) {
             if (!containers.isEmpty()) {
@@ -231,18 +185,6 @@ public class ClusterContainerRunner {
                     cloudPlatform, hostGroup, adjustment, hostBlackList, cluster.getId().toString());
             containers.put(hostGroup.getName(), containerOrchestrator.runContainer(containerConfigService.get(stack, AMBARI_AGENT), credential,
                     ambariAgentConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-
-            if (SWARM.equals(orchestrator.getType())) {
-                List<String> hosts = ambariAgentConstraint.getHosts();
-
-                ContainerConstraint consulWatchConstraint = constraintFactory.getConsulWatchConstraint(hosts);
-                containers.put(CONSUL_WATCH.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, CONSUL_WATCH), credential,
-                        consulWatchConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-
-                ContainerConstraint logrotateConstraint = constraintFactory.getLogrotateConstraint(hosts);
-                containers.put(LOGROTATE.name(), containerOrchestrator.runContainer(containerConfigService.get(stack, LOGROTATE), credential,
-                        logrotateConstraint, clusterDeletionBasedModel(stack.getId(), cluster.getId())));
-            }
 
             return saveContainers(containers, cluster);
         } catch (CloudbreakOrchestratorException ex) {

@@ -259,7 +259,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @Override
     public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, boolean publicInAccount, OnFailureAction onFailureAction,
-            AdjustmentType adjustmentType, Long threshold, Boolean relocateDocker, boolean wait, PlatformVariant platformVariant, String orchestrator,
+            AdjustmentType adjustmentType, Long threshold, boolean wait, PlatformVariant platformVariant, String orchestrator,
             String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params, Map<String, String> userDefinedTags,
             String customImage, Long timeout, String customDomain, String customHostname, boolean clusterNameAsSubdomain, boolean hostgroupNameAsHostname) {
         try {
@@ -271,7 +271,6 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             StackRequest stackRequest = new StackRequest();
             stackRequest.setName(name);
             stackRequest.setRegion(region.getName());
-            stackRequest.setRelocateDocker(relocateDocker);
             if (availabilityZone != null) {
                 stackRequest.setAvailabilityZone(availabilityZone.getName());
             }

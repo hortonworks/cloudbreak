@@ -11,13 +11,11 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
@@ -80,14 +78,6 @@ public class ClusterContainerRunnerTest {
 
     @InjectMocks
     private ClusterContainerRunner underTest;
-
-    @Before
-    public void setUp() {
-        ReflectionTestUtils.setField(containerConfigService, "registratorDockerImageName", "sequence/testcont:0.1.1");
-        ReflectionTestUtils.setField(containerConfigService, "consulWatchPlugnDockerImageName", "sequence/testcont:0.1.1");
-        ReflectionTestUtils.setField(containerConfigService, "kerberosDockerImageName", "sequence/testcont:0.1.1");
-        ReflectionTestUtils.setField(containerConfigService, "logrotateDockerImageName", "sequence/testcont:0.1.1");
-    }
 
     @Test(expected = CloudbreakException.class)
     public void runNewNodesClusterContainersWhenContainerRunnerFailed()

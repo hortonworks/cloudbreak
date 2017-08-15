@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.SWARM;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer.MUNCHAUSEN;
 import static com.sequenceiq.cloudbreak.service.PollingResult.EXIT;
 import static com.sequenceiq.cloudbreak.service.PollingResult.TIMEOUT;
 import static java.util.Collections.singletonMap;
@@ -42,7 +40,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
-import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -125,10 +122,8 @@ public class ClusterBootstrapper {
 
         if (orchestratorType.hostOrchestrator()) {
             bootstrapOnHost(stack);
-        } else if (orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            LOGGER.info("Skipping bootstrap of the machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
         } else if (orchestratorType.containerOrchestrator()) {
-            bootstrapContainers(stack);
+            LOGGER.info("Skipping bootstrap of the machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
         } else {
             LOGGER.error("Orchestrator not found: {}", stackOrchestratorType);
             throw new CloudbreakException("HostOrchestrator not found: " + stackOrchestratorType);
@@ -189,66 +184,6 @@ public class ClusterBootstrapper {
         }
     }
 
-    public void bootstrapContainers(Stack stack) throws CloudbreakException {
-        Set<Node> nodes = new HashSet<>();
-        for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-            nodes.add(new Node(instanceMetaData.getPrivateIp(), instanceMetaData.getPublicIpWrapper()));
-        }
-        try {
-            InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-            GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
-            String gatewayIp = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
-            ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
-            PollingResult bootstrapApiPolling = containerBootstrapApiPollingService.pollWithTimeoutSingleFailure(
-                    containerBootstrapApiCheckerTask,
-                    new ContainerBootstrapApiContext(stack, gatewayConfig, containerOrchestrator),
-                    POLL_INTERVAL,
-                    MAX_POLLING_ATTEMPTS);
-            validatePollingResultForCancellation(bootstrapApiPolling, "Polling of bootstrap API was cancelled.");
-
-            List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator.getMaxBootstrapNodes(), gatewayIp);
-            containerOrchestrator.bootstrap(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(0), stack.getConsulServers(),
-                    clusterDeletionBasedModel(stack.getId(), null));
-            if (nodeMap.size() > 1) {
-                PollingResult gatewayAvailability = containerClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
-                        containerClusterAvailabilityCheckerTask,
-                        new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(0)),
-                        POLL_INTERVAL,
-                        MAX_POLLING_ATTEMPTS);
-                validatePollingResultForCancellation(gatewayAvailability, "Polling of gateway node availability was cancelled.");
-                for (int i = 1; i < nodeMap.size(); i++) {
-                    containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), nodeMap.get(i),
-                            clusterDeletionBasedModel(stack.getId(), null));
-                    PollingResult agentAvailability = containerClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
-                            containerClusterAvailabilityCheckerTask,
-                            new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodeMap.get(i)),
-                            POLL_INTERVAL,
-                            MAX_POLLING_ATTEMPTS);
-                    validatePollingResultForCancellation(agentAvailability, "Polling of agent nodes availability was cancelled.");
-                }
-            }
-            PollingResult allNodesAvailabilityPolling = containerClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
-                    containerClusterAvailabilityCheckerTask,
-                    new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodes),
-                    POLL_INTERVAL,
-                    MAX_POLLING_ATTEMPTS);
-            validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
-            Orchestrator orchestrator = new Orchestrator();
-            orchestrator.setApiEndpoint(gatewayIp + ":" + stack.getGatewayPort());
-            orchestrator.setType("SWARM");
-            orchestratorRepository.save(orchestrator);
-            stack.setOrchestrator(orchestrator);
-            stackRepository.save(stack);
-            if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
-                clusterBootstrapperErrorHandler.terminateFailedNodes(null, containerOrchestrator, stack, gatewayConfig, nodes);
-            }
-        } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException e) {
-            throw new CloudbreakException(e);
-        }
-    }
-
     public void bootstrapNewNodes(Long stackId, Set<String> upscaleCandidateAddresses, Set<String> recoveryHostNames) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Set<Node> nodes = new HashSet<>();
@@ -273,14 +208,16 @@ public class ClusterBootstrapper {
             allNodes.add(node);
         }
         try {
-            InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
+            String stackOrchestratorType = stack.getOrchestrator().getType();
             OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
             if (orchestratorType.hostOrchestrator()) {
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                 bootstrapNewNodesOnHost(stack, allGatewayConfigs, nodes, allNodes);
             } else if (orchestratorType.containerOrchestrator()) {
-                GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, stack.getCluster().getGateway().getEnableGateway());
-                bootstrapNewNodesInContainer(stack, gatewayInstance, nodes, gatewayConfig);
+                LOGGER.info("Skipping bootstrap of the new machines because the stack's orchestrator type is '{}'.", stackOrchestratorType);
+            } else {
+                LOGGER.error("Orchestrator not found: {}", stackOrchestratorType);
+                throw new CloudbreakException("HostOrchestrator not found: " + stackOrchestratorType);
             }
         } catch (CloudbreakOrchestratorCancelledException e) {
             throw new CancellationException(e.getMessage());
@@ -318,32 +255,6 @@ public class ClusterBootstrapper {
         validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of new nodes availability was cancelled.");
         if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
             clusterBootstrapperErrorHandler.terminateFailedNodes(hostOrchestrator, null, stack, gatewayConfig, nodes);
-        }
-    }
-
-    private void bootstrapNewNodesInContainer(Stack stack, InstanceMetaData gatewayInstance, Set<Node> nodes, GatewayConfig gatewayConfig)
-            throws CloudbreakException, CloudbreakOrchestratorException {
-        ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(SWARM);
-        String gatewayIpToTls = gatewayConfigService.getGatewayIp(stack, gatewayInstance);
-        List<Set<Node>> nodeMap = prepareBootstrapSegments(nodes, containerOrchestrator.getMaxBootstrapNodes(), gatewayIpToTls);
-        for (Set<Node> aNodeMap : nodeMap) {
-            containerOrchestrator.bootstrapNewNodes(gatewayConfig, containerConfigService.get(stack, MUNCHAUSEN), aNodeMap,
-                    clusterDeletionBasedModel(stack.getId(), null));
-            PollingResult newNodesAvailabilityPolling = containerClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
-                    containerClusterAvailabilityCheckerTask,
-                    new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, aNodeMap),
-                    POLL_INTERVAL,
-                    MAX_POLLING_ATTEMPTS);
-            validatePollingResultForCancellation(newNodesAvailabilityPolling, "Polling of new nodes availability was cancelled.");
-        }
-        PollingResult pollingResult = containerClusterAvailabilityPollingService.pollWithTimeoutSingleFailure(
-                containerClusterAvailabilityCheckerTask,
-                new ContainerOrchestratorClusterContext(stack, containerOrchestrator, gatewayConfig, nodes),
-                POLL_INTERVAL,
-                MAX_POLLING_ATTEMPTS);
-        validatePollingResultForCancellation(pollingResult, "Polling of new nodes availability was cancelled.");
-        if (TIMEOUT.equals(pollingResult)) {
-            clusterBootstrapperErrorHandler.terminateFailedNodes(null, containerOrchestrator, stack, gatewayConfig, nodes);
         }
     }
 

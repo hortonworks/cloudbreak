@@ -45,9 +45,6 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(value = StackModelDescription.NETWORK_ID)
     private Long networkId;
 
-    @ApiModelProperty(StackModelDescription.RELOCATE_DOCKER)
-    private Boolean relocateDocker;
-
     @ApiModelProperty(StackModelDescription.AMBARI_VERSION)
     private String ambariVersion;
 
@@ -144,14 +141,6 @@ public abstract class StackBase implements JsonEntity {
 
     public void setPlatformVariant(String platformVariant) {
         this.platformVariant = platformVariant;
-    }
-
-    public Boolean getRelocateDocker() {
-        return relocateDocker;
-    }
-
-    public void setRelocateDocker(Boolean relocateDocker) {
-        this.relocateDocker = relocateDocker;
     }
 
     public String getAmbariVersion() {

@@ -375,9 +375,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if ($rootScope.activeCredential && ($rootScope.activeCredential.cloudPlatform == 'AWS' || $rootScope.activeCredential.cloudPlatform == 'OPENSTACK' || $rootScope.activeCredential.cloudPlatform == 'BYOS')) {
                 delete $scope.cluster.fileSystem;
             }
-            if ($scope.cluster.orchestrator.type === 'SALT') {
-                $scope.cluster.enableShipyard = false;
-            }
             if ($scope.cluster.platformVariant === 'BYOS') {
                 $scope.cluster.networkId = null;
                 if ($scope.cluster.customContainer == true) {
@@ -957,19 +954,16 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.fileSystem.properties.tenantId = $rootScope.activeCredential.parameters.tenantId;
                     $scope.cluster.fileSystem.properties.clientId = $rootScope.activeCredential.parameters.accessKey;
                     $scope.cluster.fileSystem.properties.secure = false;
-                    $scope.cluster.relocateDocker = true;
                     $scope.cluster.parameters.persistentStorage = "cbstore";
                     $scope.cluster.parameters.attachedStorageOption = "SINGLE";
                 } else if ($rootScope.activeCredential.cloudPlatform == 'GCP') {
                     $scope.cluster.fileSystem = {};
                     $scope.cluster.fileSystem.type = "LOCAL";
                     $scope.cluster.fileSystem.properties = {};
-                    $scope.cluster.relocateDocker = false;
                     $scope.cluster.fileSystem.properties.projectId = $rootScope.activeCredential.parameters.projectId;
                     $scope.cluster.fileSystem.properties.serviceAccountEmail = $rootScope.activeCredential.parameters.serviceAccountId;
                     $scope.cluster.fileSystem.properties.privateKeyEncoded = $rootScope.activeCredential.parameters.serviceAccountPrivateKey;
                 } else {
-                    $scope.cluster.relocateDocker = false;
                     delete $scope.cluster.fileSystem;
                     delete $scope.cluster.parameters.persistentStorage;
                 }
@@ -1323,7 +1317,6 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 ambariStackDetails: {},
                 orchestrator: {},
                 configStrategy: $scope.configStrategies[1],
-                enableShipyard: false,
                 customImage: false,
                 customContainer: false,
                 customQueue: false,

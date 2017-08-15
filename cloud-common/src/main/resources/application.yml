@@ -85,27 +85,9 @@ cb:
 
   docker:
     container:
-      ambari.server: hortonworks/ambari-server:2.4.0-v1
-      ambari.agent: hortonworks/ambari-agent:2.4.0-v1
-      ambari.db: postgres:9.4.1
       yarn.ambari.server: hortonworks/yarn-cloudbreak-ambari-server:2.5.0-v1
       yarn.ambari.agent: hortonworks/yarn-cloudbreak-ambari-agent:2.5.0-v1
       yarn.ambari.db: hortonworks/yarn-cloudbreak-postgres:9.4.1
-      registrator: gliderlabs/registrator:v6
-      docker.consul.watch.plugn: sequenceiq/docker-consul-watch-plugn:1.6
-      kerberos: sequenceiq/kerberos:1.1
-      logrotate: sequenceiq/logrotate:v0.5.1
-      munchausen: sequenceiq/munchausen:0.6.0
-      haveged: sequenceiq/haveged:1.0
-      shipyard: shipyard/shipyard:v3.0.0
-      shipyard.db: rethinkdb:2.2.4
-      certs: ehazlett/cert-tool:0.0.3
-      alpine: gliderlabs/alpine:3.1
-      consul: gliderlabs/consul:0.6
-      gateway: sequenceiq/cb-gateway-nginx:0.3
-      swarm: swarm:1.1.0
-    env:
-      ldap: SLAPD_PASSWORD=cloudbreak|SLAPD_BINDUSER=ambari-qa|SLAPD_BINDPWD=cloudbreak|SLAPD_BINDGROUP=hadoop
 
   arm:
     template.path: templates/arm-v2.ftl

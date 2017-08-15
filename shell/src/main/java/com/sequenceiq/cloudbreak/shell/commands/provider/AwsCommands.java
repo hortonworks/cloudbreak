@@ -339,7 +339,7 @@ public class AwsCommands implements CommandMarker {
             throw shellContext.exceptionTransformer().transformToRuntimeException(
                     "Please specify the role for instanceProfile if you are using 'USE_EXISTING' profile type");
         }
-        return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold, false,
+        return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
                 ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
                 customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
