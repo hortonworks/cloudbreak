@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.client;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.StringReader;
@@ -15,6 +16,7 @@ import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
@@ -26,6 +28,7 @@ import java.util.Map;
 
 import javax.security.auth.x500.X500Principal;
 
+import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
@@ -49,10 +52,14 @@ import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
 import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.BaseEncoding;
 
 public class PkiUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PkiUtil.class);
 
     private static final int KEY_SIZE = 2048;
 
@@ -64,11 +71,11 @@ public class PkiUtil {
 
     private static final Map<String, RSAKeyParameters> CACHE =
             Collections.synchronizedMap(new LinkedHashMap<String, RSAKeyParameters>(MAX_SIZE * 4 / 3, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, RSAKeyParameters> eldest) {
-            return size() > MAX_SIZE;
-        }
-    });
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, RSAKeyParameters> eldest) {
+                    return size() > MAX_SIZE;
+                }
+            });
 
     private PkiUtil() {
     }
@@ -157,6 +164,30 @@ public class PkiUtil {
             return convertToString(cert);
         } catch (Exception e) {
             throw new PkiException("Failed to convert signed cert to String", e);
+        }
+    }
+
+    public static String convertOpenSshPublicKey(PublicKey publicKey) {
+        ByteArrayOutputStream byteOs = new ByteArrayOutputStream();
+        DataOutputStream dos = new DataOutputStream(byteOs);
+        try {
+            RSAPublicKey rsaPublicKey = (RSAPublicKey) publicKey;
+            dos.writeInt("ssh-rsa".getBytes().length);
+            dos.write("ssh-rsa".getBytes());
+            dos.writeInt(rsaPublicKey.getPublicExponent().toByteArray().length);
+            dos.write(rsaPublicKey.getPublicExponent().toByteArray());
+            dos.writeInt(rsaPublicKey.getModulus().toByteArray().length);
+            dos.write(rsaPublicKey.getModulus().toByteArray());
+            return "ssh-rsa " + new String(Base64.encodeBase64(byteOs.toByteArray()));
+        } catch (Exception e) {
+            throw new PkiException("Failed to convert public key for the cluster!", e);
+        } finally {
+            try {
+                dos.close();
+                byteOs.close();
+            } catch (IOException e) {
+                LOGGER.warn("Failed to close streams while converting public key", e);
+            }
         }
     }
 
