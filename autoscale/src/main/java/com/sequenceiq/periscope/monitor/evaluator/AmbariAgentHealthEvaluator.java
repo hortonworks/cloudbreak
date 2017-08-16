@@ -57,9 +57,9 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
 
     @Override
     public void run() {
-        LOGGER.info("Checking '{}' alerts.", AMBARI_AGENT_HEARTBEAT);
         Cluster cluster = clusterService.find(clusterId);
         MDCBuilder.buildMdcContext(cluster);
+        LOGGER.info("Checking '{}' alerts.", AMBARI_AGENT_HEARTBEAT);
         try {
             AmbariClient ambariClient = ambariClientProvider.createAmbariClient(cluster);
             List<Map<String, Object>> alertHistory = ambariClient.getAlert(AMBARI_AGENT_HEARTBEAT_DEF_NAME);

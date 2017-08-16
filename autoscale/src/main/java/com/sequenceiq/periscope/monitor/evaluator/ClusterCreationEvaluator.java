@@ -87,8 +87,9 @@ public class ClusterCreationEvaluator implements Runnable {
                 sendNotification = true;
             }
         } else {
-            LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
             PeriscopeUser user = new PeriscopeUser(stack.getOwner(), null, stack.getAccount());
+            MDCBuilder.buildMdcContext(user, stack.getStackId(), null);
+            LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
             ambariHealthCheck(user, resolvedAmbari);
             cluster = clusterService.create(user, resolvedAmbari, null, false);
             sendNotification = true;
