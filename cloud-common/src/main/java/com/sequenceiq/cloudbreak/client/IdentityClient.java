@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.net.ssl.SSLHandshakeException;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
@@ -107,8 +108,15 @@ public class IdentityClient {
         formData.add(tokenName, accessToken);
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Basic " + Base64.encodeBase64String((clientId + ":" + clientSecret).getBytes()));
-        Map<String, Object> response = checkTokenWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-                .headers(headers).post(Entity.form(formData), Map.class);
+
+        Map<String, Object> response;
+        try {
+            response = checkTokenWebTarget.request().accept(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
+                    .headers(headers).post(Entity.form(formData), Map.class);
+        } catch (BadRequestException ex) {
+            LOGGER.warn(String.format("Token check failed for access token: '%s'.", accessToken), ex);
+            throw new InvalidTokenException(accessToken);
+        }
 
         if (response.containsKey("error")) {
             throw new InvalidTokenException(accessToken);
