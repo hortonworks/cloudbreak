@@ -21,8 +21,15 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
         Long stackId = notification.getCloudContext().getId();
         CloudResource cloudResource = notification.getCloudResource();
         Resource resource = getConversionService().convert(cloudResource, Resource.class);
+        ResourceRepository resourceRepository = getResourceRepository();
+        Resource persistedResource = resourceRepository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
+        if (persistedResource != null) {
+            LOGGER.warn("Trying to persist a resource (name: {}, type: {}, stackId: {}) that is already persisted, skipping..",
+                    cloudResource.getName(), cloudResource.getType().name(), stackId);
+            return notification;
+        }
         resource.setStack(getStackRepository().findByIdLazy(stackId));
-        getResourceRepository().save(resource);
+        resourceRepository.save(resource);
         return notification;
     }
 
@@ -66,11 +73,10 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
         return getRepositoryForEntity(Resource.class);
     }
 
-    private Resource updateWithPersistedFields(Resource resource, Resource persistedResource) {
+    private void updateWithPersistedFields(Resource resource, Resource persistedResource) {
         if (persistedResource != null) {
             resource.setId(persistedResource.getId());
             resource.setInstanceGroup(persistedResource.getInstanceGroup());
         }
-        return resource;
     }
 }
