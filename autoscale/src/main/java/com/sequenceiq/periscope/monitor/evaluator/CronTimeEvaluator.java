@@ -2,6 +2,8 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +11,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.domain.BaseAlert;
+import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.monitor.MonitorUpdateRate;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.repository.TimeAlertRepository;
+import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.utils.DateUtils;
 
 @Component("CronTimeEvaluator")
@@ -24,6 +28,9 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     @Autowired
     private TimeAlertRepository alertRepository;
+
+    @Inject
+    private ClusterService clusterService;
 
     private long clusterId;
 
@@ -42,8 +49,10 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     @Override
     public void run() {
+        Cluster cluster = clusterService.find(clusterId);
+        MDCBuilder.buildMdcContext(cluster);
+
         for (TimeAlert alert : alertRepository.findAllByCluster(clusterId)) {
-            MDCBuilder.buildMdcContext(alert.getCluster());
             String alertName = alert.getName();
             LOGGER.info("Checking time based alert: '{}'", alertName);
             if (isTrigger(alert) && isPolicyAttached(alert)) {

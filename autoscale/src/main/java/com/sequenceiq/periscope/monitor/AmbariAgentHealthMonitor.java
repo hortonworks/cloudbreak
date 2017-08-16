@@ -4,15 +4,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.monitor.evaluator.AmbariAgentHealthEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
-import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 
 @Component
 public class AmbariAgentHealthMonitor extends AbstractMonitor implements Monitor {
@@ -37,14 +34,7 @@ public class AmbariAgentHealthMonitor extends AbstractMonitor implements Monitor
         return Collections.singletonMap(EvaluatorContext.CLUSTER_ID.name(), cluster.getId());
     }
 
-    @Override
-    public void execute(JobExecutionContext context) throws JobExecutionException {
-        evalContext(context);
-        List<Cluster> clustersToRecover = getClusterService().findAll(ClusterState.RUNNING);
-        for (Cluster cluster : clustersToRecover) {
-            EvaluatorExecutor evaluatorExecutor = getApplicationContext().getBean(getEvaluatorType().getSimpleName(), EvaluatorExecutor.class);
-            evaluatorExecutor.setContext(getContext(cluster));
-            getExecutorService().submit(evaluatorExecutor);
-        }
+    List<Cluster> getClusters() {
+        return getClusterService().findAll(ClusterState.RUNNING);
     }
 }
