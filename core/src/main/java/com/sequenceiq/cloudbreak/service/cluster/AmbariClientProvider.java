@@ -48,8 +48,7 @@ public class AmbariClientProvider {
             LOGGER.info("Creating Ambari client without 2-way-ssl to connect to host:port: " + clientConfig.getApiAddress() + ":" + HTTP_PORT);
             return new AmbariClient(clientConfig.getApiAddress(), HTTP_PORT, ambariUserName, ambariPassword);
         }
-        LOGGER.info(String.format("Creating Ambari client with 2-way-ssl to connect to host:port: %s:%s certificates: %s, %s, %s",
-                clientConfig.getApiAddress(), httpsPort, clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert()));
+        LOGGER.info(String.format("Creating Ambari client with 2-way-ssl to connect to host:port: %s:%s", clientConfig.getApiAddress(), httpsPort));
         return new AmbariClient(clientConfig.getApiAddress(), Integer.toString(httpsPort),
                 ambariUserName, ambariPassword,
                 clientConfig.getClientCert(), clientConfig.getClientKey(), clientConfig.getServerCert());
