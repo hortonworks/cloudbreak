@@ -209,6 +209,12 @@ function continueInit() {
                     if (splittedLocation.length == 1 || splittedLocation[1] != 'error=login_failure') {
                         var cookieArray = tokenResp.headers['set-cookie'];
                         var sessionId = getCookieFieldValue(cookieArray, 'JSESSIONID');
+                        var traefikBackendCookie = getCookieFieldValue(cookieArray, '_TRAEFIK_BACKEND')
+                        if (traefikBackendCookie != null || traefikBackendCookie != 'undefined') {
+                            req.session.traefik_backend = traefikBackendCookie;
+                            console.log("Set _TRAEFIK_BACKEND cookie for request to: " + JSON.stringify(req.session.traefik_backend))
+                            options.headers.Cookie = options.headers.Cookie + ';_TRAEFIK_BACKEND=' + traefikBackendCookie;
+                        }
 
                         getToken(req, res, function(token) {
                             getUserByName(req, res, token, username, function(adminUserData) {
@@ -309,6 +315,11 @@ function continueInit() {
                         'Cookie': 'X-Uaa-Csrf=' + csrfToken + '; JSESSIONID=' + req.session.uaa_sessionid
                     }
                 }
+                if (req.session.traefik_backend != null) {
+                    console.log("Set _TRAEFIK_BACKEND cookie for request to: " + JSON.stringify(req.session.traefik_backend))
+                    confirmOptions.headers.Cookie = confirmOptions.headers.Cookie + ';_TRAEFIK_BACKEND=' + req.session.traefik_backend;
+                }
+
                 needle.post(config.uaaAddress + '/oauth/authorize', confirmData, confirmOptions, function(err, confirmResp) {
                     if (err != null) {
                         console.log("POST /oauth/authorize - Client cannot access resource server. Check that UAA server is running.");
@@ -369,6 +380,11 @@ function continueInit() {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }
+            if (req.session.traefik_backend != null) {
+                console.log("Set _TRAEFIK_BACKEND cookie for request to: " + JSON.stringify(req.session.traefik_backend))
+                confirmOptions.headers.Cookie = confirmOptions.headers.Cookie + ';_TRAEFIK_BACKEND=' + req.session.traefik_backend;
+            }
+
             var formData = '';
             if (scopes != undefined) {
                 for (var i = 0; i < scopes.length; i++) {
