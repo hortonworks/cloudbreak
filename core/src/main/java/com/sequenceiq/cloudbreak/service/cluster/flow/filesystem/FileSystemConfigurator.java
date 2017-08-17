@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.cluster.flow.RecipeScript;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 
@@ -20,7 +21,7 @@ public interface FileSystemConfigurator<T extends FileSystemConfiguration> {
 
     List<BlueprintConfigurationEntry> getDefaultFsProperties(T fsConfig);
 
-    List<RecipeScript> getScripts(T fsConfig);
+    List<RecipeScript> getScripts(Credential credential, T fsConfig);
 
     FileSystemType getFileSystemType();
 

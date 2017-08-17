@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
+import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.AbstractFileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemScriptConfig;
@@ -46,7 +47,7 @@ public class AdlsFileSystemConfigurator extends AbstractFileSystemConfigurator<A
     }
 
     @Override
-    protected List<FileSystemScriptConfig> getScriptConfigs(AdlsFileSystemConfiguration fsConfig) {
+    protected List<FileSystemScriptConfig> getScriptConfigs(Credential credential, AdlsFileSystemConfiguration fsConfig) {
         return new ArrayList<>();
     }
 
