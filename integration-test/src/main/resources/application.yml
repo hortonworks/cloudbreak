@@ -68,6 +68,9 @@ integrationtest:
         rdsPassword:
         rdsConnectionUrl:
 
+    filesystemconfig:
+        accountKeyWasb:
+
     mockcredential:
         name:
         publicKeyFile:
@@ -103,7 +106,7 @@ integrationtest:
     defaultSecurityGroups:
        GCP: UNSECURE-gcp-all-services-open
        AWS: UNSECURE-aws-all-services-open
-       AZURE_RM: UNSECURE-azure_rm-all-services-open
+       AZURE_RM: default-azure-only-ssh-and-ssl
        OPENSTACK: UNSECURE-openstack-all-services-open
        AZURE: default-azure-only-ssh-and-ssl
     testSuites:
