@@ -33,6 +33,12 @@ public class CloudProviderParamsInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.azurermcredential.tenantId}")
     private String defaultAzureTenantId;
 
+    @Value("${integrationtest.filesystemconfig.accountKeyWasb}")
+    private String defaultAccountKeyWasb;
+
+    @Value("${integrationtest.azureEndpoints.authTokenEndpoint}")
+    private String defaultAuthTokenEndpoint;
+
     @Value("${integrationtest.openstackcredential.tenantName}")
     private String defaultOpenstackTenantName;
 
@@ -76,20 +82,22 @@ public class CloudProviderParamsInitializer extends AbstractTestNGSpringContextT
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({"cloudProvider", "azureSubscriptionId", "azureSecretKey", "azureAccesKey", "azureTenantId"})
+    @Parameters({"cloudProvider", "azureSubscriptionId", "azureSecretKey", "azureAccesKey", "azureTenantId", "azureAccountKeyWasb"})
     public void initAzureCloudProviderParameters(String cloudProvider, @Optional("") String azureSubscriptionId, @Optional ("") String azureSecretKey,
-            @Optional ("") String azureAccesKey, @Optional ("") String azureTenantId) throws Exception {
+            @Optional ("") String azureAccesKey, @Optional ("") String azureTenantId, @Optional ("") String azureAccountKeyWasb) throws Exception {
         if ("AZURE".equals(cloudProvider)) {
             azureSubscriptionId = StringUtils.hasLength(azureSubscriptionId) ? azureSubscriptionId : defaultAzureSubscriptionId;
             azureSecretKey = StringUtils.hasLength(azureSecretKey) ? azureSecretKey : defaultAzureSecretKey;
             azureAccesKey = StringUtils.hasLength(azureAccesKey) ? azureAccesKey : defaultAzureAccesKey;
             azureTenantId = StringUtils.hasLength(azureTenantId) ? azureTenantId : defaultAzureTenantId;
+            azureAccountKeyWasb = StringUtils.hasLength(azureAccountKeyWasb) ? azureAccountKeyWasb : defaultAccountKeyWasb;
 
             cloudProviderParams.put("cloudProvider", cloudProvider);
             cloudProviderParams.put("subscriptionId", azureSubscriptionId);
             cloudProviderParams.put("secretKey", azureSecretKey);
             cloudProviderParams.put("accesKey", azureAccesKey);
             cloudProviderParams.put("tenantId", azureTenantId);
+            cloudProviderParams.put("accountKeyWasb", azureAccountKeyWasb);
         }
     }
 

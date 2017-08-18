@@ -1,0 +1,78 @@
+name: Azure_simple_smoketest_cred
+parameters:
+  cloudProvider: AZURE
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
+
+  # integratontest.azurermcredential params must be set in application.yml
+  - name: azure_rm_credential_test
+    parameters:
+      credentialName: itsazurermcredandsmokecredwasb
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureCredentialCreationTest
+
+  - name: create gateway template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-gateway-wasb
+      azureVmType: Standard_D4
+      azureVolumeCount: 1
+      azureVolumeSize: 50
+      templateAdditions: "master,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
+
+  - name: create worker template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-worker-wasb
+      azureVmType: Standard_D4
+      azureVolumeCount: 1
+      azureVolumeSize: 100
+      templateAdditions: "worker,1;"
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
+
+  - name: create compute template
+    parameters:
+      azureTemplateName: it-azurerm-credandsmoke-compute-wasb
+      azureVmType: Standard_D11
+      azureVolumeCount: 1
+      azureVolumeSize: 200
+      templateAdditions: "compute,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.azure.AzureTemplateCreationTest
+
+  - name: set wasb filesystem
+    parameters:
+      filesystemType: WASB
+      fsName: ittestingcb
+    classes:
+      - com.sequenceiq.it.cloudbreak.filesystem.FilesystemConfigureTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-azure-cred-wasb
+      region: North Europe
+      clusterName: it-azure-cred-wasb
+      persistentStorage: cbstore
+      sleepTime: 60000
+      threshold: 1
+      withFs: true
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: test wasb filesystem
+    parameters:
+      filesystemType: WASB
+      filesystemName: ittestingcb
+      sshCommand: raw:sudo -S su - hdfs -c 'hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teragen 100000000 wasb://testcontainer@ittestingcb.blob.core.windows.net/it-terasort/input;
+       hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar terasort wasb://testcontainer@ittestingcb.blob.core.windows.net/it-terasort/input wasb://testcontainer@ittestingcb.blob.core.windows.net/it-terasort/output;
+       hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teravalidate wasb://testcontainer@ittestingcb.blob.core.windows.net/it-terasort/output wasb://testcontainer@ittestingcb.blob.core.windows.net/it-terasort/validate'
+    classes:
+      - com.sequenceiq.it.cloudbreak.filesystem.FilesystemTest
