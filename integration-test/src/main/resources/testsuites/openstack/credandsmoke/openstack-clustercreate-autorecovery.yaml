@@ -2,7 +2,6 @@ name: OpenStack_simple_smoketest_cred_autorecovery
 parameters:
   cloudProvider: OPENSTACK
   blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
-  cleanUp: false
 
 tests:
   - name: init

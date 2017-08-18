@@ -106,7 +106,7 @@ integrationtest:
     defaultSecurityGroups:
        GCP: UNSECURE-gcp-all-services-open
        AWS: UNSECURE-aws-all-services-open
-       AZURE_RM: default-azure-only-ssh-and-ssl
+       AZURE_RM: UNSECURE-azure_rm-all-services-open
        OPENSTACK: UNSECURE-openstack-all-services-open
        AZURE: default-azure-only-ssh-and-ssl
     testSuites:
