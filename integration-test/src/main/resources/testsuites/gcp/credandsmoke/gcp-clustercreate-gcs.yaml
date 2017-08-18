@@ -1,0 +1,80 @@
+name: Gcp_simple_smoketest_cred_gcs
+parameters:
+  cloudProvider: GCP
+  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+
+tests:
+  - name: init
+    classes:
+      - com.sequenceiq.it.TestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudbreakTestSuiteInitializer
+      - com.sequenceiq.it.cloudbreak.CloudProviderParamsInitializer
+
+  # integratontest.gcpcredential params must be set in application.yml
+  - name: gcp_credential_test
+    parameters:
+      credentialName: its-gcp-credandsmoke-cred-gcs
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpCredentialCreationTest
+
+  - name: create gateway template
+    parameters:
+      gcpName: it-gcp-credandsmoke-gateway-gcs
+      gcpInstanceType: n1-highmem-16
+      volumeType: pd-standard
+      volumeCount: 1
+      volumeSize: 100
+      templateAdditions: "master,1,GATEWAY"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create worker template
+    parameters:
+      gcpName: it-gcp-credandsmoke-worker-gcs
+      gcpInstanceType: n1-highmem-8
+      volumeType: pd-standard
+      volumeCount: 2
+      volumeSize: 100
+      templateAdditions: "worker,1;"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: create compute template
+    parameters:
+      gcpName: it-gcp-credandsmoke-compute-gcs
+      gcpInstanceType: n1-highmem-8
+      volumeType: pd-ssd
+      volumeCount: 3
+      volumeSize: 50
+      templateAdditions: "compute,1"
+    classes:
+      - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
+
+  - name: set gcp filesystem
+    parameters:
+      filesystemType: GCS
+      fsName: hm-bucket
+    classes:
+      - com.sequenceiq.it.cloudbreak.filesystem.FilesystemConfigureTest
+
+  - name: create cluster
+    parameters:
+      stackName: it-gcp-cred-gcs
+      region: europe-west1
+      availabilityZone: europe-west1-b
+      clusterName: it-gcp-cred-gcs
+      threshold: 1
+      withFs: true
+    classes:
+      - com.sequenceiq.it.cloudbreak.StackCreationTest
+      - com.sequenceiq.it.cloudbreak.ClusterCreationTest
+
+  - name: test gcs filesystem
+    parameters:
+      filesystemType: GCS
+      filesystemName: hm-bucket
+      sshCommand: raw:sudo -S su - hdfs -c 'hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teragen 100000000 gs:///it-terasort/input;
+                       hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar terasort gs:///it-terasort/input gs:///it-terasort/output;
+                       hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teravalidate gs:///it-terasort/output gs:///it-terasort/validate'
+    classes:
+      - com.sequenceiq.it.cloudbreak.filesystem.FilesystemTest

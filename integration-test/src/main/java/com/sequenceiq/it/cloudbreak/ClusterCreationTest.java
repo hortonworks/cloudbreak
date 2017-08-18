@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.KerberosRequest;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
@@ -34,12 +35,13 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({"clusterName", "emailNeeded", "enableSecurity", "kerberosMasterKey", "kerberosAdmin",
-            "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "withRDSConfig", "autoRecoveryMode" })
+            "kerberosPassword", "runRecipesOnHosts", "checkAmbari", "withRDSConfig", "autoRecoveryMode", "withFs"})
     public void testClusterCreation(@Optional("it-cluster") String clusterName, @Optional("false") boolean emailNeeded,
             @Optional("false") boolean enableSecurity, @Optional String kerberosMasterKey,
             @Optional String kerberosAdmin, @Optional String kerberosPassword,
             @Optional("") String runRecipesOnHosts, @Optional("true") boolean checkAmbari,
-            @Optional ("false") boolean withRDSConfig, @Optional ("false") boolean autoRecoveryMode) throws Exception {
+            @Optional ("false") boolean withRDSConfig, @Optional ("false") boolean autoRecoveryMode,
+            @Optional ("false") boolean withFs) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackIdStr = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
@@ -61,9 +63,14 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
-        if (Boolean.TRUE.equals(withRDSConfig)) {
+        if (withRDSConfig) {
             clusterRequest = setRDSConfiguration(itContext, clusterRequest);
         }
+
+        if (withFs) {
+            clusterRequest = setFileSystem(itContext, clusterRequest);
+        }
+
         KerberosRequest kerberosRequest = new KerberosRequest();
         kerberosRequest.setAdmin(kerberosAdmin);
         kerberosRequest.setPassword(kerberosPassword);
@@ -129,5 +136,12 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
             }
         }
         Assert.assertTrue(clusterIsFound, "The RDS configuration is not connected to the cluster");
+    }
+
+    private ClusterRequest setFileSystem(IntegrationTestContext itContext, ClusterRequest clusterRequest) {
+        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.FSREQUEST, FileSystemRequest.class), "Filesystem was not configured");
+        FileSystemRequest fsRequest = itContext.getContextParam(CloudbreakITContextConstants.FSREQUEST, FileSystemRequest.class);
+        clusterRequest.setFileSystem(fsRequest);
+        return clusterRequest;
     }
 }

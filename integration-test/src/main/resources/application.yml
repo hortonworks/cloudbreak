@@ -68,6 +68,9 @@ integrationtest:
         rdsPassword:
         rdsConnectionUrl:
 
+    filesystemconfig:
+        accountKeyWasb:
+
     mockcredential:
         name:
         publicKeyFile:

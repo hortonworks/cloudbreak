@@ -47,6 +47,8 @@ public class CloudbreakITContextConstants {
 
     public static final String CLOUDPROVIDER_PARAMETERS = "CLOUDPROVIDER_PARAMETERS";
 
+    public static final String FSREQUEST = "FSREQUEST";
+
     private CloudbreakITContextConstants() {
     }
 }
