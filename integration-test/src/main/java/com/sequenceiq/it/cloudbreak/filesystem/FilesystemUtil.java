@@ -1,6 +1,10 @@
 package com.sequenceiq.it.cloudbreak.filesystem;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
+import java.security.InvalidKeyException;
 import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +29,7 @@ import com.microsoft.azure.datalake.store.ADLStoreClient;
 import com.microsoft.azure.datalake.store.oauth2.AccessTokenProvider;
 import com.microsoft.azure.datalake.store.oauth2.ClientCredsTokenProvider;
 import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.StorageException;
 import com.microsoft.azure.storage.blob.CloudBlobClient;
 import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.sequenceiq.it.util.ResourceUtil;
@@ -42,8 +47,9 @@ public class FilesystemUtil {
     private FilesystemUtil() {
     }
 
-    protected static void cleanUpFiles(ApplicationContext applicationContext, Map<String, String> cloudProviderParams,
-            String fsType, String fsName, String folderPrefix, String containerName) throws Exception {
+    static void cleanUpFiles(ApplicationContext applicationContext, Map<String, String> cloudProviderParams,
+            String fsType, String fsName, String folderPrefix, String containerName) throws  IOException, GeneralSecurityException, URISyntaxException,
+            StorageException {
         switch (fsType) {
             case "ADLS":
                 deleteAdlsObjects(cloudProviderParams, fsName, folderPrefix);
@@ -58,10 +64,9 @@ public class FilesystemUtil {
                 LOGGER.info("Filesystem type {} is not supported!", fsType);
                 break;
         }
-
     }
 
-    protected static void createWasbContainer(Map<String, String> cloudProviderParams, String accountName, String containerName) {
+    static void createWasbContainer(Map<String, String> cloudProviderParams, String accountName, String containerName) {
         try {
             String storageConnectionString = "DefaultEndpointsProtocol=http;" + "AccountName=" + accountName + ";AccountKey="
                     + cloudProviderParams.get("accountKeyWasb");
@@ -69,12 +74,16 @@ public class FilesystemUtil {
             CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
             CloudBlobContainer container = blobClient.getContainerReference(containerName);
             container.createIfNotExists();
-        } catch (Exception e) {
-            LOGGER.error("Error during creating the Wasb container", e);
+        } catch (URISyntaxException e) {
+            LOGGER.error("Error during creating the Wasb container, wrong URI syntax ", e);
+        } catch (InvalidKeyException e) {
+            LOGGER.error("Error during creating the Wasb container, invalid key ", e);
+        } catch (StorageException e) {
+            LOGGER.error("Error during creating the Wasb container, problem with storage ", e);
         }
     }
 
-    protected static void deleteWasbContainer(Map<String, String> cloudProviderParams, String accountName, String containerName) {
+    private static void deleteWasbContainer(Map<String, String> cloudProviderParams, String accountName, String containerName) {
         try {
             String storageConnectionString = "DefaultEndpointsProtocol=http;" + "AccountName=" + accountName + ";AccountKey="
                     + cloudProviderParams.get("accountKeyWasb");
@@ -82,13 +91,17 @@ public class FilesystemUtil {
             CloudBlobClient blobClient = storageAccount.createCloudBlobClient();
             CloudBlobContainer container = blobClient.getContainerReference(containerName);
             container.deleteIfExists();
-        } catch (Exception e) {
-            LOGGER.error("Error during deleting the Wasb container", e);
+        } catch (URISyntaxException e) {
+            LOGGER.error("Error during deleting the Wasb container, wrong URI syntax ", e);
+        } catch (InvalidKeyException e) {
+            LOGGER.error("Error during deleting the Wasb container, invalid key ", e);
+        } catch (StorageException e) {
+            LOGGER.error("Error during deleting the Wasb container, problem with storage ", e);
         }
     }
 
-    protected static void deleteGcsObjects(ApplicationContext applicationContext, Map<String, String> cloudProviderParams, String bucketName,
-            String folderPrefix) throws Exception {
+    private static void deleteGcsObjects(ApplicationContext applicationContext, Map<String, String> cloudProviderParams, String bucketName,
+            String folderPrefix) throws IOException, GeneralSecurityException {
         String serviceAccountPrivateKey = ResourceUtil.readBase64EncodedContentFromResource(applicationContext, cloudProviderParams.get("p12File"));
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         PrivateKey privateKey = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
@@ -105,18 +118,19 @@ public class FilesystemUtil {
         Storage storage = new Storage.Builder(httpTransport, jsonFactory, googleCredential)
                 .setApplicationName("Google-BucketsInsertExample/1.0").build();
 
-        List<StorageObject> storageObjects = new ArrayList();
+        List<StorageObject> storageObjects = new ArrayList<>();
         Storage.Objects.List listObjects = storage.objects().list(bucketName).setPrefix(folderPrefix);
         Objects objects = listObjects.execute();
+
         Assert.assertNotNull(objects.getItems(), "Not found any objects with " + folderPrefix + " prefix.");
+
         storageObjects.addAll(objects.getItems());
         for (StorageObject storageObject : storageObjects) {
-            Storage.Objects.Delete delete = storage.objects().delete("hm-bucket", storageObject.getName());
-            delete.execute();
+            storage.objects().delete("hm-bucket", storageObject.getName()).execute();
         }
     }
 
-    protected static void deleteAdlsObjects(Map<String, String> cloudProviderParams, String filesystemName, String folderPrefix) throws Exception {
+    private static void deleteAdlsObjects(Map<String, String> cloudProviderParams, String filesystemName, String folderPrefix) throws IOException {
         String authTokenEndpoint = AZURE_TOKEN_URL + cloudProviderParams.get("tenantId") + "/oauth2/token";
         AccessTokenProvider provider = new ClientCredsTokenProvider(authTokenEndpoint, cloudProviderParams.get("accesKey"),
                 cloudProviderParams.get("secretKey"));
@@ -126,4 +140,3 @@ public class FilesystemUtil {
         }
     }
 }
-

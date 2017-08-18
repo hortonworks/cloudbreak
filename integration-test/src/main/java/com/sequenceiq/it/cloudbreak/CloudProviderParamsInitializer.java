@@ -36,9 +36,6 @@ public class CloudProviderParamsInitializer extends AbstractTestNGSpringContextT
     @Value("${integrationtest.filesystemconfig.accountKeyWasb}")
     private String defaultAccountKeyWasb;
 
-    @Value("${integrationtest.azureEndpoints.authTokenEndpoint}")
-    private String defaultAuthTokenEndpoint;
-
     @Value("${integrationtest.openstackcredential.tenantName}")
     private String defaultOpenstackTenantName;
 
