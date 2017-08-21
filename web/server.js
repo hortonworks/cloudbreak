@@ -1,16 +1,91 @@
+var connectSid = 'uluwatu.sid';
 var express = require('express');
 var app = express();
 var uid = require('uid2');
-var sessionSecret = uid(30);
+var sessionSecret = process.env.ULU_OAUTH_CLIENT_SECRET;
 var server = require('http').Server(app);
 var io = require('socket.io').listen(server);
 var connect = require('connect');
 var session = require('express-session');
-var sessionStore = new connect.middleware.session.MemoryStore();
 var cookieParser = require('cookie-parser')(sessionSecret);
+var MemoryStore = require('session-memory-store')(session);
+var RedisStore = require('connect-redis')(session);
+var sessionStore = new MemoryStore();
+const Redis = require('ioredis');
+
+var redisHostAddress = process.env.REDIS_HOST_ADDRESS;
+var sentinelHostAddress = process.env.SENTINEL_HOST_ADDRESS;
+
+if ((redisHostAddress && typeof(redisHostAddress) !== 'undefined') ||
+    (sentinelHostAddress && typeof (sentinelHostAddress) !== 'undefined')) {
+
+    var redisForSessionStore;
+    var redisForSubSocketIO;
+    var redisForPubSocketIO;
+    var redisPass = process.env.REDIS_PASS;
+    var redisDB = process.env.REDIS_DB;
+
+    if (sentinelHostAddress) {
+        var sentinelCluster = process.env.SENTINEL_CLUSTER;
+        var sentinelPort = process.env.SENTINEL_PORT;
+        console.log("Configure session store to use Redis with Sentinel (host: %s, port: %d, db: %s)", sentinelHostAddress, sentinelPort, redisDB);
+        redisForSessionStore = new Redis({
+            sentinels: [{ host: sentinelHostAddress, port: sentinelPort }],
+            name: sentinelCluster,
+            password: redisPass,
+            db: redisDB
+        });
+
+        redisForSubSocketIO = new Redis({
+            sentinels: [{ host: sentinelHostAddress, port: sentinelPort }],
+            name: sentinelCluster,
+            password: redisPass,
+            db: redisDB
+        });
+
+        redisForPubSocketIO = new Redis({
+            sentinels: [{ host: sentinelHostAddress, port: sentinelPort }],
+            name: sentinelCluster,
+            password: redisPass,
+            db: redisDB
+        });
+    } else {
+        var redisPort = process.env.REDIS_PORT;
+        console.log("Configure session store to use Redis (host: %s, port: %d, db: %s)", redisHostAddress, redisPort, redisDB);
+        redisForSessionStore = new Redis({
+            host: redisHostAddress,
+            port: redisPort,
+            password: redisPass,
+            db: redisDB
+        });
+
+        redisForSubSocketIO = new Redis({
+            host: redisHostAddress,
+            port: redisPort,
+            password: redisPass,
+            db: redisDB
+        });
+
+        redisForPubSocketIO = new Redis({
+            host: redisHostAddress,
+            port: redisPort,
+            password: redisPass,
+            db: redisDB
+        });
+    }
+
+    sessionStore = new RedisStore({
+        client: redisForSessionStore
+    });
+
+    const redis = require('socket.io-redis');
+    const adapter = redis({ pubClient: redisForPubSocketIO, subClient: redisForSubSocketIO });
+    io.adapter(adapter);
+}
+
 var sessionSocketIo = require('session.socket.io');
-var connectSid = 'uluwatu.sid';
 var sessionSockets = new sessionSocketIo(io, sessionStore, cookieParser, connectSid);
+
 var morgan = require('morgan');
 var bodyParser = require('body-parser');
 var methodOverride = require('method-override');
@@ -542,7 +617,6 @@ function continueInit() {
 
     // socket ======================================================================
 
-
     sessionSockets.on('connection', function(err, socket, session) {
         if (session) {
             retrieveUserByToken(session, function(data) {
@@ -556,6 +630,7 @@ function continueInit() {
     // errors  =====================================================================
 
     app.use(function(err, req, res, next) {
+        console.log(JSON.stringify(err));
         res.status(err.status);
         res.json({
             error: {

@@ -12,6 +12,10 @@ var request = require('request');
 var dns = require('dns');
 var morgan = require('morgan');
 var cookieParser = require('cookie');
+var MemoryStore = require('session-memory-store')(session);
+var RedisStore = require('connect-redis')(session);
+var Redis = require('ioredis');
+var sessionSecret = process.env.SL_CLIENT_SECRET;
 
 var domain = require('domain'),
     d = domain.create();
@@ -92,15 +96,49 @@ function continueInit() {
     app.set('trust proxy', true)
     app.use(express.static(path.join(__dirname, 'public'), {  maxAge: '1h' }));
     app.use(favicon(path.join(__dirname, 'public', 'img', 'favicon.ico')));
+    var sessionStore = new MemoryStore();
+    var redisHostAddress = process.env.REDIS_HOST_ADDRESS;
+    var sentinelHostAddress = process.env.SENTINEL_HOST_ADDRESS;
+
+    if ((redisHostAddress && typeof(redisHostAddress) !== 'undefined') ||
+        (sentinelHostAddress && typeof (sentinelHostAddress) !== 'undefined')) {
+
+        var redisForSessionStore;
+        var redisDB = process.env.REDIS_DB;
+        if (sentinelHostAddress) {
+            console.log("Configure session store to use Redis with Sentinel (host: %s, port: %d, db: %s)", sentinelHostAddress, process.env.SENTINEL_PORT, redisDB);
+            redisForSessionStore = new Redis({
+                sentinels: [{ host: sentinelHostAddress, port: process.env.SENTINEL_PORT }],
+                name: process.env.SENTINEL_CLUSTER,
+                password: process.env.REDIS_PASS,
+                db: redisDB
+            });
+        } else {
+            console.log("Configure session store to use Redis (host: %s, port: %d, db: %s)", redisHostAddress, process.env.REDIS_PORT, redisDB);
+            redisForSessionStore = new Redis({
+                host: redisHostAddress,
+                port: process.env.REDIS_PORT,
+                password: process.env.REDIS_PASS,
+                db: redisDB
+            });
+        }
+
+        sessionStore = new RedisStore({
+            client: redisForSessionStore
+        });
+
+    }
+
     app.use(session({
         name: 'sultans.sid',
         genid: function(req) {
             return uid(30);
         },
-        secret: uid(30),
+        secret: sessionSecret,
         resave: true,
         saveUninitialized: true,
-        cookie: { secure: true }
+        cookie: { secure: true },
+        store: sessionStore
     }))
     app.use(bodyParser.urlencoded({
         extended: false
@@ -213,7 +251,6 @@ function continueInit() {
                         if (traefikBackendCookie != null || traefikBackendCookie != 'undefined') {
                             req.session.traefik_backend = traefikBackendCookie;
                             console.log("Set _TRAEFIK_BACKEND cookie for request to: " + JSON.stringify(req.session.traefik_backend))
-                            options.headers.Cookie = options.headers.Cookie + ';_TRAEFIK_BACKEND=' + traefikBackendCookie;
                         }
 
                         getToken(req, res, function(token) {
@@ -230,7 +267,6 @@ function continueInit() {
                                         if (sessionId) {
                                             req.session.uaa_sessionid = sessionId;
                                         }
-
                                         if (req.session.client_id == null) {
                                             var sourceCookie = getCookie(req, 'source')
                                             if (sourceCookie == null || sourceCookie == 'undefined') {
@@ -265,11 +301,11 @@ function continueInit() {
 
     app.get('/oauth/authorize', function(req, res) {
         debugHeaders(req)
-        if (req.param('client_id') && req.param('response_type') && req.param('scope') && req.param('redirect_uri')) {
-            req.session.client_id = req.param('client_id')
-            req.session.response_type = req.param('response_type')
-            req.session.scope = req.param('scope')
-            req.session.redirect_uri = req.param('redirect_uri')
+        if (req.query.client_id && req.query.response_type && req.query.scope && req.query.redirect_uri) {
+            req.session.client_id = req.query.client_id
+            req.session.response_type = req.query.response_type
+            req.session.scope = req.query.scope
+            req.session.redirect_uri = req.query.redirect_uri
             if (isUaaSession(req)) {
                 res.redirect(getBasePath(req) + '/confirm')
             } else {
@@ -1492,6 +1528,7 @@ function continueInit() {
     // errors
 
     app.use(function(err, req, res, next) {
+        console.log(JSON.stringify(err));
         res.status(err.status);
         res.json({
             error: {
