@@ -65,7 +65,6 @@ public class EmailSenderHostServiceTypeTest {
         greenMail.start();
 
         identityUser = new IdentityUser("sdf", "testuser", "testaccount", new ArrayList<>(), "familyname", "givenName", new Date());
-        ReflectionTestUtils.setField(emailSenderService, "msgFrom", "no-reply@sequenceiq.com");
         ReflectionTestUtils.setField(emailSenderService, "freemarkerConfiguration", freemarkerConfiguration());
 
         ReflectionTestUtils.setField(emailSenderService, "successClusterMailTemplatePath", "templates/cluster-installer-mail-success.ftl");
@@ -88,7 +87,7 @@ public class EmailSenderHostServiceTypeTest {
         ReflectionTestUtils.setField(emailSenderService, "mailSender", mailSender);
 
         EmailMimeMessagePreparator mmp = new EmailMimeMessagePreparator();
-        ReflectionTestUtils.setField(mmp, "msgFrom", "marci@test.com");
+        ReflectionTestUtils.setField(mmp, "msgFrom", "no-reply@hortonworks.com");
 
         ReflectionTestUtils.setField(emailSenderService, "emailMimeMessagePreparator", mmp);
 
