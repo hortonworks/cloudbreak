@@ -36,29 +36,17 @@ public class EmailSenderService {
 
     private static final String CLUSTER_READY_SUBJECT = "Your cluster '%s' is ready";
 
-    @Value("${cb.smtp.sender.from:}")
-    private String msgFrom;
-
     @Value("${cb.success.cluster.installer.mail.template.path:}")
     private String successClusterMailTemplatePath;
 
     @Value("${cb.failed.cluster.installer.mail.template.path:}")
     private String failedClusterMailTemplatePath;
 
-    @Value("${cb.smartsense.configure:false}")
-    private boolean configureSmartSense;
-
     @Value("${hwx.cloud.template.version:}")
     private String templateVersion;
 
     @Value("${hwx.cloud.address:}")
     private String cloudAddress;
-
-    @Value("${aws.instance.id:}")
-    private String awsInstanceId;
-
-    @Value("${aws.account.id:}")
-    private String accountId;
 
     @Inject
     private EmailMimeMessagePreparator emailMimeMessagePreparator;
