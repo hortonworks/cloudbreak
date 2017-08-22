@@ -15,7 +15,6 @@ cloudbreak-config() {
   cloudbreak-conf-rest-client
   cloudbreak-conf-ui
   cloudbreak-conf-java
-  cloudbreak-conf-baywatch
   cloudbreak-conf-consul
   migrate-config
 }
@@ -48,8 +47,6 @@ cloudbreak-conf-tags() {
     env-import DOCKER_IMAGE_CLOUDBREAK_SHELL hortonworks/cloudbreak-shell
     env-import DOCKER_IMAGE_CBD_SMARTSENSE hortonworks/cbd-smartsense
 
-    env-import CB_DOCKER_CONTAINER_AMBARI ""
-    env-import CB_DOCKER_CONTAINER_AMBARI_WARM ""
     env-import CB_DEFAULT_SUBSCRIPTION_ADDRESS http://uluwatu.service.consul:3000/notifications
     env-import CERTS_BUCKET ""
 
@@ -92,12 +89,8 @@ cloudbreak-conf-consul() {
 }
 
 cloudbreak-conf-images() {
-    declare desc="Defines base images for each provider"
+    declare desc="Defines image catalog urls"
 
-    env-import CB_AZURE_IMAGE_URI ""
-    env-import CB_AWS_AMI_MAP ""
-    env-import CB_OPENSTACK_IMAGE ""
-    env-import CB_GCP_SOURCE_IMAGE_PATH ""
     env-import CB_IMAGE_CATALOG_URL "https://s3-eu-west-1.amazonaws.com/cloudbreak-info/cb-image-catalog.json"
 }
 
@@ -307,13 +300,6 @@ cloudbreak-conf-java() {
     env-import CB_JAVA_OPTS ""
     env-import CB_HTTP_PROXY ""
     env-import CB_HTTPS_PROXY ""
-}
-
-cloudbreak-conf-baywatch() {
-  declare desc="Defines Baywatch related parameters"
-
-  env-import CB_BAYWATCH_ENABLED "false"
-  env-import CB_BAYWATCH_EXTERN_LOCATION ""
 }
 
 util-cloudbreak-shell() {
