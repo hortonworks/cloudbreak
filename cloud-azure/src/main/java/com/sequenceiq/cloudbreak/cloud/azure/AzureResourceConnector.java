@@ -60,6 +60,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private static final String ATTACHED_DISK_STORAGE_NAME = "ATTACHED_DISK_STORAGE_NAME";
 
+    private static final String MANAGED_DISK_IDS = "MANAGED_DISK_IDS";
+
     private static final String PUBLIC_ADDRESS_NAME = "PUBLIC_ADDRESS_NAME";
 
     @Value("${cb.azure.host.name.prefix.length}")
@@ -273,18 +275,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             resourcesToRemove.put(NETWORK_INTERFACES_NAMES, networkInterfacesNames);
             resourcesToRemove.put(PUBLIC_ADDRESS_NAME, publicIpAddressNames);
 
-            StorageProfile storageProfile = virtualMachine.storageProfile();
-            List<DataDisk> dataDisks = storageProfile.dataDisks();
-
-            List<String> storageProfileDiskNames = new ArrayList<>();
-            for (DataDisk datadisk : dataDisks) {
-                VirtualHardDisk vhd = datadisk.vhd();
-                storageProfileDiskNames.add(getNameFromConnectionString(vhd.uri()));
-            }
-            OSDisk osDisk = storageProfile.osDisk();
-            VirtualHardDisk vhd = osDisk.vhd();
-            storageProfileDiskNames.add(getNameFromConnectionString(vhd.uri()));
-            resourcesToRemove.put(STORAGE_PROFILE_DISK_NAMES, storageProfileDiskNames);
+            collectRemovableDisks(resourcesToRemove, virtualMachine);
         } catch (CloudException e) {
             if (e.response().code() != AzureConstants.NOT_FOUND) {
                 throw new CloudConnectorException(e.body().message(), e);
@@ -293,6 +284,31 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             throw new CloudConnectorException("can't collect instance resources", e);
         }
         return resourcesToRemove;
+    }
+
+    private void collectRemovableDisks(Map<String, Object> resourcesToRemove, VirtualMachine virtualMachine) {
+        StorageProfile storageProfile = virtualMachine.storageProfile();
+        List<DataDisk> dataDisks = storageProfile.dataDisks();
+
+        List<String> storageProfileDiskNames = new ArrayList<>();
+        List<String> managedDiskIds = new ArrayList<>();
+        for (DataDisk datadisk : dataDisks) {
+            VirtualHardDisk vhd = datadisk.vhd();
+            if (datadisk.vhd() != null) {
+                storageProfileDiskNames.add(getNameFromConnectionString(vhd.uri()));
+            } else {
+                managedDiskIds.add(datadisk.managedDisk().id());
+            }
+        }
+        OSDisk osDisk = storageProfile.osDisk();
+        if (osDisk.vhd() != null) {
+            VirtualHardDisk vhd = osDisk.vhd();
+            storageProfileDiskNames.add(getNameFromConnectionString(vhd.uri()));
+        } else {
+            managedDiskIds.add(osDisk.managedDisk().id());
+        }
+        resourcesToRemove.put(STORAGE_PROFILE_DISK_NAMES, storageProfileDiskNames);
+        resourcesToRemove.put(MANAGED_DISK_IDS, managedDiskIds);
     }
 
     @Override
@@ -313,6 +329,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                     deletePublicIps(client, stackName, (List<String>) instanceResources.get(PUBLIC_ADDRESS_NAME));
                     deleteDisk((List<String>) instanceResources.get(STORAGE_PROFILE_DISK_NAMES), client, resourceGroupName,
                             (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), diskContainer);
+                    deleteManagedDisks((List<String>) instanceResources.get(MANAGED_DISK_IDS), client);
                     if (azureStorage.getArmAttachedStorageOption(stack.getParameters()) == ArmAttachedStorageOption.PER_VM) {
                         azureStorage.deleteStorage(ac, client, (String) instanceResources.get(ATTACHED_DISK_STORAGE_NAME), resourceGroupName);
                     }
@@ -351,6 +368,12 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                 LOGGER.info("container not found: resourcegroup={}, storagename={}, container={}",
                         resourceGroup, storageName, container);
             }
+        }
+    }
+
+    private void deleteManagedDisks(List<String> managedDiskIds, AzureClient azureClient) {
+        for (String managedDiskId : managedDiskIds) {
+            azureClient.deleteManagedDisk(managedDiskId);
         }
     }
 
