@@ -201,6 +201,11 @@ public class AzureClient {
         }
     }
 
+    public void deleteManagedDisk(String id) {
+        LOGGER.debug("delete managed disk: id={}", id);
+        azure.disks().deleteById(id);
+    }
+
     public void createContainerInStorage(String resourceGroup, String storageName, String containerName) {
         LOGGER.debug("create container: RG={}, storageName={}, containerName={}", resourceGroup, storageName, containerName);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
