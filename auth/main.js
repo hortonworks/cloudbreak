@@ -23,6 +23,12 @@ var domain = require('domain'),
 var mailer = require('./mailer');
 var validator = require('./validator');
 
+var needleTimeout = process.env.SL_NEEDLE_TIMEOUT ? process.env.SL_NEEDLE_TIMEOUT : 60000;
+
+needle.defaults({
+  timeout: needleTimeout
+});
+
 var config = {
     environmentSet: true,
     clientId: process.env.SL_CLIENT_ID,
