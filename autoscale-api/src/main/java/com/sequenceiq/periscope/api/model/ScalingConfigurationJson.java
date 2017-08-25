@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.api.model;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.periscope.doc.ApiDescription.ScalingConfigurationJsonProperties;
 
@@ -10,14 +12,26 @@ import io.swagger.annotations.ApiModelProperty;
 public class ScalingConfigurationJson implements Json {
 
     @ApiModelProperty(ScalingConfigurationJsonProperties.MINSIZE)
+    @NotNull
     private int minSize;
 
     @ApiModelProperty(ScalingConfigurationJsonProperties.MAXSIZE)
+    @NotNull
     private int maxSize;
 
     @ApiModelProperty(ScalingConfigurationJsonProperties.COOLDOWN)
     @JsonProperty("cooldown")
+    @NotNull
     private int coolDown;
+
+    public ScalingConfigurationJson() {
+    }
+
+    public ScalingConfigurationJson(int minSize, int maxSize, int coolDown) {
+        this.minSize = minSize;
+        this.maxSize = maxSize;
+        this.coolDown = coolDown;
+    }
 
     public int getMinSize() {
         return minSize;

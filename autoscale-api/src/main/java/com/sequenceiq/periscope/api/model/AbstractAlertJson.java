@@ -22,6 +22,9 @@ public abstract class AbstractAlertJson implements Json {
     @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
     private Long scalingPolicyId;
 
+    @ApiModelProperty(BaseAlertJsonProperties.SCALINGPOLICYID)
+    private ScalingPolicyJson scalingPolicy;
+
     public String getAlertName() {
         return alertName;
     }
@@ -54,4 +57,11 @@ public abstract class AbstractAlertJson implements Json {
         this.scalingPolicyId = scalingPolicyId;
     }
 
+    public ScalingPolicyJson getScalingPolicy() {
+        return scalingPolicy;
+    }
+
+    public void setScalingPolicy(ScalingPolicyJson scalingPolicy) {
+        this.scalingPolicy = scalingPolicy;
+    }
 }
