@@ -113,17 +113,19 @@ public class StackToCloudStackConverter {
                 for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                     InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
                     instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(),
-                            metaData.getDiscoveryName(), status));
+                            metaData.getDiscoveryName(), status, metaData.getSubnetId()));
                 }
                 // new instances
                 int existingNodesSize = instances.size();
                 if (existingNodesSize < desiredNodeCount) {
                     for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                        instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, null, InstanceStatus.CREATE_REQUESTED));
+                        instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, null,
+                                InstanceStatus.CREATE_REQUESTED, null));
                     }
                 }
                 if (existingNodesSize == desiredNodeCount && desiredNodeCount == 0) {
-                    skeleton = buildInstance(null, template, instanceGroup.getGroupName(), 0L, null, InstanceStatus.CREATE_REQUESTED);
+                    skeleton = buildInstance(null, template, instanceGroup.getGroupName(), 0L, null,
+                            InstanceStatus.CREATE_REQUESTED, null);
                 }
                 Json attributes = instanceGroup.getAttributes();
                 Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
@@ -167,11 +169,14 @@ public class StackToCloudStackConverter {
         return cloudInstances;
     }
 
-    public CloudInstance buildInstance(String id, Template template, String name, Long privateId, String hostName, InstanceStatus status) {
+    public CloudInstance buildInstance(String id, Template template, String name, Long privateId, String hostName, InstanceStatus status, String subnetId) {
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status);
         Map<String, Object> params = new HashMap<>();
         if (hostName != null) {
             params.put(CloudInstance.DISCOVERY_NAME, hostName);
+        }
+        if (subnetId != null) {
+            params.put(CloudInstance.SUBNET_ID, subnetId);
         }
         return new CloudInstance(id, instanceTemplate, params);
     }

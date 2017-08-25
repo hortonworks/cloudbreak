@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.net.util.SubnetUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,11 +30,13 @@ import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkInterfaces;
 import com.microsoft.azure.management.network.NicIPConfiguration;
+import com.microsoft.azure.management.network.Subnet;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
@@ -42,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
@@ -64,6 +71,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private static final String PUBLIC_ADDRESS_NAME = "PUBLIC_ADDRESS_NAME";
 
+    private static final int AZURE_NUMBER_OF_RESERVED_IPS = 5;
+
     @Value("${cb.azure.host.name.prefix.length}")
     private int stackNamePrefixLength;
 
@@ -82,9 +91,10 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
         String stackName = azureUtils.getStackName(ac.getCloudContext());
         String resourceGroupName = azureUtils.getResourceGroupName(ac.getCloudContext());
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, ac.getCloudContext(), stack);
-        azureUtils.validateStorageType(stack);
         AzureClient client = ac.getParameter(AzureClient.class);
+        AzureStackView azureStackView = getAzureStack(azureCredentialView, ac.getCloudContext(), stack,
+                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
+        azureUtils.validateStorageType(stack);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
@@ -198,7 +208,9 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
 
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
-        AzureStackView azureStackView = getAzureStack(azureCredentialView, authenticatedContext.getCloudContext(), stack);
+
+        AzureStackView azureStackView = getAzureStack(azureCredentialView, authenticatedContext.getCloudContext(), stack,
+                getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
 
         String customImageId = azureStorage.getCustomImageId(client, authenticatedContext, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
@@ -221,6 +233,27 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Could not upscale: %s  ", stackName), e);
         }
+    }
+
+    private Map<String, Integer> getNumberOfAvailableIPsInSubnets(AzureClient client, Network network) {
+        Map<String, Integer> result = new HashMap<>();
+        String resourceGroup = network.getStringParameter("resourceGroupName");
+        String networkId = network.getStringParameter("networkId");
+        Collection<String> subnetIds = azureUtils.getCustomSubnetIds(network);
+        for (String subnetId : subnetIds) {
+            Subnet subnet = client.getSubnetProperties(resourceGroup, networkId, subnetId);
+            int available = getAvailableAddresses(subnet);
+            result.put(subnetId, available);
+        }
+        return result;
+    }
+
+    private int getAvailableAddresses(Subnet subnet) {
+        SubnetUtils su = new SubnetUtils(subnet.addressPrefix());
+        su.setInclusiveHostCount(true);
+        int available = su.getInfo().getAddressCount();
+        int used = subnet.networkInterfaceIPConfigurationCount();
+        return available - used - AZURE_NUMBER_OF_RESERVED_IPS;
     }
 
     @Override
@@ -353,9 +386,11 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         return azureTemplateBuilder.getTemplateString();
     }
 
-    private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudContext cloudContext, CloudStack cloudStack) {
+    private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudContext cloudContext, CloudStack cloudStack,
+            Map<String, Integer> availableIPs) {
         return new AzureStackView(cloudContext.getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView, cloudContext,
-                azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())));
+                azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
+                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs));
     }
 
     private void deleteContainer(AzureClient azureClient, String resourceGroup, String storageName, String container) {

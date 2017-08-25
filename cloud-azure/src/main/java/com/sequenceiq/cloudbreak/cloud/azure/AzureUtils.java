@@ -2,10 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +45,6 @@ public class AzureUtils {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureUtils.class);
 
     private static final String RG_NAME = "resourceGroupName";
-
-    private static final String SUBNET_ID = "subnetId";
 
     private static final String NETWORK_ID = "networkId";
 
@@ -138,7 +140,11 @@ public class AzureUtils {
     }
 
     public boolean isExistingNetwork(Network network) {
-        return isNoneEmpty(getCustomNetworkId(network)) && isNoneEmpty(getCustomResourceGroupName(network)) && isNoneEmpty(getCustomSubnetId(network));
+        return isNoneEmpty(getCustomNetworkId(network)) && isNoneEmpty(getCustomResourceGroupName(network)) && isListNotEmpty(getCustomSubnetIds(network));
+    }
+
+    private boolean isListNotEmpty(Collection<String> c) {
+        return c != null && c.size() > 0;
     }
 
     public boolean isPrivateIp(Network network) {
@@ -179,23 +185,29 @@ public class AzureUtils {
         return network.getStringParameter(RG_NAME);
     }
 
-    public String getCustomSubnetId(Network network) {
-        return network.getStringParameter(SUBNET_ID);
+    public List<String> getCustomSubnetIds(Network network) {
+        String subnetIds = network.getStringParameter(CloudInstance.SUBNET_ID);
+        if (StringUtils.isBlank(subnetIds)) {
+            return Collections.EMPTY_LIST;
+        }
+        return Arrays.asList(network.getStringParameter(CloudInstance.SUBNET_ID).split(","));
     }
 
     public void validateSubnetRules(AzureClient client, Network network) {
         if (isExistingNetwork(network)) {
             String resourceGroupName = getCustomResourceGroupName(network);
             String networkId = getCustomNetworkId(network);
-            String subnetId = getCustomSubnetId(network);
-            try {
-                Subnet subnet = client.getSubnetProperties(resourceGroupName, networkId, subnetId);
-                NetworkSecurityGroup networkSecurityGroup = subnet.getNetworkSecurityGroup();
-                if (networkSecurityGroup != null) {
-                    validateSecurityGroup(client, networkSecurityGroup);
+            Collection<String> subnetIds = getCustomSubnetIds(network);
+            for (String subnetId : subnetIds) {
+                try {
+                    Subnet subnet = client.getSubnetProperties(resourceGroupName, networkId, subnetId);
+                    NetworkSecurityGroup networkSecurityGroup = subnet.getNetworkSecurityGroup();
+                    if (networkSecurityGroup != null) {
+                        validateSecurityGroup(client, networkSecurityGroup);
+                    }
+                } catch (Exception e) {
+                    throw new CloudConnectorException("Subnet validation failed, cause: " + e.getMessage(), e);
                 }
-            } catch (Exception e) {
-                throw new CloudConnectorException("Subnet validation failed, cause: " + e.getMessage(), e);
             }
         }
     }
