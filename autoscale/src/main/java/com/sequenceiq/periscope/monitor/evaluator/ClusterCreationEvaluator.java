@@ -91,7 +91,7 @@ public class ClusterCreationEvaluator implements Runnable {
             MDCBuilder.buildMdcContext(user, stack.getStackId(), null);
             LOGGER.info("Creating cluster for Ambari host: {}", resolvedAmbari.getAmbari().getHost());
             ambariHealthCheck(user, resolvedAmbari);
-            cluster = clusterService.create(user, resolvedAmbari, null, false);
+            cluster = clusterService.create(user, resolvedAmbari, null);
             sendNotification = true;
         }
         if (sendNotification) {

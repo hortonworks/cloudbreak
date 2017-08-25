@@ -25,7 +25,12 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             if (uluCluster.cluster != undefined && uluCluster.cluster.ambariServerIp != undefined) {
                 var periCluster = selectPeriscopeClusterByAmbariIp(uluCluster.cluster.ambariServerIp);
                 if (isSelectedUluClusterEqualsPeriClusterAndRunning(periCluster)) {
-                    setActivePeriClusterWithResources(periCluster);
+                    PeriscopeCluster.get({id: periCluster.id}, function(cluster){
+                        setActivePeriClusterWithResources(cluster);
+                    }, function(error) {
+                        console.log("Periscope cluster could not be fetched. ",error);
+                        disableAutoScalingPolicies();
+                    });
                 } else {
                     disableAutoScalingPolicies();
                 }
@@ -53,10 +58,9 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             $scope.autoScalingSLAPoliciesEnabled = true;
             if ($rootScope.activeCluster.cluster.status == 'AVAILABLE' && $rootScope.activeCluster.status == 'AVAILABLE') {
                 getAlertDefinitions(periscopeCluster.id);
-                getAlarms(periscopeCluster.id);
-                getScalingConfigurations(periscopeCluster.id);
+                getAlarms(periscopeCluster);
+                getScalingConfigurations(periscopeCluster);
                 getScalingHistory(periscopeCluster.id);
-                getScalingPolicies(periscopeCluster.id);
             }
         }
 
@@ -75,30 +79,31 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             });
         }
 
-        function getAlarms(id) {
+        function getAlarms(cluster) {
             $scope.alerts = [];
-            MetricAlert.query({
-                id: id
-            }, function(success) {
-                success.forEach(function(el) {
+            $scope.policies = [];
+            if (cluster.metricAlerts) {
+                cluster.metricAlerts.forEach(function(el) {
                     $scope.alerts.push(el);
+                    if (el.scalingPolicy) {
+                        $scope.policies.push(el.scalingPolicy);
+                    }
                 });
-            });
-            TimeAlert.query({
-                id: id
-            }, function(success) {
-                success.forEach(function(el) {
+            }
+            if (cluster.timeAlerts) {
+                cluster.timeAlerts.forEach(function(el) {
                     $scope.alerts.push(el);
+                    if (el.scalingPolicy) {
+                        $scope.policies.push(el.scalingPolicy);
+                    }
                 });
-            });
+            }
         }
 
-        function getScalingConfigurations(id) {
-            PeriscopeClusterScalingConfiguration.get({
-                id: id
-            }, function(success) {
-                $scope.scalingConfiguration = success;
-            });
+        function getScalingConfigurations(cluster) {
+            if (cluster.scalingConfiguration) {
+                $scope.scalingConfiguration = cluster.scalingConfiguration;
+            }
         }
 
         function getScalingHistory(id) {
@@ -143,15 +148,6 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             } else {
                 $scope.filteredScalingHistory = [];
             }
-        }
-
-        function getScalingPolicies(id) {
-            ScalingPolicy.query({
-                id: id
-            }, function(policies) {
-                $scope.policies = policies;
-                resetScalingActionForm();
-            });
         }
 
         $scope.enableAutoScaling = function() {
@@ -246,7 +242,10 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
             $scope.alerts = $filter('filter')($scope.alerts, function(value, index) {
                 return value.id != alarm.id;
             }, true);
-            getScalingPolicies(periClusterId);
+            $scope.policies = $filter('filter')($scope.policies, function(value, index) {
+                return value.alertId != alarm.id;
+            }, true);
+
         }
 
         function deleteAlarmErrorHandler(error) {
@@ -282,7 +281,7 @@ angular.module('uluwatuControllers').controller('periscopeController', ['$scope'
                     id: $scope.actPeriscopeCluster.id
                 }, $scope.scalingAction.policy, function(success) {
                     angular.element(document.querySelector('#create-policy-collapse-btn')).click();
-                    getScalingPolicies($scope.actPeriscopeCluster.id);
+                    $scope.policies.push(success);
                     $scope.policyForm.$setPristine();
                     resetScalingActionForm();
                 });

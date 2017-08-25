@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.periscope.api.model.AmbariJson;
+import com.sequenceiq.periscope.api.model.ClusterRequestJson;
 import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
 import com.sequenceiq.periscope.api.model.ClusterJson;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
@@ -28,6 +28,7 @@ import com.sequenceiq.periscope.model.AmbariStack;
 import com.sequenceiq.periscope.notification.HttpNotificationSender;
 import com.sequenceiq.periscope.rest.converter.AmbariConverter;
 import com.sequenceiq.periscope.rest.converter.ClusterConverter;
+import com.sequenceiq.periscope.rest.converter.ClusterRequestConverter;
 import com.sequenceiq.periscope.service.AuthenticatedUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.HistoryService;
@@ -59,15 +60,18 @@ public class ClusterController implements ClusterEndpoint {
     @Inject
     private HttpNotificationSender notificationSender;
 
+    @Inject
+    private ClusterRequestConverter clusterRequestConverter;
+
     @Override
-    public ClusterJson addCluster(AmbariJson ambariServer) {
+    public ClusterJson addCluster(ClusterRequestJson ambariServer) {
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
         MDCBuilder.buildUserMdcContext(user);
         return setCluster(user, ambariServer, null);
     }
 
     @Override
-    public ClusterJson modifyCluster(AmbariJson ambariServer, Long clusterId) {
+    public ClusterJson modifyCluster(ClusterRequestJson ambariServer, Long clusterId) {
         PeriscopeUser user = authenticatedUserService.getPeriscopeUser();
         MDCBuilder.buildMdcContext(user, clusterId);
         return setCluster(user, ambariServer, clusterId);
@@ -117,7 +121,7 @@ public class ClusterController implements ClusterEndpoint {
         return clusterConverter.convert(cluster);
     }
 
-    private ClusterJson setCluster(PeriscopeUser user, AmbariJson json, Long clusterId) {
+    private ClusterJson setCluster(PeriscopeUser user, ClusterRequestJson json, Long clusterId) {
         Ambari ambari = ambariConverter.convert(json);
         Long stackId = json.getStackId();
         boolean access = clusterSecurityService.hasAccess(user, ambari, stackId);
@@ -126,17 +130,16 @@ public class ClusterController implements ClusterEndpoint {
             LOGGER.info("Illegal access to Ambari cluster '{}' from user '{}'", host, user.getEmail());
             throw new AccessDeniedException(String.format("Accessing Ambari cluster '%s' is not allowed", host));
         } else {
-            Cluster cluster;
-            boolean enableAutoscaling = json.isEnableAutoscaling();
+            Cluster cluster = clusterRequestConverter.convert(json);
             if (!hasAmbariConnectionDetailsSpecified(json)) {
                 AmbariStack ambariStack = new AmbariStack(ambari, stackId, null);
-                cluster = clusterService.create(user, ambariStack, PENDING, enableAutoscaling);
+                cluster = clusterService.create(cluster, user, ambariStack, PENDING);
             } else {
                 AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);
                 if (clusterId == null) {
-                    cluster = clusterService.create(user, resolvedAmbari, RUNNING, enableAutoscaling);
+                    cluster = clusterService.create(cluster, user, resolvedAmbari, RUNNING);
                 } else {
-                    cluster = clusterService.update(clusterId, resolvedAmbari, enableAutoscaling);
+                    cluster = clusterService.update(clusterId, resolvedAmbari, cluster.isAutoscalingEnabled());
                 }
             }
             createHistoryAndNotification(cluster);
@@ -144,7 +147,7 @@ public class ClusterController implements ClusterEndpoint {
         }
     }
 
-    private boolean hasAmbariConnectionDetailsSpecified(AmbariJson json) {
+    private boolean hasAmbariConnectionDetailsSpecified(ClusterRequestJson json) {
         return !StringUtils.isEmpty(json.getHost())
                 && !StringUtils.isEmpty(json.getPort());
     }

@@ -90,13 +90,20 @@ public class ApiDescription {
         public static final String NOTES = "Ambari cluster.";
     }
 
-    public static class AmbariJsonProperties {
+    public static class ClusterJsonsProperties {
         public static final String HOST = "Ambari server host address";
         public static final String PORT = "Ambari server port";
         public static final String USERNAME = "Ambari server username";
         public static final String PASSWORD = "Ambari server password";
         public static final String STACK_ID = "Id of the stack in Cloudbreak";
         public static final String ENABLE_AUTOSCALING = "Enable or Disable the Autoscaling feature set on the underlying Periscope cluster";
+        public static final String AUTOSCALING_ENABLED = "Indicate that the Autoscaling feature set is Enabled or Disabled";
+        public static final String ID = "Id of the cluster";
+        public static final String STATE = "State of the cluster";
+        public static final String METRIC_ALERTS = "Metric based alerts of the cluster";
+        public static final String TIME_ALERTS = "Time based alerts of the cluster";
+        public static final String PROMETHEUS_ALERTS = "Prometheus based alerts of the cluster";
+        public static final String SCALING_CONFIGURATION = "Scaling configuration for the cluster";
     }
 
     public static class ScalingConfigurationJsonProperties {
@@ -146,15 +153,6 @@ public class ApiDescription {
         public static final String ALERTNAME = "Name of the alert";
         public static final String DESCRIPTION = "Description of the alert";
         public static final String SCALINGPOLICYID = "Id of the scaling ploicy";
-    }
-
-    public static class ClusterJsonProperties {
-        public static final String ID = "Id of the cluster";
-        public static final String HOST = "Host address of the ambari server";
-        public static final String PORT = "Port of the Ambari server";
-        public static final String STATE = "State of the cluster";
-        public static final String STACKID = "Id of the stack in cloudbreak";
-        public static final String AUTOSCALING_ENABLED = "Indicate that the Autoscaling feature set is enabled or disabled on the underlying Periscope cluster";
     }
 
     public static class HistoryJsonProperties {
