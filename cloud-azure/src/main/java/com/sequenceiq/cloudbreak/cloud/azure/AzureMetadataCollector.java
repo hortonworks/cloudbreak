@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,6 +51,7 @@ public class AzureMetadataCollector implements MetadataCollector {
             for (Map.Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
                 AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
                 VirtualMachine vm = azureClient.getVirtualMachine(resourceName, instance.getKey());
+                String subnetId = vm.getPrimaryNetworkInterface().primaryIPConfiguration().subnetName();
 
                 String privateIp = null;
                 String publicIp = null;
@@ -93,7 +95,9 @@ public class AzureMetadataCollector implements MetadataCollector {
 
                 InstanceTemplate template = templateMap.get(instanceId);
                 if (template != null) {
-                    CloudInstance cloudInstance = new CloudInstance(instanceId, template);
+                    Map<String, Object> params = new HashMap<>();
+                    params.put(CloudInstance.SUBNET_ID, subnetId);
+                    CloudInstance cloudInstance = new CloudInstance(instanceId, template, params);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                     results.add(new CloudVmMetaDataStatus(status, md));
                 }

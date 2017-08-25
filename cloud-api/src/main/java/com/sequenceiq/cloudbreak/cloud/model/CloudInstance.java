@@ -8,6 +8,8 @@ public class CloudInstance extends DynamicModel {
 
     public static final String DISCOVERY_NAME = "DiscoveryName";
 
+    public static final String SUBNET_ID = "subnetId";
+
     private String instanceId;
 
     private InstanceTemplate template;

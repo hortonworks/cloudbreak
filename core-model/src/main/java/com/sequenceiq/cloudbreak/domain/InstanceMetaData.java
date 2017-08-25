@@ -121,6 +121,8 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private Long terminationDate;
 
+    private String subnetId;
+
     public InstanceMetaData() {
     }
 
@@ -296,5 +298,13 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public void setServerCert(String serverCert) {
         this.serverCert = serverCert;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
+    }
+
+    public void setSubnetId(String subnetId) {
+        this.subnetId = subnetId;
     }
 }

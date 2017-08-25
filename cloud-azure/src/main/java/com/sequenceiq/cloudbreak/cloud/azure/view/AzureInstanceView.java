@@ -37,8 +37,10 @@ public class AzureInstanceView {
 
     private boolean managedDisk;
 
+    private String subnetId;
+
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
-            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk) {
+            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId) {
         this.instance = instance;
         this.instanceTemplate = instance.getTemplate();
         this.stackNamePrefixLength = stackNamePrefixLength;
@@ -49,6 +51,7 @@ public class AzureInstanceView {
         this.stackName = stackName;
         this.availabilitySetName = availabilitySetName;
         this.managedDisk = managedDisk;
+        this.subnetId = subnetId;
     }
 
     /**
@@ -142,5 +145,9 @@ public class AzureInstanceView {
 
     public String getAvailabilitySetName() {
         return availabilitySetName;
+    }
+
+    public String getSubnetId() {
+        return subnetId;
     }
 }

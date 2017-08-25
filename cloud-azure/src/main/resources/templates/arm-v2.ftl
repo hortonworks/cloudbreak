@@ -32,10 +32,6 @@
           "type": "string",
           "defaultValue" : "${existingVNETName}"
         },
-        "existingSubnetName" : {
-          "type": "string",
-          "defaultValue" : "${existingSubnetName}"
-        },
         <#else>
         "virtualNetworkNamePrefix" : {
             "type": "string",
@@ -82,10 +78,8 @@
       "osDiskVhdName" : "[concat('https://',parameters('userImageStorageAccountName'),'.blob.core.windows.net/',parameters('userDataStorageContainerName'),'/',parameters('vmNamePrefix'),'osDisk')]",
       <#if existingVPC>
       "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('existingVNETName'))]",
-      "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('existingSubnetName'))]",
       <#else>
       "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',parameters('virtualNetworkNamePrefix'))]",
-      "subnet1Ref": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]",
       </#if>
       <#list igs as group>
       "${group.compressedName}secGroupName": "${group.compressedName}${stackname}sg",
@@ -268,9 +262,15 @@
                                        "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('publicIPNamePrefix'), '${instance.instanceId}'))]"
                                    },
                                    </#if>
+                                   <#if existingVPC>
                                    "subnet": {
-                                       "id": "[variables('subnet1Ref')]"
+                                       "id": "[concat(variables('vnetID'),'/subnets/', '${instance.subnetId}')]"
                                    }
+                                   <#else>
+                                   "subnet": {
+                                       "id": "[concat(variables('vnetID'),'/subnets/',parameters('subnet1Name'))]"
+                                   }
+                                   </#if>
                                }
                            }
                        ]

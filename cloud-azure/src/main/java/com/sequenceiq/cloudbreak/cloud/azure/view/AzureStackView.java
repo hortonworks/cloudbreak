@@ -5,7 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
+import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -22,7 +25,8 @@ public class AzureStackView {
 
     private List<String> instanceGroupNames = new ArrayList<>();
 
-    public AzureStackView(String stackName, int stackNamePrefixLength, List<Group> groupList, AzureStorageView armStorageView) {
+    public AzureStackView(String stackName, int stackNamePrefixLength, List<Group> groupList, AzureStorageView armStorageView,
+            AzureSubnetStrategy subnetStrategy) {
         for (Group group : groupList) {
             String groupName = group.getType().name();
             List<AzureInstanceView> existingInstances = groups.computeIfAbsent(groupName, k -> new ArrayList<>());
@@ -45,7 +49,8 @@ public class AzureStackView {
                 String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
                 boolean managedDisk = Boolean.TRUE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
                 AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(), attachedDiskStorageName,
-                        template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName(), managedDisk);
+                        template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName(), managedDisk,
+                        getInstanceSubnetId(instance, subnetStrategy));
                 existingInstances.add(azureInstance);
             }
             boolean managedDisk = Boolean.TRUE.equals(group.getReferenceInstanceConfiguration().getTemplate()
@@ -54,6 +59,14 @@ public class AzureStackView {
             instanceGroupNames.add(group.getName());
             instanceGroups.add(instanceGroupView);
         }
+    }
+
+    private String getInstanceSubnetId(CloudInstance instance, AzureSubnetStrategy subnetStrategy) {
+        String stored = instance.getStringParameter(CloudInstance.SUBNET_ID);
+        if (StringUtils.isNoneBlank(stored)) {
+            return stored;
+        }
+        return subnetStrategy.getNextSubnetId();
     }
 
     public Map<String, List<AzureInstanceView>> getGroups() {
