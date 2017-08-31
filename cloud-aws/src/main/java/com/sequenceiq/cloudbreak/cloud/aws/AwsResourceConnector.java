@@ -48,16 +48,19 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.Address;
 import com.amazonaws.services.ec2.model.AssociateAddressRequest;
+import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesRequest;
 import com.amazonaws.services.ec2.model.DescribeAddressesResult;
 import com.amazonaws.services.ec2.model.DescribeImagesRequest;
 import com.amazonaws.services.ec2.model.DescribeImagesResult;
+import com.amazonaws.services.ec2.model.DescribeKeyPairsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsRequest;
 import com.amazonaws.services.ec2.model.DescribeSubnetsResult;
 import com.amazonaws.services.ec2.model.DescribeVpcsRequest;
 import com.amazonaws.services.ec2.model.DisassociateAddressRequest;
 import com.amazonaws.services.ec2.model.Filter;
 import com.amazonaws.services.ec2.model.Image;
+import com.amazonaws.services.ec2.model.ImportKeyPairRequest;
 import com.amazonaws.services.ec2.model.ReleaseAddressRequest;
 import com.amazonaws.services.ec2.model.Subnet;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
@@ -166,6 +169,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
+        createKeyPair(ac, stack);
         String cFStackName = cfStackUtil.getCfStackName(ac);
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
@@ -226,6 +230,30 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         saveGeneratedSubnet(ac, stack, cFStackName, cfClient, resourceNotifier);
         List<CloudResource> cloudResources = getCloudResources(ac, stack, cFStackName, cfClient, amazonEC2Client, amazonASClient, mapPublicIpOnLaunch);
         return check(ac, cloudResources);
+    }
+
+    private void createKeyPair(AuthenticatedContext ac, CloudStack stack) {
+        if (!awsClient.existingKeyPairNameSpecified(ac)) {
+            AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
+            try {
+                String region = ac.getCloudContext().getLocation().getRegion().value();
+                LOGGER.info(String.format("Importing public key to %s region on AWS", region));
+                AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+                String keyPairName = awsClient.getKeyPairName(ac);
+                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getPublicKey());
+                try {
+                    client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
+                    LOGGER.info("Key-pair already exists: {}", keyPairName);
+                } catch (AmazonServiceException e) {
+                    client.importKeyPair(importKeyPairRequest);
+                }
+            } catch (Exception e) {
+                String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
+                        e.getMessage());
+                LOGGER.error(errorMessage, e);
+                throw new CloudConnectorException(e.getMessage(), e);
+            }
+        }
     }
 
     private boolean isNoCIDRProvided(boolean existingVPC, boolean existingSubnet, String cidr) {
@@ -508,12 +536,29 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
+            deleteKeyPair(ac);
         } else {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
             LOGGER.info("No CloudFormation stack saved for stack.");
         }
         return check(ac, resources);
+    }
+
+    private void deleteKeyPair(AuthenticatedContext ac) {
+        AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
+        String region = ac.getCloudContext().getLocation().getRegion().value();
+        if (!awsClient.existingKeyPairNameSpecified(ac)) {
+            try {
+                AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
+                DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(awsClient.getKeyPairName(ac));
+                client.deleteKeyPair(deleteKeyPairRequest);
+            } catch (Exception e) {
+                String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
+                        awsCredential.getRoleArn(), region, e.getMessage());
+                LOGGER.error(errorMessage, e);
+            }
+        }
     }
 
     private void resumeAutoScalingPolicies(AuthenticatedContext ac, CloudStack stack) {

@@ -182,7 +182,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
                 iterator.remove();
             }
         }
-        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity(), null);
+        return new Group(scalingGroup.getName(), scalingGroup.getType(), instances, scalingGroup.getSecurity(), null,
+                scalingGroup.getPublicKey(), scalingGroup.getLoginUserName());
     }
 
     private Group getGroup(List<Group> groups, String groupName) {

@@ -10,10 +10,6 @@ public class AwsCredentialView {
         this.cloudCredential = cloudCredential;
     }
 
-    public String getPublicKey() {
-        return cloudCredential.getPublicKey();
-    }
-
     public String getName() {
         return cloudCredential.getName();
     }

@@ -3,19 +3,14 @@ angular.module('cloudbreakApp').component('azureCredential', {
     controller: AzureCredentialController
 });
 
-AzureCredentialController.$inject = ['$rootScope', '$filter', 'InteractiveLogin', 'AccountCredential', 'UserCredential', 'DefaultSsh'];
+AzureCredentialController.$inject = ['$rootScope', '$filter', 'InteractiveLogin', 'AccountCredential', 'UserCredential'];
 
-function AzureCredentialController($rootScope, $filter, InteractiveLogin, AccountCredential, UserCredential, DefaultSsh) {
+function AzureCredentialController($rootScope, $filter, InteractiveLogin, AccountCredential, UserCredential) {
     var ctrl = this;
     var defaultSshKey;
 
     ctrl.$onInit = function () {
-        DefaultSsh.get(function (result) {
-            defaultSshKey = result.defaultSshKey;
-            init();
-        }, function (error) {
-            init();
-        });
+        init();
     };
 
     ctrl.cancel = function () {
@@ -29,8 +24,7 @@ function AzureCredentialController($rootScope, $filter, InteractiveLogin, Accoun
                 selector: 'interactive',
                 roleType: 'CONTRIBUTOR',
                 roleName: 'Contributor'
-            },
-            publicKey: defaultSshKey
+            }
         };
         if (ctrl.azureCredentialForm) {
             ctrl.azureCredentialForm.$setPristine();

@@ -14,9 +14,9 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final boolean publicInAccount;
 
-    public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String publicKey, String loginUserName, String description, String owner,
+    public ExtendedCloudCredential(Long id, String cloudPlatform, String name, String description, String owner,
             String account, boolean publicInAccount) {
-        super(id, name, publicKey, loginUserName);
+        super(id, name);
         this.cloudPlatform = cloudPlatform;
         this.description = description;
         this.owner = owner;
@@ -26,7 +26,7 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description, String owner, String account,
             boolean publicInAccount) {
-        super(cloudCredential.getId(), cloudCredential.getName(), cloudCredential.getPublicKey(), cloudCredential.getLoginUserName());
+        super(cloudCredential.getId(), cloudCredential.getName());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
             putParameter(parameter.getKey(), parameter.getValue());

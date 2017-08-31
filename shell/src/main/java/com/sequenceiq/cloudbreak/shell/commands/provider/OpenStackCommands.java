@@ -121,9 +121,6 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "projectDomainName", help = "projectDomainName of the credential for cb-keystone-v3-project-scope")
                     String projectDomainName,
             @CliOption(key = "projectName", help = "projectName of the credential for cb-keystone-v3-project-scope") String projectName,
-            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
-            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key file") String sshKeyUrl,
-            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "facing", help = "URL perspective in which the API is accessing data") OpenStackFacing facing,
             @CliOption(key = "description", help = "Description of the credential") String description,
             @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account",
@@ -164,7 +161,7 @@ public class OpenStackCommands implements CommandMarker {
         if (facing != null) {
             parameters.put("facing", facing.getName());
         }
-        return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
+        return baseCredentialCommands.create(name, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
     @CliCommand(value = "network create --OPENSTACK --EXISTING_SUBNET",
@@ -305,6 +302,9 @@ public class OpenStackCommands implements CommandMarker {
     @CliCommand(value = "stack create --OPENSTACK", help = "Create a new OpenStack stack based on a template")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
+            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key file") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
             @CliOption(key = "availabilityZone", mandatory = true, help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
             @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account",
@@ -328,8 +328,8 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
                     specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
         Map<String, String> params = new HashMap<>();
-        return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
+        return stackCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType,
+                threshold, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
                 ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
                 customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }

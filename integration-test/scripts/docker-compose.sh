@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set +x
+set -x
 
 : ${INTEGCB_LOCATION?"integcb location"}
 
@@ -14,6 +14,7 @@ $INTEGCB_LOCATION/.deps/bin/docker-compose down
 
 echo -e "\n\033[1;96m--- Start cloudbreak\033[0m\n"
 cd $INTEGCB_LOCATION
+./cbd regenerate
 ./cbd start-wait consul registrator identity commondb cloudbreak
 
 echo -e "\n\033[1;96m--- Start testing... (it may take few minutes to finish.)\033[0m\n"

@@ -30,7 +30,7 @@ public class CredentialToCloudCredentialConverter {
         Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
         fields = definitionService.revertProperties(platform(credential.cloudPlatform()), fields);
         fields.put(CREDENTIAL_ID, credential.getId());
-        return new CloudCredential(credential.getId(), credential.getName(), credential.getPublicKey(), credential.getLoginUserName(), fields);
+        return new CloudCredential(credential.getId(), credential.getName(), fields);
     }
 
 }

@@ -69,6 +69,8 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setOwner(source.getOwner());
         stackJson.setAccount(source.getAccount());
         stackJson.setPublicInAccount(source.isPublicInAccount());
+        stackJson.setPublicKey(source.getPublicKey());
+        stackJson.setLoginUserName(source.getLoginUserName());
         stackJson.setId(source.getId());
         if (source.getCredential() == null) {
             stackJson.setCloudPlatform(null);

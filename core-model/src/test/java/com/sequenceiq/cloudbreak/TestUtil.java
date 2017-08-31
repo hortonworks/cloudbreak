@@ -30,12 +30,12 @@ import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
@@ -73,25 +73,6 @@ public class TestUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TestUtil.class);
 
-    private static final String AZURE_PUB_KEY =
-            "-----BEGIN CERTIFICATE-----\n"
-                    + "MIICsDCCAhmgAwIBAgIJAPtq+czPZYU/MA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV\n"
-                    + "BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX\n"
-                    + "aWRnaXRzIFB0eSBMdGQwHhcNMTQwNTEzMDIxNDUwWhcNMTUwNTEzMDIxNDUwWjBF\n"
-                    + "MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50\n"
-                    + "ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKB\n"
-                    + "gQCvv6nBCp3wiqDVT0g1dEAJvfLiTU6oPVau9FCaNWrxJgkR697kuxMNhY4CpLXS\n"
-                    + "DgmSh/guI4iN5pmQtJ5RJsVBZRHWEu7k+GdvSFkNJ/7+i1t2DOjNtnOxGQ6TpjZg\n"
-                    + "lyDGNW2m2IY9iaaTzzwhowCcfMMwC+S0OzZ5AT3YE152XQIDAQABo4GnMIGkMB0G\n"
-                    + "A1UdDgQWBBR/lhZljxO+cPl9EQmfSb2sndrKFDB1BgNVHSMEbjBsgBR/lhZljxO+\n"
-                    + "cPl9EQmfSb2sndrKFKFJpEcwRTELMAkGA1UEBhMCQVUxEzARBgNVBAgTClNvbWUt\n"
-                    + "U3RhdGUxITAfBgNVBAoTGEludGVybmV0IFdpZGdpdHMgUHR5IEx0ZIIJAPtq+czP\n"
-                    + "ZYU/MAwGA1UdEwQFMAMBAf8wDQYJKoZIhvcNAQEFBQADgYEABYXu5HwJ8F9LyPrD\n"
-                    + "HkUQUM6HRoybllBZWf0uwrM5Mey/pYwhouR1PNd2/y6OXt5mjzxLG/53YvidfrEG\n"
-                    + "I5QW2HYwS3jZ2zlOLx5fj+wmeenxNrMxgP7XkbkVcBa76wdfZ1xBAr0ybXb13Gi2\n"
-                    + "TA0+meQcD7qPGKxxijqwU5Y1QTw=\n"
-                    + "-----END CERTIFICATE-----";
-
     private static final String DUMMY_NAME = "dummyName";
 
     private TestUtil() {
@@ -119,24 +100,20 @@ public class TestUtil {
 
     public static Credential awsCredential() {
         Credential awsCredential = new Credential();
-        awsCredential.setPublicKey(AZURE_PUB_KEY);
         awsCredential.setPublicInAccount(false);
         awsCredential.setArchived(false);
         awsCredential.setCloudPlatform(AWS);
         awsCredential.setDescription(DUMMY_DESCRIPTION);
         awsCredential.setId(1L);
-        awsCredential.setLoginUserName("cb");
         awsCredential.setName(DUMMY_NAME);
         return awsCredential;
     }
 
     public static Credential gcpCredential() {
         Credential credential = new Credential();
-        credential.setPublicKey(AZURE_PUB_KEY);
         credential.setId(1L);
         credential.setName(DUMMY_NAME);
         credential.setCloudPlatform(GCP);
-        credential.setLoginUserName("cb");
         credential.setPublicInAccount(true);
         credential.setDescription(DUMMY_DESCRIPTION);
         return credential;

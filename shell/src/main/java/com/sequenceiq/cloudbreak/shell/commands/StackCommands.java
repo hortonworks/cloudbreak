@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.shell.commands;
 
+import java.io.File;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
@@ -13,6 +14,9 @@ import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 public interface StackCommands {
 
     String create(String name,
+            File sshKeyPath,
+            String sshKeyUrl,
+            String sshKeyString,
             StackRegion region,
             StackAvailabilityZone availabilityZone,
             boolean publicInAccount,

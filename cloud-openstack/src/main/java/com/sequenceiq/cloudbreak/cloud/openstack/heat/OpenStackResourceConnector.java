@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.model.compute.Keypair;
 import org.openstack4j.model.heat.Stack;
 import org.openstack4j.model.heat.StackUpdate;
 import org.slf4j.Logger;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
+import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -84,7 +86,10 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
         List<CloudResourceStatus> resources;
         Stack existingStack = client.heat().stacks().getStackByName(stackName);
+
         if (existingStack == null) {
+            createKeyPair(authenticatedContext, stack, client);
+
             Stack heatStack = client
                     .heat()
                     .stacks()
@@ -106,6 +111,23 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         }
         LOGGER.debug("Launched resources: {}", resources);
         return resources;
+    }
+
+    private void createKeyPair(AuthenticatedContext authenticatedContext, CloudStack stack, OSClient client) {
+        KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext);
+
+        String keyPairName = keystoneCredential.getKeyPairName();
+        if (client.compute().keypairs().get(keyPairName) == null) {
+            try {
+                Keypair keyPair = client.compute().keypairs().create(keyPairName, stack.getPublicKey());
+                LOGGER.info("Keypair has been created: {}", keyPair);
+            } catch (Exception e) {
+                LOGGER.error("Failed to create keypair", e);
+                throw new CloudConnectorException(e.getMessage(), e);
+            }
+        } else {
+            LOGGER.info("Keypair already exists: {}", keyPairName);
+        }
     }
 
     @Override
@@ -149,6 +171,8 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                             return exists;
                         });
                         client.heat().stacks().delete(stackName, heatStackId);
+                        LOGGER.info("Heat stack has been deleted");
+                        deleteKeyPair(authenticatedContext, client);
                     } catch (Retry.ActionWentFail af) {
                         LOGGER.info(String.format("Stack not found with name: %s", resource.getName()));
                     }
@@ -158,6 +182,13 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             }
         }
         return check(authenticatedContext, resources);
+    }
+
+    private void deleteKeyPair(AuthenticatedContext authenticatedContext, OSClient client) {
+        KeystoneCredentialView keystoneCredential = openStackClient.createKeystoneCredential(authenticatedContext);
+        String keyPairName = keystoneCredential.getKeyPairName();
+        client.compute().keypairs().delete(keyPairName);
+        LOGGER.info("Keypair has been deleted: {}", keyPairName);
     }
 
     @Override
@@ -273,9 +304,11 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                     instances.remove(instance);
                 }
             }
-            groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null));
+            groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null,
+                    stack.getPublicKey(), stack.getLoginUserName()));
         }
-        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(), stack.getTemplate());
+        return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(), stack.getTemplate(),
+                stack.getPublicKey(), stack.getLoginUserName());
     }
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {

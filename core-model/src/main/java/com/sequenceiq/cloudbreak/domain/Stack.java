@@ -75,6 +75,11 @@ public class Stack implements ProvisionEntity {
     @Column(nullable = false)
     private String region;
 
+    @Column(columnDefinition = "TEXT", nullable = false)
+    private String publicKey;
+
+    private String loginUserName;
+
     private String availabilityZone;
 
     private Integer gatewayPort;
@@ -592,5 +597,29 @@ public class Stack implements ProvisionEntity {
 
     public void setClusterNameAsSubdomain(boolean clusterNameAsSubdomain) {
         this.clusterNameAsSubdomain = clusterNameAsSubdomain;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public boolean passwordAuthenticationRequired() {
+        return publicKey != null && publicKey.startsWith("Basic:");
+    }
+
+    public String getLoginPassword() {
+        return publicKey.replaceAll("Basic:", "").trim();
+    }
+
+    public String getLoginUserName() {
+        return loginUserName;
+    }
+
+    public void setLoginUserName(String loginUserName) {
+        this.loginUserName = loginUserName;
     }
 }

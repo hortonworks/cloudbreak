@@ -94,7 +94,7 @@ public class HeatTemplateBuilderTest {
         rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, null);
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null, "pubkey", "cloudbreak"));
         userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"

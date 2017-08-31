@@ -11,7 +11,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.it.util.ResourceUtil;
 
 public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.openstackcredential.name}")
@@ -29,25 +28,19 @@ public class OpenStackCredentialCreationTest extends AbstractCloudbreakIntegrati
     @Value("${integrationtest.openstackcredential.endpoint}")
     private String defaultEndpoint;
 
-    @Value("${integrationtest.openstackcredential.publicKeyFile}")
-    private String defaultPublicKeyFile;
-
     @Test
-    @Parameters({ "credentialName", "tenantName", "userName", "password", "endpoint", "publicKeyFile" })
+    @Parameters({ "credentialName", "tenantName", "userName", "password", "endpoint" })
     public void testOpenStackCredentialCreation(@Optional("")String credentialName, @Optional("")String tenantName, @Optional("")String userName,
-            @Optional("")String password, @Optional("")String endpoint, @Optional("")String publicKeyFile) throws Exception {
+            @Optional("")String password, @Optional("")String endpoint) throws Exception {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
         tenantName = StringUtils.hasLength(tenantName) ? tenantName : defaultTenantName;
         userName = StringUtils.hasLength(userName) ? userName : defaultUserName;
         password = StringUtils.hasLength(password) ? password : defaultPassword;
         endpoint = StringUtils.hasLength(endpoint) ? endpoint : defaultEndpoint;
-        publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
-        String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
 
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName(credentialName);
-        credentialRequest.setPublicKey(publicKey);
         credentialRequest.setDescription("Aws Rm credential for integartiontest");
         Map<String, Object> map = new HashMap<>();
         map.put("tenantName", tenantName);

@@ -118,7 +118,7 @@ public class GcpInstanceResourceBuilderTest {
         userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData);
         cloudContext = new CloudContext(privateId, "testname", "GCP", "owner");
-        cloudCredential = new CloudCredential(privateId, "credentialname", "sshkey", "loginuser");
+        cloudCredential = new CloudCredential(privateId, "credentialname");
         cloudCredential.putParameter("projectId", "projectId");
         projectId = GcpStackUtil.getProjectId(cloudCredential);
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
@@ -196,7 +196,7 @@ public class GcpInstanceResourceBuilderTest {
     public Group newGroupWithParams(Map<String, Object> params) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params);
         CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate);
-        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null);
+        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null, null, null);
     }
 
 }

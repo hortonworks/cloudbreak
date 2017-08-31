@@ -116,9 +116,6 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "roleArn", help = "roleArn for assuming roles or use access and secret based authentication") String roleArn,
             @CliOption(key = "accessKey", help = "accessKey of the credential") String accessKey,
             @CliOption(key = "secretKey", help = "secretKey of the credential") String secretKey,
-            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
-            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key file") String sshKeyUrl,
-            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
@@ -139,7 +136,7 @@ public class AwsCommands implements CommandMarker {
         if (!StringUtils.isEmpty(keyPairName)) {
             parameters.put("existingKeyPairName", keyPairName);
         }
-        return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
+        return baseCredentialCommands.create(name, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
     @CliCommand(value = "network create --AWS --NEW", help = "Create an AWS network configuration with a new network and a new subnet")
@@ -297,6 +294,9 @@ public class AwsCommands implements CommandMarker {
     @CliCommand(value = "stack create --AWS", help = "Create a new AWS stack based on a template")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
+            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key file") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
             @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
             @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account",
@@ -339,8 +339,8 @@ public class AwsCommands implements CommandMarker {
             throw shellContext.exceptionTransformer().transformToRuntimeException(
                     "Please specify the role for instanceProfile if you are using 'USE_EXISTING' profile type");
         }
-        return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
+        return stackCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType,
+                threshold, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,
                 ambariVersion, hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
                 customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }

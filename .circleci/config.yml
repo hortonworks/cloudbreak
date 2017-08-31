@@ -1,0 +1,83 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - restore_cache:
+          key: gradle-cache
+      - run:
+          name: build
+          command: ./gradlew -Penv=jenkins -b build.gradle clean build --info --stacktrace -x test
+      - save_cache:
+          key: gradle-cache
+          paths:
+            - "~/.gradle"
+      - persist_to_workspace:
+          root: .
+          paths:
+            - core/build/libs/cloudbreak.jar
+            - integration-test/build/libs/cloudbreak-integration-test.jar
+
+  unit-test:
+    docker:
+      - image: circleci/openjdk:8-jdk
+    steps:
+      - checkout
+      - run:
+          name: test
+          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            find . -type f -regex ".*/build/test-results/.*xml" -exec cp {} ~/junit/ \;
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+
+  integration-test:
+    machine: true
+    steps:
+      - checkout
+      - attach_workspace:
+          at: .
+      - run:
+          name: Install make
+          command: sudo apt-get install -y make
+      - run:
+          name: Install uuidgen
+          command: sudo apt-get install -y uuid-runtime
+      - run:
+          name: Create cert dir
+          command: mkdir integration-test/integcb/cert; chmod 777 integration-test/integcb/cert
+      - run:
+          name: integration-test
+          command: cd integration-test && make without-build && make revert-db
+      - run:
+          name: Save test results
+          command: |
+            mkdir -p ~/junit/
+            cp integration-test/test-output/junitreports/* ~/junit/
+          when: always
+      - store_test_results:
+          path: ~/junit
+      - store_artifacts:
+          path: ~/junit
+      - store_artifacts:
+          path: integration-test
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - build
+      - unit-test:
+          requires:
+            - build
+      - integration-test:
+          requires:
+            - build

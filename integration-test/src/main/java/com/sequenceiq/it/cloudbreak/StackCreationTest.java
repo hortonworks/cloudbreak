@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.util.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
@@ -21,8 +23,12 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.scaling.ScalingUtil;
 import com.sequenceiq.it.cloudbreak.tags.TagsUtil;
+import com.sequenceiq.it.util.ResourceUtil;
 
 public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
+
+    @Value("${integrationtest.publicKeyFile}")
+    private String defaultPublicKeyFile;
 
     @BeforeMethod
     public void setContextParams() {
@@ -35,11 +41,11 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({ "stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "orchestrator",
-    "userDefinedTags"})
+    "userDefinedTags", "publicKeyFile" })
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
             @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage,  @Optional("SALT") String orchestrator,
-            @Optional ("") String userDefinedTags)
+            @Optional ("") String userDefinedTags, @Optional("")String publicKeyFile)
             throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
@@ -56,7 +62,10 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         }
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
+        publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
+        String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         StackRequest stackRequest = new StackRequest();
+        stackRequest.setPublicKey(publicKey);
         stackRequest.setName(stackName);
         stackRequest.setCredentialId(Long.valueOf(credentialId));
         stackRequest.setRegion(region);

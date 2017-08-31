@@ -102,15 +102,15 @@ public class CloudFormationTemplateBuilderTest {
         );
         image = new Image("cb-centos66-amb200-2015-05-25", userData);
         groups = new ArrayList<>();
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
-        groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null, "pubkey", "cloudbreak"));
+        groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null, "pubkey", "cloudbreak"));
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         Map<String, String> tags = new HashMap<>();
         tags.put("testtagkey", "testtagvalue");
-        cloudStack = new CloudStack(groups, network, image, parameters, tags, null);
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, null, "pubkey", "cloudbreak");
     }
 
     @Test
@@ -673,7 +673,7 @@ public class CloudFormationTemplateBuilderTest {
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
-        CloudCredential cc = new CloudCredential(1L, null, null, null);
+        CloudCredential cc = new CloudCredential(1L, null);
         return new AuthenticatedContext(cloudContext, cc);
     }
 
