@@ -89,7 +89,7 @@ angular.module('uluwatuControllers').controller('credentialController', [
             $scope.awsCredential = false;
             $scope.gcpCredential = false;
             $scope.openstackCredential = false;
-            $scope.azureRmCredential = false;
+            $scope.azureCredential = false;
             $scope.mesosCredential = false;
             $scope.yarnCredential = true;
         }

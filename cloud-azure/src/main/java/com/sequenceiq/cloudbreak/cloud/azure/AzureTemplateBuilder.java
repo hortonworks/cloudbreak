@@ -80,7 +80,6 @@ public class AzureTemplateBuilder {
             model.put("existingVPC", azureUtils.isExistingNetwork(network));
             model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
             model.put("existingVNETName", azureUtils.getCustomNetworkId(network));
-            model.put("existingSubnetName", azureUtils.getCustomSubnetId(network));
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
             model.put("noFirewallRules", azureUtils.isNoSecurityGroups(network));
             model.put("userDefinedTags", cloudStack.getTags());
