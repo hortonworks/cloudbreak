@@ -7,22 +7,13 @@ angular.module('uluwatuControllers').controller('credentialController', [
     function($scope, $rootScope, $filter, $base64, $interpolate, UserCredential, AccountCredential, GlobalCredential, InteractiveLogin ,GlobalCredentialCertificate, AccountStack, UserStack, GlobalStack, DefaultSsh) {
         $rootScope.credentials = AccountCredential.query();
         $rootScope.importedStacks = AccountStack.query();
-        DefaultSsh.get(function (result) {
-            $scope.defaultSshKey = result.defaultSshKey;
 
-            $scope.credentialAws = {
-                parameters: {
-                    selector: 'role-based'
-                },
-                publicKey: $scope.defaultSshKey
-            };
-            $scope.credentialGcp = {
-                publicKey: $scope.defaultSshKey
-            };
-            $scope.credentialOpenstack = {
-                publicKey: $scope.defaultSshKey
-            };
-        });
+        $scope.credentialAws = {
+            parameters: {
+                selector: 'role-based'
+            },
+            publicKey: $scope.defaultSshKey
+        };
 
         $scope.credentialYarn = {};
         $scope.credentialInCreation = false;

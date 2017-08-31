@@ -18,24 +18,33 @@ public class Group extends DynamicModel {
 
     private final Security security;
 
+    private final String publicKey;
+
+    private final String loginUserName;
+
     private Optional<CloudInstance> skeleton = Optional.empty();
 
-    public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton) {
+    public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
+            String publicKey, String loginUserName) {
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
         this.security = security;
         this.skeleton = Optional.ofNullable(skeleton);
+        this.publicKey = publicKey;
+        this.loginUserName = loginUserName;
     }
 
     public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
-            Map<String, Object> parameters) {
+            Map<String, Object> parameters, String publicKey, String loginUserName) {
         super(parameters);
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
         this.security = security;
         this.skeleton = Optional.ofNullable(skeleton);
+        this.publicKey = publicKey;
+        this.loginUserName = loginUserName;
     }
 
     public CloudInstance getReferenceInstanceConfiguration() {
@@ -63,5 +72,13 @@ public class Group extends DynamicModel {
 
     public Security getSecurity() {
         return security;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public String getLoginUserName() {
+        return loginUserName;
     }
 }

@@ -85,7 +85,34 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 stack,
                 Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
                         "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
-                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname"));
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName"));
+        Assert.assertEquals("eu-west-1", stack.getRegion());
+    }
+
+    @Test(expected = BadRequestException.class)
+    public void testConvertWithLoginUserName() throws CloudbreakException {
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+
+        // GIVEN
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        ReflectionTestUtils.setField(underTest, "enableCustomImage", true);
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+        given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(new FailurePolicy())
+                .willReturn(new Orchestrator());
+        given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
+        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        // WHEN
+        Stack stack = underTest.convert(getRequest("stack/stack-with-loginusername.json"));
+        // THEN
+        assertAllFieldsNotNull(
+                stack,
+                Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
+                        "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName"));
         Assert.assertEquals("eu-west-1", stack.getRegion());
     }
 

@@ -175,19 +175,6 @@
     <!-- .col-sm-9 -->
 </div>
 
-<div class="form-group" ng-class="{ 'has-error': openstackCredentialForm.openstack_sshPublicKey.$dirty && openstackCredentialForm.openstack_sshPublicKey.$invalid }">
-    <label class="col-sm-3 control-label" for="openstack_sshPublicKey">{{msg.credential_openstack_form_ssh_key_label}}</label>
-
-    <div class="col-sm-9">
-        <textarea ng-attr-placeholder="{{msg.credential_openstack_form_ssh_key_placeholder}}" rows="4" type="text" class="form-control" ng-model="credentialOpenstack.publicKey" name="openstack_sshPublicKey" id="openstack_sshPublicKey" required></textarea>
-        <div class="help-block" ng-show="openstackCredentialForm.openstack_sshPublicKey.$dirty && openstackCredentialForm.openstack_sshPublicKey.$invalid">
-            <i class="fa fa-warning"></i> {{msg.credential_ssh_key_invalid}}
-        </div>
-    </div>
-    <!-- .col-sm-9 -->
-
-</div>
-
 <div class="form-group">
     <label class="col-sm-3 control-label" for="topologySelect">{{msg.credential_select_topology}}</label>
     <div class="col-sm-8">

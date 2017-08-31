@@ -7,6 +7,7 @@
   "onFailureAction": "ROLLBACK",
   "availabilityZone": "avZone",
   "publicKey": "ssh-key",
+  "loginUserName": "cloudbreak",
   "failurePolicy": {
     "id": 1,
     "threshold": 10,

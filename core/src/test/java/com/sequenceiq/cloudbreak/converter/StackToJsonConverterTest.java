@@ -104,7 +104,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
                 .willReturn(new FailurePolicyResponse())
                 .willReturn(new NetworkResponse())
                 .willReturn(new OrchestratorResponse())
-                .willReturn(new CredentialResponse());
+                .willReturn(new CloudbreakDetailsJson());
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<InstanceGroupRequest>());
         // WHEN
@@ -195,6 +195,8 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         stack.setGatewayPort(9443);
         stack.setCustomDomain("custom.domain");
         stack.setCustomHostname("hostname");
+        stack.setPublicKey("rsakey");
+        stack.setLoginUserName("cloudbreak");
         stack.setHostgroupNameAsHostname(false);
         stack.setClusterNameAsSubdomain(false);
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);

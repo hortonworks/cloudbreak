@@ -13,7 +13,7 @@ public class OpenSshPublicKeyValidator {
 
     public void validate(String publicKey) {
         try {
-            PublicKeyReaderUtil.loadOpenSsh(publicKey);
+            PublicKeyReaderUtil.load(publicKey);
         } catch (Exception e) {
             String errorMessage = String.format("Could not validate publickey certificate [certificate: '%s'], detailed message: %s",
                     publicKey, e.getMessage());

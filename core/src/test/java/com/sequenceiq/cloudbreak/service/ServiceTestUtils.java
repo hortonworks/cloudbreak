@@ -28,8 +28,6 @@ public final class ServiceTestUtils {
 
     public static final String DUMMY_ACCOUNT = "acmecorp";
 
-    public static final String PUBLIC_KEY = "mypublickey";
-
     private static final String C3LARGE_INSTANCE = "c3.large";
 
     private static final String N1_STANDARD_1 = "n1-standard-1";
@@ -143,7 +141,6 @@ public final class ServiceTestUtils {
                 awsCredential.setCloudPlatform(platform);
                 awsCredential.setAccount(account);
                 awsCredential.setPublicInAccount(true);
-                awsCredential.setPublicKey(PUBLIC_KEY);
                 return awsCredential;
             case GCP:
                 Credential gcpCredential = new Credential();
@@ -152,7 +149,6 @@ public final class ServiceTestUtils {
                 gcpCredential.setCloudPlatform(platform);
                 gcpCredential.setAccount(account);
                 gcpCredential.setPublicInAccount(true);
-                gcpCredential.setPublicKey(PUBLIC_KEY);
                 return gcpCredential;
             default:
                 return null;
