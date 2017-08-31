@@ -5,6 +5,15 @@
         </select>
     </div>
 </div>
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="publicKey">{{msg.cluster_form_ssh_key_label}}</label>
+    <div class="col-sm-8">
+        <textarea ng-attr-placeholder="{{msg.cluster_form_ssh_key_placeholder}}" rows="4" type="text" class="form-control" ng-model="cluster.publicKey" name="publicKey" id="publicKey" required></textarea>
+        <div class="help-block" ng-show="clusterCreationForm.sshPublicKey.$dirty && clusterCreationForm.sshPublicKey.$invalid">
+            <i class="fa fa-warning"></i> {{msg.credential_ssh_key_invalid}}
+        </div>
+    </div>
+</div>
 <div class="form-group" name="cluster_perimeter_security1">
     <label class="col-sm-3 control-label" for="cluster_perimeter_security">{{msg.cluster_form_enable_knox_gateway}}</label>
     <div class="col-sm-8">

@@ -64,7 +64,7 @@ public class AwsTagPreparationServiceTest {
 
     private AuthenticatedContext authenticatedContext() {
         CloudContext cloudContext = new CloudContext(1L, "testname", "AWS", "owner");
-        CloudCredential cloudCredential = new CloudCredential(1L, "credentialname", "sshkey", "loginuser");
+        CloudCredential cloudCredential = new CloudCredential(1L, "credentialname");
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }
 }

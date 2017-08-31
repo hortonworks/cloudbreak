@@ -33,12 +33,6 @@ public abstract class CredentialBase implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(CredentialModelDescription.LOGIN_USERNAME)
-    private String loginUserName;
-
-    @ApiModelProperty(CredentialModelDescription.PUBLIC_KEY)
-    private String publicKey;
-
     @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
 
@@ -66,28 +60,12 @@ public abstract class CredentialBase implements JsonEntity {
         this.cloudPlatform = cloudPlatform;
     }
 
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
     public Map<String, Object> getParameters() {
         return parameters;
     }
 
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
-    }
-
-    public String getLoginUserName() {
-        return loginUserName;
-    }
-
-    public void setLoginUserName(String loginUserName) {
-        this.loginUserName = loginUserName;
     }
 
     public Long getTopologyId() {

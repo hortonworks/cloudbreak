@@ -75,6 +75,12 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
     private Map<String, String> defaultTags = new HashMap<>();
 
+    @ApiModelProperty(StackModelDescription.LOGIN_USERNAME)
+    private String loginUserName;
+
+    @ApiModelProperty(StackModelDescription.PUBLIC_KEY)
+    private String publicKey;
+
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
     }
@@ -219,5 +225,21 @@ public abstract class StackBase implements JsonEntity {
 
     public void setDefaultTags(Map<String, String> defaultTags) {
         this.defaultTags = defaultTags;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getLoginUserName() {
+        return loginUserName;
+    }
+
+    public void setLoginUserName(String loginUserName) {
+        this.loginUserName = loginUserName;
     }
 }

@@ -27,9 +27,9 @@ public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskCo
             ssh.addHostKeyVerifier(sshCheckerTaskContext.getHostKeyVerifier());
             String user = sshCheckerTaskContext.getUser();
             ssh.connect(sshCheckerTaskContext.getPublicIp(), sshCheckerTaskContext.getSshPort());
-            if (sshCheckerTaskContext.getStack().getCredential().passwordAuthenticationRequired()) {
+            if (sshCheckerTaskContext.getStack().passwordAuthenticationRequired()) {
                 LOGGER.info("Connecting with ssh to: {}, user: {} with password", sshCheckerTaskContext.getPublicIp(), user);
-                ssh.authPassword(user, sshCheckerTaskContext.getStack().getCredential().getLoginPassword());
+                ssh.authPassword(user, sshCheckerTaskContext.getStack().getLoginPassword());
             } else {
                 LOGGER.info("Connecting with ssh to: {}, user: {}", sshCheckerTaskContext.getPublicIp(), user);
                 KeyPair keyPair = KeyStoreUtil.createKeyPair(sshCheckerTaskContext.getSshPrivateKey());

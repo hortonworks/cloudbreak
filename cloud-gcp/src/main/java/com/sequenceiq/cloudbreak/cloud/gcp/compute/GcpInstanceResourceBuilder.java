@@ -109,7 +109,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
         Items sshMetaData = new Items();
         sshMetaData.setKey("sshKeys");
-        sshMetaData.setValue(auth.getCloudCredential().getLoginUserName() + ':' + auth.getCloudCredential().getPublicKey());
+        sshMetaData.setValue(group.getLoginUserName() + ":" + group.getPublicKey());
 
         Items startupScript = new Items();
         startupScript.setKey("startup-script");
