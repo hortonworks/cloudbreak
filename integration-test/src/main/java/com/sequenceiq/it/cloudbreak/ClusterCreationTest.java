@@ -63,14 +63,13 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         clusterRequest.setBlueprintId(Long.valueOf(blueprintId));
         clusterRequest.setHostGroups(hostGroupJsons1);
 
-        if (Boolean.TRUE.equals(withRDSConfig)) {
+        if (withRDSConfig) {
             clusterRequest = setRDSConfiguration(itContext, clusterRequest);
         }
 
-        if (Boolean.TRUE.equals(withFs)) {
+        if (withFs) {
             clusterRequest = setFileSystem(itContext, clusterRequest);
         }
-
 
         KerberosRequest kerberosRequest = new KerberosRequest();
         kerberosRequest.setAdmin(kerberosAdmin);

@@ -17,12 +17,15 @@ public class SshUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(com.sequenceiq.it.cloudbreak.SshUtil.class);
 
-    public Boolean ssh(String host, String defaultPrivateKeyFile, String sshCommand, String checkType, String value) {
+    private SshUtil() {
+    }
+
+    public static Boolean runSshCommand(String host, String defaultPrivateKeyFile, String sshCommand, String checkType, String value) {
         SSHClient sshClient = null;
         boolean result = false;
         try {
             sshClient = createSSHClient(host, 22, "cloudbreak", defaultPrivateKeyFile);
-            Pair<Integer, String> cmdOut = executeSshCommand(sshClient, sshCommand);
+            Pair<Integer, String> cmdOut = execute(sshClient, sshCommand);
             LOGGER.info("Ssh command status code and output: " + cmdOut.toString());
             result = cmdOut.getLeft() == 0 && checkCommandOutput(cmdOut, checkType, value);
         } catch (Exception ex) {
@@ -32,14 +35,14 @@ public class SshUtil {
                 if (sshClient != null) {
                     sshClient.disconnect();
                 }
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 LOGGER.error("Error during ssh disconnect", ex);
             }
         }
         return result;
     }
 
-    private SSHClient createSSHClient(String host, int port, String user, String privateKeyFile) throws IOException {
+    private static SSHClient createSSHClient(String host, int port, String user, String privateKeyFile) throws IOException {
         SSHClient sshClient = new SSHClient();
         sshClient.addHostKeyVerifier(new PromiscuousVerifier());
         sshClient.connect(host, port);
@@ -47,13 +50,13 @@ public class SshUtil {
         return sshClient;
     }
 
-    private Session startSshSession(SSHClient ssh) throws IOException {
+    private static Session startSshSession(SSHClient ssh) throws IOException {
         Session sshSession = ssh.startSession();
         sshSession.allocateDefaultPTY();
         return sshSession;
     }
 
-    private Pair<Integer, String> executeSshCommand(SSHClient ssh, String command) throws IOException {
+    private static Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
         Session session = null;
         Session.Command cmd = null;
         LOGGER.info("Waiting to SSH command to be executed...");
@@ -73,27 +76,18 @@ public class SshUtil {
         }
     }
 
-    private Boolean checkCommandOutput(Pair<Integer, String> cmdOut, String checkType, String value) throws IOException {
+    private static boolean checkCommandOutput(Pair<Integer, String> cmdOut, String checkType, String value) throws IOException {
         switch (checkType) {
             case "contains":
-                if (cmdOut.getRight().contains(value)) {
-                    return Boolean.TRUE;
-                }
-                break;
+                return cmdOut.getRight().contains(value);
             case "notContains":
-                if (!(cmdOut.getRight().contains(value))) {
-                    return Boolean.TRUE;
-                }
-                break;
+                return !(cmdOut.getRight().contains(value));
             case "beginsWith":
-                if (cmdOut.getRight().startsWith(value)) {
-                    return Boolean.TRUE;
-                }
-                break;
+                return cmdOut.getRight().startsWith(value);
             default:
                 LOGGER.info("Check type {} is not exist!", checkType);
                 break;
         }
-    return false;
+        return false;
     }
 }

@@ -1,32 +1,30 @@
 package com.sequenceiq.periscope.api.model;
 
-import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonProperties;
+import com.sequenceiq.periscope.doc.ApiDescription.ClusterJsonsProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("ClusterSummary")
-public class ClusterJson implements Json {
+public class ClusterJson extends ClusterBaseJson {
 
-    @ApiModelProperty(ClusterJsonProperties.ID)
+    @ApiModelProperty(ClusterJsonsProperties.ID)
     private long id;
 
-    @ApiModelProperty(ClusterJsonProperties.HOST)
-    private String host;
-
-    @ApiModelProperty(ClusterJsonProperties.PORT)
-    private String port;
-
-    @ApiModelProperty(ClusterJsonProperties.STATE)
+    @ApiModelProperty(ClusterJsonsProperties.STATE)
     private String state;
 
-    @ApiModelProperty(ClusterJsonProperties.STACKID)
-    private Long stackId;
-
-    @ApiModelProperty(ClusterJsonProperties.AUTOSCALING_ENABLED)
+    @ApiModelProperty(ClusterJsonsProperties.AUTOSCALING_ENABLED)
     private boolean autoscalingEnabled;
 
     public ClusterJson() {
+    }
+
+    public ClusterJson(String host, String port, String user, Long stackId, boolean autoscalingEnabled, long id, String state) {
+        super(host, port, user, stackId);
+        this.id = id;
+        this.state = state;
+        this.autoscalingEnabled = autoscalingEnabled;
     }
 
     public long getId() {
@@ -37,36 +35,12 @@ public class ClusterJson implements Json {
         this.id = id;
     }
 
-    public String getHost() {
-        return host;
-    }
-
-    public void setHost(String host) {
-        this.host = host;
-    }
-
-    public String getPort() {
-        return port;
-    }
-
-    public void setPort(String port) {
-        this.port = port;
-    }
-
     public String getState() {
         return state;
     }
 
     public void setState(String state) {
         this.state = state;
-    }
-
-    public Long getStackId() {
-        return stackId;
-    }
-
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
     }
 
     public boolean isAutoscalingEnabled() {

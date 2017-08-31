@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.rest.converter;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.periscope.api.model.MetricAlertJson;
@@ -7,6 +9,9 @@ import com.sequenceiq.periscope.domain.MetricAlert;
 
 @Component
 public class MetricAlertConverter extends AbstractConverter<MetricAlertJson, MetricAlert> {
+
+    @Inject
+    private ScalingPolicyConverter scalingPolicyConverter;
 
     @Override
     public MetricAlert convert(MetricAlertJson source) {
@@ -16,6 +21,9 @@ public class MetricAlertConverter extends AbstractConverter<MetricAlertJson, Met
         alert.setDefinitionName(source.getAlertDefinition());
         alert.setPeriod(source.getPeriod());
         alert.setAlertState(source.getAlertState());
+        if (source.getScalingPolicy() != null) {
+            alert.setScalingPolicy(scalingPolicyConverter.convert(source.getScalingPolicy()));
+        }
         return alert;
     }
 
@@ -29,6 +37,9 @@ public class MetricAlertConverter extends AbstractConverter<MetricAlertJson, Met
         json.setPeriod(source.getPeriod());
         json.setAlertDefinition(source.getDefinitionName());
         json.setAlertState(source.getAlertState());
+        if (source.getScalingPolicy() != null) {
+            json.setScalingPolicy(scalingPolicyConverter.convert(source.getScalingPolicy()));
+        }
         return json;
     }
 

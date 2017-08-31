@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.MetricAlert;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.domain.TimeAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
-import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.MetricAlertRepository;
 import com.sequenceiq.periscope.repository.PrometheusAlertRepository;
@@ -70,10 +70,13 @@ public class AlertService {
     @Inject
     private PrometheusAlertTemplateService prometheusAlertService;
 
+    @Inject
+    private ScalingService scalingPolicyService;
+
     public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
-        MetricAlert metricAlert = metricAlertRepository.save(alert);
+        MetricAlert metricAlert = (MetricAlert) save(alert);
         cluster.addMetricAlert(metricAlert);
         clusterRepository.save(cluster);
         return metricAlert;
@@ -113,7 +116,7 @@ public class AlertService {
     public TimeAlert createTimeAlert(long clusterId, TimeAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
-        alert = timeAlertRepository.save(alert);
+        alert = (TimeAlert) save(alert);
         cluster.addTimeAlert(alert);
         clusterRepository.save(cluster);
         return alert;
@@ -169,14 +172,17 @@ public class AlertService {
         throw new NotFoundException(String.format("Could not found alert with id: '%s', for cluster: '%s'!", alertId, clusterId));
     }
 
-    public void save(BaseAlert alert) {
+    public BaseAlert save(BaseAlert alert) {
+        BaseAlert res = alert;
+
         if (alert instanceof MetricAlert) {
-            metricAlertRepository.save((MetricAlert) alert);
+            res = metricAlertRepository.save((MetricAlert) alert);
         } else if (alert instanceof TimeAlert) {
-            timeAlertRepository.save((TimeAlert) alert);
+            res = timeAlertRepository.save((TimeAlert) alert);
         } else if (alert instanceof PrometheusAlert) {
-            prometheusAlertRepository.save((PrometheusAlert) alert);
+            res = prometheusAlertRepository.save((PrometheusAlert) alert);
         }
+        return res;
     }
 
     public List<Map<String, Object>> getAlertDefinitions(long clusterId) {
@@ -209,7 +215,7 @@ public class AlertService {
     public PrometheusAlert createPrometheusAlert(long clusterId, PrometheusAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
-        PrometheusAlert savedAlert = prometheusAlertRepository.save(alert);
+        PrometheusAlert savedAlert = (PrometheusAlert) save(alert);
         cluster.addPrometheusAlert(savedAlert);
         clusterRepository.save(cluster);
         consulKeyValueService.addAlert(cluster, savedAlert);

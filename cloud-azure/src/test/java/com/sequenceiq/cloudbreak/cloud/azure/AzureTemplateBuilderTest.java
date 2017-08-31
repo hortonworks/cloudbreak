@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy.SubnetStratgyType.FILL;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertThat;
@@ -30,6 +31,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
@@ -100,6 +102,8 @@ public class AzureTemplateBuilderTest {
 
     private AzureStorageView azureStorageView;
 
+    private AzureSubnetStrategy azureSubnetStrategy;
+
     private AzureStackView azureStackView;
 
     private Gson gson = new Gson();
@@ -126,7 +130,9 @@ public class AzureTemplateBuilderTest {
         volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>());
-        instance = new CloudInstance("SOME_ID", instanceTemplate);
+        Map<String, Object> params = new HashMap<>();
+        params.put(CloudInstance.SUBNET_ID, "existingSubnet");
+        instance = new CloudInstance("SOME_ID", instanceTemplate, params);
         rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, null);
@@ -136,6 +142,8 @@ public class AzureTemplateBuilderTest {
                 Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")));
         azureCredentialView = new AzureCredentialView(cloudCredential("siq-haas"));
         azureStorageView = new AzureStorageView(azureCredentialView, cloudContext, azureStorage, null);
+
+        azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Arrays.asList("existingSubnet"), ImmutableMap.of("existingSubnet", 100));
         reset(azureUtils);
     }
 
@@ -151,7 +159,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
 
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -177,7 +185,7 @@ public class AzureTemplateBuilderTest {
         userDefinedTags.put("testtagkey1", "testtagvalue1");
         userDefinedTags.put("testtagkey2", "testtagvalue2");
         cloudStack = new CloudStack(groups, network, image, parameters, userDefinedTags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -197,7 +205,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
-        when(azureUtils.getCustomSubnetId(any())).thenReturn("existingSubnet");
+        when(azureUtils.getCustomSubnetIds(any())).thenReturn(Arrays.asList("existingSubnet"));
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureUtils.isNoSecurityGroups(any())).then(invocation -> true);
@@ -206,7 +214,7 @@ public class AzureTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -229,7 +237,7 @@ public class AzureTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -252,7 +260,7 @@ public class AzureTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -277,7 +285,7 @@ public class AzureTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -297,7 +305,7 @@ public class AzureTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -317,7 +325,7 @@ public class AzureTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -337,7 +345,7 @@ public class AzureTemplateBuilderTest {
         parameters.put("attachedStorageOption", "attachedStorageOptionTest");
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -358,7 +366,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -380,7 +388,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -397,7 +405,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
-        when(azureUtils.getCustomSubnetId(any())).thenReturn("existingSubnet");
+        when(azureUtils.getCustomSubnetIds(any())).thenReturn(Arrays.asList("existingSubnet"));
         Network network = new Network(new Subnet("testSubnet"));
         Map<String, String> parameters = new HashMap<>();
         parameters.put("persistentStorage", "persistentStorageTest");
@@ -405,7 +413,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -428,7 +436,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -449,7 +457,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -470,7 +478,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -491,7 +499,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");
@@ -513,7 +521,7 @@ public class AzureTemplateBuilderTest {
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString());
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy);
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), Mockito.anyString(),
                 any(ArmAttachedStorageOption.class))).thenReturn("test");

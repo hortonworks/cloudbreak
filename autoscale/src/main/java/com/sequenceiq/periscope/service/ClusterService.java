@@ -38,11 +38,17 @@ public class ClusterService {
     @Inject
     private AlertService alertService;
 
-    public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState, boolean enableAutoscaling) {
+    public Cluster create(PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
+        return create(new Cluster(), user, stack, clusterState);
+    }
+
+    public Cluster create(Cluster cluster, PeriscopeUser user, AmbariStack stack, ClusterState clusterState) {
         PeriscopeUser periscopeUser = createUserIfAbsent(user);
         validateClusterUniqueness(stack);
-        Cluster cluster = new Cluster(periscopeUser, stack);
-        cluster.setAutoscalingEnabled(enableAutoscaling);
+        cluster.setUser(periscopeUser);
+        cluster.setAmbari(stack.getAmbari());
+        cluster.setStackId(stack.getStackId());
+
         if (clusterState != null) {
             cluster.setState(clusterState);
         }

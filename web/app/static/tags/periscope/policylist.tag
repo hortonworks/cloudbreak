@@ -37,7 +37,7 @@
         </form>
     </div>
 </div>
-<div class="modal fade" id="delete-scaling-policy-modal-{{policy.id}}" tabindex="-1" role="dialog" aria-labelledby="modal01-title" aria-hidden="true">
+<div class="modal" id="delete-scaling-policy-modal-{{policy.id}}" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-sm">
         <div class="modal-content">
             <!-- .modal-header -->
@@ -50,7 +50,7 @@
                         <button type="button" class="btn btn-block btn-default" data-dismiss="modal">{{msg.periscope_resource_list_cancel_label}}</button>
                     </div>
                     <div class="col-xs-6">
-                        <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" ng-click="deletePolicy(policy)"><i class="fa fa-times fa-fw"></i>{{msg.periscope_resource_list_delete_label}}</button>
+                        <button type="button" class="btn btn-block btn-danger" data-dismiss="modal" ng-click="deletePolicy(policy);$jq('body').removeClass('modal-open')"><i class="fa fa-times fa-fw"></i>{{msg.periscope_resource_list_delete_label}}</button>
                     </div>
                 </div>
             </div>

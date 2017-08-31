@@ -61,6 +61,8 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private Long terminationDate;
 
+    private String subnetId;
+
     public InstanceMetaData() {
     }
 
@@ -243,5 +245,13 @@ public class InstanceMetaData implements ProvisionEntity {
             return null;
         }
         return discoveryFQDN.split("\\.")[0];
+    }
+
+    public String getSubnetId() {
+        return subnetId;
+    }
+
+    public void setSubnetId(String subnetId) {
+        this.subnetId = subnetId;
     }
 }

@@ -169,7 +169,14 @@ cloudbreakApp.config(['$routeProvider', '$locationProvider', function($routeProv
     blockUIConfig.autoInjectBodyBlock = false;
     blockUIConfig.requestFilter = function(config) {
         var block = false;
-        if (config.url.match(/^(.*)usages($|\/).*/) || config.url.match(/^(.*)templates($|\/).*/) || config.url.match(/^(.*)blueprints($|\/).*/) || config.url.match(/^(.*)credentials($|\/).*/) || config.url.match(/^(.*)users($|\?).*/) || config.url.match(/^(.*)permission($|\?).*/) || config.url.match(/^(.*)stacks($|\/).*/) || config.url.match(/^periscope\/clusters($|\/).*/) || config.url.match(/^(.*)usages($|\?).*/)) {
+        if (config.url.match(/^(.*)usages($|\/).*/) ||
+            config.url.match(/^(.*)templates($|\/).*/) ||
+            config.url.match(/^(.*)blueprints($|\/).*/) ||
+            config.url.match(/^(.*)credentials($|\/).*/) ||
+            config.url.match(/^(.*)users($|\?).*/) ||
+            config.url.match(/^(.*)permission($|\?).*/) ||
+            config.url.match(/^(.*)stacks($|\/).*/) ||
+            config.url.match(/^(.*)usages($|\?).*/)) {
             block = true;
         }
         if (!block) {

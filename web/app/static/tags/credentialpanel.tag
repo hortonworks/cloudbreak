@@ -30,8 +30,7 @@
                                 <div class="btn-segmented-control" id="providerSelector1">
                                     <div class="btn-group btn-group-justified">
                                         <a id="awsChange" ng-if="isVisible('AWS')" type="button" ng-class="{'btn':true, 'btn-info':awsCredential, 'btn-default':!awsCredential}" ng-click="createAwsCredentialRequest()">{{msg.aws_label}}</a>
-                                        <a id="azureChange" ng-if="isVisible('AZURE')" type="button" ng-class="{'btn':true,
-    'btn-info':azureCredential, 'btn-default':!azureCredential}" ng-click="createAzureCredentialRequest()">{{msg.azure_label}}</a>
+                                        <a id="azureChange" ng-if="isVisible('AZURE')" type="button" ng-class="{'btn':true, 'btn-info':azureCredential, 'btn-default':!azureCredential}" ng-click="createAzureCredentialRequest()">{{msg.azure_label}}</a>
                                         <a id="mesosChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':mesosCredential, 'btn-default':!mesosCredential}" ng-click="importMesosStackRequest()">{{msg.mesos_label}}</a>
                                         <a id="yarnChange" ng-if="isVisible('BYOS')" type="button" ng-class="{'btn':true, 'btn-info':yarnCredential, 'btn-default':!yarnCredential}" ng-click="importYarnCredentialRequest()">{{msg.yarn_label}}</a>
                                     </div>

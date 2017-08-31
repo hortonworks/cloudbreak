@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -25,7 +28,9 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
         InstanceStatus status = getInstanceStatus(metaDataEnity);
         InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(
                 template, group.getGroupName(), metaDataEnity.getPrivateId(), status);
-        return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate);
+        Map<String, Object> params = new HashMap<>();
+        params.put(CloudInstance.SUBNET_ID, metaDataEnity.getSubnetId());
+        return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate, params);
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {

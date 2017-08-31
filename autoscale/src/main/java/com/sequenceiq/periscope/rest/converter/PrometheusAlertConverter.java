@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.periscope.api.model.AlertOperator;
 import com.sequenceiq.periscope.api.model.PrometheusAlertJson;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
+import com.sequenceiq.periscope.domain.ScalingPolicy;
 import com.sequenceiq.periscope.model.json.Json;
 import com.sequenceiq.periscope.service.PrometheusAlertTemplateService;
 
@@ -27,6 +28,9 @@ public class PrometheusAlertConverter extends AbstractConverter<PrometheusAlertJ
 
     @Inject
     private PrometheusAlertTemplateService templateService;
+
+    @Inject
+    private ScalingPolicyConverter scalingPolicyConverter;
 
     @Override
     public PrometheusAlert convert(PrometheusAlertJson source) {
@@ -43,6 +47,11 @@ public class PrometheusAlertConverter extends AbstractConverter<PrometheusAlertJ
             String alertRule = templateService.createAlert(alertRuleName, alert.getName(), String.valueOf(threshold), alert.getPeriod(), operator);
             alert.setAlertRule(alertRule);
             alert.setParameters(createParametersFrom(threshold, alertOperator));
+            if (source.getScalingPolicy() != null) {
+                ScalingPolicy scalingPolicy = scalingPolicyConverter.convert(source.getScalingPolicy());
+                scalingPolicy.setAlert(alert);
+                alert.setScalingPolicy(scalingPolicy);
+            }
         } catch (Exception e) {
             throw new ConversionFailedException(
                     TypeDescriptor.valueOf(PrometheusAlertJson.class),
@@ -67,6 +76,9 @@ public class PrometheusAlertConverter extends AbstractConverter<PrometheusAlertJ
         Map<String, Object> parameters = source.getParameters().getMap();
         json.setAlertOperator(AlertOperator.valueOf(String.valueOf(parameters.get(OPERATOR_PARAM_KEY))));
         json.setThreshold(Double.valueOf(String.valueOf(parameters.get(THRESHOLD_PARAM_KEY))));
+        if (source.getScalingPolicy() != null) {
+            json.setScalingPolicy(scalingPolicyConverter.convert(source.getScalingPolicy()));
+        }
         return json;
     }
 

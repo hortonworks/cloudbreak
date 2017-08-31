@@ -15,7 +15,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.periscope.api.model.AmbariJson;
+import com.sequenceiq.periscope.api.model.ClusterRequestJson;
 import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
 import com.sequenceiq.periscope.api.model.ClusterJson;
 import com.sequenceiq.periscope.api.model.StateJson;
@@ -33,13 +33,13 @@ public interface ClusterEndpoint {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_POST, produces = JSON, notes = ClusterNotes.NOTES)
-    ClusterJson addCluster(AmbariJson ambariServer);
+    ClusterJson addCluster(ClusterRequestJson ambariServer);
 
     @PUT
     @Path(value = "{clusterId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_PUT, produces = JSON, notes = ClusterNotes.NOTES)
-    ClusterJson modifyCluster(AmbariJson ambariServer, @PathParam(value = "clusterId") Long clusterId);
+    ClusterJson modifyCluster(ClusterRequestJson ambariServer, @PathParam(value = "clusterId") Long clusterId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)

@@ -20,7 +20,7 @@ tests:
   - name: create gateway template
     parameters:
       gcpName: it-gcp-credandsmoke-gateway-gcs
-      gcpInstanceType: n1-highmem-8
+      gcpInstanceType: n1-highmem-16
       volumeType: pd-standard
       volumeCount: 1
       volumeSize: 100
@@ -42,14 +42,13 @@ tests:
   - name: create compute template
     parameters:
       gcpName: it-gcp-credandsmoke-compute-gcs
-      gcpInstanceType: n1-highcpu-4
+      gcpInstanceType: n1-highmem-8
       volumeType: pd-ssd
       volumeCount: 3
-      volumeSize: 100
+      volumeSize: 50
       templateAdditions: "compute,1"
     classes:
       - com.sequenceiq.it.cloudbreak.GcpTemplateCreationTest
-
 
   - name: set gcp filesystem
     parameters:
@@ -69,7 +68,6 @@ tests:
     classes:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
-
 
   - name: test gcs filesystem
     parameters:

@@ -53,6 +53,10 @@ public class ScalingService {
         return policyRepository.findAllByCluster(clusterId);
     }
 
+    public ScalingPolicy save(ScalingPolicy policy) {
+        return policyRepository.save(policy);
+    }
+
     private ScalingPolicy getScalingPolicy(long clusterId, long policyId) {
         ScalingPolicy policy = policyRepository.findByCluster(clusterId, policyId);
         if (policy == null) {

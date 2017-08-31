@@ -31,7 +31,7 @@ public class FilesystemConfigureTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({"filesystemType", "fsName"})
-    public void testFilesystemConfigure(String filesystemType, String fsName) throws Exception {
+    public void testFilesystemConfigure(String filesystemType, String fsName) {
         //GIVEN
         IntegrationTestContext itContext = getItContext();
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
@@ -43,11 +43,9 @@ public class FilesystemConfigureTest extends AbstractCloudbreakIntegrationTest {
         fsRequest.setDefaultFs(false);
         // THEN
         getItContext().putContextParam(FSREQUEST, fsRequest);
-        LOGGER.error("ize    " + createRequestProperties(cloudProviderParams, fsName).entrySet().toString() + "\n");
     }
 
-    protected static  Map<String, String> createRequestProperties(Map<String, String> cloudProviderParams, String fsName) throws
-            Exception {
+    protected static Map<String, String> createRequestProperties(Map<String, String> cloudProviderParams, String fsName) {
         Map<String, String> requestProperties = new HashMap<>();
         switch (cloudProviderParams.get("cloudProvider")) {
             case "AZURE":
@@ -64,11 +62,7 @@ public class FilesystemConfigureTest extends AbstractCloudbreakIntegrationTest {
             default:
                 LOGGER.info("CloudProvider {} is not supported!", cloudProviderParams.get("cloudProvider"));
                 break;
-        }
-    return requestProperties;
+            }
+        return requestProperties;
     }
 }
-
-
-
-
