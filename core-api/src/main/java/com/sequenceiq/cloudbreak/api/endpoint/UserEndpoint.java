@@ -11,6 +11,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.User;
+import com.sequenceiq.cloudbreak.api.model.UserProfileRequest;
+import com.sequenceiq.cloudbreak.api.model.UserProfileResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -44,4 +46,18 @@ public interface UserEndpoint {
     @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_RESOURCE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
             nickname = "hasResourcesUser")
     Boolean hasResources(@PathParam(value = "id") String id);
+
+    @GET
+    @Path("profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_GET_PROFILE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+            nickname = "getUserProfile")
+    UserProfileResponse getProfile();
+
+    @PUT
+    @Path("profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.UserOpDescription.USER_PUT_PROFILE, produces = ContentType.JSON, notes = Notes.USER_NOTES,
+            nickname = "modifyProfile")
+    void modifyProfile(UserProfileRequest userProfileRequest);
 }
