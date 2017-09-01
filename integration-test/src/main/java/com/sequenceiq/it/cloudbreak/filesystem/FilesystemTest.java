@@ -60,6 +60,7 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
         }
         //WHEN
         boolean sshResult = SshUtil.executeCommand(masterIp, defaultPrivateKeyFile, sshCommand, "notContains", "Container killed on request");
+
         //THEN
         Assert.assertTrue(sshResult, "Ssh command executing was not successful");
     }
