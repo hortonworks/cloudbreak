@@ -64,7 +64,6 @@ public class FilesystemUtil {
                 LOGGER.info("Filesystem type {} is not supported!", fsType);
                 break;
         }
-
     }
 
     static void createWasbContainer(Map<String, String> cloudProviderParams, String accountName, String containerName) {

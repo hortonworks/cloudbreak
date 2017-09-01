@@ -20,34 +20,15 @@ public class SshUtil {
     private SshUtil() {
     }
 
-    public static Boolean runSshCommand(String host, String defaultPrivateKeyFile, String sshCommand, String checkType, String value) {
-        SSHClient sshClient = null;
-        boolean result = false;
-        try {
-            sshClient = createSSHClient(host, 22, "cloudbreak", defaultPrivateKeyFile);
+    public static boolean executeCommand(String host, String defaultPrivateKeyFile, String sshCommand, String checkType, String value) throws IOException {
+        try (SSHClient sshClient = new SSHClient()) {
+            sshClient.addHostKeyVerifier(new PromiscuousVerifier());
+            sshClient.connect(host, 22);
+            sshClient.authPublickey("cloudbreak", defaultPrivateKeyFile);
             Pair<Integer, String> cmdOut = execute(sshClient, sshCommand);
             LOGGER.info("Ssh command status code and output: " + cmdOut.toString());
-            result = cmdOut.getLeft() == 0 && checkCommandOutput(cmdOut, checkType, value);
-        } catch (Exception ex) {
-            LOGGER.error("Error during remote command execution", ex);
-        } finally {
-            try {
-                if (sshClient != null) {
-                    sshClient.disconnect();
-                }
-            } catch (IOException ex) {
-                LOGGER.error("Error during ssh disconnect", ex);
-            }
+            return cmdOut.getLeft() == 0 && checkCommandOutput(cmdOut, checkType, value);
         }
-        return result;
-    }
-
-    private static SSHClient createSSHClient(String host, int port, String user, String privateKeyFile) throws IOException {
-        SSHClient sshClient = new SSHClient();
-        sshClient.addHostKeyVerifier(new PromiscuousVerifier());
-        sshClient.connect(host, port);
-        sshClient.authPublickey(user, privateKeyFile);
-        return sshClient;
     }
 
     private static Session startSshSession(SSHClient ssh) throws IOException {
@@ -57,21 +38,12 @@ public class SshUtil {
     }
 
     private static Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
-        Session session = null;
-        Session.Command cmd = null;
         LOGGER.info("Waiting to SSH command to be executed...");
-        try {
-            session = startSshSession(ssh);
-            cmd = session.exec(command);
-            String stdout = IOUtils.readFully(cmd.getInputStream()).toString();
-            cmd.join(10, TimeUnit.SECONDS);
-            return Pair.of(cmd.getExitStatus(), stdout);
-        } finally {
-            if (cmd != null) {
-                cmd.close();
-            }
-            if (session != null) {
-                session.close();
+        try (Session session = startSshSession(ssh)) {
+            try (Session.Command cmd = session.exec(command)) {
+                String stdout = IOUtils.readFully(cmd.getInputStream()).toString();
+                cmd.join(10, TimeUnit.SECONDS);
+                return Pair.of(cmd.getExitStatus(), stdout);
             }
         }
     }
