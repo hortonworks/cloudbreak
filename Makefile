@@ -20,7 +20,7 @@ format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 vet:
-	go vet -race github.com/hortonworks/hdc-cli/cli
+	go vet -all github.com/hortonworks/hdc-cli/cli
 
 test:
 	go test -race github.com/hortonworks/hdc-cli/cli
