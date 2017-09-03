@@ -69,6 +69,12 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.HOSTGROUP_NAME_AS_HOSTNAME)
     private boolean hostgroupNameAsHostname;
 
+    @ApiModelProperty(StackModelDescription.LOGIN_USERNAME)
+    private String loginUserName;
+
+    @ApiModelProperty(StackModelDescription.PUBLIC_KEY)
+    private String publicKey;
+
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
     }
@@ -197,5 +203,21 @@ public abstract class StackBase implements JsonEntity {
 
     public void setHostgroupNameAsHostname(boolean hostgroupNameAsHostname) {
         this.hostgroupNameAsHostname = hostgroupNameAsHostname;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public void setPublicKey(String publicKey) {
+        this.publicKey = publicKey;
+    }
+
+    public String getLoginUserName() {
+        return loginUserName;
+    }
+
+    public void setLoginUserName(String loginUserName) {
+        this.loginUserName = loginUserName;
     }
 }

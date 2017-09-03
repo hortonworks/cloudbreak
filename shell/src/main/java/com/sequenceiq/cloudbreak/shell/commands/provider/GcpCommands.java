@@ -122,9 +122,6 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "serviceAccountId", mandatory = true, help = "serviceAccountId of the credential") String serviceAccountId,
             @CliOption(key = "serviceAccountPrivateKeyPath", mandatory = true, help = "path of a service account private key (p12) file")
             File serviceAccountPrivateKeyPath,
-            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
-            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key url") String sshKeyUrl,
-            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the credential") String description,
@@ -141,7 +138,7 @@ public class GcpCommands implements CommandMarker {
         parameters.put("projectId", projectId);
         parameters.put("serviceAccountId", serviceAccountId);
         parameters.put("serviceAccountPrivateKey", serviceAccountPrivateKey);
-        return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
+        return baseCredentialCommands.create(name, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
     @CliCommand(value = "network create --GCP --NEW", help = "Create a GCP network configuration with a new network and a new subnet")
@@ -300,6 +297,9 @@ public class GcpCommands implements CommandMarker {
     @CliCommand(value = "stack create --GCP", help = "Create a new GCP stack based on a template")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
+            @CliOption(key = "sshKeyPath", help = "path of a public SSH key file") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", help = "URL of a public SSH key url") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
             @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
             @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account",
@@ -330,8 +330,8 @@ public class GcpCommands implements CommandMarker {
             }
             availabilityZone = new StackAvailabilityZone(availabilityZonesByRegion.iterator().next());
         }
-        return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion,
+        return stackCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType,
+                threshold, wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM, ambariVersion,
                 hdpVersion, imageCatalog, params, TagParser.parseTagsIntoMap(tags), customImage, timeout,
                 customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }

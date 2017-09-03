@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.gs.collections.impl.utility.StringIterate.isEmpty;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import java.io.IOException;
@@ -21,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
@@ -85,6 +87,13 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setTags(getTags(mergeTags(sourceTags, getDefaultTags(source.getAccount()))));
         if (sourceTags != null && sourceTags.get("datalakeId") != null) {
             stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
+        }
+        stack.setPublicKey(source.getPublicKey());
+        if (!BYOS.equals(source.getCloudPlatform()) && Strings.isNullOrEmpty(source.getPublicKey())) {
+            throw new BadRequestException("You should define the publickey!");
+        }
+        if (source.getLoginUserName() != null) {
+            throw new BadRequestException("You can not modify the default user!");
         }
         stack.setOwner(source.getOwner());
         stack.setAvailabilityZone(source.getAvailabilityZone());

@@ -88,7 +88,7 @@ public class MarathonCommands implements CommandMarker {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("type", PLATFORM);
         parameters.put("apiEndpoint", apiEndpoint);
-        return baseCredentialCommands.create(name, null, null, null, description, publicInAccount, null, parameters, BYOS);
+        return baseCredentialCommands.create(name, description, publicInAccount, null, parameters, BYOS);
     }
 
     @CliCommand(value = "stack create --MARATHON", help = "Create a new MARATHON stack")

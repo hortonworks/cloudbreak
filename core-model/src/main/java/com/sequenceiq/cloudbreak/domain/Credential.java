@@ -37,13 +37,8 @@ public class Credential {
     @Column(nullable = false)
     private String account;
 
-    private String loginUserName;
-
     @Column(nullable = false)
     private boolean publicInAccount;
-
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String publicKey;
 
     @Column(columnDefinition = "boolean default false")
     private boolean archived;
@@ -110,36 +105,12 @@ public class Credential {
         this.publicInAccount = publicInAccount;
     }
 
-    public String getPublicKey() {
-        return publicKey;
-    }
-
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
     public boolean isArchived() {
         return archived;
     }
 
-    public String getLoginUserName() {
-        return loginUserName;
-    }
-
-    public void setLoginUserName(String loginUserName) {
-        this.loginUserName = loginUserName;
-    }
-
     public void setArchived(boolean archived) {
         this.archived = archived;
-    }
-
-    public boolean passwordAuthenticationRequired() {
-        return publicKey != null ? publicKey.startsWith("Basic:") : false;
-    }
-
-    public String getLoginPassword() {
-        return publicKey.replaceAll("Basic:", "").trim();
     }
 
     public String cloudPlatform() {

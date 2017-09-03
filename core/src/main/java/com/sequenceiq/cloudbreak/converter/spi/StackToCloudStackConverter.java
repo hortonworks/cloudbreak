@@ -79,7 +79,8 @@ public class StackToCloudStackConverter {
         if (stackTemplate != null) {
             template = stackTemplate.getTemplate();
         }
-        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), template);
+        return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), template,
+                stack.getPublicKey(), stack.getLoginUserName());
     }
 
     public Map<String, String> getUserDefinedTags(Stack stack) {
@@ -134,7 +135,7 @@ public class StackToCloudStackConverter {
                 Json attributes = instanceGroup.getAttributes();
                 Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
                 groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup), skeleton,
-                        fields));
+                        fields, instanceGroup.getStack().getPublicKey(), instanceGroup.getStack().getLoginUserName()));
             }
         }
         return groups;

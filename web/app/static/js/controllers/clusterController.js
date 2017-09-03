@@ -3,8 +3,8 @@
 var log = log4javascript.getLogger("clusterController-logger");
 var $jq = jQuery.noConflict();
 
-angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', 'GlobalStackInstance', '$interval', 'UserEvents', 'PeriscopeCluster', 'PlatformVariant', '$sce',
-    function($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, GlobalStackInstance, $interval, UserEvents, PeriscopeCluster, PlatformVariant, $sce) {
+angular.module('uluwatuControllers').controller('clusterController', ['$scope', '$rootScope', '$filter', 'UluwatuCluster', 'GlobalStack', 'Cluster', 'DefaultSsh', 'GlobalStackInstance', '$interval', 'UserEvents', 'PeriscopeCluster', 'PlatformVariant', '$sce',
+    function($scope, $rootScope, $filter, UluwatuCluster, GlobalStack, Cluster, DefaultSsh, GlobalStackInstance, $interval, UserEvents, PeriscopeCluster, PlatformVariant, $sce) {
 
         $rootScope.ledStyles = {
             "REQUESTED": "state2-run-blink",
@@ -73,9 +73,19 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             $scope.terminatableStatuses = [
                 'CREATED', 'FAILED', 'UNREGISTERED', 'DECOMMISSIONED'
             ];
+        initDefaultSsh();
         getUluwatuClusters();
         initCluster();
         initWizard();
+
+        $scope.defautSshKey = "";
+
+        function initDefaultSsh() {
+            DefaultSsh.get(function (result) {
+                $scope.defautSshKey = result.defaultSshKey;
+                $scope.cluster.publicKey = $scope.defautSshKey;
+            });
+        }
 
         function initWizard() {
             $scope.configureHostGroups = false;
@@ -1313,6 +1323,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
                 },
+                publicKey: $scope.defautSshKey,
                 ambariRepoDetailsJson: {},
                 ambariStackDetails: {},
                 orchestrator: {},

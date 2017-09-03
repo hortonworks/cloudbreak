@@ -201,7 +201,7 @@ public class StackCreationService {
         LOGGER.info("Fingerprint has been determined: {}", sshFingerprints.getSshFingerprints());
         Stack stack = context.getStack();
         for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
-            tlsSetupService.setupTls(stack, gwInstance, stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
+            tlsSetupService.setupTls(stack, gwInstance, stack.getLoginUserName(), sshFingerprints.getSshFingerprints());
         }
     }
 
@@ -209,7 +209,7 @@ public class StackCreationService {
         Stack stack = context.getStack();
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
-            tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
+            tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getLoginUserName(), sshFingerprints);
         }
     }
 

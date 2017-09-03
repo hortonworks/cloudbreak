@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
-import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -88,8 +87,8 @@ public class TlsSetupService {
         try {
             waitForSsh(stack, publicIp, sshPort, hostKeyVerifier, user);
             SecurityConfig securityConfig = stack.getSecurityConfig();
-            setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, securityConfig, stack.getCredential());
-            uploadTlsSetupScript(orchestrator, ssh, publicIp, stack.getGatewayPort(), stack.getCredential());
+            setupTemporarySsh(ssh, publicIp, sshPort, hostKeyVerifier, user, securityConfig, stack);
+            uploadTlsSetupScript(orchestrator, ssh, publicIp, stack);
             executeTlsSetupScript(ssh);
             downloadAndSavePrivateKey(ssh, gwInstance);
         } catch (IOException e) {
@@ -110,8 +109,8 @@ public class TlsSetupService {
         try {
             String privateKey = stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded();
             HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
-            prepareSshConnection(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack.getCredential());
-            removeTemporarySShKey(ssh, user, stack.getCredential());
+            prepareSshConnection(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack);
+            removeTemporarySShKey(ssh, user, stack);
         } catch (IOException e) {
             LOGGER.info("Unable to delete temporary SSH key for stack {}", stack.getId());
         } finally {
@@ -131,20 +130,20 @@ public class TlsSetupService {
     }
 
     private void setupTemporarySsh(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user,
-            SecurityConfig securityConfig, Credential credential) throws IOException, CloudbreakException {
+            SecurityConfig securityConfig, Stack stack) throws IOException, CloudbreakException {
         LOGGER.info("Setting up temporary ssh...");
-        prepareSshConnection(ssh, ip, port, hostKeyVerifier, user, securityConfig.getCloudbreakSshPrivateKeyDecoded(), credential);
+        prepareSshConnection(ssh, ip, port, hostKeyVerifier, user, securityConfig.getCloudbreakSshPrivateKeyDecoded(), stack);
         String remoteTlsCertificatePath = "/tmp/cb-client.pem";
         ssh.newSCPFileTransfer().upload(uploadParameterFile(securityConfig.getClientCertDecoded(), "client.pem"), remoteTlsCertificatePath);
         LOGGER.info("Temporary ssh setup finished succesfully, public key is uploaded to {}", remoteTlsCertificatePath);
     }
 
     private void prepareSshConnection(SSHClient ssh, String ip, int port, HostKeyVerifier hostKeyVerifier, String user,
-            String privateKeyString, Credential credential) throws CloudbreakException, IOException {
+            String privateKeyString, Stack stack) throws CloudbreakException, IOException {
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, port);
-        if (credential.passwordAuthenticationRequired()) {
-            ssh.authPassword(user, credential.getLoginPassword());
+        if (stack.passwordAuthenticationRequired()) {
+            ssh.authPassword(user, stack.getLoginPassword());
         } else {
             try {
                 KeyPair keyPair = KeyStoreUtil.createKeyPair(privateKeyString);
@@ -156,15 +155,15 @@ public class TlsSetupService {
         }
     }
 
-    private void uploadTlsSetupScript(Orchestrator orchestrator, SSHClient ssh, String publicIp, Integer sslPort, Credential credential)
+    private void uploadTlsSetupScript(Orchestrator orchestrator, SSHClient ssh, String publicIp, Stack stack)
             throws IOException, TemplateException, CloudbreakException {
         LOGGER.info("Uploading tls-setup.sh to the gateway...");
         Map<String, Object> model = new HashMap<>();
         model.put("publicIp", publicIp);
-        model.put("username", credential.getLoginUserName());
-        model.put("sudopre", credential.passwordAuthenticationRequired() ? String.format("echo '%s'|", credential.getLoginPassword()) : "");
-        model.put("sudocheck", credential.passwordAuthenticationRequired() ? "-S" : "");
-        model.put("sslPort", sslPort.toString());
+        model.put("username", stack.getLoginUserName());
+        model.put("sudopre", stack.passwordAuthenticationRequired() ? String.format("echo '%s'|", stack.getLoginPassword()) : "");
+        model.put("sudocheck", stack.passwordAuthenticationRequired() ? "-S" : "");
+        model.put("sslPort", stack.getGatewayPort().toString());
 
 
         OrchestratorType type = orchestratorTypeResolver.resolveType(orchestrator.getType());
@@ -212,8 +211,8 @@ public class TlsSetupService {
         }
     }
 
-    private void removeTemporarySShKey(SSHClient ssh, String user, Credential credential) throws IOException, CloudbreakException {
-        if (!credential.passwordAuthenticationRequired()) {
+    private void removeTemporarySShKey(SSHClient ssh, String user, Stack stack) throws IOException, CloudbreakException {
+        if (!stack.passwordAuthenticationRequired()) {
             LOGGER.info("Removing temporary sshkey from the gateway...");
             String removeCommand = String.format("sudo sed -i '/#tmpssh_start/,/#tmpssh_end/{s/./ /g}' /home/%s/.ssh/authorized_keys", user);
             int exitStatus = executeSshCommand(ssh, removeCommand, false, "");

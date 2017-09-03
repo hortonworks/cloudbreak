@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
@@ -76,6 +77,7 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -86,6 +88,10 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 @Service
 @Transactional
 public class StackService {
+
+    private static final String SSH_USER_CENT = "centos";
+
+    private static final String SSH_USER_CB = "cloudbreak";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
@@ -142,6 +148,9 @@ public class StackService {
 
     @Inject
     private Decorator<StackResponse> stackResponseDecorator;
+
+    @Inject
+    private OpenSshPublicKeyValidator rsaPublicKeyValidator;
 
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
@@ -298,8 +307,16 @@ public class StackService {
         setPlatformVariant(stack);
         MDCBuilder.buildMdcContext(stack);
         try {
+            if (!stack.passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getPublicKey())) {
+                rsaPublicKeyValidator.validate(stack.getPublicKey());
+            }
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
+            }
+            if (stack.getCredential().getAttributes().getMap().get("keystoneVersion") != null) {
+                stack.setLoginUserName(SSH_USER_CENT);
+            } else {
+                stack.setLoginUserName(SSH_USER_CB);
             }
             String template = connector.getTemplate(stack);
             savedStack = stackRepository.save(stack);

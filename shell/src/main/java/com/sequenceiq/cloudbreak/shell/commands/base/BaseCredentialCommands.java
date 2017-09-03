@@ -2,16 +2,9 @@ package com.sequenceiq.cloudbreak.shell.commands.base;
 
 import static com.sequenceiq.cloudbreak.shell.util.TopologyUtil.checkTopologyForResource;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
@@ -25,10 +18,6 @@ import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
 public class BaseCredentialCommands implements BaseCommands, CredentialCommands {
-
-    private static final String FILE_NOT_FOUND = "File not found with ssh key";
-
-    private static final String URL_NOT_FOUND = "Url not Available for ssh key";
 
     private static final String CREATE_SUCCESS_MESSAGE = "Credential created with id: '%d' and name: '%s'";
 
@@ -177,35 +166,13 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     }
 
     @Override
-    public String create(String name, File sshKeyPath, String sshKeyUrl, String sshKeyString, String description, boolean publicInAccount, Long platformId,
+    public String create(String name, String description, boolean publicInAccount, Long platformId,
             Map<String, Object> parameters, String platform) {
-        if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
-            throw shellContext.exceptionTransformer().transformToRuntimeException(
-                    "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString");
-        }
-        String sshKey;
-        if (sshKeyPath != null) {
-            try {
-                sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath()))).replace("\n", "");
-            } catch (IOException ex) {
-                throw shellContext.exceptionTransformer().transformToRuntimeException(FILE_NOT_FOUND);
-            }
-        } else if (sshKeyUrl != null) {
-            try {
-                sshKey = readUrl(sshKeyUrl);
-            } catch (IOException ex) {
-                throw shellContext.exceptionTransformer().transformToRuntimeException(URL_NOT_FOUND);
-            }
-        } else {
-            sshKey = sshKeyString;
-        }
         try {
-
             CredentialRequest credentialRequest = new CredentialRequest();
             credentialRequest.setName(name);
             credentialRequest.setDescription(description);
             credentialRequest.setCloudPlatform(platform);
-            credentialRequest.setPublicKey(sshKey);
             credentialRequest.setParameters(parameters);
 
             if (platformId != null) {
@@ -238,19 +205,5 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
         } else {
             shellContext.setHint(Hints.SELECT_BLUEPRINT);
         }
-    }
-
-    protected String readUrl(String url) throws IOException {
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = "http://" + url;
-        }
-        BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-        String str;
-        StringBuilder sb = new StringBuilder();
-        while ((str = in.readLine()) != null) {
-            sb.append(str);
-        }
-        in.close();
-        return sb.toString();
     }
 }

@@ -9,10 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.inject.Inject;
-
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ResourceLoader;
+import org.springframework.util.StringUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
@@ -33,14 +31,15 @@ import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.InstanceGroup;
 import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
+import com.sequenceiq.it.util.ResourceUtil;
 
 public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegrationTest {
 
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;
 
-    @Inject
-    private ResourceLoader resourceLoader;
+    @Value("${integrationtest.publicKeyFile}")
+    private String defaultPublicKeyFile;
 
     @BeforeMethod
     public void setContextParams() {
@@ -53,11 +52,11 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
 
     @Test
     @Parameters({"stackName", "region", "onFailureAction", "threshold", "adjustmentType", "variant", "availabilityZone", "persistentStorage", "orchestrator",
-            "mockPort", "sshPort"})
+            "mockPort", "sshPort", "publicKeyFile"})
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
             @Optional("") String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("SALT") String orchestrator,
-            @Optional("9443") int mockPort, @Optional("2020") int sshPort)
+            @Optional("9443") int mockPort, @Optional("2020") int sshPort, @Optional("")String publicKeyFile)
             throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
@@ -84,6 +83,11 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
         String securityGroupId = itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID);
         StackRequest stackRequest = new StackRequest();
+
+        publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
+        String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
+        stackRequest.setPublicKey(publicKey);
+
         stackRequest.setName(stackName);
         stackRequest.setCredentialId(Long.valueOf(credentialId));
         stackRequest.setRegion(region);

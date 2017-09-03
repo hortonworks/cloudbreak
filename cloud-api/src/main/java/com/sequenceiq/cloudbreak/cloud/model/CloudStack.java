@@ -19,17 +19,24 @@ public class CloudStack {
 
     private String template;
 
+    private String loginUserName;
+
+    private String publicKey;
+
     private final Map<String, String> parameters;
 
     private final Map<String, String> tags;
 
-    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template) {
+    public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
+            String publicKey, String loginUserName) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
         this.parameters = ImmutableMap.copyOf(parameters);
         this.tags = ImmutableMap.copyOf(tags);
         this.template = template;
+        this.publicKey = publicKey;
+        this.loginUserName = loginUserName;
     }
 
     public List<Group> getGroups() {
@@ -68,5 +75,13 @@ public class CloudStack {
 
     public String getTemplate() {
         return template;
+    }
+
+    public String getPublicKey() {
+        return publicKey;
+    }
+
+    public String getLoginUserName() {
+        return loginUserName;
     }
 }

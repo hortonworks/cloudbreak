@@ -33,6 +33,6 @@ public class SshUserHandler implements CloudPlatformEventHandler<SshUserRequest>
         SshUserRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
         CloudCredential cloudCredential = request.getCloudCredential();
-        request.getResult().onNext(new SshUserResponse(cloudContext, cloudCredential.getLoginUserName()));
+        request.getResult().onNext(new SshUserResponse(cloudContext, request.getLoginUserName()));
     }
 }

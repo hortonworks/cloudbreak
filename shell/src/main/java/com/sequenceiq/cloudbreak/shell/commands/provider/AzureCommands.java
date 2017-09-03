@@ -136,9 +136,6 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "tenantId", mandatory = true, help = "tenantId of the credential") String tenantId,
             @CliOption(key = "appId", mandatory = true, help = "appId of the credential") String appId,
             @CliOption(key = "password", mandatory = true, help = "password of the credential") String password,
-            @CliOption(key = "sshKeyPath", help = "sshKeyPath of the template") File sshKeyPath,
-            @CliOption(key = "sshKeyUrl", help = "sshKeyUrl of the template") String sshKeyUrl,
-            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "publicInAccount", help = "flags if the credential is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the credential") String description,
@@ -149,7 +146,7 @@ public class AzureCommands implements CommandMarker {
         parameters.put("secretKey", password);
         parameters.put("tenantId", tenantId);
         parameters.put("accessKey", appId);
-        return baseCredentialCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, description, publicInAccount, platformId, parameters, PLATFORM);
+        return baseCredentialCommands.create(name, description, publicInAccount, platformId, parameters, PLATFORM);
     }
 
     @CliCommand(value = "network create --AZURE --NEW", help = "Create an Azure network configuration with a new network and a new subnet")
@@ -387,6 +384,9 @@ public class AzureCommands implements CommandMarker {
     @CliCommand(value = "stack create --AZURE", help = "Create a new Azure stack based on a template")
     public String create(
             @CliOption(key = "name", mandatory = true, help = "Name of the stack") String name,
+            @CliOption(key = "sshKeyPath", help = "sshKeyPath of the template") File sshKeyPath,
+            @CliOption(key = "sshKeyUrl", help = "sshKeyUrl of the template") String sshKeyUrl,
+            @CliOption(key = "sshKeyString", help = "Raw data of a public SSH key file") String sshKeyString,
             @CliOption(key = "region", mandatory = true, help = "region of the stack") StackRegion region,
             @CliOption(key = "availabilityZone", help = "availabilityZone of the stack") StackAvailabilityZone availabilityZone,
             @CliOption(key = "publicInAccount", help = "marks the stack as visible for all members of the account",
@@ -430,8 +430,8 @@ public class AzureCommands implements CommandMarker {
             } else if (shellContext.isAzureActiveCredential()) {
                 params.put("persistentStorage", "cbstore");
             }
-        return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
-                wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params,
+        return stackCommands.create(name, sshKeyPath, sshKeyUrl, sshKeyString, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType,
+                threshold, wait, platformVariant, orchestratorType.getName(), PLATFORM, ambariVersion, hdpVersion, imageCatalog, params,
                 TagParser.parseTagsIntoMap(tags), customImage, timeout, customDomain, customHostname, clusterNameAsSubdomain, hostgroupNameAsHostname);
     }
 }

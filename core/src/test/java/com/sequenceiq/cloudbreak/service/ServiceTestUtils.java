@@ -11,8 +11,8 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -27,8 +27,6 @@ public final class ServiceTestUtils {
     public static final String DUMMY_OWNER = "gipsz@jakab.kom";
 
     public static final String DUMMY_ACCOUNT = "acmecorp";
-
-    public static final String PUBLIC_KEY = "mypublickey";
 
     private static final String C3LARGE_INSTANCE = "c3.large";
 
@@ -143,7 +141,6 @@ public final class ServiceTestUtils {
                 awsCredential.setCloudPlatform(platform);
                 awsCredential.setAccount(account);
                 awsCredential.setPublicInAccount(true);
-                awsCredential.setPublicKey(PUBLIC_KEY);
                 return awsCredential;
             case GCP:
                 Credential gcpCredential = new Credential();
@@ -152,7 +149,6 @@ public final class ServiceTestUtils {
                 gcpCredential.setCloudPlatform(platform);
                 gcpCredential.setAccount(account);
                 gcpCredential.setPublicInAccount(true);
-                gcpCredential.setPublicKey(PUBLIC_KEY);
                 return gcpCredential;
             default:
                 return null;

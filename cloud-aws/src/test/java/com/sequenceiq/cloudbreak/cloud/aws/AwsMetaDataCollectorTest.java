@@ -333,7 +333,7 @@ public class AwsMetaDataCollectorTest {
     private AuthenticatedContext authenticatedContext() {
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
         CloudContext cloudContext = new CloudContext(5L, "name", "platform", "owner", "variant", location);
-        CloudCredential cc = new CloudCredential(1L, null, null, null);
+        CloudCredential cc = new CloudCredential(1L, null, null);
         return new AuthenticatedContext(cloudContext, cc);
     }
 }

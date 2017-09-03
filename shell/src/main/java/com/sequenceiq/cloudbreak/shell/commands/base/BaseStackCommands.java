@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.shell.commands.base;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -10,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
@@ -48,6 +55,10 @@ import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 public class BaseStackCommands implements BaseCommands, StackCommands {
 
     public static final long TIMEOUT = 5000L;
+
+    private static final String FILE_NOT_FOUND = "File not found with ssh key";
+
+    private static final String URL_NOT_FOUND = "Url not Available for ssh key";
 
     private ShellContext shellContext;
 
@@ -258,17 +269,39 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @Override
-    public String create(String name, StackRegion region, StackAvailabilityZone availabilityZone, boolean publicInAccount, OnFailureAction onFailureAction,
-            AdjustmentType adjustmentType, Long threshold, boolean wait, PlatformVariant platformVariant, String orchestrator,
-            String platform, String ambariVersion, String hdpVersion, String imageCatalog, Map<String, String> params, Map<String, String> userDefinedTags,
-            String customImage, Long timeout, String customDomain, String customHostname, boolean clusterNameAsSubdomain, boolean hostgroupNameAsHostname) {
+    public String create(String name, File sshKeyPath, String sshKeyUrl, String sshKeyString, StackRegion region, StackAvailabilityZone availabilityZone,
+            boolean publicInAccount, OnFailureAction onFailureAction, AdjustmentType adjustmentType, Long threshold, boolean wait,
+            PlatformVariant platformVariant, String orchestrator, String platform, String ambariVersion, String hdpVersion, String imageCatalog,
+            Map<String, String> params, Map<String, String> userDefinedTags, String customImage, Long timeout, String customDomain, String customHostname,
+            boolean clusterNameAsSubdomain, boolean hostgroupNameAsHostname) {
         try {
+            if ((sshKeyPath == null) && (sshKeyUrl == null || sshKeyUrl.isEmpty()) && sshKeyString == null) {
+                throw shellContext.exceptionTransformer().transformToRuntimeException(
+                        "An SSH public key must be specified either with --sshKeyPath or --sshKeyUrl or --sshKeyString");
+            }
+            String sshKey;
+            if (sshKeyPath != null) {
+                try {
+                    sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath()))).replace("\n", "");
+                } catch (IOException ex) {
+                    throw shellContext.exceptionTransformer().transformToRuntimeException(FILE_NOT_FOUND);
+                }
+            } else if (sshKeyUrl != null) {
+                try {
+                    sshKey = readUrl(sshKeyUrl);
+                } catch (IOException ex) {
+                    throw shellContext.exceptionTransformer().transformToRuntimeException(URL_NOT_FOUND);
+                }
+            } else {
+                sshKey = sshKeyString;
+            }
             validateNetwork();
             validateRegion(region);
             validateInstanceGroups(platform, region.getName(), availabilityZone == null ? null : availabilityZone.getName());
             validateAvailabilityZone(region, availabilityZone);
             Long id;
             StackRequest stackRequest = new StackRequest();
+            stackRequest.setPublicKey(sshKey);
             stackRequest.setName(name);
             stackRequest.setRegion(region.getName());
             if (availabilityZone != null) {
@@ -665,4 +698,17 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
+    protected String readUrl(String url) throws IOException {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "http://" + url;
+        }
+        BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
+        String str;
+        StringBuilder sb = new StringBuilder();
+        while ((str = in.readLine()) != null) {
+            sb.append(str);
+        }
+        in.close();
+        return sb.toString();
+    }
 }

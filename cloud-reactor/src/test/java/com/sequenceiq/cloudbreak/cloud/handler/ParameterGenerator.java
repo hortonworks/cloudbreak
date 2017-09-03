@@ -48,7 +48,7 @@ public class ParameterGenerator {
     }
 
     public CloudCredential createCloudCredential() {
-        CloudCredential c = new CloudCredential(1L, "opencred", "public_key", "cloudbreak");
+        CloudCredential c = new CloudCredential(1L, "opencred");
         c.putParameter("userName", "userName");
         c.putParameter("password", "password");
         c.putParameter("tenantName", "tenantName");
@@ -70,7 +70,7 @@ public class ParameterGenerator {
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         Security security = new Security(rules, null);
-        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
+        groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null, "pubkey", "cloudbreak"));
 
         Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
@@ -82,7 +82,7 @@ public class ParameterGenerator {
         Network network = new Network(subnet);
         network.putParameter("publicNetId", "028ffc0c-63c5-4ca0-802a-3ac753eaf76c");
 
-        return new CloudStack(groups, network, image, new HashMap<>(), new HashMap<>(), null);
+        return new CloudStack(groups, network, image, new HashMap<>(), new HashMap<>(), null, "pubkey", "cloudbreak");
     }
 
     public String getSshFingerprint() {

@@ -10,6 +10,8 @@ logging:
 integrationtest:
     outputdir: .
 
+    publicKeyFile:
+
     # uaa properties
     uaa:
         server:
@@ -29,7 +31,6 @@ integrationtest:
        projectId:
        serviceAccountId:
        p12File:
-       publicKeyFile:
 
     #ambari credentials
     ambari:
@@ -43,7 +44,6 @@ integrationtest:
        roleArn:
        accessKey:
        secretKey:
-       publicKeyFile:
 
     # openstack credential details
     openstackcredential:
@@ -52,7 +52,6 @@ integrationtest:
        userName:
        password:
        endpoint:
-       publicKeyFile:
 
     # azure rm credential details
     azurermcredential:
@@ -61,7 +60,6 @@ integrationtest:
         accessKey:
         subscriptionId:
         tenantId:
-        publicKeyFile:
 
     rdsconfig:
         rdsUser:
@@ -70,7 +68,6 @@ integrationtest:
 
     mockcredential:
         name:
-        publicKeyFile:
 
     cleanup:
         retryCount: 3

@@ -11,7 +11,6 @@ import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
-import com.sequenceiq.it.util.ResourceUtil;
 
 public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.azurermcredential.name}")
@@ -29,14 +28,10 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
     @Value("${integrationtest.azurermcredential.tenantId}")
     private String defaultTenantId;
 
-    @Value("${integrationtest.azurermcredential.publicKeyFile}")
-    private String defaultPublicKeyFile;
-
     @Test
-    @Parameters({ "credentialName", "subscriptionId", "secretKey", "accessKey", "tenantId", "publicKeyFile" })
+    @Parameters({ "credentialName", "subscriptionId", "secretKey", "accessKey", "tenantId" })
     public void testAzureRMCredentialCreation(@Optional("itazurermcreden") String credentialName, @Optional("") String subscriptionId,
-            @Optional("") String secretKey, @Optional("") String accessKey, @Optional("") String tenantId,
-            @Optional("") String publicKeyFile) throws Exception {
+            @Optional("") String secretKey, @Optional("") String accessKey, @Optional("") String tenantId) throws Exception {
         // GIVEN
         credentialName = StringUtils.hasLength(credentialName) ? credentialName : defaultName;
         subscriptionId = StringUtils.hasLength(subscriptionId) ? subscriptionId : defaultSubscriptionId;
@@ -44,12 +39,9 @@ public class AzureRmCredentialCreationTest extends AbstractCloudbreakIntegration
         tenantId = StringUtils.hasLength(tenantId) ? tenantId : defaultTenantId;
         accessKey = StringUtils.hasLength(accessKey) ? accessKey : defaultAccesKey;
 
-        publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
-        String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
         // WHEN
         CredentialRequest credentialRequest = new CredentialRequest();
         credentialRequest.setName(credentialName);
-        credentialRequest.setPublicKey(publicKey);
         credentialRequest.setDescription("Azure Rm credential for integartiontest");
         Map<String, Object> map = new HashMap<>();
         map.put("subscriptionId", subscriptionId);
