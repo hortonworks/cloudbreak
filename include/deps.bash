@@ -14,7 +14,9 @@ deps-require() {
 	declare name="$1" version="${2:-latest}"
 	deps-check "$name" "$version" && return
 	echo "* Dependency required, installing $name $version ..." | yellow
+	create-temp-dir
 	deps-install "$name" "$version"
+	rm -rf "$TEMP_DIR"
 }
 
 deps-check() {
@@ -24,7 +26,7 @@ deps-check() {
 
 deps-install() {
 	declare name="$1" version="${2:-latest}"
-	local tag index tmpdir tmpfile dep filename extension install
+	local tag index tmpfile dep filename extension install
 	mkdir -p "$(deps-dir)/bin"
 	index=$(curl -s "$DEPS_REPO/$name")
 	tag="$(uname -s)_$(uname -m | grep -s 64 > /dev/null && echo amd64 || echo 386)"
@@ -33,7 +35,6 @@ deps-install() {
 		_exit 2
 	fi
 	IFS=' ' read v t url checksum <<< "$dep"
-	tmpdir="$(deps-dir)/tmp"
     downdir="$(deps-dir)/tmp/download"
 	mkdir -p "$downdir"
 	tmpfile="${downdir:?}/$name"
@@ -44,7 +45,7 @@ deps-install() {
 			_exit 2
 		fi
 	fi
-	cd "$tmpdir"
+	cd "$TEMP_DIR"
 	filename="$(basename "$url")"
 	extension="${filename##*.}"
 	case "$extension" in
@@ -63,6 +64,5 @@ deps-install() {
         mv "$tmpfile" "$(deps-dir)/bin"
 	fi
 	cd - > /dev/null
-	rm -rf "${tmpdir:?}"
 	deps-check "$name" "$version"
 }
