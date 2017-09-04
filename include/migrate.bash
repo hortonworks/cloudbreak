@@ -59,7 +59,7 @@ migrate-execute-mybatis-migrations() {
         --label cbreak.sidekick=true \
         --link $container_name:db \
         -v $new_scripts_location:/migrate/scripts \
-        sequenceiq/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
+        hortonworks/mybatis-migrations:$DOCKER_TAG_MIGRATION "$@" \
       | tee -a "$DB_MIGRATION_LOG")
 
     if ${VERBOSE_MIGRATION}; then

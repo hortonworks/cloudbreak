@@ -7,7 +7,6 @@ GIT_REV=$(shell git rev-parse --short HEAD)
 GIT_BRANCH=$(shell git rev-parse --abbrev-ref HEAD)
 GIT_TAG=$(shell git describe --exact-match --tags 2>/dev/null )
 S3_TARGET?=s3://public-repo-1.hortonworks.com/HDP/cloudbreak/
-#S3_TARGET=s3://public-repo.sequenceiq.com
 
 # if on a git tag, use that as a version number
 ifeq ($(GIT_TAG),)
@@ -151,10 +150,10 @@ release-next-ver: deps
 	./release-next-ver.sh
 
 generate-aws-json:
-	curl -L https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/amazon.image/search | jq .versions[0] > mkdocs_theme/providers/aws.json
+	curl -L https://atlas.hashicorp.com/api/v1/artifacts/hortonworks/cbd/amazon.image/search | jq .versions[0] > mkdocs_theme/providers/aws.json
 
 generate-openstack-json:
-	curl -L  https://atlas.hashicorp.com/api/v1/artifacts/sequenceiq/cbd/openstack.image/search | jq .versions[0] > 
+	curl -L  https://atlas.hashicorp.com/api/v1/artifacts/hortonworks/cbd/openstack.image/search | jq .versions[0] > 
 	mkdocs_theme/providers/openstack.json
 
 circleci:

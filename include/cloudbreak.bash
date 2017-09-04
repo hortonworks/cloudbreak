@@ -653,7 +653,7 @@ util-local-dev() {
         -l traefik.frontend.rule=PathPrefix:/cb/ \
         -l traefik.backend=cloudbreak-backend \
         -l traefik.frontend.priority=10 \
-        sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:$port
+        hortonworks/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:$port
 
     docker run -d \
         --name periscope-proxy \
@@ -664,7 +664,7 @@ util-local-dev() {
         -l traefik.frontend.rule=PathPrefix:/as/ \
         -l traefik.backend=periscope-backend \
         -l traefik.frontend.priority=10 \
-        sequenceiq/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:8085
+        hortonworks/ambassadord:$DOCKER_TAG_AMBASSADOR $CB_LOCAL_DEV_BIND_ADDR:8085
 
 }
 
