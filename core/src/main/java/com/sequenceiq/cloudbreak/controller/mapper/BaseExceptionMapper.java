@@ -13,7 +13,9 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseExceptionMapper.class);
 
     public Response toResponse(E exception) {
-        LOGGER.error(getErrorMessage(exception), exception);
+        if (logException()) {
+            LOGGER.error(getErrorMessage(exception), exception);
+        }
         return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
     }
 
@@ -23,6 +25,10 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
 
     protected Object getEntity(E exception) {
         return new ExceptionResult(exception.getMessage());
+    }
+
+    protected boolean logException() {
+        return true;
     }
 
     abstract Response.Status getResponseStatus();

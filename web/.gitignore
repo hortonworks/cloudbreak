@@ -9,3 +9,4 @@ npm-debug.log
 app/static/bower_components
 start-local.sh
 build.sh
+package-lock.json

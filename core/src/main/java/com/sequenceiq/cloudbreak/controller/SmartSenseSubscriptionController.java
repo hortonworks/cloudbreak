@@ -35,7 +35,7 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         SmartSenseSubscription subscription = smartSenseSubService.getDefault(cbUser);
         if (subscription == null) {
-            throw new NotFoundException("SmartSense subscription not found");
+            throw new SmartSenseNotFoundException("SmartSense subscription not found");
         }
         return toJsonConverter.convert(subscription);
     }
@@ -48,7 +48,6 @@ public class SmartSenseSubscriptionController implements SmartSenseSubscriptionE
 
     @Override
     public void delete(Long id) {
-        IdentityUser cbUser = authenticatedUserService.getCbUser();
         smartSenseSubService.delete(id);
     }
 
