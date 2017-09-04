@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
 import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
@@ -39,9 +40,12 @@ import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
@@ -95,6 +99,8 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
+    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
 
     private Map<AvailabilityZone, List<VmType>> sortListOfVmTypes = new HashMap<>();
@@ -108,10 +114,25 @@ public class AwsPlatformParameters implements PlatformParameters {
     @PostConstruct
     public void init() {
         this.regions = readRegions(resourceDefinition("zone"));
+        this.regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
         readVmTypes();
         this.sortListOfVmTypes = refineList();
         this.defaultRegion = getDefaultRegion();
         this.defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
+    }
+
+    private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
+        Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+        try {
+            RegionDisplayNameSpecifications regionDisplayNameSpecifications = JsonUtil.readValue(displayNames, RegionDisplayNameSpecifications.class);
+            for (RegionDisplayNameSpecification regionDisplayNameSpecification : regionDisplayNameSpecifications.getItems()) {
+                regionDisplayNames.put(Region.region(regionDisplayNameSpecification.getName()),
+                        displayName(regionDisplayNameSpecification.getDisplayName()));
+            }
+        } catch (IOException ex) {
+            return regionDisplayNames;
+        }
+        return sortMap(regionDisplayNames);
     }
 
     private void readVmTypes() {
@@ -199,15 +220,15 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), displayName());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayName());
     }
 
-    private Map<String, String> displayName() {
-        Map<String, String> map = new HashMap<>();
-        map.put(AwsDiskType.Standard.value(), AwsDiskType.Standard.displayName());
-        map.put(AwsDiskType.Gp2.value(), AwsDiskType.Gp2.displayName());
-        map.put(AwsDiskType.Ephemeral.value(), AwsDiskType.Ephemeral.displayName());
-        map.put(AwsDiskType.St1.value(), AwsDiskType.St1.displayName());
+    private Map<DiskType, DisplayName> diskDisplayName() {
+        Map<DiskType, DisplayName> map = new HashMap<>();
+        map.put(diskType(AwsDiskType.Standard.value()), displayName(AwsDiskType.Standard.displayName()));
+        map.put(diskType(AwsDiskType.Gp2.value()), displayName(AwsDiskType.Gp2.displayName()));
+        map.put(diskType(AwsDiskType.Ephemeral.value()), displayName(AwsDiskType.Ephemeral.displayName()));
+        map.put(diskType(AwsDiskType.St1.value()), displayName(AwsDiskType.St1.displayName()));
         return map;
     }
 
@@ -234,7 +255,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Override
     public Regions regions() {
-        return new Regions(regions.keySet(), defaultRegion);
+        return new Regions(regions.keySet(), defaultRegion, regionDisplayNames);
     }
 
     @Override

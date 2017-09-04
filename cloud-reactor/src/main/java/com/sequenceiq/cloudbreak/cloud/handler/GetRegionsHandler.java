@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -40,18 +41,21 @@ public class GetRegionsHandler implements CloudPlatformEventHandler<GetPlatformR
         GetPlatformRegionsRequest request = getRegionsRequestEvent.getData();
         try {
             Map<Platform, Collection<Region>> platformRegions = Maps.newHashMap();
+            Map<Platform, Map<Region, DisplayName>> platformRegionsDisplayName = Maps.newHashMap();
             Map<Platform, Map<Region, List<AvailabilityZone>>> platformAvailabilityZones = Maps.newHashMap();
             Map<Platform, Region> platformDefaultRegion = Maps.newHashMap();
             for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 Region defaultRegion = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().regions().defaultType();
+                Map<Region, DisplayName> displayNames = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().regions().displayNames();
                 Collection<Region> regions = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().regions().types();
                 Map<Region, List<AvailabilityZone>> availabilityZones = cloudPlatformConnectors.getDefault(connector.getKey()).parameters()
                         .availabilityZones().getAll();
                 platformAvailabilityZones.put(connector.getKey(), availabilityZones);
                 platformRegions.put(connector.getKey(), regions);
+                platformRegionsDisplayName.put(connector.getKey(), displayNames);
                 platformDefaultRegion.put(connector.getKey(), defaultRegion);
             }
-            PlatformRegions pv = new PlatformRegions(platformRegions, platformAvailabilityZones, platformDefaultRegion);
+            PlatformRegions pv = new PlatformRegions(platformRegions, platformAvailabilityZones, platformDefaultRegion, platformRegionsDisplayName);
             GetPlatformRegionsResult getPlatformRegionsResult = new GetPlatformRegionsResult(request, pv);
             request.getResult().onNext(getPlatformRegionsResult);
             LOGGER.info("Query platform machine types types finished.");

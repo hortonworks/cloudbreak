@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.GEO_REDUNDANT;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.LOCALLY_REDUNDANT;
+import static com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType.PREMIUM_LOCALLY_REDUNDANT;
 import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
@@ -35,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -91,6 +96,8 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
+    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+
     private List<VmType> vmTypes = new ArrayList<>();
 
     private Map<AvailabilityZone, List<VmType>> vmTypesForZones = new HashMap<>();
@@ -104,9 +111,23 @@ public class AzurePlatformParameters implements PlatformParameters {
     @PostConstruct
     public void init() {
         this.regions = readRegions(resourceDefinition("zone"));
+        this.regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone"));
         readVmTypes();
         this.defaultRegion = getDefaultRegion();
         this.defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
+    }
+
+    private Map<Region, DisplayName> readRegionDisplayNames(String zone) {
+        Map<Region, DisplayName> regionsWithDisplayName = new HashMap<>();
+        try {
+            RegionsSpecification oRegions = JsonUtil.readValue(zone, RegionsSpecification.class);
+            for (RegionSpecification regionSpecification : oRegions.getItems()) {
+                regionsWithDisplayName.put(Region.region(regionSpecification.getName()), DisplayName.displayName(regionSpecification.getName()));
+            }
+        } catch (IOException e) {
+            return regionsWithDisplayName;
+        }
+        return sortMap(regionsWithDisplayName);
     }
 
     private void readVmTypes() {
@@ -197,12 +218,12 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), displayNames());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayNames());
     }
 
     @Override
     public Regions regions() {
-        return new Regions(regions.keySet(), defaultRegion);
+        return new Regions(regions.keySet(), defaultRegion, regionDisplayNames);
     }
 
     @Override
@@ -210,11 +231,11 @@ public class AzurePlatformParameters implements PlatformParameters {
         return new AvailabilityZones(regions);
     }
 
-    private Map<String, String> displayNames() {
-        Map<String, String> map = new HashMap<>();
-        map.put(AzureDiskType.GEO_REDUNDANT.value(), AzureDiskType.GEO_REDUNDANT.displayName());
-        map.put(AzureDiskType.LOCALLY_REDUNDANT.value(), AzureDiskType.LOCALLY_REDUNDANT.displayName());
-        map.put(AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.value(), AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.displayName());
+    private Map<DiskType, DisplayName> diskDisplayNames() {
+        Map<DiskType, DisplayName> map = new HashMap<>();
+        map.put(diskType(GEO_REDUNDANT.value()), displayName(GEO_REDUNDANT.displayName()));
+        map.put(diskType(LOCALLY_REDUNDANT.value()), displayName(LOCALLY_REDUNDANT.displayName()));
+        map.put(diskType(PREMIUM_LOCALLY_REDUNDANT.value()), displayName(PREMIUM_LOCALLY_REDUNDANT.displayName()));
         return map;
     }
 
@@ -228,14 +249,14 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private Map<String, VolumeParameterType> diskMappings() {
         Map<String, VolumeParameterType> map = new HashMap<>();
-        map.put(AzureDiskType.GEO_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
-        map.put(AzureDiskType.LOCALLY_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
-        map.put(AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
+        map.put(GEO_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
+        map.put(LOCALLY_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
+        map.put(PREMIUM_LOCALLY_REDUNDANT.value(), VolumeParameterType.MAGNETIC);
         return map;
     }
 
     private DiskType defaultDiskType() {
-        return diskType(AzureDiskType.LOCALLY_REDUNDANT.value());
+        return diskType(LOCALLY_REDUNDANT.value());
     }
 
     @Override

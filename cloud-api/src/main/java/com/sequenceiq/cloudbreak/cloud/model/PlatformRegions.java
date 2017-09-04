@@ -13,17 +13,21 @@ public class PlatformRegions {
 
     private final Map<Platform, Region> defaultRegions;
 
+    private final Map<Platform, Map<Region, DisplayName>> regionDisplayNames;
+
     public PlatformRegions(Map<Platform, Collection<Region>> regions, Map<Platform, Map<Region, List<AvailabilityZone>>> availabiltyZones,
-            Map<Platform, Region> defaultRegions) {
+            Map<Platform, Region> defaultRegions, Map<Platform, Map<Region, DisplayName>> regionDisplayNames) {
         this.regions = regions;
         this.availabiltyZones = availabiltyZones;
         this.defaultRegions = defaultRegions;
+        this.regionDisplayNames = regionDisplayNames;
     }
 
     public PlatformRegions() {
         this.regions = new HashMap<>();
         this.availabiltyZones = new HashMap<>();
         this.defaultRegions = new HashMap<>();
+        this.regionDisplayNames = new HashMap<>();
     }
 
     public Map<Platform, Collection<Region>> getRegions() {
@@ -36,5 +40,9 @@ public class PlatformRegions {
 
     public Map<Platform, Region> getDefaultRegions() {
         return defaultRegions;
+    }
+
+    public Map<Platform, Map<Region, DisplayName>> getRegionDisplayNames() {
+        return regionDisplayNames;
     }
 }

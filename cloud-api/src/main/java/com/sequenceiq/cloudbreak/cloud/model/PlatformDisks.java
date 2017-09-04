@@ -11,10 +11,10 @@ public class PlatformDisks {
 
     private Map<Platform, Map<String, VolumeParameterType>> diskMappings;
 
-    private Map<Platform, Map<String, String>> diskDisplayNames;
+    private Map<Platform, Map<DiskType, DisplayName>> diskDisplayNames;
 
     public PlatformDisks(Map<Platform, Collection<DiskType>> diskTypes, Map<Platform, DiskType> defaultDisks,
-            Map<Platform, Map<String, VolumeParameterType>> diskMappings, Map<Platform, Map<String, String>> diskDisplayNames) {
+            Map<Platform, Map<String, VolumeParameterType>> diskMappings, Map<Platform, Map<DiskType, DisplayName>> diskDisplayNames) {
         this.diskTypes = diskTypes;
         this.defaultDisks = defaultDisks;
         this.diskMappings = diskMappings;
@@ -40,7 +40,7 @@ public class PlatformDisks {
         return diskMappings;
     }
 
-    public Map<Platform, Map<String, String>> getDiskDisplayNames() {
+    public Map<Platform, Map<DiskType, DisplayName>> getDiskDisplayNames() {
         return diskDisplayNames;
     }
 }

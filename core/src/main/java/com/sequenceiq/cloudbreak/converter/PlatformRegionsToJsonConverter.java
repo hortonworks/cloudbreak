@@ -23,6 +23,7 @@ public class PlatformRegionsToJsonConverter extends AbstractConversionServiceAwa
         json.setAvailabilityZones(convertAvailibilityZones(source.getAvailabiltyZones()));
         json.setDefaultRegions(PlatformConverterUtil.convertDefaults(source.getDefaultRegions()));
         json.setRegions(PlatformConverterUtil.convertPlatformMap(source.getRegions()));
+        json.setDisplayNames(PlatformConverterUtil.convertDisplayNameMap(source.getRegionDisplayNames()));
         return json;
     }
 

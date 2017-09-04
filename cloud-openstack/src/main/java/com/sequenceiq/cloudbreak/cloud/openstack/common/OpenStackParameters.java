@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -71,6 +72,8 @@ public class OpenStackParameters implements PlatformParameters {
     private TagSpecification tagSpecification;
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+
+    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
     private Region defaultRegion;
 
@@ -113,7 +116,7 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Override
     public Regions regions() {
-        return new Regions(regions.keySet(), defaultRegion);
+        return new Regions(regions.keySet(), defaultRegion, regionDisplayNames);
     }
 
     @Override

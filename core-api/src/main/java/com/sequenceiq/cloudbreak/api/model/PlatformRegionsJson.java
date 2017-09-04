@@ -15,6 +15,9 @@ public class PlatformRegionsJson implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.REGIONS)
     private Map<String, Collection<String>> regions;
 
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.REGION_DISPLAYNAMES)
+    private Map<String, Map<String, String>> displayNames;
+
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.AVAILABILITY_ZONES)
     private Map<String, Map<String, Collection<String>>> availabilityZones;
 
@@ -25,6 +28,7 @@ public class PlatformRegionsJson implements JsonEntity {
         this.regions = new HashMap<>();
         this.availabilityZones = new HashMap<>();
         this.defaultRegions = new HashMap<>();
+        this.displayNames = new HashMap<>();
     }
 
     public Map<String, Collection<String>> getRegions() {
@@ -49,5 +53,13 @@ public class PlatformRegionsJson implements JsonEntity {
 
     public void setDefaultRegions(Map<String, String> defaultRegions) {
         this.defaultRegions = defaultRegions;
+    }
+
+    public Map<String, Map<String, String>> getDisplayNames() {
+        return displayNames;
+    }
+
+    public void setDisplayNames(Map<String, Map<String, String>> displayNames) {
+        this.displayNames = displayNames;
     }
 }
