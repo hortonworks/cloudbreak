@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 
 @Component
-public class CloudNetworksToPlatformNetworksResponse extends AbstractConversionServiceAwareConverter<CloudNetworks, PlatformNetworksResponse> {
+public class CloudNetworksToPlatformNetworksResponseConverter extends AbstractConversionServiceAwareConverter<CloudNetworks, PlatformNetworksResponse> {
 
     @Override
     public PlatformNetworksResponse convert(CloudNetworks source) {

@@ -142,7 +142,7 @@ public class MockPlatformParameters implements PlatformParameters {
         diskMappings.put(MockDiskType.MAGNETIC_DISK.value(), VolumeParameterType.MAGNETIC);
         diskMappings.put(MockDiskType.SSD.value(), VolumeParameterType.SSD);
         diskMappings.put(MockDiskType.EPHEMERAL.value(), VolumeParameterType.EPHEMERAL);
-        return new DiskTypes(getDiskTypes(), getDefaultDiskType(), diskMappings);
+        return new DiskTypes(getDiskTypes(), getDefaultDiskType(), diskMappings, new HashMap<>());
     }
 
     private Collection<DiskType> getDiskTypes() {

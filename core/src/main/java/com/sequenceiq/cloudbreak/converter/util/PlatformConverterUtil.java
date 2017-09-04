@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.api.client.util.Lists;
@@ -25,6 +26,18 @@ public class PlatformConverterUtil {
         Map<String, Collection<String>> result = Maps.newHashMap();
         for (Map.Entry<P, C> entry : vms.entrySet()) {
             result.put(entry.getKey().value(), convertList(entry.getValue()));
+        }
+        return result;
+    }
+
+    public static <P extends StringType, C extends Map<String, String>> Map<String, Map<String, String>> convertDisplayNameMap(Map<P, C> dNs) {
+        Map<String, Map<String, String>> result = Maps.newHashMap();
+        for (Map.Entry<P, C> entry : dNs.entrySet()) {
+            Map<String, String> innerMap = new HashMap<>();
+            for (Map.Entry<String, String> stringStringEntry : entry.getValue().entrySet()) {
+                innerMap.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+            }
+            result.put(entry.getKey().value(), innerMap);
         }
         return result;
     }

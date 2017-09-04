@@ -199,7 +199,16 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), displayName());
+    }
+
+    private Map<String, String> displayName() {
+        Map<String, String> map = new HashMap<>();
+        map.put(AwsDiskType.Standard.value(), AwsDiskType.Standard.displayName());
+        map.put(AwsDiskType.Gp2.value(), AwsDiskType.Gp2.displayName());
+        map.put(AwsDiskType.Ephemeral.value(), AwsDiskType.Ephemeral.displayName());
+        map.put(AwsDiskType.St1.value(), AwsDiskType.St1.displayName());
+        return map;
     }
 
     private Map<String, VolumeParameterType> diskMappings() {
@@ -317,19 +326,26 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     public enum AwsDiskType {
-        Standard("standard"),
-        Ephemeral("ephemeral"),
-        Gp2("gp2"),
-        St1("st1");
+        Standard("standard", "Magnetic"),
+        Ephemeral("ephemeral", "Ephemeral"),
+        Gp2("gp2", "General Purpose (SSD)"),
+        St1("st1", "Throughput Optimized HDD");
 
         private final String value;
 
-        AwsDiskType(String value) {
+        private final String displayName;
+
+        AwsDiskType(String value, String displayName) {
             this.value = value;
+            this.displayName = displayName;
         }
 
         public String value() {
             return value;
+        }
+
+        public String displayName() {
+            return displayName;
         }
     }
 }

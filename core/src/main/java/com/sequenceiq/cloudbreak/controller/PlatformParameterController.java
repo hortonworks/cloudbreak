@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -14,11 +15,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformNetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformResourceRequestJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupsResponse;
+import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
@@ -182,31 +186,31 @@ public class PlatformParameterController implements ConnectorEndpoint {
     }
 
     @Override
-    public PlatformNetworksResponse getCloudNetworks(PlatformResourceRequestJson resourceRequestJson) {
+    public Map<String, Set<PlatformNetworkResponse>> getCloudNetworks(PlatformResourceRequestJson resourceRequestJson) {
         resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudNetworks cloudNetworks = cloudParameterService.getCloudNetworks(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
-        return conversionService.convert(cloudNetworks, PlatformNetworksResponse.class);
+        return conversionService.convert(cloudNetworks, PlatformNetworksResponse.class).getNetworks();
     }
 
     @Override
-    public PlatformSshKeysResponse getCloudSshKeys(PlatformResourceRequestJson resourceRequestJson) {
+    public Map<String, Set<PlatformSshKeyResponse>> getCloudSshKeys(PlatformResourceRequestJson resourceRequestJson) {
         resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudSshKeys cloudSshKeys = cloudParameterService.getCloudSshKeys(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
-        return conversionService.convert(cloudSshKeys, PlatformSshKeysResponse.class);
+        return conversionService.convert(cloudSshKeys, PlatformSshKeysResponse.class).getSshKeys();
 
     }
 
     @Override
-    public PlatformSecurityGroupsResponse getSecurityGroups(PlatformResourceRequestJson resourceRequestJson) {
+    public Map<String, Set<PlatformSecurityGroupResponse>> getSecurityGroups(PlatformResourceRequestJson resourceRequestJson) {
         resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
         CloudSecurityGroups securityGroups = cloudParameterService.getSecurityGroups(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
-        return conversionService.convert(securityGroups, PlatformSecurityGroupsResponse.class);
+        return conversionService.convert(securityGroups, PlatformSecurityGroupsResponse.class).getSecurityGroups();
     }
 
     private PlatformResourceRequestJson prepareAccountAndOwner(PlatformResourceRequestJson resourceRequestJson, IdentityUser user) {

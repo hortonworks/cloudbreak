@@ -75,7 +75,7 @@ public class UserDataBuilderTest {
 
             @Override
             public DiskTypes diskTypes() {
-                return new DiskTypes(new ArrayList<>(), DiskType.diskType(""), new HashMap<>());
+                return new DiskTypes(new ArrayList<>(), DiskType.diskType(""), new HashMap<>(), new HashMap<>());
             }
 
             @Override

@@ -77,7 +77,7 @@ public class BYOSPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(Collections.emptyList(), DiskType.diskType(""), diskMappings());
+        return new DiskTypes(Collections.emptyList(), DiskType.diskType(""), diskMappings(), new HashMap<>());
     }
 
     private Map<String, VolumeParameterType> diskMappings() {
