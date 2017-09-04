@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 
 @Component
-public class CloudSshKeysToPlatformSshKeysResponse extends AbstractConversionServiceAwareConverter<CloudSshKeys, PlatformSshKeysResponse> {
+public class CloudSshKeysToPlatformSshKeysResponseConverter extends AbstractConversionServiceAwareConverter<CloudSshKeys, PlatformSshKeysResponse> {
 
     @Override
     public PlatformSshKeysResponse convert(CloudSshKeys source) {

@@ -42,15 +42,17 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
             Map<Platform, Collection<DiskType>> platformDiskTypes = Maps.newHashMap();
             Map<Platform, DiskType> defaultDiskTypes = Maps.newHashMap();
             Map<Platform, Map<String, VolumeParameterType>> diskMappings = Maps.newHashMap();
-
+            Map<Platform, Map<String, String>> diskDisplayNames = Maps.newHashMap();
 
             for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 DiskTypes diskTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().diskTypes();
                 defaultDiskTypes.put(connector.getKey(), diskTypes.defaultType());
                 platformDiskTypes.put(connector.getKey(), diskTypes.types());
                 diskMappings.put(connector.getKey(), diskTypes.diskMapping());
+                diskDisplayNames.put(connector.getKey(), diskTypes.displayNames());
             }
-            GetDiskTypesResult getDiskTypesResult = new GetDiskTypesResult(request, new PlatformDisks(platformDiskTypes, defaultDiskTypes, diskMappings));
+            GetDiskTypesResult getDiskTypesResult = new GetDiskTypesResult(request,
+                    new PlatformDisks(platformDiskTypes, defaultDiskTypes, diskMappings, diskDisplayNames));
             request.getResult().onNext(getDiskTypesResult);
             LOGGER.info("Query platform disk types finished.");
         } catch (Exception e) {

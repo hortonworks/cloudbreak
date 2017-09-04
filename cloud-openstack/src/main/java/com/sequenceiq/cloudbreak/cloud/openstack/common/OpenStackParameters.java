@@ -94,7 +94,7 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), new HashMap<>());
     }
 
     private Collection<DiskType> getDiskTypes() {

@@ -20,6 +20,7 @@ public class PlatformDiskTypesToJsonConverter extends AbstractConversionServiceA
         json.setDefaultDisks(PlatformConverterUtil.convertDefaults(source.getDefaultDisks()));
         json.setDiskTypes(PlatformConverterUtil.convertPlatformMap(source.getDiskTypes()));
         json.setDiskMappings(diskMappingsConvert(source.getDiskMappings()));
+        json.setDiskDisplayNames(PlatformConverterUtil.convertDisplayNameMap(source.getDiskDisplayNames()));
         return json;
     }
 

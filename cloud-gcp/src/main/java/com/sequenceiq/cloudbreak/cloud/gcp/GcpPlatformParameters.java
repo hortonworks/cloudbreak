@@ -189,7 +189,15 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), displayNames());
+    }
+
+    private Map<String, String> displayNames() {
+        Map<String, String> map = new HashMap<>();
+        map.put(GcpDiskType.HDD.value(), GcpDiskType.HDD.displayName());
+        map.put(GcpDiskType.SSD.value(), GcpDiskType.SSD.displayName());
+
+        return map;
     }
 
     private Map<String, VolumeParameterType> diskMappings() {
@@ -304,12 +312,15 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     public enum GcpDiskType {
-        SSD("pd-ssd"), HDD("pd-standard");
+        SSD("pd-ssd", "Solid-state persistent disks (SSD)"),
+        HDD("pd-standard", "Standard persistent disks (HDD)");
 
         private final String value;
+        private final String displayName;
 
-        GcpDiskType(String value) {
+        GcpDiskType(String value, String displayName) {
             this.value = value;
+            this.displayName = displayName;
         }
 
         public static String getUrl(String projectId, AvailabilityZone zone, String volumeId) {
@@ -318,6 +329,10 @@ public class GcpPlatformParameters implements PlatformParameters {
 
         public String value() {
             return value;
+        }
+
+        public String displayName() {
+            return displayName;
         }
 
         public String getUrl(String projectId, AvailabilityZone zone) {

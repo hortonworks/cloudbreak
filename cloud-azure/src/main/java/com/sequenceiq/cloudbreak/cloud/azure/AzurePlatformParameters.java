@@ -197,7 +197,7 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), displayNames());
     }
 
     @Override
@@ -208,6 +208,14 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public AvailabilityZones availabilityZones() {
         return new AvailabilityZones(regions);
+    }
+
+    private Map<String, String> displayNames() {
+        Map<String, String> map = new HashMap<>();
+        map.put(AzureDiskType.GEO_REDUNDANT.value(), AzureDiskType.GEO_REDUNDANT.displayName());
+        map.put(AzureDiskType.LOCALLY_REDUNDANT.value(), AzureDiskType.LOCALLY_REDUNDANT.displayName());
+        map.put(AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.value(), AzureDiskType.PREMIUM_LOCALLY_REDUNDANT.displayName());
+        return map;
     }
 
     private Collection<DiskType> getDiskTypes() {

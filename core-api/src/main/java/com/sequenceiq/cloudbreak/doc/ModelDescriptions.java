@@ -195,6 +195,7 @@ public class ModelDescriptions {
         public static final String DISK_TYPES = "disk types";
         public static final String DEFAULT_DISKS = "default disks";
         public static final String DISK_MAPPINGS = "disk mappings";
+        public static final String DISK_DISPLAYNAMES = "disk displayNames";
         public static final String IMAGES = "default images";
         public static final String IMAGES_REGEX = "images regex";
         public static final String TAG_SPECIFICATIONS = "tag specifications";

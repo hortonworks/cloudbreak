@@ -21,10 +21,14 @@ public class PlatformDisksJson implements JsonEntity {
     @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DISK_MAPPINGS)
     private Map<String, Map<String, String>> diskMappings;
 
+    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DISK_DISPLAYNAMES)
+    private Map<String, Map<String, String>> diskDisplayNames;
+
     public PlatformDisksJson() {
         this.diskTypes = new HashMap<>();
         this.defaultDisks = new HashMap<>();
         this.diskMappings = new HashMap<>();
+        this.diskDisplayNames = new HashMap<>();
     }
 
     public Map<String, Collection<String>> getDiskTypes() {
@@ -49,5 +53,13 @@ public class PlatformDisksJson implements JsonEntity {
 
     public void setDiskMappings(Map<String, Map<String, String>> diskMappings) {
         this.diskMappings = diskMappings;
+    }
+
+    public Map<String, Map<String, String>> getDiskDisplayNames() {
+        return diskDisplayNames;
+    }
+
+    public void setDiskDisplayNames(Map<String, Map<String, String>> diskDisplayNames) {
+        this.diskDisplayNames = diskDisplayNames;
     }
 }

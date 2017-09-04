@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 
 @Component
-public class CloudSecurityGroupsToPlatformSecurityGroupsResponse
+public class CloudSecurityGroupsToPlatformSecurityGroupsResponseConverter
         extends AbstractConversionServiceAwareConverter<CloudSecurityGroups, PlatformSecurityGroupsResponse> {
 
     @Override
