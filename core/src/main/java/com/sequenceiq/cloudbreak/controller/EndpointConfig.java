@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.HttpRequestMethodNotSupported
 import com.sequenceiq.cloudbreak.controller.mapper.MethodArgumentNotValidExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.NotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.RuntimeExceptionMapper;
+import com.sequenceiq.cloudbreak.controller.mapper.SmartSenseNotFoundExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SpringAccessDeniedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SpringBadRequestExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.SubscriptionAlreadyExistExceptionMapper;
@@ -89,6 +90,7 @@ public class EndpointConfig extends ResourceConfig {
         register(HttpRequestMethodNotSupportedExceptionMapper.class);
         register(MethodArgumentNotValidExceptionMapper.class);
         register(NotFoundExceptionMapper.class);
+        register(SmartSenseNotFoundExceptionMapper.class);
         register(SpringAccessDeniedExceptionMapper.class);
         register(SpringBadRequestExceptionMapper.class);
         register(SubscriptionAlreadyExistExceptionMapper.class);
