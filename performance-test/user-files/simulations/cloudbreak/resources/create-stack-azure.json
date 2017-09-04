@@ -1,0 +1,54 @@
+{
+  "name": "${stackName}",
+  "credentialId": ${azureCredentialId},
+  "region": "North Europe",
+  "failurePolicy": {
+    "adjustmentType": "BEST_EFFORT",
+    "threshold": null
+  },
+  "onFailureAction": "DO_NOTHING",
+  "instanceGroups": [
+    {
+      "templateId": ${azureTemplateId},
+      "securityGroupId": ${azureSecurityGroupId},
+      "group": "master",
+      "nodeCount": 1,
+      "type": "GATEWAY",
+      "parameters": {
+        "availabilitySet": {
+          "name": "",
+          "faultDomainCount": 3
+        }
+      }
+    },
+    {
+      "templateId": ${azureTemplateId},
+      "securityGroupId": ${azureSecurityGroupId},
+      "group": "slave_1",
+      "nodeCount": 1,
+      "type": "CORE",
+      "parameters": {
+        "availabilitySet": {
+          "name": "",
+          "faultDomainCount": 3
+        }
+      }
+    }
+  ],
+  "parameters": {
+    "persistentStorage": "cbstore",
+    "attachedStorageOption": "SINGLE"
+  },
+  "networkId": ${azureNetworkId},
+  "relocateDocker": true,
+  "availabilityZone": null,
+  "orchestrator": {
+    "type": "SALT"
+  },
+  "tags": {
+    "userDefined": {}
+  },
+  "platformVariant": "AZURE",
+  "customImage": null,
+  "flexId": null
+}
