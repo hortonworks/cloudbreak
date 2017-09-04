@@ -15,9 +15,10 @@ public class DiskTypes extends CloudTypes<DiskType> {
 
     private final Map<String, VolumeParameterType> diskMapping;
 
-    private final Map<String, String> displayNames;
+    private final Map<DiskType, DisplayName> displayNames;
 
-    public DiskTypes(Collection<DiskType> diskTypes, DiskType defaultDiskType, Map<String, VolumeParameterType> diskMapping, Map<String, String> displayNames) {
+    public DiskTypes(Collection<DiskType> diskTypes, DiskType defaultDiskType, Map<String, VolumeParameterType> diskMapping,
+            Map<DiskType, DisplayName> displayNames) {
         super(diskTypes, defaultDiskType);
         this.diskMapping = diskMapping;
         this.displayNames = displayNames;
@@ -27,7 +28,7 @@ public class DiskTypes extends CloudTypes<DiskType> {
         return diskMapping;
     }
 
-    public Map<String, String> displayNames() {
+    public Map<DiskType, DisplayName> displayNames() {
         return displayNames;
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
 import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
@@ -36,9 +37,12 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
 import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
@@ -90,6 +94,8 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
 
+    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+
     private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
 
     private Region defaultRegion;
@@ -102,6 +108,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     public void init() {
         this.regions = readRegionsGcp();
         this.vmTypes = readVmTypes();
+        this.regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
 
         this.defaultRegion = getDefaultRegion();
         this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
@@ -109,9 +116,23 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     private void initDefaultVmTypes() {
-        for (Map.Entry<AvailabilityZone, List<VmType>> vmType: vmTypes.entrySet()) {
+        for (Map.Entry<AvailabilityZone, List<VmType>> vmType : vmTypes.entrySet()) {
             defaultVmTypes.put(vmType.getKey(), nthElement(vmType.getValue(), DEFAULT_VM_TYPE_POSITION));
         }
+    }
+
+    private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
+        Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+        try {
+            RegionDisplayNameSpecifications regionDisplayNameSpecifications = JsonUtil.readValue(displayNames, RegionDisplayNameSpecifications.class);
+            for (RegionDisplayNameSpecification regionDisplayNameSpecification : regionDisplayNameSpecifications.getItems()) {
+                regionDisplayNames.put(Region.region(regionDisplayNameSpecification.getName()),
+                        displayName(regionDisplayNameSpecification.getDisplayName()));
+            }
+        } catch (IOException ex) {
+            return regionDisplayNames;
+        }
+        return sortMap(regionDisplayNames);
     }
 
     private Map<AvailabilityZone, List<VmType>> readVmTypes() {
@@ -189,13 +210,13 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), displayNames());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayNames());
     }
 
-    private Map<String, String> displayNames() {
-        Map<String, String> map = new HashMap<>();
-        map.put(GcpDiskType.HDD.value(), GcpDiskType.HDD.displayName());
-        map.put(GcpDiskType.SSD.value(), GcpDiskType.SSD.displayName());
+    private Map<DiskType, DisplayName> diskDisplayNames() {
+        Map<DiskType, DisplayName> map = new HashMap<>();
+        map.put(diskType(GcpDiskType.HDD.value()), displayName(GcpDiskType.HDD.displayName()));
+        map.put(diskType(GcpDiskType.SSD.value()), displayName(GcpDiskType.SSD.displayName()));
 
         return map;
     }
@@ -222,7 +243,7 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public Regions regions() {
-        return new Regions(regions.keySet(), defaultRegion);
+        return new Regions(regions.keySet(), defaultRegion, regionDisplayNames);
     }
 
     @Override

@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -42,7 +43,7 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
             Map<Platform, Collection<DiskType>> platformDiskTypes = Maps.newHashMap();
             Map<Platform, DiskType> defaultDiskTypes = Maps.newHashMap();
             Map<Platform, Map<String, VolumeParameterType>> diskMappings = Maps.newHashMap();
-            Map<Platform, Map<String, String>> diskDisplayNames = Maps.newHashMap();
+            Map<Platform, Map<DiskType, DisplayName>> diskDisplayNames = Maps.newHashMap();
 
             for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 DiskTypes diskTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().diskTypes();

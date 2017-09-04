@@ -80,7 +80,7 @@ public class UserDataBuilderTest {
 
             @Override
             public Regions regions() {
-                return new Regions(new ArrayList<>(), Region.region(""));
+                return new Regions(new ArrayList<>(), Region.region(""), new HashMap<>());
             }
 
             @Override

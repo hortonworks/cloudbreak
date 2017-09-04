@@ -30,12 +30,13 @@ public class PlatformConverterUtil {
         return result;
     }
 
-    public static <P extends StringType, C extends Map<String, String>> Map<String, Map<String, String>> convertDisplayNameMap(Map<P, C> dNs) {
+    public static <P extends StringType, T extends StringType, C extends StringType> Map<String, Map<String, String>>
+        convertDisplayNameMap(Map<P, Map<T, C>> dNs) {
         Map<String, Map<String, String>> result = Maps.newHashMap();
-        for (Map.Entry<P, C> entry : dNs.entrySet()) {
+        for (Map.Entry<P, Map<T, C>> entry : dNs.entrySet()) {
             Map<String, String> innerMap = new HashMap<>();
-            for (Map.Entry<String, String> stringStringEntry : entry.getValue().entrySet()) {
-                innerMap.put(stringStringEntry.getKey(), stringStringEntry.getValue());
+            for (Map.Entry<T, C> tzEntry : entry.getValue().entrySet()) {
+                innerMap.put(tzEntry.getKey().value(), tzEntry.getValue().value());
             }
             result.put(entry.getKey().value(), innerMap);
         }

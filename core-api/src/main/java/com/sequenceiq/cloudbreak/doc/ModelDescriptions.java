@@ -207,6 +207,7 @@ public class ModelDescriptions {
         public static final String DEFAULT_VIRTUAL_MACHINES_PER_ZONES = "default virtual machines per zones";
         public static final String VIRTUAL_MACHINES_PER_ZONES = "virtual machines per zones";
         public static final String REGIONS = "regions";
+        public static final String REGION_DISPLAYNAMES = "regions with displayNames";
         public static final String AVAILABILITY_ZONES = "availability zones";
         public static final String DEFAULT_REGIOS = "default regions";
     }

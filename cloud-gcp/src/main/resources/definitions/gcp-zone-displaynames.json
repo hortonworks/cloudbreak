@@ -1,0 +1,20 @@
+{
+  "items": [
+    {
+      "name": "us-central1",
+      "displayName": "Central US"
+    },
+    {
+      "name": "europe-west1",
+      "displayName": "Western Europe"
+    },
+    {
+      "name": "asia-east1",
+      "displayName": "East Asia"
+    },
+    {
+      "name": "us-east1",
+      "displayName": "Eastern US"
+    }
+  ]
+}
