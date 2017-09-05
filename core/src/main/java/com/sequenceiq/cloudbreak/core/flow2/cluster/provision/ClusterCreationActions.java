@@ -72,7 +72,7 @@ public class ClusterCreationActions {
         return new AbstractClusterAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
             @Override
             protected void doExecute(ClusterContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
-                clusterCreationService.startingAmbariServices(context.getStack(), context.getCluster());
+                clusterCreationService.startingAmbariServices(context.getStack());
                 sendEvent(context);
             }
 

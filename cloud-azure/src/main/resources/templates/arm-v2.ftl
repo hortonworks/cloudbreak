@@ -304,7 +304,7 @@
                            "vmSize": "${instance.flavor}"
                        },
                        "osProfile": {
-                           "computername": "${instance.hostName}",
+                           "computername": "${instance.instanceName}",
                            "adminUsername": "[parameters('adminUsername')]",
                            <#if disablePasswordAuthentication == false>
                            "adminPassword": "${credential.password}",
