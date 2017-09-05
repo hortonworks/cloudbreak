@@ -53,14 +53,6 @@ compose-pull-parallel() {
     (sed -n "s/.*image://p" docker-compose.yml ; echo "${DOCKER_IMAGE_CLOUDBREAK_SHELL}:${DOCKER_TAG_CLOUDBREAK_SHELL}") |sort -u|xargs -n1 -P 20 docker pull
 }
 
-create-logfile() {
-
-    rm -f ${CBD_LOG_NAME}.log
-    export LOG=${CBD_LOG_NAME}-$(date +%Y%m%d-%H%M%S).log
-    touch $LOG
-    ln -s $LOG ${CBD_LOG_NAME}.log
-}
-
 compose-up() {
     dockerCompose up -d "$@"
 }
@@ -227,6 +219,9 @@ traefik:
         - /var/run/docker.sock:/var/run/docker.sock
         - ./certs/traefik:/certs/traefik
         - ./logs/traefik:/opt/traefik/log/
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: traefik:$DOCKER_TAG_TRAEFIK
     restart: on-failure
     command: --debug --web --InsecureSkipVerify=true \
@@ -242,6 +237,9 @@ haveged:
     labels:
       - traefik.enable=false
     privileged: true
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: hortonworks/haveged:$DOCKER_TAG_HAVEGED
 
 consul:
@@ -259,6 +257,9 @@ consul:
         - "8400:8400"
         - "8500:8500"
     hostname: node1
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: gliderlabs/consul-server:$DOCKER_TAG_CONSUL
     command: --bootstrap --advertise $PRIVATE_IP $DOCKER_CONSUL_OPTIONS
 
@@ -268,6 +269,9 @@ registrator:
     privileged: true
     volumes:
         - "/var/run/docker.sock:/tmp/docker.sock"
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: gliderlabs/registrator:$DOCKER_TAG_REGISTRATOR
     links:
         - consul
@@ -281,8 +285,11 @@ logsink:
     environment:
         - SERVICE_NAME=logsink
     volumes:
-        - .:/tmp
+        - ./logs:/tmp
     image: hortonworks/socat:1.0.0
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     command: socat -u TCP-LISTEN:3333,reuseaddr,fork OPEN:/tmp/cbreak.log,creat,append
 
 logspout:
@@ -299,9 +306,24 @@ logspout:
         - logsink
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    image: gliderlabs/logspout:v3.1
     entrypoint: ["/bin/sh"]
     command: -c 'sleep 1; ROUTE_URIS=\$\$LOGSINK_PORT_3333_TCP /bin/logspout'
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: hortonworks/logspout:v3.2.2
+
+logrotate:
+    environment:
+        - "CRON_EXPR=0 * * * *"
+        - LOGROTATE_LOGFILES=/var/log/cloudbreak-deployer/*/*.log
+        - LOGROTATE_FILESIZE=10M
+    volumes:
+        - ./logs:/var/log/cloudbreak-deployer
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
+    image: hortonworks/logrotate:$DOCKER_TAG_LOGROTATE
 
 mail:
     labels:
@@ -312,6 +334,9 @@ mail:
         - SERVICE_NAME=smtp
         - maildomain=example.com
         - 'smtp_user=admin:$(escape-string-compose-yaml $LOCAL_SMTP_PASSWORD \')'
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: catatnight/postfix:$DOCKER_TAG_POSTFIX
 
 smartsense:
@@ -336,6 +361,9 @@ smartsense:
     dns: $PRIVATE_IP
     volumes:
         - .:/var/lib/cloudbreak-deployment
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: $DOCKER_IMAGE_CBD_SMARTSENSE:$DOCKER_TAG_CBD_SMARTSENSE
 
 commondb:
@@ -349,6 +377,9 @@ commondb:
         #- SERVICE_CHECK_CMD=bash -c 'psql -h 127.0.0.1 -p 5432  -U postgres -c "select 1"'
     volumes:
         - "$COMMON_DB_VOL:/var/lib/postgresql/data"
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: postgres:$DOCKER_TAG_POSTGRES
     command: 'postgres -c max_connections=300'
 
@@ -373,6 +404,9 @@ identity:
     volumes:
       - ./uaa.yml:/uaa/uaa.yml
       - ./logs/identity:/tomcat/logs/
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: hortonworks/cloudbreak-uaa:$DOCKER_TAG_UAA
 
 cloudbreak:
@@ -462,6 +496,9 @@ cloudbreak:
     dns: $PRIVATE_IP
     links:
         - consul
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: $DOCKER_IMAGE_CLOUDBREAK:$DOCKER_TAG_CLOUDBREAK
     command: bash
 
@@ -505,6 +542,9 @@ sultans:
     volumes:
         - $SULTANS_VOLUME_HOST:$SULTANS_VOLUME_CONTAINER
     dns: $PRIVATE_IP
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: $DOCKER_IMAGE_CLOUDBREAK_AUTH:$DOCKER_TAG_SULTANS
 
 uluwatu:
@@ -555,6 +595,9 @@ uluwatu:
     volumes:
         - $ULUWATU_VOLUME_HOST:$ULUWATU_VOLUME_CONTAINER
     dns: $PRIVATE_IP
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: $DOCKER_IMAGE_CLOUDBREAK_WEB:$DOCKER_TAG_ULUWATU
 
 periscope:
@@ -604,6 +647,9 @@ periscope:
         - "$CBD_CERT_ROOT_PATH:/certs"
         - ./logs/autoscale:/autoscale-log
         - /dev/urandom:/dev/random
+    log_opt:
+        max-size: "10M"
+        max-file: "5"
     image: $DOCKER_IMAGE_CLOUDBREAK_PERISCOPE:$DOCKER_TAG_PERISCOPE
 
 EOF

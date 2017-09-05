@@ -474,7 +474,6 @@ start-requested-services() {
         fi
     fi
 
-    create-logfile
     compose-up $services
     hdc-cli-downloadable
 }
