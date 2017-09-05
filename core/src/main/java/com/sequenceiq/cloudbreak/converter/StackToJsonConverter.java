@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -28,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -158,15 +158,21 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
 
     private void convertTags(StackResponse stackJson, Json tag) {
         try {
-            Map<String, Object> tags = new HashMap<>();
             if (tag != null) {
                 if (tag.getValue() != null) {
-                    stackJson.setTags(tag.get(Map.class));
+                    StackTags stackTag = tag.get(StackTags.class);
+                    stackJson.setApplicationTags(stackTag.getApplicationTags());
+                    stackJson.setDefaultTags(stackTag.getDefaultTags());
+                    stackJson.setUserDefinedTags(stackTag.getUserDefinedTags());
                 } else {
-                    stackJson.setTags(tags);
+                    stackJson.setApplicationTags(new HashMap<>());
+                    stackJson.setDefaultTags(new HashMap<>());
+                    stackJson.setUserDefinedTags(new HashMap<>());
                 }
             } else {
-                stackJson.setTags(new HashMap<>());
+                stackJson.setApplicationTags(new HashMap<>());
+                stackJson.setDefaultTags(new HashMap<>());
+                stackJson.setUserDefinedTags(new HashMap<>());
             }
         } catch (Exception e) {
             LOGGER.error("Failed to convert dynamic tags.", e);

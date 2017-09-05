@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.PortDefinition;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
@@ -86,8 +87,9 @@ public class StackToCloudStackConverter {
         Map<String, String> result = Maps.newHashMap();
         try {
             if (stack.getTags() != null) {
-                Map<String, String> userDefined = (Map<String, String>) stack.getTags().get(Map.class).get("userDefined");
-                Map<String, String> defaultTags = (Map<String, String>) stack.getTags().get(Map.class).get("defaultTags");
+                StackTags stackTag = stack.getTags().get(StackTags.class);
+                Map<String, String> userDefined = stackTag.getUserDefinedTags();
+                Map<String, String> defaultTags = stackTag.getDefaultTags();
                 if (userDefined != null) {
                     result.putAll(userDefined);
                 }

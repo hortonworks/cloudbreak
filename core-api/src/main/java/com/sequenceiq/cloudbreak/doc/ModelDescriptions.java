@@ -113,7 +113,9 @@ public class ModelDescriptions {
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
         public static final String CUSTOM_IMAGE = "custom image for the cluster";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
-        public static final String TAGS = "stack related tags";
+        public static final String APPLICATION_TAGS = "stack related application tags";
+        public static final String DEFAULT_TAGS = "stack related default tags";
+        public static final String USERDEFINED_TAGS = "stack related userdefined tags";
         public static final String CREDENTIAL = "stack related credential";
         public static final String FILESYSTEM = "cluster related filesystem";
         public static final String NETWORK = "stack related network";
