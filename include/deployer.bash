@@ -104,10 +104,8 @@ cbd-update-release() {
 
         local url=https://github.com/hortonworks/cloudbreak-deployer/releases/download/v${lastver}/cloudbreak-deployer_${lastver}_${osarch}.tgz
         info "Updating $SELF_EXECUTABLE from url: $url"
-        create-temp-dir
         curl -Ls $url | tar -zx -C $TEMP_DIR
         mv $TEMP_DIR/cbd $SELF_EXECUTABLE
-        rm -rf "$TEMP_DIR"
         debug $SELF_EXECUTABLE is updated
     else
         debug you have the latest version | green
@@ -120,10 +118,8 @@ cbd-update-snap() {
 
     url=$(cci-latest hortonworks/cloudbreak-deployer $branch)
     info "Update $SELF_EXECUTABLE from: $url"
-    create-temp-dir
     curl -Ls $url | tar -zx -C $TEMP_DIR
     mv $TEMP_DIR/cbd $SELF_EXECUTABLE
-    rm -rf "$TEMP_DIR"
     debug $SELF_EXECUTABLE is updated
 }
 
@@ -534,6 +530,7 @@ main() {
     start-time-init
 	color-init
     deps-init
+    create-temp-dir
     deps-require sed
     if is_command_needs_profile $1; then
         init-profile
@@ -622,5 +619,6 @@ main() {
 	else
 		cmd-ns "" "$@"
 	fi
+    rm -rf $TEMP_DIR
     docker-kill-all-sidekicks
 }

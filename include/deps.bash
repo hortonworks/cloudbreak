@@ -14,9 +14,7 @@ deps-require() {
 	declare name="$1" version="${2:-latest}"
 	deps-check "$name" "$version" && return
 	echo "* Dependency required, installing $name $version ..." | yellow
-	create-temp-dir
 	deps-install "$name" "$version"
-	rm -rf "$TEMP_DIR"
 }
 
 deps-check() {
@@ -45,7 +43,7 @@ deps-install() {
 			_exit 2
 		fi
 	fi
-	cd "$TEMP_DIR"
+	cd $TEMP_DIR
 	filename="$(basename "$url")"
 	extension="${filename##*.}"
 	case "$extension" in

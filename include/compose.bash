@@ -162,7 +162,7 @@ compose-generate-check-diff() {
                 (diff $compose_delme_path docker-compose.yml || true) | debug-cat
             fi
             return 1
-         fi
+        fi
     fi
     return 0
 }

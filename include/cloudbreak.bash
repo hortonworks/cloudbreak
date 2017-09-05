@@ -429,7 +429,6 @@ generate_uaa_check_diff() {
                 (diff $uaa_delme_path uaa.yml || true) | debug-cat
             fi
             return 1
-
         fi
     else
         generate_uaa_config_force uaa.yml
