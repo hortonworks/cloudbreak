@@ -522,7 +522,7 @@ _exit() {
 }
 
 is_command_needs_profile() {
-    [[ ' '"aws azure bash-complete help init machine version update delete"' ' != *" $1 "* ]]
+    [[ ' '"aws bash-complete help init machine version update delete"' ' != *" $1 "* ]]
 }
 
 main() {
@@ -567,9 +567,6 @@ main() {
     cmd-export aws-list-roles
     cmd-export aws-certs-upload-s3
     cmd-export aws-certs-restore-s3
-
-    cmd-export-ns azure "Azure namespace"
-    cmd-export azure-configure-arm
 
     cmd-export-ns machine "Docker-machine"
     cmd-export machine-create
