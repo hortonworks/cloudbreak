@@ -59,16 +59,15 @@ public class AzureInstanceView {
      */
     public String getHostName() {
         String hostName = instance.getStringParameter(CloudInstance.DISCOVERY_NAME);
-        if (hostName == null) {
-            String shortenedStackname;
-            if (stackName.length() > stackNamePrefixLength) {
-                shortenedStackname = stackName.substring(0, stackNamePrefixLength);
-            } else {
-                shortenedStackname = stackName;
-            }
-            hostName = shortenedStackname + "-" + getInstanceId();
-        }
-        return hostName;
+        return hostName == null ? getInstanceName() : hostName;
+    }
+
+    /**
+     * Used in freemarker template.
+     */
+    public String getInstanceName() {
+        String shortenedStackName = stackName.length() > stackNamePrefixLength ? stackName.substring(0, stackNamePrefixLength) : stackName;
+        return shortenedStackName + "-" + getInstanceId();
     }
 
     /**

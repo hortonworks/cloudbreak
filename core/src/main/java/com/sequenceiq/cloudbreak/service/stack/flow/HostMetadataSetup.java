@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,7 +48,7 @@ public class HostMetadataSetup {
         Stack stack = stackService.getById(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
-            updateWithHostData(stack, Collections.emptySet());
+            updateWithHostData(stack, stack.getRunningInstanceMetaData());
             instanceMetaDataRepository.save(allInstanceMetaData);
         }
     }
@@ -66,26 +65,18 @@ public class HostMetadataSetup {
         }
     }
 
-    private void updateWithHostData(Stack stack, Set<InstanceMetaData> newInstanceMetadata)
-            throws CloudbreakSecuritySetupException {
+    private void updateWithHostData(Stack stack, Set<InstanceMetaData> metadataToUpdate) throws CloudbreakSecuritySetupException {
         try {
-            Set<InstanceMetaData> metadataToUpdate;
-            if (newInstanceMetadata == null || newInstanceMetadata.isEmpty()) {
-                metadataToUpdate = stack.getRunningInstanceMetaData();
-            } else {
-                metadataToUpdate = newInstanceMetadata;
-            }
             List<String> privateIps = metadataToUpdate.stream().map(InstanceMetaData::getPrivateIp).collect(Collectors.toList());
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
             Map<String, String> members = hostOrchestrator.getMembers(gatewayConfig, privateIps);
             LOGGER.info("Received host names from hosts: {}, original targets: {}", members.values(), privateIps);
             for (InstanceMetaData instanceMetaData : metadataToUpdate) {
-                String privateIp = instanceMetaData.getPrivateIp();
-                String address = members.get(privateIp);
                 instanceMetaData.setConsulServer(false);
+                String address = members.get(instanceMetaData.getPrivateIp());
                 instanceMetaData.setDiscoveryFQDN(address);
-                LOGGER.info("Domain used for isntance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
+                LOGGER.info("Domain used for instance: {} original: {}, fqdn: {}", instanceMetaData.getInstanceId(), address,
                         instanceMetaData.getDiscoveryFQDN());
             }
         } catch (Exception e) {

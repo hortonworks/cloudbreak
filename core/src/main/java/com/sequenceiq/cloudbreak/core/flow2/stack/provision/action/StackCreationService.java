@@ -56,7 +56,6 @@ import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetadataService;
@@ -72,6 +71,7 @@ import reactor.bus.EventBus;
 
 @Component
 public class StackCreationService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationService.class);
 
     @Inject
@@ -88,9 +88,6 @@ public class StackCreationService {
 
     @Inject
     private EventBus eventBus;
-
-    @Inject
-    private CloudbreakMessagesService messagesService;
 
     @Inject
     private ServiceProviderConnectorAdapter connector;

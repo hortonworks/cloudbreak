@@ -61,7 +61,7 @@ public class ClusterCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void startingAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
+    public void startingAmbariServices(Stack stack) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_AMBARI_SERVICES, "Running cluster services.");

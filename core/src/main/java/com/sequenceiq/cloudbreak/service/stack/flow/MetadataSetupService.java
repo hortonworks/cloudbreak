@@ -8,8 +8,6 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
@@ -28,7 +26,6 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 
 @Service
 public class MetadataSetupService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MetadataSetupService.class);
 
     @Inject
     private ServiceProviderMetadataAdapter metadata;

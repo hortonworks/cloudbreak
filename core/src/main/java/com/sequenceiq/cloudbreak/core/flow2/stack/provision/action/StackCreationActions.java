@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Configuration
 public class StackCreationActions {
-    public static final String TLS_INFO_KEY = "TLS_INFO";
 
     @Inject
     private ImageService imageService;
