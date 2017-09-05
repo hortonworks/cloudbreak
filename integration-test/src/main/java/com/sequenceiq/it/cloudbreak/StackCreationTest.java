@@ -71,7 +71,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         stackRequest.setInstanceGroups(igMap);
 
         if (!userDefinedTags.isEmpty()) {
-            stackRequest.setTags(userDefinedTagsMap(userDefinedTags));
+            stackRequest.setUserDefinedTags(TagsUtil.getTagsToCheck(userDefinedTags));
         }
 
         OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
@@ -92,11 +92,5 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         itContext.putContextParam(CloudbreakITContextConstants.STACK_ID, stackId);
         ScalingUtil.putInstanceCountToContext(itContext, stackId);
-    }
-
-    private Map<String, Object> userDefinedTagsMap(String userDefinedTag) {
-        Map<String, Object> tags = new HashMap<>();
-        tags.put("userDefined", TagsUtil.getTagsToCheck(userDefinedTag));
-        return tags;
     }
 }

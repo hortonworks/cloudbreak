@@ -80,8 +80,7 @@ public class TagsUtil {
     }
 
     protected static Map<String, String> checkTagsStack(StackResponse stackResponse) {
-        Map<String, Object> tagsList = stackResponse.getTags();
-        Map<String, String> userDefinedTagsList = (Map<String, String>) tagsList.get("userDefined");
+        Map<String, String> userDefinedTagsList = stackResponse.getUserDefinedTags();
         Assert.assertNotNull(userDefinedTagsList);
         return userDefinedTagsList;
     }

@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
@@ -81,8 +82,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setRegion(getRegion(source));
         setPlatform(source);
         stack.setCloudPlatform(source.getCloudPlatform());
-        Map<String, Object> sourceTags = source.getTags();
-        stack.setTags(getTags(mergeTags(sourceTags, getDefaultTags(source.getAccount()))));
+        Map<String, String> sourceTags = source.getApplicationTags();
+        stack.setTags(getTags(mergeTags(sourceTags, source.getUserDefinedTags(), getDefaultTags(source.getAccount()))));
         if (sourceTags != null && sourceTags.get("datalakeId") != null) {
             stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
         }
@@ -118,10 +119,10 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         }
     }
 
-    private Json getTags(Map<String, Object> tags) {
+    private Json getTags(StackTags tags) {
         try {
-            if (tags == null || tags.isEmpty()) {
-                return new Json(new HashMap<>());
+            if (tags == null) {
+                return new Json(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
             }
             return new Json(tags);
         } catch (Exception e) {
@@ -129,8 +130,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         }
     }
 
-    private Object getDefaultTags(String account) {
-        Object result = new HashMap<String, String>();
+    private Map<String, String> getDefaultTags(String account) {
+        Map<String, String> result = new HashMap<>();
         try {
             AccountPreferences pref = accountPreferencesService.getByAccount(account);
             if (pref != null && pref.getDefaultTags() != null && StringUtils.isNoneBlank(pref.getDefaultTags().getValue())) {
@@ -142,10 +143,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         return result;
     }
 
-    private Map<String, Object> mergeTags(Map<String, Object> tags, Object defaultTags) {
-        Map<String, Object> result = new HashMap<>(tags);
-        result.put("defaultTags", defaultTags);
-        return result;
+    private StackTags mergeTags(Map<String, String> applicationTags, Map<String, String> userDefinedTags, Map<String, String> defaultTags) {
+        return new StackTags(userDefinedTags, applicationTags, defaultTags);
     }
 
     private String getRegion(StackRequest source) {

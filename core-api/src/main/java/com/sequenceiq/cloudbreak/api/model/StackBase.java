@@ -54,9 +54,6 @@ public abstract class StackBase implements JsonEntity {
     @ApiModelProperty(StackModelDescription.PARAMETERS)
     private Map<String, String> parameters = new HashMap<>();
 
-    @ApiModelProperty(StackModelDescription.TAGS)
-    private Map<String, Object> tags = new HashMap<>();
-
     @ApiModelProperty(StackModelDescription.CUSTOM_DOMAIN)
     private String customDomain;
 
@@ -68,6 +65,15 @@ public abstract class StackBase implements JsonEntity {
 
     @ApiModelProperty(StackModelDescription.HOSTGROUP_NAME_AS_HOSTNAME)
     private boolean hostgroupNameAsHostname;
+
+    @ApiModelProperty(StackModelDescription.APPLICATION_TAGS)
+    private Map<String, String> applicationTags = new HashMap<>();
+
+    @ApiModelProperty(StackModelDescription.USERDEFINED_TAGS)
+    private Map<String, String> userDefinedTags = new HashMap<>();
+
+    @ApiModelProperty(StackModelDescription.DEFAULT_TAGS)
+    private Map<String, String> defaultTags = new HashMap<>();
 
     public OnFailureAction getOnFailureAction() {
         return onFailureAction;
@@ -159,14 +165,6 @@ public abstract class StackBase implements JsonEntity {
         this.hdpVersion = hdpVersion;
     }
 
-    public Map<String, Object> getTags() {
-        return tags;
-    }
-
-    public void setTags(Map<String, Object> tags) {
-        this.tags = tags;
-    }
-
     public String getCustomDomain() {
         return customDomain;
     }
@@ -197,5 +195,29 @@ public abstract class StackBase implements JsonEntity {
 
     public void setHostgroupNameAsHostname(boolean hostgroupNameAsHostname) {
         this.hostgroupNameAsHostname = hostgroupNameAsHostname;
+    }
+
+    public Map<String, String> getApplicationTags() {
+        return applicationTags;
+    }
+
+    public void setApplicationTags(Map<String, String> applicationTags) {
+        this.applicationTags = applicationTags;
+    }
+
+    public Map<String, String> getUserDefinedTags() {
+        return userDefinedTags;
+    }
+
+    public void setUserDefinedTags(Map<String, String> userDefinedTags) {
+        this.userDefinedTags = userDefinedTags;
+    }
+
+    public Map<String, String> getDefaultTags() {
+        return defaultTags;
+    }
+
+    public void setDefaultTags(Map<String, String> defaultTags) {
+        this.defaultTags = defaultTags;
     }
 }

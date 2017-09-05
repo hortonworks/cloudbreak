@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.shell.commands.base;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -284,7 +283,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setPlatformVariant(platformVariant == null ? "" : platformVariant.getName());
             stackRequest.setCloudPlatform(platform);
             stackRequest.setParameters(params);
-            stackRequest.setTags(Collections.singletonMap("userDefined", userDefinedTags));
+            stackRequest.setUserDefinedTags(userDefinedTags);
             stackRequest.setAmbariVersion(ambariVersion);
             stackRequest.setHdpVersion(hdpVersion);
             stackRequest.setImageCatalog(imageCatalog);
