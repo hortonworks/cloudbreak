@@ -139,7 +139,6 @@ func main() {
 		"version-compare": VersionCompare,
 	}, []string{
 		"include/aws-roles.bash",
-		"include/azure-tools.bash",
 		"include/circle.bash",
 		"include/cloudbreak.bash",
 		"include/compose.bash",
