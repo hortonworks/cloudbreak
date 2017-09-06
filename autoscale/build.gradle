@@ -13,7 +13,18 @@ jar {
 }
 
 apply plugin: 'org.springframework.boot'
-apply plugin: 'application'
+
+bootRun {
+  systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
+  systemProperty 'spring.config.location', System.properties['spring.config.location']
+  if (project.hasProperty('jvmArgs')) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
+springBoot {
+  mainClass = 'com.sequenceiq.periscope.PeriscopeApplication'
+}
 
 dependencies {
 
@@ -80,7 +91,6 @@ test {
     logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
   }
 }
-
 
 compileJava.dependsOn buildInfo
 

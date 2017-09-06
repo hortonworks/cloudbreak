@@ -23,7 +23,13 @@ apply plugin: 'org.springframework.boot'
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
   systemProperty 'spring.config.location', System.properties['spring.config.location']
-  jvmArgs = ['-XX:MaxPermSize=1024m']
+  if (project.hasProperty('jvmArgs')) {
+    jvmArgs += project.jvmArgs.split("\\s+").toList()
+  }
+}
+
+springBoot {
+  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
 jar {
@@ -125,10 +131,6 @@ task buildInfo(type: BuildInfoTask) {
   applicationPropertiesPath = "$buildDir"
   basename = jar.baseName
   buildVersion = version
-}
-
-springBoot {
-  mainClass = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
 task execute(type: JavaExec) {
