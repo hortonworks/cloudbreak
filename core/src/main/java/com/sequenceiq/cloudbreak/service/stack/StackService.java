@@ -322,6 +322,7 @@ public class StackService {
             String template = connector.getTemplate(stack);
             savedStack = stackRepository.save(stack);
             addTemplateForStack(stack, template);
+            addCloudbreakDetailsForStack(stack);
             MDCBuilder.buildMdcContext(savedStack);
             instanceGroupRepository.save(savedStack.getInstanceGroups());
 
@@ -341,7 +342,6 @@ public class StackService {
                 save(savedStack);
                 savedStack = stackRepository.findById(savedStack.getId());
             }
-            addCloudbreakDetailsForStack(savedStack);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
         } catch (CloudbreakSecuritySetupException e) {

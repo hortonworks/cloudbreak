@@ -2,11 +2,13 @@ package com.sequenceiq.cloudbreak.util;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 public class JsonUtil {
 
@@ -29,6 +31,12 @@ public class JsonUtil {
 
     public static JsonNode readTree(String content) throws IOException {
         return MAPPER.readTree(content);
+    }
+
+    public static JsonNode createJsonTree(Map<String, Object> map) {
+        ObjectNode rootNode = MAPPER.createObjectNode();
+        map.entrySet().stream().forEach(e -> rootNode.set(e.getKey(), MAPPER.valueToTree(e.getValue())));
+        return rootNode;
     }
 
     public static String minify(String content) {

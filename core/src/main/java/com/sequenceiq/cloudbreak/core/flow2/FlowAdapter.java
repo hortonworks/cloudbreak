@@ -8,6 +8,7 @@ import org.springframework.statemachine.access.StateMachineAccess;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
+import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 
 public class FlowAdapter<S extends FlowState, E> implements Flow {
     private final String flowId;
@@ -24,14 +25,17 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
 
     private final Class<? extends FlowConfiguration> flowConfigClass;
 
+    private final FlowStructuredEventHandler flowStructuredEventHandler;
+
     public FlowAdapter(String flowId, StateMachine<S, E> flowMachine, MessageFactory<E> messageFactory, StateConverter<S> stateConverter,
-            EventConverter<E> eventConverter, Class<? extends FlowConfiguration> flowConfigClass) {
+            EventConverter<E> eventConverter, Class<? extends FlowConfiguration> flowConfigClass, FlowStructuredEventHandler flowStructuredEventHandler) {
         this.flowId = flowId;
         this.flowMachine = flowMachine;
         this.messageFactory = messageFactory;
         this.stateConverter = stateConverter;
         this.eventConverter = eventConverter;
         this.flowConfigClass = flowConfigClass;
+        this.flowStructuredEventHandler = flowStructuredEventHandler;
     }
 
     @Override
@@ -79,8 +83,9 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
     }
 
     @Override
-    public void setFlowFailed() {
+    public void setFlowFailed(Exception exception) {
         flowFailed = true;
+        flowStructuredEventHandler.setException(exception);
     }
 
     @Override

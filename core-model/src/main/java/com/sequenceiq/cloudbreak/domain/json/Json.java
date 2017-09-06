@@ -8,6 +8,7 @@ import java.util.Map;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -31,6 +32,7 @@ public class Json implements Serializable {
         return JsonUtil.readValue(value, valueType);
     }
 
+    @JsonIgnore
     public Map<String, Object> getMap() {
         try {
             if (value == null) {
