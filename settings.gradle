@@ -22,6 +22,7 @@ include 'autoscale'
 include 'auth'
 include 'web'
 include 'autoscale-api'
+include 'structuredevent-model'
 
 rootProject.name = 'cloudbreak'
 

@@ -130,7 +130,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                             return;
                         }
                         flowId = UUID.randomUUID().toString();
-                        flow = flowConfig.createFlow(flowId);
+                        flow = flowConfig.createFlow(flowId, payload.getStackId());
                         flow.initialize();
                         flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                         acceptFlow(payload);
@@ -211,14 +211,14 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         if (RESTARTABLE_FLOWS.contains(flowLog.getFlowType())) {
             Optional<FlowConfiguration<?>> flowConfig = flowConfigs.stream()
                     .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
-            Flow flow = flowConfig.get().createFlow(flowId);
+            Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
+            Flow flow = flowConfig.get().createFlow(flowId, payload.getStackId());
             runningFlows.put(flow, flowLog.getFlowChainId());
             if (flowLog.getFlowChainId() != null) {
                 flowChainHandler.restoreFlowChain(flowLog.getFlowChainId());
             }
             Map<Object, Object> variables = (Map<Object, Object>) JsonReader.jsonToJava(flowLog.getVariables());
             flow.initialize(flowLog.getCurrentState(), variables);
-            Object payload = JsonReader.jsonToJava(flowLog.getPayload());
             RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
             if (restartAction != null) {
                 restartAction.restart(flowId, flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);

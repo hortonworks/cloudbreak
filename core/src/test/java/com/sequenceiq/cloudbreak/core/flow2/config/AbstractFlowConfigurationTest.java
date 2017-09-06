@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -12,6 +13,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.context.ApplicationContext;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfigurationTest.FlowConfiguration.NotAcceptedException;
+import com.sequenceiq.cloudbreak.structuredevent.FlowStructuredEventHandler;
 
 public class AbstractFlowConfigurationTest {
 
@@ -43,6 +46,9 @@ public class AbstractFlowConfigurationTest {
     @Mock
     private AbstractAction<State, Event, ?, ?> action;
 
+    @Mock
+    private FlowStructuredEventHandler<State, Event> flowStructuredEventHandler;
+
     private Flow flow;
 
     private List<FlowConfiguration.Transition<State, Event>> transitions;
@@ -54,6 +60,8 @@ public class AbstractFlowConfigurationTest {
         underTest = new FlowConfiguration();
         MockitoAnnotations.initMocks(this);
         given(applicationContext.getBean(anyString(), any(Class.class))).willReturn(action);
+        given(applicationContext.getBean(eq(FlowStructuredEventHandler.class), eq(State.INIT), eq(State.FINAL), anyString(), Matchers.eq("flowId"),
+                Matchers.anyLong())).willReturn(flowStructuredEventHandler);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()
@@ -64,7 +72,7 @@ public class AbstractFlowConfigurationTest {
         edgeConfig = new FlowConfiguration.FlowEdgeConfig(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
         underTest.init();
         verify(applicationContext, times(8)).getBean(anyString(), any(Class.class));
-        flow = underTest.createFlow("flowId");
+        flow = underTest.createFlow("flowId", 0L);
         flow.initialize();
     }
 
@@ -157,7 +165,8 @@ public class AbstractFlowConfigurationTest {
                             throw new NotAcceptedException();
                         }
                     };
-            return new FlowConfiguration.MachineConfiguration<>(configurationBuilder, stateBuilder, transitionBuilder, listener, new SyncTaskExecutor());
+            return new FlowConfiguration.MachineConfiguration<State, Event>(configurationBuilder, stateBuilder, transitionBuilder, listener,
+                    new SyncTaskExecutor());
         }
 
         @Override
