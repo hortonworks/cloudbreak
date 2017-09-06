@@ -240,6 +240,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
         additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL, false, String.class, Optional.absent()));
         additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("encryptStorage", false, Boolean.class, Optional.absent()));
         additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
                 Optional.absent()));

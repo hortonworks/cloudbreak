@@ -1,0 +1,1 @@
+2017-09-07 14:03:00,009 [taskScheduler-1] distributeFlows:149 INFO  c.s.c.s.h.HeartbeatService - [instance:149F0D87-36DD-420E-9422-9DF378E7A8BC] [type:springLog] [id:] [name:] Active CB nodes: (1)[[CloudbreakNode{uuid='149F0D87-36DD-420E-9422-9DF378E7A8BC', lastUpdated=1504785750009}]], failed CB nodes: (0)[[]]
