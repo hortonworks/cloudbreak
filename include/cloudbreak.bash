@@ -227,7 +227,7 @@ cloudbreak-conf-defaults() {
     if [[ ! -z "$CB_TEMPLATE_DEFAULTS" ]]; then
         env-import CB_TEMPLATE_DEFAULTS
     fi;
-    env-import CB_LOCAL_DEV_BIND_ADDR "192.168.59.3"
+    env-import CB_LOCAL_DEV_BIND_ADDR "192.168.64.1"
     env-import ADDRESS_RESOLVING_TIMEOUT 120000
     env-import CB_UI_MAX_WAIT 400
     env-import CB_HOST_DISCOVERY_CUSTOM_DOMAIN ""
