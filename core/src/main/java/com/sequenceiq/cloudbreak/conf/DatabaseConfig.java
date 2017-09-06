@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.conf;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -40,6 +42,12 @@ public class DatabaseConfig {
     @Value("${cb.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + "}")
     private String dbSchemaName;
 
+    @Value("${cb.db.env.ssl:}")
+    private boolean ssl;
+
+    @Value("#{'${cb.cert.dir:}/${cb.db.env.cert.file:}'}")
+    private String certFile;
+
     @Value("${cb.hbm2ddl.strategy:validate}")
     private String hbm2ddlStrategy;
 
@@ -55,6 +63,13 @@ public class DatabaseConfig {
         DatabaseUtil.createSchemaIfNeeded("postgresql", databaseAddress, dbName, dbUser, dbPassword, dbSchemaName);
         SimpleDriverDataSource dataSource = new SimpleDriverDataSource();
         dataSource.setDriverClass(Driver.class);
+        if (ssl && Files.exists(Paths.get(certFile))) {
+            Properties properties = new Properties();
+            properties.setProperty("ssl", "true");
+            properties.setProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
+            properties.setProperty("sslfactoryarg", "file://" + certFile);
+            dataSource.setConnectionProperties(properties);
+        }
         dataSource.setUrl(String.format("jdbc:postgresql://%s/%s?currentSchema=%s", databaseAddress, dbName, dbSchemaName));
         dataSource.setUsername(dbUser);
         dataSource.setPassword(dbPassword);
