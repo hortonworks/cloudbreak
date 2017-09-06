@@ -407,6 +407,8 @@ public class AzureCommands implements CommandMarker {
             String persistentStorage,
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "encryptStorage", help = "Encrypt Azure storage", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "false", mandatory = false) boolean encryptStorage,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
 
             orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
@@ -424,6 +426,7 @@ public class AzureCommands implements CommandMarker {
             if (diskPerStorage != null) {
                 params.put("diskPerStorage", diskPerStorage.toString());
             }
+            params.put("encryptStorage", String.valueOf(encryptStorage));
             if (attachedStorageOption != null && shellContext.isAzureActiveCredential()) {
                 params.put("attachedStorageOption", attachedStorageOption.name());
             } else if (shellContext.isAzureActiveCredential()) {
