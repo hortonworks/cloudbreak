@@ -959,6 +959,7 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                     $scope.cluster.fileSystem.properties.secure = false;
                     $scope.cluster.relocateDocker = true;
                     $scope.cluster.parameters.persistentStorage = "cbstore";
+                    $scope.cluster.parameters.encryptStorage = false;
                     $scope.cluster.parameters.attachedStorageOption = "SINGLE";
                 } else if ($rootScope.activeCredential.cloudPlatform == 'GCP') {
                     $scope.cluster.fileSystem = {};
