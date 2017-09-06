@@ -35,7 +35,6 @@ cb:
   cert:
     dir: /certs/
 
-
   tls:
     private.key.file: client-key.pem
     cert.file: client.pem
@@ -52,6 +51,8 @@ cb:
     pass:
     db: cbdb
     schema: public
+    cert.file: database.crt
+    ssl: false
 
   aws:
     spotinstances.enabled: true
