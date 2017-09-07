@@ -106,7 +106,7 @@ public class TlsSecurityService {
         return buildTLSClientConfig(stackId, apiAddress, stackRepository.findOneWithLists(stackId).getPrimaryGatewayInstance());
     }
 
-    public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) throws CloudbreakSecuritySetupException {
+    public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
         Stack stack = stackRepository.findOneWithLists(stackId);
         if (!BYOS.equals(stack.cloudPlatform())) {
             SecurityConfig securityConfig = stack.getSecurityConfig();

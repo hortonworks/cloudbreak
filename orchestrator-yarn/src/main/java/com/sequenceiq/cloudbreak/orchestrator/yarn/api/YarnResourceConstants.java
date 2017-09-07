@@ -7,7 +7,7 @@ public final class YarnResourceConstants {
 
     public static final String API_VERSION = "v1";
 
-    public static final String API_BASE_PATH = CONTEXT_ROOT + "/" + API_VERSION;
+    public static final String API_BASE_PATH = CONTEXT_ROOT + '/' + API_VERSION;
 
     public static final int RETRIES = 300;
 

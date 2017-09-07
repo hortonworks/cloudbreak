@@ -26,6 +26,7 @@ public class CollectMetadataComponentTest extends AbstractComponentTest<CollectM
         return "COLLECTMETADATAREQUEST";
     }
 
+    @Override
     protected CloudPlatformRequest getRequest() {
         return new CollectMetadataRequest(
                 g().createCloudContext(),

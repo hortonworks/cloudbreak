@@ -15,11 +15,11 @@ public class ResourcesStatePollerResult {
 
     private String statusReason;
 
-    private List<CloudResourceStatus> results;
+    private final List<CloudResourceStatus> results;
 
     public ResourcesStatePollerResult(CloudContext cloudContext) {
         this.cloudContext = cloudContext;
-        this.results = new ArrayList<>();
+        results = new ArrayList<>();
     }
 
     public ResourcesStatePollerResult(CloudContext cloudContext, ResourceStatus status, String statusReason, List<CloudResourceStatus> results) {

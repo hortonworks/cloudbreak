@@ -13,15 +13,15 @@ import com.sequenceiq.cloudbreak.cloud.template.ResourceChecker;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 
 @Component(PollResourceTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class PollResourceTask extends AbstractPollTask<List<CloudResourceStatus>> {
     public static final String NAME = "pollResourceTask";
 
-    private ResourceChecker checker;
+    private final ResourceChecker checker;
 
-    private List<CloudResource> cloudResources;
+    private final List<CloudResource> cloudResources;
 
-    private ResourceBuilderContext context;
+    private final ResourceBuilderContext context;
 
     public PollResourceTask(AuthenticatedContext authenticatedContext, ResourceChecker checker,
             List<CloudResource> cloudResources, ResourceBuilderContext context, boolean cancellable) {

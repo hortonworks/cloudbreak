@@ -10,9 +10,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 
 public class UpscaleStackResult extends CloudPlatformResult<CloudPlatformRequest> {
 
-    private ResourceStatus resourceStatus;
+    private final ResourceStatus resourceStatus;
 
-    private List<CloudResourceStatus> results;
+    private final List<CloudResourceStatus> results;
 
     public UpscaleStackResult(CloudPlatformRequest<?> request, ResourceStatus resourceStatus, List<CloudResourceStatus> results) {
         super(request);
@@ -22,8 +22,8 @@ public class UpscaleStackResult extends CloudPlatformResult<CloudPlatformRequest
 
     public UpscaleStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
         super(statusReason, errorDetails, request);
-        this.resourceStatus = ResourceStatus.FAILED;
-        this.results = new ArrayList<>();
+        resourceStatus = ResourceStatus.FAILED;
+        results = new ArrayList<>();
     }
 
     public List<CloudResourceStatus> getResults() {

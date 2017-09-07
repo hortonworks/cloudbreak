@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FailurePolicyModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -10,7 +10,7 @@ public abstract class FailurePolicyBase implements JsonEntity {
     @ApiModelProperty(FailurePolicyModelDescription.THRESHOLD)
     private Long threshold;
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.ADJUSTMENT_TYPE, required = true)
+    @ApiModelProperty(value = ClusterModelDescription.ADJUSTMENT_TYPE, required = true)
     private AdjustmentType adjustmentType;
 
     public Long getThreshold() {

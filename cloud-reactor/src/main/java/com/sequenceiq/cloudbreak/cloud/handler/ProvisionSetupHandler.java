@@ -51,7 +51,7 @@ public class ProvisionSetupHandler implements CloudPlatformEventHandler<SetupReq
             result = new SetupResult(request);
 
             LOGGER.info("Provision setup finished for {}", cloudContext);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             result = new SetupResult(e, request);
         }
         request.getResult().onNext(result);

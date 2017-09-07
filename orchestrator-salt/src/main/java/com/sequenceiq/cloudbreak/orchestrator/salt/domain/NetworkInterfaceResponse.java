@@ -15,13 +15,13 @@ public class NetworkInterfaceResponse {
 
     public Map<String, String> getResultGroupByHost() {
         Map<String, String> res = new HashMap<>();
-        result.stream().forEach(map -> map.forEach(res::put));
+        result.forEach(map -> map.forEach(res::put));
         return res;
     }
 
     public Map<String, String> getResultGroupByIP() {
         Map<String, String> res = new HashMap<>();
-        result.stream().forEach(map -> map.forEach((k, v) -> res.put(v, k)));
+        result.forEach(map -> map.forEach((k, v) -> res.put(v, k)));
         return res;
     }
 
@@ -31,7 +31,7 @@ public class NetworkInterfaceResponse {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("NetworkInterfaceResponse{");
+        StringBuilder sb = new StringBuilder("NetworkInterfaceResponse{");
         sb.append("result=").append(result);
         sb.append('}');
         return sb.toString();

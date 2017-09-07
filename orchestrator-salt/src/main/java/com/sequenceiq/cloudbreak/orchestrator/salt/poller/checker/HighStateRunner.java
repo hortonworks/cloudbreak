@@ -26,6 +26,6 @@ public class HighStateRunner extends BaseSaltJobRunner {
 
     @Override
     public String toString() {
-        return "HighStateChecker{" + super.toString() + "}";
+        return "HighStateChecker{" + super.toString() + '}';
     }
 }

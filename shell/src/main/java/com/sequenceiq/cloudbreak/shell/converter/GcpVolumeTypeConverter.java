@@ -13,9 +13,6 @@ public class GcpVolumeTypeConverter extends AbstractConverter<GcpVolumeType> {
     @Autowired
     private ShellContext context;
 
-    public GcpVolumeTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return GcpVolumeType.class.isAssignableFrom(type);
@@ -25,7 +22,7 @@ public class GcpVolumeTypeConverter extends AbstractConverter<GcpVolumeType> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVolumeTypesByPlatform("GCP"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

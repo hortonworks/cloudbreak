@@ -61,7 +61,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         BLUEPRINT,
         RDSCONFIG,
         LDAP_CONFIG,
-        CONNECTED_CLUSTER;
+        CONNECTED_CLUSTER
     }
 
     @Inject
@@ -143,7 +143,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
     private void prepareConnectedClusterParameters(Cluster requestedCluster, IdentityUser user, ConnectedClusterRequest connectedClusterRequest) {
         if (connectedClusterRequest != null) {
             Long stackId;
-            Stack publicStack = null;
+            Stack publicStack;
             if (!Strings.isNullOrEmpty(connectedClusterRequest.getSourceClusterName())) {
                 publicStack = stackService.getPublicStack(connectedClusterRequest.getSourceClusterName(), user);
                 stackId = publicStack.getId();
@@ -151,15 +151,13 @@ public class ClusterDecorator implements Decorator<Cluster> {
                 stackId = connectedClusterRequest.getSourceClusterId();
                 publicStack = stackService.get(connectedClusterRequest.getSourceClusterId());
             }
-            if (publicStack != null) {
-                // We should set the ldap to the source cluster ldap
-                requestedCluster.setLdapConfig(publicStack.getCluster().getLdapConfig());
-                // We should set the ranger metastore to the source cluster ranger metastore if exist!
-                RDSConfig rangerRds = rdsConfigService.findByClusterIdAndType(publicStack.getOwner(), publicStack.getAccount(),
-                        publicStack.getCluster().getId(), RdsType.RANGER);
-                if (rangerRds != null) {
-                    requestedCluster.getRdsConfigs().add(rangerRds);
-                }
+            // We should set the ldap to the source cluster ldap
+            requestedCluster.setLdapConfig(publicStack.getCluster().getLdapConfig());
+            // We should set the ranger metastore to the source cluster ranger metastore if exist!
+            RDSConfig rangerRds = rdsConfigService.findByClusterIdAndType(publicStack.getOwner(), publicStack.getAccount(),
+                    publicStack.getCluster().getId(), RdsType.RANGER);
+            if (rangerRds != null) {
+                requestedCluster.getRdsConfigs().add(rangerRds);
             }
 
             try {

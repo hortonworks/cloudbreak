@@ -33,12 +33,14 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = "platform list")
+    @CliAvailabilityIndicator("platform list")
+    @Override
     public boolean listAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "platform list", help = "Shows the currently available platforms")
+    @Override
     public String list() {
         try {
             Set<TopologyResponse> publics = shellContext.cloudbreakClient().topologyEndpoint().getPublics();
@@ -49,7 +51,8 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = "platform show")
+    @CliAvailabilityIndicator("platform show")
+    @Override
     public boolean showAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
@@ -113,7 +116,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
         return select(null, name);
     }
 
-    @CliAvailabilityIndicator(value = "platform delete")
+    @CliAvailabilityIndicator("platform delete")
     @Override
     public boolean deleteAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -133,7 +136,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
                 }
             }
             throw shellContext.exceptionTransformer().transformToRuntimeException("No platform specified");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
@@ -155,6 +158,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
         return true;
     }
 
+    @Override
     public String create(String name, String description, String cloudPlatform, Map<String, String> mapping) {
         try {
             TopologyRequest req = new TopologyRequest();
@@ -165,7 +169,7 @@ public class BasePlatformCommands implements BaseCommands, PlatformCommands {
             Long id = shellContext.cloudbreakClient().topologyEndpoint().postPublic(req).getId();
             shellContext.setHint(Hints.CREATE_CREDENTIAL_WITH_TOPOLOGY);
             return String.format(CREATE_SUCCESS_MSG, id, name);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
 

@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
 @Component(ResourceStopStartThread.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class ResourceStopStartThread implements Callable<ResourceRequestResult<List<CloudVmInstanceStatus>>> {
 
     public static final String NAME = "resourceStopStartThread";

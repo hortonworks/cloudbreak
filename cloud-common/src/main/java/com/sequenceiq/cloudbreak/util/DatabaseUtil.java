@@ -19,10 +19,11 @@ public class DatabaseUtil {
             SimpleDriverDataSource ds = new SimpleDriverDataSource();
             ds.setDriverClass(Driver.class);
             ds.setUrl(String.format("jdbc:%s://%s/%s", dbType, dbAddress, dbName));
-            Connection conn = ds.getConnection(dbUser, dbPassword);
-            Statement statement = conn.createStatement();
-            statement.execute("CREATE SCHEMA IF NOT EXISTS " + dbSchema);
-            conn.close();
+            try (Connection conn = ds.getConnection(dbUser, dbPassword)) {
+                try (Statement statement = conn.createStatement()) {
+                    statement.execute("CREATE SCHEMA IF NOT EXISTS " + dbSchema);
+                }
+            }
         }
     }
 }

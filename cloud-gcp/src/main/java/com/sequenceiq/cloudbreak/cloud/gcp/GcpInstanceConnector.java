@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Instances.GetSerialPortOutput;
 import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -67,7 +68,7 @@ public class GcpInstanceConnector extends AbstractInstanceConnector {
         }
         CloudCredential credential = authenticatedContext.getCloudCredential();
         try {
-            Compute.Instances.GetSerialPortOutput instanceGet = GcpStackUtil.buildCompute(credential).instances()
+            GetSerialPortOutput instanceGet = GcpStackUtil.buildCompute(credential).instances()
                     .getSerialPortOutput(GcpStackUtil.getProjectId(credential),
                             authenticatedContext.getCloudContext().getLocation().getAvailabilityZone().value(), vm.getInstanceId());
             return instanceGet.execute().getContents();

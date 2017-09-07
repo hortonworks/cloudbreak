@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -41,7 +42,7 @@ public class GetPlatformOrchestratorsHandler implements CloudPlatformEventHandle
             Map<Platform, Collection<Orchestrator>> platformCollectionHashMap = Maps.newHashMap();
             Map<Platform, Orchestrator> defaults = Maps.newHashMap();
 
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+            for (Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 PlatformOrchestrator platformOrchestrator = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().orchestratorParams();
 
                 platformCollectionHashMap.put(connector.getKey(), platformOrchestrator.types());
@@ -51,7 +52,7 @@ public class GetPlatformOrchestratorsHandler implements CloudPlatformEventHandle
                     new PlatformOrchestrators(platformCollectionHashMap, defaults));
             request.getResult().onNext(getPlatformOrchestratorsResult);
             LOGGER.info("Query platform orchestrators types finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformOrchestratorsResult(e.getMessage(), e, request));
         }
     }

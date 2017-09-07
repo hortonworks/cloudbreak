@@ -5,30 +5,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformRegionsJson implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.REGIONS)
+    @ApiModelProperty(ConnectorModelDescription.REGIONS)
     private Map<String, Collection<String>> regions;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.REGION_DISPLAYNAMES)
+    @ApiModelProperty(ConnectorModelDescription.REGION_DISPLAYNAMES)
     private Map<String, Map<String, String>> displayNames;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.AVAILABILITY_ZONES)
+    @ApiModelProperty(ConnectorModelDescription.AVAILABILITY_ZONES)
     private Map<String, Map<String, Collection<String>>> availabilityZones;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_REGIOS)
+    @ApiModelProperty(ConnectorModelDescription.DEFAULT_REGIOS)
     private Map<String, String> defaultRegions;
 
     public PlatformRegionsJson() {
-        this.regions = new HashMap<>();
-        this.availabilityZones = new HashMap<>();
-        this.defaultRegions = new HashMap<>();
-        this.displayNames = new HashMap<>();
+        regions = new HashMap<>();
+        availabilityZones = new HashMap<>();
+        defaultRegions = new HashMap<>();
+        displayNames = new HashMap<>();
     }
 
     public Map<String, Collection<String>> getRegions() {

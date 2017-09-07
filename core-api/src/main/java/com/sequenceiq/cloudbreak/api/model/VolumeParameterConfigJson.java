@@ -2,10 +2,11 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class VolumeParameterConfigJson {
+@JsonInclude(Include.NON_NULL)
+public class VolumeParameterConfigJson implements JsonEntity {
     private String volumeParameterType;
 
     private Integer minimumSize;
@@ -15,10 +16,6 @@ public class VolumeParameterConfigJson {
     private Integer minimumNumber;
 
     private Integer maximumNumber;
-
-    public VolumeParameterConfigJson() {
-
-    }
 
     public String getVolumeParameterType() {
         return volumeParameterType;

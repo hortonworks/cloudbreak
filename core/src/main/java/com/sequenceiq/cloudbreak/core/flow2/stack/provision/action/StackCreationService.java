@@ -27,7 +27,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
@@ -146,7 +145,7 @@ public class StackCreationService {
     private Date getStartDateIfExist(Map<Object, Object> variables) {
         Date result = null;
         Object startDateObj = variables.get(START_DATE);
-        if (startDateObj != null && startDateObj instanceof Date) {
+        if (startDateObj instanceof Date) {
             result = (Date) startDateObj;
         }
         return result;
@@ -263,7 +262,7 @@ public class StackCreationService {
             }
         } catch (Exception ex) {
             LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, String.format("Rollback failed: %s", ex.getMessage()));
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, format("Rollback failed: %s", ex.getMessage()));
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_ROLLBACK_FAILED, CREATE_FAILED.name(), ex.getMessage());
         }
     }
@@ -300,7 +299,7 @@ public class StackCreationService {
                 InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
                 instanceGroup.setNodeCount(nodeCount - failedCount);
                 instanceGroupRepository.save(instanceGroup);
-                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, Status.UPDATE_IN_PROGRESS.name(),
+                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, UPDATE_IN_PROGRESS.name(),
                         failedCount, group.getName(), failedResources.get(0).getStatusReason());
             }
         }

@@ -8,9 +8,6 @@ public class VmsSpecification {
     @JsonProperty("items")
     private List<VmSpecification> items;
 
-    public VmsSpecification() {
-    }
-
     public List<VmSpecification> getItems() {
         return items;
     }

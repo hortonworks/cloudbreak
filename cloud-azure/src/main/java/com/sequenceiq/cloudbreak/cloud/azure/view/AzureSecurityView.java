@@ -11,11 +11,11 @@ import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 
 public class AzureSecurityView {
 
-    private Map<String, List<AzurePortView>> ports = new HashMap<>();
+    private final Map<String, List<AzurePortView>> ports = new HashMap<>();
 
     public AzureSecurityView(List<Group> groups) {
         for (Group group : groups) {
-            List<AzurePortView> groupPorts = new ArrayList<>();
+            List<AzurePortView> groupPorts = new ArrayList<>(group.getSecurity().getRules().size());
             for (SecurityRule securityRule : group.getSecurity().getRules()) {
                 for (PortDefinition port : securityRule.getPorts()) {
                     if (port.isRange()) {

@@ -101,7 +101,11 @@ public class MailSenderConfig {
     private final class DummyEmailSender implements JavaMailSender {
         private final Logger logger = LoggerFactory.getLogger(DummyEmailSender.class);
 
-        private final String msg = "SMTP not configured! Related configuration entries: " + missingVars();
+        private final String msg;
+
+        private DummyEmailSender() {
+            msg = "SMTP not configured! Related configuration entries: " + missingVars();
+        }
 
         @Override
         public MimeMessage createMimeMessage() {

@@ -6,7 +6,7 @@ public enum StopRestrictionReason {
     EPHEMERAL_VOLUMES ("Instances with ephemeral volumes cannot be stopped."),
     SPOT_INSTANCES ("Spot instances cannot be stopped.");
 
-    private String reason;
+    private final String reason;
 
     StopRestrictionReason(String reason) {
         this.reason = reason;

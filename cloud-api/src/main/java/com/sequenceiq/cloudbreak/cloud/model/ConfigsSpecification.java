@@ -11,9 +11,6 @@ public class ConfigsSpecification {
     @JsonProperty("properties")
     private PropertySpecification properties;
 
-    public ConfigsSpecification() {
-    }
-
     public List<ConfigSpecification> getConfigs() {
         return configs;
     }

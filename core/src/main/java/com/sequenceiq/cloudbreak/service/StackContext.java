@@ -4,9 +4,9 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public abstract class StackContext {
 
-    private Stack stack;
+    private final Stack stack;
 
-    public StackContext(Stack stack) {
+    protected StackContext(Stack stack) {
         this.stack = stack;
     }
 

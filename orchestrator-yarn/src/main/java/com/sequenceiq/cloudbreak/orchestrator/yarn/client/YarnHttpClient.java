@@ -8,8 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.api.YarnResourceConstants;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.api.YarnEndpoint;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.api.YarnResourceConstants;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.ApplicationDetailRequest;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.CreateApplicationRequest;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.DeleteApplicationRequest;
@@ -26,13 +26,14 @@ public class YarnHttpClient implements YarnClient {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnHttpClient.class);
 
-    private String apiEndpoint;
+    private final String apiEndpoint;
 
     public YarnHttpClient(String apiEndpoint) {
         this.apiEndpoint = apiEndpoint;
     }
 
-    public ResponseContext createApplication(CreateApplicationRequest createApplicationRequest) throws CloudbreakOrchestratorFailedException,
+    @Override
+    public ResponseContext createApplication(CreateApplicationRequest createApplicationRequest) throws
             MalformedURLException {
         YarnEndpoint dashEndpoint = new YarnEndpoint(apiEndpoint, YarnResourceConstants.APPLICATIONS_PATH);
 
@@ -54,12 +55,13 @@ public class YarnHttpClient implements YarnClient {
         return responseContext;
     }
 
+    @Override
     public void deleteApplication(DeleteApplicationRequest deleteApplicationRequest) throws CloudbreakOrchestratorFailedException, MalformedURLException {
 
         // Add the application name to the URL
         YarnEndpoint dashEndpoint = new YarnEndpoint(apiEndpoint,
                 YarnResourceConstants.APPLICATIONS_PATH
-                        + "/" + deleteApplicationRequest.getName());
+                        + '/' + deleteApplicationRequest.getName());
 
         ClientConfig clientConfig = new DefaultClientConfig();
         Client client = Client.create(clientConfig);
@@ -86,6 +88,7 @@ public class YarnHttpClient implements YarnClient {
 
     }
 
+    @Override
     public void validateApiEndpoint() throws CloudbreakOrchestratorFailedException, MalformedURLException {
         YarnEndpoint dashEndpoint = new YarnEndpoint(
                 apiEndpoint,
@@ -109,15 +112,16 @@ public class YarnHttpClient implements YarnClient {
         }
     }
 
+    @Override
     public ResponseContext getApplicationDetail(ApplicationDetailRequest applicationDetailRequest)
-            throws CloudbreakOrchestratorFailedException, MalformedURLException {
+            throws MalformedURLException {
 
         ResponseContext responseContext = new ResponseContext();
 
         // Add the application name to the URL
         YarnEndpoint dashEndpoint = new YarnEndpoint(apiEndpoint,
                 YarnResourceConstants.APPLICATIONS_PATH
-                        + "/" + applicationDetailRequest.getName());
+                        + '/' + applicationDetailRequest.getName());
 
         // Construct the webresource and perform the get
         WebResource webResource = getNewWebResource(dashEndpoint.getFullEndpointUrl().toString());
@@ -138,7 +142,7 @@ public class YarnHttpClient implements YarnClient {
 
     }
 
-    public boolean checkStatusCode(ClientResponse response, int successStatusCode) throws MalformedURLException {
+    public boolean checkStatusCode(ClientResponse response, int successStatusCode) {
         boolean success = false;
         if (successStatusCode == response.getStatus()) {
             success = true;

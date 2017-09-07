@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.junit.Assert;
@@ -32,6 +33,9 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Base64;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Builder;
+import com.google.api.services.compute.Compute.Instances;
+import com.google.api.services.compute.Compute.Instances.Get;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Tags;
 import com.microsoft.azure.PagedList;
@@ -73,7 +77,7 @@ public class TagsUtil {
     }
 
     protected static void checkTags(Map<String, String> tagsToCheck, Map<String, String> extractedTagsToCheck) {
-        for (Map.Entry entry : tagsToCheck.entrySet()) {
+        for (Entry<String, String> entry : tagsToCheck.entrySet()) {
             Assert.assertTrue(extractedTagsToCheck.keySet().contains(entry.getKey()));
             Assert.assertEquals(extractedTagsToCheck.get(entry.getKey()), entry.getValue());
         }
@@ -126,21 +130,21 @@ public class TagsUtil {
                 for (Tag tag : extractedTags) {
                     extractedTagsToCheck.put(tag.getKey(), tag.getValue());
                 }
-                TagsUtil.checkTags(tagsToCheckMap, extractedTagsToCheck);
+                checkTags(tagsToCheckMap, extractedTagsToCheck);
                 extractedTags.clear();
             }
         }
     }
 
     protected static void checkTagsAzure(String accesKey, String tenantId, String secretKey, String subscriptionId,
-            String stackName, Map<String, String> tagsToCheckMap) throws Exception {
+            String stackName, Map<String, String> tagsToCheckMap) {
         ApplicationTokenCredentials serviceClientCredentials = new ApplicationTokenCredentials(accesKey, tenantId, secretKey, null);
         Azure azure = Azure.authenticate(serviceClientCredentials).withSubscription(subscriptionId);
         PagedList<VirtualMachine> virtualMachinesList = azure.virtualMachines().list();
         for (VirtualMachine vm : virtualMachinesList) {
             if (vm.name().contains(stackName)) {
                 Map<String, String> extractedTags = vm.tags();
-                TagsUtil.checkTags(tagsToCheckMap, extractedTags);
+                checkTags(tagsToCheckMap, extractedTags);
             }
         }
     }
@@ -160,15 +164,15 @@ public class TagsUtil {
                 .setServiceAccountPrivateKey(privateKey)
                 .build();
 
-        Compute compute = new Compute.Builder(httpTransport, jsonFactory, null)
+        Compute compute = new Builder(httpTransport, jsonFactory, null)
                 .setApplicationName(applicationName)
                 .setHttpRequestInitializer(googleCredential)
                 .build();
 
-        Compute.Instances instances = compute.instances();
+        Instances instances = compute.instances();
 
         for (String id : instanceIdList) {
-            Compute.Instances.Get response = instances.get(projectId, availabilityZone, id);
+            Get response = instances.get(projectId, availabilityZone, id);
             com.google.api.services.compute.model.Instance instance = response.execute();
             Tags gcpTags = instance.getTags();
             Map<String, String> extractedTags = new HashMap<>();
@@ -180,7 +184,7 @@ public class TagsUtil {
                     extractedTags.put(tmpTagList[0], tmpTagList[1]);
                 }
             }
-            TagsUtil.checkTags(tagsToCheckMap, extractedTags);
+            checkTags(tagsToCheckMap, extractedTags);
             extractedTags.clear();
         }
 
@@ -196,7 +200,7 @@ public class TagsUtil {
 
         for (String instanceId : instanceIdList) {
             Map<String, String> serverMetadata = os.compute().servers().getMetadata(instanceId);
-            TagsUtil.checkTags(tagsToCheckMap, serverMetadata);
+            checkTags(tagsToCheckMap, serverMetadata);
         }
     }
 }

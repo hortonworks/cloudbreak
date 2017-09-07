@@ -17,8 +17,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleSta
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_METADATA_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.EXTEND_METADATA_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.FINAL_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.GATEWAY_TLS_SETUP_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleState.UPSCALE_FAILED_STATE;
 
 import java.util.List;
@@ -26,11 +26,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleState, StackUpscaleEvent> {
     private static final List<Transition<StackUpscaleState, StackUpscaleEvent>> TRANSITIONS =
-            new Transition.Builder<StackUpscaleState, StackUpscaleEvent>()
+            new Builder<StackUpscaleState, StackUpscaleEvent>()
                     .from(INIT_STATE).to(ADD_INSTANCES_STATE).event(ADD_INSTANCES_EVENT).noFailureEvent()
                     .from(ADD_INSTANCES_STATE).to(ADD_INSTANCES_FINISHED_STATE).event(ADD_INSTANCES_FINISHED_EVENT)
                                     .failureEvent(ADD_INSTANCES_FAILURE_EVENT)
@@ -77,7 +78,7 @@ public class StackUpscaleConfig extends AbstractFlowConfiguration<StackUpscaleSt
     @Override
     public StackUpscaleEvent[] getInitEvents() {
         return new StackUpscaleEvent[] {
-                StackUpscaleEvent.ADD_INSTANCES_EVENT
+                ADD_INSTANCES_EVENT
         };
     }
 }

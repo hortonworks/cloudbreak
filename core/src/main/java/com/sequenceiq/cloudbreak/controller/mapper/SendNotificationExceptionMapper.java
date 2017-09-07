@@ -14,6 +14,7 @@ abstract class SendNotificationExceptionMapper<E extends Throwable> extends Base
     @Inject
     private CloudbreakEventService eventService;
 
+    @Override
     public Response toResponse(E exception) {
         Long stackId = stackUnderOperationService.get();
         if (stackId != null) {

@@ -55,13 +55,15 @@ public enum ExposedService {
     ExposedService(String portName, String serviceName, String postFix, String knoxService, String knoxUrl) {
         this.portName = portName;
         this.serviceName = serviceName;
-        this.postfix = postFix;
+        postfix = postFix;
         this.knoxService = knoxService;
         this.knoxUrl = knoxUrl;
     }
 
     public static List<ExposedService> filterSupportedKnoxServices() {
-        return Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.getKnoxService())).collect(Collectors.toList());
+        return Arrays.stream(values()).filter(x -> {
+            return !Strings.isNullOrEmpty(x.knoxService);
+        }).collect(Collectors.toList());
     }
 
     public static List<String> getAllKnoxExposed() {
@@ -70,21 +72,23 @@ public enum ExposedService {
     }
 
     public static List<String> getAllServiceName() {
-        List<String> allServiceName = Arrays.stream(values()).filter(x -> !Strings.isNullOrEmpty(x.getServiceName()))
+        List<String> allServiceName = Arrays.stream(values()).filter(x -> {
+            return !Strings.isNullOrEmpty(x.serviceName);
+        })
                 .map(ExposedService::getServiceName).collect(Collectors.toList());
         return ImmutableList.copyOf(allServiceName);
     }
 
     public String getServiceName() {
-        return this.serviceName;
+        return serviceName;
     }
 
     public String getPortName() {
-        return this.portName;
+        return portName;
     }
 
     public String getPostFix() {
-        return this.postfix;
+        return postfix;
     }
 
     public String getKnoxService() {

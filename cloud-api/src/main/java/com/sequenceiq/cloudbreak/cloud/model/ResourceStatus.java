@@ -8,7 +8,7 @@ public enum ResourceStatus {
     FAILED(StatusGroup.PERMANENT),
     IN_PROGRESS(StatusGroup.TRANSIENT);
 
-    private StatusGroup statusGroup;
+    private final StatusGroup statusGroup;
 
     ResourceStatus(StatusGroup statusGroup) {
         this.statusGroup = statusGroup;

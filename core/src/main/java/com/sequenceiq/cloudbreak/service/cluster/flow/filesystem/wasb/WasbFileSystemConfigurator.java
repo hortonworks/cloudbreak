@@ -35,7 +35,7 @@ public class WasbFileSystemConfigurator extends AbstractFileSystemConfigurator<W
     @Override
     public String getDefaultFsValue(WasbFileSystemConfiguration fsConfig) {
         String protocol = fsConfig.isSecure() ? "wasbs://" : "wasb://";
-        return protocol + fsConfig.getProperty(STORAGE_CONTAINER) + "@" + fsConfig.getAccountName() + ".blob.core.windows.net";
+        return protocol + fsConfig.getProperty(STORAGE_CONTAINER) + '@' + fsConfig.getAccountName() + ".blob.core.windows.net";
     }
 
     @Override

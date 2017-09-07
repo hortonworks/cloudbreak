@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -86,7 +87,7 @@ public class CloudParameterService {
 
     public String getPlatformByVariant(String requestedVariant) {
         PlatformVariants platformVariants = getPlatformVariants();
-        for (Map.Entry<Platform, Collection<Variant>> platformCollectionEntry : platformVariants.getPlatformToVariants().entrySet()) {
+        for (Entry<Platform, Collection<Variant>> platformCollectionEntry : platformVariants.getPlatformToVariants().entrySet()) {
             for (Variant variant : platformCollectionEntry.getValue()) {
                 if (variant.value().equals(requestedVariant)) {
                     return platformCollectionEntry.getKey().value();

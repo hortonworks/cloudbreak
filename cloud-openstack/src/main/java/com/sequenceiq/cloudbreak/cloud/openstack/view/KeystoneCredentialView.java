@@ -16,22 +16,22 @@ public class KeystoneCredentialView {
 
     private static final String CB_KEYPAIR_NAME = "cb";
 
-    private CloudCredential cloudCredential;
+    private final CloudCredential cloudCredential;
 
-    private String stackName;
+    private final String stackName;
 
     public KeystoneCredentialView(AuthenticatedContext authenticatedContext) {
-        this.stackName = authenticatedContext.getCloudContext().getName() + "_" + authenticatedContext.getCloudContext().getId();
-        this.cloudCredential = authenticatedContext.getCloudCredential();
+        stackName = authenticatedContext.getCloudContext().getName() + '_' + authenticatedContext.getCloudContext().getId();
+        cloudCredential = authenticatedContext.getCloudCredential();
     }
 
     public KeystoneCredentialView(CloudCredential cloudCredential) {
-        this.stackName = "";
+        stackName = "";
         this.cloudCredential = cloudCredential;
     }
 
     public String getKeyPairName() {
-        return String.format("%s-%s-%s-%s", CB_KEYPAIR_NAME, getStackName(), deleteWhitespace(getName().toLowerCase()), cloudCredential.getId());
+        return String.format("%s-%s-%s-%s", CB_KEYPAIR_NAME, stackName, deleteWhitespace(getName().toLowerCase()), cloudCredential.getId());
     }
 
     public String getName() {

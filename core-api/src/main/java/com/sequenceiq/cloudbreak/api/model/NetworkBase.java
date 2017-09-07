@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -15,11 +16,11 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class NetworkBase implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;
 
-    @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.SUBNET_CIDR)
+    @ApiModelProperty(NetworkModelDescription.SUBNET_CIDR)
     @ValidSubnet
     private String subnetCIDR;
 
@@ -27,10 +28,10 @@ public abstract class NetworkBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(value = ModelDescriptions.NetworkModelDescription.PARAMETERS)
+    @ApiModelProperty(NetworkModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
-    @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
+    @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
 
     public String getDescription() {

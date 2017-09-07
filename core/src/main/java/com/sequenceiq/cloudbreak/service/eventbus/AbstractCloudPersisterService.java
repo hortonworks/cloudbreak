@@ -28,16 +28,7 @@ public abstract class AbstractCloudPersisterService<T> implements Persister<T> {
     @Qualifier("conversionService")
     private ConversionService conversionService;
 
-    private Map<Class, CrudRepository> repositoryMap = new HashMap<>();
-
-    @Override
-    public abstract T persist(T data);
-
-    @Override
-    public abstract T update(T data);
-
-    @Override
-    public abstract T retrieve(T data);
+    private final Map<Class, CrudRepository> repositoryMap = new HashMap<>();
 
     @PostConstruct
     public void checkRepoMap() {

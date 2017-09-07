@@ -11,7 +11,7 @@ public class EmailMimeMessagePreparator {
     @Value("${cb.smtp.sender.from:}")
     private String msgFrom;
 
-    public MimeMessagePreparator prepareMessage(final String to, final String subject, final String body) {
+    public MimeMessagePreparator prepareMessage(String to, String subject, String body) {
         return mimeMessage -> {
             MimeMessageHelper message = new MimeMessageHelper(mimeMessage);
             message.setFrom(msgFrom);

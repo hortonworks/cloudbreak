@@ -28,7 +28,7 @@ public class NameNodeFilter implements HostFilter {
                     iterator.remove();
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new HostFilterException("Cannot check the address of the NN and SNN", e);
         }
         return result;

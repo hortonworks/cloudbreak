@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.controller.validation.template;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -25,10 +25,10 @@ public class TemplateValidator {
     @Inject
     private CloudParameterService cloudParameterService;
 
-    private Supplier<Map<Platform, Collection<VmType>>> virtualMachines =
+    private final Supplier<Map<Platform, Collection<VmType>>> virtualMachines =
             Suppliers.memoize(() -> cloudParameterService.getVmtypes(true).getVirtualMachines());
 
-    private Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
+    private final Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 
     public void validateTemplateRequest(Template value) {
@@ -72,7 +72,7 @@ public class TemplateValidator {
             String maxSize = vmType.getMetaDataValue(VmTypeMeta.MAXIMUM_PERSISTENT_DISKS_SIZE_GB);
             if (maxSize != null) {
                 int fullSize = value.getVolumeSize() * value.getVolumeCount();
-                if (Integer.valueOf(maxSize) < fullSize) {
+                if (Integer.parseInt(maxSize) < fullSize) {
                     throw new BadRequestException(
                             String.format("The %s platform does not support %s Gb full volume size. The maximum size of disks could be %s Gb.",
                                     value.cloudPlatform(), fullSize, maxSize));

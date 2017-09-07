@@ -23,7 +23,7 @@ public class CollectMetadataResult extends CloudPlatformResult<CollectMetadataRe
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CollectMetadataResult{");
+        StringBuilder sb = new StringBuilder("CollectMetadataResult{");
         sb.append("cloudContext=").append(getRequest().getCloudContext());
         sb.append(", results=").append(results);
         sb.append(", exception=").append(getErrorDetails());

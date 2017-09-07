@@ -12,7 +12,7 @@ public class JsonToCreateApplicationResponseConverterTest {
     private static final String JSON_RESPONSE = "{\n"
             + "  \"uri\": \"/services/v1/applications/demo-app\",\n"
             + "  \"state\": \"ACCEPTED\"\n"
-            + "}";
+            + '}';
 
     @Test
     public void testConvert() throws Exception {

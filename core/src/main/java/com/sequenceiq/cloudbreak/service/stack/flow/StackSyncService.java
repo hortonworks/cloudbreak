@@ -87,13 +87,13 @@ public class StackSyncService {
     public void updateInstances(Stack stack, List<InstanceMetaData> instanceMetaDataList, List<CloudVmInstanceStatus> instanceStatuses,
             boolean stackStatusUpdateEnabled) {
         Map<InstanceSyncState, Integer> counts = initInstanceStateCounts();
-        for (final InstanceMetaData metaData : instanceMetaDataList) {
+        for (InstanceMetaData metaData : instanceMetaDataList) {
             Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
                     .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null
                             && is.getCloudInstance().getInstanceId().equals(metaData.getInstanceId()))
                     .findFirst();
 
-            InstanceSyncState state = !status.isPresent() ? InstanceSyncState.DELETED : transform(status.get().getStatus());
+            InstanceSyncState state = status.isPresent() ? transform(status.get().getStatus()) : InstanceSyncState.DELETED;
             syncInstanceStatusByState(stack, counts, metaData, state);
         }
 
@@ -336,7 +336,7 @@ public class StackSyncService {
         STACK_SYNC_INSTANCE_UPDATED("stack.sync.instance.updated"),
         STACK_SYNC_INSTANCE_FAILED("stack.sync.instance.failed");
 
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;

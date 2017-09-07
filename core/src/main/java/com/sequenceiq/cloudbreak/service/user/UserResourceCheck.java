@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 @Service
 public class UserResourceCheck {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserDetailsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserResourceCheck.class);
 
     @Inject
     private UserDetailsService userDetailsService;

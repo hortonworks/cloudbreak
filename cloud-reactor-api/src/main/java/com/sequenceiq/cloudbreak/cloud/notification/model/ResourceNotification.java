@@ -23,7 +23,7 @@ public class ResourceNotification {
     public ResourceNotification(CloudResource cloudResource, CloudContext cloudContext, ResourceNotificationType type) {
         this.cloudResource = cloudResource;
         this.cloudContext = cloudContext;
-        this.promise = Promises.prepare();
+        promise = Promises.prepare();
         this.type = type;
     }
 
@@ -53,7 +53,7 @@ public class ResourceNotification {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ResourceNotification{");
+        StringBuilder sb = new StringBuilder("ResourceNotification{");
         sb.append("cloudResource=").append(cloudResource);
         sb.append(", promise=").append(promise);
         sb.append(", cloudContext=").append(cloudContext);

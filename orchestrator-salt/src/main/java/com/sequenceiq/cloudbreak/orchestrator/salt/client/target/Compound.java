@@ -39,7 +39,7 @@ public class Compound implements Target<String> {
         GRAINS("G@"),
         PILLAR("I@");
 
-        private String delimiter;
+        private final String delimiter;
 
         CompoundType(String delimiter) {
             this.delimiter = delimiter;

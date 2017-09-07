@@ -4,7 +4,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RepairClusterRequest;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,10 +12,10 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class ClusterRepairRequest {
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RepairClusterRequest.HOSTGROUPS, required = true)
+    @ApiModelProperty(value = RepairClusterRequest.HOSTGROUPS, required = true)
     private List<String> hostGroups;
 
-    @ApiModelProperty(value = ModelDescriptions.RepairClusterRequest.REMOVE_ONLY)
+    @ApiModelProperty(RepairClusterRequest.REMOVE_ONLY)
     private boolean removeOnly;
 
     public List<String> getHostGroups() {

@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsGroupView;
-import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -34,7 +33,6 @@ public class CloudFormationTemplateBuilder {
 
     public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
-        AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(context.stack);
         List<AwsGroupView> awsGroupViews = new ArrayList<>();
         List<AwsGroupView> awsGatewayGroupViews = new ArrayList<>();
         int i = 0;
@@ -157,7 +155,7 @@ public class CloudFormationTemplateBuilder {
         }
 
         public ModelContext withExistingVpc(boolean existingVpc) {
-            this.existingVPC = existingVpc;
+            existingVPC = existingVpc;
             return this;
         }
 
@@ -167,12 +165,12 @@ public class CloudFormationTemplateBuilder {
         }
 
         public ModelContext withExistingSubnetCidr(List<String> cidr) {
-            this.existingSubnetCidr = cidr;
+            existingSubnetCidr = cidr;
             return this;
         }
 
         public ModelContext withExistingSubnetIds(List<String> subnetIds) {
-            this.existingSubnetIds = subnetIds;
+            existingSubnetIds = subnetIds;
             return this;
         }
 
@@ -197,17 +195,17 @@ public class CloudFormationTemplateBuilder {
         }
 
         public ModelContext withDefaultSubnet(String subnet) {
-            this.defaultSubnet = subnet;
+            defaultSubnet = subnet;
             return this;
         }
 
         public ModelContext withCloudbreakPublicIp(String publicIp) {
-            this.cloudbreakPublicIp = publicIp;
+            cloudbreakPublicIp = publicIp;
             return this;
         }
 
         public ModelContext withDefaultInboundSecurityGroup(String securityGroup) {
-            this.defaultInboundSecurityGroup = securityGroup;
+            defaultInboundSecurityGroup = securityGroup;
             return this;
         }
 

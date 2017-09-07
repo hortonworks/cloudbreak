@@ -5,25 +5,25 @@ import java.util.Map;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.FileSystem;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class FileSystemBase {
+public abstract class FileSystemBase implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.NAME, required = true)
+    @ApiModelProperty(value = FileSystem.NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.TYPE, required = true)
+    @ApiModelProperty(value = FileSystem.TYPE, required = true)
     private FileSystemType type;
 
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.DEFAULT)
+    @ApiModelProperty(FileSystem.DEFAULT)
     private boolean defaultFs;
 
-    @ApiModelProperty(value = ModelDescriptions.FileSystem.PROPERTIES)
+    @ApiModelProperty(FileSystem.PROPERTIES)
     private Map<String, String> properties;
 
     public String getName() {

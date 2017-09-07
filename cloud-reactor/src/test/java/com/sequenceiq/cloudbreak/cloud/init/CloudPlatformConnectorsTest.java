@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 public class CloudPlatformConnectorsTest {
 
-    private CloudPlatformConnectors c = new CloudPlatformConnectors();
+    private final CloudPlatformConnectors c = new CloudPlatformConnectors();
 
     @Before
     public void setUp() {
@@ -81,7 +81,7 @@ public class CloudPlatformConnectorsTest {
         c.cloudPlatformConnectors();
     }
 
-    private CloudConnector getConnector(final String platform, final String variant) {
+    private CloudConnector getConnector(String platform, String variant) {
         return new CloudConnector() {
             @Override
             public Authenticator authentication() {

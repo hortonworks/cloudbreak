@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.cloud.event.InstancePayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-
-import java.util.Set;
 
 public class InstanceTerminationTriggerEvent extends StackEvent implements InstancePayload {
     private final Set<String> instanceIds;

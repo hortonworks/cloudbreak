@@ -8,9 +8,9 @@ public class ImageStatusResult {
 
     public static final int INIT = 0;
 
-    private ImageStatus imageStatus;
+    private final ImageStatus imageStatus;
 
-    private Integer statusProgressValue;
+    private final Integer statusProgressValue;
 
     public ImageStatusResult(ImageStatus imageStatus, Integer statusProgressValue) {
         this.imageStatus = imageStatus;

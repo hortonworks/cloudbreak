@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.api.model.RdsBuildResult;
 import com.sequenceiq.cloudbreak.api.model.RdsTestResult;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UtilityOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,39 +35,39 @@ public interface UtilEndpoint {
     @POST
     @Path("rds")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_RDS_CONNECTION, produces = ContentType.JSON, nickname = "testRdsConnectionUtil")
+    @ApiOperation(value = UtilityOpDescription.TEST_RDS_CONNECTION, produces = ContentType.JSON, nickname = "testRdsConnectionUtil")
     RdsTestResult testRdsConnection(@Valid RDSConfigRequest rdsConfigRequest);
 
     @GET
     @Path("rds/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_RDS_CONNECTION_BY_ID, produces = ContentType.JSON,
+    @ApiOperation(value = UtilityOpDescription.TEST_RDS_CONNECTION_BY_ID, produces = ContentType.JSON,
             nickname = "testRdsConnectionByIdUtil")
-    RdsTestResult testRdsConnectionById(@PathParam(value = "id") Long id);
+    RdsTestResult testRdsConnectionById(@PathParam("id") Long id);
 
     @POST
     @Path("ldap")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON, nickname = "testLdapConnectionUtil")
+    @ApiOperation(value = UtilityOpDescription.TEST_LDAP_CONNECTION, produces = ContentType.JSON, nickname = "testLdapConnectionUtil")
     LdapTestResult testLdapConnection(@Valid LdapValidationRequest ldapValidationRequest);
 
     @GET
     @Path("ldap/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_LDAP_CONNECTION_BY_ID, produces = ContentType.JSON,
+    @ApiOperation(value = UtilityOpDescription.TEST_LDAP_CONNECTION_BY_ID, produces = ContentType.JSON,
             nickname = "testLdapConnectionByIdUtil")
-    LdapTestResult testLdapConnectionById(@PathParam(value = "id") Long id);
+    LdapTestResult testLdapConnectionById(@PathParam("id") Long id);
 
     @POST
     @Path("ambari-database")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.TEST_DATABASE, produces = ContentType.JSON, nickname = "testAmbariDatabaseUtil")
+    @ApiOperation(value = UtilityOpDescription.TEST_DATABASE, produces = ContentType.JSON, nickname = "testAmbariDatabaseUtil")
     AmbariDatabaseTestResult testAmbariDatabase(@Valid AmbariDatabaseDetailsJson ambariDatabaseDetailsJson);
 
     @POST
     @Path("rds-database")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UtilityOpDescription.CREATE_DATABASE, produces = ContentType.JSON, nickname = "createRDSDatabaseUtil")
+    @ApiOperation(value = UtilityOpDescription.CREATE_DATABASE, produces = ContentType.JSON, nickname = "createRDSDatabaseUtil")
     RdsBuildResult buildRdsConnection(@Valid RDSBuildRequest rdsBuildRequest, @QueryParam("target") Set<String> targets);
 
 }

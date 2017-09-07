@@ -5,7 +5,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,24 +15,24 @@ import io.swagger.annotations.ApiModelProperty;
 public class LdapValidationRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.SERVER_HOST, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_HOST, required = true)
     private String serverHost;
 
     @NotNull
     @Max(65535)
     @Min(1)
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.SERVER_PORT, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_PORT, required = true)
     private Integer serverPort;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.PROTOCOL)
+    @ApiModelProperty(LdapConfigModelDescription.PROTOCOL)
     private String protocol = "ldap";
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_DN, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)
     private String bindDn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
 
     public String getServerHost() {

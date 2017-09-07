@@ -43,11 +43,11 @@ public class AwsSmartSenseIdGenerator {
                     AmazonIdentityManagementClient iamClient = new AmazonIdentityManagementClient(new BasicAWSCredentials(accessKey, secretKey));
                     String arn = iamClient.getUser().getUser().getArn();
                     smartSenseId = getSmartSenseIdFromArn(arn);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     LOGGER.error("Could not get ARN of IAM user from AWS.", e);
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Could not get SmartSense Id from AWS credential.", e);
         }
         return smartSenseId;

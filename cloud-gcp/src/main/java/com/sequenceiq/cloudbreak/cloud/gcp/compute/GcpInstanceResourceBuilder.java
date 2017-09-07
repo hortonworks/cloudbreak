@@ -13,10 +13,14 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Addresses;
+import com.google.api.services.compute.Compute.Instances.Get;
+import com.google.api.services.compute.Compute.Instances.Insert;
 import com.google.api.services.compute.model.AccessConfig;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Metadata;
+import com.google.api.services.compute.model.Metadata.Items;
 import com.google.api.services.compute.model.NetworkInterface;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Scheduling;
@@ -96,18 +100,18 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         tagList.add(groupname);
         tagList.add(GcpStackUtil.getClusterTag(auth.getCloudContext()));
         tagList.add(GcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        customTags.entrySet().stream().forEach(e -> tagList.add(e.getKey() + "-" + e.getValue()));
+        customTags.entrySet().forEach(e -> tagList.add(e.getKey() + '-' + e.getValue()));
         tags.setItems(tagList);
         instance.setTags(tags);
 
         Metadata metadata = new Metadata();
         metadata.setItems(new ArrayList<>());
 
-        Metadata.Items sshMetaData = new Metadata.Items();
+        Items sshMetaData = new Items();
         sshMetaData.setKey("sshKeys");
-        sshMetaData.setValue(auth.getCloudCredential().getLoginUserName() + ":" + auth.getCloudCredential().getPublicKey());
+        sshMetaData.setValue(auth.getCloudCredential().getLoginUserName() + ':' + auth.getCloudCredential().getPublicKey());
 
-        Metadata.Items startupScript = new Metadata.Items();
+        Items startupScript = new Items();
         startupScript.setKey("startup-script");
         startupScript.setValue(image.getUserData(group.getType()));
 
@@ -115,7 +119,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         metadata.getItems().add(startupScript);
         instance.setMetadata(metadata);
 
-        Compute.Instances.Insert insert = compute.instances().insert(projectId, location.getAvailabilityZone().value(), instance);
+        Insert insert = compute.instances().insert(projectId, location.getAvailabilityZone().value(), instance);
         insert.setPrettyPrint(Boolean.TRUE);
         try {
             Operation operation = insert.execute();
@@ -218,7 +222,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             accessConfig.setType("ONE_TO_ONE_NAT");
             List<CloudResource> reservedIp = filterResourcesByType(computeResources, ResourceType.GCP_RESERVED_IP);
             if (InstanceGroupType.GATEWAY == group.getType() && !reservedIp.isEmpty()) {
-                Compute.Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(), reservedIp.get(0).getName());
+                Addresses.Get getReservedIp = compute.addresses().get(projectId, region.value(), reservedIp.get(0).getName());
                 accessConfig.setNatIP(getReservedIp.execute().getAddress());
             }
             networkInterface.setAccessConfigs(Collections.singletonList(accessConfig));
@@ -250,7 +254,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         Compute compute = context.getCompute();
         String instanceId = instance.getInstanceId();
         try {
-            Compute.Instances.Get get = compute.instances().get(projectId, availabilityZone, instanceId);
+            Get get = compute.instances().get(projectId, availabilityZone, instanceId);
             String state = stopRequest ? "RUNNING" : "TERMINATED";
             if (state.equals(get.execute().getStatus())) {
                 Operation operation = stopRequest ? compute.instances().stop(projectId, availabilityZone, instanceId).setPrettyPrint(true).execute()

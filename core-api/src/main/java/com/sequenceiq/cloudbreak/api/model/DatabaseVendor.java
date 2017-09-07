@@ -38,10 +38,10 @@ public enum DatabaseVendor {
     }
 
     public static Collection<DatabaseVendor> availableVendors() {
-        return EnumSet.complementOf(EnumSet.of(DatabaseVendor.EMBEDDED));
+        return EnumSet.complementOf(EnumSet.of(EMBEDDED));
     }
 
     public static Collection<DatabaseVendor> outOfTheBoxVendors() {
-        return EnumSet.of(DatabaseVendor.POSTGRES, DatabaseVendor.MYSQL, DatabaseVendor.MARIADB);
+        return EnumSet.of(POSTGRES, MYSQL, MARIADB);
     }
 }

@@ -19,6 +19,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.jpa.domain.Specification;
 
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.repository.CloudbreakUsageRepository;
 
@@ -48,7 +49,7 @@ public class DefaultCloudbreakUsagesRetrievalHostServiceTypeTest {
     @Before
     public void setUp() {
         underTest = new CloudbreakUsagesRetrievalService();
-        filterParameters = new CbUsageFilterParameters.Builder()
+        filterParameters = new Builder()
                 .setFilterEndDate(DUMMY_END_DATE).setAccount(DUMMY_ACCOUNT).setSince(DUMMY_SINCE)
                 .setOwner(DUMMY_OWNER).setRegion(DUMMY_REGION).setCloud(DUMMY_CLOUD).build();
         usage = new CloudbreakUsage();

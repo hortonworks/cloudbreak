@@ -40,86 +40,86 @@ public interface AlertEndpoint {
     @Path("metric")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_POST, produces = JSON, notes = METRIC_BASED_NOTES)
-    MetricAlertJson createAlerts(@PathParam(value = "clusterId") Long clusterId, @Valid MetricAlertJson json);
+    MetricAlertJson createAlerts(@PathParam("clusterId") Long clusterId, @Valid MetricAlertJson json);
 
     @PUT
     @Path("metric/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_PUT, produces = JSON, notes = METRIC_BASED_NOTES)
-    MetricAlertJson updateAlerts(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId,
+    MetricAlertJson updateAlerts(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId,
             @Valid MetricAlertJson json);
 
     @GET
     @Path("metric")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_GET, produces = JSON, notes = METRIC_BASED_NOTES)
-    List<MetricAlertJson> getAlerts(@PathParam(value = "clusterId") Long clusterId);
+    List<MetricAlertJson> getAlerts(@PathParam("clusterId") Long clusterId);
 
     @DELETE
-    @Path(value = "metric/{alertId}")
+    @Path("metric/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_DELETE, produces = JSON, notes = METRIC_BASED_NOTES)
-    void deleteAlarm(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId);
+    void deleteAlarm(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId);
 
     @GET
-    @Path(value = "metric/definitions")
+    @Path("metric/definitions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_DEFINITIONS, produces = JSON, notes = METRIC_BASED_NOTES)
-    List<Map<String, Object>> getAlertDefinitions(@PathParam(value = "clusterId") Long clusterId);
+    List<Map<String, Object>> getAlertDefinitions(@PathParam("clusterId") Long clusterId);
 
     @POST
     @Path("time")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.TIME_BASED_POST, produces = JSON, notes = TIME_BASED_NOTES)
-    TimeAlertJson createTimeAlert(@PathParam(value = "clusterId") Long clusterId, @Valid TimeAlertJson json) throws ParseException;
+    TimeAlertJson createTimeAlert(@PathParam("clusterId") Long clusterId, @Valid TimeAlertJson json) throws ParseException;
 
     @PUT
     @Path("time/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.TIME_BASED_PUT, produces = JSON, notes = TIME_BASED_NOTES)
-    TimeAlertJson setTimeAlert(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId, @Valid TimeAlertJson json)
+    TimeAlertJson setTimeAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId, @Valid TimeAlertJson json)
             throws ParseException;
 
     @GET
     @Path("time")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.TIME_BASED_GET, produces = JSON, notes = TIME_BASED_NOTES)
-    List<TimeAlertJson> getTimeAlerts(@PathParam(value = "clusterId") Long clusterId);
+    List<TimeAlertJson> getTimeAlerts(@PathParam("clusterId") Long clusterId);
 
     @DELETE
     @Path("time/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.TIME_BASED_DELETE, produces = JSON, notes = TIME_BASED_NOTES)
-    void deleteTimeAlert(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId);
+    void deleteTimeAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId);
 
     @POST
     @Path("prometheus")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_POST, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
-    PrometheusAlertJson createPrometheusAlert(@PathParam(value = "clusterId") Long clusterId, @Valid PrometheusAlertJson json);
+    PrometheusAlertJson createPrometheusAlert(@PathParam("clusterId") Long clusterId, @Valid PrometheusAlertJson json);
 
     @PUT
     @Path("prometheus/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_PUT, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
-    PrometheusAlertJson updatePrometheusAlert(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId,
+    PrometheusAlertJson updatePrometheusAlert(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId,
             @Valid PrometheusAlertJson json);
 
     @GET
     @Path("prometheus")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_GET, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
-    List<PrometheusAlertJson> getPrometheusAlerts(@PathParam(value = "clusterId") Long clusterId);
+    List<PrometheusAlertJson> getPrometheusAlerts(@PathParam("clusterId") Long clusterId);
 
     @DELETE
-    @Path(value = "prometheus/{alertId}")
+    @Path("prometheus/{alertId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.PROMETHEUS_BASED_DELETE, produces = JSON, notes = PROMETHEUS_BASED_NOTES)
-    void deletePrometheusAlarm(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "alertId") Long alertId);
+    void deletePrometheusAlarm(@PathParam("clusterId") Long clusterId, @PathParam("alertId") Long alertId);
 
     @GET
-    @Path(value = "prometheus/definitions")
+    @Path("prometheus/definitions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = AlertOpDescription.METRIC_BASED_DEFINITIONS, produces = JSON, notes = PROMETHEUS_BASED_DEFINITIONS)
-    List<AlertRuleDefinitionEntry> getPrometheusDefinitions(@PathParam(value = "clusterId") Long clusterId);
+    List<AlertRuleDefinitionEntry> getPrometheusDefinitions(@PathParam("clusterId") Long clusterId);
 }

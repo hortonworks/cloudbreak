@@ -10,9 +10,9 @@ public class CloudInstance extends DynamicModel {
 
     public static final String SUBNET_ID = "subnetId";
 
-    private String instanceId;
+    private final String instanceId;
 
-    private InstanceTemplate template;
+    private final InstanceTemplate template;
 
     public CloudInstance(String instanceId, InstanceTemplate template) {
         this.instanceId = instanceId;
@@ -35,7 +35,7 @@ public class CloudInstance extends DynamicModel {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudInstance{");
+        StringBuilder sb = new StringBuilder("CloudInstance{");
         sb.append("instanceId='").append(instanceId).append('\'');
         sb.append(", template=").append(template);
         sb.append('}');

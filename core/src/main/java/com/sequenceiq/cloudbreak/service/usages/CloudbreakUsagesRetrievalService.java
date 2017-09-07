@@ -19,12 +19,12 @@ public class CloudbreakUsagesRetrievalService {
     private CloudbreakUsageRepository usageRepository;
 
     public List<CloudbreakUsage> findUsagesFor(CbUsageFilterParameters params) {
-        return (List<CloudbreakUsage>) usageRepository.findAll(
+        return usageRepository.findAll(
                 Specifications.where(CloudbreakUsageSpecifications.usagesWithStringFields("account", params.getAccount()))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("owner", params.getOwner()))
-                .and(CloudbreakUsageSpecifications.usagesSince(params.getSince()))
-                .and(CloudbreakUsageSpecifications.usagesBefore(params.getFilterEndDate()))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("provider", params.getCloud()))
-                .and(CloudbreakUsageSpecifications.usagesWithStringFields("region", params.getRegion())));
+                        .and(CloudbreakUsageSpecifications.usagesWithStringFields("owner", params.getOwner()))
+                        .and(CloudbreakUsageSpecifications.usagesSince(params.getSince()))
+                        .and(CloudbreakUsageSpecifications.usagesBefore(params.getFilterEndDate()))
+                        .and(CloudbreakUsageSpecifications.usagesWithStringFields("provider", params.getCloud()))
+                        .and(CloudbreakUsageSpecifications.usagesWithStringFields("region", params.getRegion())));
     }
 }

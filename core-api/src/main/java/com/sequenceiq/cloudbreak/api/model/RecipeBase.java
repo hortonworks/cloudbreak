@@ -15,7 +15,7 @@ public abstract class RecipeBase implements JsonEntity {
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The recipe's name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
 
-    @ApiModelProperty(value = ModelDescriptions.NAME)
+    @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
 
     @Size(max = 1000)
@@ -23,13 +23,13 @@ public abstract class RecipeBase implements JsonEntity {
     private String description;
 
     @NotNull
-    @ApiModelProperty(value = RecipeModelDescription.TYPE)
+    @ApiModelProperty(RecipeModelDescription.TYPE)
     private RecipeType recipeType;
 
-    @ApiModelProperty(value = RecipeModelDescription.CONTENT)
+    @ApiModelProperty(RecipeModelDescription.CONTENT)
     private String content;
 
-    @ApiModelProperty(value = RecipeModelDescription.RECIPE_URI)
+    @ApiModelProperty(RecipeModelDescription.RECIPE_URI)
     private String uri;
 
     public String getName() {

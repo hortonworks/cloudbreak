@@ -15,9 +15,11 @@ public enum ClusterStatus {
     PENDING(Status.AVAILABLE, null, "There are in progress or pending operations in Ambari. Wait them to be finsihed and try syncing later."),
     AMBIGUOUS(Status.AVAILABLE, null, "There are stopped and running Ambari services as well. Restart or stop all of them and try syncing later.");
 
-    private String statusReason;
-    private Status stackStatus;
-    private Status clusterStatus;
+    private final String statusReason;
+
+    private final Status stackStatus;
+
+    private final Status clusterStatus;
 
     ClusterStatus(Status stackStatus, Status clusterStatus, String statusReason) {
         this.stackStatus = stackStatus;

@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -57,10 +58,10 @@ import reactor.Environment;
 @PropertySource("classpath:application.properties")
 public class TestApplicationContext {
 
-    private CloudInstance cloudInstance = new CloudInstance("instanceId",
+    private final CloudInstance cloudInstance = new CloudInstance("instanceId",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()));
 
-    private CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
+    private final CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
             new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()));
 
     @Mock
@@ -126,7 +127,7 @@ public class TestApplicationContext {
 
     @Bean
     public CloudConnector cloudConnectors() throws Exception {
-        CloudResource resource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name("ref").build();
+        CloudResource resource = new Builder().type(ResourceType.HEAT_STACK).name("ref").build();
         when(cloudConnector.authentication()).thenReturn(authenticator);
         when(cloudConnector.credentials()).thenReturn(credentialConnector);
         when(credentialConnector.create(any(AuthenticatedContext.class))).thenReturn(new CloudCredentialStatus(null, CredentialStatus.CREATED));

@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 public class HostMatcher implements Target<String> {
 
-    private List<String> addresses;
+    private final List<String> addresses;
 
     public HostMatcher(List<String> addresses) {
         this.addresses = addresses;

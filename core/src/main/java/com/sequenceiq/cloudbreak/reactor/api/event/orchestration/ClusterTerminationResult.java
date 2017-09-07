@@ -13,7 +13,7 @@ public class ClusterTerminationResult extends ClusterPlatformResult<ClusterTermi
 
     public ClusterTerminationResult(String statusReason, Exception errorDetails, ClusterTerminationRequest request) {
         super(statusReason, errorDetails, request);
-        this.operationAllowed = Boolean.TRUE;
+        operationAllowed = Boolean.TRUE;
     }
 
     public Boolean isOperationAllowed() {

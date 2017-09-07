@@ -9,11 +9,12 @@ import java.util.UUID;
 import javax.inject.Inject;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ import reactor.bus.EventBus;
  * Created by perdos on 9/22/16.
  */
 @Component(AzureInteractiveLoginStatusCheckerTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask {
 
     public static final String NAME = "armInteractiveLoginStatusCheckerTask";
@@ -86,7 +87,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     @Override
     public Boolean call() {
         Response response = createPollingRequest();
-        if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             String tokenResponseString = response.readEntity(String.class);
             try {
                 String refreshToken = new ObjectMapper().readTree(tokenResponseString).get("refresh_token").asText();
@@ -152,7 +153,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     private Response createPollingRequest() {
         Form pollingForm = createPollingForm();
         WebTarget resource = ClientBuilder.newClient().target(LOGIN_MICROSOFTONLINE_OAUTH2);
-        Invocation.Builder request = resource.path("token").queryParam("api-version", "1.0").request();
+        Builder request = resource.path("token").queryParam("api-version", "1.0").request();
         request.accept(MediaType.APPLICATION_JSON);
         return request.post(Entity.entity(pollingForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
     }
@@ -160,10 +161,10 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     private String createResourceToken(String refreshToken, String tenantId, String resource) throws InteractiveLoginException {
         Form resourceTokenForm = createResourceTokenForm(refreshToken, resource);
         WebTarget webTarget = ClientBuilder.newClient().target(LOGIN_MICROSOFTONLINE);
-        Invocation.Builder request = webTarget.path(tenantId + "/oauth2/token").queryParam("api-version", "1.0").request();
+        Builder request = webTarget.path(tenantId + "/oauth2/token").queryParam("api-version", "1.0").request();
         request.accept(MediaType.APPLICATION_JSON);
         Response response = request.post(Entity.entity(resourceTokenForm, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             throw new InteractiveLoginException("Obtain access token for " + resource + " failed "
                     + "with tenant ID: " + tenantId + ", status code " + response.getStatus()
                     + ", error message: " + response.readEntity(String.class));

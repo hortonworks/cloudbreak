@@ -28,7 +28,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudSshKeys} contains every sshkey per region
      */
-    CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception;
+    CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the securitygroup in the defined region
@@ -40,10 +40,7 @@ public interface PlatformResources {
 
     default boolean regionMatch(Region actualRegion, Region expectedRegion) {
         if (expectedRegion != null && !Strings.isNullOrEmpty(expectedRegion.value())) {
-            if (actualRegion.value().equals(expectedRegion.value())) {
-                return true;
-            }
-            return false;
+            return actualRegion.value().equals(expectedRegion.value());
         } else {
             return true;
         }
@@ -51,10 +48,7 @@ public interface PlatformResources {
 
     default boolean regionMatch(String actualRegion, Region expectedRegion) {
         if (expectedRegion != null && !Strings.isNullOrEmpty(expectedRegion.value())) {
-            if (actualRegion.equals(expectedRegion.value())) {
-                return true;
-            }
-            return false;
+            return actualRegion.equals(expectedRegion.value());
         } else {
             return true;
         }

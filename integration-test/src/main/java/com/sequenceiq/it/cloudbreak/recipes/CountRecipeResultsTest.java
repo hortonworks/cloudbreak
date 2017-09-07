@@ -31,6 +31,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
 public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
@@ -56,11 +57,11 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));
         List<Future> futures = new ArrayList<>(publicIps.size() * files.length);
         ExecutorService executorService = Executors.newFixedThreadPool(publicIps.size());
-        final AtomicInteger count = new AtomicInteger(0);
+        AtomicInteger count = new AtomicInteger(0);
         //WHEN
         try {
-            for (final String file : files) {
-                for (final String ip : publicIps) {
+            for (String file : files) {
+                for (String ip : publicIps) {
                     futures.add(executorService.submit(() -> {
                         if (findFile(ip, file)) {
                             count.incrementAndGet();
@@ -128,7 +129,7 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
 
     private Pair<Integer, String> executeSshCommand(SSHClient ssh, String command) throws IOException {
         Session session = null;
-        Session.Command cmd = null;
+        Command cmd = null;
         try {
             session = startSshSession(ssh);
             cmd = session.exec(command);

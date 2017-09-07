@@ -5,7 +5,6 @@ import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,14 +28,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 @Component
 public class AwsClient {
+
     private static final String DEFAULT_REGION_NAME = "us-west-1";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
 
     private static final String EXISTING_KEYPAIR_PARAM_KEY = "existingKeyPairName";
-
-    @Inject
-    private AwsPlatformParameters awsPlatformParameters;
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
@@ -98,7 +95,7 @@ public class AwsClient {
     }
 
     public boolean existingKeyPairNameSpecified(AuthenticatedContext auth) {
-        return StringUtils.isNoneEmpty(getExistingKeyPairName(auth));
+        return isNoneEmpty(getExistingKeyPairName(auth));
     }
 
     public String getExistingKeyPairName(AuthenticatedContext auth) {

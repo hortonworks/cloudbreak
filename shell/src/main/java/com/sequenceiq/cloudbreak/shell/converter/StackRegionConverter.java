@@ -14,10 +14,6 @@ public class StackRegionConverter extends AbstractConverter<StackRegion> {
     @Autowired
     private ShellContext context;
 
-    public StackRegionConverter() {
-
-    }
-
     @Override
     public boolean supports(Class<?> type, String s) {
         return StackRegion.class.isAssignableFrom(type);
@@ -27,7 +23,7 @@ public class StackRegionConverter extends AbstractConverter<StackRegion> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getRegionsByPlatform(context.getActiveCloudPlatform()));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

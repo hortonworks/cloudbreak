@@ -19,7 +19,7 @@ public class DownscaleStackResult extends CloudPlatformResult<CloudPlatformReque
 
     public DownscaleStackResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
         super(statusReason, errorDetails, request);
-        this.downscaledResources = Collections.emptyList();
+        downscaledResources = Collections.emptyList();
     }
 
     public List<CloudResource> getDownscaledResources() {

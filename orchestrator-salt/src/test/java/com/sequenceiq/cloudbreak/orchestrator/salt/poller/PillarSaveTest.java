@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -20,19 +19,10 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 
 public class PillarSaveTest {
-
-    @Test
-    public void testPillarProperties() {
-        SaltConnector saltConnector = mock(SaltConnector.class);
-        Map<String, Object> pillarJson = new HashMap<>();
-        SaltPillarProperties pillarProperties = new SaltPillarProperties("/nodes/hosts.sls", pillarJson);
-        new PillarSave(saltConnector, Collections.emptySet(), pillarProperties);
-    }
 
     @Test
     public void testDiscovery() throws Exception {

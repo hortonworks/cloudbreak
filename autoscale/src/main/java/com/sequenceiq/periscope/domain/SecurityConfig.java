@@ -15,9 +15,7 @@ import org.apache.commons.codec.binary.Base64;
 
 @Entity
 @Table(name = "SecurityConfig")
-@NamedQueries({
-        @NamedQuery(name = "SecurityConfig.findByClusterId", query = "SELECT s FROM SecurityConfig s WHERE s.cluster.id= :id"),
-})
+@NamedQueries(@NamedQuery(name = "SecurityConfig.findByClusterId", query = "SELECT s FROM SecurityConfig s WHERE s.cluster.id= :id"))
 public class SecurityConfig {
 
     @Id
@@ -99,8 +97,8 @@ public class SecurityConfig {
     }
 
     public void update(SecurityConfig updatedConfig) {
-        this.clientCert = updatedConfig.getClientCert();
-        this.clientKey = updatedConfig.getClientKey();
-        this.serverCert = updatedConfig.getServerCert();
+        clientCert = updatedConfig.clientCert;
+        clientKey = updatedConfig.clientKey;
+        serverCert = updatedConfig.serverCert;
     }
 }

@@ -23,6 +23,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Instances;
+import com.google.api.services.compute.Compute.Instances.Insert;
 import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
@@ -61,31 +64,13 @@ public class GcpInstanceResourceBuilderTest {
 
     private List<Volume> volumes;
 
-    private Location location;
-
-    private Map<InstanceGroupType, String> userData;
-
     private Image image;
-
-    private List<SecurityRule> rules;
 
     private Security security;
 
-    private CloudContext cloudContext;
-
-    private CloudCredential cloudCredential;
-
-    private String projectId;
-
     private AuthenticatedContext authenticatedContext;
 
-    private GcpResourceNameService resourceNameService;
-
     private GcpContext context;
-
-    private CloudResource networkResource;
-
-    private List<CloudResource> networkResources;
 
     private Operation operation;
 
@@ -93,16 +78,16 @@ public class GcpInstanceResourceBuilderTest {
     private Compute compute;
 
     @Mock
-    private Compute.Instances instances;
+    private Instances instances;
 
     @Mock
-    private Compute.Instances.Insert insert;
+    private Insert insert;
 
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
 
     @InjectMocks
-    private GcpInstanceResourceBuilder builder = new GcpInstanceResourceBuilder();
+    private final GcpInstanceResourceBuilder builder = new GcpInstanceResourceBuilder();
 
     @Before
     public void setUp() throws Exception {
@@ -111,24 +96,24 @@ public class GcpInstanceResourceBuilderTest {
         flavor = "m1.medium";
         instanceId = "SOME_ID";
         volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
-        rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, null);
-        location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
-        userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
+        Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));
+        Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         image = new Image("cb-centos66-amb200-2015-05-25", userData);
-        cloudContext = new CloudContext(privateId, "testname", "GCP", "owner");
-        cloudCredential = new CloudCredential(privateId, "credentialname", "sshkey", "loginuser");
+        CloudContext cloudContext = new CloudContext(privateId, "testname", "GCP", "owner");
+        CloudCredential cloudCredential = new CloudCredential(privateId, "credentialname", "sshkey", "loginuser");
         cloudCredential.putParameter("projectId", "projectId");
-        projectId = GcpStackUtil.getProjectId(cloudCredential);
+        String projectId = GcpStackUtil.getProjectId(cloudCredential);
         authenticatedContext = new AuthenticatedContext(cloudContext, cloudCredential);
         context = new GcpContext(cloudContext.getName(), location, projectId, compute, false, 30, false);
-        networkResources = Arrays.asList(new CloudResource.Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
+        List<CloudResource> networkResources = Arrays.asList(new Builder().type(ResourceType.GCP_NETWORK).name("network-test").build());
         context.addNetworkResources(networkResources);
         operation = new Operation();
         operation.setName("operation");
         operation.setHttpErrorStatusCode(null);
-        resourceNameService = new GcpResourceNameService();
+        GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(builder, "resourceNameService", resourceNameService);
     }
@@ -145,7 +130,8 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
+
+        builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
         // THEN
         verify(compute).instances();
@@ -165,7 +151,8 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
+
+        builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
         // THEN
         verify(compute).instances();
@@ -185,7 +172,8 @@ public class GcpInstanceResourceBuilderTest {
         when(instances.insert(anyString(), anyString(), instanceArg.capture())).thenReturn(insert);
         when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
-        List<CloudResource> resources = builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
+
+        builder.build(context, privateId, authenticatedContext, group, image, buildableResources, Collections.emptyMap());
 
         // THEN
         verify(compute).instances();

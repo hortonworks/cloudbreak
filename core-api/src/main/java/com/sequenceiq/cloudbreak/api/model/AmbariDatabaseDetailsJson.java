@@ -17,7 +17,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("AmbariDatabaseDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AmbariDatabaseDetailsJson {
+public class AmbariDatabaseDetailsJson implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = VENDOR, required = true)

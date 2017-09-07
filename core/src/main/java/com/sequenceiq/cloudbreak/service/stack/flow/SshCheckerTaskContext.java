@@ -7,15 +7,15 @@ import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 
 public class SshCheckerTaskContext extends StackContext {
 
-    private HostKeyVerifier hostKeyVerifier;
+    private final HostKeyVerifier hostKeyVerifier;
 
-    private String publicIp;
+    private final String publicIp;
 
-    private int sshPort;
+    private final int sshPort;
 
-    private String user;
+    private final String user;
 
-    private String sshPrivateKey;
+    private final String sshPrivateKey;
 
     public SshCheckerTaskContext(Stack stack, HostKeyVerifier hostKeyVerifier, String publicIp, int sshPort, String user, String sshPrivateKey) {
         super(stack);

@@ -17,47 +17,47 @@ public class ContainerConstraint {
 
     private final List<List<String>> constraints;
 
-    private Map<String, String> env;
+    private final Map<String, String> env;
 
     private final String networkMode;
 
     private final TcpPortBinding tcpPortBinding;
 
-    private ContainerName containerName;
+    private final ContainerName containerName;
 
     private final Map<String, String> links;
 
     private final String appName;
 
-    private List<String> hosts;
+    private final List<String> hosts;
 
-    private Map<String, String> volumeBinds;
+    private final Map<String, String> volumeBinds;
 
-    private Double cpu;
+    private final Double cpu;
 
-    private Double mem;
+    private final Double mem;
 
-    private Double disk;
+    private final Double disk;
 
-    private String identifier;
+    private final String identifier;
 
-    private ContainerConstraint(ContainerConstraint.Builder builder) {
-        this.cmd = builder.cmd;
-        this.cpu = builder.cpus;
-        this.mem = builder.mem;
-        this.instances = builder.instances;
-        this.ports = builder.ports;
-        this.constraints = builder.constraints;
-        this.volumeBinds = builder.volumeBinds;
-        this.env = builder.env;
-        this.networkMode = builder.networkMode;
-        this.tcpPortBinding = builder.tcpPortBinding;
-        this.hosts = builder.hosts;
-        this.containerName = builder.containerName;
-        this.links = builder.links;
-        this.appName = builder.appName;
-        this.disk = builder.disk;
-        this.identifier = builder.identifier;
+    private ContainerConstraint(Builder builder) {
+        cmd = builder.cmd;
+        cpu = builder.cpus;
+        mem = builder.mem;
+        instances = builder.instances;
+        ports = builder.ports;
+        constraints = builder.constraints;
+        volumeBinds = builder.volumeBinds;
+        env = builder.env;
+        networkMode = builder.networkMode;
+        tcpPortBinding = builder.tcpPortBinding;
+        hosts = builder.hosts;
+        containerName = builder.containerName;
+        links = builder.links;
+        appName = builder.appName;
+        disk = builder.disk;
+        identifier = builder.identifier;
     }
 
     public String[] getCmd() {
@@ -159,22 +159,22 @@ public class ContainerConstraint {
         private String identifier;
 
         public Builder containerConstraint(ContainerConstraint containerConstraint) {
-            this.cmd = containerConstraint.getCmd();
-            this.ports = containerConstraint.getPorts();
-            this.cpus = containerConstraint.getCpu();
-            this.mem = containerConstraint.getMem();
-            this.instances = containerConstraint.getInstances();
-            this.constraints = containerConstraint.getConstraints();
-            this.volumeBinds = containerConstraint.getVolumeBinds();
-            this.env = containerConstraint.getEnv();
-            this.networkMode = containerConstraint.getNetworkMode();
-            this.tcpPortBinding = containerConstraint.getTcpPortBinding();
-            this.hosts = containerConstraint.getHosts();
-            this.containerName = containerConstraint.getContainerName();
-            this.links = containerConstraint.getLinks();
-            this.appName = containerConstraint.getAppName();
-            this.disk = containerConstraint.getDisk();
-            this.identifier = containerConstraint.getIdentifier();
+            cmd = containerConstraint.getCmd();
+            ports = containerConstraint.getPorts();
+            cpus = containerConstraint.getCpu();
+            mem = containerConstraint.getMem();
+            instances = containerConstraint.getInstances();
+            constraints = containerConstraint.getConstraints();
+            volumeBinds = containerConstraint.getVolumeBinds();
+            env = containerConstraint.getEnv();
+            networkMode = containerConstraint.getNetworkMode();
+            tcpPortBinding = containerConstraint.getTcpPortBinding();
+            hosts = containerConstraint.getHosts();
+            containerName = containerConstraint.getContainerName();
+            links = containerConstraint.getLinks();
+            appName = containerConstraint.getAppName();
+            disk = containerConstraint.getDisk();
+            identifier = containerConstraint.getIdentifier();
             return this;
         }
 
@@ -189,22 +189,22 @@ public class ContainerConstraint {
         }
 
         public Builder cpus(Double numberOfCpus) {
-            this.cpus = numberOfCpus;
+            cpus = numberOfCpus;
             return this;
         }
 
         public Builder memory(Double megaBytesOfMemory) {
-            this.mem = megaBytesOfMemory;
+            mem = megaBytesOfMemory;
             return this;
         }
 
         public Builder withDiskSize(Double diskSize) {
-            this.disk = diskSize;
+            disk = diskSize;
             return this;
         }
 
         public Builder instances(Integer numberOfInstances) {
-            this.instances = numberOfInstances;
+            instances = numberOfInstances;
             return this;
         }
 
@@ -229,7 +229,7 @@ public class ContainerConstraint {
         }
 
         public Builder tcpPortBinding(TcpPortBinding binding) {
-            this.tcpPortBinding = binding;
+            tcpPortBinding = binding;
             return this;
         }
 
@@ -239,17 +239,17 @@ public class ContainerConstraint {
         }
 
         public Builder withNamePrefix(String namePrefix) {
-            this.containerName = new ContainerName(null, namePrefix);
+            containerName = new ContainerName(null, namePrefix);
             return this;
         }
 
         public Builder withName(String name) {
-            this.containerName = new ContainerName(name, null);
+            containerName = new ContainerName(name, null);
             return this;
         }
 
         public Builder addLink(String hostContainerLink, String link) {
-            this.links.put(hostContainerLink, link);
+            links.put(hostContainerLink, link);
             return this;
         }
 

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public class Json {
 
-    private String value;
+    private final String value;
 
     Json(String value) {
         this.value = value;

@@ -10,7 +10,7 @@ public class InstanceGroupEventData extends CloudbreakEventData {
 
     public InstanceGroupEventData(Long entityId, String eventType, String eventMessage, String instanceGroup) {
         super(entityId, eventType, eventMessage);
-        this.instanceGroupName = instanceGroup;
+        instanceGroupName = instanceGroup;
     }
 
     public String getInstanceGroupName() {
@@ -23,10 +23,10 @@ public class InstanceGroupEventData extends CloudbreakEventData {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakEventData{");
-        sb.append("entityId=").append(super.getEntityId());
-        sb.append(", eventType='").append(super.getEventType()).append('\'');
-        sb.append(", eventMessage='").append(super.getEventMessage()).append('\'');
+        StringBuilder sb = new StringBuilder("CloudbreakEventData{");
+        sb.append("entityId=").append(getEntityId());
+        sb.append(", eventType='").append(getEventType()).append('\'');
+        sb.append(", eventMessage='").append(getEventMessage()).append('\'');
         sb.append(", instanceGroup='").append(instanceGroupName).append('\'');
         sb.append('}');
         return sb.toString();

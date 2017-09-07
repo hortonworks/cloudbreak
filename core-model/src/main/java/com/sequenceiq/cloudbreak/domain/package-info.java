@@ -1,12 +1,5 @@
-@TypeDefs({
-        @TypeDef(
-                name = "encrypted_string",
-                typeClass = EncryptedStringType.class,
-                parameters = {
-                        @Parameter(name = "encryptorRegisteredName", value = "hibernateStringEncryptor")
-                }
-        )
-})
+@TypeDefs(@TypeDef(name = "encrypted_string", typeClass = EncryptedStringType.class, parameters = @Parameter(name = "encryptorRegisteredName",
+        value = "hibernateStringEncryptor")))
 
 package com.sequenceiq.cloudbreak.domain;
 

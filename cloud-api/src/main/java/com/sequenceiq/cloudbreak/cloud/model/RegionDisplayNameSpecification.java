@@ -9,9 +9,6 @@ public class RegionDisplayNameSpecification {
     @JsonProperty("displayName")
     private String displayName;
 
-    public RegionDisplayNameSpecification() {
-    }
-
     public String getName() {
         return name;
     }

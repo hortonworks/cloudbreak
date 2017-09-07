@@ -24,7 +24,7 @@ public class Info {
             for (int j = 1; j <= subAddress; j++) {
                 List<String> ipList = new ArrayList<>();
                 ipList.add("server");
-                ipList.add("192.168." + i + "." + j);
+                ipList.add("192.168." + i + '.' + j);
                 statusList.add(ipList);
             }
         }

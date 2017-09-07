@@ -80,7 +80,7 @@ public class BaseStackCommandsTest {
 
         String select = underTest.select(50L, null);
 
-        Assert.assertEquals(select, "Stack selected, id: 50");
+        Assert.assertEquals("Stack selected, id: 50", select);
     }
 
     @Test(expected = RuntimeException.class)
@@ -98,7 +98,7 @@ public class BaseStackCommandsTest {
 
         String select = underTest.select(null, "test1");
 
-        Assert.assertEquals(select, "Stack selected, name: test1");
+        Assert.assertEquals("Stack selected, name: test1", select);
     }
 
     @Test(expected = RuntimeException.class)

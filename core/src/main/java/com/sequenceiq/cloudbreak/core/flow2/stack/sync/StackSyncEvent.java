@@ -10,7 +10,7 @@ public enum StackSyncEvent implements FlowEvent {
     SYNC_FINALIZED_EVENT("SYNCSTACKFINALIZED"),
     SYNC_FAIL_HANDLED_EVENT("SYNCFAILHANDLED");
 
-    private String event;
+    private final String event;
 
     StackSyncEvent(String event) {
         this.event = event;

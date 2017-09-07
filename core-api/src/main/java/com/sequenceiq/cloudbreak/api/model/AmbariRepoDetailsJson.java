@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("AmbariRepoDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AmbariRepoDetailsJson {
+public class AmbariRepoDetailsJson implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = AmbariRepoDetailsDescription.VERSION, required = true)

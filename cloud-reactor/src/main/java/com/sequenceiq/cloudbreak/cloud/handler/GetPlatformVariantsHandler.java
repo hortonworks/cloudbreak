@@ -34,7 +34,7 @@ public class GetPlatformVariantsHandler implements CloudPlatformEventHandler<Get
             GetPlatformVariantsResult platformVariantResult = new GetPlatformVariantsResult(request, pv);
             request.getResult().onNext(platformVariantResult);
             LOGGER.info("Query platform variant finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformVariantsResult(e.getMessage(), e, request));
         }
     }

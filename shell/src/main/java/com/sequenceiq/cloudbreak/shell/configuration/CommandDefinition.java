@@ -153,14 +153,12 @@ public class CommandDefinition {
 
     @Bean
     public YarnCommands yarnCommands() {
-        return new YarnCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
-                baseTemplateCommands(), basePlatformCommands(), stackCommands());
+        return new YarnCommands(shellContext, baseCredentialCommands(), stackCommands());
     }
 
     @Bean
     public MarathonCommands marathonCommands() {
-        return new MarathonCommands(shellContext, baseCredentialCommands(), baseNetworkCommands(), baseSecurityGroupCommands(),
-                baseTemplateCommands(), basePlatformCommands(), stackCommands());
+        return new MarathonCommands(shellContext, baseCredentialCommands(), stackCommands());
     }
 
     @Bean

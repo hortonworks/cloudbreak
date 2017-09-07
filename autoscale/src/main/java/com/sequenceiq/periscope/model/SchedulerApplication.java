@@ -19,8 +19,8 @@ public class SchedulerApplication {
     private YarnApplicationState state;
 
     public SchedulerApplication(ApplicationReport appReport, Priority priority) {
-        this.applicationId = appReport.getApplicationId();
-        this.startTime = appReport.getStartTime();
+        applicationId = appReport.getApplicationId();
+        startTime = appReport.getStartTime();
         this.priority = priority;
     }
 
@@ -61,8 +61,8 @@ public class SchedulerApplication {
     }
 
     public void update(ApplicationReport report) {
-        this.progress = report.getProgress();
-        this.state = report.getYarnApplicationState();
+        progress = report.getProgress();
+        state = report.getYarnApplicationState();
     }
 
 }

@@ -3,32 +3,28 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.UserNamePasswordModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("UserNamePassword")
-public class UserNamePasswordJson {
+public class UserNamePasswordJson implements JsonEntity {
 
     @NotNull
     @Size(min = 1, message = "The length of the name has to be greater than 1")
-    @ApiModelProperty(value = ModelDescriptions.UserNamePasswordModelDescription.NEW_USER_NAME, required = true)
+    @ApiModelProperty(value = UserNamePasswordModelDescription.NEW_USER_NAME, required = true)
     private String userName;
 
     @NotNull
     @Size(min = 1, message = "The length of the old password has to be greater than 1")
-    @ApiModelProperty(value = ModelDescriptions.UserNamePasswordModelDescription.OLD_PASSWORD, required = true)
+    @ApiModelProperty(value = UserNamePasswordModelDescription.OLD_PASSWORD, required = true)
     private String oldPassword;
 
     @NotNull
     @Size(min = 1, message = "The length of the password has to be greater than 1")
-    @ApiModelProperty(value = ModelDescriptions.UserNamePasswordModelDescription.NEW_PASSWORD, required = true)
+    @ApiModelProperty(value = UserNamePasswordModelDescription.NEW_PASSWORD, required = true)
     private String password;
-
-    public UserNamePasswordJson() {
-
-    }
 
     public String getUserName() {
         return userName;

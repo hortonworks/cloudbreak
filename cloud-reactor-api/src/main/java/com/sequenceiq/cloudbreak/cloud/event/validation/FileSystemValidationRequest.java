@@ -27,7 +27,7 @@ public class FileSystemValidationRequest extends CloudPlatformRequest<FileSystem
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("FileSystemValidationRequest{");
+        StringBuilder sb = new StringBuilder("FileSystemValidationRequest{");
         sb.append("fileSystem=").append(fileSystem);
         sb.append('}');
         return sb.toString();

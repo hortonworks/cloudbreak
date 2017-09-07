@@ -7,7 +7,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class PlatformNetworkResponse {
+public class PlatformNetworkResponse implements JsonEntity {
 
     private String name;
 

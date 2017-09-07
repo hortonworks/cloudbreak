@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SuiteContext {
-    private Map<String, IntegrationTestContext> suiteContextMap = Collections.synchronizedMap(new HashMap<String, IntegrationTestContext>());
+
+    private final Map<String, IntegrationTestContext> suiteContextMap = Collections.synchronizedMap(new HashMap<>());
 
     public IntegrationTestContext getItContext(String suite) {
         return suiteContextMap.get(suite);

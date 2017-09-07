@@ -18,7 +18,7 @@ public enum ClusterResetEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERRESETFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERRESETFAILHANDLEDEVENT");
 
-    private String event;
+    private final String event;
 
     ClusterResetEvent(String event) {
         this.event = event;

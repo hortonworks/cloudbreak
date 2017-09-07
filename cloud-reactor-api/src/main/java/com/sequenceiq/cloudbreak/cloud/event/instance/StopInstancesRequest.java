@@ -10,9 +10,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 public class StopInstancesRequest<T> extends CloudPlatformRequest<T> {
 
-    private List<CloudResource> resources;
+    private final List<CloudResource> resources;
 
-    private List<CloudInstance> cloudInstances;
+    private final List<CloudInstance> cloudInstances;
 
     public StopInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> resources, List<CloudInstance> cloudInstances) {
         super(cloudContext, cloudCredential);
@@ -30,7 +30,7 @@ public class StopInstancesRequest<T> extends CloudPlatformRequest<T> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("StopInstancesRequest{");
+        StringBuilder sb = new StringBuilder("StopInstancesRequest{");
         sb.append("cloudInstances=").append(cloudInstances);
         sb.append(", resources=").append(resources);
         sb.append('}');

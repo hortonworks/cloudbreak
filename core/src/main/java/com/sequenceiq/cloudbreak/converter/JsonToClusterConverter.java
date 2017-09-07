@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -46,7 +47,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         cluster.setPassword(source.getPassword());
         cluster.setExecutorType(source.getExecutorType());
         Boolean enableSecurity = source.getEnableSecurity();
-        cluster.setSecure(enableSecurity == null ? false : enableSecurity);
+        cluster.setSecure(enableSecurity == null ? Boolean.FALSE : enableSecurity);
         convertKnox(source, cluster);
         KerberosRequest kerberos = source.getKerberos();
         KerberosConfig kerberosConfig = new KerberosConfig();
@@ -171,7 +172,7 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
     private Map<String, String> convertContainerConfigs(CustomContainerRequest customContainerRequest) {
         Map<String, String> configs = new HashMap<>();
         if (customContainerRequest != null) {
-            for (Map.Entry<String, String> stringStringEntry : customContainerRequest.getDefinitions().entrySet()) {
+            for (Entry<String, String> stringStringEntry : customContainerRequest.getDefinitions().entrySet()) {
                 configs.put(stringStringEntry.getKey(), stringStringEntry.getValue());
             }
         }

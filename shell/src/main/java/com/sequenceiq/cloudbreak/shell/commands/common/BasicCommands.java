@@ -54,6 +54,6 @@ public class BasicCommands implements CommandMarker {
     }
 
     private String getRow(String name, Object value) {
-        return String.format("%s: %s\n", name, value == null ? "" : value.toString());
+        return String.format("%s: %s%n", name, value == null ? "" : value.toString());
     }
 }

@@ -6,7 +6,7 @@ public enum FileSystemType {
     WASB(WasbFileSystemConfiguration.class),
     ADLS(AdlsFileSystemConfiguration.class);
 
-    private Class clazz;
+    private final Class clazz;
 
     FileSystemType(Class clazz) {
         this.clazz = clazz;

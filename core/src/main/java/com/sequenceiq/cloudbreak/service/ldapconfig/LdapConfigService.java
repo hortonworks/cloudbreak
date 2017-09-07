@@ -4,16 +4,17 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.LdapConfigRepository;
@@ -33,7 +34,7 @@ public class LdapConfigService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public LdapConfig create(IdentityUser user, LdapConfig ldapConfig) {
         ldapConfig.setOwner(user.getUserId());
         ldapConfig.setAccount(user.getAccount());
@@ -82,11 +83,7 @@ public class LdapConfigService {
     }
 
     public void delete(Long id) {
-        LdapConfig ldapConfig = get(id);
-        if (ldapConfig == null) {
-            throw new NotFoundException(String.format("LdapConfig '%s' not found.", id));
-        }
-        delete(ldapConfig);
+        delete(get(id));
     }
 
     public void delete(String name, IdentityUser user) {

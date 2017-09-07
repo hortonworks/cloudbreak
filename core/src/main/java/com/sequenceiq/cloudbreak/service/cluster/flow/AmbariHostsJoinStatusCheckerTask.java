@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class AmbariHostsJoinStatusCheckerTask extends ClusterBasedStatusCheckerT
             Map<String, String> hostNames = ambariClient.getHostStatuses();
             for (HostMetadata hostMetadata : hosts.getHostsInCluster()) {
                 boolean contains = false;
-                for (Map.Entry<String, String> hostName : hostNames.entrySet()) {
+                for (Entry<String, String> hostName : hostNames.entrySet()) {
                     if (hostName.getKey().equals(hostMetadata.getHostName()) && !"UNKNOWN".equals(hostName.getValue())) {
                         contains = true;
                         break;
@@ -33,7 +34,7 @@ public class AmbariHostsJoinStatusCheckerTask extends ClusterBasedStatusCheckerT
                     return false;
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Did not join all hosts yet, polling");
             return false;
         }

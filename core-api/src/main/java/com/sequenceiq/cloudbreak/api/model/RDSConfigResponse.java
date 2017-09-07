@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,19 +12,19 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class RDSConfigResponse extends RDSConfigJson {
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.NAME, required = true)
+    @ApiModelProperty(value = RDSConfig.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.ID)
+    @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(value = ModelDescriptions.CREATED)
+    @ApiModelProperty(ModelDescriptions.CREATED)
     private Long creationDate;
 
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfigModelDescription.CLUSTER_NAMES)
+    @ApiModelProperty(RDSConfigModelDescription.CLUSTER_NAMES)
     private Set<String> clusterNames;
 
     public String getName() {

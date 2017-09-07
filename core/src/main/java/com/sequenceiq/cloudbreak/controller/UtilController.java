@@ -88,7 +88,7 @@ public class UtilController implements UtilEndpoint {
             } else {
                 rdsTestResult.setConnectionResult("not found");
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             rdsTestResult.setConnectionResult(e.getMessage());
         }
         return rdsTestResult;

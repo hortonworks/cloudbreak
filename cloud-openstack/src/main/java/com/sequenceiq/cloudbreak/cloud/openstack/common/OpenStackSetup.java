@@ -56,7 +56,7 @@ public class OpenStackSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
     }
 
-    private void verifyFlavors(OSClient osClient, List<Group> instanceGroups) {
+    private void verifyFlavors(OSClient osClient, Iterable<Group> instanceGroups) {
         List<? extends Flavor> flavors = osClient.compute().flavors().list();
         Set<String> notFoundFlavors = new HashSet<>();
         for (Group instanceGroup : instanceGroups) {

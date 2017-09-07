@@ -15,10 +15,8 @@ import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
-})
-public class Credential {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+public class Credential implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "credential_generator")
@@ -57,10 +55,6 @@ public class Credential {
 
     @ManyToOne
     private Topology topology;
-
-    public Credential() {
-
-    }
 
     public Long getId() {
         return id;
@@ -135,7 +129,7 @@ public class Credential {
     }
 
     public boolean passwordAuthenticationRequired() {
-        return publicKey != null ? publicKey.startsWith("Basic:") : false;
+        return publicKey != null && publicKey.startsWith("Basic:");
     }
 
     public String getLoginPassword() {

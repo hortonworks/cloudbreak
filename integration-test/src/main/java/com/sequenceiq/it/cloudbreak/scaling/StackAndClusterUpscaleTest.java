@@ -1,8 +1,6 @@
 package com.sequenceiq.it.cloudbreak.scaling;
 
 import org.testng.Assert;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
@@ -18,7 +16,6 @@ import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
 public class StackAndClusterUpscaleTest extends AbstractCloudbreakIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackAndClusterUpscaleTest.class);
 
     @BeforeMethod
     public void setContextParameters() {
@@ -31,7 +28,7 @@ public class StackAndClusterUpscaleTest extends AbstractCloudbreakIntegrationTes
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        int stackIntId = Integer.valueOf(stackId);
+        int stackIntId = Integer.parseInt(stackId);
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class).stackEndpoint();
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);

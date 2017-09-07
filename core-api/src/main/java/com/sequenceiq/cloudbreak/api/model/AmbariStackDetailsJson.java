@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("AmbariStackDetails")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AmbariStackDetailsJson {
+public class AmbariStackDetailsJson implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.STACK, required = true)
@@ -20,7 +20,7 @@ public class AmbariStackDetailsJson {
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERSION, required = true)
     private String version;
 
-    @ApiModelProperty(value = AmbariStackDetailsDescription.OS)
+    @ApiModelProperty(AmbariStackDetailsDescription.OS)
     private String os;
 
     @NotNull

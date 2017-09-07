@@ -12,7 +12,7 @@ public enum StackDownscaleState implements FlowState {
     DOWNSCALE_FINISHED_STATE,
     FINAL_STATE;
 
-    private Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
+    private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     @Override
     public Class<? extends RestartAction> restartAction() {

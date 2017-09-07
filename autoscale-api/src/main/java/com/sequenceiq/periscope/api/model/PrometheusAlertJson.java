@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.api.model;
 
-import com.sequenceiq.periscope.doc.ApiDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.PrometheusAlertJsonProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,19 +9,19 @@ import io.swagger.annotations.ApiModelProperty;
 public class PrometheusAlertJson extends AbstractAlertJson {
     private static final int DEFAULT_PERIOD = 1;
 
-    @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.ALERTRULE)
+    @ApiModelProperty(PrometheusAlertJsonProperties.ALERTRULE)
     private String alertRuleName;
 
-    @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.PERIOD)
+    @ApiModelProperty(PrometheusAlertJsonProperties.PERIOD)
     private int period = DEFAULT_PERIOD;
 
-    @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.THRESHOLD)
+    @ApiModelProperty(PrometheusAlertJsonProperties.THRESHOLD)
     private double threshold;
 
-    @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.ALERTSTATE)
+    @ApiModelProperty(PrometheusAlertJsonProperties.ALERTSTATE)
     private AlertState alertState;
 
-    @ApiModelProperty(ApiDescription.PrometheusAlertJsonProperties.ALERTOPERATOR)
+    @ApiModelProperty(PrometheusAlertJsonProperties.ALERTOPERATOR)
     private AlertOperator alertOperator;
 
     public String getAlertRuleName() {

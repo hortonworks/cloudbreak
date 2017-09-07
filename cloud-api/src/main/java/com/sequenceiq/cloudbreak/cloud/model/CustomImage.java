@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 
 public class CustomImage extends StringType {
 
-    private String image;
+    private final String image;
 
     private CustomImage(String region, String image) {
         super(region);

@@ -14,7 +14,7 @@ public class HypervisorExtractor {
         LOGGER.info("Hypervisor info for instance: {}. HypervisorHostname: {}, Host: {}", server.getInstanceName(), server.getHypervisorHostname(), server
                 .getHost());
         String hypervisor = server.getHypervisorHostname();
-        LOGGER.info("Hypervisor for instance: {} is: {}", server.getInstanceName(), server.getHypervisorHostname(), server.getHost());
+        LOGGER.info("Hypervisor for instance: {} is: {} on {}", server.getInstanceName(), server.getHypervisorHostname(), server.getHost());
         if (hypervisor == null) {
             hypervisor = server.getHost();
         }

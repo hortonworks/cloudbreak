@@ -8,7 +8,6 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -21,7 +20,7 @@ public class SmartSenseSubscriptionCommands implements CommandMarker {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = { "smartsense register" })
+    @CliAvailabilityIndicator("smartsense register")
     public boolean createAvailable() {
         return true;
     }
@@ -34,18 +33,18 @@ public class SmartSenseSubscriptionCommands implements CommandMarker {
             Long id = shellContext.cloudbreakClient().smartSenseSubscriptionEndpoint().postPrivate(subscriptionJson).getId();
             shellContext.resetSmartSenseSubscription();
             return String.format("SmartSense subscription registered with id: '%d'", id);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
 
-    @CliAvailabilityIndicator(value = { "smartsense describe" })
+    @CliAvailabilityIndicator("smartsense describe")
     public boolean describeAvailable() {
         return true;
     }
 
     @CliCommand(value = "smartsense describe", help = "Describes the SmartSense subscription")
-    public String describe() throws JsonProcessingException {
+    public String describe() {
         try {
             SmartSenseSubscriptionJson smartSenseSubscription = shellContext.cloudbreakClient().smartSenseSubscriptionEndpoint().get();
             Map<String, String> map = new HashMap<>();
@@ -57,7 +56,7 @@ public class SmartSenseSubscriptionCommands implements CommandMarker {
         }
     }
 
-    @CliAvailabilityIndicator(value = { "smartsense delete --id", "smartsense delete --subscriptionId" })
+    @CliAvailabilityIndicator({"smartsense delete --id", "smartsense delete --subscriptionId"})
     public boolean deleteAvailable() {
         return true;
     }
@@ -80,12 +79,12 @@ public class SmartSenseSubscriptionCommands implements CommandMarker {
     }
 
     @CliCommand(value = "smartsense delete --id", help = "Deletes the SmartSense subscription by its id")
-    public String deleteById(@CliOption(key = "", mandatory = true) Long id) throws Exception {
+    public String deleteById(@CliOption(key = "", mandatory = true) Long id) {
         return delete(id, null);
     }
 
     @CliCommand(value = "smartsense delete --subscriptionId", help = "Deletes the SmartSense subscription by its subscription id")
-    public String deleteBySubscriptionId(@CliOption(key = "", mandatory = true) String subscriptionId) throws Exception {
+    public String deleteBySubscriptionId(@CliOption(key = "", mandatory = true) String subscriptionId) {
         return delete(null, subscriptionId);
     }
 }

@@ -17,7 +17,7 @@ public final class VolumeUtils {
         for (int i = 1; i <= volumeCount; i++) {
             localDirs.append(getVolumeDir(i, directory));
             if (i != volumeCount) {
-                localDirs.append(",");
+                localDirs.append(',');
             }
         }
         return localDirs.toString();
@@ -26,9 +26,9 @@ public final class VolumeUtils {
     public static String buildVolumePathString(List<String> volumes, String directory) {
         StringBuilder localDirs = new StringBuilder("");
         for (int i = 0; i <= volumes.size() - 1; i++) {
-            localDirs.append(volumes.get(i)).append("/").append(directory);
+            localDirs.append(volumes.get(i)).append('/').append(directory);
             if (i != volumes.size() - 1) {
-                localDirs.append(",");
+                localDirs.append(',');
             }
         }
         return localDirs.toString();
@@ -39,6 +39,6 @@ public final class VolumeUtils {
     }
 
     private static String getVolumeDir(int volumeIndex, String directory) {
-        return VOLUME_PREFIX + volumeIndex + "/" + directory;
+        return VOLUME_PREFIX + volumeIndex + '/' + directory;
     }
 }

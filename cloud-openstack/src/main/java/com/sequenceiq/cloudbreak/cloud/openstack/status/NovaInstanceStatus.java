@@ -25,7 +25,7 @@ public enum NovaInstanceStatus {
         String status = server.getStatus().toString();
         if (isStoppedInstanceStatus(status)) {
             return InstanceStatus.STOPPED;
-        } else if (status.equals(STARTED.getStatus())) {
+        } else if (status.equals(STARTED.status)) {
             return InstanceStatus.STARTED;
         } else {
             return InstanceStatus.IN_PROGRESS;
@@ -33,6 +33,6 @@ public enum NovaInstanceStatus {
     }
 
     private static boolean isStoppedInstanceStatus(String status) {
-        return status.equals(STOPPED.getStatus()) || status.equals(SUSPENDED.getStatus()) || status.equals(PAUSED.getStatus());
+        return status.equals(STOPPED.status) || status.equals(SUSPENDED.status) || status.equals(PAUSED.status);
     }
 }

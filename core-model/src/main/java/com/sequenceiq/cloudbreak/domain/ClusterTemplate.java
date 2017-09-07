@@ -17,9 +17,7 @@ import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Entity
-@Table(name = "ClusterTemplate", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
-})
+@Table(name = "ClusterTemplate", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class ClusterTemplate implements ProvisionEntity {
 
     @Id

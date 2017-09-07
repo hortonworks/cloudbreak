@@ -13,7 +13,7 @@ import javax.persistence.MapKeyColumn;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-public class FileSystem {
+public class FileSystem implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "filesystem_generator")

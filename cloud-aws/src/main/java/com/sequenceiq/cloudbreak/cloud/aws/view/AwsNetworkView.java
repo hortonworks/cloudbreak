@@ -16,7 +16,7 @@ public class AwsNetworkView {
 
     private static final String SUBNET = "subnetId";
 
-    private Network network;
+    private final Network network;
 
     public AwsNetworkView(Network network) {
         this.network = network;

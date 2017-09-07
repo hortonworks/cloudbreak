@@ -51,9 +51,9 @@ public class VersionComparatorTest {
 
     private class VersionString implements Versioned {
 
-        private String version;
+        private final String version;
 
-        VersionString(String version) {
+        private VersionString(String version) {
             this.version = version;
         }
 

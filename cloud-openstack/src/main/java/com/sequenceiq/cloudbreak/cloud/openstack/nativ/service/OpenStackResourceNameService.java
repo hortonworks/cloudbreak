@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.openstack.nativ.service;
 
 import java.util.Date;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +10,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service("OpenStackResourceNameService")
 public class OpenStackResourceNameService extends CloudbreakResourceNameService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(OpenStackResourceNameService.class);
 
     private static final int ATTACHED_DISKS_PART_COUNT = 4;
 
@@ -65,12 +62,11 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
 
     private String instanceName(Object[] parts) {
         checkArgs(INSTANCE_NAME_PART_COUNT, parts);
-        String name;
         String stackName = String.valueOf(parts[0]);
         String instanceGroupName = String.valueOf(parts[1]);
         String privateId = String.valueOf(parts[2]);
 
-        name = normalize(stackName);
+        String name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
@@ -82,9 +78,8 @@ public class OpenStackResourceNameService extends CloudbreakResourceNameService 
 
     private String openStackNetworkResourceName(Object[] parts) {
         checkArgs(1, parts);
-        String networkName;
         String stackName = String.valueOf(parts[0]);
-        networkName = normalize(stackName);
+        String networkName = normalize(stackName);
         networkName = adjustPartLength(networkName);
         networkName = appendHash(networkName, new Date());
         networkName = adjustBaseLength(networkName, maxResourceNameLength);

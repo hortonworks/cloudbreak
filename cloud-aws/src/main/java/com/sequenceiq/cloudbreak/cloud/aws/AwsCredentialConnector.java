@@ -8,7 +8,6 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -52,7 +51,7 @@ public class AwsCredentialConnector implements CredentialConnector {
         String accessKey = awsCredential.getAccessKey();
         String secretKey = awsCredential.getSecretKey();
         String smartSenseId = smartSenseIdGenerator.getSmartSenseId(awsCredential);
-        if (StringUtils.isNoneEmpty(smartSenseId)) {
+        if (isNoneEmpty(smartSenseId)) {
             credential.putParameter(SMART_SENSE_ID, smartSenseId);
         }
         if (isNoneEmpty(roleArn) && isNoneEmpty(accessKey) && isNoneEmpty(secretKey)) {
@@ -85,7 +84,7 @@ public class AwsCredentialConnector implements CredentialConnector {
                 } catch (AmazonServiceException e) {
                     client.importKeyPair(importKeyPairRequest);
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to import public key [roleArn:'%s'], detailed message: %s", awsCredential.getRoleArn(),
                         e.getMessage());
                 LOGGER.error(errorMessage, e);
@@ -110,7 +109,7 @@ public class AwsCredentialConnector implements CredentialConnector {
                 AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
                 DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(awsClient.getKeyPairName(auth));
                 client.deleteKeyPair(deleteKeyPairRequest);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to delete public key [roleArn:'%s', region: '%s'], detailed message: %s",
                         awsCredential.getRoleArn(), region, e.getMessage());
                 LOGGER.error(errorMessage, e);
@@ -130,7 +129,7 @@ public class AwsCredentialConnector implements CredentialConnector {
                 LOGGER.error(errorMessage, ae);
                 return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID",
                     awsCredential.getRoleArn());
             LOGGER.error(errorMessage, e);

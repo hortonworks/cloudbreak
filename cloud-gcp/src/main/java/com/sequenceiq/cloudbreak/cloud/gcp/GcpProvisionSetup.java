@@ -18,9 +18,14 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Images.Get;
+import com.google.api.services.compute.Compute.Images.Insert;
 import com.google.api.services.compute.model.Image;
+import com.google.api.services.compute.model.Image.RawDisk;
 import com.google.api.services.compute.model.ImageList;
 import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.Storage.Buckets;
+import com.google.api.services.storage.Storage.Objects.Copy;
 import com.google.api.services.storage.model.Bucket;
 import com.google.api.services.storage.model.StorageObject;
 import com.sequenceiq.cloudbreak.cloud.Setup;
@@ -60,7 +65,7 @@ public class GcpProvisionSetup implements Setup {
                 bucket.setName(String.format("%s-%s-%d", projectId, cloudContext.getName(), cloudContext.getId()));
                 bucket.setStorageClass("STANDARD");
                 try {
-                    Storage.Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
+                    Buckets.Insert ins = storage.buckets().insert(projectId, bucket);
                     ins.execute();
                 } catch (GoogleJsonResponseException ex) {
                     if (ex.getStatusCode() != HttpStatus.SC_CONFLICT) {
@@ -68,15 +73,15 @@ public class GcpProvisionSetup implements Setup {
                     }
                 }
                 String tarName = getTarName(imageName);
-                Storage.Objects.Copy copy = storage.objects().copy(getBucket(imageName), tarName, bucket.getName(), tarName, new StorageObject());
+                Copy copy = storage.objects().copy(getBucket(imageName), tarName, bucket.getName(), tarName, new StorageObject());
                 copy.execute();
 
                 Image gcpApiImage = new Image();
                 gcpApiImage.setName(getImageName(imageName));
-                Image.RawDisk rawDisk = new Image.RawDisk();
+                RawDisk rawDisk = new RawDisk();
                 rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucket.getName(), tarName));
                 gcpApiImage.setRawDisk(rawDisk);
-                Compute.Images.Insert ins = compute.images().insert(projectId, gcpApiImage);
+                Insert ins = compute.images().insert(projectId, gcpApiImage);
                 ins.execute();
             }
         } catch (Exception e) {
@@ -96,7 +101,7 @@ public class GcpProvisionSetup implements Setup {
             Image gcpApiImage = new Image();
             gcpApiImage.setName(getImageName(imageName));
             Compute compute = buildCompute(credential);
-            Compute.Images.Get getImages = compute.images().get(projectId, gcpApiImage.getName());
+            Get getImages = compute.images().get(projectId, gcpApiImage.getName());
             String status = getImages.execute().getStatus();
             LOGGER.info("Status of image {} copy: {}", gcpApiImage.getName(), status);
             if (READY.equals(status)) {

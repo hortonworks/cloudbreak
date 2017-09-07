@@ -39,7 +39,7 @@ public class DatabaseConfig {
     @Value("${cb.db.env.db:}")
     private String dbName;
 
-    @Value("${cb.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + "}")
+    @Value("${cb.db.env.schema:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
 
     @Value("${cb.db.env.ssl:}")

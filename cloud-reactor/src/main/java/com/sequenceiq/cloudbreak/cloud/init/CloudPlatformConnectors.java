@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -32,12 +33,12 @@ public class CloudPlatformConnectors {
     @Value("${cb.platform.default.variants:}")
     private String platformDefaultVariants;
 
-    private Map<Platform, Variant> defaultVariants = new HashMap<>();
+    private final Map<Platform, Variant> defaultVariants = new HashMap<>();
 
     @Inject
     private List<CloudConnector> cloudConnectors;
 
-    private Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
+    private final Map<CloudPlatformVariant, CloudConnector> map = new HashMap<>();
 
     private Multimap<Platform, Variant> platformToVariants;
 
@@ -70,7 +71,7 @@ public class CloudPlatformConnectors {
     }
 
     private void setupDefaultVariants(Multimap<Platform, Variant> platformToVariants, Map<Platform, Variant> environmentDefaults) {
-        for (Map.Entry<Platform, Collection<Variant>> platformVariants : platformToVariants.asMap().entrySet()) {
+        for (Entry<Platform, Collection<Variant>> platformVariants : platformToVariants.asMap().entrySet()) {
             if (platformVariants.getValue().size() == 1) {
                 defaultVariants.put(platformVariants.getKey(), platformVariants.getValue().toArray(new Variant[]{})[0]);
             } else {

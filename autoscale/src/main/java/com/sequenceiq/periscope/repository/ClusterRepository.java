@@ -12,6 +12,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
+    @Override
     Cluster findOne(@Param("id") Long id);
 
     Cluster findById(Long id);

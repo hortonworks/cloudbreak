@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -25,7 +27,6 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.util.Lists;
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.MachineDefinitionView;
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
@@ -92,31 +94,31 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Qualifier("GcpTagSpecification")
     private TagSpecification tagSpecification;
 
-    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+    private Map<Region, List<AvailabilityZone>> regions;
 
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+    private Map<Region, DisplayName> regionDisplayNames;
 
-    private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+    private Map<AvailabilityZone, List<VmType>> vmTypes;
 
     private Region defaultRegion;
 
     private VmType defaultVmType;
 
-    private Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
+    private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
     @PostConstruct
     public void init() {
-        this.regions = readRegionsGcp();
-        this.vmTypes = readVmTypes();
-        this.regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
+        regions = readRegionsGcp();
+        vmTypes = readVmTypes();
+        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
 
-        this.defaultRegion = getDefaultRegion();
-        this.defaultVmType = nthElement(this.vmTypes.get(this.vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
+        defaultRegion = getDefaultRegion();
+        defaultVmType = nthElement(vmTypes.get(vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
         initDefaultVmTypes();
     }
 
     private void initDefaultVmTypes() {
-        for (Map.Entry<AvailabilityZone, List<VmType>> vmType : vmTypes.entrySet()) {
+        for (Entry<AvailabilityZone, List<VmType>> vmType : vmTypes.entrySet()) {
             defaultVmTypes.put(vmType.getKey(), nthElement(vmType.getValue(), DEFAULT_VM_TYPE_POSITION));
         }
     }
@@ -140,7 +142,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         String vm = getDefinition(gcpVmParameterDefinitionPath, "vm");
         try {
             MachineDefinitionWrapper machineDefinitionWrapper = JsonUtil.readValue(vm, MachineDefinitionWrapper.class);
-            for (Map.Entry<String, Object> object : machineDefinitionWrapper.getItems().entrySet()) {
+            for (Entry<String, Object> object : machineDefinitionWrapper.getItems().entrySet()) {
                 Map value = (Map) object.getValue();
                 List<Object> machineTpes = (List<Object>) value.get("machineTypes");
                 for (Object machineType : machineTpes) {
@@ -150,7 +152,7 @@ public class GcpPlatformParameters implements PlatformParameters {
                         List<VmType> vmTypeList = new ArrayList<>();
                         vmTypes.put(availabilityZone, vmTypeList);
                     }
-                    VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder()
+                    VmTypeMeta vmTypeMeta = VmTypeMetaBuilder.builder()
                             .withCpuAndMemory(Integer.valueOf(machineDefinitionView.getGuestCpus()),
                                     Float.valueOf(machineDefinitionView.getMemoryMb()) / THOUSAND)
                             .withMagneticConfig(TEN, Integer.valueOf(machineDefinitionView.getMaximumPersistentDisksSizeGb()),
@@ -167,8 +169,8 @@ public class GcpPlatformParameters implements PlatformParameters {
         } catch (IOException e) {
             return vmTypes;
         }
-        for (Map.Entry<AvailabilityZone, List<VmType>> availabilityZoneListEntry : vmTypes.entrySet()) {
-            Collections.sort(availabilityZoneListEntry.getValue(), new StringTypesCompare());
+        for (Entry<AvailabilityZone, List<VmType>> availabilityZoneListEntry : vmTypes.entrySet()) {
+            availabilityZoneListEntry.getValue().sort(new StringTypesCompare());
         }
         return sortMap(vmTypes);
     }
@@ -197,8 +199,8 @@ public class GcpPlatformParameters implements PlatformParameters {
         } catch (IOException e) {
             return regions;
         }
-        for (Map.Entry<Region, List<AvailabilityZone>> availabilityZoneListEntry : regions.entrySet()) {
-            Collections.sort(availabilityZoneListEntry.getValue(), new StringTypesCompare());
+        for (Entry<Region, List<AvailabilityZone>> availabilityZoneListEntry : regions.entrySet()) {
+            availabilityZoneListEntry.getValue().sort(new StringTypesCompare());
         }
         return sortMap(regions);
     }
@@ -267,7 +269,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.empty()));
         return additionalStackParameterValidations;
     }
 
@@ -286,7 +288,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
         Map<AvailabilityZone, VmTypes> result = new HashMap<>();
-        for (Map.Entry<AvailabilityZone, List<VmType>> zoneTypes : vmTypes.entrySet()) {
+        for (Entry<AvailabilityZone, List<VmType>> zoneTypes : vmTypes.entrySet()) {
             AvailabilityZone zone = zoneTypes.getKey();
             result.put(zone, new VmTypes(zoneTypes.getValue(), defaultVmTypes.get(zone)));
         }
@@ -296,7 +298,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public PlatformImage images() {
         List<CustomImage> customImages = new ArrayList<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
             String property = environment.getProperty("gcp." + "default");
             customImages.add(customImage(regionListEntry.getKey().value(), property));
         }

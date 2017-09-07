@@ -5,31 +5,31 @@ import org.springframework.stereotype.Service;
 @Service
 public class StackUnderOperationService {
 
-    private ThreadLocal<Boolean> onLocal = new ThreadLocal<>();
+    private static final ThreadLocal<Boolean> ON_LOCAL = new ThreadLocal<>();
 
-    private ThreadLocal<Long> stackIdLocal = new ThreadLocal<>();
+    private static final ThreadLocal<Long> STACK_ID_LOCAL = new ThreadLocal<>();
 
     public void on() {
-        onLocal.set(Boolean.TRUE);
+        ON_LOCAL.set(Boolean.TRUE);
     }
 
     public void off() {
-        stackIdLocal.remove();
-        onLocal.remove();
+        STACK_ID_LOCAL.remove();
+        ON_LOCAL.remove();
     }
 
     public void set(Long stackId) {
-        if (onLocal.get() == Boolean.TRUE) {
-            stackIdLocal.set(stackId);
+        if (ON_LOCAL.get() == Boolean.TRUE) {
+            STACK_ID_LOCAL.set(stackId);
         } else {
-            onLocal.remove();
+            ON_LOCAL.remove();
         }
     }
 
     public Long get() {
-        Long stackId = stackIdLocal.get();
+        Long stackId = STACK_ID_LOCAL.get();
         if (stackId == null) {
-            stackIdLocal.remove();
+            STACK_ID_LOCAL.remove();
         }
         return stackId;
     }

@@ -14,7 +14,7 @@ public class VmType extends StringType {
 
     private VmType(String vmType, VmTypeMeta meta, Boolean extended) {
         super(vmType);
-        this.metaData = meta;
+        metaData = meta;
         this.extended = extended;
     }
 
@@ -27,7 +27,7 @@ public class VmType extends StringType {
     }
 
     public VolumeParameterConfig getVolumeParameterbyVolumeParameterType(VolumeParameterType volumeParameterType) {
-        return volumeParameterType.getVolumeParameterbyType(this.metaData);
+        return volumeParameterType.getVolumeParameterbyType(metaData);
     }
 
     public Boolean getExtended() {

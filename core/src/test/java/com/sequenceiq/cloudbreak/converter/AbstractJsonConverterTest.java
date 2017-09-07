@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 public abstract class AbstractJsonConverterTest<S> extends AbstractConverterTest {
 
-    private List<String> defaultSkippedFields = Arrays.asList("id", "owner", "account");
+    private final List<String> defaultSkippedFields = Arrays.asList("id", "owner", "account");
 
     public S getRequest(String jsonFilePath) {
         return readJsonFile(jsonFilePath, getRequestClass());
@@ -39,7 +39,7 @@ public abstract class AbstractJsonConverterTest<S> extends AbstractConverterTest
     private S readJsonFile(String jsonPath, Class<S> clazz) {
         try {
             String classPackage = getClass().getPackage().getName().replaceAll("\\.", "/");
-            Resource resource = new ClassPathResource(classPackage + "/" + jsonPath);
+            Resource resource = new ClassPathResource(classPackage + '/' + jsonPath);
             BufferedReader fileReader = new BufferedReader(
                     new FileReader(resource.getFile()));
             return JsonUtil.readValue(fileReader, clazz);

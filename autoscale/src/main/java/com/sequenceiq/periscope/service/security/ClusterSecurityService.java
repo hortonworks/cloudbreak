@@ -27,7 +27,7 @@ public class ClusterSecurityService {
     public boolean hasAccess(PeriscopeUser user, Ambari ambari, Long stackId) {
         try {
             return hasAccess(user.getId(), user.getAccount(), ambari.getHost(), stackId);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             // if the cluster is unknown for cloudbreak
             // it should allow it to monitor
             return true;
@@ -62,7 +62,7 @@ public class ClusterSecurityService {
             } else {
                 return new AmbariStack(ambari, id, securityConfig);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return new AmbariStack(ambari);
         }
     }

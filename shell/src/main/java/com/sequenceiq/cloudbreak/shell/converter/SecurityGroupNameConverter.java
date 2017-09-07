@@ -14,10 +14,6 @@ public class SecurityGroupNameConverter extends AbstractConverter<SecurityGroupN
     @Autowired
     private ShellContext context;
 
-    public SecurityGroupNameConverter() {
-
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return SecurityGroupName.class.isAssignableFrom(type);
@@ -27,7 +23,7 @@ public class SecurityGroupNameConverter extends AbstractConverter<SecurityGroupN
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getSecurityGroups().values());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

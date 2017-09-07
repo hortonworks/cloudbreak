@@ -33,7 +33,7 @@ public class RecipeMigration {
             for (Plugin plugin : legacyRecipe.getPlugins()) {
                 String decodedRecipe = new String(Base64.decodeBase64(plugin.getContent().replaceFirst("base64://", "")));
                 Map<String, String> recipeMap = Stream.of(decodedRecipe.split("\n"))
-                        .collect(Collectors.toMap(s -> s.substring(0, s.indexOf(":")), s -> s.substring(s.indexOf(":") + 1)));
+                        .collect(Collectors.toMap(s -> s.substring(0, s.indexOf(':')), s -> s.substring(s.indexOf(':') + 1)));
 
                 if (recipeMap.containsKey(PRE_INSTALL_TAG)) {
                     create(legacyRecipe, RecipeType.PRE, recipeMap.get(PRE_INSTALL_TAG));
@@ -49,7 +49,7 @@ public class RecipeMigration {
 
     private void create(Recipe legacyRecipe, RecipeType recipeType, String content) {
         Recipe recipe = new Recipe();
-        recipe.setName(recipeType.name().toLowerCase() + "-" + legacyRecipe.getName());
+        recipe.setName(recipeType.name().toLowerCase() + '-' + legacyRecipe.getName());
         recipe.setOwner(legacyRecipe.getOwner());
         recipe.setAccount(legacyRecipe.getAccount());
         recipe.setDescription(legacyRecipe.getDescription());

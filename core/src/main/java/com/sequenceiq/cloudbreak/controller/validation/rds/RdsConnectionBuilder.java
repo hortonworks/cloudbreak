@@ -28,13 +28,11 @@ public class RdsConnectionBuilder {
         Properties connectionProps = new Properties();
         connectionProps.put("user", connectionUserName);
         connectionProps.put("password", connectionPassword);
-        try {
-            Connection conn = DriverManager.getConnection(connectionURL, connectionProps);
+        try (Connection conn = DriverManager.getConnection(connectionURL, connectionProps)) {
             for (String target : targets) {
                 createDb(conn, clusterName, target);
                 map.put(target, clusterName + target);
             }
-            conn.close();
         } catch (SQLException e) {
             throw new BadRequestException("Failed to connect to RDS: " + e.getMessage(), e);
         }
@@ -42,11 +40,10 @@ public class RdsConnectionBuilder {
     }
 
     private void createDb(Connection conn, String clusterName, String service) {
-        try {
-            Statement statement = conn.createStatement();
+        try (Statement statement = conn.createStatement()) {
             statement.executeUpdate("CREATE DATABASE " + clusterName + service);
         } catch (PSQLException ex) {
-            if (ex.getSQLState().equals("42P04")) {
+            if ("42P04".equals(ex.getSQLState())) {
                 LOGGER.warn("The expected database already exist");
             } else {
                 throw new BadRequestException("Failed to create database in RDS: " + ex.getMessage(), ex);

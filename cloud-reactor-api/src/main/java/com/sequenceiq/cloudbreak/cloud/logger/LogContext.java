@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Indicates that a class or a method needs to be added to our log context
  * by adding the known type of class to the MDC log context.
  */
-@Target(value = { ElementType.METHOD, ElementType.TYPE })
-@Retention(value = RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.TYPE})
+@Retention(RetentionPolicy.RUNTIME)
 @Inherited
 public @interface LogContext { }

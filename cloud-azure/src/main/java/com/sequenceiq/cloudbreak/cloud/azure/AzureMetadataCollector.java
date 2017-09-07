@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -38,7 +39,7 @@ public class AzureMetadataCollector implements MetadataCollector {
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
-        final CloudResource resource = azureUtils.getTemplateResource(resources);
+        CloudResource resource = azureUtils.getTemplateResource(resources);
         List<CloudVmMetaDataStatus> results = new ArrayList<>();
 
         List<InstanceTemplate> templates = Lists.transform(vms, CloudInstance::getTemplate);
@@ -48,7 +49,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                 from.getGroupName(), Long.toString(from.getPrivateId())));
 
         try {
-            for (Map.Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
+            for (Entry<String, InstanceTemplate> instance : templateMap.entrySet()) {
                 AzureClient azureClient = authenticatedContext.getParameter(AzureClient.class);
                 VirtualMachine vm = azureClient.getVirtualMachine(resourceName, instance.getKey());
                 String subnetId = vm.getPrimaryNetworkInterface().primaryIPConfiguration().subnetName();
@@ -81,7 +82,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                     List<LoadBalancerBackend> backends = networkInterface.primaryIPConfiguration().listAssociatedLoadBalancerBackends();
                     List<LoadBalancerInboundNatRule> inboundNatRules = networkInterface.primaryIPConfiguration().listAssociatedLoadBalancerInboundNatRules();
 
-                    if (backends.size() > 0 || inboundNatRules.size() > 0) {
+                    if (!backends.isEmpty() || !inboundNatRules.isEmpty()) {
                         publicIp = azureClient.getLoadBalancerIps(resource.getName(), azureUtils.getLoadBalancerId(resource.getName())).get(0);
                     }
 
@@ -95,15 +96,14 @@ public class AzureMetadataCollector implements MetadataCollector {
 
                 InstanceTemplate template = templateMap.get(instanceId);
                 if (template != null) {
-                    Map<String, Object> params = new HashMap<>();
+                    Map<String, Object> params = new HashMap<>(1);
                     params.put(CloudInstance.SUBNET_ID, subnetId);
                     CloudInstance cloudInstance = new CloudInstance(instanceId, template, params);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                     results.add(new CloudVmMetaDataStatus(status, md));
                 }
             }
-
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
         return results;

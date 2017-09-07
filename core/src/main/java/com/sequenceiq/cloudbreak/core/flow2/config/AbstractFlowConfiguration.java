@@ -33,7 +33,6 @@ import org.springframework.statemachine.state.State;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.DefaultFlowTriggerCondition;
-import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.EventConverterAdapter;
 import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowAdapter;
@@ -44,6 +43,7 @@ import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory;
 import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
 import com.sequenceiq.cloudbreak.core.flow2.StateConverterAdapter;
+import com.sequenceiq.cloudbreak.core.flow2.restart.DefaultRestartAction;
 
 public abstract class AbstractFlowConfiguration<S extends FlowState, E extends FlowEvent> implements FlowConfiguration<E> {
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractFlowConfiguration.class);
@@ -61,7 +61,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     @Qualifier("DefaultRestartAction")
     private DefaultRestartAction defaultRestartAction;
 
-    public AbstractFlowConfiguration(Class<S> stateType, Class<E> eventType) {
+    protected AbstractFlowConfiguration(Class<S> stateType, Class<E> eventType) {
         this.stateType = stateType;
         this.eventType = eventType;
     }
@@ -77,7 +77,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
     @Override
     public Flow createFlow(String flowId) {
-        return new FlowAdapter<>(flowId, getStateMachineFactory().getStateMachine(), new MessageFactory<E>(), new StateConverterAdapter<>(stateType),
+        return new FlowAdapter<>(flowId, stateMachineFactory.getStateMachine(), new MessageFactory<>(), new StateConverterAdapter<>(stateType),
                 new EventConverterAdapter<>(eventType), getClass());
     }
 
@@ -163,7 +163,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     }
 
     @Override
-    public RestartAction getRestartAction(final String event) {
+    public RestartAction getRestartAction(String event) {
         Optional<Transition<S, E>> transaction = getTransitions().stream().filter(t -> t.event.event().equals(event)).findFirst();
         if (transaction.isPresent() && transaction.get().target.restartAction() != null) {
             Class<? extends RestartAction> restartAction = transaction.get().target.restartAction();
@@ -193,7 +193,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         }
     }
 
-    protected static class Transition<S extends FlowState, E extends FlowEvent> {
+    public static class Transition<S extends FlowState, E extends FlowEvent> {
         private final S source;
 
         private final S target;
@@ -221,7 +221,8 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         }
 
         public static class Builder<S extends FlowState, E extends FlowEvent> {
-            private List<Transition<S, E>> transitions = new ArrayList<>();
+
+            private final List<Transition<S, E>> transitions = new ArrayList<>();
 
             private Optional<E> defaultFailureEvent = Optional.empty();
 
@@ -261,7 +262,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
 
             ToBuilder(S from, Builder<S, E> b) {
                 this.from = from;
-                this.builder = b;
+                builder = b;
             }
 
             public WithBuilder<S, E> to(S to) {
@@ -279,7 +280,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             WithBuilder(S from, S to, Builder<S, E> b) {
                 this.from = from;
                 this.to = to;
-                this.builder = b;
+                builder = b;
             }
 
             public FailureBuilder<S, E> event(E with) {
@@ -302,7 +303,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
                 this.from = from;
                 this.to = to;
                 this.with = with;
-                this.builder = b;
+                builder = b;
             }
 
             public FailureBuilder<S, E> failureState(S toFailure) {
@@ -327,7 +328,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
         }
     }
 
-    protected static class FlowEdgeConfig<S, E> {
+    public static class FlowEdgeConfig<S, E> {
         private final S initState;
 
         private final S finalState;

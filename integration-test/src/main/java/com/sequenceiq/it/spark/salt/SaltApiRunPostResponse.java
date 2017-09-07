@@ -8,7 +8,7 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -24,13 +24,13 @@ public class SaltApiRunPostResponse extends ITResponse {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltApiRunPostResponse.class);
 
-    private Map<String, CloudVmMetaDataStatus> instanceMap;
+    private final Map<String, CloudVmMetaDataStatus> instanceMap;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public SaltApiRunPostResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
         this.instanceMap = instanceMap;
-        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
+        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
     }
 
     @Override
@@ -89,8 +89,8 @@ public class SaltApiRunPostResponse extends ITResponse {
         NetworkInterfaceResponse networkInterfaceResponse = new NetworkInterfaceResponse();
         List<Map<String, String>> result = new ArrayList<>();
 
-        for (String instanceId : instanceMap.keySet()) {
-            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
+        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
                 Map<String, String> networkHashMap = new HashMap<>();
@@ -100,17 +100,17 @@ public class SaltApiRunPostResponse extends ITResponse {
         }
 
         networkInterfaceResponse.setResult(result);
-        return getObjectMapper().writeValueAsString(networkInterfaceResponse);
+        return objectMapper.writeValueAsString(networkInterfaceResponse);
     }
 
     protected Object saltUtilSyncGrainsResponse() throws JsonProcessingException {
         ApplyResponse applyResponse = new ApplyResponse();
-        ArrayList<Map<String, Object>> responseList = new ArrayList<>();
+        List<Map<String, Object>> responseList = new ArrayList<>();
 
         Map<String, Object> hostMap = new HashMap<>();
 
-        for (String instance : instanceMap.keySet()) {
-            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instance);
+        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
                 hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
@@ -120,17 +120,17 @@ public class SaltApiRunPostResponse extends ITResponse {
         responseList.add(hostMap);
 
         applyResponse.setResult(responseList);
-        return getObjectMapper().writeValueAsString(applyResponse);
+        return objectMapper.writeValueAsString(applyResponse);
     }
 
     protected Object grainsResponse() throws JsonProcessingException {
         ApplyResponse applyResponse = new ApplyResponse();
-        ArrayList<Map<String, Object>> responseList = new ArrayList<>();
+        List<Map<String, Object>> responseList = new ArrayList<>();
 
         Map<String, Object> hostMap = new HashMap<>();
 
-        for (String instance : instanceMap.keySet()) {
-            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instance);
+        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus()) {
                 String privateIp = cloudVmMetaDataStatus.getMetaData().getPrivateIp();
                 hostMap.put("host-" + privateIp.replace(".", "-"), privateIp);
@@ -139,7 +139,7 @@ public class SaltApiRunPostResponse extends ITResponse {
         responseList.add(hostMap);
 
         applyResponse.setResult(responseList);
-        return getObjectMapper().writeValueAsString(applyResponse);
+        return objectMapper.writeValueAsString(applyResponse);
     }
 
     @Override

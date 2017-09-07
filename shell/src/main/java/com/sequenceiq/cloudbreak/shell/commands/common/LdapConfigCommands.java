@@ -22,7 +22,7 @@ public class LdapConfigCommands implements BaseCommands {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = { "ldapconfig create" })
+    @CliAvailabilityIndicator("ldapconfig create")
     public boolean createAvailable() {
         return true;
     }
@@ -64,13 +64,13 @@ public class LdapConfigCommands implements BaseCommands {
                 id = shellContext.cloudbreakClient().ldapConfigEndpoint().postPrivate(config).getId();
             }
             return String.format("Ldap config created with id: '%d' and name: '%s'", id, config.getName());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "ldapconfig select --id", "ldapconfig select --name" })
+    @CliAvailabilityIndicator({"ldapconfig select --id", "ldapconfig select --name"})
     public boolean selectAvailable() {
         return true;
     }
@@ -157,7 +157,7 @@ public class LdapConfigCommands implements BaseCommands {
         return show(null, name, outPutType);
     }
 
-    @CliAvailabilityIndicator(value = { "ldapconfig delete --id", "ldapconfig delete --name" })
+    @CliAvailabilityIndicator({"ldapconfig delete --id", "ldapconfig delete --name"})
     @Override
     public boolean deleteAvailable() {
         return true;
@@ -191,7 +191,7 @@ public class LdapConfigCommands implements BaseCommands {
         return delete(null, name);
     }
 
-    @CliAvailabilityIndicator(value = "ldapconfig list")
+    @CliAvailabilityIndicator("ldapconfig list")
     @Override
     public boolean listAvailable() {
         return true;

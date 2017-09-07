@@ -9,10 +9,6 @@ public class RdsConfigPropertyJson implements JsonEntity {
 
     private String value;
 
-    public RdsConfigPropertyJson() {
-
-    }
-
     public String getName() {
         return name;
     }

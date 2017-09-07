@@ -45,9 +45,9 @@ public class BYOSPlatformParameters implements PlatformParameters {
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
-    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+    private Map<Region, List<AvailabilityZone>> regions;
 
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+    private final Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
     private Region defaultRegion;
 
@@ -59,8 +59,8 @@ public class BYOSPlatformParameters implements PlatformParameters {
         } else {
             zone = byosRegionDefinition;
         }
-        this.regions = readRegions(zone);
-        this.defaultRegion = getDefaultRegion();
+        regions = readRegions(zone);
+        defaultRegion = getDefaultRegion();
     }
 
     @Override

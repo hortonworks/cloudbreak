@@ -11,8 +11,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 @Component
 public class BlueprintValidator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintValidator.class);
 
     private ObjectMapper objectMapper = new ObjectMapper();
 

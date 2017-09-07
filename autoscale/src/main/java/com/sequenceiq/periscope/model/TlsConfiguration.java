@@ -2,11 +2,11 @@ package com.sequenceiq.periscope.model;
 
 public class TlsConfiguration {
 
-    private String clientKey;
+    private final String clientKey;
 
-    private String clientCert;
+    private final String clientCert;
 
-    private String serverCert;
+    private final String serverCert;
 
     public TlsConfiguration(String clientKey, String clientCert, String serverCert) {
         this.clientKey = clientKey;

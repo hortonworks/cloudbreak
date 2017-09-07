@@ -300,7 +300,7 @@ public class AppConfig implements ResourceLoaderAware {
                     if (file.isFile() && file.getName().endsWith("yml") || file.getName().endsWith("yaml")) {
                         resources.add(resourceLoader.getResource("file:" + file.getAbsolutePath()));
                     }
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     LOGGER.warn("Cannot load file into property source: {}", file.getAbsolutePath());
                 }
             }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.shell.commands.provider;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.shell.core.CommandMarker;
@@ -18,11 +19,7 @@ import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.shell.commands.CredentialCommands;
-import com.sequenceiq.cloudbreak.shell.commands.NetworkCommands;
-import com.sequenceiq.cloudbreak.shell.commands.PlatformCommands;
-import com.sequenceiq.cloudbreak.shell.commands.SecurityGroupCommands;
 import com.sequenceiq.cloudbreak.shell.commands.StackCommands;
-import com.sequenceiq.cloudbreak.shell.commands.TemplateCommands;
 import com.sequenceiq.cloudbreak.shell.completion.ConstraintName;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
@@ -37,40 +34,24 @@ public class YarnCommands implements CommandMarker {
 
     private ShellContext shellContext;
 
-    private CredentialCommands baseCredentialCommands;
+    private final CredentialCommands baseCredentialCommands;
 
-    private NetworkCommands baseNetworkCommands;
-
-    private SecurityGroupCommands baseSecurityGroupCommands;
-
-    private TemplateCommands baseTemplateCommands;
-
-    private PlatformCommands basePlatformCommands;
-
-    private StackCommands stackCommands;
+    private final StackCommands stackCommands;
 
     public YarnCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
-            NetworkCommands baseNetworkCommands,
-            SecurityGroupCommands baseSecurityGroupCommands,
-            TemplateCommands baseTemplateCommands,
-            PlatformCommands basePlatformCommands,
             StackCommands stackCommands) {
         this.baseCredentialCommands = baseCredentialCommands;
-        this.baseNetworkCommands = baseNetworkCommands;
-        this.baseSecurityGroupCommands = baseSecurityGroupCommands;
         this.shellContext = shellContext;
-        this.baseTemplateCommands = baseTemplateCommands;
-        this.basePlatformCommands = basePlatformCommands;
         this.stackCommands = stackCommands;
     }
 
-    @CliAvailabilityIndicator(value = "stack create --YARN")
+    @CliAvailabilityIndicator("stack create --YARN")
     public boolean createStackAvailable() {
         return shellContext.isPlatformAvailable(BYOS) &&  shellContext.getActiveHostGroups().size() == shellContext.getYarnHostGroups().size();
     }
 
-    @CliAvailabilityIndicator(value = "credential create --YARN")
+    @CliAvailabilityIndicator("credential create --YARN")
     public boolean createCredentialAvailable() {
         return shellContext.isPlatformAvailable(BYOS);
     }
@@ -95,8 +76,8 @@ public class YarnCommands implements CommandMarker {
             @CliOption(key = "publicInAccount", help = "flags if the stack is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
-        Set<Map.Entry<String, YarnHostgroupEntry>> entries = shellContext.getYarnHostGroups().entrySet();
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
+        Set<Entry<String, YarnHostgroupEntry>> entries = shellContext.getYarnHostGroups().entrySet();
         StackRequest stackRequest = new StackRequest();
         OrchestratorRequest orchestratorRequest = new OrchestratorRequest();
         orchestratorRequest.setApiEndpoint(shellContext.getApiEndpoint());
@@ -107,7 +88,7 @@ public class YarnCommands implements CommandMarker {
         stackRequest.setCloudPlatform(BYOS);
         stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
 
-        for (Map.Entry<String, YarnHostgroupEntry> entry : entries) {
+        for (Entry<String, YarnHostgroupEntry> entry : entries) {
             InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
             instanceGroupRequest.setGroup(entry.getKey());
             instanceGroupRequest.setType(InstanceGroupType.CORE);

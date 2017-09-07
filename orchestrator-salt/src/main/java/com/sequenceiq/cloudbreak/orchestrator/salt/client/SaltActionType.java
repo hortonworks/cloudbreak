@@ -7,7 +7,7 @@ public enum SaltActionType {
     RUN("run"),
     STOP("stop");
 
-    private String action;
+    private final String action;
 
     SaltActionType(String action) {
         this.action = action;

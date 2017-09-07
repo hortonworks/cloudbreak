@@ -15,7 +15,7 @@ public enum ClusterDownscaleEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERDOWNSCALEFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERDOWNSCALEFAILHANDLEDEVENT");
 
-    private String event;
+    private final String event;
 
     ClusterDownscaleEvent(String event) {
         this.event = event;

@@ -1,12 +1,10 @@
 package com.sequenceiq.cloudbreak.service.decorator;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -29,10 +27,7 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
-    @Autowired
-    @Qualifier("conversionService")
-    private ConversionService conversionService;
-
+    @Override
     public Credential decorate(Credential credential, Object... data) {
         if (null == data || data.length == 0) {
             return credential;
@@ -49,7 +44,7 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
                 throw new BadRequestException("Source credential does not exist!");
             } else {
                 Map<String, Object> map = credential.getAttributes().getMap();
-                for (Map.Entry<String, Object> stringObjectEntry : credentialSourceRequest.getParameters().entrySet()) {
+                for (Entry<String, Object> stringObjectEntry : credentialSourceRequest.getParameters().entrySet()) {
                     map.put(stringObjectEntry.getKey(), stringObjectEntry.getValue().toString());
                 }
                 credential.setId(null);

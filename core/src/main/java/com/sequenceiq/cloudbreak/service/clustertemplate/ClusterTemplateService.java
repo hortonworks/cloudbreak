@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +67,7 @@ public class ClusterTemplateService {
         return clusterTemplate;
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public ClusterTemplate create(IdentityUser user, ClusterTemplate clusterTemplate) {
         LOGGER.debug("Creating clusterTemplate: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         ClusterTemplate savedClusterTemplate;
@@ -112,7 +113,7 @@ public class ClusterTemplateService {
         delete(clusterTemplate);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Iterable<ClusterTemplate> save(Iterable<ClusterTemplate> entities) {
         return clusterTemplateRepository.save(entities);
     }

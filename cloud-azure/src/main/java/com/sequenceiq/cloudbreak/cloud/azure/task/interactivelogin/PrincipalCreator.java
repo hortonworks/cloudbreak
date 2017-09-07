@@ -8,10 +8,11 @@ import java.io.IOException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ public class PrincipalCreator {
     public ServicePrincipalInner createServicePrincipal(String accessToken, String appId, String tenantId) throws InteractiveLoginException {
         Response response = createServicePrincipalWithGraph(accessToken, appId, tenantId);
 
-        if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             String principal = response.readEntity(String.class);
 
             try {
@@ -64,7 +65,7 @@ public class PrincipalCreator {
     private Response createServicePrincipalWithGraph(String accessToken, String appId, String tenantId) {
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(GRAPH_WINDOWS + tenantId);
-        Invocation.Builder request = resource.path("servicePrincipals").queryParam("api-version", GRAPH_API_VERSION).request();
+        Builder request = resource.path("servicePrincipals").queryParam("api-version", GRAPH_API_VERSION).request();
         request.accept(MediaType.APPLICATION_JSON);
 
         JsonObject jsonObject = new JsonObject();

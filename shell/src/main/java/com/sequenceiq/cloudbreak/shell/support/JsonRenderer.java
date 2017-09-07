@@ -11,7 +11,7 @@ public class JsonRenderer {
     private final ObjectMapper objectMapper;
 
     public JsonRenderer() {
-        this.objectMapper = new ObjectMapper();
+        objectMapper = new ObjectMapper();
     }
 
     public String render(Object object) throws JsonProcessingException {

@@ -25,6 +25,7 @@ public class TerminateStackComponentTest extends AbstractComponentTest<Terminate
         return "TERMINATESTACKREQUEST";
     }
 
+    @Override
     protected CloudPlatformRequest getRequest() {
         return new TerminateStackRequest(g().createCloudContext(), g().createCloudStack(), g().createCloudCredential(), g().createCloudResourceList());
     }

@@ -21,9 +21,9 @@ public class JidInfoResponseTransformerTest {
         InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_real_response.json");
         Map map = JsonUtil.readValue(IOUtils.toString(responseStream), HashMap.class);
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(map);
-        for (String key : res.keySet()) {
+        for (List<RunnerInfo> value : res.values()) {
             int current = -1;
-            List<RunnerInfo> runnerInfoList = res.get(key);
+            List<RunnerInfo> runnerInfoList = value;
             for (RunnerInfo runnerInfo : runnerInfoList) {
                 int former = current;
                 current = Math.max(current, runnerInfo.getRunNum());

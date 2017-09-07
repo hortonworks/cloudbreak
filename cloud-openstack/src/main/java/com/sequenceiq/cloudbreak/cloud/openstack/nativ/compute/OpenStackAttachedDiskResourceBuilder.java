@@ -14,6 +14,7 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.api.exceptions.OS4JException;
 import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.storage.block.Volume;
+import org.openstack4j.model.storage.block.Volume.Status;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
@@ -49,9 +50,9 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
         InstanceTemplate template = getInstanceTemplate(group, privateId);
         NovaInstanceView instanceView = new NovaInstanceView(context.getName(), template, group.getType());
         String groupName = group.getName();
-        final String stackName = getUtils().getStackName(auth);
+        String stackName = getUtils().getStackName(auth);
         for (int i = 0; i < instanceView.getVolumes().size(); i++) {
-            final String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
+            String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
             CloudResource resource = createNamedResource(resourceType(), groupName, resourceName);
             resource.putParameter(VOLUME_VIEW, instanceView.getVolumes().get(i));
             cloudResources.add(resource);
@@ -60,12 +61,12 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
     }
 
     @Override
-    public List<CloudResource> build(OpenStackContext context, long privateId, final AuthenticatedContext auth, Group group, Image image,
+    public List<CloudResource> build(OpenStackContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
         List<CloudResource> resources = new ArrayList<>();
-        final List<CloudResource> syncedResources = Collections.synchronizedList(resources);
+        List<CloudResource> syncedResources = Collections.synchronizedList(resources);
         List<Future<Void>> futures = new ArrayList<>();
-        for (final CloudResource cloudResource : buildableResource) {
+        for (CloudResource cloudResource : buildableResource) {
             Future<Void> submit = intermediateBuilderExecutor.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
@@ -73,7 +74,7 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
                     Volume osVolume = Builders.volume().name(cloudResource.getName())
                             .size(volumeView.getSize()).build();
                     try {
-                        final OSClient osClient = createOSClient(auth);
+                        OSClient osClient = createOSClient(auth);
                         osVolume = osClient.blockStorage().volumes().create(osVolume);
                         CloudResource newRes = createPersistedResource(cloudResource, group.getName(), osVolume.getId());
                         newRes.putParameter(OpenStackConstants.VOLUME_MOUNT_POINT, volumeView.getDevice());
@@ -108,18 +109,19 @@ public class OpenStackAttachedDiskResourceBuilder extends AbstractOpenStackCompu
         return ResourceType.OPENSTACK_ATTACHED_DISK;
     }
 
+    @Override
     protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         CloudContext cloudContext = auth.getCloudContext();
         OSClient osClient = createOSClient(auth);
         Volume osVolume = osClient.blockStorage().volumes().get(resource.getReference());
         if (osVolume != null && context.isBuild()) {
-            Volume.Status volumeStatus = osVolume.getStatus();
-            if (Volume.Status.ERROR == volumeStatus || Volume.Status.ERROR_DELETING == volumeStatus
-                    || Volume.Status.ERROR_RESTORING == osVolume.getStatus()) {
+            Status volumeStatus = osVolume.getStatus();
+            if (Status.ERROR == volumeStatus || Status.ERROR_DELETING == volumeStatus
+                    || Status.ERROR_RESTORING == osVolume.getStatus()) {
                 throw new OpenStackResourceException("Volume in failed state", resource.getType(), resource.getName(), cloudContext.getId(),
                         volumeStatus.name());
             }
-            return volumeStatus == Volume.Status.AVAILABLE;
+            return volumeStatus == Status.AVAILABLE;
         } else if (osVolume == null && !context.isBuild()) {
             return true;
         }

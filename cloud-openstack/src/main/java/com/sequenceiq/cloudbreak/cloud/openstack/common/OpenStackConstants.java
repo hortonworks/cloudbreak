@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 public class OpenStackConstants {
+
     public static final Platform OPENSTACK_PLATFORM = Platform.platform("OPENSTACK");
 
     public static final String FACING = "facing";
@@ -17,8 +18,6 @@ public class OpenStackConstants {
     public static final String ROUTER_ID = "routerId";
 
     public static final String VOLUME_MOUNT_POINT = "volumeMountPoint";
-
-    public static final String INSTANCE_ID = "instanceId";
 
     public static final String PORT_ID = "portId";
 
@@ -37,14 +36,14 @@ public class OpenStackConstants {
         HEAT("HEAT"),
         NATIVE("NATIVE");
 
-        private Variant variant;
+        private final Variant variant;
 
         OpenStackVariant(String variant) {
             this.variant = Variant.variant(variant);
         }
 
         public Variant variant() {
-            return this.variant;
+            return variant;
         }
     }
 }

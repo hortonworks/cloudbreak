@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class FlowRegister {
-    private Map<String, Pair<Flow, String>> runningFlows = new ConcurrentHashMap<>();
+
+    private final Map<String, Pair<Flow, String>> runningFlows = new ConcurrentHashMap<>();
 
     public void put(Flow flow, String chainFlowId) {
         runningFlows.put(flow.getFlowId(), new ImmutablePair<>(flow, chainFlowId));

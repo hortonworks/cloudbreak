@@ -19,11 +19,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartState, StackStartEvent> {
 
-    private static final List<Transition<StackStartState, StackStartEvent>> TRANSITIONS = new Transition.Builder<StackStartState, StackStartEvent>()
+    private static final List<Transition<StackStartState, StackStartEvent>> TRANSITIONS = new Builder<StackStartState, StackStartEvent>()
             .defaultFailureEvent(START_FAILURE_EVENT)
             .from(INIT_STATE).to(START_STATE).event(STACK_START_EVENT).noFailureEvent()
             .from(START_STATE).to(COLLECTING_METADATA).event(START_FINISHED_EVENT).defaultFailureEvent()
@@ -46,7 +47,7 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     @Override
     public StackStartEvent[] getInitEvents() {
         return new StackStartEvent[] {
-                StackStartEvent.STACK_START_EVENT
+                STACK_START_EVENT
         };
     }
 

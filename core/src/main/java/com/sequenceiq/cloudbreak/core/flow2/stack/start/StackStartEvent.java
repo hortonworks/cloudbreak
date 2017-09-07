@@ -13,7 +13,7 @@ public enum StackStartEvent implements FlowEvent {
     START_FINALIZED_EVENT("STARTSTACKFINALIZED"),
     START_FAIL_HANDLED_EVENT("STARTFAILHANDLED");
 
-    private String event;
+    private final String event;
 
     StackStartEvent(String event) {
         this.event = event;

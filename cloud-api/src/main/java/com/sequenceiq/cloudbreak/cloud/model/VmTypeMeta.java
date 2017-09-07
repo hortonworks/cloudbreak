@@ -25,9 +25,6 @@ public class VmTypeMeta {
 
     private Map<String, String> properties = new HashMap<>();
 
-    public VmTypeMeta() {
-    }
-
     public VolumeParameterConfig getMagneticConfig() {
         return magneticConfig;
     }
@@ -88,7 +85,7 @@ public class VmTypeMeta {
 
         private VolumeParameterConfig st1Config;
 
-        private Map<String, String> properties = new HashMap<>();
+        private final Map<String, String> properties = new HashMap<>();
 
         private VmTypeMetaBuilder() {
         }
@@ -98,95 +95,95 @@ public class VmTypeMeta {
         }
 
         public VmTypeMetaBuilder withMagneticConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
-            this.magneticConfig = new VolumeParameterConfig(VolumeParameterType.MAGNETIC, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            magneticConfig = new VolumeParameterConfig(VolumeParameterType.MAGNETIC, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
         public VmTypeMetaBuilder withMagneticConfig(VolumeParameterConfig volumeParameterConfig) {
-            this.magneticConfig = volumeParameterConfig;
+            magneticConfig = volumeParameterConfig;
             return this;
         }
 
         public VmTypeMetaBuilder withAutoAttachedConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
-            this.autoAttachedConfig = new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            autoAttachedConfig = new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
         public VmTypeMetaBuilder withAutoAttachedConfig(VolumeParameterConfig volumeParameterConfig) {
-            this.autoAttachedConfig = volumeParameterConfig;
+            autoAttachedConfig = volumeParameterConfig;
             return this;
         }
 
         public VmTypeMetaBuilder withSsdConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
-            this.ssdConfig = new VolumeParameterConfig(VolumeParameterType.SSD, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            ssdConfig = new VolumeParameterConfig(VolumeParameterType.SSD, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
         public VmTypeMetaBuilder withSsdConfig(VolumeParameterConfig volumeParameterConfig) {
-            this.ssdConfig = volumeParameterConfig;
+            ssdConfig = volumeParameterConfig;
             return this;
         }
 
         public VmTypeMetaBuilder withEphemeralConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
-            this.ephemeralConfig = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            ephemeralConfig = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
         public VmTypeMetaBuilder withEphemeralConfig(VolumeParameterConfig volumeParameterConfig) {
-            this.ephemeralConfig = volumeParameterConfig;
+            ephemeralConfig = volumeParameterConfig;
             return this;
         }
 
         public VmTypeMetaBuilder withSt1Config(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
-            this.st1Config = new VolumeParameterConfig(VolumeParameterType.ST1, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            st1Config = new VolumeParameterConfig(VolumeParameterType.ST1, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
         public VmTypeMetaBuilder withSt1Config(VolumeParameterConfig volumeParameterConfig) {
-            this.st1Config = volumeParameterConfig;
+            st1Config = volumeParameterConfig;
             return this;
         }
 
         public VmTypeMetaBuilder withProperty(String name, String value) {
-            this.properties.put(name, value);
+            properties.put(name, value);
             return this;
         }
 
         public VmTypeMetaBuilder withCpuAndMemory(Integer cpu, Float memory) {
-            this.properties.put(CPU, cpu.toString());
-            this.properties.put(MEMORY, memory.toString());
+            properties.put(CPU, cpu.toString());
+            properties.put(MEMORY, memory.toString());
             return this;
         }
 
         public VmTypeMetaBuilder withCpuAndMemory(String cpu, String memory) {
-            this.properties.put(CPU, cpu);
-            this.properties.put(MEMORY, memory);
+            properties.put(CPU, cpu);
+            properties.put(MEMORY, memory);
             return this;
         }
 
         public VmTypeMetaBuilder withMaximumPersistentDisksSizeGb(Float maximumPersistentDisksSizeGb) {
-            this.properties.put(MAXIMUM_PERSISTENT_DISKS_SIZE_GB, maximumPersistentDisksSizeGb.toString());
+            properties.put(MAXIMUM_PERSISTENT_DISKS_SIZE_GB, maximumPersistentDisksSizeGb.toString());
             return this;
         }
 
         public VmTypeMetaBuilder withMaximumPersistentDisksSizeGb(String maximumPersistentDisksSizeGb) {
-            this.properties.put(MAXIMUM_PERSISTENT_DISKS_SIZE_GB, maximumPersistentDisksSizeGb);
+            properties.put(MAXIMUM_PERSISTENT_DISKS_SIZE_GB, maximumPersistentDisksSizeGb);
             return this;
         }
 
         public VmTypeMetaBuilder withPrice(Double price) {
-            this.properties.put(PRICE, price.toString());
+            properties.put(PRICE, price.toString());
             return this;
         }
 
         public VmTypeMeta create() {
             VmTypeMeta vmTypeMeta = new VmTypeMeta();
-            vmTypeMeta.setAutoAttachedConfig(this.autoAttachedConfig);
-            vmTypeMeta.setEphemeralConfig(this.ephemeralConfig);
-            vmTypeMeta.setMagneticConfig(this.magneticConfig);
-            vmTypeMeta.setSsdConfig(this.ssdConfig);
-            vmTypeMeta.setSt1Config(this.st1Config);
-            vmTypeMeta.setProperties(this.properties);
+            vmTypeMeta.setAutoAttachedConfig(autoAttachedConfig);
+            vmTypeMeta.setEphemeralConfig(ephemeralConfig);
+            vmTypeMeta.setMagneticConfig(magneticConfig);
+            vmTypeMeta.setSsdConfig(ssdConfig);
+            vmTypeMeta.setSt1Config(st1Config);
+            vmTypeMeta.setProperties(properties);
             return vmTypeMeta;
         }
 

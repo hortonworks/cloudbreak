@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -106,10 +107,9 @@ public class OrchestratorRecipeExecutor {
 
     private void recipesEvent(Long stackId, Status status, Map<String, List<RecipeModel>> recipeMap) {
         List<String> recipes = new ArrayList<>();
-        for (String hostGroupName : recipeMap.keySet()) {
-            List<String> recipeNamesPerHostgroup = new ArrayList<>();
-            List<RecipeModel> recipeModels = recipeMap.get(hostGroupName);
-            for (RecipeModel rm : recipeModels) {
+        for (Entry<String, List<RecipeModel>> entry : recipeMap.entrySet()) {
+            List<String> recipeNamesPerHostgroup = new ArrayList<>(entry.getValue().size());
+            for (RecipeModel rm : entry.getValue()) {
                 //filter out default recipes
                 if (!DEFAULT_RECIPES.contains(rm.getName())) {
                     recipeNamesPerHostgroup.add(rm.getName());
@@ -117,7 +117,7 @@ public class OrchestratorRecipeExecutor {
             }
             if (!recipeNamesPerHostgroup.isEmpty()) {
                 String recipeNamesStr = Joiner.on(',').join(recipeNamesPerHostgroup);
-                recipes.add(String.format("%s:[%s]", hostGroupName, recipeNamesStr));
+                recipes.add(String.format("%s:[%s]", entry.getKey(), recipeNamesStr));
             }
         }
 
@@ -125,7 +125,7 @@ public class OrchestratorRecipeExecutor {
             Collections.sort(recipes);
             String messageStr = Joiner.on(';').join(recipes);
             cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(),
-                    cloudbreakMessagesService.getMessage(OrchestratorRecipeExecutor.Msg.EXECUTE_RECIPES.code(), Collections.singletonList(messageStr)));
+                    cloudbreakMessagesService.getMessage(Msg.EXECUTE_RECIPES.code(), Collections.singletonList(messageStr)));
         }
     }
 
@@ -133,7 +133,7 @@ public class OrchestratorRecipeExecutor {
 
         EXECUTE_RECIPES("recipes.execute");
 
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;

@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -127,7 +128,6 @@ public class StackController implements StackEndpoint {
 
     @Override
     public Map<String, Object> status(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         return conversionService.convert(stackService.get(id), Map.class);
     }
 
@@ -172,9 +172,9 @@ public class StackController implements StackEndpoint {
             validateAccountPreferences(id, scalingAdjustment);
             stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
         } else if (BYOS.equals(stack.cloudPlatform())) {
-            return Response.status(Response.Status.BAD_REQUEST).build();
+            return Response.status(Status.BAD_REQUEST).build();
         }
-        return Response.status(Response.Status.ACCEPTED).build();
+        return Response.status(Status.ACCEPTED).build();
     }
 
     @Override
@@ -199,14 +199,14 @@ public class StackController implements StackEndpoint {
         stackService.validateStack(stackValidation);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
         fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem());
-        return Response.status(Response.Status.ACCEPTED).build();
+        return Response.status(Status.ACCEPTED).build();
     }
 
     @Override
     public Response deleteInstance(Long stackId, String instanceId) {
         IdentityUser user = authenticatedUserService.getCbUser();
         stackService.removeInstance(user, stackId, instanceId);
-        return Response.status(Response.Status.ACCEPTED).build();
+        return Response.status(Status.ACCEPTED).build();
     }
 
     @Override

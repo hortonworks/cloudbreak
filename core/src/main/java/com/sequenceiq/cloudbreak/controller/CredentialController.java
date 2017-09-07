@@ -73,7 +73,6 @@ public class CredentialController implements CredentialEndpoint {
 
     @Override
     public CredentialResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         Credential credential = credentialService.get(id);
         return convert(credential);
     }

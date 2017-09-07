@@ -26,7 +26,7 @@ public class InstancesStatusResult {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("InstancesStatusResult{");
+        StringBuilder sb = new StringBuilder("InstancesStatusResult{");
         sb.append("cloudContext=").append(cloudContext);
         sb.append(", results=").append(results);
         sb.append('}');

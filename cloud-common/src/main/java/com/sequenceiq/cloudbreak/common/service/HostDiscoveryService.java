@@ -26,7 +26,7 @@ public class HostDiscoveryService {
             if (domainName.startsWith(".")) {
                 result = sub + domainName;
             } else {
-                result = sub + "." + domainName;
+                result = sub + '.' + domainName;
             }
             LOGGER.info("Custom domain defined: {}", result);
 

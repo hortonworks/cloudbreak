@@ -7,11 +7,13 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Networks.Insert;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -36,7 +38,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
             com.google.api.services.compute.model.Network gcpNetwork = new com.google.api.services.compute.model.Network();
             gcpNetwork.setName(resource.getName());
             gcpNetwork.setAutoCreateSubnetworks(false);
-            Compute.Networks.Insert networkInsert = compute.networks().insert(projectId, gcpNetwork);
+            Insert networkInsert = compute.networks().insert(projectId, gcpNetwork);
             try {
                 Operation operation = networkInsert.execute();
                 if (operation.getHttpErrorStatusCode() != null) {
@@ -49,7 +51,7 @@ public class GcpNetworkResourceBuilder extends AbstractGcpNetworkBuilder {
             }
         }
         context.putParameter(NETWORK_NAME, resource.getName());
-        return new CloudResource.Builder().cloudResource(resource).persistent(false).build();
+        return new Builder().cloudResource(resource).persistent(false).build();
     }
 
     @Override

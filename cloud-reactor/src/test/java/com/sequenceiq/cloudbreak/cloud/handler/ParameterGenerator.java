@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -90,7 +91,7 @@ public class ParameterGenerator {
     }
 
     public List<CloudResource> createCloudResourceList() {
-        CloudResource cr = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name("testref").build();
+        CloudResource cr = new Builder().type(ResourceType.HEAT_STACK).name("testref").build();
         return Lists.newArrayList(cr);
     }
 

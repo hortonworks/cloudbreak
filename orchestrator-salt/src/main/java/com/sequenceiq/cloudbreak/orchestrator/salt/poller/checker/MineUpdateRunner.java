@@ -24,7 +24,7 @@ public class MineUpdateRunner extends BaseSaltJobRunner {
 
     @Override
     public String toString() {
-        return "MineUpdateRunner{" + super.toString() + "}";
+        return "MineUpdateRunner{" + super.toString() + '}';
     }
 
 }

@@ -10,9 +10,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 
 public class CollectMetadataRequest extends CloudPlatformRequest<CollectMetadataResult> {
 
-    private List<CloudResource> cloudResource;
+    private final List<CloudResource> cloudResource;
 
-    private List<CloudInstance> vms;
+    private final List<CloudInstance> vms;
 
     public CollectMetadataRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudResource> cloudResource, List<CloudInstance> vms) {
         super(cloudContext, cloudCredential);

@@ -46,14 +46,14 @@ public class ContainerOrchestratorResolverTest {
         underTest.get("SWARM1");
     }
 
-    class TestOneMockContainerOrchestrator extends MockContainerOrchestrator {
+    private static class TestOneMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
         public String name() {
             return "YARN";
         }
     }
 
-    class TestTwoMockContainerOrchestrator extends MockContainerOrchestrator {
+    private static class TestTwoMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
         public String name() {
             return "MESOS";

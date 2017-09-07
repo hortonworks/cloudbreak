@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 import com.sequenceiq.cloudbreak.common.type.CommonStatus;
 
 @Component(ResourceDeleteThread.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class ResourceDeleteThread implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
 
     public static final String NAME = "resourceDeleteThread";

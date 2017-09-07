@@ -34,7 +34,7 @@ public class StackScalingTest extends AbstractCloudbreakIntegrationTest {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        int stackIntId = Integer.valueOf(stackId);
+        int stackIntId = Integer.parseInt(stackId);
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class).stackEndpoint();
         int expectedNodeCount = ScalingUtil.getNodeCountStack(stackEndpoint, stackId) + scalingAdjustment;

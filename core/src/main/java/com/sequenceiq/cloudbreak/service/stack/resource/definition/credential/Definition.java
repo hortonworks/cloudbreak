@@ -18,7 +18,7 @@ public class Definition {
     }
 
     public void setValues(List<Value> values) {
-        this.defaultValues = values;
+        defaultValues = values;
     }
 
     public List<Selector> getSelectors() {

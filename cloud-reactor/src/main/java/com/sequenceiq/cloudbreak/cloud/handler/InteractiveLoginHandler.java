@@ -44,7 +44,7 @@ public class InteractiveLoginHandler implements CloudPlatformEventHandler<Intera
             InteractiveLoginResult interactiveLoginResult = new InteractiveLoginResult(request, parameters);
             request.getResult().onNext(interactiveLoginResult);
             LOGGER.info("Interactive login request successfully processed");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new InteractiveLoginResult(e.getMessage(), e, request));
         }
     }

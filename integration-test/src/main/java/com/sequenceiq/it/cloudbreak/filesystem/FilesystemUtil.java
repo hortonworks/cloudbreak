@@ -23,6 +23,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.Base64;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.Storage.Builder;
 import com.google.api.services.storage.model.Objects;
 import com.google.api.services.storage.model.StorageObject;
 import com.microsoft.azure.datalake.store.ADLStoreClient;
@@ -48,8 +49,7 @@ public class FilesystemUtil {
     }
 
     static void cleanUpFiles(ApplicationContext applicationContext, Map<String, String> cloudProviderParams,
-            String fsType, String fsName, String folderPrefix, String containerName) throws  IOException, GeneralSecurityException, URISyntaxException,
-            StorageException {
+            String fsType, String fsName, String folderPrefix, String containerName) throws IOException, GeneralSecurityException {
         switch (fsType) {
             case "ADLS":
                 deleteAdlsObjects(cloudProviderParams, fsName, folderPrefix);
@@ -115,7 +115,7 @@ public class FilesystemUtil {
                 .setServiceAccountPrivateKey(privateKey)
                 .build();
 
-        Storage storage = new Storage.Builder(httpTransport, jsonFactory, googleCredential)
+        Storage storage = new Builder(httpTransport, jsonFactory, googleCredential)
                 .setApplicationName("Google-BucketsInsertExample/1.0").build();
 
         List<StorageObject> storageObjects = new ArrayList<>();

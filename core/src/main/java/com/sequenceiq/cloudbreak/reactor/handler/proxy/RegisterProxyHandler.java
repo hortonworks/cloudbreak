@@ -48,7 +48,7 @@ public class RegisterProxyHandler implements ReactorEventHandler<RegisterProxyRe
             String contextPath = stack.getCluster().getGateway().getPath();
             proxyRegistrator.register(stack.getName(), contextPath, proxyIp);
             response = new RegisterProxySuccess(stackId);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             response = new RegisterProxyFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event(event.getHeaders(), response));

@@ -13,6 +13,7 @@ public class HDPInfo implements Versioned {
 
     private Map<String, Map<String, String>> images;
 
+    @Override
     public String getVersion() {
         return version;
     }

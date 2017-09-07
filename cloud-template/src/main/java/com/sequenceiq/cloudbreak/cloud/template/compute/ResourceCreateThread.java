@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
 
 @Component(ResourceCreateThread.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class ResourceCreateThread implements Callable<ResourceRequestResult<List<CloudResourceStatus>>> {
 
     public static final String NAME = "resourceCreateThread";
@@ -104,7 +104,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
             }
         } catch (CancellationException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("", e);
             results.clear();
             for (CloudResource buildableResource : buildableResources) {

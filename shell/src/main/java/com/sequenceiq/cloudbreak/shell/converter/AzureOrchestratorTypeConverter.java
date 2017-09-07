@@ -14,9 +14,6 @@ public class AzureOrchestratorTypeConverter extends AbstractConverter<ArmOrchest
     @Autowired
     private ShellContext context;
 
-    public AzureOrchestratorTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return ArmOrchestratorType.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class AzureOrchestratorTypeConverter extends AbstractConverter<ArmOrchest
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getOrchestratorNamesByPlatform("AZURE"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

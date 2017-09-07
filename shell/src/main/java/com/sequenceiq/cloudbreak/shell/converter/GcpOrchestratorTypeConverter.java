@@ -14,9 +14,6 @@ public class GcpOrchestratorTypeConverter extends AbstractConverter<GcpOrchestra
     @Autowired
     private ShellContext context;
 
-    public GcpOrchestratorTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return GcpOrchestratorType.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class GcpOrchestratorTypeConverter extends AbstractConverter<GcpOrchestra
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getOrchestratorNamesByPlatform("GCP"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

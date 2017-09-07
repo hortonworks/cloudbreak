@@ -88,14 +88,14 @@ public class StackStartStopService {
         Stack stack = context.getStack();
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, "Cluster infrastructure stopped successfully.");
 
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, Status.STOPPED.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_STOPPED, STOPPED.name());
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BILLING_STOPPED, BillingStatus.BILLING_STOPPED.name());
         usageService.stopUsagesForStack(stack);
 
         if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
             emailSenderService.sendStopSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
                     stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, Status.STOPPED.name());
+            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, STOPPED.name());
         }
     }
 

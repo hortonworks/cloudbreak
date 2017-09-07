@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.shell.transformer;
 
 import javax.ws.rs.ClientErrorException;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +17,9 @@ public class ExceptionTransformer {
     public RuntimeException transformToRuntimeException(Exception e) {
         LOGGER.error("Transform exception: {}", e.getMessage(), e);
         if (e instanceof ClientErrorException) {
-            if (((ClientErrorException) e).getResponse() != null && ((ClientErrorException) e).getResponse().hasEntity()) {
-                String response = ((ClientErrorException) e).getResponse().readEntity(String.class);
+            Response webAppResponse = ((WebApplicationException) e).getResponse();
+            if (webAppResponse != null && webAppResponse.hasEntity()) {
+                String response = webAppResponse.readEntity(String.class);
                 if (response != null) {
                     String[] split = response.replaceAll("}", "").replaceAll("\\{", "").replaceAll("\\\\\"", "'").split("\"");
                     String splitResponse = split[split.length - 1];

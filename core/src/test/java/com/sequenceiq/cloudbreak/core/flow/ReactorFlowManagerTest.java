@@ -47,7 +47,7 @@ public class ReactorFlowManagerTest {
     @InjectMocks
     private ReactorFlowManager flowManager;
 
-    private Long stackId = 1L;
+    private final Long stackId = 1L;
 
     @Before
     public void setUp() {

@@ -31,7 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
 @Component(ASGroupStatusCheckerTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "aSGroupStatusCheckerTask";
 
@@ -53,29 +53,29 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ASGroupStatusCheckerTask.class);
 
-    private String autoScalingGroupName;
+    private final String autoScalingGroupName;
 
-    private Integer requiredInstances;
+    private final Integer requiredInstances;
 
-    private AwsClient awsClient;
+    private final AwsClient awsClient;
 
-    private CloudFormationStackUtil cloudFormationStackUtil;
+    private final CloudFormationStackUtil cloudFormationStackUtil;
 
-    private AmazonAutoScalingClient autoScalingClient;
+    private final AmazonAutoScalingClient autoScalingClient;
 
     private Optional<Activity> latestActivity;
 
     public ASGroupStatusCheckerTask(AuthenticatedContext authenticatedContext, String asGroupName, Integer requiredInstances, AwsClient awsClient,
             CloudFormationStackUtil cloudFormationStackUtil) {
         super(authenticatedContext, true);
-        this.autoScalingGroupName = asGroupName;
+        autoScalingGroupName = asGroupName;
         this.requiredInstances = requiredInstances;
         this.awsClient = awsClient;
         this.cloudFormationStackUtil = cloudFormationStackUtil;
-        this.autoScalingClient = awsClient.createAutoScalingClient(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
+        autoScalingClient = awsClient.createAutoScalingClient(new AwsCredentialView(getAuthenticatedContext().getCloudCredential()),
                 getAuthenticatedContext().getCloudContext().getLocation().getRegion().value());
         List<Activity> autoScalingActivities = getAutoScalingActivities();
-        this.latestActivity = autoScalingActivities.stream().findFirst();
+        latestActivity = autoScalingActivities.stream().findFirst();
     }
 
     @Override
@@ -125,8 +125,8 @@ public class ASGroupStatusCheckerTask extends PollBooleanStateTask {
     }
 
     private void updateLatestActivity(List<Activity> activities) {
-        if (activities.size() > 0) {
-            this.latestActivity = Optional.ofNullable(activities.get(0));
+        if (!activities.isEmpty()) {
+            latestActivity = Optional.ofNullable(activities.get(0));
         }
     }
 

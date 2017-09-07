@@ -44,7 +44,7 @@ public class DownscaleStackCollectResourcesHandler implements CloudPlatformEvent
                     request.getCloudResources(), request.getInstances());
             LOGGER.info("Collect resources successfully finished for {}", cloudContext);
             result = new DownscaleStackCollectResourcesResult(request, resourcesToScale);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Failed to handle DownscaleStackCollectResourcesRequest.", e);
             result = new DownscaleStackCollectResourcesResult(e.getMessage(), e, request);
         }

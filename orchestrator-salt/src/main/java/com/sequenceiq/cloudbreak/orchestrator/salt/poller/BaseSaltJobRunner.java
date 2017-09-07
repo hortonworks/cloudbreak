@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -17,7 +18,7 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
     private Set<String> target = new HashSet<>();
 
-    private Set<Node> allNode;
+    private final Set<Node> allNode;
 
     private JobId jid;
 
@@ -25,43 +26,52 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
 
     private Multimap<String, String> nodesWithError;
 
-    public BaseSaltJobRunner(Set<String> target, Set<Node> allNode) {
+    protected BaseSaltJobRunner(Set<String> target, Set<Node> allNode) {
         this.target = target;
         this.allNode = allNode;
     }
 
+    @Override
     public Set<String> getTarget() {
         return target;
     }
 
+    @Override
     public void setTarget(Set<String> target) {
         this.target = target;
     }
 
+    @Override
     public JobId getJid() {
         return jid;
     }
 
+    @Override
     public void setJid(JobId jid) {
         this.jid = jid;
     }
 
+    @Override
     public JobState getJobState() {
         return jobState;
     }
 
+    @Override
     public void setJobState(JobState jobState) {
         this.jobState = jobState;
     }
 
+    @Override
     public Multimap<String, String> getNodesWithError() {
         return nodesWithError;
     }
 
+    @Override
     public void setNodesWithError(Multimap<String, String> nodesWithError) {
         this.nodesWithError = nodesWithError;
     }
 
+    @Override
     public StateType stateType() {
         return StateType.SIMPLE;
     }
@@ -69,7 +79,7 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
     public Set<String> collectNodes(ApplyResponse applyResponse) {
         Set<String> set = new HashSet<>();
         for (Map<String, Object> stringObjectMap : applyResponse.getResult()) {
-            set.addAll(stringObjectMap.entrySet().stream().map(Map.Entry::getKey).collect(Collectors.toList()));
+            set.addAll(stringObjectMap.entrySet().stream().map(Entry::getKey).collect(Collectors.toList()));
         }
         return set;
     }

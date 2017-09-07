@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
@@ -9,7 +9,7 @@ import org.springframework.security.authentication.AuthenticationCredentialsNotF
 public class AuthenticationCredentialsNotFoundExceptionMapper extends BaseExceptionMapper<AuthenticationCredentialsNotFoundException> {
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.UNAUTHORIZED;
+    Status getResponseStatus() {
+        return Status.UNAUTHORIZED;
     }
 }

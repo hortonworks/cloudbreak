@@ -143,9 +143,7 @@ public class StackSyncActions {
             for (InstanceMetaData im : instanceMetaDataRepository.findAllInStack(stackId)) {
                 String hostName = im.getDiscoveryFQDN();
                 InstanceMetaData instanceMetaData = metaDataMap.get(hostName);
-                if (instanceMetaData == null) {
-                    metaDataMap.put(hostName, im);
-                } else if (im.getPrivateId().compareTo(instanceMetaData.getPrivateId()) == 1) {
+                if (instanceMetaData == null || im.getPrivateId().compareTo(instanceMetaData.getPrivateId()) == 1) {
                     metaDataMap.put(hostName, im);
                 }
             }

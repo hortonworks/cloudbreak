@@ -16,9 +16,6 @@ public class Notification {
 
     private String owner;
 
-    public Notification() {
-    }
-
     public String getEventType() {
         return eventType;
     }

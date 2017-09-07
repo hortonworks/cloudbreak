@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -34,9 +35,9 @@ public class HadoopConfigurationService {
     @Inject
     private BlueprintProcessor blueprintProcessor;
 
-    private Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
+    private final Map<String, ServiceConfig> serviceConfigs = new HashMap<>();
 
-    private Map<String, Map<String, String>> bpConfigs = new HashMap<>();
+    private final Map<String, Map<String, String>> bpConfigs = new HashMap<>();
 
     @Value("#{'${cb.byos.dfs.data.dir}'.split('\\,')}")
     private List<String> byosDfsDataDirs;
@@ -102,9 +103,9 @@ public class HadoopConfigurationService {
                 config.putAll(getProperties(name, true, volumeCount, hostGroup, blueprintText));
             }
         }
-        for (Map.Entry<String, Map<String, String>> entry : bpConfigs.entrySet()) {
+        for (Entry<String, Map<String, String>> entry : bpConfigs.entrySet()) {
             if (config.containsKey(entry.getKey())) {
-                for (Map.Entry<String, String> inEntry : entry.getValue().entrySet()) {
+                for (Entry<String, String> inEntry : entry.getValue().entrySet()) {
                     config.get(entry.getKey()).put(inEntry.getKey(), inEntry.getValue());
                 }
             } else {
@@ -163,17 +164,17 @@ public class HadoopConfigurationService {
             List<String> relatedServices = serviceConfig.getRelatedServices();
             if (hostComponents.stream().anyMatch(relatedServices::contains)) {
                 Map<String, List<ConfigProperty>> config = global ? serviceConfig.getGlobalConfig() : serviceConfig.getHostGroupConfig();
-                for (String siteConfig : config.keySet()) {
+                for (Entry<String, List<ConfigProperty>> entry : config.entrySet()) {
                     Map<String, String> properties = new HashMap<>();
-                    for (ConfigProperty property : config.get(siteConfig)) {
-                        String directory = serviceName.toLowerCase() + (property.getDirectory().isEmpty() ? "" : "/" + property.getDirectory());
+                    for (ConfigProperty property : entry.getValue()) {
+                        String directory = serviceName.toLowerCase() + (property.getDirectory().isEmpty() ? "" : '/' + property.getDirectory());
                         String value = getValue(global, volumeCount, property, directory);
                         if (value != null) {
                             properties.put(property.getName(), value);
                         }
                     }
                     if (!properties.isEmpty()) {
-                        result.put(siteConfig, properties);
+                        result.put(entry.getKey(), properties);
                     }
                 }
             }
@@ -188,13 +189,13 @@ public class HadoopConfigurationService {
         } else if (volumeCount != null && volumeCount > 0) {
             value = global ? property.getPrefix() + getLogVolume(directory) : buildVolumePathString(volumeCount, directory);
         } else if (byosDataDirIsSet()) {
-            value = global ? property.getPrefix() + byosDfsDataDirs.get(0) + "/" + directory : buildVolumePathString(byosDfsDataDirs, directory);
+            value = global ? property.getPrefix() + byosDfsDataDirs.get(0) + '/' + directory : buildVolumePathString(byosDfsDataDirs, directory);
         }
         return value;
     }
 
     private boolean byosDataDirIsSet() {
-        return byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty() && !"".equals(byosDfsDataDirs.get(0));
+        return byosDfsDataDirs != null && !byosDfsDataDirs.isEmpty() && byosDfsDataDirs.get(0) != null && !byosDfsDataDirs.get(0).isEmpty();
     }
 
     private String getServiceName(String componentName) {

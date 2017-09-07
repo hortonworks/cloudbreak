@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,15 +12,15 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RDSConfigRequest extends RDSConfigJson {
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.NAME, required = true)
+    @ApiModelProperty(value = RDSConfig.NAME, required = true)
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.USERNAME, required = true)
+    @ApiModelProperty(value = RDSConfig.USERNAME, required = true)
     private String connectionUserName;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.PASSWORD, required = true)
+    @ApiModelProperty(value = RDSConfig.PASSWORD, required = true)
     private String connectionPassword;
 
     public String getName() {

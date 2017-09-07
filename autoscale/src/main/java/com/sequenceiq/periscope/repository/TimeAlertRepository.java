@@ -11,6 +11,7 @@ import com.sequenceiq.periscope.domain.TimeAlert;
 public interface TimeAlertRepository extends CrudRepository<TimeAlert, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
+    @Override
     TimeAlert findOne(@Param("id") Long id);
 
     @PostAuthorize("hasPermission(returnObject,'read')")

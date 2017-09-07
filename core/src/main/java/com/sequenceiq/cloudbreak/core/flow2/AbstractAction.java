@@ -19,6 +19,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 
 import reactor.bus.EventBus;
@@ -43,7 +44,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     @Inject
     private ErrorHandlerAwareFlowEventFactory reactorEventFactory;
 
-    private Class<P> payloadClass;
+    private final Class<P> payloadClass;
 
     private List<PayloadConverter<P>> payloadConverters;
 
@@ -61,8 +62,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     @Override
     public void execute(StateContext<S, E> context) {
-        String flowId = (String) context.getMessageHeader(MessageFactory.HEADERS.FLOW_ID.name());
-        P payload = convertPayload(context.getMessageHeader(MessageFactory.HEADERS.DATA.name()));
+        String flowId = (String) context.getMessageHeader(HEADERS.FLOW_ID.name());
+        P payload = convertPayload(context.getMessageHeader(HEADERS.DATA.name()));
         C flowContext = null;
         try {
             Map<Object, Object> variables = context.getExtendedState().getVariables();

@@ -18,11 +18,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterStartState, ClusterStartEvent> {
     private static final List<Transition<ClusterStartState, ClusterStartEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterStartState, ClusterStartEvent>()
+            new Builder<ClusterStartState, ClusterStartEvent>()
                     .from(INIT_STATE).to(CLUSTER_STARTING_STATE).event(CLUSTER_START_EVENT).noFailureEvent()
                     .from(CLUSTER_STARTING_STATE).to(CLUSTER_START_POLLING_STATE).event(ClusterStartEvent.CLUSTER_START_POLLING_EVENT)
                         .failureEvent(CLUSTER_START_FAILURE_EVENT)

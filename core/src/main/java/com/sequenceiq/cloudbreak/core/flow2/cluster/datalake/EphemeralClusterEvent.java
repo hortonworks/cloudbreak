@@ -12,7 +12,7 @@ public enum EphemeralClusterEvent implements FlowEvent {
     EPHEMERAL_CLUSTER_FLOW_FINISHED("EPHEMERAL_CLUSTER_FLOW_FINISHED"),
     EPHEMERAL_CLUSTER_FAILURE_HANDLED("EPHEMERAL_CLUSTER_FAILURE_HANDLED");
 
-    private String event;
+    private final String event;
 
     EphemeralClusterEvent(String event) {
         this.event = event;

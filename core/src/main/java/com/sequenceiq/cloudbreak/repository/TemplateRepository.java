@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.domain.Topology;
 @EntityType(entityClass = Template.class)
 public interface TemplateRepository extends CrudRepository<Template, Long> {
 
+    @Override
     Template findOne(@Param("id") Long id);
 
     @Query("SELECT t FROM Template t WHERE t.owner= :user AND deleted IS NOT TRUE AND t.status <> 'DEFAULT_DELETED'")

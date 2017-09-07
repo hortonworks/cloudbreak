@@ -11,7 +11,7 @@ public enum ManualStackRepairTriggerState implements FlowState {
     MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE,
     FINAL_STATE;
 
-    private Class<? extends RestartAction> restartAction = WaitForSyncRestartAction.class;
+    private final Class<? extends RestartAction> restartAction = WaitForSyncRestartAction.class;
 
     @Override
     public Class<? extends RestartAction> restartAction() {

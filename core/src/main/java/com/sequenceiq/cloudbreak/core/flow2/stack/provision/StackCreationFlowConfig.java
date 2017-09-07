@@ -44,10 +44,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCreationState, StackCreationEvent> {
-    private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = new Transition.Builder<StackCreationState, StackCreationEvent>()
+    private static final List<Transition<StackCreationState, StackCreationEvent>> TRANSITIONS = new Builder<StackCreationState, StackCreationEvent>()
             .defaultFailureEvent(STACK_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(VALIDATION_STATE).event(START_CREATION_EVENT).noFailureEvent()
             .from(VALIDATION_STATE).to(SETUP_STATE).event(VALIDATION_FINISHED_EVENT).failureEvent(VALIDATION_FAILED_EVENT)
@@ -89,7 +90,7 @@ public class StackCreationFlowConfig extends AbstractFlowConfiguration<StackCrea
     @Override
     public StackCreationEvent[] getInitEvents() {
         return new StackCreationEvent[] {
-                StackCreationEvent.START_CREATION_EVENT
+                START_CREATION_EVENT
         };
     }
 }

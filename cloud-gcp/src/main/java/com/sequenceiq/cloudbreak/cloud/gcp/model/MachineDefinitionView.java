@@ -50,7 +50,7 @@ public class MachineDefinitionView {
     }
 
     public Integer getMaximumNumberWithLimit() {
-        int maxNumber = Integer.valueOf(getMaximumPersistentDisks());
+        int maxNumber = Integer.parseInt(getMaximumPersistentDisks());
         return maxNumber > LIMIT ? LIMIT : maxNumber;
     }
 

@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
 
 public class NeutronNetworkView {
 
-    private Network network;
+    private final Network network;
 
     public NeutronNetworkView(Network network) {
         this.network = network;
@@ -57,7 +57,7 @@ public class NeutronNetworkView {
 
         PROVIDER("provider"), SELF_SERVICE("self-service");
 
-        private String value;
+        private final String value;
 
         NetworkingOptions(String value) {
             this.value = value;

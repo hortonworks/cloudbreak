@@ -12,7 +12,7 @@ public class ResourceStatusLists {
     public static CloudResourceStatus aggregate(List<CloudResourceStatus> cloudResourceStatuses) {
 
         ResourceStatus status = null;
-        String statusReason = "";
+        StringBuilder statusReason = new StringBuilder();
 
         for (CloudResourceStatus crs : cloudResourceStatuses) {
             ResourceStatus currentStatus = crs.getStatus();
@@ -24,23 +24,22 @@ public class ResourceStatusLists {
             switch (currentStatus) {
                 case FAILED:
                     status = currentStatus;
-                    statusReason += crs.getStatusReason() + "\n";
+                    statusReason.append(crs.getStatusReason()).append('\n');
                     break;
                 default:
                     if (currentStatus.isTransient()) {
                         status = currentStatus;
                     }
-
             }
         }
 
         if (status == null) {
             status = ResourceStatus.FAILED;
-            statusReason += "Resources does not have any state";
+            statusReason.append("Resources does not have any state");
         }
 
 
-        return new CloudResourceStatus(null, status, statusReason);
+        return new CloudResourceStatus(null, status, statusReason.toString());
     }
 
 

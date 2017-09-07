@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.net.ConnectException;
 import java.util.Collections;
 
 import org.junit.Test;
@@ -15,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.ecwid.consul.transport.RawResponse;
+import com.ecwid.consul.transport.TransportException;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.ConsulRawClient;
 import com.ecwid.consul.v1.QueryParams;
@@ -41,7 +41,7 @@ public class ConsulHostServiceTypeCheckerTaskTest {
     public void checkStatusForConnectionError() {
         ConsulRawClient raw1 = mock(ConsulRawClient.class);
         ConsulClient client1 = new ConsulClient(raw1);
-        when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(ConnectException.class);
+        when(raw1.makeGetRequest(SERVICE_ENDPOINT + AMBARI_SERVICE, null, QueryParams.DEFAULT)).thenThrow(TransportException.class);
 
         boolean result = task.checkStatus(new ConsulContext(stack, client1, Collections.singletonList(AMBARI_SERVICE)));
 

@@ -9,7 +9,7 @@ public abstract class StringType {
     }
 
     public String value() {
-        return this.value;
+        return value;
     }
 
     @Override

@@ -83,10 +83,10 @@ public class ClusterTerminationFlowService {
             cluster.setStatus(DELETE_FAILED);
             cluster.setStatusReason(errorDetails.getMessage());
             clusterService.updateCluster(cluster);
-        }
-        flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
-        if (cluster != null && cluster.getEmailNeeded()) {
-            sendDeleteFailedMail(cluster);
+            flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), errorDetails.getMessage());
+            if (cluster.getEmailNeeded()) {
+                sendDeleteFailedMail(cluster);
+            }
         }
     }
 

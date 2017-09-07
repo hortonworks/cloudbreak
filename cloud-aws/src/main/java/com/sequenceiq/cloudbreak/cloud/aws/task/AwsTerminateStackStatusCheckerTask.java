@@ -14,7 +14,7 @@ import com.amazonaws.services.cloudformation.model.StackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 
 @Component(AwsTerminateStackStatusCheckerTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class AwsTerminateStackStatusCheckerTask extends AbstractAwsStackStatusCheckerTask {
     public static final String NAME = "awsTerminateStackStatusCheckerTask";
 

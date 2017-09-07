@@ -43,7 +43,7 @@ public class GetPlatformSshKeysHandler implements CloudPlatformEventHandler<GetP
             GetPlatformSshKeysResult getPlatformSshKeysResult = new GetPlatformSshKeysResult(request, cloudSshKeys);
             request.getResult().onNext(getPlatformSshKeysResult);
             LOGGER.info("Query platform networks types finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformSshKeysResult(e.getMessage(), e, request));
         }
     }

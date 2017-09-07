@@ -93,7 +93,7 @@ public class SaltOrchestratorTest {
         targets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg"));
 
         saltConnector = mock(SaltConnector.class);
-        PowerMockito.whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
+        whenNew(SaltConnector.class).withAnyArguments().thenReturn(saltConnector);
         parallelOrchestratorComponentRunner = mock(ParallelOrchestratorComponentRunner.class);
         when(parallelOrchestratorComponentRunner.submit(any())).thenReturn(CompletableFuture.completedFuture(true));
         when(hostDiscoveryService.determineDomain("test", "test", false)).thenReturn(".example.com");
@@ -105,8 +105,8 @@ public class SaltOrchestratorTest {
     public void bootstrapTest() throws Exception {
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
-        PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
-        PowerMockito.whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
+        whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
+        whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
 
         saltOrchestrator.bootstrap(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
 
@@ -121,8 +121,8 @@ public class SaltOrchestratorTest {
 
     @Test
     public void bootstrapNewNodesTest() throws Exception {
-        PowerMockito.whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
-        PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
+        whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
+        whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
 
         saltOrchestrator.init(parallelOrchestratorComponentRunner, exitCriteria);
 
@@ -135,8 +135,8 @@ public class SaltOrchestratorTest {
 
     @Test
     public void runServiceTest() throws Exception {
-        PowerMockito.whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
-        PowerMockito.whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
+        whenNew(SaltBootstrap.class).withAnyArguments().thenReturn(mock(SaltBootstrap.class));
+        whenNew(OrchestratorBootstrapRunner.class).withAnyArguments().thenReturn(mock(OrchestratorBootstrapRunner.class));
         PillarSave pillarSave = mock(PillarSave.class);
         whenNew(PillarSave.class).withAnyArguments().thenReturn(pillarSave);
 

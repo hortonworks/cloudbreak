@@ -17,7 +17,7 @@ public class CloudStack {
 
     private final Image image;
 
-    private String template;
+    private final String template;
 
     private final Map<String, String> parameters;
 
@@ -58,7 +58,7 @@ public class CloudStack {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudStack{");
+        StringBuilder sb = new StringBuilder("CloudStack{");
         sb.append("groups=").append(groups);
         sb.append(", network=").append(network);
         sb.append(", image=").append(image);

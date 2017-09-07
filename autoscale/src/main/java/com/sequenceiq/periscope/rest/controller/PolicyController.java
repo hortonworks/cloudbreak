@@ -3,7 +3,6 @@ package com.sequenceiq.periscope.rest.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,18 +25,18 @@ public class PolicyController implements PolicyEndpoint {
     @Override
     public ScalingPolicyJson addScaling(Long clusterId, ScalingPolicyJson json) {
         ScalingPolicy scalingPolicy = policyConverter.convert(json);
-        return createScalingPolicyJsonResponse(scalingService.createPolicy(clusterId, json.getAlertId(), scalingPolicy), HttpStatus.CREATED);
+        return createScalingPolicyJsonResponse(scalingService.createPolicy(clusterId, json.getAlertId(), scalingPolicy));
     }
 
     @Override
     public ScalingPolicyJson setScaling(Long clusterId, Long policyId, ScalingPolicyJson scalingPolicy) {
         ScalingPolicy policy = policyConverter.convert(scalingPolicy);
-        return createScalingPolicyJsonResponse(scalingService.updatePolicy(clusterId, policyId, policy), HttpStatus.OK);
+        return createScalingPolicyJsonResponse(scalingService.updatePolicy(clusterId, policyId, policy));
     }
 
     @Override
     public List<ScalingPolicyJson> getScaling(Long clusterId) {
-        return createScalingPoliciesJsonResponse(scalingService.getPolicies(clusterId), HttpStatus.OK);
+        return createScalingPoliciesJsonResponse(scalingService.getPolicies(clusterId));
     }
 
     @Override
@@ -45,11 +44,11 @@ public class PolicyController implements PolicyEndpoint {
         scalingService.deletePolicy(clusterId, policyId);
     }
 
-    private List<ScalingPolicyJson> createScalingPoliciesJsonResponse(List<ScalingPolicy> scalingPolicies, HttpStatus status) {
+    private List<ScalingPolicyJson> createScalingPoliciesJsonResponse(List<ScalingPolicy> scalingPolicies) {
         return policyConverter.convertAllToJson(scalingPolicies);
     }
 
-    private ScalingPolicyJson createScalingPolicyJsonResponse(ScalingPolicy scalingPolicy, HttpStatus status) {
+    private ScalingPolicyJson createScalingPolicyJsonResponse(ScalingPolicy scalingPolicy) {
         return policyConverter.convert(scalingPolicy);
     }
 

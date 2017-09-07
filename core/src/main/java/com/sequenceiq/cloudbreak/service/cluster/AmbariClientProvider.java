@@ -45,7 +45,7 @@ public class AmbariClientProvider {
      */
     public AmbariClient getAmbariClient(HttpClientConfig clientConfig, Integer httpsPort, String ambariUserName, String ambariPassword) {
         if (clientConfig.getClientCert() == null || httpsPort == null || clientConfig.getClientKey() == null || clientConfig.getServerCert() == null) {
-            LOGGER.info("Creating Ambari client without 2-way-ssl to connect to host:port: " + clientConfig.getApiAddress() + ":" + HTTP_PORT);
+            LOGGER.info("Creating Ambari client without 2-way-ssl to connect to host:port: " + clientConfig.getApiAddress() + ':' + HTTP_PORT);
             return new AmbariClient(clientConfig.getApiAddress(), HTTP_PORT, ambariUserName, ambariPassword);
         }
         LOGGER.info(String.format("Creating Ambari client with 2-way-ssl to connect to host:port: %s:%s", clientConfig.getApiAddress(), httpsPort));
@@ -64,7 +64,7 @@ public class AmbariClientProvider {
     public AmbariClient getDefaultAmbariClient(HttpClientConfig clientConfig, Integer httpsPort) {
         if (clientConfig.getClientCert() == null || clientConfig.getClientKey() == null || clientConfig.getServerCert() == null || httpsPort == null) {
             LOGGER.info("Creating Ambari client with default credentials without 2-way-ssl to connect to host:port: "
-                    + clientConfig.getApiAddress() + ":" + HTTP_PORT);
+                    + clientConfig.getApiAddress() + ':' + HTTP_PORT);
             return new AmbariClient(clientConfig.getApiAddress(), HTTP_PORT, "admin", "admin");
         }
         LOGGER.info(String.format("Creating Ambari client with default "

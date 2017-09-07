@@ -13,7 +13,7 @@ class FillSubnetStrategy extends AzureSubnetStrategy {
 
     @Override
     public String getNextSubnetId() {
-        if (getSubnets().size() > 0) {
+        if (!getSubnets().isEmpty()) {
             for (String subnet : getSubnets()) {
                 if (getAvailableIPs().get(subnet) > 0) {
                     getAvailableIPs().put(subnet, getAvailableIPs().get(subnet) - 1);

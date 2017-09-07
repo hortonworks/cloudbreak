@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class HostGroupBase {
+public abstract class HostGroupBase implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
@@ -20,13 +20,13 @@ public abstract class HostGroupBase {
 
     @Valid
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.CONSTRAINT, required = true)
+    @ApiModelProperty(value = HostGroupModelDescription.CONSTRAINT, required = true)
     private ConstraintJson constraint;
 
-    @ApiModelProperty(value = HostGroupModelDescription.RECIPE_IDS)
+    @ApiModelProperty(HostGroupModelDescription.RECIPE_IDS)
     private Set<Long> recipeIds;
 
-    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.RECOVERY_MODE)
+    @ApiModelProperty(HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
 
     public String getName() {

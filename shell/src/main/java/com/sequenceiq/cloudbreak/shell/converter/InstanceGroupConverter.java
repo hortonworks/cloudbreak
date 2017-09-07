@@ -14,9 +14,6 @@ public class InstanceGroupConverter extends AbstractConverter<InstanceGroup> {
     @Autowired
     private ShellContext context;
 
-    public InstanceGroupConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String s) {
         return InstanceGroup.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class InstanceGroupConverter extends AbstractConverter<InstanceGroup> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getActiveInstanceGroups());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

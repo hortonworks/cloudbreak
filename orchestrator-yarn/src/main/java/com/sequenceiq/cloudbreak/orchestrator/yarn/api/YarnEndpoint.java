@@ -9,14 +9,9 @@ public class YarnEndpoint {
 
     private String apiEndpoint;
 
-    private final String contextRoot = YarnResourceConstants.CONTEXT_ROOT;
-
-    private final String version = YarnResourceConstants.API_VERSION;
-
     private String path;
 
-    public YarnEndpoint(
-            String apiEndpoint, String path) {
+    public YarnEndpoint(String apiEndpoint, String path) {
         this.apiEndpoint = apiEndpoint;
         this.path = path;
     }
@@ -30,11 +25,11 @@ public class YarnEndpoint {
     }
 
     public String getContextRoot() {
-        return contextRoot;
+        return YarnResourceConstants.CONTEXT_ROOT;
     }
 
     public String getVersion() {
-        return version;
+        return YarnResourceConstants.API_VERSION;
     }
 
     public String getPath() {
@@ -46,14 +41,14 @@ public class YarnEndpoint {
     }
 
     public URL getFullEndpointUrl() throws MalformedURLException {
-        StringBuffer sb = new StringBuffer();
-        sb.append(removeLeadingAndTrailingSlash(getApiEndpoint()));
-        sb.append("/");
+        StringBuilder sb = new StringBuilder();
+        sb.append(removeLeadingAndTrailingSlash(apiEndpoint));
+        sb.append('/');
         sb.append(removeLeadingAndTrailingSlash(getContextRoot()));
-        sb.append("/");
+        sb.append('/');
         sb.append(removeLeadingAndTrailingSlash(getVersion()));
-        sb.append("/");
-        sb.append(removeLeadingAndTrailingSlash(getPath()));
+        sb.append('/');
+        sb.append(removeLeadingAndTrailingSlash(path));
         return new URL(sb.toString());
     }
 

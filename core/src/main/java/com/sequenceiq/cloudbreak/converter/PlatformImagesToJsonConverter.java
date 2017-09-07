@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.stereotype.Component;
 
@@ -18,7 +19,7 @@ public class PlatformImagesToJsonConverter extends AbstractConversionServiceAwar
     public PlatformImagesJson convert(PlatformImages source) {
         PlatformImagesJson json = new PlatformImagesJson();
         Map<String, Map<String, String>> images = new HashMap<>();
-        for (Map.Entry<Platform, Collection<CustomImage>> platformCollectionEntry : source.getImages().entrySet()) {
+        for (Entry<Platform, Collection<CustomImage>> platformCollectionEntry : source.getImages().entrySet()) {
             Map<String, String> tmp = new HashMap<>();
             for (CustomImage customImage : platformCollectionEntry.getValue()) {
                 tmp.put(customImage.value(), customImage.getImage());
@@ -26,7 +27,7 @@ public class PlatformImagesToJsonConverter extends AbstractConversionServiceAwar
             images.put(platformCollectionEntry.getKey().value(), tmp);
         }
         Map<String, String> regex = new HashMap<>();
-        for (Map.Entry<Platform, String> platformStringEntry : source.getRegex().entrySet()) {
+        for (Entry<Platform, String> platformStringEntry : source.getRegex().entrySet()) {
             regex.put(platformStringEntry.getKey().value(), platformStringEntry.getValue());
         }
         json.setImages(images);

@@ -18,12 +18,13 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<ClusterTerminationState, ClusterTerminationEvent> {
 
     private static final List<Transition<ClusterTerminationState, ClusterTerminationEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterTerminationState, ClusterTerminationEvent>()
+            new Builder<ClusterTerminationState, ClusterTerminationEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
                     .from(INIT_STATE).to(CLUSTER_TERMINATING_STATE).event(TERMINATION_EVENT).noFailureEvent()
                     .from(CLUSTER_TERMINATING_STATE).to(CLUSTER_TERMINATION_FINISH_STATE).event(TERMINATION_FINISHED_EVENT)
@@ -55,7 +56,7 @@ public class ClusterTerminationFlowConfig extends AbstractFlowConfiguration<Clus
 
     @Override
     public ClusterTerminationEvent[] getInitEvents() {
-        return new ClusterTerminationEvent[]{ ClusterTerminationEvent.TERMINATION_EVENT };
+        return new ClusterTerminationEvent[]{ TERMINATION_EVENT };
     }
 
 }

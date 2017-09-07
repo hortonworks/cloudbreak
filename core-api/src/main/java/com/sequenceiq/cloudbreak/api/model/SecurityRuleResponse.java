@@ -10,7 +10,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityRuleResponse extends SecurityRuleBase {
 
-    @ApiModelProperty(value = ModelDescriptions.ID)
+    @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
     public SecurityRuleResponse() {

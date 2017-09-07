@@ -17,12 +17,13 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<InstanceTerminationState, InstanceTerminationEvent> {
 
     private static final List<Transition<InstanceTerminationState, InstanceTerminationEvent>> TRANSITIONS =
-            new Transition.Builder<InstanceTerminationState, InstanceTerminationEvent>()
+            new Builder<InstanceTerminationState, InstanceTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
                     .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).noFailureEvent()
                     .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
@@ -59,7 +60,7 @@ public class InstanceTerminationFlowConfig extends AbstractFlowConfiguration<Ins
     @Override
     public InstanceTerminationEvent[] getInitEvents() {
         return new InstanceTerminationEvent[] {
-            InstanceTerminationEvent.TERMINATION_EVENT
+            TERMINATION_EVENT
         };
     }
 }

@@ -9,10 +9,6 @@ public class BlueprintInputJson implements JsonEntity {
 
     private String propertyValue;
 
-    public BlueprintInputJson() {
-
-    }
-
     public String getName() {
         return name;
     }

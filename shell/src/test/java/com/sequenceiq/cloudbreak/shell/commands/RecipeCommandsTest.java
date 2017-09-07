@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class RecipeCommandsTest {
+
     private static final Long RECIPE_ID = 50L;
 
     private static final String RECIPE_NAME = "dummyName";
@@ -58,15 +59,13 @@ public class RecipeCommandsTest {
     @Mock
     private OutputTransformer outputTransformer;
 
-    private RecipeResponse dummyResult;
-
-    private RuntimeException expectedException = new RuntimeException("something not found");
+    private final RuntimeException expectedException = new RuntimeException("something not found");
 
     @Before
     public void setUp() throws Exception {
         underTest = new RecipeCommands(mockContext);
         MockitoAnnotations.initMocks(this);
-        dummyResult = new RecipeResponse();
+        RecipeResponse dummyResult = new RecipeResponse();
         dummyResult.setId(RECIPE_ID);
         given(cloudbreakClient.recipeEndpoint()).willReturn(recipeEndpoint);
         RecipeResponse recipeResponse = new RecipeResponse();

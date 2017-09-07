@@ -18,12 +18,13 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackTerminationState, StackTerminationEvent> {
 
     private static final List<Transition<StackTerminationState, StackTerminationEvent>> TRANSITIONS =
-            new Transition.Builder<StackTerminationState, StackTerminationEvent>()
+            new Builder<StackTerminationState, StackTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
                     .from(INIT_STATE).to(TERMINATION_STATE).event(TERMINATION_EVENT).noFailureEvent()
                     .from(INIT_STATE).to(FORCE_TERMINATION_STATE).event(FORCE_TERMINATION_EVENT).noFailureEvent()
@@ -57,8 +58,8 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     @Override
     public StackTerminationEvent[] getInitEvents() {
         return new StackTerminationEvent[] {
-                StackTerminationEvent.TERMINATION_EVENT,
-                StackTerminationEvent.FORCE_TERMINATION_EVENT
+                TERMINATION_EVENT,
+                FORCE_TERMINATION_EVENT
         };
     }
 }

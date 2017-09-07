@@ -11,12 +11,14 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Subnetworks.Insert;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Subnetwork;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceNotNeededException;
@@ -49,7 +51,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
             String networkName = context.getStringParameter(GcpNetworkResourceBuilder.NETWORK_NAME);
             gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId, networkName));
 
-            Compute.Subnetworks.Insert snInsert = compute.subnetworks().insert(projectId, auth.getCloudContext().getLocation().getRegion().value(), gcpSubnet);
+            Insert snInsert = compute.subnetworks().insert(projectId, auth.getCloudContext().getLocation().getRegion().value(), gcpSubnet);
             try {
                 Operation operation = snInsert.execute();
                 if (operation.getHttpErrorStatusCode() != null) {
@@ -62,7 +64,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
             }
         }
         context.putParameter(SUBNET_NAME, resource.getName());
-        return new CloudResource.Builder().cloudResource(resource).persistent(false).build();
+        return new Builder().cloudResource(resource).persistent(false).build();
     }
 
     @Override

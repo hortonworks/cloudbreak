@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -84,11 +85,11 @@ public class MockPlatformParameters implements PlatformParameters {
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
-    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+    private Map<Region, List<AvailabilityZone>> regions;
 
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+    private final Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
-    private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+    private Map<AvailabilityZone, List<VmType>> vmTypes;
 
     private Region defaultRegion;
 
@@ -96,10 +97,10 @@ public class MockPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        this.regions = readRegionsMock();
-        this.vmTypes = readVmTypes();
-        this.defaultRegion = getDefaultRegion();
-        this.defaultVmType = this.vmTypes.get(this.vmTypes.keySet().iterator().next()).get(0);
+        regions = readRegionsMock();
+        vmTypes = readVmTypes();
+        defaultRegion = getDefaultRegion();
+        defaultVmType = vmTypes.get(vmTypes.keySet().iterator().next()).get(0);
     }
 
     private Map<Region, List<AvailabilityZone>> readRegionsMock() {
@@ -178,7 +179,7 @@ public class MockPlatformParameters implements PlatformParameters {
     public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
         VmTypes vmTypes = vmTypes(extended);
         Map<AvailabilityZone, VmTypes> result = new HashMap<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
             for (AvailabilityZone zone : zones.getValue()) {
                 result.put(zone, vmTypes);
             }

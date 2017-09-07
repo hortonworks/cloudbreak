@@ -20,7 +20,7 @@ public class MarathonAppBootstrap implements OrchestratorBootstrap {
     @Override
     public Boolean call() throws Exception {
         Integer desiredTasksCount = app.getInstances();
-        App appResponse = client.getApp(this.app.getId()).getApp();
+        App appResponse = client.getApp(app.getId()).getApp();
         Integer tasksRunning = appResponse.getTasksRunning();
 
         if (tasksRunning < desiredTasksCount) {

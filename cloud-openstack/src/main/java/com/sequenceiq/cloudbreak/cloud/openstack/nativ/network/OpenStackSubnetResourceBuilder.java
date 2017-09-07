@@ -47,7 +47,7 @@ public class OpenStackSubnetResourceBuilder extends AbstractOpenStackNetworkReso
                         .build();
                 subnetId = osClient.networking().subnet().create(subnet).getId();
             }
-            context.putParameter(OpenStackConstants.SUBNET_ID, subnetId);
+            context.putParameter(SUBNET_ID, subnetId);
             return createPersistedResource(resource, subnetId);
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Subnet creation failed", resourceType(), resource.getName(), ex);

@@ -11,13 +11,13 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class NetworkResponse extends NetworkBase {
-    @ApiModelProperty(value = ModelDescriptions.ID)
+    @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 
     @JsonProperty("publicInAccount")

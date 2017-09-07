@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.microsoft.azure.management.resources.SubscriptionPolicies;
 import com.microsoft.azure.management.resources.SubscriptionState;
 
@@ -10,25 +11,25 @@ public class AzureSubscription {
      * The fully qualified ID for the subscription. For example,
      * /subscriptions/00000000-0000-0000-0000-000000000000.
      */
-    @JsonProperty(value = "id", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(value = "id", access = Access.WRITE_ONLY)
     private String id;
 
     /**
      * The subscription ID.
      */
-    @JsonProperty(value = "subscriptionId", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(value = "subscriptionId", access = Access.WRITE_ONLY)
     private String subscriptionId;
 
     /**
      * The tenant ID.
      */
-    @JsonProperty(value = "tenantId", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(value = "tenantId", access = Access.WRITE_ONLY)
     private String tenantId;
 
     /**
      * The subscription display name.
      */
-    @JsonProperty(value = "displayName", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(value = "displayName", access = Access.WRITE_ONLY)
     private String displayName;
 
     /**
@@ -36,13 +37,13 @@ public class AzureSubscription {
      * Disabled, and Deleted. Possible values include: 'Enabled', 'Warned',
      * 'PastDue', 'Disabled', 'Deleted'.
      */
-    @JsonProperty(value = "state", access = JsonProperty.Access.WRITE_ONLY)
+    @JsonProperty(value = "state", access = Access.WRITE_ONLY)
     private SubscriptionState state;
 
     /**
      * The subscription policies.
      */
-    @JsonProperty(value = "subscriptionPolicies")
+    @JsonProperty("subscriptionPolicies")
     private SubscriptionPolicies subscriptionPolicies;
 
     /**
@@ -50,11 +51,8 @@ public class AzureSubscription {
      * combinations of Legacy, RoleBased, Bypassed, Direct and Management. For
      * example, 'Legacy, RoleBased'.
      */
-    @JsonProperty(value = "authorizationSource")
+    @JsonProperty("authorizationSource")
     private String authorizationSource;
-
-    public AzureSubscription() {
-    }
 
     public String getId() {
         return id;

@@ -8,9 +8,6 @@ public class RegionsSpecification {
     @JsonProperty("items")
     private List<RegionSpecification> items;
 
-    public RegionsSpecification() {
-    }
-
     public List<RegionSpecification> getItems() {
         return items;
     }

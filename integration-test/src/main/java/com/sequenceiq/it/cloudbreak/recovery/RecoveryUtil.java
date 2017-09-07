@@ -34,7 +34,7 @@ public class RecoveryUtil {
 
         outerloop:
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            if (hostGroup.equals(instanceGroup.getGroup().toString())) {
+            if (hostGroup.equals(instanceGroup.getGroup())) {
                 Set<InstanceMetaDataJson> instanceMetaData = instanceGroup.getMetadata();
                 for (InstanceMetaDataJson metaData : instanceMetaData) {
                     instanceId = metaData.getInstanceId();

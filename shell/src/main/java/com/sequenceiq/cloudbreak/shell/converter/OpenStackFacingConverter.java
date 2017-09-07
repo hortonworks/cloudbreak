@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.shell.completion.OpenStackFacing;
 
 public class OpenStackFacingConverter extends AbstractConverter<OpenStackFacing> {
 
-    private static Collection<String> values = Arrays.asList("admin", "public", "internal");
+    private static final Collection<String> VALUES = Arrays.asList("admin", "public", "internal");
 
     @Override
     public boolean supports(Class<?> type, String optionContext) {
@@ -20,6 +20,6 @@ public class OpenStackFacingConverter extends AbstractConverter<OpenStackFacing>
 
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
-        return getAllPossibleValues(completions, values);
+        return getAllPossibleValues(completions, VALUES);
     }
 }

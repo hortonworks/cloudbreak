@@ -37,7 +37,7 @@ public class PlatformParameterHandler implements CloudPlatformEventHandler<Platf
             PlatformParameterResult platformParameterResult = new PlatformParameterResult(request, platformParameters);
             request.getResult().onNext(platformParameterResult);
             LOGGER.info("Query platform parameters finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new PlatformParameterResult(e.getMessage(), e, request));
         }
     }

@@ -4,9 +4,9 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 
 public class SshUserResponse<T> {
 
-    private CloudContext cloudContext;
+    private final CloudContext cloudContext;
 
-    private String user;
+    private final String user;
 
     public SshUserResponse(CloudContext cloudContext, String user) {
         this.cloudContext = cloudContext;
@@ -23,7 +23,7 @@ public class SshUserResponse<T> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SshUserResponse{");
+        StringBuilder sb = new StringBuilder("SshUserResponse{");
         sb.append("cloudContext=").append(cloudContext);
         sb.append(", user='").append(user).append('\'');
         sb.append('}');

@@ -39,7 +39,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "credential delete --id", "credential delete --name" })
+    @CliAvailabilityIndicator({"credential delete --id", "credential delete --name"})
     public boolean deleteAvailable() {
         return true;
     }
@@ -73,7 +73,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "credential select --id", "credential select --name" })
+    @CliAvailabilityIndicator({"credential select --id", "credential select --name"})
     public boolean selectAvailable() {
         return true;
     }
@@ -112,7 +112,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     }
 
     @Override
-    @CliAvailabilityIndicator(value = "credential list")
+    @CliAvailabilityIndicator("credential list")
     public boolean listAvailable() {
         return true;
     }
@@ -129,7 +129,7 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "credential show --id", "credential show --name" })
+    @CliAvailabilityIndicator({"credential show --id", "credential show --name"})
     public boolean showAvailable() {
         return true;
     }
@@ -244,13 +244,13 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
         if (!url.startsWith("http://") && !url.startsWith("https://")) {
             url = "http://" + url;
         }
-        BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()));
-        String str;
         StringBuilder sb = new StringBuilder();
-        while ((str = in.readLine()) != null) {
-            sb.append(str);
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(new URL(url).openStream()))) {
+            String str;
+            while ((str = in.readLine()) != null) {
+                sb.append(str);
+            }
         }
-        in.close();
         return sb.toString();
     }
 }

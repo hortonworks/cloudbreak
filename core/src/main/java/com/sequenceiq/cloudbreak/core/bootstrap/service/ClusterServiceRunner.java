@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -77,7 +78,7 @@ public class ClusterServiceRunner {
             HttpClientConfig ambariClientConfig = buildAmbariClientConfig(stack, ambariServerIp);
             clusterService.updateAmbariClientConfig(cluster.getId(), ambariClientConfig);
             Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-            for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+            for (Entry<String, List<Container>> containersEntry : containers.entrySet()) {
                 List<String> hostNames = new ArrayList<>();
                 for (Container container : containersEntry.getValue()) {
                     hostNames.add(container.getHost());

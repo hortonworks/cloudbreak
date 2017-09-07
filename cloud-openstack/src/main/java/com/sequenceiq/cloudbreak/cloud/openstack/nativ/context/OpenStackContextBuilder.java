@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.nativ.context;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants;
+import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.OpenStackVariant;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.template.ResourceContextBuilder;
 
@@ -57,7 +57,7 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
                         openStackContext.putParameter(OpenStackConstants.NETWORK_ID, resource.getReference());
                         break;
                     case OPENSTACK_SECURITY_GROUP:
-                        openStackContext.addGroupResources(resource.getGroup(), Arrays.asList(resource));
+                        openStackContext.addGroupResources(resource.getGroup(), Collections.singletonList(resource));
                         break;
                     default:
                         LOGGER.debug("Resource is not used during context build: {}", resource);
@@ -79,6 +79,6 @@ public class OpenStackContextBuilder implements ResourceContextBuilder<OpenStack
 
     @Override
     public Variant variant() {
-        return OpenStackConstants.OpenStackVariant.NATIVE.variant();
+        return OpenStackVariant.NATIVE.variant();
     }
 }

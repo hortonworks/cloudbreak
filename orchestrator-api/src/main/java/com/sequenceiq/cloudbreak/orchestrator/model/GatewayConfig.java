@@ -121,7 +121,7 @@ public class GatewayConfig {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GatewayConfig{");
+        StringBuilder sb = new StringBuilder("GatewayConfig{");
         sb.append("connectionAddress='").append(connectionAddress).append('\'');
         sb.append(", publicAddress='").append(publicAddress).append('\'');
         sb.append(", privateAddress='").append(privateAddress).append('\'');

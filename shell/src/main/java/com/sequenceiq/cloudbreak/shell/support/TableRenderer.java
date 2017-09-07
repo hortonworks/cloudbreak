@@ -5,11 +5,11 @@ import static java.util.Collections.singletonList;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.shell.support.table.Table;
 import org.springframework.shell.support.table.TableHeader;
@@ -47,11 +47,11 @@ public class TableRenderer {
     public String renderMultiValueMap(Map<String, List<String>> rows, boolean sortByFirstColumn, String... headers) {
         Table table = createTable(headers);
         if (rows != null) {
-            List<Map.Entry<String, List<String>>> entries = new ArrayList<>(rows.entrySet());
+            List<Entry<String, List<String>>> entries = new ArrayList<>(rows.entrySet());
             if (sortByFirstColumn) {
-                Collections.sort(entries, new Comparator<Map.Entry<String, List<String>>>() {
+                entries.sort(new Comparator<Entry<String, List<String>>>() {
                     @Override
-                    public int compare(Map.Entry<String, List<String>> a, Map.Entry<String, List<String>> b) {
+                    public int compare(Entry<String, List<String>> a, Entry<String, List<String>> b) {
                         if (isEmpty(a) || isEmpty(b)) {
                             return compareKeys(a, b);
                         }
@@ -59,18 +59,18 @@ public class TableRenderer {
                         return comp == 0 ? compareKeys(a, b) : comp;
                     }
 
-                    private int compareKeys(Map.Entry<String, List<String>> a, Map.Entry<String, List<String>> b) {
+                    private int compareKeys(Entry<String, List<String>> a, Entry<String, List<String>> b) {
                         return a.getKey().compareToIgnoreCase(b.getKey());
                     }
 
-                    private boolean isEmpty(Map.Entry<String, List<String>> input) {
+                    private boolean isEmpty(Entry<String, List<String>> input) {
                         return input.getValue() == null || input.getValue().isEmpty() || input.getValue().get(0) == null;
                     }
                 });
             } else {
-                Collections.sort(entries, (a, b) -> a.getKey().compareToIgnoreCase(b.getKey()));
+                entries.sort((a, b) -> a.getKey().compareToIgnoreCase(b.getKey()));
             }
-            for (Map.Entry<String, List<String>> entry : entries) {
+            for (Entry<String, List<String>> entry : entries) {
                 if (entry.getValue() != null) {
                     for (String value : entry.getValue()) {
                         table.addRow(entry.getKey(), value);
@@ -86,8 +86,8 @@ public class TableRenderer {
         List<String> mainHeaders = new ArrayList<>();
         if (rows != null) {
             int index = 0;
-            for (String key1 : rows.keySet()) {
-                Object value = rows.get(key1);
+            for (Entry<String, E> entry : rows.entrySet()) {
+                Object value = entry.getValue();
                 if (value != null) {
                     Field[] fields = value.getClass().getDeclaredFields();
                     if (index == 0) {
@@ -101,8 +101,8 @@ public class TableRenderer {
                         }
                         table = createTable(headers.toArray(new String[headers.size()]));
                     }
-                    List<String> rowValues = new ArrayList<>();
-                    rowValues.add(key1);
+                    List<String> rowValues = new ArrayList<>(fields.length + 1);
+                    rowValues.add(entry.getKey());
                     for (Field classField : fields) {
                         if (mainHeaders.contains(classField.getName())) {
                             classField.setAccessible(true);
@@ -149,21 +149,9 @@ public class TableRenderer {
     private static <E> Map<String, List<String>> convert(Map<E, String> map) {
         Map<String, List<String>> result = new HashMap<>();
         if (map != null) {
-            for (E key : map.keySet()) {
-                if (map.get(key) != null) {
-                    result.put(key.toString(), singletonList(map.get(key)));
-                }
-            }
-        }
-        return result;
-    }
-
-    private static <E> Map<String, List<String>> convertObjectMap(Map<String, E> map) {
-        Map<String, List<String>> result = new HashMap<>();
-        if (map != null) {
-            for (String key : map.keySet()) {
-                if (map.get(key) != null) {
-                    result.put(key, singletonList(map.get(key).toString()));
+            for (Entry<E, String> entry : map.entrySet()) {
+                if (entry.getValue() != null) {
+                    result.put(entry.getKey().toString(), singletonList(entry.getValue()));
                 }
             }
         }

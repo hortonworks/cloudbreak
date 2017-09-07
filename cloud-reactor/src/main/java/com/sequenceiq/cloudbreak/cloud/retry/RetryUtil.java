@@ -19,7 +19,7 @@ public class RetryUtil implements Runnable {
     private CheckTask check;
 
     private RetryUtil(int count) {
-        this.retryCount = count;
+        retryCount = count;
     }
 
     public static RetryUtil withDefaultRetries() {
@@ -41,7 +41,7 @@ public class RetryUtil implements Runnable {
     }
 
     public RetryUtil checkIfRecoverable(ExceptionCheckTask check) {
-        this.exceptionCheck = check;
+        exceptionCheck = check;
         return this;
     }
 
@@ -56,7 +56,7 @@ public class RetryUtil implements Runnable {
             retryCount--;
             task.run();
             runChecker();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             runExceptionChecker(e);
         }
     }

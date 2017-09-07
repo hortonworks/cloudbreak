@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class ClusterDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
-    private Long stackId;
 
-    private Long clusterId;
+    private final Long stackId;
+
+    private final Long clusterId;
 
     public ClusterDeletionBasedExitCriteriaModel(Long stackId, Long clusterId) {
         this.stackId = stackId;

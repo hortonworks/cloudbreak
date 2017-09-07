@@ -3,17 +3,17 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformImagesJson implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.IMAGES)
+    @ApiModelProperty(ConnectorModelDescription.IMAGES)
     private Map<String, Map<String, String>> images;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.IMAGES_REGEX)
+    @ApiModelProperty(ConnectorModelDescription.IMAGES_REGEX)
     private Map<String, String> imagesRegex;
 
     public Map<String, Map<String, String>> getImages() {

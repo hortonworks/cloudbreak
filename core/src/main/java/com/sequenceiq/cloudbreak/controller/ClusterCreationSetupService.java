@@ -5,7 +5,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,7 +83,7 @@ public class ClusterCreationSetupService {
     @Autowired
     private BlueprintService blueprintService;
 
-    public void validate(ClusterRequest request, Stack stack, IdentityUser user) throws Exception {
+    public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
         if (request.getEnableSecurity() && request.getKerberos() == null) {
             throw new BadRequestException("If the security is enabled the kerberos parameters cannot be empty");
         }
@@ -167,14 +167,14 @@ public class ClusterCreationSetupService {
                 String stackName = blueprintUtils.getBlueprintStackName(root);
                 if ("HDF".equalsIgnoreCase(stackName)) {
                     LOGGER.info("Stack name is HDF, use the default HDF repo for version: " + stackVersion);
-                    for (Map.Entry<String, DefaultHDFInfo> entry : defaultHDFEntries.getEntries().entrySet()) {
+                    for (Entry<String, DefaultHDFInfo> entry : defaultHDFEntries.getEntries().entrySet()) {
                         if (entry.getKey().equals(stackVersion)) {
                             return entry.getValue();
                         }
                     }
                 } else {
                     LOGGER.info("Stack name is HDP, use the default HDP repo for version: " + stackVersion);
-                    for (Map.Entry<String, DefaultHDPInfo> entry : defaultHDPEntries.getEntries().entrySet()) {
+                    for (Entry<String, DefaultHDPInfo> entry : defaultHDPEntries.getEntries().entrySet()) {
                         if (entry.getKey().equals(stackVersion)) {
                             return entry.getValue();
                         }

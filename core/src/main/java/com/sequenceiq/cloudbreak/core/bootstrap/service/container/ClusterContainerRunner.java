@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -96,8 +97,7 @@ public class ClusterContainerRunner {
             throws CloudbreakException, CloudbreakOrchestratorException {
 
         Orchestrator orchestrator = stack.getOrchestrator();
-        Map<String, Object> map = new HashMap<>();
-        map.putAll(orchestrator.getAttributes().getMap());
+        Map<String, Object> map = new HashMap<>(orchestrator.getAttributes().getMap());
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
@@ -164,8 +164,7 @@ public class ClusterContainerRunner {
             throws CloudbreakException, CloudbreakOrchestratorException {
 
         Orchestrator orchestrator = stack.getOrchestrator();
-        Map<String, Object> map = new HashMap<>();
-        map.putAll(orchestrator.getAttributes().getMap());
+        Map<String, Object> map = new HashMap<>(orchestrator.getAttributes().getMap());
         OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
         ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
         Map<String, List<ContainerInfo>> containers = new HashMap<>();
@@ -176,7 +175,7 @@ public class ClusterContainerRunner {
             String ambariServerHost = existingContainers.stream()
                     .filter(input -> input.getImage().contains(AMBARI_SERVER.getName()))
                     .findFirst().get().getHost();
-            final HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupRepository.findHostGroupInClusterByName(cluster.getId(), hostGroupName);
             String ambariAgentApp = existingContainers.stream()
                     .filter(input -> hostGroup.getHostNames().contains(input.getHost()) && input.getImage().contains(AMBARI_AGENT.getName()))
                     .findFirst().get().getName();
@@ -197,7 +196,7 @@ public class ClusterContainerRunner {
     }
 
     private List<String> getOtherHostgroupsAgentHostsFromContainer(Set<Container> existingContainers, String hostGroupName) {
-        final String hostGroupNamePart = hostGroupName.replace("_", "-");
+        String hostGroupNamePart = hostGroupName.replace("_", "-");
         return existingContainers.stream()
                 .filter(input -> input.getImage().contains(AMBARI_AGENT.getName()) && !input.getName().contains(hostGroupNamePart))
                 .map(Container::getHost).collect(Collectors.toList());
@@ -227,7 +226,7 @@ public class ClusterContainerRunner {
 
     private Map<String, List<Container>> saveContainers(Map<String, List<ContainerInfo>> containerInfo, Cluster cluster) {
         Map<String, List<Container>> containers = new HashMap<>();
-        for (Map.Entry<String, List<ContainerInfo>> containerInfoEntry : containerInfo.entrySet()) {
+        for (Entry<String, List<ContainerInfo>> containerInfoEntry : containerInfo.entrySet()) {
             List<Container> hostGroupContainers = convert(containerInfoEntry.getValue(), cluster);
             containers.put(containerInfoEntry.getKey(), hostGroupContainers);
             containerService.save(hostGroupContainers);

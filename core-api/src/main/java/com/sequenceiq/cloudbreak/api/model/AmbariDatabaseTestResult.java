@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -8,7 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public class AmbariDatabaseTestResult implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_ERROR, required = true)
+    @ApiModelProperty(value = ClusterModelDescription.AMBARI_DATABASE_ERROR, required = true)
     private String error;
 
     public AmbariDatabaseTestResult() {

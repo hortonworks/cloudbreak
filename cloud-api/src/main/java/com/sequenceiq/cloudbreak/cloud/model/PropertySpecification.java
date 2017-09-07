@@ -13,9 +13,6 @@ public class PropertySpecification {
     @JsonProperty("Price")
     private Double price;
 
-    public PropertySpecification() {
-    }
-
     public String getMemory() {
         return memory;
     }

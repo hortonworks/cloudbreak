@@ -13,17 +13,17 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
 public class ResourceBuilderContext extends DynamicModel {
 
-    private Location location;
+    private final Location location;
 
-    private String name;
+    private final String name;
 
-    private int parallelResourceRequest;
+    private final int parallelResourceRequest;
 
-    private Queue<CloudResource> networkResources = new ConcurrentLinkedQueue<>();
+    private final Queue<CloudResource> networkResources = new ConcurrentLinkedQueue<>();
 
-    private Map<String, List<CloudResource>> groupResources = new HashMap<>();
+    private final Map<String, List<CloudResource>> groupResources = new HashMap<>();
 
-    private Map<Long, List<CloudResource>> computeResources = new HashMap<>();
+    private final Map<Long, List<CloudResource>> computeResources = new HashMap<>();
 
     private boolean build;
 
@@ -59,7 +59,7 @@ public class ResourceBuilderContext extends DynamicModel {
     }
 
     public void addNetworkResources(List<CloudResource> resources) {
-        this.networkResources.addAll(resources);
+        networkResources.addAll(resources);
     }
 
     public List<CloudResource> getGroupResources(String groupName) {

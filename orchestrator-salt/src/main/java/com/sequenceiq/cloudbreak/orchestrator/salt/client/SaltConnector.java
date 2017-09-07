@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
@@ -72,13 +72,13 @@ public class SaltConnector implements Closeable {
 
     public SaltConnector(GatewayConfig gatewayConfig, boolean debug) {
         try {
-            this.restClient = RestClientUtil.createClient(
+            restClient = RestClientUtil.createClient(
                     gatewayConfig.getServerCert(), gatewayConfig.getClientCert(), gatewayConfig.getClientKey(), debug, SaltConnector.class);
             String saltBootPasswd = Optional.ofNullable(gatewayConfig.getSaltBootPassword()).orElse(SALT_BOOT_PASSWORD);
             HttpAuthenticationFeature feature = HttpAuthenticationFeature.basic(SALT_BOOT_USER, saltBootPasswd);
-            this.saltTarget = restClient.target(gatewayConfig.getGatewayUrl()).register(feature);
-            this.saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
-            this.signatureKey = gatewayConfig.getSignatureKey();
+            saltTarget = restClient.target(gatewayConfig.getGatewayUrl()).register(feature);
+            saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
+            signatureKey = gatewayConfig.getSignatureKey();
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
@@ -140,7 +140,7 @@ public class SaltConnector implements Closeable {
                     form.param("arg", a);
                 }
             } else {
-                for (int i = 0; i < arg.length - 1; i = i + 2) {
+                for (int i = 0; i < arg.length - 1; i += 2) {
                     form.param(arg[i], arg[i + 1]);
                 }
             }
@@ -217,7 +217,7 @@ public class SaltConnector implements Closeable {
         StringBuilder failedResponsesErrorMessage = new StringBuilder();
         failedResponsesErrorMessage.append("Failed response from salt bootstrap, endpoint: ").append(BOOT_HOSTNAME_ENDPOINT);
         for (GenericResponse failedResponse : failedResponses) {
-            failedResponsesErrorMessage.append("\n").append("Status code: ").append(failedResponse.getStatusCode());
+            failedResponsesErrorMessage.append('\n').append("Status code: ").append(failedResponse.getStatusCode());
             failedResponsesErrorMessage.append(" Error message: ").append(failedResponse.getStatus());
         }
         LOGGER.error(failedResponsesErrorMessage.toString());

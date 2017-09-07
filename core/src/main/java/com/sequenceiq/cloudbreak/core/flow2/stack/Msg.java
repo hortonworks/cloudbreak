@@ -80,7 +80,7 @@ public enum Msg {
     AMBARI_CLUSTER_GATEWAY_CHANGE_FAILED("ambari.cluster.gateway.change.failed"),
     STACK_IMAGE_SETUP("stack.image.setup");
 
-    private String code;
+    private final String code;
 
     Msg(String msgCode) {
         code = msgCode;

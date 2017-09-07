@@ -14,10 +14,8 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" }),
-})
-public class ConstraintTemplate {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+public class ConstraintTemplate implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "constraint_template_generator")

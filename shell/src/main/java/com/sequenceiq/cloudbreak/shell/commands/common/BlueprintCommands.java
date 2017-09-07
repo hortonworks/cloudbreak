@@ -31,7 +31,7 @@ public class BlueprintCommands implements BaseCommands {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = "blueprint create")
+    @CliAvailabilityIndicator("blueprint create")
     public boolean createAvailable() {
         return true;
     }
@@ -87,7 +87,7 @@ public class BlueprintCommands implements BaseCommands {
     }
 
     @Override
-    @CliAvailabilityIndicator(value = "blueprint list")
+    @CliAvailabilityIndicator("blueprint list")
     public boolean listAvailable() {
         return true;
     }
@@ -104,7 +104,7 @@ public class BlueprintCommands implements BaseCommands {
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "blueprint select --id", "blueprint select --name" })
+    @CliAvailabilityIndicator({"blueprint select --id", "blueprint select --name"})
     public boolean selectAvailable() {
         return shellContext.isBlueprintAccessible();
     }
@@ -165,7 +165,7 @@ public class BlueprintCommands implements BaseCommands {
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "blueprint show --id", "blueprint show --name" })
+    @CliAvailabilityIndicator({"blueprint show --id", "blueprint show --name"})
     public boolean showAvailable() {
         return true;
     }
@@ -209,7 +209,7 @@ public class BlueprintCommands implements BaseCommands {
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "blueprint delete --id", "blueprint delete --name" })
+    @CliAvailabilityIndicator({"blueprint delete --id", "blueprint delete --name"})
     public boolean deleteAvailable() {
         return true;
     }
@@ -243,7 +243,7 @@ public class BlueprintCommands implements BaseCommands {
         return delete(null, name);
     }
 
-    @CliAvailabilityIndicator(value = "blueprint defaults")
+    @CliAvailabilityIndicator("blueprint defaults")
     public boolean defaultAvailable() {
         return true;
     }

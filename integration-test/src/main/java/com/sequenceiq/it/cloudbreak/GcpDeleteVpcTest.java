@@ -16,6 +16,8 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Builder;
+import com.google.api.services.compute.Compute.Networks.Delete;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.it.util.ResourceUtil;
@@ -34,17 +36,15 @@ public class GcpDeleteVpcTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.gcpcredential.p12File}")
     private String defaultP12File;
 
-    private JacksonFactory jsonFactory;
-
     @AfterSuite
-    @Parameters({ "vpcName" })
+    @Parameters("vpcName")
     public void deleteNetwork(@Optional("it-vpc") String vpcName) throws Exception {
         springTestContextPrepareTestInstance();
         String serviceAccountPrivateKey = ResourceUtil.readBase64EncodedContentFromResource(applicationContext, defaultP12File);
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         PrivateKey privateKey = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
                 new ByteArrayInputStream(Base64.decodeBase64(serviceAccountPrivateKey)), "notasecret", "privatekey", "notasecret");
-        jsonFactory = JacksonFactory.getDefaultInstance();
+        JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         GoogleCredential googleCredential = new GoogleCredential.Builder().setTransport(httpTransport)
                 .setJsonFactory(jsonFactory)
                 .setServiceAccountId(defaultServiceAccountId)
@@ -52,12 +52,12 @@ public class GcpDeleteVpcTest extends AbstractCloudbreakIntegrationTest {
                 .setServiceAccountPrivateKey(privateKey)
                 .build();
 
-        Compute compute = new Compute.Builder(httpTransport, jsonFactory, null)
+        Compute compute = new Builder(httpTransport, jsonFactory, null)
                 .setApplicationName(defaultName)
                 .setHttpRequestInitializer(googleCredential)
                 .build();
 
-        Compute.Networks.Delete delete = compute.networks().delete(defaultProjectId, vpcName);
+        Delete delete = compute.networks().delete(defaultProjectId, vpcName);
 
         Operation operation = delete.execute();
         if (operation.getHttpErrorStatusCode() != null) {

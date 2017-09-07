@@ -18,10 +18,11 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 import com.sequenceiq.periscope.client.AutoscaleClient;
+import com.sequenceiq.periscope.client.AutoscaleClient.AutoscaleClientBuilder;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTests {
-    private static final Logger LOG = LoggerFactory.getLogger(CloudbreakTestSuiteInitializer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AutoscaleTestSuiteInitializer.class);
 
     @Value("${integrationtest.periscope.server}")
     private String defaultPeriscopeServer;
@@ -43,14 +44,14 @@ public class AutoscaleTestSuiteInitializer extends AbstractTestNGSpringContextTe
     }
 
     @BeforeSuite(dependsOnMethods = "initContext")
-    @Parameters({"periscopeServer"})
+    @Parameters("periscopeServer")
     public void initCloudbreakSuite(@Optional("") String periscopeServer) {
         periscopeServer = StringUtils.hasLength(periscopeServer) ? periscopeServer : defaultPeriscopeServer;
         String identity = itContext.getContextParam(IntegrationTestContext.IDENTITY_URL);
         String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
-        AutoscaleClient autoscaleClient = new AutoscaleClient.AutoscaleClientBuilder(periscopeServer + autoscaleRootContextPath,
+        AutoscaleClient autoscaleClient = new AutoscaleClientBuilder(periscopeServer + autoscaleRootContextPath,
                         identity, "cloudbreak_shell")
                 .withCertificateValidation(false)
                 .withDebug(true)

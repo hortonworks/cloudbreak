@@ -20,11 +20,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterResetState, ClusterResetEvent> {
     private static final List<Transition<ClusterResetState, ClusterResetEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterResetState, ClusterResetEvent>()
+            new Builder<ClusterResetState, ClusterResetEvent>()
                     .from(INIT_STATE).to(CLUSTER_RESET_STATE).event(CLUSTER_RESET_EVENT).noFailureEvent()
                     .from(CLUSTER_RESET_STATE).to(CLUSTER_RESET_FINISHED_STATE).event(CLUSTER_RESET_FINISHED_EVENT)
                             .failureEvent(CLUSTER_RESET_FINISHED_FAILURE_EVENT)
@@ -46,7 +47,7 @@ public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterRes
     }
 
     @Override
-    protected AbstractFlowConfiguration.FlowEdgeConfig<ClusterResetState, ClusterResetEvent> getEdgeConfig() {
+    protected FlowEdgeConfig<ClusterResetState, ClusterResetEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

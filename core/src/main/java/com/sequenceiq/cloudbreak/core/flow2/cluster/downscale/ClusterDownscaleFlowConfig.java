@@ -20,11 +20,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterDownscaleFlowConfig extends AbstractFlowConfiguration<ClusterDownscaleState, ClusterDownscaleEvent> {
     private static final List<Transition<ClusterDownscaleState, ClusterDownscaleEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterDownscaleState, ClusterDownscaleEvent>()
+            new Builder<ClusterDownscaleState, ClusterDownscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
                     .from(INIT_STATE).to(COLLECT_CANDIDATES_STATE).event(DECOMMISSION_EVENT).noFailureEvent()
                     .from(COLLECT_CANDIDATES_STATE).to(DECOMMISSION_STATE).event(COLLECT_CANDIDATES_FINISHED_EVENT)

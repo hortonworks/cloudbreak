@@ -173,7 +173,7 @@ public class ClusterBootstrapper {
             validatePollingResultForCancellation(allNodesAvailabilityPolling, "Polling of all nodes availability was cancelled.");
 
             Orchestrator orchestrator = stack.getOrchestrator();
-            orchestrator.setApiEndpoint(gatewayIp + ":" + stack.getGatewayPort());
+            orchestrator.setApiEndpoint(gatewayIp + ':' + stack.getGatewayPort());
             orchestrator.setType(hostOrchestrator.name());
             orchestratorRepository.save(orchestrator);
             if (TIMEOUT.equals(allNodesAvailabilityPolling)) {
@@ -242,7 +242,7 @@ public class ClusterBootstrapper {
         ClusterComponent stateComponent = clusterComponentProvider.getComponent(cluster.getId(), ComponentType.SALT_STATE);
         if (stateComponent != null) {
             String content = (String) stateComponent.getAttributes().getMap().getOrDefault(ComponentType.SALT_STATE.name(), "");
-            if (content.length() != 0) {
+            if (!content.isEmpty()) {
                 stateZip = Base64.decodeBase64(content);
             }
         }

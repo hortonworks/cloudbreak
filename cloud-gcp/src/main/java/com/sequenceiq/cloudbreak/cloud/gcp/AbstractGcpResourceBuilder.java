@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Operation.Error.Errors;
 import com.sequenceiq.cloudbreak.cloud.CloudPlatformAware;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -115,7 +117,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
             String msg = null;
             StringBuilder error = new StringBuilder();
             if (execute.getError().getErrors() != null) {
-                for (Operation.Error.Errors errors : execute.getError().getErrors()) {
+                for (Errors errors : execute.getError().getErrors()) {
                     error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
                 }
                 msg = error.toString();
@@ -129,11 +131,11 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
     }
 
     protected CloudResource createNamedResource(ResourceType type, String name) {
-        return new CloudResource.Builder().type(type).name(name).build();
+        return new Builder().type(type).name(name).build();
     }
 
     protected CloudResource createOperationAwareCloudResource(CloudResource resource, Operation operation) {
-        return new CloudResource.Builder()
+        return new Builder()
                 .cloudResource(resource)
                 .params(Collections.singletonMap(OPERATION_ID, operation.getName()))
                 .persistent(false)

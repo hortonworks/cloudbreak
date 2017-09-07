@@ -11,7 +11,7 @@ public class GetStackParamValidationRequest extends CloudPlatformRequest<GetStac
     //BEGIN GENERATED CODE
     @Override
     public String toString() {
-        return "GetStackParamValidationRequest{" + getCloudContext().toString() + "}";
+        return "GetStackParamValidationRequest{" + getCloudContext() + '}';
     }
     //END GENERATED CODE
 }

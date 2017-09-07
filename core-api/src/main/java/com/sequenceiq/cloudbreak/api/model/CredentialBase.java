@@ -8,6 +8,7 @@ import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.CredentialModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -25,20 +26,20 @@ public abstract class CredentialBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PARAMETERS)
+    @ApiModelProperty(CredentialModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(ModelDescriptions.CredentialModelDescription.LOGIN_USERNAME)
+    @ApiModelProperty(CredentialModelDescription.LOGIN_USERNAME)
     private String loginUserName;
 
-    @ApiModelProperty(value = ModelDescriptions.CredentialModelDescription.PUBLIC_KEY)
+    @ApiModelProperty(CredentialModelDescription.PUBLIC_KEY)
     private String publicKey;
 
-    @ApiModelProperty(value = ModelDescriptions.TOPOLOGY_ID)
+    @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
     private Long topologyId;
 
     public String getDescription() {

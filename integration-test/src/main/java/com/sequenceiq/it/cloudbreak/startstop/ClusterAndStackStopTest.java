@@ -29,7 +29,7 @@ public class ClusterAndStackStopTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "waitOn"})
+    @Parameters("waitOn")
     public void testClusterAndStackStop(@Optional(NOWAIT) Boolean waitOn) throws Exception {
         // GIVEN
         IntegrationTestContext itContext = getItContext();

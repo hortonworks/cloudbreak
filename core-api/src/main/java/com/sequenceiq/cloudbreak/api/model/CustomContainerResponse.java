@@ -6,7 +6,7 @@ import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CustomContainerResponse {
+public class CustomContainerResponse implements JsonEntity {
 
     private Map<String, String> definitions = new HashMap<>();
 

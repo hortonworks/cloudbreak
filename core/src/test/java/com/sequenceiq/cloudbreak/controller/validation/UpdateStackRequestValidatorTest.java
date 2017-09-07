@@ -3,11 +3,9 @@ package com.sequenceiq.cloudbreak.controller.validation;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -100,7 +98,7 @@ public class UpdateStackRequestValidatorTest {
         assertFalse(valid);
     }
 
-    private class DummyAnnotation implements Annotation {
+    private static class DummyAnnotation implements Annotation {
 
         @Override
         public boolean equals(Object obj) {
@@ -123,7 +121,7 @@ public class UpdateStackRequestValidatorTest {
         }
     }
 
-    private class DummyConstraintDescriptor implements ConstraintDescriptor<DummyAnnotation>, Serializable {
+    private static class DummyConstraintDescriptor implements ConstraintDescriptor<DummyAnnotation> {
 
         @Override
         public DummyAnnotation getAnnotation() {
@@ -137,12 +135,12 @@ public class UpdateStackRequestValidatorTest {
 
         @Override
         public Set<Class<?>> getGroups() {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
 
         @Override
         public Set<Class<? extends Payload>> getPayload() {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
 
         @Override
@@ -152,17 +150,17 @@ public class UpdateStackRequestValidatorTest {
 
         @Override
         public List<Class<? extends ConstraintValidator<DummyAnnotation, ?>>> getConstraintValidatorClasses() {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         @Override
         public Map<String, Object> getAttributes() {
-            return new HashMap<>();
+            return Collections.emptyMap();
         }
 
         @Override
         public Set<ConstraintDescriptor<?>> getComposingConstraints() {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
 
         @Override

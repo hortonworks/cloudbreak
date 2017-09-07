@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -114,11 +115,11 @@ public class AzureSetup implements Setup {
             } else if (CopyStatus.ABORTED.equals(copyState.getStatus()) || CopyStatus.INVALID.equals(copyState.getStatus())) {
                 return new ImageStatusResult(ImageStatus.CREATE_FAILED, 0);
             } else {
-                int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / (double) copyState.getTotalBytes());
+                int percentage = (int) (((double) copyState.getBytesCopied() * ImageStatusResult.COMPLETED) / copyState.getTotalBytes());
                 LOGGER.info(String.format("CopyStatus Pending %s byte/%s byte: %.4s %%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage));
                 return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
             }
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
         }
     }
@@ -126,7 +127,7 @@ public class AzureSetup implements Setup {
     @Override
     public void prerequisites(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier persistenceNotifier) {
         String storageGroup = azureUtils.getResourceGroupName(ac.getCloudContext());
-        CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
+        CloudResource cloudResource = new Builder().type(ResourceType.ARM_TEMPLATE).name(storageGroup).build();
         String region = ac.getCloudContext().getLocation().getRegion().value();
         try {
             AzureClient client = ac.getParameter(AzureClient.class);
@@ -167,7 +168,7 @@ public class AzureSetup implements Setup {
         }
     }
 
-    private void validateAdlsFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
+    private void validateAdlsFileSystem(CloudCredential credential, FileSystem fileSystem) {
 
         Map<String, Object> credentialAttributes = credential.getParameters();
         String clientSecret = String.valueOf(credentialAttributes.get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
@@ -193,7 +194,7 @@ public class AzureSetup implements Setup {
         }
     }
 
-    private boolean storageContainsImage(AzureClient client, String groupName, String storageName, String image) throws Exception {
+    private boolean storageContainsImage(AzureClient client, String groupName, String storageName, String image) {
         List<ListBlobItem> listBlobItems = client.listBlobInStorage(groupName, storageName, IMAGES);
         for (ListBlobItem listBlobItem : listBlobItems) {
             if (getNameFromConnectionString(listBlobItem.getUri().getPath()).equals(image.split("/")[image.split("/").length - 1])) {

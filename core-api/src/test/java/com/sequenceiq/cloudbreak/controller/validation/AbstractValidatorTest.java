@@ -1,17 +1,14 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import javax.validation.ConstraintTarget;
 import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
+import javax.validation.ConstraintValidatorContext.ConstraintViolationBuilder;
 import javax.validation.Payload;
 import javax.validation.metadata.ConstraintDescriptor;
 
@@ -20,15 +17,15 @@ import org.hibernate.validator.internal.engine.path.PathImpl;
 
 abstract class AbstractValidatorTest {
 
-    ConstraintValidatorContext.ConstraintViolationBuilder getConstraintViolationBuilder() {
+    ConstraintViolationBuilder getConstraintViolationBuilder() {
         return new ConstraintValidatorContextImpl(
-                new ArrayList<>(), null,
+                Collections.emptyList(), null,
                 PathImpl.createRootPath(),
                 new DummyConstraintDescriptor()
         ).buildConstraintViolationWithTemplate("dummytemplate");
     }
 
-    private class DummyAnnotation implements Annotation {
+    private static class DummyAnnotation implements Annotation {
 
         @Override
         public boolean equals(Object obj) {
@@ -51,7 +48,7 @@ abstract class AbstractValidatorTest {
         }
     }
 
-    private class DummyConstraintDescriptor implements ConstraintDescriptor<DummyAnnotation>, Serializable {
+    private static class DummyConstraintDescriptor implements ConstraintDescriptor<DummyAnnotation> {
 
         @Override
         public DummyAnnotation getAnnotation() {
@@ -65,12 +62,12 @@ abstract class AbstractValidatorTest {
 
         @Override
         public Set<Class<?>> getGroups() {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
 
         @Override
         public Set<Class<? extends Payload>> getPayload() {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
 
         @Override
@@ -80,17 +77,17 @@ abstract class AbstractValidatorTest {
 
         @Override
         public List<Class<? extends ConstraintValidator<DummyAnnotation, ?>>> getConstraintValidatorClasses() {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         @Override
         public Map<String, Object> getAttributes() {
-            return new HashMap<>();
+            return Collections.emptyMap();
         }
 
         @Override
         public Set<ConstraintDescriptor<?>> getComposingConstraints() {
-            return new HashSet<>();
+            return Collections.emptySet();
         }
 
         @Override

@@ -27,7 +27,7 @@ public class TagParserTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testWrongTag() {
-        Map<String, String> result = TagParser.parseTagsIntoMap("key");
+        TagParser.parseTagsIntoMap("key");
     }
 
     @Test

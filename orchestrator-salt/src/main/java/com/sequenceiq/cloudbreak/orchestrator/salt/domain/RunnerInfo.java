@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Map;
 
@@ -20,9 +21,6 @@ public class RunnerInfo {
     private int runNum;
 
     private Map<String, Object> changes;
-
-    public RunnerInfo() {
-    }
 
     public String getStateId() {
         return stateId;
@@ -88,7 +86,7 @@ public class RunnerInfo {
         this.changes = changes;
     }
 
-    public static class RunNumComparator implements Comparator<RunnerInfo> {
+    public static class RunNumComparator implements Comparator<RunnerInfo>, Serializable {
 
         @Override
         public int compare(RunnerInfo o1, RunnerInfo o2) {
@@ -97,7 +95,7 @@ public class RunnerInfo {
 
     }
 
-    public static class DurationComparator implements Comparator<RunnerInfo> {
+    public static class DurationComparator implements Comparator<RunnerInfo>, Serializable {
 
         @Override
         public int compare(RunnerInfo o1, RunnerInfo o2) {

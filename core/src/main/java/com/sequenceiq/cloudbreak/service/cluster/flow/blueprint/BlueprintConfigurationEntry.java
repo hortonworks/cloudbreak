@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 public class BlueprintConfigurationEntry {
 
-    private String configFile;
+    private final String configFile;
 
-    private String key;
+    private final String key;
 
-    private String value;
+    private final String value;
 
     public BlueprintConfigurationEntry(String configFile, String key, String value) {
         this.configFile = configFile;

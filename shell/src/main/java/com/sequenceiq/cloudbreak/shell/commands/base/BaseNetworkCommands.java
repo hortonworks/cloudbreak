@@ -26,7 +26,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = { "network delete --id", "network delete --name" })
+    @CliAvailabilityIndicator({"network delete --id", "network delete --name"})
     @Override
     public boolean deleteAvailable() {
         return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -47,8 +47,8 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
     @Override
     public String delete(Long id, String name) throws Exception {
         try {
-            Long networkId = id == null ? null : id;
-            String networkName = name == null ? null : name;
+            Long networkId = id;
+            String networkName = name;
             if (networkId != null) {
                 shellContext.cloudbreakClient().networkEndpoint().delete(networkId);
                 refreshNetworksInContext();
@@ -64,7 +64,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = { "network select --id", "network select --name" })
+    @CliAvailabilityIndicator({"network select --id", "network select --name"})
     @Override
     public boolean selectAvailable() {
         return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -102,7 +102,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = "network list")
+    @CliAvailabilityIndicator("network list")
     @Override
     public boolean listAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -119,7 +119,7 @@ public class BaseNetworkCommands implements BaseCommands, NetworkCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = { "network show --id", "network show --name" })
+    @CliAvailabilityIndicator({"network show --id", "network show --name"})
     @Override
     public boolean showAvailable() {
         return !shellContext.getNetworksByProvider().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();

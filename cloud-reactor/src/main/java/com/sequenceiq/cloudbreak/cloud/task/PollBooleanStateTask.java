@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 public abstract class PollBooleanStateTask extends AbstractPollTask<Boolean> {
 
     @Inject
-    public PollBooleanStateTask(AuthenticatedContext authenticatedContext, boolean cancellable) {
+    protected PollBooleanStateTask(AuthenticatedContext authenticatedContext, boolean cancellable) {
         super(authenticatedContext, cancellable);
     }
 

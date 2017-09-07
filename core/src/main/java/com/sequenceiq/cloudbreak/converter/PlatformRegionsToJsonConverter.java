@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.stereotype.Component;
 
@@ -29,7 +30,7 @@ public class PlatformRegionsToJsonConverter extends AbstractConversionServiceAwa
 
     private Map<String, Map<String, Collection<String>>> convertAvailibilityZones(Map<Platform, Map<Region, List<AvailabilityZone>>> availabilityZones) {
         Map<String, Map<String, Collection<String>>> result = Maps.newHashMap();
-        for (Map.Entry<Platform, Map<Region, List<AvailabilityZone>>> entry : availabilityZones.entrySet()) {
+        for (Entry<Platform, Map<Region, List<AvailabilityZone>>> entry : availabilityZones.entrySet()) {
             result.put(entry.getKey().value(), PlatformConverterUtil.convertPlatformMap(entry.getValue()));
         }
         return result;

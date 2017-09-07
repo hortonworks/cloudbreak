@@ -43,13 +43,13 @@ public class BaseInstanceGroupCommandsTest {
 
     private InstanceGroup hostGroup = new InstanceGroup("master");
 
-    private InstanceGroupTemplateId dummyTemplateId = new InstanceGroupTemplateId(DUMMY_TEMPLATE_ID);
+    private final InstanceGroupTemplateId dummyTemplateId = new InstanceGroupTemplateId(DUMMY_TEMPLATE_ID);
 
-    private InstanceGroupTemplateName dummyTemplateName = new InstanceGroupTemplateName(DUMMY_TEMPLATE);
+    private final InstanceGroupTemplateName dummyTemplateName = new InstanceGroupTemplateName(DUMMY_TEMPLATE);
 
-    private SecurityGroupId dummySecurityGroupId = new SecurityGroupId("1");
+    private final SecurityGroupId dummySecurityGroupId = new SecurityGroupId("1");
 
-    private Map<String, Object> params = new HashMap<>();
+    private final Map<String, Object> params = new HashMap<>();
 
     @InjectMocks
     private BaseInstanceGroupCommands underTest;
@@ -71,7 +71,7 @@ public class BaseInstanceGroupCommandsTest {
 
     private TemplateResponse dummyResult;
 
-    private RuntimeException expectedException = new RuntimeException("something not found");
+    private final RuntimeException expectedException = new RuntimeException("something not found");
 
     @Before
     public void setUp() throws Exception {

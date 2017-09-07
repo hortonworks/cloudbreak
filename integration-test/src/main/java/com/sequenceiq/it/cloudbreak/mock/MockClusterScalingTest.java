@@ -14,8 +14,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.testng.Assert;
@@ -45,7 +43,6 @@ import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
-import com.sequenceiq.it.cloudbreak.InstanceGroup;
 import com.sequenceiq.it.spark.ambari.AmbariCheckResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterRequestsResponse;
 import com.sequenceiq.it.spark.ambari.AmbariClusterResponse;
@@ -61,14 +58,13 @@ import com.sequenceiq.it.spark.spi.CloudVmInstanceStatuses;
 import com.sequenceiq.it.util.HostNameUtil;
 
 public class MockClusterScalingTest extends AbstractMockIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MockClusterScalingTest.class);
+
+    private static final String CLUSTER_NAME = "ambari_cluster";
 
     @Value("${mock.server.address:localhost}")
     private String mockServerAddress;
 
     private MockInstanceUtil mockInstanceUtil;
-
-    private String clusterName = "ambari_cluster";
 
     @BeforeMethod
     public void setContextParameters() {
@@ -84,17 +80,17 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        int stackIntId = Integer.valueOf(stackId);
+        int stackIntId = Integer.parseInt(stackId);
         initSpark();
 
         Map<String, CloudVmMetaDataStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
-        if (instanceMap == null || instanceMap.size() == 0) {
+        if (instanceMap == null || instanceMap.isEmpty()) {
             throw new IllegalStateException("instance map should not be empty!");
         }
 
         addSPIEndpoints(instanceMap);
         addMockEndpoints(instanceMap);
-        addAmbariMappings(instanceMap, mockPort, clusterName);
+        addAmbariMappings(instanceMap, mockPort, CLUSTER_NAME);
 
         // WHEN
         if (scalingAdjustment < 0) {
@@ -142,7 +138,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
                 "8080", stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), false);
 
-        verifyCalls(clusterName, scalingAdjustment);
+        verifyCalls(CLUSTER_NAME, scalingAdjustment);
     }
 
     private void verifyCalls(String clusterName, int scalingAdjustment) {
@@ -202,7 +198,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         }, gson()::toJson);
         post(SALT_BOOT_ROOT + "/hostname/distribute", (request, response) -> {
             GenericResponses genericResponses = new GenericResponses();
-            ArrayList<GenericResponse> responses = new ArrayList<>();
+            List<GenericResponse> responses = new ArrayList<>();
             JsonObject parsedRequest = new JsonParser().parse(request.body()).getAsJsonObject();
             JsonArray nodeArray = parsedRequest.getAsJsonArray("clients");
 
@@ -252,23 +248,6 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         }, gson()::toJson);
     }
 
-    private int getServerCount(List<InstanceGroup> instanceGroups) {
-        int numberOfServers = 0;
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            numberOfServers += instanceGroup.getNodeCount();
-        }
-        return numberOfServers;
-    }
-
-    private InstanceGroup getInstanceGroup(List<InstanceGroup> instanceGroups, String instanceGroupName) {
-        for (InstanceGroup instanceGroup : instanceGroups) {
-            if (instanceGroup.getName().equals(instanceGroupName)) {
-                return instanceGroup;
-            }
-        }
-        throw new IllegalStateException("There is no instance group with this name");
-    }
-
     private void addAmbariMappings(Map<String, CloudVmMetaDataStatus> instanceMap, int port, String clusterName) {
         get(AMBARI_API_ROOT + "/check", new AmbariCheckResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
@@ -299,11 +278,10 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             ObjectNode nameNode = rootNode.putObject("metrics").putObject("dfs").putObject("namenode");
             ObjectNode liveNodesRoot = JsonNodeFactory.instance.objectNode();
 
-            for (String instanceId : instanceMap.keySet()) {
-                CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
-                ObjectNode node = liveNodesRoot.putObject(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()));
+            for (CloudVmMetaDataStatus status : instanceMap.values()) {
+                ObjectNode node = liveNodesRoot.putObject(HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp()));
                 node.put("remaining", "10000000");
-                node.put("usedSpace", Integer.valueOf(100000).toString());
+                node.put("usedSpace", Integer.toString(100000));
                 node.put("adminState", "In Service");
             }
 

@@ -7,11 +7,11 @@ public class AzureInteractiveLoginStatusCheckerContext {
 
     private Boolean cancelled = false;
 
-    private String deviceCode;
+    private final String deviceCode;
 
     private final CredentialNotifier credentialNotifier;
 
-    private ExtendedCloudCredential extendedCloudCredential;
+    private final ExtendedCloudCredential extendedCloudCredential;
 
     public AzureInteractiveLoginStatusCheckerContext(String deviceCode, ExtendedCloudCredential extendedCloudCredential, CredentialNotifier credentialNotifier) {
         this.deviceCode = deviceCode;

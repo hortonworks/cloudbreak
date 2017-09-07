@@ -32,7 +32,7 @@ public class RestClientUtil {
 
     private static final int MAX_PER_ROUTE_CONNECTION = 20;
 
-    private static ConcurrentMap<ConfigKey, Client> clients = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<ConfigKey, Client> CLIENTS = new ConcurrentHashMap<>();
 
     private RestClientUtil() {
     }
@@ -42,12 +42,12 @@ public class RestClientUtil {
     }
 
     public static synchronized Client get(ConfigKey configKey) {
-        Client client = clients.get(configKey);
+        Client client = CLIENTS.get(configKey);
         if (client == null) {
             client = createClient(configKey);
-            clients.put(configKey, client);
+            CLIENTS.put(configKey, client);
         }
-        LOGGER.info("RestClient cache size: {}, key: {}, fetched client: {}", clients.size(), configKey, client);
+        LOGGER.info("RestClient cache size: {}, key: {}, fetched client: {}", CLIENTS.size(), configKey, client);
         return client;
     }
 

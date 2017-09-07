@@ -34,12 +34,14 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
         this.flowConfigClass = flowConfigClass;
     }
 
+    @Override
     public void initialize() {
         flowMachine.start();
     }
 
+    @Override
     public void initialize(String stateRepresentation, Map<Object, Object> variables) {
-        final S state  = stateConverter.convert(stateRepresentation);
+        S state  = stateConverter.convert(stateRepresentation);
         flowMachine.stop();
         List<? extends StateMachineAccess<S, E>> withAllRegions = flowMachine.getStateMachineAccessor().withAllRegions();
         for (StateMachineAccess<S, E> access : withAllRegions) {
@@ -51,6 +53,7 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
         flowMachine.start();
     }
 
+    @Override
     public S getCurrentState() {
         return flowMachine.getState().getId();
     }
@@ -65,6 +68,7 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
         return flowConfigClass;
     }
 
+    @Override
     public void sendEvent(String key, Object payload) {
         flowMachine.sendEvent(messageFactory.createMessage(flowId, eventConverter.convert(key), payload));
     }
@@ -76,7 +80,7 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
 
     @Override
     public void setFlowFailed() {
-        this.flowFailed = true;
+        flowFailed = true;
     }
 
     @Override

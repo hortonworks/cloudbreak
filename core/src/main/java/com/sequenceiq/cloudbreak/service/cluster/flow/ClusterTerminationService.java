@@ -87,8 +87,7 @@ public class ClusterTerminationService {
             Orchestrator orchestrator = cluster.getStack().getOrchestrator();
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
             try {
-                Map<String, Object> map = new HashMap<>();
-                map.putAll(orchestrator.getAttributes().getMap());
+                Map<String, Object> map = new HashMap<>(orchestrator.getAttributes().getMap());
                 OrchestrationCredential credential = new OrchestrationCredential(orchestrator.getApiEndpoint(), map);
                 Set<Container> containers = containerRepository.findContainersInCluster(cluster.getId());
                 List<ContainerInfo> containerInfo = containers.stream()

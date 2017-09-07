@@ -5,9 +5,10 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class ClusterContext extends CommonContext {
-    private Stack stack;
 
-    private Cluster cluster;
+    private final Stack stack;
+
+    private final Cluster cluster;
 
     public ClusterContext(String flowId, Stack stack, Cluster cluster) {
         super(flowId);

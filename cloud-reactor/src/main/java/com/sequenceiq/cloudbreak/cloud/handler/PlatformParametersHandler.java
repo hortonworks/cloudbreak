@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -37,13 +38,13 @@ public class PlatformParametersHandler implements CloudPlatformEventHandler<Plat
         PlatformParametersRequest request = platformParameterRequestEvent.getData();
         Map<Platform, PlatformParameters> platformParameters = new HashMap<>();
         try {
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+            for (Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 platformParameters.put(connector.getKey(), cloudPlatformConnectors.getDefault(connector.getKey()).parameters());
             }
             PlatformParametersResult platformParameterResult = new PlatformParametersResult(request, platformParameters);
             request.getResult().onNext(platformParameterResult);
             LOGGER.info("Query platform parameters finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new PlatformParametersResult(e.getMessage(), e, request));
         }
     }

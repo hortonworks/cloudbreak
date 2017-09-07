@@ -74,7 +74,7 @@ public class AzureTemplateBuilderTest {
     private Configuration freemarkerConfiguration;
 
     @InjectMocks
-    private AzureTemplateBuilder azureTemplateBuilder = new AzureTemplateBuilder();
+    private final AzureTemplateBuilder azureTemplateBuilder = new AzureTemplateBuilder();
 
     private String stackName;
 
@@ -84,15 +84,9 @@ public class AzureTemplateBuilderTest {
 
     private String name;
 
-    private List<Volume> volumes;
-
     private CloudInstance instance;
 
-    private List<SecurityRule> rules;
-
     private Security security;
-
-    private Map<InstanceGroupType, String> userData;
 
     private Image image;
 
@@ -106,9 +100,9 @@ public class AzureTemplateBuilderTest {
 
     private AzureStackView azureStackView;
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
-    private Map<String, String> tags = new HashMap<>();
+    private final Map<String, String> tags = new HashMap<>();
 
     @Before
     public void setUp() throws Exception {
@@ -120,30 +114,30 @@ public class AzureTemplateBuilderTest {
         ReflectionTestUtils.setField(azureTemplateBuilder, "freemarkerConfiguration", configuration);
         ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplatePath", "templates/arm-v2.ftl");
         ReflectionTestUtils.setField(azureTemplateBuilder, "armTemplateParametersPath", "templates/parameters.ftl");
-        userData = ImmutableMap.of(
+        Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, CORE_CUSTOM_DATA,
                 InstanceGroupType.GATEWAY, GATEWAY_CUSTOM_DATA
         );
         groups = new ArrayList<>();
         stackName = "testStack";
         name = "master";
-        volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
+        List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>());
         Map<String, Object> params = new HashMap<>();
         params.put(CloudInstance.SUBNET_ID, "existingSubnet");
         instance = new CloudInstance("SOME_ID", instanceTemplate, params);
-        rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
         security = new Security(rules, null);
         image = new Image("cb-centos66-amb200-2015-05-25", userData);
-        Map<String, String> parameters = new HashMap<>();
         cloudContext = new CloudContext(7899L, "thisisaverylongazureresourcenamewhichneedstobeshortened", "dummy1", "dummy2", "test",
                 Location.location(Region.region("EU"), new AvailabilityZone("availabilityZone")));
         azureCredentialView = new AzureCredentialView(cloudCredential("siq-haas"));
         azureStorageView = new AzureStorageView(azureCredentialView, cloudContext, azureStorage, null);
 
-        azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Arrays.asList("existingSubnet"), ImmutableMap.of("existingSubnet", 100));
+        azureSubnetStrategy = AzureSubnetStrategy.getAzureSubnetStrategy(FILL, Collections.singletonList("existingSubnet"),
+                ImmutableMap.of("existingSubnet", 100));
         reset(azureUtils);
     }
 
@@ -205,7 +199,7 @@ public class AzureTemplateBuilderTest {
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
         when(azureUtils.getCustomNetworkId(any())).thenReturn("existingNetworkName");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("existingResourceGroup");
-        when(azureUtils.getCustomSubnetIds(any())).thenReturn(Arrays.asList("existingSubnet"));
+        when(azureUtils.getCustomSubnetIds(any())).thenReturn(Collections.singletonList("existingSubnet"));
         Network network = new Network(new Subnet("testSubnet"));
         when(azureUtils.isPrivateIp(any())).then(invocation -> true);
         when(azureUtils.isNoSecurityGroups(any())).then(invocation -> true);
@@ -293,7 +287,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + "\""));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
     }
 
     @Test
@@ -313,7 +307,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + "\"")));
+        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"')));
     }
 
     @Test
@@ -333,7 +327,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + "\""));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
     @Test
@@ -353,7 +347,7 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + "\"")));
+        assertThat(templateString, not(containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"')));
     }
 
     @Test
@@ -374,8 +368,8 @@ public class AzureTemplateBuilderTest {
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack);
         //THEN
         gson.fromJson(templateString, Map.class);
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + "\""));
-        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + "\""));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(CORE_CUSTOM_DATA) + '"'));
+        assertThat(templateString, containsString("\"customData\": \"" + base64EncodedUserData(GATEWAY_CUSTOM_DATA) + '"'));
     }
 
     @Test

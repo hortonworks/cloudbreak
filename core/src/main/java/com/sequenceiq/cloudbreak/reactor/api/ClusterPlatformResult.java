@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.api;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 
-public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> implements Payload, Selectable {
+public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> implements Selectable {
 
     private EventStatus status;
 
@@ -15,11 +14,11 @@ public abstract class ClusterPlatformResult<R extends ClusterPlatformRequest> im
 
     private R request;
 
-    public ClusterPlatformResult(R request) {
+    protected ClusterPlatformResult(R request) {
         init(EventStatus.OK, null, null, request);
     }
 
-    public ClusterPlatformResult(String statusReason, Exception errorDetails, R request) {
+    protected ClusterPlatformResult(String statusReason, Exception errorDetails, R request) {
         init(EventStatus.FAILED, statusReason, errorDetails, request);
     }
 

@@ -12,12 +12,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -71,7 +71,7 @@ public class ConstraintTemplateService {
         constraintTemplate.setAccount(user.getAccount());
         try {
             return constraintTemplateRepository.save(constraintTemplate);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new DuplicateKeyValueException(APIResourceType.CONSTRAINT_TEMPLATE, constraintTemplate.getName(), e);
         }
     }

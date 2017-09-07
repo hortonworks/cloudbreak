@@ -79,9 +79,7 @@ abstract class AbstractAwsStackStatusCheckerTask extends PollBooleanStateTask {
         StackEvent cause = null;
         for (StackEvent event : stackEvents) {
             if (event.getResourceStatus().equals(errorStatus.toString())) {
-                if (cause == null) {
-                    cause = event;
-                } else if (cause.getTimestamp().getTime() > event.getTimestamp().getTime()) {
+                if (cause == null || cause.getTimestamp().getTime() > event.getTimestamp().getTime()) {
                     cause = event;
                 }
             }

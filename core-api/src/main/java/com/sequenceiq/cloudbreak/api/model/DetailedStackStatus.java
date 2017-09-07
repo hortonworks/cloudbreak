@@ -52,7 +52,7 @@ public enum DetailedStackStatus {
     // Wait for sync
     WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC);
 
-    private Status status;
+    private final Status status;
 
     DetailedStackStatus(Status status) {
         this.status = status;

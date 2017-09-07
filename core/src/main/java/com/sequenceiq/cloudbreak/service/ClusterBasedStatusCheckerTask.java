@@ -9,8 +9,10 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 
 public abstract class ClusterBasedStatusCheckerTask<T extends StackContext> extends SimpleStatusCheckerTask<T> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBasedStatusCheckerTask.class);
 
+    @Override
     public boolean exitPolling(T t) {
         try {
             Long stackId = t.getStack().getId();

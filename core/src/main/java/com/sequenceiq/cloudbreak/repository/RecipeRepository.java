@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.domain.Recipe;
 @EntityType(entityClass = Recipe.class)
 public interface RecipeRepository extends CrudRepository<Recipe, Long> {
 
+    @Override
     Recipe findOne(@Param("id") Long id);
 
     @Query("SELECT r FROM Recipe r WHERE r.name= :name AND r.account= :account")

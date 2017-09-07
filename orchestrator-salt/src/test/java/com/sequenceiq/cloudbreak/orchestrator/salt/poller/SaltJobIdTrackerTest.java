@@ -70,7 +70,7 @@ public class SaltJobIdTrackerTest {
             saltJobIdTracker.call();
             fail("should throw exception");
         } catch (CloudbreakOrchestratorFailedException e) {
-            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + "'")).and(containsString("is running")));
+            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
         PowerMockito.verifyStatic();
         SaltStates.jobIsRunning(any(), eq(jobId));
@@ -98,7 +98,7 @@ public class SaltJobIdTrackerTest {
             saltJobIdTracker.call();
             fail("should throw exception");
         } catch (CloudbreakOrchestratorFailedException e) {
-            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + "'")).and(containsString("is running")));
+            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
         PowerMockito.verifyStatic();
         SaltStates.jobIsRunning(any(), eq(jobId));
@@ -138,7 +138,7 @@ public class SaltJobIdTrackerTest {
         try {
             saltJobIdTracker.call();
         } catch (CloudbreakOrchestratorFailedException e) {
-            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + "'")).and(containsString("is running")));
+            assertThat(e.getMessage(), both(containsString("jobId='" + jobId + '\'')).and(containsString("is running")));
         }
 
         PowerMockito.verifyStatic();

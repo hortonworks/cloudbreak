@@ -13,23 +13,23 @@ public class GcpStackUtilTest {
     @Test
     public void projectIdConverterWithNewNameRestrictions() {
         String projectId = GcpStackUtil.getProjectId(cloudCredential("siq-haas"));
-        Assert.assertEquals(projectId, "siq-haas");
+        Assert.assertEquals("siq-haas", projectId);
         projectId = GcpStackUtil.getProjectId(cloudCredential("siq-haas123"));
-        Assert.assertEquals(projectId, "siq-haas123");
+        Assert.assertEquals("siq-haas123", projectId);
         projectId = GcpStackUtil.getProjectId(cloudCredential("Siq-haas123"));
-        Assert.assertEquals(projectId, "siq-haas123");
+        Assert.assertEquals("siq-haas123", projectId);
     }
 
     @Test
     public void projectIdConverterWithOldNameRestrictions() {
         String projectId = GcpStackUtil.getProjectId(cloudCredential("echo:siq-haas"));
-        Assert.assertEquals(projectId, "echo-siq-haas");
+        Assert.assertEquals("echo-siq-haas", projectId);
         projectId = GcpStackUtil.getProjectId(cloudCredential("echo:>siq>-haas"));
-        Assert.assertEquals(projectId, "echo--siq--haas");
+        Assert.assertEquals("echo--siq--haas", projectId);
         projectId = GcpStackUtil.getProjectId(cloudCredential("e?cho:siq-haas123"));
-        Assert.assertEquals(projectId, "e-cho-siq-haas123");
+        Assert.assertEquals("e-cho-siq-haas123", projectId);
         projectId = GcpStackUtil.getProjectId(cloudCredential("echo:siq-hasfdsf12?as"));
-        Assert.assertEquals(projectId, "echo-siq-hasfdsf12-as");
+        Assert.assertEquals("echo-siq-hasfdsf12-as", projectId);
     }
 
     private CloudCredential cloudCredential(String projectId) {

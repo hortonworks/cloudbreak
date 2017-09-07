@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -44,7 +45,7 @@ public class GetVirtualMachineTypesHandler implements CloudPlatformEventHandler<
             Map<Platform, VmType> platformDefaultVm = Maps.newHashMap();
             Map<Platform, Map<AvailabilityZone, Collection<VmType>>> platformVmPerZones = Maps.newHashMap();
             Map<Platform, Map<AvailabilityZone, VmType>> platformDefaultVmPerZones = Maps.newHashMap();
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+            for (Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 Platform platform = connector.getKey();
                 PlatformParameters platformParams = cloudPlatformConnectors.getDefault(platform).parameters();
                 VmTypes vmTypes =  platformParams.vmTypes(request.getExtended());
@@ -55,7 +56,7 @@ public class GetVirtualMachineTypesHandler implements CloudPlatformEventHandler<
 
                 Map<AvailabilityZone, Collection<VmType>> vmPerZones = Maps.newHashMap();
                 Map<AvailabilityZone, VmType> defaultVmPerZones = Maps.newHashMap();
-                for (Map.Entry<AvailabilityZone, VmTypes> types: zoneVmTypes.entrySet()) {
+                for (Entry<AvailabilityZone, VmTypes> types: zoneVmTypes.entrySet()) {
                     vmPerZones.put(types.getKey(), types.getValue().types());
                     defaultVmPerZones.put(types.getKey(), types.getValue().defaultType());
                 }
@@ -66,7 +67,7 @@ public class GetVirtualMachineTypesHandler implements CloudPlatformEventHandler<
             GetVirtualMachineTypesResult getVirtualMachineTypesResult = new GetVirtualMachineTypesResult(request, pv);
             request.getResult().onNext(getVirtualMachineTypesResult);
             LOGGER.info("Query platform machine types types finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetVirtualMachineTypesResult(e.getMessage(), e, request));
         }
     }

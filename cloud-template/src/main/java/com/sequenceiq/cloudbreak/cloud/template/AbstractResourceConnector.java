@@ -98,7 +98,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) throws Exception {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) {
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 

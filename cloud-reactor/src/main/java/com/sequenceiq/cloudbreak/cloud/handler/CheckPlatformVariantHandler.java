@@ -36,7 +36,7 @@ public class CheckPlatformVariantHandler implements CloudPlatformEventHandler<Ch
             CheckPlatformVariantResult platformParameterResult = new CheckPlatformVariantResult(request, defaultVariant);
             request.getResult().onNext(platformParameterResult);
             LOGGER.info("Query platform variant finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new CheckPlatformVariantResult(e.getMessage(), e, request));
         }
     }

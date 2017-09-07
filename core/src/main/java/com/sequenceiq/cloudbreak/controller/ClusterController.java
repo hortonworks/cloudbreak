@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,24 +130,24 @@ public class ClusterController implements ClusterEndpoint {
         UserNamePasswordJson userNamePasswordJson = updateJson.getUserNamePasswordJson();
         if (userNamePasswordJson != null) {
             ambariUserNamePasswordChange(stackId, stack, userNamePasswordJson);
-            return Response.status(Response.Status.ACCEPTED).build();
+            return Response.status(Status.ACCEPTED).build();
         }
 
         if (updateJson.getStatus() != null) {
             LOGGER.info("Cluster status update request received. Stack id:  {}, status: {} ", stackId, updateJson.getStatus());
             clusterService.updateStatus(stackId, updateJson.getStatus());
-            return Response.status(Response.Status.ACCEPTED).build();
+            return Response.status(Status.ACCEPTED).build();
         }
 
         if (updateJson.getBlueprintId() != null && updateJson.getHostgroups() != null && stack.getCluster().isCreateFailed()) {
             LOGGER.info("Cluster rebuild request received. Stack id:  {}", stackId);
             recreateCluster(stackId, updateJson);
-            return Response.status(Response.Status.ACCEPTED).build();
+            return Response.status(Status.ACCEPTED).build();
         }
 
         if (updateJson.getHostGroupAdjustment() != null) {
             clusterHostgroupAdjustmentChange(stackId, updateJson, stack);
-            return Response.status(Response.Status.ACCEPTED).build();
+            return Response.status(Status.ACCEPTED).build();
         }
         LOGGER.error("Invalid cluster update request received. Stack id: {}", stackId);
         throw new BadRequestException("Invalid update cluster request!");

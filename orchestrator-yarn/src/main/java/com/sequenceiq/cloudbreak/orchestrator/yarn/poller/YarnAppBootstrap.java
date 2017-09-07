@@ -56,7 +56,7 @@ public class YarnAppBootstrap implements OrchestratorBootstrap {
                             applicationDetailResponse.getState()));
                 } else {
                     // Validate the container is running
-                    if (applicationDetailResponse.getContainers().size() > 0) {
+                    if (!applicationDetailResponse.getContainers().isEmpty()) {
                         Container appContainer = applicationDetailResponse.getContainers().get(0);
                         if (!appContainer.getState().equals(ContainerState.READY.name())) {
                             String msg = String.format("Application %s not ready, in %s state, sleeping 1000 ms",

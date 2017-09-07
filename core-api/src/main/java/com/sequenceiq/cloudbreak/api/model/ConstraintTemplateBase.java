@@ -6,6 +6,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConstraintTemplateModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -24,19 +25,19 @@ public abstract class ConstraintTemplateBase implements JsonEntity {
     private String description;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.CPU, required = true)
+    @ApiModelProperty(value = ConstraintTemplateModelDescription.CPU, required = true)
     private Double cpu;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.MEMORY, required = true)
+    @ApiModelProperty(value = ConstraintTemplateModelDescription.MEMORY, required = true)
     private Double memory;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.DISK, required = true)
+    @ApiModelProperty(value = ConstraintTemplateModelDescription.DISK, required = true)
     private Double disk;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.ConstraintTemplateModelDescription.ORCHESTRATOR_TYPE, required = true)
+    @ApiModelProperty(value = ConstraintTemplateModelDescription.ORCHESTRATOR_TYPE, required = true)
     private String orchestratorType;
 
     public String getName() {

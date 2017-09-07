@@ -23,7 +23,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
@@ -111,7 +111,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
 
         Map<String, CloudVmMetaDataStatus> instanceMap = itContext.getContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, Map.class);
 
-        if (instanceMap == null || instanceMap.size() == 0) {
+        if (instanceMap == null || instanceMap.isEmpty()) {
             throw new IllegalStateException("instance map should not be empty!");
         }
 
@@ -132,9 +132,8 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(SALT_BOOT_ROOT + "/health", "GET").exactTimes(1).verify();
         Verification distributeVerification = verify(SALT_BOOT_ROOT + "/salt/action/distribute", "POST").exactTimes(1);
 
-        for (String instanceId : instanceMap.keySet()) {
-            CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
-            distributeVerification.bodyContains("address\":\"" + cloudVmMetaDataStatus.getMetaData().getPrivateIp());
+        for (CloudVmMetaDataStatus status : instanceMap.values()) {
+            distributeVerification.bodyContains("address\":\"" + status.getMetaData().getPrivateIp());
         }
         distributeVerification.verify();
 
@@ -198,7 +197,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
             genericResponse.setStatusCode(HttpStatus.OK.value());
             return genericResponse;
         }, gson()::toJson);
-        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
+        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap));
         post(SALT_BOOT_ROOT + "/file", (request, response) -> {
             response.status(HttpStatus.CREATED.value());
@@ -216,13 +215,12 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         }, gson()::toJson);
         post(SALT_BOOT_ROOT + "/hostname/distribute", (request, response) -> {
             GenericResponses genericResponses = new GenericResponses();
-            ArrayList<GenericResponse> responses = new ArrayList<>();
+            List<GenericResponse> responses = new ArrayList<>();
 
-            for (String instanceId : instanceMap.keySet()) {
-                CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
+            for (CloudVmMetaDataStatus status : instanceMap.values()) {
                 GenericResponse genericResponse = new GenericResponse();
-                genericResponse.setAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
-                genericResponse.setStatus(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()));
+                genericResponse.setAddress(status.getMetaData().getPrivateIp());
+                genericResponse.setStatus(HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp()));
                 genericResponse.setStatusCode(HttpStatus.OK.value());
                 responses.add(genericResponse);
             }

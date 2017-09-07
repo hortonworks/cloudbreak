@@ -21,7 +21,7 @@ public class SshCheckerTask extends StackBasedStatusCheckerTask<SshCheckerTaskCo
 
     @Override
     public boolean checkStatus(SshCheckerTaskContext sshCheckerTaskContext) {
-        final SSHClient ssh = new SSHClient();
+        SSHClient ssh = new SSHClient();
         boolean ret = false;
         try {
             ssh.addHostKeyVerifier(sshCheckerTaskContext.getHostKeyVerifier());

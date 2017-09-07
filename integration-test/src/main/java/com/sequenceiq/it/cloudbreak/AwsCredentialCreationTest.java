@@ -45,7 +45,7 @@ public class AwsCredentialCreationTest extends AbstractCloudbreakIntegrationTest
         credentialRequest.setPublicKey(publicKey);
         credentialRequest.setDescription("Aws credential for integrationtest");
         Map<String, Object> map = new HashMap<>();
-        if (roleArn != null && !"".equals(roleArn)) {
+        if (roleArn != null && !roleArn.isEmpty()) {
             map.put("selector", "role-based");
             map.put("roleArn", roleArn);
         } else {

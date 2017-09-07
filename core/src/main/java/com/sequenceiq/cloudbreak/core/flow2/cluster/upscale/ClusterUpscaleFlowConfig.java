@@ -27,11 +27,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterUpscaleState, ClusterUpscaleEvent> {
     private static final List<Transition<ClusterUpscaleState, ClusterUpscaleEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterUpscaleState, ClusterUpscaleEvent>()
+            new Builder<ClusterUpscaleState, ClusterUpscaleEvent>()
                     .defaultFailureEvent(FAILURE_EVENT)
                     .from(INIT_STATE).to(UPSCALING_AMBARI_STATE).event(CLUSTER_UPSCALE_TRIGGER_EVENT).noFailureEvent()
                     .from(UPSCALING_AMBARI_STATE).to(EXECUTING_PRERECIPES_STATE).event(UPSCALE_AMBARI_FINISHED_EVENT).failureEvent(UPSCALE_AMBARI_FAILED_EVENT)

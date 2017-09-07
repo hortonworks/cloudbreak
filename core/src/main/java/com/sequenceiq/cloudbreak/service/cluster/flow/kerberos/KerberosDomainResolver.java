@@ -6,6 +6,6 @@ import org.springframework.stereotype.Service;
 public class KerberosDomainResolver {
 
     public String getDomains(String gwDomain) {
-        return "." + gwDomain;
+        return '.' + gwDomain;
     }
 }

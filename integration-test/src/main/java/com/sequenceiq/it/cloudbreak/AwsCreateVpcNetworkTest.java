@@ -82,7 +82,7 @@ public class AwsCreateVpcNetworkTest extends AbstractCloudbreakIntegrationTest {
     private List<Output> getOutputForRequest(String vpcStackName, AmazonCloudFormationClient client) {
         int tried = 0;
         while (tried < MAX_TRY) {
-            LOGGER.info("checking vpc stack creation result, tried: " + tried + "/" + MAX_TRY);
+            LOGGER.info("checking vpc stack creation result, tried: " + tried + '/' + MAX_TRY);
             DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest();
             describeStacksRequest.withStackName(vpcStackName);
             Stack resultStack = client.describeStacks(describeStacksRequest).getStacks().get(0);

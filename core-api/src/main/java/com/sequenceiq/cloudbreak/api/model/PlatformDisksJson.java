@@ -5,30 +5,30 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformDisksJson implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DISK_TYPES)
+    @ApiModelProperty(ConnectorModelDescription.DISK_TYPES)
     private Map<String, Collection<String>> diskTypes;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_DISKS)
+    @ApiModelProperty(ConnectorModelDescription.DEFAULT_DISKS)
     private Map<String, String> defaultDisks;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DISK_MAPPINGS)
+    @ApiModelProperty(ConnectorModelDescription.DISK_MAPPINGS)
     private Map<String, Map<String, String>> diskMappings;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DISK_DISPLAYNAMES)
+    @ApiModelProperty(ConnectorModelDescription.DISK_DISPLAYNAMES)
     private Map<String, Map<String, String>> displayNames;
 
     public PlatformDisksJson() {
-        this.diskTypes = new HashMap<>();
-        this.defaultDisks = new HashMap<>();
-        this.diskMappings = new HashMap<>();
-        this.displayNames = new HashMap<>();
+        diskTypes = new HashMap<>();
+        defaultDisks = new HashMap<>();
+        diskMappings = new HashMap<>();
+        displayNames = new HashMap<>();
     }
 
     public Map<String, Collection<String>> getDiskTypes() {

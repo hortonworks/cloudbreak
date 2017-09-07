@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.metadata;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -28,11 +29,10 @@ public class ComputeApiExtractor implements CloudInstanceMetaDataExtractor {
         String floatingIp = null;
         Map<String, List<? extends Address>> adrMap = server.getAddresses().getAddresses();
         LOGGER.debug("Address map: {} of instance: {}", adrMap, server.getName());
-        for (String key : adrMap.keySet()) {
-            LOGGER.debug("Network resource key: {} of instance: {}", key, server.getName());
-            List<? extends Address> adrList = adrMap.get(key);
-            for (Address adr : adrList) {
-                LOGGER.debug("Network resource key: {} of instance: {}, address: {}", key, server.getName(), adr);
+        for (Entry<String, List<? extends Address>> entry : adrMap.entrySet()) {
+            LOGGER.debug("Network resource key: {} of instance: {}", entry.getKey(), server.getName());
+            for (Address adr : entry.getValue()) {
+                LOGGER.debug("Network resource key: {} of instance: {}, address: {}", entry.getKey(), server.getName(), adr);
                 switch (adr.getType()) {
                     case "fixed":
                         privateIp = adr.getAddr();

@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class CloneUtils {
 
@@ -12,8 +13,8 @@ public class CloneUtils {
     public static Map<String, Map<String, String>> copy(Map<String, Map<String, String>> original) {
         Map<String, Map<String, String>> copy = new HashMap<>();
         if (original != null) {
-            for (String key : original.keySet()) {
-                copy.put(key, new HashMap<>(original.get(key)));
+            for (Entry<String, Map<String, String>> entry : original.entrySet()) {
+                copy.put(entry.getKey(), new HashMap<>(entry.getValue()));
             }
         }
         return copy;

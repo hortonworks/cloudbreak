@@ -23,7 +23,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.client.KeyStoreUtil;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Credential;
@@ -41,6 +40,7 @@ import freemarker.template.TemplateException;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.transport.verification.HostKeyVerifier;
 import net.schmizz.sshj.userauth.keyprovider.KeyPairWrapper;
 import net.schmizz.sshj.xfer.InMemoryDestFile;
@@ -123,7 +123,7 @@ public class TlsSetupService {
         }
     }
 
-    private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user) throws CloudbreakSecuritySetupException {
+    private void waitForSsh(Stack stack, String publicIp, int sshPort, HostKeyVerifier hostKeyVerifier, String user) {
         sshCheckerTaskContextPollingService.pollWithTimeoutSingleFailure(
                 sshCheckerTask,
                 new SshCheckerTaskContext(stack, hostKeyVerifier, publicIp, sshPort, user, stack.getSecurityConfig().getCloudbreakSshPrivateKeyDecoded()),
@@ -183,8 +183,8 @@ public class TlsSetupService {
         }
     }
 
-    private InMemorySourceFile uploadParameterFile(String generatedTemplate, final String name) {
-        final byte[] tlsScriptBytes = generatedTemplate.getBytes(StandardCharsets.UTF_8);
+    private InMemorySourceFile uploadParameterFile(String generatedTemplate, String name) {
+        byte[] tlsScriptBytes = generatedTemplate.getBytes(StandardCharsets.UTF_8);
         return new InMemorySourceFile() {
             @Override
             public String getName() {
@@ -197,7 +197,7 @@ public class TlsSetupService {
             }
 
             @Override
-            public InputStream getInputStream() throws IOException {
+            public InputStream getInputStream() {
                 return new ByteArrayInputStream(tlsScriptBytes);
             }
         };
@@ -224,12 +224,12 @@ public class TlsSetupService {
         }
     }
 
-    private void downloadAndSavePrivateKey(SSHClient ssh, InstanceMetaData gwInstance) throws IOException, CloudbreakSecuritySetupException {
+    private void downloadAndSavePrivateKey(SSHClient ssh, InstanceMetaData gwInstance) throws IOException {
         ByteArrayOutputStream cert = new ByteArrayOutputStream();
         ssh.newSCPFileTransfer().download("/tmp/cluster.pem", new InMemoryDestFile() {
 
             @Override
-            public OutputStream getOutputStream() throws IOException {
+            public OutputStream getOutputStream() {
                 return cert;
             }
         });
@@ -246,17 +246,18 @@ public class TlsSetupService {
     }
 
     private int executeSshCommand(SSHClient ssh, String command, boolean logOutput, String logPrefix) throws IOException {
-        Session session = startSshSession(ssh);
-        Session.Command cmd = session.exec(command);
-        if (logOutput) {
-            logStdOutAndStdErr(cmd, logPrefix);
+        Command cmd;
+        try (Session session = startSshSession(ssh)) {
+            cmd = session.exec(command);
+            if (logOutput) {
+                logStdOutAndStdErr(cmd, logPrefix);
+            }
+            cmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
         }
-        cmd.join(SETUP_TIMEOUT, TimeUnit.SECONDS);
-        session.close();
         return cmd.getExitStatus();
     }
 
-    private void logStdOutAndStdErr(Session.Command command, String commandDesc) throws IOException {
+    private void logStdOutAndStdErr(Command command, String commandDesc) throws IOException {
         LOGGER.info("Standard output of {} command", commandDesc);
         LOGGER.info(IOUtils.readFully(command.getInputStream()).toString());
         LOGGER.info("Standard error of {} command", commandDesc);

@@ -16,7 +16,7 @@ public class DownscaleStackCollectResourcesResult extends CloudPlatformResult<Cl
 
     public DownscaleStackCollectResourcesResult(String statusReason, Exception errorDetails, CloudPlatformRequest request) {
         super(statusReason, errorDetails, request);
-        this.resourcesToScale = Collections.emptyMap();
+        resourcesToScale = Collections.emptyMap();
     }
 
     public Object getResourcesToScale() {

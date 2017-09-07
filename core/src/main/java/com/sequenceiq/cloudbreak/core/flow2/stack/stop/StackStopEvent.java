@@ -10,7 +10,7 @@ public enum StackStopEvent implements FlowEvent {
     STOP_FINALIZED_EVENT("STOPSTACKFINALIZED"),
     STOP_FAIL_HANDLED_EVENT("STOPFAILHANDLED");
 
-    private String event;
+    private final String event;
 
     StackStopEvent(String event) {
         this.event = event;

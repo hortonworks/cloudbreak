@@ -8,9 +8,6 @@ public class ZoneVmSpecifications {
     @JsonProperty("items")
     private List<ZoneVmSpecification> items;
 
-    public ZoneVmSpecifications() {
-    }
-
     public List<ZoneVmSpecification> getItems() {
         return items;
     }

@@ -11,7 +11,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class StackTerminationContext extends StackContext {
 
-    private List<CloudResource> cloudResources;
+    private final List<CloudResource> cloudResources;
 
     public StackTerminationContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
             List<CloudResource> cloudResources) {

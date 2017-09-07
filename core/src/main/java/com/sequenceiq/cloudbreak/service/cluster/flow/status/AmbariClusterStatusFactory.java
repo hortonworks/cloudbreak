@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -16,12 +17,13 @@ import com.sequenceiq.ambari.client.AmbariClient;
 
 @Component
 public class AmbariClusterStatusFactory {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterStatusFactory.class);
 
-    private EnumSet<ClusterStatus> partialStatuses = EnumSet.of(ClusterStatus.INSTALLING, ClusterStatus.INSTALL_FAILED, ClusterStatus.STARTING,
+    private final EnumSet<ClusterStatus> partialStatuses = EnumSet.of(ClusterStatus.INSTALLING, ClusterStatus.INSTALL_FAILED, ClusterStatus.STARTING,
             ClusterStatus.STOPPING);
 
-    private EnumSet<ClusterStatus> fullStatuses = EnumSet.of(ClusterStatus.INSTALLED, ClusterStatus.STARTED);
+    private final EnumSet<ClusterStatus> fullStatuses = EnumSet.of(ClusterStatus.INSTALLED, ClusterStatus.STARTED);
 
     public ClusterStatus createClusterStatus(AmbariClient ambariClient, String blueprint) {
         ClusterStatus clusterStatus;
@@ -59,9 +61,9 @@ public class AmbariClusterStatusFactory {
                 Set<String> componentNames = new HashSet<>();
                 hostComponentsStates.entrySet().forEach(e -> componentNames.addAll(e.getValue().keySet()));
                 Map<String, String> componentsCategory = ambariClient.getComponentsCategory(new ArrayList<>(componentNames));
-                for (Map.Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
+                for (Entry<String, Map<String, String>> hostComponentsEntry : hostComponentsStates.entrySet()) {
                     Map<String, String> componentStateMap = hostComponentsEntry.getValue();
-                    for (Map.Entry<String, String> componentStateEntry : componentStateMap.entrySet()) {
+                    for (Entry<String, String> componentStateEntry : componentStateMap.entrySet()) {
                         String category = componentsCategory.get(componentStateEntry.getKey());
                         if (!"CLIENT".equals(category)) {
                             putComponentState(componentStateEntry.getValue(), orderedPartialStatuses, orderedFullStatuses, unsupportedStatuses);

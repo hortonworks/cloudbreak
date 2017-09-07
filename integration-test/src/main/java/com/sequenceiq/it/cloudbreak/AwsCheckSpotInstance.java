@@ -50,7 +50,7 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
         List<String> hostGroupList = Arrays.asList(hostGroupToCheck.split(","));
 
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            if (hostGroupList.contains(instanceGroup.getGroup().toString())) {
+            if (hostGroupList.contains(instanceGroup.getGroup())) {
                 Set<InstanceMetaDataJson> instanceMetaData = instanceGroup.getMetadata();
                 for (InstanceMetaDataJson metaData : instanceMetaData) {
                     instanceIdList.add(metaData.getInstanceId());

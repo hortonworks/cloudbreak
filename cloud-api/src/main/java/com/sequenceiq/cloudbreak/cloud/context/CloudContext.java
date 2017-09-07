@@ -29,8 +29,8 @@ public class CloudContext {
         this.name = name;
         this.platform = Platform.platform(platform);
         this.owner = owner;
-        this.variant = null;
-        this.location = null;
+        variant = null;
+        location = null;
     }
 
     public CloudContext(Long id, String name, String platform, String owner, String variant, Location location) {
@@ -72,7 +72,7 @@ public class CloudContext {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudContext{");
+        StringBuilder sb = new StringBuilder("CloudContext{");
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
         sb.append(", platform='").append(platform).append('\'');

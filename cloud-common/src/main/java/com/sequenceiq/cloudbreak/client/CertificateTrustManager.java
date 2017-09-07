@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.client;
 
 import java.security.KeyManagementException;
 import java.security.SecureRandom;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.net.ssl.HostnameVerifier;
@@ -33,7 +32,7 @@ public class CertificateTrustManager {
 
     public static SSLContext sslContext() {
         // Create a trust manager that does not validate certificate chains
-        TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
+        TrustManager[] trustAllCerts = {new X509TrustManager() {
             @Override
             public X509Certificate[] getAcceptedIssuers() {
                 LOGGER.info("accept all issuer");
@@ -41,13 +40,13 @@ public class CertificateTrustManager {
             }
 
             @Override
-            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+            public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {
                 LOGGER.info("checkClientTrusted");
                 // Trust everything
             }
 
             @Override
-            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+            public void checkServerTrusted(X509Certificate[] x509Certificates, String s) {
                 LOGGER.info("checkServerTrusted");
                 // Trust everything
             }

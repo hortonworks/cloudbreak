@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TopologyModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -29,7 +30,7 @@ public abstract class TopologyBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(ModelDescriptions.TopologyModelDescription.NODES)
+    @ApiModelProperty(TopologyModelDescription.NODES)
     private Map<String, String> nodes;
 
     public String getName() {

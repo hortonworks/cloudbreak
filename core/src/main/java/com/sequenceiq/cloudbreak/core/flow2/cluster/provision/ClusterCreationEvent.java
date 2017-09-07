@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachin
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyFailed;
-import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 
 public enum ClusterCreationEvent implements FlowEvent {
     CLUSTER_CREATION_EVENT("CLUSTER_PROVISION_TRIGGER_EVENT"),
@@ -34,7 +34,7 @@ public enum ClusterCreationEvent implements FlowEvent {
     CLUSTER_CREATION_FINISHED_EVENT("CLUSTER_CREATION_FINISHED"),
     CLUSTER_CREATION_FAILURE_HANDLED_EVENT("CLUSTER_CREATION_FAILHANDLED");
 
-    private String event;
+    private final String event;
 
     ClusterCreationEvent(String event) {
         this.event = event;

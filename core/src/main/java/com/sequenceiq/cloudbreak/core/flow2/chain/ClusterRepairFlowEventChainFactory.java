@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         Stack stack = stackService.getById(event.getStackId());
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
         Map<String, List<String>> failedNodesMap = event.getFailedNodesMap();
-        for (Map.Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
+        for (Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);

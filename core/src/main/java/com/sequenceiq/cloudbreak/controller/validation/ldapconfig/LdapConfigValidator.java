@@ -39,7 +39,7 @@ public class LdapConfigValidator {
     private void validateLdapConnection(String protocol, String serverHost, Integer serverPort, String bindDn, String bindPassword) {
         try {
             //BEGIN GENERATED CODE
-            Hashtable<String, String> env = new Hashtable<String, String>();
+            Hashtable<String, String> env = new Hashtable<>();
             //END GENERATED CODE
             env.put("com.sun.jndi.ldap.read.timeout", "1000");
             env.put("com.sun.jndi.ldap.connect.timeout", "5000");
@@ -47,7 +47,7 @@ public class LdapConfigValidator {
             String url = new StringBuilder(protocol).
                     append("://").
                     append(serverHost).
-                    append(":").
+                    append(':').
                     append(serverPort).toString();
             env.put(Context.PROVIDER_URL, url);
             env.put(Context.SECURITY_AUTHENTICATION, "simple");

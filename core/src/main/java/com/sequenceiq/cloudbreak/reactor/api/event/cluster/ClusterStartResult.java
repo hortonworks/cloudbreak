@@ -13,7 +13,7 @@ public class ClusterStartResult extends ClusterPlatformResult<ClusterStartReques
 
     public ClusterStartResult(String statusReason, Exception errorDetails, ClusterStartRequest request) {
         super(statusReason, errorDetails, request);
-        this.requestId = null;
+        requestId = null;
     }
 
     public Integer getRequestId() {

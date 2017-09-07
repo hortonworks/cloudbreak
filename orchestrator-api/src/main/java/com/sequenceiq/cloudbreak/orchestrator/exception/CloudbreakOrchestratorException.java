@@ -2,15 +2,15 @@ package com.sequenceiq.cloudbreak.orchestrator.exception;
 
 public abstract class CloudbreakOrchestratorException extends Exception {
 
-    public CloudbreakOrchestratorException(String message) {
+    protected CloudbreakOrchestratorException(String message) {
         super(message);
     }
 
-    public CloudbreakOrchestratorException(String message, Throwable cause) {
+    protected CloudbreakOrchestratorException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public CloudbreakOrchestratorException(Throwable cause) {
+    protected CloudbreakOrchestratorException(Throwable cause) {
         super(cause);
     }
 

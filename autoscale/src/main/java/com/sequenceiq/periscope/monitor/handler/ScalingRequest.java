@@ -61,7 +61,7 @@ public class ScalingRequest implements Runnable {
             } else {
                 scaleDown(scalingAdjustment, totalNodes);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Cannot retrieve an oauth token from the identity server", e);
         }
     }
@@ -83,11 +83,13 @@ public class ScalingRequest implements Runnable {
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             cloudbreakClient.stackEndpoint().put(stackId, updateStackJson);
             history = historyService.createEntry(ScalingStatus.SUCCESS, "Upscale successfully triggered", totalNodes, policy);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             history = historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger upscaling due to: " + e.getMessage(), totalNodes, policy);
             LOGGER.error("Error adding nodes to cluster", e);
         } finally {
-            notificationSender.send(history);
+            if (history != null) {
+                notificationSender.send(history);
+            }
         }
     }
 
@@ -112,7 +114,9 @@ public class ScalingRequest implements Runnable {
             history = historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger downscaling due to: " + e.getMessage(), totalNodes, policy);
             LOGGER.error("Error removing nodes from the cluster", e);
         } finally {
-            notificationSender.send(history);
+            if (history != null) {
+                notificationSender.send(history);
+            }
         }
     }
 

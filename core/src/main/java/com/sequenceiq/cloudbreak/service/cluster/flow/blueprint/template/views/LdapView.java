@@ -7,44 +7,44 @@ public class LdapView {
 
     private String connectionURL;
 
-    private String bindDn;
+    private final String bindDn;
 
-    private String bindPassword;
+    private final String bindPassword;
 
-    private DirectoryType directoryType;
+    private final DirectoryType directoryType;
 
-    private String userSearchBase;
+    private final String userSearchBase;
 
-    private String userNameAttribute;
+    private final String userNameAttribute;
 
-    private String userObjectClass;
+    private final String userObjectClass;
 
-    private String groupSearchBase;
+    private final String groupSearchBase;
 
-    private String groupNameAttribute;
+    private final String groupNameAttribute;
 
-    private String groupObjectClass;
+    private final String groupObjectClass;
 
-    private String groupMemberAttribute;
+    private final String groupMemberAttribute;
 
-    private String domain;
+    private final String domain;
 
     public LdapView(LdapConfig ldapConfig) {
-        this.connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost();
+        connectionURL = ldapConfig.getProtocol() + "://" + ldapConfig.getServerHost();
         if (ldapConfig.getServerPort() != null) {
-            this.connectionURL =  this.connectionURL + ":" + ldapConfig.getServerPort();
+            connectionURL = connectionURL + ':' + ldapConfig.getServerPort();
         }
-        this.bindDn = ldapConfig.getBindDn();
-        this.bindPassword = ldapConfig.getBindPassword();
-        this.directoryType = ldapConfig.getDirectoryType();
-        this.userSearchBase = ldapConfig.getUserSearchBase();
-        this.userNameAttribute = ldapConfig.getUserNameAttribute();
-        this.userObjectClass = ldapConfig.getUserObjectClass();
-        this.groupSearchBase = ldapConfig.getGroupSearchBase();
-        this.groupNameAttribute = ldapConfig.getGroupNameAttribute();
-        this.groupObjectClass = ldapConfig.getGroupObjectClass();
-        this.groupMemberAttribute = ldapConfig.getGroupMemberAttribute();
-        this.domain = ldapConfig.getDomain();
+        bindDn = ldapConfig.getBindDn();
+        bindPassword = ldapConfig.getBindPassword();
+        directoryType = ldapConfig.getDirectoryType();
+        userSearchBase = ldapConfig.getUserSearchBase();
+        userNameAttribute = ldapConfig.getUserNameAttribute();
+        userObjectClass = ldapConfig.getUserObjectClass();
+        groupSearchBase = ldapConfig.getGroupSearchBase();
+        groupNameAttribute = ldapConfig.getGroupNameAttribute();
+        groupObjectClass = ldapConfig.getGroupObjectClass();
+        groupMemberAttribute = ldapConfig.getGroupMemberAttribute();
+        domain = ldapConfig.getDomain();
     }
 
     public String getConnectionURL() {

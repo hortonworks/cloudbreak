@@ -57,7 +57,7 @@ public class InstanceTemplate extends DynamicModel {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("InstanceTemplate{");
+        StringBuilder sb = new StringBuilder("InstanceTemplate{");
         sb.append("flavor='").append(flavor).append('\'');
         sb.append(", groupName='").append(groupName).append('\'');
         sb.append(", privateId=").append(privateId);

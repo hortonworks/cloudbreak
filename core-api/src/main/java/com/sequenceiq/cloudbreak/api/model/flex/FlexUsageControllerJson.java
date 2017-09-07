@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.api.model.flex;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FlexUsageControllerJson {
+public class FlexUsageControllerJson implements JsonEntity {
 
     private String guid;
 

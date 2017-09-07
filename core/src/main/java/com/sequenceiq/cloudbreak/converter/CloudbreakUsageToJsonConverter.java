@@ -11,14 +11,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.UsageStatus;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.usages.UsageTimeService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 
 @Component
 public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwareConverter<CloudbreakUsage, CloudbreakUsageJson> {
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUsageToJsonConverter.class);
 
@@ -31,7 +32,7 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
     @Override
     public CloudbreakUsageJson convert(CloudbreakUsage entity) {
         CloudbreakUsageJson json = new CloudbreakUsageJson();
-        String day = DATE_FORMAT.format(entity.getDay());
+        String day = new SimpleDateFormat(DATE_FORMAT).format(entity.getDay());
         String cbUser;
         try {
             cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();

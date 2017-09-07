@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ public class ImageService {
         return componentConfigProvider.getImage(stackId);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public void create(Stack stack, PlatformParameters params, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> customImage)
             throws CloudbreakImageNotFoundException {
         try {

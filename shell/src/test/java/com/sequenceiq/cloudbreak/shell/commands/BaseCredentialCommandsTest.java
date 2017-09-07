@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 
 public class BaseCredentialCommandsTest {
+
     private static final String DUMMY_NAME = "dummyName";
 
     private static final Long DUMMY_ID = 60L;
@@ -52,7 +53,7 @@ public class BaseCredentialCommandsTest {
 
     private CredentialResponse dummyResult;
 
-    private RuntimeException expectedException = new RuntimeException("something not found");
+    private final RuntimeException expectedException = new RuntimeException("something not found");
 
     @Before
     public void setUp() throws Exception {

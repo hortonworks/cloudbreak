@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureI
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -12,10 +13,12 @@ import java.util.UUID;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,8 +92,8 @@ public class AzureRoleManager {
     public void assignRole(String accessToken, String subscriptionId, String roleDefinitionId, String principalObjectId) throws InteractiveLoginException {
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(AZURE_MANAGEMENT);
-        Invocation.Builder request = resource.path("subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleAssignments/"
-                + UUID.randomUUID().toString()).queryParam("api-version", "2015-07-01").request();
+        Builder request = resource.path("subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleAssignments/"
+                + UUID.randomUUID()).queryParam("api-version", "2015-07-01").request();
         request.accept(MediaType.APPLICATION_JSON);
 
         request.header("Authorization", "Bearer " + accessToken);
@@ -104,7 +107,7 @@ public class AzureRoleManager {
 
         Response response = request.put(Entity.entity(jsonObject.toString(), MediaType.APPLICATION_JSON));
 
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             String errorMsg = response.readEntity(String.class);
             LOGGER.error("Assign role request error - status code: " + response.getStatus()
                     + " - error message: " + errorMsg);
@@ -116,7 +119,7 @@ public class AzureRoleManager {
     }
 
     private String getContributorRoleDefinitionId(String subscriptionId, String accessToken) throws InteractiveLoginException {
-        List<AzureRoleDefinition> roleDefinitions = getRoleDefinitions(subscriptionId, accessToken, "roleName%20eq%20'" + CONTRIBUTOR_ROLE + "'");
+        List<AzureRoleDefinition> roleDefinitions = getRoleDefinitions(subscriptionId, accessToken, "roleName%20eq%20'" + CONTRIBUTOR_ROLE + '\'');
         if (roleDefinitions.size() == 1) {
             return roleDefinitions.get(0).getId();
         } else {
@@ -125,21 +128,17 @@ public class AzureRoleManager {
     }
 
     private AzureRoleDefinition getRoleDefinitonByName(String subscriptionId, String accessToken, String roleName) throws InteractiveLoginException {
-        List<AzureRoleDefinition> roleList = getRoleDefinitions(subscriptionId, accessToken, "roleName%20eq%20'" + roleName + "'");
-        if (roleList.size() > 0) {
+        List<AzureRoleDefinition> roleList = getRoleDefinitions(subscriptionId, accessToken, "roleName%20eq%20'" + roleName + '\'');
+        if (!roleList.isEmpty()) {
             return roleList.get(0);
         }
         return null;
     }
 
-    private List<AzureRoleDefinition> getCustomRoleDefinitons(String subscriptionId, String accessToken) throws InteractiveLoginException {
-        return getRoleDefinitions(subscriptionId, accessToken, "type%20eq%20'CustomRole'");
-    }
-
     private List<AzureRoleDefinition> getRoleDefinitions(String subscriptionId, String accessToken, String filter) throws InteractiveLoginException {
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(AZURE_MANAGEMENT);
-        Invocation.Builder request = resource.path("subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleDefinitions")
+        Builder request = resource.path("subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleDefinitions")
                 .queryParam("$filter", filter)
                 .queryParam("api-version", "2015-07-01")
                 .request();
@@ -147,13 +146,13 @@ public class AzureRoleManager {
 
         request.header("Authorization", "Bearer " + accessToken);
         Response response = request.get();
-        if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             AzureRoleDefinitionListResponse azureRoleDefinitionListResponse = response.readEntity(AzureRoleDefinitionListResponse.class);
             LOGGER.info("Role definitions retrieved:" + azureRoleDefinitionListResponse.getValue());
             return azureRoleDefinitionListResponse.getValue();
 
         } else {
-            if (Response.Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
+            if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
                 throw new InteractiveLoginException("You have no permission to access Active Directory roles, please contact with your administrator");
             } else {
                 String errorResponse = response.readEntity(String.class);
@@ -174,7 +173,7 @@ public class AzureRoleManager {
         String uuid = UUID.randomUUID().toString();
         String roleDefinitionId = "subscriptions/" + subscriptionId + "/providers/Microsoft.Authorization/roleDefinitions/"
                 + uuid;
-        Invocation.Builder request = resource.path(roleDefinitionId).queryParam("api-version", "2015-07-01").request();
+        Builder request = resource.path(roleDefinitionId).queryParam("api-version", "2015-07-01").request();
         request.accept(MediaType.APPLICATION_JSON);
 
         request.header("Authorization", "Bearer " + accessToken);
@@ -189,7 +188,7 @@ public class AzureRoleManager {
 
         Response response = request.put(Entity.entity(customRole, MediaType.APPLICATION_JSON));
 
-        if (response.getStatusInfo().getFamily() != Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
             String errorMsg = response.readEntity(String.class);
             LOGGER.error("Create role request error - status code: " + response.getStatus()
                     + " - error message: " + errorMsg);
@@ -209,7 +208,7 @@ public class AzureRoleManager {
         AzureRoleDefinitionProperties properties = new AzureRoleDefinitionProperties();
         properties.setRoleName(roleName);
         properties.setDescription("Custom role for cluster management via Cloudbreak client");
-        properties.setAssignableScopes(Arrays.asList("/subscriptions/" + subscriptionId));
+        properties.setAssignableScopes(Collections.singletonList("/subscriptions/" + subscriptionId));
         properties.setType("CustomRole");
         AzurePermission permission = new AzurePermission();
         permission.setActions(Arrays.asList(
@@ -219,7 +218,7 @@ public class AzureRoleManager {
                 "Microsoft.Network/*",
                 "Microsoft.Storage/*",
                 "Microsoft.Resources/*"));
-        properties.setPermissions(Arrays.asList(permission));
+        properties.setPermissions(Collections.singletonList(permission));
         role.setProperties(properties);
         return role;
     }

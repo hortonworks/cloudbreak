@@ -13,7 +13,7 @@ public class GetInstancesStateResult extends CloudPlatformResult<GetInstancesSta
 
     public GetInstancesStateResult(GetInstancesStateRequest<GetInstancesStateResult> request) {
         super(request);
-        this.statuses = Collections.emptyList();
+        statuses = Collections.emptyList();
     }
 
     public GetInstancesStateResult(GetInstancesStateRequest<GetInstancesStateResult> request, List<CloudVmInstanceStatus> statuses) {
@@ -23,7 +23,7 @@ public class GetInstancesStateResult extends CloudPlatformResult<GetInstancesSta
 
     public GetInstancesStateResult(String statusReason, Exception errorDetails, GetInstancesStateRequest<GetInstancesStateResult> request) {
         super(statusReason, errorDetails, request);
-        this.statuses = Collections.emptyList();
+        statuses = Collections.emptyList();
     }
 
     public CloudContext getCloudContext() {
@@ -40,7 +40,7 @@ public class GetInstancesStateResult extends CloudPlatformResult<GetInstancesSta
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GetInstancesStateResult{");
+        StringBuilder sb = new StringBuilder("GetInstancesStateResult{");
         sb.append("cloudContext=").append(getCloudContext());
         sb.append(", statuses=").append(statuses);
         sb.append(", exception=").append(getErrorDetails());

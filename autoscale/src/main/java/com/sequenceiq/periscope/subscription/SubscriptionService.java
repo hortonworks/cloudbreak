@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +22,7 @@ public class SubscriptionService {
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Long subscribe(Subscription subscription) {
         List<Subscription> clientSubscriptions = subscriptionRepository.findByClientIdAndEndpoint(subscription.getClientId(), subscription.getEndpoint());
         if (!clientSubscriptions.isEmpty()) {

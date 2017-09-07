@@ -29,7 +29,7 @@ public class TagsTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({ "tags" })
+    @Parameters("tags")
     public void testTagTest(String tags) throws Exception {
         //GIVEN
         IntegrationTestContext itContext = getItContext();

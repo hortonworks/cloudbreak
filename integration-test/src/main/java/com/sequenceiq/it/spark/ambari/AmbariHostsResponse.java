@@ -15,7 +15,8 @@ import spark.Request;
 import spark.Response;
 
 public class AmbariHostsResponse extends ITResponse {
-    private Map<String, CloudVmMetaDataStatus> instanceMap;
+
+    private final Map<String, CloudVmMetaDataStatus> instanceMap;
 
     public AmbariHostsResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
         this.instanceMap = instanceMap;
@@ -25,8 +26,8 @@ public class AmbariHostsResponse extends ITResponse {
     public Object handle(Request request, Response response) throws Exception {
         response.type("text/plain");
         List<Map<String, ?>> itemList = new ArrayList<>();
-        for (String instanceId : instanceMap.keySet()) {
-            CloudVmMetaDataStatus status = instanceMap.get(instanceId);
+        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus status = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
                 Hosts hosts = new Hosts(Collections.singletonList(HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp())), "HEALTHY");
                 itemList.add(Collections.singletonMap("Hosts", hosts));

@@ -6,9 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorCancelledException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorComponentRunner;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
@@ -31,13 +29,11 @@ public class MockContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel) {
     }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorCancelledException, CloudbreakOrchestratorFailedException {
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) {
     }
 
     @Override

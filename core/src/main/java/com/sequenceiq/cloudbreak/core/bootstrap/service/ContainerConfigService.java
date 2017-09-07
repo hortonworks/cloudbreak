@@ -16,7 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.bootstrap.config.ContainerConfigBuilder;
+import com.sequenceiq.cloudbreak.core.bootstrap.config.ContainerConfigBuilder.Builder;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.domain.Component;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -63,13 +63,13 @@ public class ContainerConfigService {
             Optional<String> customQueue = getCustomQueue(stack);
             switch (dc) {
                 case AMBARI_SERVER:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariServerContainer(customContainerName), customQueue).build();
+                    config = new Builder(orchestrator.ambariServerContainer(customContainerName), customQueue).build();
                     break;
                 case AMBARI_AGENT:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariClientContainer(customContainerName), customQueue).build();
+                    config = new Builder(orchestrator.ambariClientContainer(customContainerName), customQueue).build();
                     break;
                 case AMBARI_DB:
-                    config = new ContainerConfigBuilder.Builder(orchestrator.ambariDbContainer(customContainerName), customQueue).build();
+                    config = new Builder(orchestrator.ambariDbContainer(customContainerName), customQueue).build();
                     break;
                 default:
                     throw new CloudbreakServiceException(String.format("No configuration exist for %s", dc));

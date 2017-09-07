@@ -17,7 +17,7 @@ public class AmbariHealthCheckerTask extends ClusterBasedStatusCheckerTask<Ambar
         try {
             String ambariHealth = ambariClientPollerObject.getAmbariClient().healthCheck();
             return "RUNNING".equals(ambariHealth);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Ambari is not running yet: {}", e.getMessage());
             return false;
         }

@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.orchestrator.model.port;
 
 public class TcpPortBinding {
 
-    private Integer exposedPort;
+    private final Integer exposedPort;
 
-    private String hostIp;
+    private final String hostIp;
 
-    private Integer hostPort;
+    private final Integer hostPort;
 
     public TcpPortBinding(Integer exposedPort, String hostIp, Integer hostPort) {
         this.exposedPort = exposedPort;

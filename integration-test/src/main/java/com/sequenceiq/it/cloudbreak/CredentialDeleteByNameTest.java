@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class CredentialDeleteByNameTest extends AbstractCloudbreakIntegrationTest {
     @Test
-    @Parameters({ "credentialName" })
+    @Parameters("credentialName")
     public void testDeleteCredentialByName(String credentialName) throws Exception {
         // GIVEN
         // WHEN

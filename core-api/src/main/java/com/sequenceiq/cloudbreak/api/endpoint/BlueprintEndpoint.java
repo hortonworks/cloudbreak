@@ -18,7 +18,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.BlueprintOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,69 +31,69 @@ public interface BlueprintEndpoint {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.GET_BY_ID, produces = JSON, notes = BLUEPRINT_NOTES, nickname = "getBlueprint")
-    BlueprintResponse get(@PathParam(value = "id") Long id);
+    @ApiOperation(value = BlueprintOpDescription.GET_BY_ID, produces = JSON, notes = BLUEPRINT_NOTES, nickname = "getBlueprint")
+    BlueprintResponse get(@PathParam("id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.DELETE_BY_ID, produces = JSON, notes = BLUEPRINT_NOTES, nickname = "deleteBlueprint")
-    void delete(@PathParam(value = "id") Long id);
+    @ApiOperation(value = BlueprintOpDescription.DELETE_BY_ID, produces = JSON, notes = BLUEPRINT_NOTES, nickname = "deleteBlueprint")
+    void delete(@PathParam("id") Long id);
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.POST_PRIVATE, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.POST_PRIVATE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "postPrivateBlueprint")
     BlueprintResponse postPrivate(@Valid BlueprintRequest blueprintRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.GET_PRIVATE, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.GET_PRIVATE, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getPrivatesBlueprint")
     Set<BlueprintResponse> getPrivates();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.GET_PRIVATE_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.GET_PRIVATE_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getPrivateBlueprint")
-    BlueprintResponse getPrivate(@PathParam(value = "name") String name);
+    BlueprintResponse getPrivate(@PathParam("name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.DELETE_PRIVATE_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.DELETE_PRIVATE_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "deletePrivateBlueprint")
-    void deletePrivate(@PathParam(value = "name") String name);
+    void deletePrivate(@PathParam("name") String name);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.POST_PUBLIC, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.POST_PUBLIC, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "postPublicBlueprint")
     BlueprintResponse postPublic(@Valid BlueprintRequest blueprintRequest);
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.GET_PUBLIC, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.GET_PUBLIC, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getPublicsBlueprint")
     Set<BlueprintResponse> getPublics();
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.GET_PUBLIC_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.GET_PUBLIC_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "getPublicBlueprint")
-    BlueprintResponse getPublic(@PathParam(value = "name") String name);
+    BlueprintResponse getPublic(@PathParam("name") String name);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.BlueprintOpDescription.DELETE_PUBLIC_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
+    @ApiOperation(value = BlueprintOpDescription.DELETE_PUBLIC_BY_NAME, produces = JSON, notes = BLUEPRINT_NOTES,
             nickname = "deletePublicBlueprint")
-    void deletePublic(@PathParam(value = "name") String name);
+    void deletePublic(@PathParam("name") String name);
 
 }

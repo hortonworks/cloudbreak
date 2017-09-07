@@ -37,7 +37,7 @@ public class DatabaseConfig {
     @Value("${periscope.db.name:periscopedb}")
     private String dbName;
 
-    @Value("${periscope.db.schema.name:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + "}")
+    @Value("${periscope.db.schema.name:" + DatabaseUtil.DEFAULT_SCHEMA_NAME + '}')
     private String dbSchemaName;
 
     @Value("${periscope.db.hbm2ddl.strategy:validate}")

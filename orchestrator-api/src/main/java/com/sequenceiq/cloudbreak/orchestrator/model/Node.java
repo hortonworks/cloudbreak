@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.orchestrator.model;
 import java.util.Set;
 
 public class Node {
-    private String privateIp;
+    private final String privateIp;
 
-    private String publicIp;
+    private final String publicIp;
 
     private String hostname;
 
@@ -21,7 +21,7 @@ public class Node {
 
     public Node(String privateIp, String publicIp, String fqdn, String domain, String hostGroup) {
         this(privateIp, publicIp);
-        this.hostname = fqdn;
+        hostname = fqdn;
         this.hostGroup = hostGroup;
         this.domain = domain;
     }
@@ -68,7 +68,7 @@ public class Node {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Node{");
+        StringBuilder sb = new StringBuilder("Node{");
         sb.append("privateIp='").append(privateIp).append('\'');
         sb.append(", publicIp='").append(publicIp).append('\'');
         sb.append(", hostname='").append(hostname).append('\'');

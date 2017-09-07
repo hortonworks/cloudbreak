@@ -9,11 +9,11 @@ import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 
 public class GetPlatformSshKeysRequest extends CloudPlatformRequest<GetPlatformSshKeysResult> {
 
-    private String region;
+    private final String region;
 
-    private String variant;
+    private final String variant;
 
-    private ExtendedCloudCredential extendedCloudCredential;
+    private final ExtendedCloudCredential extendedCloudCredential;
 
     private Map<String, String> filters = new HashMap<>();
 

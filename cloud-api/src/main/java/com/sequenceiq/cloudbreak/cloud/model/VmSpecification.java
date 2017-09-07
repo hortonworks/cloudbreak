@@ -12,9 +12,6 @@ public class VmSpecification {
     @JsonProperty("meta")
     private MetaSpecification metaSpecification;
 
-    public VmSpecification() {
-    }
-
     public Boolean getExtended() {
         return extended;
     }

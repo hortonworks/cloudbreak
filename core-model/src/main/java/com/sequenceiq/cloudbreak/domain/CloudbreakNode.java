@@ -69,12 +69,12 @@ public class CloudbreakNode implements Comparable<CloudbreakNode> {
 
     @Override
     public int compareTo(CloudbreakNode o) {
-        return o.uuid.compareToIgnoreCase(this.uuid);
+        return o.uuid.compareToIgnoreCase(uuid);
     }
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakNode{");
+        StringBuilder sb = new StringBuilder("CloudbreakNode{");
         sb.append("uuid='").append(uuid).append('\'');
         sb.append(", lastUpdated=").append(lastUpdated);
         sb.append('}');

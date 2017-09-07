@@ -8,7 +8,7 @@ public class SaltCommandTracker implements OrchestratorBootstrap {
 
     private final SaltConnector saltConnector;
 
-    private SaltJobRunner saltJobRunner;
+    private final SaltJobRunner saltJobRunner;
 
     public SaltCommandTracker(SaltConnector saltConnector, SaltJobRunner saltJobRunner) {
         this.saltConnector = saltConnector;

@@ -48,7 +48,7 @@ public class OpenStackUtils {
     }
 
     public String getPrivateInstanceId(String groupName, String privateId) {
-        return getNormalizedGroupName(groupName) + "_" + privateId;
+        return getNormalizedGroupName(groupName) + '_' + privateId;
     }
 
     public String getPrivateInstanceId(Map<String, String> metadata) {
@@ -60,7 +60,7 @@ public class OpenStackUtils {
     }
 
     public String getStackName(AuthenticatedContext context) {
-        return context.getCloudContext().getName() + "_" + context.getCloudContext().getId();
+        return context.getCloudContext().getName() + '_' + context.getCloudContext().getId();
     }
 
     public CloudResourceStatus heatStatus(CloudResource resource, Stack heatStack) {

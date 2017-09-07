@@ -13,7 +13,7 @@ enum ChangePrimaryGatewayState implements FlowState {
     CHANGE_PRIMARY_GATEWAY_FAILED_STATE,
     FINAL_STATE;
 
-    private Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
+    private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     @Override
     public Class<? extends RestartAction> restartAction() {

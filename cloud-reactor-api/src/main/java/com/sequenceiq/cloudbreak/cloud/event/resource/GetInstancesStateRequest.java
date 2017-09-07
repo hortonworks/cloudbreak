@@ -14,7 +14,7 @@ public class GetInstancesStateRequest<T> extends CloudPlatformRequest<T> {
 
     public GetInstancesStateRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
         super(cloudContext, cloudCredential);
-        this.instances = Collections.emptyList();
+        instances = Collections.emptyList();
     }
 
     public GetInstancesStateRequest(CloudContext cloudContext, CloudCredential cloudCredential, List<CloudInstance> instances) {
@@ -28,7 +28,7 @@ public class GetInstancesStateRequest<T> extends CloudPlatformRequest<T> {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GetInstancesStateRequest{");
+        StringBuilder sb = new StringBuilder("GetInstancesStateRequest{");
         sb.append(", instances=").append(instances);
         sb.append('}');
         return sb.toString();

@@ -10,7 +10,7 @@ import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.PrometheusEvaluator;
 
 @Component
-public class PrometheusMonitor extends AbstractMonitor implements Monitor {
+public class PrometheusMonitor extends AbstractMonitor {
 
     @Override
     public String getIdentifier() {

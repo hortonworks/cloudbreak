@@ -5,6 +5,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.stereotype.Service;
 
@@ -18,12 +19,12 @@ public class ContainerService {
     @Inject
     private ContainerRepository containerRepository;
 
-    @Transactional(javax.transaction.Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Iterable<Container> save(List<Container> containers) {
         return containerRepository.save(containers);
     }
 
-    @Transactional(javax.transaction.Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Set<Container> findContainersInCluster(Long clusterId) {
         return containerRepository.findContainersInCluster(clusterId);
     }

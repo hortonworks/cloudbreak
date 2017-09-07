@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.periscope.api.endpoint.ClusterEndpoint;
-import com.sequenceiq.periscope.api.model.ClusterRequestJson;
 import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
 import com.sequenceiq.periscope.api.model.ClusterJson;
+import com.sequenceiq.periscope.api.model.ClusterRequestJson;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.domain.Ambari;

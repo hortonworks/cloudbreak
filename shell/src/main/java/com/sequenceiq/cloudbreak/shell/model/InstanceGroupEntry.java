@@ -4,15 +4,15 @@ import java.util.Map;
 
 public class InstanceGroupEntry {
 
-    private Long templateId;
+    private final Long templateId;
 
-    private Integer nodeCount;
+    private final Integer nodeCount;
 
     private String type;
 
-    private Long securityGroupId;
+    private final Long securityGroupId;
 
-    private Map<String, Object> attributes;
+    private final Map<String, Object> attributes;
 
     public InstanceGroupEntry(Long templateId, Long securityGroupId, Integer nodeCount, String type, Map<String, Object>  attributes) {
         this.templateId = templateId;

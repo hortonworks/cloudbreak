@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Security;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
+import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 
 import freemarker.template.Configuration;
@@ -54,23 +55,11 @@ public class HeatTemplateBuilderTest {
     private OpenStackUtils openStackUtil;
 
     @InjectMocks
-    private HeatTemplateBuilder heatTemplateBuilder = new HeatTemplateBuilder();
+    private final HeatTemplateBuilder heatTemplateBuilder = new HeatTemplateBuilder();
 
     private String stackName;
 
     private List<Group> groups;
-
-    private String name;
-
-    private List<Volume> volumes;
-
-    private CloudInstance instance;
-
-    private List<SecurityRule> rules;
-
-    private Security security;
-
-    private Map<InstanceGroupType, String> userData;
 
     private Image image;
 
@@ -85,17 +74,17 @@ public class HeatTemplateBuilderTest {
         ReflectionTestUtils.setField(heatTemplateBuilder, "openStackHeatTemplatePath", "templates/openstack-heat.ftl");
 
         stackName = "testStack";
-        groups = new ArrayList<>();
-        name = "master";
-        volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
+        groups = new ArrayList<>(1);
+        String name = "master";
+        List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>());
-        instance = new CloudInstance("SOME_ID", instanceTemplate);
-        rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+        CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate);
+        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        security = new Security(rules, null);
+        Security security = new Security(rules, null);
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
-        userData = ImmutableMap.of(
+        Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
@@ -111,7 +100,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -123,7 +112,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("cb-sec-group_" + 't'));
         assertThat(templateString, containsString("app_net_id"));
         assertThat(templateString, not(containsString("app_network")));
         assertThat(templateString, containsString("subnet_id"));
@@ -141,7 +130,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -153,7 +142,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("cb-sec-group_" + 't'));
         assertThat(templateString, not(containsString("app_net_id")));
         assertThat(templateString, containsString("app_network"));
         assertThat(templateString, containsString("subnet_id"));
@@ -171,7 +160,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -183,7 +172,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("name: cb-sec-group_" + 't'));
         assertThat(templateString, containsString("app_net_id"));
         assertThat(templateString, not(containsString("app_network")));
         assertThat(templateString, containsString("subnet_id"));
@@ -201,7 +190,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -213,7 +202,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("name: cb-sec-group_" + 't'));
         assertThat(templateString, containsString("app_net_id"));
         assertThat(templateString, not(containsString("app_network")));
         assertThat(templateString, containsString("subnet_id"));
@@ -231,7 +220,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -243,7 +232,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("name: cb-sec-group_" + 't'));
         assertThat(templateString, not(containsString("app_net_id")));
         assertThat(templateString, containsString("app_network"));
         assertThat(templateString, containsString("subnet_id"));
@@ -261,7 +250,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -273,7 +262,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("name: cb-sec-group_" + 't'));
         assertThat(templateString, containsString("app_net_id"));
         assertThat(templateString, not(containsString("app_network")));
         assertThat(templateString, containsString("subnet_id"));
@@ -291,7 +280,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -303,7 +292,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("name: cb-sec-group_" + 't'));
         assertThat(templateString, not(containsString("app_net_id")));
         assertThat(templateString, containsString("app_network"));
         assertThat(templateString, containsString("subnet_id"));
@@ -321,7 +310,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -333,7 +322,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, containsString("name: cb-sec-group_" + "t"));
+        assertThat(templateString, containsString("name: cb-sec-group_" + 't'));
         assertThat(templateString, not(containsString("app_net_id")));
         assertThat(templateString, containsString("app_network"));
         assertThat(templateString, containsString("subnet_id"));
@@ -351,7 +340,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -363,7 +352,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("name: cb-sec-group_" + "t")));
+        assertThat(templateString, not(containsString("name: cb-sec-group_" + 't')));
         assertThat(templateString, not(containsString("app_net_id")));
         assertThat(templateString, containsString("app_network"));
         assertThat(templateString, not(containsString("subnet_id")));
@@ -381,7 +370,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -393,7 +382,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("name: cb-sec-group_" + "t")));
+        assertThat(templateString, not(containsString("name: cb-sec-group_" + 't')));
         assertThat(templateString, containsString("app_net_id"));
         assertThat(templateString, not(containsString("app_network")));
         assertThat(templateString, not(containsString("subnet_id")));
@@ -411,7 +400,7 @@ public class HeatTemplateBuilderTest {
         //WHEN
         when(openStackUtil.adjustStackNameLength(Mockito.anyString())).thenReturn("t");
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnet);
         modelContext.withGroups(groups);
@@ -423,7 +412,7 @@ public class HeatTemplateBuilderTest {
 
         String templateString = heatTemplateBuilder.build(modelContext);
         //THEN
-        assertThat(templateString, not(containsString("name: cb-sec-group_" + "t")));
+        assertThat(templateString, not(containsString("name: cb-sec-group_" + 't')));
         assertThat(templateString, not(containsString("app_net_id")));
         assertThat(templateString, containsString("app_network"));
         assertThat(templateString, not(containsString("subnet_id")));

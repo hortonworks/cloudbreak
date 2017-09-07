@@ -79,7 +79,7 @@ public class ComponentLocatorServiceTest {
     }
 
     private <T> Set<T> set(T... array) {
-        return new HashSet<T>(Arrays.asList(array));
+        return new HashSet<>(Arrays.asList(array));
     }
 
     @Test

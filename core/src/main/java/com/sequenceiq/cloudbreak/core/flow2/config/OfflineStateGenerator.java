@@ -94,7 +94,7 @@ public class OfflineStateGenerator {
         Flow flow = initializeFlow();
         StateMachine<FlowState, FlowEvent> stateMachine = getStateMachine(flow);
         FlowState init = stateMachine.getInitialState().getId();
-        builder.append(generateStartPoint(init, flowConfiguration.getClass().getSimpleName())).append("\n");
+        builder.append(generateStartPoint(init, flowConfiguration.getClass().getSimpleName())).append('\n');
         List<Transition<FlowState, FlowEvent>> transitions = (List<Transition<FlowState, FlowEvent>>) stateMachine.getTransitions();
         Map<String, FlowState> transitionsAlreadyDefined = new HashMap<>();
         transitionsAlreadyDefined.put(init.toString(), init);
@@ -106,16 +106,16 @@ public class OfflineStateGenerator {
                     String id = generateTransitionId(source, target, transition.getTrigger().getEvent());
                     if (!transitionsAlreadyDefined.keySet().contains(id)) {
                         if (target.action() != null && !transitionsAlreadyDefined.values().contains(target)) {
-                            builder.append(generateState(target, target.action().getSimpleName())).append("\n");
+                            builder.append(generateState(target, target.action().getSimpleName())).append('\n');
                         }
-                        builder.append(generateTransition(source, target, transition.getTrigger().getEvent())).append("\n");
+                        builder.append(generateTransition(source, target, transition.getTrigger().getEvent())).append('\n');
                         transitionsAlreadyDefined.put(id, target);
                     }
                     transitions.remove(transition);
                 }
             }
         }
-        saveToFile(builder.append("}").toString());
+        saveToFile(builder.append('}').toString());
     }
 
     private String generateTransitionId(FlowState source, FlowState target, FlowEvent event) {

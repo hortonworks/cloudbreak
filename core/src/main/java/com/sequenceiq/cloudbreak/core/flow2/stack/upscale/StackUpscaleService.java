@@ -21,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
@@ -137,7 +136,7 @@ public class StackUpscaleService {
 
     public void extendingMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_METADATA);
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
+        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
     }
 
     @Transactional
@@ -185,7 +184,7 @@ public class StackUpscaleService {
 
     public void bootstrappingNewNodes(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.BOOTSTRAPPING_NEW_NODES);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BOOTSTRAP_NEW_NODES, Status.UPDATE_IN_PROGRESS.name());
+        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_BOOTSTRAP_NEW_NODES, UPDATE_IN_PROGRESS.name());
     }
 
     public void extendingHostMetadata(Stack stack) {
@@ -203,7 +202,7 @@ public class StackUpscaleService {
             String errorReason = payload.getException().getMessage();
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), errorReason);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }
     }
@@ -240,7 +239,7 @@ public class StackUpscaleService {
                 InstanceGroup instanceGroup = instanceGroupRepository.findOneByGroupNameInStack(stackId, group.getName());
                 instanceGroup.setNodeCount(nodeCount - failedCount);
                 instanceGroupRepository.save(instanceGroup);
-                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, Status.UPDATE_IN_PROGRESS.name(),
+                flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_ROLLBACK_MESSAGE, UPDATE_IN_PROGRESS.name(),
                         failedCount, group.getName(), failedResources.get(0).getStatusReason());
             }
         }

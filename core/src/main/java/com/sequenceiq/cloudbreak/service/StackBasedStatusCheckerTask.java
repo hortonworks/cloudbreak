@@ -9,11 +9,13 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 public abstract class StackBasedStatusCheckerTask<T extends StackContext> extends SimpleStatusCheckerTask<T> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBasedStatusCheckerTask.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackBasedStatusCheckerTask.class);
 
     @Inject
     private StackRepository stackRepository;
 
+    @Override
     public boolean exitPolling(T t) {
         try {
             Stack stack = stackRepository.findByIdLazy(t.getStack().getId());

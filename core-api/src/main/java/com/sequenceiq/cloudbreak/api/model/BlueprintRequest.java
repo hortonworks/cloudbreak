@@ -20,10 +20,10 @@ public class BlueprintRequest extends BlueprintBase {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = BlueprintModelDescription.URL)
+    @ApiModelProperty(BlueprintModelDescription.URL)
     private String url;
 
-    @ApiModelProperty(value = ModelDescriptions.BlueprintModelDescription.BLUEPRINT_PROPERTIES)
+    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_PROPERTIES)
     private List<Map<String, Map<String, String>>> properties;
 
     public String getName() {

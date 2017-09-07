@@ -56,7 +56,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
             "mockPort", "sshPort"})
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("") String variant, @Optional() String availabilityZone, @Optional() String persistentStorage, @Optional("SALT") String orchestrator,
+            @Optional("") String variant, @Optional String availabilityZone, @Optional String persistentStorage, @Optional("SALT") String orchestrator,
             @Optional("9443") int mockPort, @Optional("2020") int sshPort)
             throws Exception {
         // GIVEN
@@ -82,7 +82,6 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
 
         String credentialId = itContext.getContextParam(CloudbreakITContextConstants.CREDENTIAL_ID);
         String networkId = itContext.getContextParam(CloudbreakITContextConstants.NETWORK_ID);
-        String securityGroupId = itContext.getContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID);
         StackRequest stackRequest = new StackRequest();
         stackRequest.setName(stackName);
         stackRequest.setCredentialId(Long.valueOf(credentialId));

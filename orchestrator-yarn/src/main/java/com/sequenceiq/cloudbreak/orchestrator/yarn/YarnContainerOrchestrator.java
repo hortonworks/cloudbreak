@@ -131,14 +131,12 @@ public class YarnContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) {
         assert false;
     }
 
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel) {
         assert false;
     }
 

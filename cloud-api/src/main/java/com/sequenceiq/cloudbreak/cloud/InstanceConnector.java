@@ -24,7 +24,7 @@ public interface InstanceConnector {
      * @return status of instances
      * @throws Exception in case of any error
      */
-    List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) throws Exception;
+    List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
 
     /**
      * Stop instances. You can start instances trough this method. It does not need to wait/block until the VM instances are stopped, but it can return
@@ -38,7 +38,7 @@ public interface InstanceConnector {
      * @return status of instances
      * @throws Exception in case of any error
      */
-    List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) throws Exception;
+    List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
 
     /**
      * Invoked to check whether the instances have already reached a StatusGroup.PERMANENT state.

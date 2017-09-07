@@ -14,9 +14,6 @@ public class ZoneVmSpecification {
     @JsonProperty("defaultVmType")
     private String defaultVmType;
 
-    public ZoneVmSpecification() {
-    }
-
     public String getZone() {
         return zone;
     }

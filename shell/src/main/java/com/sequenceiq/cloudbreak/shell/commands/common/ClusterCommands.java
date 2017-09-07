@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -49,14 +50,16 @@ import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.model.YarnHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResult;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResultStatus;
 
 public class ClusterCommands implements BaseCommands {
 
     private ShellContext shellContext;
 
-    private CloudbreakShellUtil cloudbreakShellUtil;
+    private final CloudbreakShellUtil cloudbreakShellUtil;
 
-    private BaseStackCommands stackCommands;
+    private final BaseStackCommands stackCommands;
 
     public ClusterCommands(ShellContext shellContext, CloudbreakShellUtil cloudbreakShellUtil, BaseStackCommands stackCommands) {
         this.shellContext = shellContext;
@@ -64,7 +67,7 @@ public class ClusterCommands implements BaseCommands {
         this.stackCommands = stackCommands;
     }
 
-    @CliAvailabilityIndicator(value = "cluster create")
+    @CliAvailabilityIndicator("cluster create")
     public boolean createAvailable() {
         if (!shellContext.isBlueprintAvailable()) {
             return false;
@@ -113,32 +116,32 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "kerberosMasterKey", specifiedDefaultValue = "key", help = "Kerberos master key") String kerberosMasterKey,
             @CliOption(key = "kerberosAdmin", specifiedDefaultValue = "admin", help = "Kerberos admin name") String kerberosAdmin,
             @CliOption(key = "kerberosPassword", specifiedDefaultValue = "admin", help = "Kerberos admin password") String kerberosPassword,
-            @CliOption(key = "kerberosUrl", mandatory = false, help = "Kerberos url (e.g. 10.0.0.4)") String kerberosUrl,
-            @CliOption(key = "kerberosRealm", mandatory = false, help = "Kerberos realm (e.g. custom.com)") String kerberosRealm,
-            @CliOption(key = "kerberosTcpAllowed", mandatory = false, help = "Enable TCP for Kerberos", specifiedDefaultValue = "true",
+            @CliOption(key = "kerberosUrl", help = "Kerberos url (e.g. 10.0.0.4)") String kerberosUrl,
+            @CliOption(key = "kerberosRealm", help = "Kerberos realm (e.g. custom.com)") String kerberosRealm,
+            @CliOption(key = "kerberosTcpAllowed", help = "Enable TCP for Kerberos", specifiedDefaultValue = "true",
                     unspecifiedDefaultValue = "false")
                     Boolean kerberosTcpAllowed,
-            @CliOption(key = "kerberosPrincipal", mandatory = false, help = "Kerberos principal (e.g. admin/admin)") String kerberosPrincipal,
-            @CliOption(key = "kerberosLdapUrl", mandatory = false, help = "Kerberos ldap url (e.g. ldaps://acme.com)") String kerberosLdapUrl,
-            @CliOption(key = "kerberosContainerDn", mandatory = false, help = "Kerberos container dn (e.g. ou=ambaritest,dc=WWW,dc=ACME,dc=COM)")
+            @CliOption(key = "kerberosPrincipal", help = "Kerberos principal (e.g. admin/admin)") String kerberosPrincipal,
+            @CliOption(key = "kerberosLdapUrl", help = "Kerberos ldap url (e.g. ldaps://acme.com)") String kerberosLdapUrl,
+            @CliOption(key = "kerberosContainerDn", help = "Kerberos container dn (e.g. ou=ambaritest,dc=WWW,dc=ACME,dc=COM)")
                     String kerberosContainerDn,
             @CliOption(key = "configStrategy", help = "Config recommendation strategy") ConfigStrategy strategy,
             @CliOption(key = "enableKnoxGateway", help = "Enable Knox Gateway",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean enableKnoxGateway,
-            @CliOption(key = "ambariServerImage", help = "Name of the ambari server image in case of BYOS orchestrator", mandatory = false)
+            @CliOption(key = "ambariServerImage", help = "Name of the ambari server image in case of BYOS orchestrator")
                     String ambariServerImage,
-            @CliOption(key = "ambariAgentImage", help = "Name of the ambari agent image in case of BYOS orchestrator", mandatory = false)
+            @CliOption(key = "ambariAgentImage", help = "Name of the ambari agent image in case of BYOS orchestrator")
                     String ambariAgentImage,
-            @CliOption(key = "ambariDbImage", help = "Name of the ambari db image in case of BYOS orchestrator", mandatory = false)
+            @CliOption(key = "ambariDbImage", help = "Name of the ambari db image in case of BYOS orchestrator")
                     String ambariDbImage,
-            @CliOption(key = "customQueue", help = "Name of the custom queue for yarn orchestrator", mandatory = false,
+            @CliOption(key = "customQueue", help = "Name of the custom queue for yarn orchestrator",
                     unspecifiedDefaultValue = "default", specifiedDefaultValue = "default") String customQueue,
-            @CliOption(key = "executorType", help = "Executor type of yarn", mandatory = false) String executorType,
+            @CliOption(key = "executorType", help = "Executor type of yarn") String executorType,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         try {
             Set<HostGroupRequest> hostGroupList = new HashSet<>();
-            Set<? extends Map.Entry<String, ? extends NodeCountEntry>> entries;
+            Set<? extends Entry<String, ? extends NodeCountEntry>> entries;
             if (shellContext.isMarathonMode()) {
                 entries = shellContext.getMarathonHostGroups().entrySet();
             } else if (shellContext.isYarnMode()) {
@@ -146,7 +149,7 @@ public class ClusterCommands implements BaseCommands {
             } else {
                 entries = shellContext.getHostGroups().entrySet();
             }
-            for (Map.Entry<String, ? extends NodeCountEntry> entry : entries) {
+            for (Entry<String, ? extends NodeCountEntry> entry : entries) {
                 HostGroupRequest hostGroupBase = new HostGroupRequest();
                 hostGroupBase.setName(entry.getKey());
 
@@ -207,10 +210,10 @@ public class ClusterCommands implements BaseCommands {
                 // Check if Knox is configured in selected blueprint
                 List<InstanceGroupEntry> gatewayIgList = shellContext.getInstanceGroups().values()
                         .stream()
-                        .filter(e -> e.getType().equals("GATEWAY")).collect(Collectors.toList());
+                        .filter(e -> "GATEWAY".equals(e.getType())).collect(Collectors.toList());
                 List<String> gatewayIgNameList = new ArrayList<>();
 
-                for (Map.Entry<String, InstanceGroupEntry> entry : shellContext.getInstanceGroups().entrySet()) {
+                for (Entry<String, InstanceGroupEntry> entry : shellContext.getInstanceGroups().entrySet()) {
                     for (InstanceGroupEntry gatewayIg : gatewayIgList) {
                         if (Objects.equals(gatewayIg, entry.getValue())) {
                             gatewayIgNameList.add(entry.getKey());
@@ -231,10 +234,10 @@ public class ClusterCommands implements BaseCommands {
                 // Check if Knox is configured in selected blueprint
                 List<InstanceGroupEntry> gatewayIgList = shellContext.getInstanceGroups().values()
                         .stream()
-                        .filter(e -> e.getType().equals("GATEWAY")).collect(Collectors.toList());
+                        .filter(e -> "GATEWAY".equals(e.getType())).collect(Collectors.toList());
                 List<String> gatewayIgNameList = new ArrayList<>();
 
-                for (Map.Entry<String, InstanceGroupEntry> entry : shellContext.getInstanceGroups().entrySet()) {
+                for (Entry<String, InstanceGroupEntry> entry : shellContext.getInstanceGroups().entrySet()) {
                     for (InstanceGroupEntry gatewayIg : gatewayIgList) {
                         if (Objects.equals(gatewayIg, entry.getValue())) {
                             gatewayIgNameList.add(entry.getKey());
@@ -381,9 +384,9 @@ public class ClusterCommands implements BaseCommands {
             shellContext.resetFileSystemConfiguration();
             shellContext.resetAmbariDatabaseDetailsJson();
             if (wait) {
-                CloudbreakShellUtil.WaitResult waitResult =
+                WaitResult waitResult =
                         cloudbreakShellUtil.waitAndCheckClusterStatus(Long.valueOf(stackId), Status.AVAILABLE.name(), timeout);
-                if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
+                if (WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                     throw shellContext.exceptionTransformer().transformToRuntimeException(
                             String.format("Cluster creation failed on stack with id: '%s': '%s'", stackId, waitResult.getReason()));
                 } else {
@@ -396,7 +399,7 @@ public class ClusterCommands implements BaseCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = {"cluster stop", "cluster start"})
+    @CliAvailabilityIndicator({"cluster stop", "cluster start"})
     public boolean startStopAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
                 || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
@@ -449,7 +452,8 @@ public class ClusterCommands implements BaseCommands {
         throw new MethodNotSupportedException("Cluster delete command not available");
     }
 
-    @CliAvailabilityIndicator(value = {"cluster delete"})
+    @CliAvailabilityIndicator("cluster delete")
+    @Override
     public boolean deleteAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
                 || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
@@ -513,7 +517,7 @@ public class ClusterCommands implements BaseCommands {
         throw new MethodNotSupportedException("Cluster list command not available");
     }
 
-    @CliAvailabilityIndicator(value = {"cluster show", "cluster show --id", "cluster show --name"})
+    @CliAvailabilityIndicator({"cluster show", "cluster show --id", "cluster show --name"})
     @Override
     public boolean showAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
@@ -557,13 +561,13 @@ public class ClusterCommands implements BaseCommands {
         return show(null, name, outPutType);
     }
 
-    @CliAvailabilityIndicator(value = {"cluster node --ADD", "cluster node --REMOVE"})
+    @CliAvailabilityIndicator({"cluster node --ADD", "cluster node --REMOVE"})
     public boolean nodeAvailable() {
         return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
                 || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
-    @CliAvailabilityIndicator(value = {"cluster fileSystem"})
+    @CliAvailabilityIndicator("cluster fileSystem")
     public boolean fileSystemAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
@@ -574,7 +578,7 @@ public class ClusterCommands implements BaseCommands {
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be added to the cluster") Integer adjustment,
             @CliOption(key = "wait", help = "Wait until the operation completes",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         try {
             if (adjustment < 1) {
                 throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node addition should be at least 1");
@@ -613,7 +617,7 @@ public class ClusterCommands implements BaseCommands {
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withStackDownScale,
             @CliOption(key = "wait", help = "Wait until the operation completes",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         try {
             if (adjustment > -1) {
                 throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node removal should be negative");
@@ -651,7 +655,7 @@ public class ClusterCommands implements BaseCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = "cluster sync")
+    @CliAvailabilityIndicator("cluster sync")
     public boolean syncAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
@@ -669,12 +673,12 @@ public class ClusterCommands implements BaseCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = "cluster upgrade")
+    @CliAvailabilityIndicator("cluster upgrade")
     public boolean upgradeAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
-    @CliCommand(value = "cluster upgrade")
+    @CliCommand("cluster upgrade")
     public String upgradeCluster(
             @CliOption(key = "baseUrl", mandatory = true, help = "Base URL of the Ambari repo") String baseUrl,
             @CliOption(key = "gpgKeyUrl", mandatory = true, help = "GPG key of the Ambari repo") String gpgKeyUrl,

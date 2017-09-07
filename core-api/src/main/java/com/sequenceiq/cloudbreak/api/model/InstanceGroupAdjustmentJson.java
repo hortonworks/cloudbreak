@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("InstanceGroupAdjustment")
-public class InstanceGroupAdjustmentJson {
+public class InstanceGroupAdjustmentJson implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = InstanceGroupModelDescription.INSTANCE_GROUP_NAME, required = true)
@@ -19,12 +19,8 @@ public class InstanceGroupAdjustmentJson {
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer scalingAdjustment;
 
-    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
+    @ApiModelProperty(InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
     private Boolean withClusterEvent = Boolean.FALSE;
-
-    public InstanceGroupAdjustmentJson() {
-
-    }
 
     public String getInstanceGroup() {
         return instanceGroup;

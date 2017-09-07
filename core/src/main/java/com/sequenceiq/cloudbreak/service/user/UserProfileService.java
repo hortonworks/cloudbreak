@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.user;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -69,7 +70,7 @@ public class UserProfileService {
                 throw new NotFoundException(String.format("Credential '%s' not found in the specified account.", request.getCredentialName()));
             }
         }
-        for (Map.Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
+        for (Entry<String, Object> uiStringObjectEntry : request.getUiProperties().entrySet()) {
             Map<String, Object> map = userProfile.getUiProperties().getMap();
             if (map == null || map.isEmpty()) {
                 map = new HashMap<>();

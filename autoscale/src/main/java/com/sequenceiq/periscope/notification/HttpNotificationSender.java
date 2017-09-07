@@ -26,7 +26,7 @@ public class HttpNotificationSender {
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
-    private Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
+    private final Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
 
     public void send(History history) {
         send(convertHistory(history));

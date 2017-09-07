@@ -30,7 +30,7 @@ public class AmbariHostsLeaveStatusCheckerTask extends ClusterBasedStatusChecker
                     return false;
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Failed to check the left hosts", e);
             return false;
         }

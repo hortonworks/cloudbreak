@@ -7,11 +7,11 @@ import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 
 public class EncryptedJsonToString extends JsonToString {
 
-    private final static StandardPBEStringEncryptor ENCRYPTOR = new StandardPBEStringEncryptor();
+    private static final StandardPBEStringEncryptor ENCRYPTOR = new StandardPBEStringEncryptor();
 
-    private final static StandardPBEStringEncryptor LEGACY_ENCRYPTOR = new StandardPBEStringEncryptor();
+    private static final StandardPBEStringEncryptor LEGACY_ENCRYPTOR = new StandardPBEStringEncryptor();
 
-    {
+    static {
         String secret = Optional.ofNullable(System.getProperty("cb.client.secret")).orElse(System.getenv("CB_CLIENT_SECRET"));
         ENCRYPTOR.setPassword(secret);
         LEGACY_ENCRYPTOR.setPassword("cbsecret2015");

@@ -14,9 +14,6 @@ public class ConfigsResponse {
     @ApiModelProperty(value = ModelDescriptions.RESPONSE, required = true)
     private Set<BlueprintInputJson> inputs = new HashSet<>();
 
-    public ConfigsResponse() {
-    }
-
     public Set<BlueprintInputJson> getInputs() {
         return inputs;
     }

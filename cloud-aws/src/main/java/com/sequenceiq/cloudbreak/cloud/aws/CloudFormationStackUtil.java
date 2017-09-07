@@ -54,7 +54,7 @@ public class CloudFormationStackUtil {
         List<String> instanceIds = new ArrayList<>();
         if (describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances() != null) {
             for (Instance instance : describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()) {
-                if (instance.getLifecycleState().equals("InService")) {
+                if ("InService".equals(instance.getLifecycleState())) {
                     instanceIds.add(instance.getInstanceId());
                 }
             }

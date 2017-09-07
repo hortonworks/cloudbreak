@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.autoscaling;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.junit.Assert;
 import org.testng.annotations.AfterTest;
@@ -66,8 +67,8 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
     public void cleanUpscaling() {
         Map<Long, List<Long>> autoscalingAlerts = itContext.getContextParam(CloudbreakITContextConstants.AUTOSCALE_ALERTS, Map.class);
         if (autoscalingAlerts != null) {
-            for (Map.Entry elem : autoscalingAlerts.entrySet()) {
-                for (Object alertId : (List) (elem.getValue())) {
+            for (Entry elem : autoscalingAlerts.entrySet()) {
+                for (Object alertId : (Iterable<?>) (elem.getValue())) {
                     AutoscalingUtil.deletePrometheusAlert(autoscaleClient, (Long) elem.getKey(), (Long) alertId);
                 }
             }

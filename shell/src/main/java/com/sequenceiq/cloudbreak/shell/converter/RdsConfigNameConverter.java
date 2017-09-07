@@ -24,7 +24,7 @@ public class RdsConfigNameConverter extends AbstractConverter<RdsConfigName> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getRdsConfigs().values());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

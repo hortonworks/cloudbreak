@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -38,7 +39,7 @@ public class AzurePlatformResources implements PlatformResources {
             String actualRegion = network.region().label();
             if (regionMatch(actualRegion, region)) {
                 Set<String> subnets = new HashSet<>();
-                for (Map.Entry<String, Subnet> subnet : network.subnets().entrySet()) {
+                for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
                     subnets.add(subnet.getValue().name());
                 }
                 Map<Object, Object> properties = new HashMap<>();
@@ -56,7 +57,7 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudSshKeys();
     }
 

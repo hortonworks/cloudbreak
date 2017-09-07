@@ -8,7 +8,7 @@ public class RetryingServiceAddressResolver implements ServiceAddressResolver {
 
     private static final int SLEEPTIME = 2000;
 
-    private ServiceAddressResolver serviceAddressResolver;
+    private final ServiceAddressResolver serviceAddressResolver;
 
     private int maxRetryCount;
 

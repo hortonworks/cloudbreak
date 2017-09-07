@@ -128,14 +128,12 @@ public class AlertController implements AlertEndpoint {
     }
 
     private List<MetricAlertJson> createAlarmsResponse(Set<MetricAlert> alerts) {
-        List<MetricAlert> metricAlerts = new ArrayList<>();
-        metricAlerts.addAll(alerts);
+        List<MetricAlert> metricAlerts = new ArrayList<>(alerts);
         return metricAlertConverter.convertAllToJson(metricAlerts);
     }
 
     private List<TimeAlertJson> createTimeAlertsResponse(Set<TimeAlert> alarms) {
-        List<TimeAlert> metricAlarms = new ArrayList<>();
-        metricAlarms.addAll(alarms);
+        List<TimeAlert> metricAlarms = new ArrayList<>(alarms);
         return createTimeAlertsResponse(metricAlarms);
     }
 

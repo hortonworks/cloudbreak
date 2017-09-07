@@ -16,11 +16,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -177,7 +179,7 @@ public class AmbariClusterService implements ClusterService {
     private AuthorizationService authorizationService;
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Cluster create(IdentityUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
         Stack stack = stackService.getById(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
@@ -262,7 +264,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Cluster updateAmbariClientConfig(Long clusterId, HttpClientConfig ambariClientConfig) {
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setAmbariIp(ambariClientConfig.getApiAddress());
@@ -281,7 +283,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public void updateHostMetadata(Long clusterId, Map<String, List<String>> hostsPerHostGroup, HostMetadataState hostMetadataState) {
-        for (Map.Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
+        for (Entry<String, List<String>> hostGroupEntry : hostsPerHostGroup.entrySet()) {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterId, hostGroupEntry.getKey());
             if (hostGroup != null) {
                 Set<String> existingHosts = hostMetadataRepository.findEmptyHostsInHostGroup(hostGroup.getId()).stream()
@@ -345,7 +347,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
         Stack stack = stackService.getById(stackId);
         Cluster cluster = stack.getCluster();
@@ -428,7 +430,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) throws CloudbreakSecuritySetupException {
+    public void repairCluster(Long stackId, List<String> repairedHostGroups, boolean removeOnly) {
         Stack stack = stackService.get(stackId);
         Cluster cluster = stack.getCluster();
         Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
@@ -544,7 +546,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
         Stack stack = stackService.findLazy(stackId);
@@ -569,19 +571,19 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status) {
         return updateClusterStatusByStackId(stackId, status, "");
     }
 
     @Override
-    @Transactional(Transactional.TxType.NOT_SUPPORTED)
+    @Transactional(TxType.NOT_SUPPORTED)
     public Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) {
         return updateClusterStatusByStackId(stackId, status, "");
     }
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Cluster updateCluster(Cluster cluster) {
         LOGGER.debug("Updating cluster. clusterId: {}", cluster.getId());
         cluster = clusterRepository.save(cluster);
@@ -589,7 +591,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Cluster updateClusterMetadata(Long stackId) {
         Stack stack = stackService.findLazy(stackId);
         Cluster cluster = stack.getCluster();
@@ -649,9 +651,6 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
         Blueprint blueprint = blueprintService.get(blueprintId);
-        if (blueprint == null) {
-            throw new BadRequestException(String.format("Blueprint not exists with '%s' id.", blueprintId));
-        }
         Stack stack = stackService.getById(stackId);
         Cluster cluster = getCluster(stackId, stack);
         AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
@@ -662,7 +661,7 @@ public class AmbariClusterService implements ClusterService {
         if (validateBlueprint) {
             blueprintValidator.validateBlueprintForStack(blueprint, hostGroups, stack.getInstanceGroups());
         }
-        Boolean containerOrchestrator = false;
+        Boolean containerOrchestrator;
         try {
             containerOrchestrator = orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator();
         } catch (CloudbreakException e) {
@@ -746,7 +745,7 @@ public class AmbariClusterService implements ClusterService {
             }
             try {
                 flowManager.triggerClusterUpgrade(stack.getId());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 throw new CloudbreakServiceException(e);
             }
         }
@@ -828,10 +827,11 @@ public class AmbariClusterService implements ClusterService {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
             String blueprintName = root.path("Blueprints").path("blueprint_name").asText();
             Map<String, String> categories = ambariClient.getComponentsCategory(blueprintName, hostGroup);
-            for (String component : categories.keySet()) {
-                if (categories.get(component).equalsIgnoreCase(MASTER_CATEGORY)) {
+            for (Entry<String, String> entry : categories.entrySet()) {
+                if (entry.getValue().equalsIgnoreCase(MASTER_CATEGORY)) {
                     throw new BadRequestException(
-                            String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup, component));
+                            String.format("Cannot downscale the '%s' hostGroupAdjustment group, because it contains a '%s' component", hostGroup,
+                                    entry.getKey()));
                 }
             }
         } catch (IOException e) {
@@ -925,7 +925,7 @@ public class AmbariClusterService implements ClusterService {
 
         Set<BlueprintInputJson> blueprintInputJsons = new HashSet<>();
 
-        for (Map.Entry<String, String> stringStringEntry : results.entrySet()) {
+        for (Entry<String, String> stringStringEntry : results.entrySet()) {
             for (BlueprintParameterJson blueprintParameter : requests) {
                 if (stringStringEntry.getKey().equals(blueprintParameter.getName())) {
                     BlueprintInputJson blueprintInputJson = new BlueprintInputJson();
@@ -951,7 +951,7 @@ public class AmbariClusterService implements ClusterService {
     private void prepareResults(Set<BlueprintParameterJson> requests, Cluster cluster, Map<String, String> bpI, Map<String, String> results) {
         if (cluster.getBlueprintInputs().getValue() != null) {
             if (bpI != null) {
-                for (Map.Entry<String, String> stringStringEntry : bpI.entrySet()) {
+                for (Entry<String, String> stringStringEntry : bpI.entrySet()) {
                     if (!results.keySet().contains(stringStringEntry.getKey())) {
                         results.put(stringStringEntry.getKey(), stringStringEntry.getValue());
                     }
@@ -971,7 +971,7 @@ public class AmbariClusterService implements ClusterService {
         for (BlueprintParameterJson request : requests) {
             if (bpI != null) {
                 boolean contains = false;
-                for (Map.Entry<String, String> stringStringEntry : bpI.entrySet()) {
+                for (Entry<String, String> stringStringEntry : bpI.entrySet()) {
                     if (stringStringEntry.getKey().equals(request.getName())) {
                         contains = true;
                     }
@@ -1005,7 +1005,7 @@ public class AmbariClusterService implements ClusterService {
         AMBARI_CLUSTER_MANUALRECOVERY_REQUESTED("ambari.cluster.manualrecovery.requested"),
         AMBARI_CLUSTER_FAILED_NODES_REPORTED("ambari.cluster.failednodes.reported");
 
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;

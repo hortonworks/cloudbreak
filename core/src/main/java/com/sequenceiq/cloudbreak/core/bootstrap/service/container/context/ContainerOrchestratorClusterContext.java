@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class ContainerOrchestratorClusterContext extends StackContext {
 
-    private ContainerOrchestrator containerOrchestrator;
+    private final ContainerOrchestrator containerOrchestrator;
 
-    private GatewayConfig gatewayConfig;
+    private final GatewayConfig gatewayConfig;
 
     private Set<Node> nodes = new HashSet<>();
 

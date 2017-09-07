@@ -13,7 +13,7 @@ public class VerboseHostKeyVerifier implements HostKeyVerifier {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(VerboseHostKeyVerifier.class);
 
-    private Set<String> expectedFingerprints;
+    private final Set<String> expectedFingerprints;
 
     public VerboseHostKeyVerifier(Set<String> expectedFingerprints) {
         this.expectedFingerprints = expectedFingerprints;

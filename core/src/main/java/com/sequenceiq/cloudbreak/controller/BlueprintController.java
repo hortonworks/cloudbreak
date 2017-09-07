@@ -78,7 +78,6 @@ public class BlueprintController implements BlueprintEndpoint {
 
     @Override
     public BlueprintResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         Blueprint blueprint = blueprintService.get(id);
         return conversionService.convert(blueprint, BlueprintResponse.class);
     }

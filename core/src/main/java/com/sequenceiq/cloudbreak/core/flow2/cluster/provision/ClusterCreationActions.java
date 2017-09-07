@@ -19,16 +19,16 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.InstallClusterSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartAmbariSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.BootstrapMachinesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.HostMetadataSetupSuccess;
-import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
 
 @Configuration
 public class ClusterCreationActions {

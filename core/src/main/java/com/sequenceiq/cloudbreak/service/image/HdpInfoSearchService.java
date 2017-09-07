@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,12 +54,12 @@ public class HdpInfoSearchService {
         }
         List<AmbariCatalog> ambariCatalog;
         if (StringUtils.isEmpty(cbVersion) || "unspecified".equals(cbVersion)) {
-            ambariCatalog = imageCatalog.getAmbariVersions().stream().collect(Collectors.toList());
+            ambariCatalog = new ArrayList<>(imageCatalog.getAmbariVersions());
         } else {
             ambariCatalog = imageCatalog.getAmbariVersions().stream().filter(p -> p.getAmbariInfo().getCbVersions().contains(cbVersion))
                     .collect(Collectors.toList());
             if (CollectionUtils.isEmpty(ambariCatalog) && cbVersion.contains("dev")) {
-                ambariCatalog = imageCatalog.getAmbariVersions().stream().collect(Collectors.toList());
+                ambariCatalog = new ArrayList<>(imageCatalog.getAmbariVersions());
             }
         }
         List<AmbariCatalog> ambariCatalogs = ambariCatalog.stream()
@@ -69,9 +69,9 @@ public class HdpInfoSearchService {
                 .collect(Collectors.toList());
         if (!StringUtils.isEmpty(cbVersion) && cbVersion.contains("dev")) {
             List<AmbariCatalog> filteredCatalogs = cloudbreakVerionPrefixMatch(extractCbVersion(cbVersion), ambariCatalogs);
-            ambariCatalogs = filteredCatalogs.size() > 0 ? filteredCatalogs : ambariCatalogs;
+            ambariCatalogs = !filteredCatalogs.isEmpty() ? filteredCatalogs : ambariCatalogs;
         }
-        Collections.sort(ambariCatalogs, new VersionComparator());
+        ambariCatalogs.sort(new VersionComparator());
         LOGGER.info("Prefix matched Ambari versions: {}. Ambari search prefix: {}", ambariCatalogs, ambariVersion);
         return ambariCatalogs;
     }
@@ -89,7 +89,7 @@ public class HdpInfoSearchService {
         }
         List<HDPInfo> hdpInfos = ambariCatalog.getAmbariInfo().getHdp().stream()
                 .filter(p -> p.getVersion().startsWith(hdpVersion)).collect(Collectors.toList());
-        Collections.sort(hdpInfos, new VersionComparator());
+        hdpInfos.sort(new VersionComparator());
         LOGGER.info("Prefix matched HDP versions: {} for Ambari version: {}. HDP search prefix: {}", hdpInfos, ambariCatalog.getVersion(), hdpVersion);
         return hdpInfos;
 

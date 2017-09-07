@@ -10,9 +10,10 @@ import spark.Request;
 import spark.Response;
 
 public class ConsulMemberResponse extends ITResponse {
+
     private static final int ALIVE_STATUS = 1;
 
-    private int serverNumber;
+    private final int serverNumber;
 
     public ConsulMemberResponse(int serverNumber) {
         this.serverNumber = serverNumber;
@@ -24,9 +25,9 @@ public class ConsulMemberResponse extends ITResponse {
             int subAddress = Integer.min(254, serverNumber - i * 254);
             for (int j = 1; j <= subAddress; j++) {
                 Member member = new Member();
-                member.setAddress("192.168." + i + "." + j);
+                member.setAddress("192.168." + i + '.' + j);
                 member.setStatus(ALIVE_STATUS);
-                member.setName("consul-" + i + "-" + j);
+                member.setName("consul-" + i + '-' + j);
                 members.add(member);
             }
         }

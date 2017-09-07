@@ -5,12 +5,8 @@ import org.testng.ITestResult;
 import org.testng.internal.IResultListener2;
 
 public class ThreadLocalTestListener implements IResultListener2 {
-    private ThreadLocal<VerboseLogReporter> logReporter = new ThreadLocal<VerboseLogReporter>() {
-        @Override
-        protected VerboseLogReporter initialValue() {
-            return new VerboseLogReporter();
-        }
-    };
+
+    private static final ThreadLocal<VerboseLogReporter> LOG_REPORTER = ThreadLocal.withInitial(VerboseLogReporter::new);
 
     @Override
     public void beforeConfiguration(ITestResult tr) {
@@ -67,6 +63,6 @@ public class ThreadLocalTestListener implements IResultListener2 {
     }
 
     private VerboseLogReporter getLogReporter() {
-        return logReporter.get();
+        return LOG_REPORTER.get();
     }
 }

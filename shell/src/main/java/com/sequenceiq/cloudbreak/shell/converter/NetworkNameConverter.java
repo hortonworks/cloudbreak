@@ -20,9 +20,6 @@ public class NetworkNameConverter extends AbstractConverter<NetworkName> {
     @Inject
     private ResponseTransformer responseTransformer;
 
-    public NetworkNameConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return NetworkName.class.isAssignableFrom(type);
@@ -33,7 +30,7 @@ public class NetworkNameConverter extends AbstractConverter<NetworkName> {
         try {
             Map<String, String> networksMap = responseTransformer.transformToMap(cloudbreakClient.networkEndpoint().getPublics(), "id", "name");
             return getAllPossibleValues(completions, networksMap.values());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

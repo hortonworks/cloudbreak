@@ -39,7 +39,7 @@ public class ResourceDefinitionHandler implements CloudPlatformEventHandler<Reso
             } else {
                 request.getResult().onNext(new ResourceDefinitionResult(request, definition));
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new ResourceDefinitionResult(e.getMessage(), e, request));
         }
     }

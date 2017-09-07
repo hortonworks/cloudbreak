@@ -50,7 +50,6 @@ public class FlexSubscriptionController implements FlexSubscriptionEndpoint {
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser cbUser = authenticatedUserService.getCbUser();
         FlexSubscription subscription = flexService.findOneByName(name);
         flexService.delete(subscription);
     }

@@ -92,46 +92,46 @@ public class History {
     }
 
     public History(ScalingStatus status, String statusReason, int originalNodeCount) {
-        this.scalingStatus = status;
+        scalingStatus = status;
         this.statusReason = statusReason;
         this.originalNodeCount = originalNodeCount;
-        this.timestamp = System.currentTimeMillis();
+        timestamp = System.currentTimeMillis();
     }
 
     public History withScalingPolicy(ScalingPolicy policy) {
-        this.adjustment = policy.getScalingAdjustment();
-        this.adjustmentType = policy.getAdjustmentType();
-        this.hostGroup = policy.getHostGroup();
+        adjustment = policy.getScalingAdjustment();
+        adjustmentType = policy.getAdjustmentType();
+        hostGroup = policy.getHostGroup();
         return this;
     }
 
     public History withAlert(BaseAlert alert) {
         if (alert instanceof MetricAlert) {
             MetricAlert ma = (MetricAlert) alert;
-            this.properties.put(ALERT_DEFINITION, ma.getDefinitionName());
-            this.properties.put(PERIOD, "" + ma.getPeriod());
-            this.properties.put(ALERT_STATE, ma.getAlertState().name());
-            this.alertType = AlertType.METRIC;
+            properties.put(ALERT_DEFINITION, ma.getDefinitionName());
+            properties.put(PERIOD, "" + ma.getPeriod());
+            properties.put(ALERT_STATE, ma.getAlertState().name());
+            alertType = AlertType.METRIC;
         } else if (alert instanceof TimeAlert) {
             TimeAlert ta = (TimeAlert) alert;
-            this.properties.put(TIME_ZONE, ta.getTimeZone());
-            this.properties.put(CRON, ta.getCron());
-            this.alertType = AlertType.TIME;
+            properties.put(TIME_ZONE, ta.getTimeZone());
+            properties.put(CRON, ta.getCron());
+            alertType = AlertType.TIME;
         } else if (alert instanceof PrometheusAlert) {
             PrometheusAlert pa = (PrometheusAlert) alert;
-            this.properties.put(ALERT_RULE, pa.getAlertRule());
-            this.properties.put(PERIOD, "" + pa.getPeriod());
-            this.properties.put(ALERT_STATE, pa.getAlertState().name());
-            this.properties.put(PARAMETERS, pa.getParameters().getValue());
+            properties.put(ALERT_RULE, pa.getAlertRule());
+            properties.put(PERIOD, "" + pa.getPeriod());
+            properties.put(ALERT_STATE, pa.getAlertState().name());
+            properties.put(PARAMETERS, pa.getParameters().getValue());
         }
-        this.properties.put(ALERT_DESCRIPTION, alert.getDescription());
+        properties.put(ALERT_DESCRIPTION, alert.getDescription());
         return this;
     }
 
     public History withCluster(Cluster cluster) {
-        this.clusterId = cluster.getId();
-        this.cbStackId = cluster.getStackId();
-        this.userId = cluster.getUser().getId();
+        clusterId = cluster.getId();
+        cbStackId = cluster.getStackId();
+        userId = cluster.getUser().getId();
         return this;
     }
 

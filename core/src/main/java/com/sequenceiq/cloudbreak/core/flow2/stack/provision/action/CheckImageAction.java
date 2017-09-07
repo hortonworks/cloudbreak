@@ -42,7 +42,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
     }
 
     @Override
-    protected void doExecute(final StackContext context, StackEvent payload, Map<Object, Object> variables) {
+    protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
         CheckImageResult checkImageResult = stackCreationService.checkImage(context);
         switch (checkImageResult.getImageStatus()) {
             case IN_PROGRESS:
@@ -78,7 +78,7 @@ public class CheckImageAction extends AbstractStackCreationAction<StackEvent> {
         payloadConverters.add(new PrepareImageResultToStackEventConverter());
     }
 
-    private void repeat(final StackContext context) {
+    private void repeat(StackContext context) {
         timer.submit(aLong -> sendEvent(context.getFlowId(), new StackEvent(StackCreationEvent.IMAGE_COPY_CHECK_EVENT.event(),
                 context.getStack().getId())), REPEAT_TIME, TimeUnit.MILLISECONDS);
     }

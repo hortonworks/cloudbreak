@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_FAILURE_HANDLED;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_FLOW_FINISHED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterEvent.EPHEMERAL_CLUSTER_UPDATE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterState.EPHEMERAL_CLUSTER_UPDATE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.EphemeralClusterState.EPHEMERAL_CLUSTER_UPDATE_FINISHED_STATE;
@@ -16,12 +16,13 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class EphemeralClusterFlowConfig extends AbstractFlowConfiguration<EphemeralClusterState, EphemeralClusterEvent> {
 
     private static final List<Transition<EphemeralClusterState, EphemeralClusterEvent>> TRANSITIONS =
-            new Transition.Builder<EphemeralClusterState, EphemeralClusterEvent>()
+            new Builder<EphemeralClusterState, EphemeralClusterEvent>()
                     .defaultFailureEvent(EPHEMERAL_CLUSTER_UPDATE_FAILED)
                     .from(INIT_STATE).to(EPHEMERAL_CLUSTER_UPDATE_STATE).event(EPHEMERAL_CLUSTER_UPDATE_TRIGGER_EVENT).noFailureEvent()
                     .from(EPHEMERAL_CLUSTER_UPDATE_STATE).to(EPHEMERAL_CLUSTER_UPDATE_FINISHED_STATE).event(EPHEMERAL_CLUSTER_UPDATE_FINISHED)

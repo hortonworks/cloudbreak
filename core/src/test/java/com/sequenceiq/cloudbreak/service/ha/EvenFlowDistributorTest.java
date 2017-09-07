@@ -27,7 +27,7 @@ public class EvenFlowDistributorTest {
 
     private static final String NODE_3_ID = "65B623B9-9FE7-41F4-95A5-848DCB0C108E";
 
-    private EvenFlowDistributor flowDistributor = new EvenFlowDistributor();
+    private final EvenFlowDistributor flowDistributor = new EvenFlowDistributor();
 
     @Test
     public void testOddFlowDistribution() {

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.stereotype.Component;
 
@@ -25,7 +26,7 @@ public class JsonToTopologyConverter extends AbstractConversionServiceAwareConve
     private List<TopologyRecord> convertNodes(Map<String, String> nodes) {
         List<TopologyRecord> result = Lists.newArrayList();
         if (nodes != null) {
-            for (Map.Entry<String, String> node : nodes.entrySet()) {
+            for (Entry<String, String> node : nodes.entrySet()) {
                 result.add(new TopologyRecord(node.getKey(), node.getValue()));
             }
         }

@@ -198,7 +198,7 @@ public class ClusterHostServiceRunner {
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
             List<String> exposedServices = exposedJson.get(ExposedServices.class).getServices();
             if (blueprintProcessor.componentExistsInBlueprint("HIVE_SERVER_INTERACTIVE", cluster.getBlueprint().getBlueprintText())) {
-                exposedServices = exposedServices.stream().map(x -> x.equals("HIVE") ? "HIVE_INTERACTIVE" : x).collect(Collectors.toList());
+                exposedServices = exposedServices.stream().map(x -> "HIVE".equals(x) ? "HIVE_INTERACTIVE" : x).collect(Collectors.toList());
             }
             gateway.put("exposed", exposedServices);
         } else {
@@ -209,7 +209,7 @@ public class ClusterHostServiceRunner {
         servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
     }
 
-    private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) throws IOException {
+    private void saveLdapPillar(LdapConfig ldapConfig, Map<String, SaltPillarProperties> servicePillar) {
         if (ldapConfig != null) {
             servicePillar.put("ldap", new SaltPillarProperties("/gateway/ldap.sls", singletonMap("ldap", ldapConfig)));
         }
@@ -218,7 +218,7 @@ public class ClusterHostServiceRunner {
     private void saveDockerPillar(ExecutorType executorType, Map<String, SaltPillarProperties> servicePillar) {
         Map<String, Object> dockerMap = new HashMap<>();
 
-        dockerMap.put("enableContainerExecutor", ExecutorType.CONTAINER.equals(executorType) ? true : false);
+        dockerMap.put("enableContainerExecutor", ExecutorType.CONTAINER.equals(executorType));
 
         servicePillar.put("docker", new SaltPillarProperties("/docker/init.sls", singletonMap("docker", dockerMap)));
     }

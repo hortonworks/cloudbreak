@@ -13,7 +13,7 @@ public class EndpointRule {
     public EndpointRule(String action, String remoteSubNet) {
         this.action = action;
         this.remoteSubNet = remoteSubNet;
-        this.description = "Added by Cloudbreak";
+        description = "Added by Cloudbreak";
     }
 
     public String getAction() {
@@ -35,7 +35,7 @@ public class EndpointRule {
         private final String text;
 
         Action(String value) {
-            this.text = value;
+            text = value;
         }
 
         public String getText() {

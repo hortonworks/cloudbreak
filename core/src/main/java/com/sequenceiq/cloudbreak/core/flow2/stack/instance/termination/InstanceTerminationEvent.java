@@ -10,7 +10,7 @@ public enum InstanceTerminationEvent implements FlowEvent {
     TERMINATION_FINALIZED_EVENT("TERMINATEINSTANCEFINALIZED"),
     TERMINATION_FAIL_HANDLED_EVENT("TERMINATIONINSTANCEFAILHANDLED");
 
-    private String event;
+    private final String event;
 
     InstanceTerminationEvent(String event) {
         this.event = event;

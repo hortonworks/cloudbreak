@@ -26,7 +26,7 @@ public class MockSshServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockSshServer.class);
 
-    private Map<Integer, SshServer> sshServerMap = new HashMap<>();
+    private final Map<Integer, SshServer> sshServerMap = new HashMap<>();
 
     @Inject
     private ResourceLoader resourceLoader;

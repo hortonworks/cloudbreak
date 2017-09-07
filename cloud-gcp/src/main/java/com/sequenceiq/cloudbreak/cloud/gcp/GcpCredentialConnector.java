@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -13,8 +11,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.model.Disk;
-import com.google.api.services.compute.model.DiskList;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -72,14 +68,10 @@ public class GcpCredentialConnector implements CredentialConnector {
     }
 
     private void listDisks(GcpContext gcpContext, Compute compute) throws IOException {
-        List<Disk> disks = new ArrayList<>();
         for (AvailabilityZone gcpZone : gcpPlatformParameters.availabilityZones().getAllAvailabilityZone()) {
             try {
-                Compute.Disks.List list = compute.disks().list(gcpContext.getProjectId(), gcpZone.value());
-                DiskList execute = list.execute();
-                disks.addAll(execute.getItems());
-            } catch (NullPointerException ex) {
-                disks.addAll(new ArrayList<>());
+                compute.disks().list(gcpContext.getProjectId(), gcpZone.value()).execute();
+            } catch (NullPointerException ignore) {
             }
         }
     }

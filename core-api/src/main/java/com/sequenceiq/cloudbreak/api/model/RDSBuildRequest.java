@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,11 +13,11 @@ import io.swagger.annotations.ApiModelProperty;
 public class RDSBuildRequest implements JsonEntity {
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDS_REQUEST, required = true)
+    @ApiModelProperty(value = RDSConfig.RDS_REQUEST, required = true)
     private RDSConfigRequest rdsConfigRequest;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDS_REQUEST_CLUSTER_NAME, required = true)
+    @ApiModelProperty(value = RDSConfig.RDS_REQUEST_CLUSTER_NAME, required = true)
     private String clusterName;
 
     public RDSConfigRequest getRdsConfigRequest() {

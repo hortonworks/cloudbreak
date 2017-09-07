@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -155,17 +156,17 @@ public class AlertService {
     public BaseAlert getBaseAlert(long clusterId, long alertId) {
         try {
             return findMetricAlertByCluster(clusterId, alertId);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Could not found Metric alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
         try {
             return findTimeAlertByCluster(clusterId, alertId);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Could not found Time alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
         try {
             return findPrometheusAlertByCluster(clusterId, alertId);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Could not found Prometheus alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
 
@@ -191,7 +192,7 @@ public class AlertService {
         List<Map<String, String>> alertDefinitions = ambariClientProvider.createAmbariClient(cluster).getAlertDefinitions();
         for (Map<String, String> alertDefinition : alertDefinitions) {
             Map<String, Object> tmp = new HashMap<>();
-            for (Map.Entry<String, String> stringStringEntry : alertDefinition.entrySet()) {
+            for (Entry<String, String> stringStringEntry : alertDefinition.entrySet()) {
                 tmp.put(stringStringEntry.getKey(), stringStringEntry.getValue());
             }
             ret.add(tmp);
@@ -254,7 +255,7 @@ public class AlertService {
 
     public void addPrometheusAlertsToConsul(Cluster cluster) {
         Set<PrometheusAlert> alerts = prometheusAlertRepository.findAllByCluster(cluster.getId());
-        alerts.stream().forEach(alert -> consulKeyValueService.addAlert(cluster, alert));
+        alerts.forEach(alert -> consulKeyValueService.addAlert(cluster, alert));
     }
 
     public List<AlertRuleDefinitionEntry> getPrometheusAlertDefinitions() {
@@ -274,7 +275,7 @@ public class AlertService {
         try {
             client.createAlert(json);
             LOGGER.info("Alert: {} added to the cluster", alertName);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Cannot add '{}' to the cluster", alertName);
         }
     }

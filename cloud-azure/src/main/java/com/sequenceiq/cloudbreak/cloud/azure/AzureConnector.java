@@ -53,10 +53,12 @@ public class AzureConnector implements CloudConnector {
     @Inject
     private AzurePlatformResources azurePlatformResources;
 
+    @Override
     public Authenticator authentication() {
         return azureAuthenticator;
     }
 
+    @Override
     public Setup setup() {
         return azureSetup;
     }
@@ -66,22 +68,27 @@ public class AzureConnector implements CloudConnector {
         return Arrays.asList(azureTagValidator, azureResourceGroupValidator);
     }
 
+    @Override
     public CredentialConnector credentials() {
         return azureCredentialConnector;
     }
 
+    @Override
     public ResourceConnector resources() {
         return azureResourceConnector;
     }
 
+    @Override
     public InstanceConnector instances() {
         return azureInstanceConnector;
     }
 
+    @Override
     public MetadataCollector metadata() {
         return azureMetadataCollector;
     }
 
+    @Override
     public PlatformParameters parameters() {
         return azurePlatformParameters;
     }
@@ -91,10 +98,12 @@ public class AzureConnector implements CloudConnector {
         return azurePlatformResources;
     }
 
+    @Override
     public Platform platform() {
         return AzureConstants.PLATFORM;
     }
 
+    @Override
     public Variant variant() {
         return AzureConstants.VARIANT;
     }

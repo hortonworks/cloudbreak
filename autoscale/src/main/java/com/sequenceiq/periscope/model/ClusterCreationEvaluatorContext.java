@@ -7,9 +7,9 @@ import com.sequenceiq.periscope.domain.Cluster;
 
 public class ClusterCreationEvaluatorContext {
 
-    private AutoscaleStackResponse stack;
+    private final AutoscaleStackResponse stack;
 
-    private Optional<Cluster> clusterOptional;
+    private final Optional<Cluster> clusterOptional;
 
     public ClusterCreationEvaluatorContext(AutoscaleStackResponse stack, Optional<Cluster> clusterOptional) {
         this.stack = stack;

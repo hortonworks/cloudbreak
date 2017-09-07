@@ -15,7 +15,7 @@ public class ResourceDefinitionResult extends CloudPlatformResult {
 
     public ResourceDefinitionResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request) {
         super(statusReason, errorDetails, request);
-        this.definition = null;
+        definition = null;
     }
 
     public String getDefinition() {
@@ -24,7 +24,7 @@ public class ResourceDefinitionResult extends CloudPlatformResult {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ResourceDefinitionResult{");
+        StringBuilder sb = new StringBuilder("ResourceDefinitionResult{");
         sb.append("definition='").append(JsonUtil.minify(definition)).append('\'');
         sb.append('}');
         return sb.toString();

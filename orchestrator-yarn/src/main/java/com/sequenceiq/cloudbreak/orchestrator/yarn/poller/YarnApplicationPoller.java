@@ -24,8 +24,6 @@ public class YarnApplicationPoller {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(YarnApplicationPoller.class);
 
-    public YarnApplicationPoller() { }
-
     public void waitForApplicationStart(String appName, String apiEndpoint) throws CloudbreakOrchestratorException, MalformedURLException {
 
         YarnClient dashHttpClient = new YarnHttpClient(apiEndpoint);
@@ -50,7 +48,7 @@ public class YarnApplicationPoller {
                         sleep();
                     } else {
                         // Validate the container is running
-                        if (applicationDetailResponse.getContainers().size() > 0) {
+                        if (!applicationDetailResponse.getContainers().isEmpty()) {
                             Container appContainer = applicationDetailResponse.getContainers().get(0);
                             if (!appContainer.getState().equals(ContainerState.READY.name())) {
                                 String msg = String.format("Application %s not ready, in %s state, sleeping 1000 ms",

@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.container.DockerContainer;
-import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint.Builder;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -116,7 +116,7 @@ public class ClusterContainerRunnerTest {
         when(containerService.save(anyList())).thenReturn(new ArrayList<>());
         when(constraintFactory.getAmbariAgentConstraint(ambariServer.getHost(), null, stack.cloudPlatform(),
                 TestUtil.hostGroup(), hostGroupAdjustment.getScalingAdjustment(), new ArrayList<>(), ""))
-                .thenReturn(new ContainerConstraint.Builder().build());
+                .thenReturn(new Builder().build());
         underTest.addClusterContainers(stack.getId(), hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment());
     }
 

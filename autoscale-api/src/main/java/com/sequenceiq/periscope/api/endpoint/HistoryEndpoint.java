@@ -13,8 +13,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.periscope.api.model.HistoryJson;
-import com.sequenceiq.periscope.doc.ApiDescription;
 import com.sequenceiq.periscope.doc.ApiDescription.HistoryNotes;
+import com.sequenceiq.periscope.doc.ApiDescription.HistoryOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,12 +26,12 @@ public interface HistoryEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.HistoryOpDescription.HISTORY_GET_ALL, produces = JSON, notes = HistoryNotes.NOTES)
-    List<HistoryJson> getHistory(@PathParam(value = "clusterId") Long clusterId);
+    @ApiOperation(value = HistoryOpDescription.HISTORY_GET_ALL, produces = JSON, notes = HistoryNotes.NOTES)
+    List<HistoryJson> getHistory(@PathParam("clusterId") Long clusterId);
 
     @GET
     @Path("{historyId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.HistoryOpDescription.HISTORY_GET, produces = JSON, notes = HistoryNotes.NOTES)
-    HistoryJson getHistory(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "historyId") Long historyId);
+    @ApiOperation(value = HistoryOpDescription.HISTORY_GET, produces = JSON, notes = HistoryNotes.NOTES)
+    HistoryJson getHistory(@PathParam("clusterId") Long clusterId, @PathParam("historyId") Long historyId);
 }

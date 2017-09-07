@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.sequenceiq.cloudbreak.controller.json.ValidationResult;
@@ -18,7 +18,7 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
                     .append(constraintViolation.getPropertyPath())
                     .append(" - ")
                     .append(constraintViolation.getMessage())
-                    .append("\n");
+                    .append('\n');
         }
         return violations.toString();
     }
@@ -37,7 +37,7 @@ public class ConstraintViolationExceptionMapper extends SendNotificationExceptio
     }
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.BAD_REQUEST;
+    Status getResponseStatus() {
+        return Status.BAD_REQUEST;
     }
 }

@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.PlatformResourceRequestModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,19 +14,19 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformResourceRequestJson {
 
-    @ApiModelProperty(value = ModelDescriptions.PlatformResourceRequestModelDescription.CREDENTIAL_ID)
+    @ApiModelProperty(PlatformResourceRequestModelDescription.CREDENTIAL_ID)
     private Long credentialId;
 
-    @ApiModelProperty(value = ModelDescriptions.PlatformResourceRequestModelDescription.CREDENTIAL_NAME)
+    @ApiModelProperty(PlatformResourceRequestModelDescription.CREDENTIAL_NAME)
     private String credentialName;
 
-    @ApiModelProperty(value = ModelDescriptions.PlatformResourceRequestModelDescription.REGION)
+    @ApiModelProperty(PlatformResourceRequestModelDescription.REGION)
     private String region;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.PLATFORM_VARIANT)
+    @ApiModelProperty(StackModelDescription.PLATFORM_VARIANT)
     private String platformVariant;
 
-    @ApiModelProperty(ModelDescriptions.PlatformResourceRequestModelDescription.FILTER)
+    @ApiModelProperty(PlatformResourceRequestModelDescription.FILTER)
     private Map<String, String> filters = new HashMap<>();
 
     @ApiModelProperty(hidden = true)

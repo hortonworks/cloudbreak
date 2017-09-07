@@ -1,20 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.azure.view;
 
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
-import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 
 public class AzureStorageView {
 
-    private AzureCredentialView acv;
+    private final AzureCredentialView acv;
 
-    private CloudContext cloudContext;
+    private final CloudContext cloudContext;
 
-    private AzureStorage armStorage;
+    private final AzureStorage armStorage;
 
-    private ArmAttachedStorageOption armAttachedStorageOption;
+    private final ArmAttachedStorageOption armAttachedStorageOption;
 
     public AzureStorageView(AzureCredentialView acv, CloudContext cloudContext, AzureStorage armStorage,
             ArmAttachedStorageOption armAttachedStorageOption) {

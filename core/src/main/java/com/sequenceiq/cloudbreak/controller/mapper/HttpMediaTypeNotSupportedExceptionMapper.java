@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import org.springframework.web.HttpMediaTypeNotSupportedException;
@@ -9,7 +9,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 public class HttpMediaTypeNotSupportedExceptionMapper extends BaseExceptionMapper<HttpMediaTypeNotSupportedException> {
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.NOT_ACCEPTABLE;
+    Status getResponseStatus() {
+        return Status.NOT_ACCEPTABLE;
     }
 }

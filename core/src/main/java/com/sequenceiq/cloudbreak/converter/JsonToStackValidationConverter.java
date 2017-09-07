@@ -13,7 +13,6 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.FluentIterable;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
@@ -111,16 +110,16 @@ public class JsonToStackValidationConverter extends AbstractConversionServiceAwa
         }
     }
 
-    private Set<HostGroup> convertHostGroupsFromJson(Set<InstanceGroup> instanceGroups, final Set<HostGroupRequest> hostGroupsJsons) {
+    private Set<HostGroup> convertHostGroupsFromJson(Set<InstanceGroup> instanceGroups, Set<HostGroupRequest> hostGroupsJsons) {
         Set<HostGroup> hostGroups = new HashSet<>();
-        for (final HostGroupRequest json : hostGroupsJsons) {
+        for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = new HostGroup();
             hostGroup.setName(json.getName());
             Constraint constraint = getConversionService().convert(json.getConstraint(), Constraint.class);
-            final String instanceGroupName = json.getConstraint().getInstanceGroupName();
+            String instanceGroupName = json.getConstraint().getInstanceGroupName();
             if (instanceGroupName != null) {
                 InstanceGroup instanceGroup =
-                        FluentIterable.from(instanceGroups).firstMatch(instanceGroup1 -> instanceGroup1.getGroupName().equals(instanceGroupName)).get();
+                        instanceGroups.stream().filter(instanceGroup1 -> instanceGroup1.getGroupName().equals(instanceGroupName)).findFirst().get();
                 if (instanceGroup == null) {
                     throw new BadRequestException(String.format("Cannot find instance group named '%s' in instance group list", instanceGroupName));
                 }

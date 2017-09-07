@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
-@ApiModel(value = "FailurePolicyResponse")
+@ApiModel("FailurePolicyResponse")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class FailurePolicyResponse extends FailurePolicyBase {
 

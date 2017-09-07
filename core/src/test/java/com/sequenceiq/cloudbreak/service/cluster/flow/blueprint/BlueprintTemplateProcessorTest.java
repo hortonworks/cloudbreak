@@ -34,7 +34,7 @@ public class BlueprintTemplateProcessorTest {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @InjectMocks
-    private BlueprintTemplateProcessor underTest = new BlueprintTemplateProcessor();
+    private final BlueprintTemplateProcessor underTest = new BlueprintTemplateProcessor();
 
     @Before
     public void before() {

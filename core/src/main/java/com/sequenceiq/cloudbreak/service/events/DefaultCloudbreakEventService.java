@@ -95,7 +95,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
                     .where(CloudbreakEventSpecifications.eventsForUser(owner))
                     .and(CloudbreakEventSpecifications.eventsSince(since)));
         }
-        return null != events ? events : Collections.EMPTY_LIST;
+        return null != events ? events : Collections.emptyList();
     }
 
     @Override
@@ -105,7 +105,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
         if (stackId != null) {
             events = eventRepository.findCloudbreakEventsForStack(owner.getUserId(), stackId);
         }
-        return null != events ? events : Collections.EMPTY_LIST;
+        return null != events ? events : Collections.emptyList();
     }
 
     private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage, String instanceGroupName) {

@@ -15,9 +15,9 @@ import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
@@ -70,5 +70,5 @@ public interface ClusterService {
 
     void failureReport(Long stackId, List<String> failedNodes) throws CloudbreakSecuritySetupException;
 
-    void repairCluster(Long stackId, List<String> hostGroups, boolean removeOnly) throws CloudbreakSecuritySetupException;
+    void repairCluster(Long stackId, List<String> hostGroups, boolean removeOnly);
 }

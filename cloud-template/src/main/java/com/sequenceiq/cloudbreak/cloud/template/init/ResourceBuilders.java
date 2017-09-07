@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.template.init;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -31,11 +31,11 @@ public class ResourceBuilders {
     @Inject
     private List<GroupResourceBuilder> group;
 
-    private Map<Platform, List<NetworkResourceBuilder>> networkChain = new HashMap<>();
+    private final Map<Platform, List<NetworkResourceBuilder>> networkChain = new HashMap<>();
 
-    private Map<Platform, List<GroupResourceBuilder>> groupChain = new HashMap<>();
+    private final Map<Platform, List<GroupResourceBuilder>> groupChain = new HashMap<>();
 
-    private Map<Platform, List<ComputeResourceBuilder>> computeChain = new HashMap<>();
+    private final Map<Platform, List<ComputeResourceBuilder>> computeChain = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -59,41 +59,41 @@ public class ResourceBuilders {
 
     private void initNetwork(BuilderComparator comparator) {
         for (NetworkResourceBuilder builder : network) {
-            List<NetworkResourceBuilder> chain = this.networkChain.get(builder.platform());
+            List<NetworkResourceBuilder> chain = networkChain.get(builder.platform());
             if (chain == null) {
                 chain = new LinkedList<>();
-                this.networkChain.put(builder.platform(), chain);
+                networkChain.put(builder.platform(), chain);
             }
             chain.add(builder);
-            Collections.sort(chain, comparator);
+            chain.sort(comparator);
         }
     }
 
     private void initCompute(BuilderComparator comparator) {
         for (ComputeResourceBuilder builder : compute) {
-            List<ComputeResourceBuilder> chain = this.computeChain.get(builder.platform());
+            List<ComputeResourceBuilder> chain = computeChain.get(builder.platform());
             if (chain == null) {
                 chain = new LinkedList<>();
-                this.computeChain.put(builder.platform(), chain);
+                computeChain.put(builder.platform(), chain);
             }
             chain.add(builder);
-            Collections.sort(chain, comparator);
+            chain.sort(comparator);
         }
     }
 
     private void initGroup(BuilderComparator comparator) {
         for (GroupResourceBuilder builder : group) {
-            List<GroupResourceBuilder> chain = this.groupChain.get(builder.platform());
+            List<GroupResourceBuilder> chain = groupChain.get(builder.platform());
             if (chain == null) {
                 chain = new LinkedList<>();
-                this.groupChain.put(builder.platform(), chain);
+                groupChain.put(builder.platform(), chain);
             }
             chain.add(builder);
-            Collections.sort(chain, comparator);
+            chain.sort(comparator);
         }
     }
 
-    private class BuilderComparator implements Comparator<OrderedBuilder> {
+    private static class BuilderComparator implements Comparator<OrderedBuilder>, Serializable {
         @Override
         public int compare(OrderedBuilder o1, OrderedBuilder o2) {
             return Integer.compare(o1.order(), o2.order());

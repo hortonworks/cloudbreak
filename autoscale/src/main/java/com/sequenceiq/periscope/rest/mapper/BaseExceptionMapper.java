@@ -1,6 +1,7 @@
 package com.sequenceiq.periscope.rest.mapper;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseExceptionMapper.class);
 
+    @Override
     public Response toResponse(E exception) {
         LOGGER.error(exception.getMessage(), exception);
         return Response.status(getResponseStatus()).entity(getEntity(exception)).build();
@@ -21,5 +23,5 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
         return new ExceptionResult(exception.getMessage());
     }
 
-    abstract Response.Status getResponseStatus();
+    abstract Status getResponseStatus();
 }

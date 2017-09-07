@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.swagger.annotations.ApiModel;
 
-@ApiModel(value = "OrchestratorRequest")
+@ApiModel("OrchestratorRequest")
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrchestratorRequest extends OrchestratorBase {
 }

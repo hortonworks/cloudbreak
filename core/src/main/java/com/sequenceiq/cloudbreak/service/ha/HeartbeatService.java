@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
 
 @Service
 public class HeartbeatService {
@@ -96,12 +98,12 @@ public class HeartbeatService {
                         self.setLastUpdated(clock.getCurrentTime());
                         cloudbreakNodeRepository.save(self);
                         return true;
-                    } catch (Exception e) {
+                    } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
-                        throw new Retry.ActionWentFail(e.getMessage());
+                        throw new ActionWentFail(e.getMessage());
                     }
                 });
-            } catch (Retry.ActionWentFail af) {
+            } catch (ActionWentFail af) {
                 LOGGER.error(String.format("Failed to update the heartbeat timestamp 5 times for node %s: %s", nodeId, af.getMessage()));
                 cancelEveryFlowWithoutDbUpdate();
             }
@@ -122,7 +124,7 @@ public class HeartbeatService {
 
             try {
                 cleanupNodes(failedNodes);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LOGGER.error("Failed to cleanup the nodes, somebody might have already done it..", e);
             }
 
@@ -132,7 +134,7 @@ public class HeartbeatService {
             for (String flow : newFlows) {
                 try {
                     flow2Handler.restartFlow(flow);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     LOGGER.error(String.format("Failed to restart flow: %s", flow), e);
                 }
             }
@@ -155,17 +157,17 @@ public class HeartbeatService {
 
         if (!failedFlowLogs.isEmpty()) {
             LOGGER.info("The following flows will be distributed across the active nodes: {}", getFlowIds(failedFlowLogs));
-            List<FlowLog> updatedFlowLogs = new ArrayList<>();
             List<FlowLog> invalidFlows = getInvalidFlows(failedFlowLogs);
+            List<FlowLog> updatedFlowLogs = new ArrayList<>(invalidFlows.size());
             invalidFlows.forEach(fl -> fl.setFinalized(true));
             updatedFlowLogs.addAll(invalidFlows);
             failedFlowLogs.removeAll(invalidFlows);
             LOGGER.info("The following flows have been filtered out from distribution: {}", getFlowIds(invalidFlows));
             Map<CloudbreakNode, List<String>> flowDistribution = flowDistributor.distribute(getFlowIds(failedFlowLogs), activeNodes);
-            for (CloudbreakNode node : flowDistribution.keySet()) {
-                flowDistribution.get(node).forEach(flowId ->
+            for (Entry<CloudbreakNode, List<String>> entry : flowDistribution.entrySet()) {
+                entry.getValue().forEach(flowId ->
                         failedFlowLogs.stream().filter(flowLog -> flowLog.getFlowId().equalsIgnoreCase(flowId)).forEach(flowLog -> {
-                            flowLog.setCloudbreakNodeId(node.getUuid());
+                            flowLog.setCloudbreakNodeId(entry.getKey().getUuid());
                             updatedFlowLogs.add(flowLog);
                         }));
             }

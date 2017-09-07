@@ -5,7 +5,7 @@ public enum AlertOperator {
     LESS_THAN("<"),
     MORE_THAN(">");
 
-    private String operator;
+    private final String operator;
 
     AlertOperator(String operator) {
         this.operator = operator;

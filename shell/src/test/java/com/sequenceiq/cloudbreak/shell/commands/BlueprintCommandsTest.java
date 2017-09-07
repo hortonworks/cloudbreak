@@ -44,7 +44,7 @@ public class BlueprintCommandsTest {
 
     private BlueprintResponse dummyResult;
 
-    private RuntimeException expectedException = new RuntimeException("something not found");
+    private final RuntimeException expectedException = new RuntimeException("something not found");
 
     @Before
     public void setUp() {

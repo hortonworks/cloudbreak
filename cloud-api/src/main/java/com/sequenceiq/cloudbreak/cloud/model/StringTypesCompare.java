@@ -3,11 +3,12 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static java.lang.Character.isDigit;
 import static java.lang.Character.isSpaceChar;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 
-public class StringTypesCompare implements Comparator<StringType> {
+public class StringTypesCompare implements Comparator<StringType>, Serializable {
 
     int compareRight(String a, String b) {
         int bias = 0;
@@ -36,6 +37,7 @@ public class StringTypesCompare implements Comparator<StringType> {
         }
     }
 
+    @Override
     public int compare(StringType o1, StringType o2) {
         String a = o1.value();
         String b = o2.value();

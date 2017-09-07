@@ -37,10 +37,6 @@ public class InstanceMetaDataJson implements JsonEntity {
     @ApiModelProperty(InstanceGroupModelDescription.INSTANCE_TYPE)
     private InstanceMetadataType instanceType;
 
-    public InstanceMetaDataJson() {
-
-    }
-
     public String getInstanceGroup() {
         return instanceGroup;
     }

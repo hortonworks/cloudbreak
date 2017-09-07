@@ -11,14 +11,15 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.google.common.util.concurrent.Striped;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.AccountPreferences;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.repository.AccountPreferencesRepository;
 
 @Service
 public class SimpleAccountPreferencesService implements AccountPreferencesService {
+
     private static final long ZERO = 0L;
 
     private static final int STRIPES = 10;
@@ -29,7 +30,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
     @Inject
     private AccountPreferencesRepository repository;
 
-    private Striped<Lock> locks = Striped.lazyWeakLock(STRIPES);
+    private final Striped<Lock> locks = Striped.lazyWeakLock(STRIPES);
 
     @Override
     public AccountPreferences save(AccountPreferences accountPreferences) {
@@ -48,6 +49,7 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
         return repository.findOne(id);
     }
 
+    @Override
     public Boolean isPlatformSelectionDisabled() {
         return !StringUtils.isEmpty(enabledPlatforms);
     }

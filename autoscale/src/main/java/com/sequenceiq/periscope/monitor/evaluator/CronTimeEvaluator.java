@@ -36,7 +36,7 @@ public class CronTimeEvaluator extends AbstractEventPublisher implements Evaluat
 
     @Override
     public void setContext(Map<String, Object> context) {
-        this.clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
+        clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
     }
 
     private boolean isTrigger(TimeAlert alert) {

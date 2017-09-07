@@ -37,6 +37,7 @@ public class PrometheusAlert extends BaseAlert {
     @Column(columnDefinition = "TEXT")
     private Json parameters;
 
+    @Override
     public Cluster getCluster() {
         return cluster;
     }

@@ -21,9 +21,7 @@ import org.hibernate.annotations.Type;
 import com.sequenceiq.cloudbreak.common.type.RecipeType;
 
 @Entity
-@Table(name = "recipe", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"})
-})
+@Table(name = "recipe", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class Recipe implements ProvisionEntity {
 
     @Id

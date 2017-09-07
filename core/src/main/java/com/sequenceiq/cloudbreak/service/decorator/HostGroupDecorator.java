@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
-import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.ConstraintTemplate;
@@ -134,8 +134,8 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
             throw new BadRequestException("The constraint field must be set in the reinstall request!");
         }
         HostGroup result = subject;
-        final String instanceGroupName = constraintJson.getInstanceGroupName();
-        final String constraintTemplateName = constraintJson.getConstraintTemplateName();
+        String instanceGroupName = constraintJson.getInstanceGroupName();
+        String constraintTemplateName = constraintJson.getConstraintTemplateName();
         Cluster cluster = clusterService.retrieveClusterByStackId(stackId);
         Constraint decoratedConstraint = decorateConstraint(stackId, user, constraint, instanceGroupName, constraintTemplateName);
         if (!isEmpty(instanceGroupName)) {
@@ -148,7 +148,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         return result;
     }
 
-    private HostGroup getHostGroupByInstanceGroupName(Constraint constraint, HostGroup subject, Cluster cluster, final String instanceGroupName) {
+    private HostGroup getHostGroupByInstanceGroupName(Constraint constraint, HostGroup subject, Cluster cluster, String instanceGroupName) {
         HostGroup result = subject;
         Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
         if (hostGroups.isEmpty()) {
@@ -165,7 +165,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         return result;
     }
 
-    private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, final String instanceGroupName, Set<HostGroup> hostGroups) {
+    private HostGroup getDetailsFromExistingHostGroup(Constraint constraint, HostGroup subject, String instanceGroupName, Set<HostGroup> hostGroups) {
         Optional<HostGroup> hostGroupOptional = hostGroups.stream().filter(input ->
                 input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupName)
         ).findFirst();

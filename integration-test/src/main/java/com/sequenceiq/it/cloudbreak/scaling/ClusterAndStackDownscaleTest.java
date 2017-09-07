@@ -18,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
 public class ClusterAndStackDownscaleTest extends AbstractCloudbreakIntegrationTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackAndClusterUpscaleTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterAndStackDownscaleTest.class);
 
     @BeforeMethod
     public void setContextParameters() {
@@ -34,7 +34,7 @@ public class ClusterAndStackDownscaleTest extends AbstractCloudbreakIntegrationT
         // GIVEN
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        int stackIntId = Integer.valueOf(stackId);
+        int stackIntId = Integer.parseInt(stackId);
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class).stackEndpoint();
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);

@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.RdsConfigOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,71 +30,71 @@ public interface RdsConfigEndpoint {
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getRds")
-    RDSConfigResponse get(@PathParam(value = "id") Long id);
+    RDSConfigResponse get(@PathParam("id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "deleteRds")
-    void delete(@PathParam(value = "id") Long id);
+    void delete(@PathParam("id") Long id);
 
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "postPrivateRds")
     RDSConfigResponse postPrivate(@Valid RDSConfigRequest rdsConfigRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getPrivatesRds")
     Set<RDSConfigResponse> getPrivates();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getPrivateRds")
-    RDSConfigResponse getPrivate(@PathParam(value = "name") String name);
+    RDSConfigResponse getPrivate(@PathParam("name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "deletePrivateRds")
-    void deletePrivate(@PathParam(value = "name") String name);
+    void deletePrivate(@PathParam("name") String name);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "postPublicRds")
     RDSConfigResponse postPublic(@Valid RDSConfigRequest rdsConfigRequest);
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getPublicsRds")
     Set<RDSConfigResponse> getPublics();
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "getPublicRds")
-    RDSConfigResponse getPublic(@PathParam(value = "name") String name);
+    RDSConfigResponse getPublic(@PathParam("name") String name);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.RdsConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
+    @ApiOperation(value = RdsConfigOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.RDSCONFIG_NOTES,
             nickname = "deletePublicRds")
-    void deletePublic(@PathParam(value = "name") String name);
+    void deletePublic(@PathParam("name") String name);
 
 }

@@ -13,11 +13,12 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ClusterRequest {
+public class ClusterRequest implements JsonEntity {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
@@ -26,10 +27,10 @@ public class ClusterRequest {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_ID)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
-    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
     private BlueprintRequest blueprint;
 
     @Size(max = 1000)
@@ -37,7 +38,7 @@ public class ClusterRequest {
     private String description;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUPS)
+    @ApiModelProperty(ClusterModelDescription.HOSTGROUPS)
     private Set<HostGroupRequest> hostGroups;
 
     @ApiModelProperty(ClusterModelDescription.EMAIL_NEEDED)
@@ -48,74 +49,74 @@ public class ClusterRequest {
 
     private GatewayJson gateway;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.ENABLE_SECURITY)
+    @ApiModelProperty(StackModelDescription.ENABLE_SECURITY)
     private Boolean enableSecurity = Boolean.FALSE;
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME, required = true)
+    @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
     private String userName;
 
     @NotNull
     @Size(max = 100, min = 5, message = "The length of the password has to be in range of 5 to 100")
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD, required = true)
+    @ApiModelProperty(value = StackModelDescription.PASSWORD, required = true)
     private String password;
 
     private KerberosRequest kerberos;
 
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
 
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG)
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
     private LdapConfigRequest ldapConfig;
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.VALIDATE_BLUEPRINT)
+    @ApiModelProperty(ClusterModelDescription.VALIDATE_BLUEPRINT)
     private Boolean validateBlueprint = Boolean.TRUE;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_REPO_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
 
-    @ApiModelProperty(value = ClusterModelDescription.RDSCONFIG_IDS)
+    @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
     private Set<Long> rdsConfigIds = new HashSet<>();
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.RDS_CONFIGS)
+    @ApiModelProperty(ClusterModelDescription.RDS_CONFIGS)
     private Set<RDSConfigRequest> rdsConfigJsons = new HashSet<>();
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.FILE_SYSTEM)
+    @ApiModelProperty(StackModelDescription.FILE_SYSTEM)
     private FileSystemRequest fileSystem;
 
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy = ConfigStrategy.ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES;
 
-    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
-    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 
-    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
+    @ApiModelProperty(ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerRequest customContainer;
 
-    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_QUEUE)
+    @ApiModelProperty(ClusterModelDescription.CUSTOM_QUEUE)
     private String customQueue;
 
-    @ApiModelProperty(value = ClusterModelDescription.EXECUTOR_TYPE)
+    @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType = ExecutorType.DEFAULT;
 
-    @ApiModelProperty(value = ClusterModelDescription.CONNECTED_CLUSTER)
+    @ApiModelProperty(ClusterModelDescription.CONNECTED_CLUSTER)
     private ConnectedClusterRequest connectedCluster;
 
     public String getDescription() {

@@ -37,7 +37,7 @@ public class BlueprintTemplateProcessor {
         Handlebars handlebars = new Handlebars();
         handlebars.registerHelperMissing(new Helper<Object>() {
             @Override
-            public CharSequence apply(final Object context, final Options options) throws IOException {
+            public CharSequence apply(Object context, Options options) {
                 return options.fn.text();
             }
         });

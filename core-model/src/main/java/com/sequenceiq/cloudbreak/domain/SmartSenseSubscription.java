@@ -10,10 +10,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "subscriptionId"})
-})
-public class SmartSenseSubscription {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "subscriptionId"}))
+public class SmartSenseSubscription implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "smartsense_generator")

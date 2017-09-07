@@ -26,6 +26,7 @@ public class DefaultSubscriptionService implements ApplicationListener<ContextRe
     @Inject
     private SubscriptionService subscriptionService;
 
+    @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (!Strings.isNullOrEmpty(defaultSubscriptionAddress)) {
             LOGGER.info("Configuring default subscription {}", defaultSubscriptionAddress);

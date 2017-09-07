@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.template.group;
 
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
-import static java.util.Arrays.asList;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -69,9 +68,10 @@ public class GroupResourceService {
                     createResource(auth, buildableResource);
                     CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
                     updateResource(auth, resource);
-                    PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, asList(resource), context, true);
+                    PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(builder, auth, Collections.singletonList(resource),
+                            context, true);
                     List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
-                    context.addGroupResources(group.getName(), Arrays.asList(resource));
+                    context.addGroupResources(group.getName(), Collections.singletonList(resource));
                     results.addAll(pollerResult);
                 } catch (ResourceNotNeededException e) {
                     LOGGER.warn("Skipping resource creation: {}", e.getMessage());
@@ -94,7 +94,7 @@ public class GroupResourceService {
                     CloudResource deletedResource = builder.delete(context, auth, resource, network);
                     if (deletedResource != null) {
                         PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
-                                builder, auth, asList(deletedResource), context, cancellable);
+                                builder, auth, Collections.singletonList(deletedResource), context, cancellable);
                         List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                         results.addAll(pollerResult);
                     }
@@ -115,7 +115,7 @@ public class GroupResourceService {
                 CloudResourceStatus status = builder.update(context, auth, network, security, resource);
                 if (status != null) {
                     PollTask<List<CloudResourceStatus>> task = statusCheckFactory.newPollResourceTask(
-                            builder, auth, asList(status.getCloudResource()), context, true);
+                            builder, auth, Collections.singletonList(status.getCloudResource()), context, true);
                     List<CloudResourceStatus> pollerResult = syncPollingScheduler.schedule(task);
                     results.addAll(pollerResult);
                 }
@@ -132,14 +132,14 @@ public class GroupResourceService {
         return getResources(resources, types);
     }
 
-    protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
+    protected CloudResource createResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyAllocation(buildableResource, auth.getCloudContext());
         }
         return buildableResource;
     }
 
-    protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) throws Exception {
+    protected CloudResource updateResource(AuthenticatedContext auth, CloudResource buildableResource) {
         if (buildableResource.isPersistent()) {
             resourceNotifier.notifyUpdate(buildableResource, auth.getCloudContext());
         }
@@ -147,11 +147,11 @@ public class GroupResourceService {
     }
 
     private List<CloudResource> getResources(List<CloudResource> resources, ResourceType type) {
-        return getResources(resources, Arrays.asList(type));
+        return getResources(resources, Collections.singletonList(type));
     }
 
     private List<CloudResource> getResources(List<CloudResource> resources, List<ResourceType> types) {
-        List<CloudResource> filtered = new ArrayList<>();
+        List<CloudResource> filtered = new ArrayList<>(resources.size());
         for (CloudResource resource : resources) {
             if (types.contains(resource.getType())) {
                 filtered.add(resource);
@@ -162,6 +162,7 @@ public class GroupResourceService {
 
     private List<Group> getOrderedCopy(List<Group> groups) {
         Ordering<Group> byLengthOrdering = new Ordering<Group>() {
+            @Override
             public int compare(Group left, Group right) {
                 return Ints.compare(left.getInstancesSize(), right.getInstancesSize());
             }

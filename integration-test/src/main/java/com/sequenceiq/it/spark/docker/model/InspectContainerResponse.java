@@ -15,7 +15,7 @@ public class InspectContainerResponse {
 
     public InspectContainerResponse(String id) {
         this.id = id;
-        state = new InspectContainerResponse.ContainerState();
+        state = new ContainerState();
         state.setRunning(true);
     }
 

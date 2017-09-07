@@ -17,11 +17,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterCredentialChangeFlowConfig extends AbstractFlowConfiguration<ClusterCredentialChangeState, ClusterCredentialChangeEvent> {
     private static final List<Transition<ClusterCredentialChangeState, ClusterCredentialChangeEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterCredentialChangeState, ClusterCredentialChangeEvent>()
+            new Builder<ClusterCredentialChangeState, ClusterCredentialChangeEvent>()
                     .from(INIT_STATE).to(CLUSTER_CREDENTIALCHANGE_STATE).event(CLUSTER_CREDENTIALCHANGE_EVENT).noFailureEvent()
                     .from(CLUSTER_CREDENTIALCHANGE_STATE).to(CLUSTER_CREDENTIALCHANGE_FINISHED_STATE).event(CLUSTER_CREDENTIALCHANGE_FINISHED_EVENT)
                             .failureEvent(CLUSTER_CREDENTIALCHANGE_FINISHED_FAILURE_EVENT)

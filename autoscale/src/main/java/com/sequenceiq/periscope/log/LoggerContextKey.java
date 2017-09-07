@@ -14,6 +14,6 @@ public enum LoggerContextKey {
 
     @Override
     public String toString() {
-        return this.value;
+        return value;
     }
 }

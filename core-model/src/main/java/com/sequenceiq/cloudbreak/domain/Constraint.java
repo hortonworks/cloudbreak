@@ -10,7 +10,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "hostgroup_constraint")
-public class Constraint {
+public class Constraint implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "constraint_template_generator")
     @SequenceGenerator(name = "constraint_template_generator", sequenceName = "hostgroup_constraint_id_seq", allocationSize = 1)

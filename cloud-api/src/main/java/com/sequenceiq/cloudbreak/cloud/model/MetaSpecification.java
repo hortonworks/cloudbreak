@@ -11,9 +11,6 @@ public class MetaSpecification {
     @JsonProperty("properties")
     private PropertySpecification properties;
 
-    public MetaSpecification() {
-    }
-
     public List<ConfigSpecification> getConfigSpecification() {
         return configSpecification;
     }

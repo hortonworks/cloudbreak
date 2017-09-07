@@ -19,6 +19,7 @@ import org.springframework.ui.freemarker.FreeMarkerConfigurationFactoryBean;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -43,31 +44,15 @@ import freemarker.template.Configuration;
 
 public class CloudFormationTemplateBuilderTest {
 
-    private CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
+    private final CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
 
     private CloudStack cloudStack;
 
     private String name;
 
-    private List<Group> groups;
-
-    private CloudInstance instance;
-
-    private List<Volume> volumes;
-
-    private List<SecurityRule> rules;
-
-    private Security security;
-
-    private Map<InstanceGroupType, String> userData;
-
-    private Image image;
-
-    private CloudFormationTemplateBuilder.ModelContext modelContext;
+    private ModelContext modelContext;
 
     private String awsCloudFormationTemplate;
-
-    private String snapshotId;
 
     private AuthenticatedContext authenticatedContext;
 
@@ -84,24 +69,23 @@ public class CloudFormationTemplateBuilderTest {
 
         String awsCloudFormationTemplatePath = "templates/aws-cf-stack.ftl";
         awsCloudFormationTemplate = configuration.getTemplate(awsCloudFormationTemplatePath, "UTF-8").toString();
-        snapshotId = "";
         authenticatedContext = authenticatedContext();
         existingSubnetCidr = "testSubnet";
 
         name = "master";
-        volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
+        List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
                 new HashMap<>());
-        instance = new CloudInstance("SOME_ID", instanceTemplate);
-        rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
+        CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate);
+        List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
-        security = new Security(rules, null);
-        userData = ImmutableMap.of(
+        Security security = new Security(rules, null);
+        Map<InstanceGroupType, String> userData = ImmutableMap.of(
                 InstanceGroupType.CORE, "CORE",
                 InstanceGroupType.GATEWAY, "GATEWAY"
         );
-        image = new Image("cb-centos66-amb200-2015-05-25", userData);
-        groups = new ArrayList<>();
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
+        List<Group> groups = new ArrayList<>();
         groups.add(new Group(name, InstanceGroupType.CORE, Collections.singletonList(instance), security, null));
         groups.add(new Group(name, InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null));
         Network network = new Network(new Subnet("testSubnet"));
@@ -122,7 +106,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -151,7 +135,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -184,7 +168,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -217,7 +201,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -250,7 +234,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -283,7 +267,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -316,7 +300,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -349,7 +333,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -382,7 +366,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -415,7 +399,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -448,7 +432,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -481,7 +465,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -514,7 +498,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -547,7 +531,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -580,7 +564,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = true;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -613,7 +597,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = true;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)
@@ -646,7 +630,7 @@ public class CloudFormationTemplateBuilderTest {
         boolean enableInstanceProfile = false;
         boolean instanceProfileAvailable = false;
         //WHEN
-        modelContext = new CloudFormationTemplateBuilder.ModelContext()
+        modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
                 .withStack(cloudStack)
                 .withExistingVpc(existingVPC)

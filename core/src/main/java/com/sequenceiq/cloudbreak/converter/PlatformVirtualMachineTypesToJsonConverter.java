@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.stereotype.Component;
 
@@ -35,10 +36,10 @@ public class PlatformVirtualMachineTypesToJsonConverter extends AbstractConversi
 
     public Map<String, Map<String, String>> convertDefaultVmsPerZoneMap(Map<Platform, Map<AvailabilityZone, VmType>> defaultVmsPerZone) {
         Map<String, Map<String, String>> result = Maps.newHashMap();
-        for (Map.Entry<Platform, Map<AvailabilityZone, VmType>> entry : defaultVmsPerZone.entrySet()) {
+        for (Entry<Platform, Map<AvailabilityZone, VmType>> entry : defaultVmsPerZone.entrySet()) {
             Map<String, String> zoneResult = Maps.newHashMap();
             result.put(entry.getKey().value(), zoneResult);
-            for (Map.Entry<AvailabilityZone, VmType> zoneEntry : entry.getValue().entrySet()) {
+            for (Entry<AvailabilityZone, VmType> zoneEntry : entry.getValue().entrySet()) {
                 zoneResult.put(zoneEntry.getKey().value(), zoneEntry.getValue().value());
             }
         }
@@ -47,7 +48,7 @@ public class PlatformVirtualMachineTypesToJsonConverter extends AbstractConversi
 
     public Map<String, Map<String, Collection<VmTypeJson>>> convertVmsPerZoneMap(Map<Platform, Map<AvailabilityZone, Collection<VmType>>> zoneVms) {
         Map<String, Map<String, Collection<VmTypeJson>>> result = Maps.newHashMap();
-        for (Map.Entry<Platform, Map<AvailabilityZone, Collection<VmType>>> entry : zoneVms.entrySet()) {
+        for (Entry<Platform, Map<AvailabilityZone, Collection<VmType>>> entry : zoneVms.entrySet()) {
             result.put(entry.getKey().value(), convertVmMap(entry.getValue()));
         }
         return result;
@@ -55,7 +56,7 @@ public class PlatformVirtualMachineTypesToJsonConverter extends AbstractConversi
 
     public Map<String, Collection<VmTypeJson>> convertVmMap(Map<? extends StringType, Collection<VmType>> vms) {
         Map<String, Collection<VmTypeJson>> result = Maps.newHashMap();
-        for (Map.Entry<? extends StringType, Collection<VmType>> entry : vms.entrySet()) {
+        for (Entry<? extends StringType, Collection<VmType>> entry : vms.entrySet()) {
             result.put(entry.getKey().value(), convertVmList(entry.getValue()));
         }
         return result;

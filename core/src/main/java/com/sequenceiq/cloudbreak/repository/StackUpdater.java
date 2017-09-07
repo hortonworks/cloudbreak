@@ -4,8 +4,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
@@ -19,11 +17,6 @@ import com.sequenceiq.cloudbreak.domain.StackStatus;
 
 @Component
 public class StackUpdater {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackUpdater.class);
-
-    @Inject
-    private StackStatusRepository stackStatusRepository;
 
     @Inject
     private StackRepository stackRepository;

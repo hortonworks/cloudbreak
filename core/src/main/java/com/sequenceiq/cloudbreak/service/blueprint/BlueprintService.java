@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,13 +17,13 @@ import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -73,22 +75,22 @@ public class BlueprintService {
         return blueprint;
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Blueprint create(IdentityUser user, Blueprint blueprint, List<Map<String, Map<String, String>>> properties) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Blueprint savedBlueprint;
         blueprint.setOwner(user.getUserId());
         blueprint.setAccount(user.getAccount());
-        if (properties != null && properties.size() != 0) {
+        if (properties != null && !properties.isEmpty()) {
             LOGGER.info("Extend blueprint with the following properties: {}", properties);
-            Map<String, Map<String, String>> configs = new HashMap<>();
+            Map<String, Map<String, String>> configs = new HashMap<>(properties.size());
             for (Map<String, Map<String, String>> property : properties) {
-                for (String key : property.keySet()) {
-                    Map<String, String> configValues = configs.get(key);
+                for (Entry<String, Map<String, String>> entry : property.entrySet()) {
+                    Map<String, String> configValues = configs.get(entry.getKey());
                     if (configValues != null) {
-                        configValues.putAll(property.get(key));
+                        configValues.putAll(entry.getValue());
                     } else {
-                        configs.put(key, property.get(key));
+                        configs.put(entry.getKey(), entry.getValue());
                     }
                 }
             }
@@ -136,7 +138,7 @@ public class BlueprintService {
         delete(blueprint);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Iterable<Blueprint> save(Iterable<Blueprint> entities) {
         return blueprintRepository.save(entities);
     }

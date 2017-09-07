@@ -10,16 +10,16 @@ import reactor.rx.Promises;
 
 public class CloudPlatformRequest<T> implements Selectable {
 
-    private CloudContext cloudContext;
+    private final CloudContext cloudContext;
 
-    private CloudCredential cloudCredential;
+    private final CloudCredential cloudCredential;
 
-    private Promise<T> result;
+    private final Promise<T> result;
 
     public CloudPlatformRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
-        this.result = Promises.prepare();
+        result = Promises.prepare();
     }
 
     public static String selector(Class clazz) {

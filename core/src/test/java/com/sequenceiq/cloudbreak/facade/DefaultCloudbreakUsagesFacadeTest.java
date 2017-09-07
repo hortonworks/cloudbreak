@@ -20,6 +20,7 @@ import org.springframework.core.convert.TypeDescriptor;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters;
+import com.sequenceiq.cloudbreak.domain.CbUsageFilterParameters.Builder;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.service.usages.CloudbreakUsagesRetrievalService;
 
@@ -41,7 +42,7 @@ public class DefaultCloudbreakUsagesFacadeTest {
         when(cloudbreakUsagesService.findUsagesFor(any(CbUsageFilterParameters.class))).thenReturn(cloudbreakUsages);
         when(conversionService.convert(anyObject(), any(TypeDescriptor.class), any(TypeDescriptor.class))).thenReturn(new ArrayList<CloudbreakUsageJson>());
 
-        underTest.getUsagesFor(new CbUsageFilterParameters.Builder().build());
+        underTest.getUsagesFor(new Builder().build());
 
         verify(cloudbreakUsagesService, times(1)).findUsagesFor(any(CbUsageFilterParameters.class));
         verify(conversionService, times(1)).convert(anyObject(), any(TypeDescriptor.class), any(TypeDescriptor.class));

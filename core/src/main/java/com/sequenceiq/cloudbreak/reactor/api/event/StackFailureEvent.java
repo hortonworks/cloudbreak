@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor.api.event;
 
 public class StackFailureEvent extends StackEvent {
-    private Exception exception;
+
+    private final Exception exception;
 
     public StackFailureEvent(Long stackId, Exception exception) {
         super(stackId);

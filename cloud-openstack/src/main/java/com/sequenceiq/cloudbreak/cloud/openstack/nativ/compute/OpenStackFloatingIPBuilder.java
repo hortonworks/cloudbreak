@@ -41,7 +41,7 @@ public class OpenStackFloatingIPBuilder extends AbstractOpenStackComputeResource
                 }
                 return Collections.singletonList(createPersistedResource(resource, group.getName(), unusedIp.getId()));
             }
-            return (List<CloudResource>) Collections.EMPTY_LIST;
+            return Collections.emptyList();
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Add floating-ip to server failed", resourceType(), resource.getName(), ex);
         }

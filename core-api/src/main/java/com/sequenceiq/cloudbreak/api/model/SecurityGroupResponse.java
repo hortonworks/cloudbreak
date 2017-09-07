@@ -8,6 +8,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,23 +17,23 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityGroupResponse extends SecurityGroupBase {
 
-    @ApiModelProperty(value = ModelDescriptions.NAME)
+    @ApiModelProperty(ModelDescriptions.NAME)
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.ID)
+    @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(value = ModelDescriptions.OWNER)
+    @ApiModelProperty(ModelDescriptions.OWNER)
     private String owner;
 
-    @ApiModelProperty(value = ModelDescriptions.ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_RULES)
+    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_RULES)
     private List<SecurityRuleResponse> securityRules = new LinkedList<>();
 
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     @NotNull
     private boolean publicInAccount;
 

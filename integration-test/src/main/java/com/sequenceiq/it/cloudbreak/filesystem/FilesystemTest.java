@@ -27,7 +27,7 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
     @Value("${integrationtest.defaultPrivateKeyFile}")
     private String defaultPrivateKeyFile;
 
-    private Map<String, String> fsParams = new HashMap<>();
+    private final Map<String, String> fsParams = new HashMap<>();
 
     @BeforeMethod
     public void setContextParameters() {
@@ -38,7 +38,7 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
 
     @Test
     @Parameters({"filesystemType", "filesystemName", "sshCommand", "folderPrefix", "wasbContainerName"})
-    public void testFileSystem(String filesystemType, String filesystemName, String sshCommand, @ Optional("it-terasort") String folderPrefix,
+    public void testFileSystem(String filesystemType, String filesystemName, String sshCommand, @Optional("it-terasort") String folderPrefix,
             @Optional("it-container") String wasbContainerName) throws IOException, GeneralSecurityException {
         //GIVEN
         fsParams.put("filesystemType", filesystemType);

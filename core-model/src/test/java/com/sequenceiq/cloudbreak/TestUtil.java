@@ -30,12 +30,12 @@ import com.sequenceiq.cloudbreak.api.model.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
@@ -267,10 +267,10 @@ public class TestUtil {
         instanceMetaData.setAmbariServer(ambariServer);
         instanceMetaData.setConsulServer(true);
         instanceMetaData.setSshPort(22);
-        instanceMetaData.setDiscoveryFQDN("test-" + instanceGroupId + "-" + serverNumber);
-        instanceMetaData.setInstanceId("test-" + instanceGroupId + "-" + serverNumber);
-        instanceMetaData.setPrivateIp("1.1." + instanceGroupId + "." + serverNumber);
-        instanceMetaData.setPublicIp("2.2." + instanceGroupId + "." + serverNumber);
+        instanceMetaData.setDiscoveryFQDN("test-" + instanceGroupId + '-' + serverNumber);
+        instanceMetaData.setInstanceId("test-" + instanceGroupId + '-' + serverNumber);
+        instanceMetaData.setPrivateIp("1.1." + instanceGroupId + '.' + serverNumber);
+        instanceMetaData.setPublicIp("2.2." + instanceGroupId + '.' + serverNumber);
         instanceMetaData.setId(instanceGroupId + serverNumber);
         instanceMetaData.setInstanceGroup(instanceGroup);
         instanceMetaData.setStartDate(new Date().getTime());
@@ -335,13 +335,13 @@ public class TestUtil {
     }
 
     public static Cluster  cluster() {
-        return cluster(TestUtil.blueprint(), stack(AVAILABLE, gcpCredential()), 0L);
+        return cluster(blueprint(), stack(AVAILABLE, gcpCredential()), 0L);
     }
 
     public static List<Cluster> generateCluster(int count) {
         List<Cluster> clusters = new ArrayList<>();
         for (int i = 0; i < count; i++) {
-            clusters.add(cluster(TestUtil.blueprint(), stack(AVAILABLE, gcpCredential()), (long) i));
+            clusters.add(cluster(blueprint(), stack(AVAILABLE, gcpCredential()), (long) i));
         }
         return clusters;
     }
@@ -391,14 +391,14 @@ public class TestUtil {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setId(1L);
         hostGroup.setName(DUMMY_NAME);
-        hostGroup.setRecipes(TestUtil.recipes(1));
-        hostGroup.setHostMetadata(TestUtil.hostMetadata(hostGroup, 1));
-        InstanceGroup instanceGroup = TestUtil.instanceGroup(1L, InstanceGroupType.CORE, TestUtil.gcpTemplate(1L));
+        hostGroup.setRecipes(recipes(1));
+        hostGroup.setHostMetadata(hostMetadata(hostGroup, 1));
+        InstanceGroup instanceGroup = instanceGroup(1L, InstanceGroupType.CORE, gcpTemplate(1L));
         Constraint constraint = new Constraint();
         constraint.setInstanceGroup(instanceGroup);
         constraint.setHostCount(instanceGroup.getNodeCount());
         hostGroup.setConstraint(constraint);
-        hostGroup.setCluster(TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(), 1L));
+        hostGroup.setCluster(cluster(blueprint(), stack(), 1L));
         hostGroup.setRecoveryMode(RecoveryMode.MANUAL);
         return hostGroup;
     }

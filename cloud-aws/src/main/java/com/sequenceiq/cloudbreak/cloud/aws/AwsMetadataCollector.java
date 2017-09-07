@@ -26,7 +26,6 @@ import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
-import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -36,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 
 @Service
 public class AwsMetadataCollector implements MetadataCollector {
@@ -49,12 +47,6 @@ public class AwsMetadataCollector implements MetadataCollector {
 
     @Inject
     private CloudFormationStackUtil cloudFormationStackUtil;
-
-    @Inject
-    private SyncPollingScheduler<Boolean> syncPollingScheduler;
-
-    @Inject
-    private AwsPollTaskFactory awsPollTaskFactory;
 
     @Override
     public List<CloudVmMetaDataStatus> collect(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
@@ -77,7 +69,7 @@ public class AwsMetadataCollector implements MetadataCollector {
             }
 
             return cloudVmMetaDataStatuses;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
     }
@@ -128,7 +120,7 @@ public class AwsMetadataCollector implements MetadataCollector {
             if (tag == null) {
                 // so it is not tracked at the moment, therefore it considered as a new instance, and we shall track it by tagging it, with the private id of
                 // an untracked CloudInstance
-                if (untrackedInstances.size() != 0) {
+                if (!untrackedInstances.isEmpty()) {
                     cloudInstance = untrackedInstances.remove();
                     cloudInstance = new CloudInstance(instanceId, cloudInstance.getTemplate());
                 }

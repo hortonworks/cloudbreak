@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class ChangePrimaryGatewaySuccess extends StackEvent {
-    private String newPrimaryGatewayFQDN;
+
+    private final String newPrimaryGatewayFQDN;
 
     public ChangePrimaryGatewaySuccess(Long stackId, String newPrimaryGatewayFQDN) {
         super(stackId);

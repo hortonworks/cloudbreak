@@ -8,6 +8,7 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +23,7 @@ public class SecurityGroupRequest extends SecurityGroupBase {
     private String name;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_RULES)
+    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_RULES)
     private List<SecurityRuleRequest> securityRules = new LinkedList<>();
 
     public String getName() {

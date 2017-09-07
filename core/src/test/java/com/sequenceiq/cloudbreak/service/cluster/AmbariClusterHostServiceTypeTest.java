@@ -26,17 +26,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
-import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.api.model.StatusRequest;
+import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
@@ -52,7 +50,6 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 
 import groovyx.net.http.HttpResponseException;
 
@@ -88,13 +85,9 @@ public class AmbariClusterHostServiceTypeTest {
 
     @InjectMocks
     @Spy
-    private AmbariClusterService underTest = new AmbariClusterService();
+    private final AmbariClusterService underTest = new AmbariClusterService();
 
     private Stack stack;
-
-    private ClusterRequest clusterRequest;
-
-    private ClusterResponse clusterResponse;
 
     private Cluster cluster;
 
@@ -103,8 +96,6 @@ public class AmbariClusterHostServiceTypeTest {
         stack = TestUtil.stack();
         cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
-        clusterRequest = new ClusterRequest();
-        clusterResponse = new ClusterResponse();
         when(stackService.get(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
         when(stackService.findLazy(anyLong())).thenReturn(stack);
@@ -180,15 +171,14 @@ public class AmbariClusterHostServiceTypeTest {
         HostMetadata metadata1 = mock(HostMetadata.class);
         HostMetadata metadata2 = mock(HostMetadata.class);
         HostMetadata metadata3 = mock(HostMetadata.class);
-        Set<HostMetadata> hostsMetaData = new HashSet<>();
-        hostsMetaData.addAll(asList(metadata1, metadata2, metadata3));
+        Set<HostMetadata> hostsMetaData = new HashSet<>(asList(metadata1, metadata2, metadata3));
         HostGroup hostGroup = new HostGroup();
         hostGroup.setHostMetadata(hostsMetaData);
         hostGroup.setName("slave_1");
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
-        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
+        when(statusToPollGroupConverter.convert(any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         underTest.updateHosts(stack.getId(), json);
     }
@@ -211,7 +201,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(ambariClient.getComponentsCategory("multi-node-yarn", "slave_1")).thenReturn(singletonMap("DATANODE", "SLAVE"));
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
-        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
+        when(statusToPollGroupConverter.convert(any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -258,7 +248,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData4);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
-        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
+        when(statusToPollGroupConverter.convert(any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -301,7 +291,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
-        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
+        when(statusToPollGroupConverter.convert(any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -350,7 +340,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node4")).thenReturn(instanceMetaData3);
         when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(hostGroup);
-        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
+        when(statusToPollGroupConverter.convert(any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         underTest.updateHosts(stack.getId(), json);
 
@@ -393,7 +383,7 @@ public class AmbariClusterHostServiceTypeTest {
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node1")).thenReturn(instanceMetaData1);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node2")).thenReturn(instanceMetaData2);
         when(instanceMetadataRepository.findHostInStack(stack.getId(), "node3")).thenReturn(instanceMetaData3);
-        when(statusToPollGroupConverter.convert(Mockito.any(Status.class))).thenReturn(PollGroup.POLLABLE);
+        when(statusToPollGroupConverter.convert(any(Status.class))).thenReturn(PollGroup.POLLABLE);
 
         underTest.updateHosts(stack.getId(), json);
 

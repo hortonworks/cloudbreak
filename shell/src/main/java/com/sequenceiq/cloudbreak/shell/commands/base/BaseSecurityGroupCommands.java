@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
@@ -57,7 +58,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
                 securityGroupRequest.setSecurityGroupId(existingSecurityGroupId);
             }
 
-            for (Map.Entry<String, String> stringStringEntry : tcpRules.entrySet()) {
+            for (Entry<String, String> stringStringEntry : tcpRules.entrySet()) {
                 SecurityRuleRequest securityRuleRequest = new SecurityRuleRequest();
                 securityRuleRequest.setPorts(stringStringEntry.getValue());
                 securityRuleRequest.setSubnet(stringStringEntry.getKey());
@@ -65,7 +66,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
                 securityRuleRequestList.add(securityRuleRequest);
             }
 
-            for (Map.Entry<String, String> stringStringEntry : udpRules.entrySet()) {
+            for (Entry<String, String> stringStringEntry : udpRules.entrySet()) {
                 SecurityRuleRequest securityRuleRequest = new SecurityRuleRequest();
                 securityRuleRequest.setPorts(stringStringEntry.getValue());
                 securityRuleRequest.setSubnet(stringStringEntry.getKey());
@@ -88,7 +89,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
         }
     }
 
-    @CliAvailabilityIndicator(value = { "securitygroup delete --id", "securitygroup delete --name" })
+    @CliAvailabilityIndicator({"securitygroup delete --id", "securitygroup delete --name"})
     @Override
     public boolean deleteAvailable() {
         return !shellContext.getSecurityGroups().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -97,8 +98,8 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
     @Override
     public String delete(Long securityGroupId, String securityGroupName) {
         try {
-            Long id = securityGroupId == null ? null : securityGroupId;
-            String name = securityGroupName == null ? null : securityGroupName;
+            Long id = securityGroupId;
+            String name = securityGroupName;
             if (id != null) {
                 shellContext.cloudbreakClient().securityGroupEndpoint().delete(id);
                 refreshSecurityGroupsInContext();
@@ -148,13 +149,14 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
         return select(null, name);
     }
 
-    @CliAvailabilityIndicator(value = "securitygroup list")
+    @CliAvailabilityIndicator("securitygroup list")
     @Override
     public boolean listAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "securitygroup list", help = "Shows the currently available security groups")
+    @Override
     public String list() {
         try {
             Set<SecurityGroupResponse> publics = shellContext.cloudbreakClient().securityGroupEndpoint().getPublics();
@@ -169,7 +171,7 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
         }
     }
 
-    @CliAvailabilityIndicator(value = { "securitygroup show --id", "securitygroup show --name" })
+    @CliAvailabilityIndicator({"securitygroup show --id", "securitygroup show --name"})
     @Override
     public boolean showAvailable() {
         return !shellContext.getSecurityGroups().isEmpty() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -179,8 +181,8 @@ public class BaseSecurityGroupCommands implements BaseCommands, SecurityGroupCom
     public String show(Long groupId, String groupName, OutPutType outPutType) {
         try {
             outPutType = outPutType == null ? OutPutType.RAW : outPutType;
-            Long id = groupId == null ? null : groupId;
-            String name = groupName == null ? null : groupName;
+            Long id = groupId;
+            String name = groupName;
             if (id != null) {
                 SecurityGroupResponse securityGroupResponse = shellContext.cloudbreakClient().securityGroupEndpoint().get(id);
                 return shellContext.outputTransformer().render(outPutType,

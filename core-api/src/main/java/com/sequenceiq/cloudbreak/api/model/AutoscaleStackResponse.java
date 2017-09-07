@@ -6,6 +6,8 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -14,14 +16,14 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AutoscaleStackResponse {
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.STACK_ID)
+    @ApiModelProperty(StackModelDescription.STACK_ID)
     private Long stackId;
 
     @Size(max = 40, min = 5, message = "The length of the name has to be in range of 5 to 40")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
             message = "The name can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.STACK_NAME, required = true)
+    @ApiModelProperty(value = StackModelDescription.STACK_NAME, required = true)
     private String name;
 
     @ApiModelProperty(ModelDescriptions.OWNER)
@@ -30,25 +32,25 @@ public class AutoscaleStackResponse {
     @ApiModelProperty(ModelDescriptions.ACCOUNT)
     private String account;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.GATEWAY_PORT)
+    @ApiModelProperty(StackModelDescription.GATEWAY_PORT)
     private Integer gatewayPort;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_IP)
+    @ApiModelProperty(StackModelDescription.AMBARI_IP)
     private String ambariServerIp;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME)
+    @ApiModelProperty(StackModelDescription.USERNAME)
     private String userName;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD)
+    @ApiModelProperty(StackModelDescription.PASSWORD)
     private String password;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.STACK_STATUS)
+    @ApiModelProperty(StackModelDescription.STACK_STATUS)
     private Status status;
 
-    @ApiModelProperty(ModelDescriptions.ClusterModelDescription.STATUS)
+    @ApiModelProperty(ClusterModelDescription.STATUS)
     private Status clusterStatus;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.CREATED)
+    @ApiModelProperty(StackModelDescription.CREATED)
     private Long created;
 
     public Long getStackId() {
