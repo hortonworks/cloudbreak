@@ -3,24 +3,24 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class KerberosRequest {
+public class KerberosRequest implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_MASTER_KEY)
+    @ApiModelProperty(StackModelDescription.KERBEROS_MASTER_KEY)
     @Size(max = 50, min = 3, message = "The length of the Kerberos password has to be in range of 3 to 50")
     private String masterKey;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_ADMIN)
+    @ApiModelProperty(StackModelDescription.KERBEROS_ADMIN)
     @Size(max = 15, min = 5, message = "The length of the Kerberos admin has to be in range of 5 to 15")
     private String admin;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.KERBEROS_PASSWORD)
+    @ApiModelProperty(StackModelDescription.KERBEROS_PASSWORD)
     @Size(max = 50, min = 5, message = "The length of the Kerberos password has to be in range of 5 to 50")
     private String password;
 

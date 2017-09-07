@@ -41,7 +41,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     public SaltBootstrap(SaltConnector sc, List<GatewayConfig> allGatewayConfigs, Set<Node> targets) {
         this.sc = sc;
         this.allGatewayConfigs = allGatewayConfigs;
-        this.originalTargets = Collections.unmodifiableSet(targets);
+        originalTargets = Collections.unmodifiableSet(targets);
         this.targets = targets;
     }
 
@@ -131,7 +131,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SaltBootstrap{");
+        StringBuilder sb = new StringBuilder("SaltBootstrap{");
         sb.append("sc=").append(sc);
         sb.append(", allGatewayConfigs=").append(allGatewayConfigs);
         sb.append(", originalTargets=").append(originalTargets);

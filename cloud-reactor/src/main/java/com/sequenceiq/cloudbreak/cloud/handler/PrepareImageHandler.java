@@ -49,7 +49,7 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event(event.getHeaders(), result));
             LOGGER.info("Prepare image finished for {}", cloudContext);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             PrepareImageResult failure = new PrepareImageResult(e, request);
             request.getResult().onNext(failure);
             eventBus.notify(failure.selector(), new Event(event.getHeaders(), failure));

@@ -10,7 +10,7 @@ import com.sequenceiq.periscope.monitor.evaluator.CronTimeEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 
 @Component
-public class TimeMonitor extends AbstractMonitor implements Monitor {
+public class TimeMonitor extends AbstractMonitor {
 
     @Override
     public String getIdentifier() {

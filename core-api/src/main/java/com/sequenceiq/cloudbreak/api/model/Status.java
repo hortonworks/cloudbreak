@@ -25,7 +25,7 @@ public enum Status {
 
     public boolean isRemovableStatus() {
         return Arrays.asList(AVAILABLE, UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(Status.valueOf(name()));
+                DELETE_COMPLETED, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
     }
 
     public boolean isStopPhaseActive() {

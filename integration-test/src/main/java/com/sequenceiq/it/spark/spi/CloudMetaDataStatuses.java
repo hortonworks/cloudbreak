@@ -3,6 +3,7 @@ package com.sequenceiq.it.spark.spi;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -16,7 +17,7 @@ import com.sequenceiq.it.spark.ITResponse;
 
 public class CloudMetaDataStatuses extends ITResponse {
 
-    private Map<String, CloudVmMetaDataStatus> instanceMap;
+    private final Map<String, CloudVmMetaDataStatus> instanceMap;
 
     public CloudMetaDataStatuses(Map<String, CloudVmMetaDataStatus> instanceMap) {
         this.instanceMap = instanceMap;
@@ -24,13 +25,14 @@ public class CloudMetaDataStatuses extends ITResponse {
 
     private List<CloudVmMetaDataStatus> createCloudVmMetaDataStatuses(List<CloudInstance> cloudInstances) {
         List<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = new ArrayList<>();
-        for (String instanceId : instanceMap.keySet()) {
-            CloudVmMetaDataStatus oldCloudVmMetaDataStatus = instanceMap.get(instanceId);
+        for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus oldCloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
             InstanceTemplate oldTemplate = oldCloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getTemplate();
             Optional<CloudInstance> cloudInstance = cloudInstances.stream()
                     .filter(instance -> Objects.equals(instance.getTemplate().getPrivateId(), oldTemplate.getPrivateId())).findFirst();
             if (cloudInstance.isPresent()) {
-                CloudInstance newCloudInstance = new CloudInstance(instanceId, cloudInstance.get().getTemplate(), cloudInstance.get().getParameters());
+                CloudInstance newCloudInstance = new CloudInstance(stringCloudVmMetaDataStatusEntry.getKey(), cloudInstance.get().getTemplate(),
+                        cloudInstance.get().getParameters());
                 CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(newCloudInstance,
                         oldCloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus());
                 CloudVmMetaDataStatus newCloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, oldCloudVmMetaDataStatus.getMetaData());

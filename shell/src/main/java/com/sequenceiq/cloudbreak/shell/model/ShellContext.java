@@ -60,31 +60,31 @@ public class ShellContext {
 
     private String byosEndpoint;
 
-    private Map<PropertyKey, String> properties = new HashMap<>();
+    private final Map<PropertyKey, String> properties = new HashMap<>();
 
-    private Map<String, InstanceGroupEntry> instanceGroups = new HashMap<>();
+    private Map<String, InstanceGroupEntry> instanceGroups;
 
-    private Map<String, HostgroupEntry> hostGroups = new HashMap<>();
+    private Map<String, HostgroupEntry> hostGroups;
 
-    private Set<String> activeHostGroups = new HashSet<>();
+    private Set<String> activeHostGroups;
 
-    private Set<String> activeInstanceGroups = new HashSet<>();
+    private Set<String> activeInstanceGroups;
 
-    private Set<String> activeTemplates = new HashSet<>();
+    private final Set<String> activeTemplates = new HashSet<>();
 
-    private Set<String> activeTemplateNames = new HashSet<>();
+    private final Set<String> activeTemplateNames = new HashSet<>();
 
-    private Map<Long, TemplateResponse> templateMap = new HashMap<>();
+    private final Map<Long, TemplateResponse> templateMap = new HashMap<>();
 
     private String activeCloudPlatform;
 
-    private Map<Long, String> networksByProvider = new HashMap<>();
+    private final Map<Long, String> networksByProvider = new HashMap<>();
 
     private Map<Long, String> securityGroups = new HashMap<>();
 
-    private Map<Long, String> rdsConfigs = new HashMap<>();
+    private final Map<Long, String> rdsConfigs = new HashMap<>();
 
-    private Map<String, AvailabilitySetEntry> azureAvailabilitySets = new HashMap<>();
+    private final Map<String, AvailabilitySetEntry> azureAvailabilitySets = new HashMap<>();
 
     private Long activeNetworkId;
 
@@ -92,7 +92,7 @@ public class ShellContext {
 
     private Map<String, Object> fileSystemParameters = new HashMap<>();
 
-    private Map<Long, String> ldapConfigs = new HashMap<>();
+    private final Map<Long, String> ldapConfigs = new HashMap<>();
 
     private Boolean defaultFileSystem;
 
@@ -100,17 +100,17 @@ public class ShellContext {
 
     private String selectedMarathonStackName;
 
-    private Set<String> constraintTemplates = new HashSet<>();
+    private Set<String> constraintTemplates;
 
     private Set<String> enabledPlatforms = new HashSet<>();
 
-    private Map<String, MarathonHostgroupEntry> marathonHostgroups = new HashMap<>();
+    private Map<String, MarathonHostgroupEntry> marathonHostgroups;
 
     private Long selectedYarnStackId;
 
     private String selectedYarnStackName;
 
-    private Map<String, YarnHostgroupEntry> yarnHostgroups = new HashMap<>();
+    private Map<String, YarnHostgroupEntry> yarnHostgroups;
 
     private AmbariDatabaseDetailsJson ambariDatabaseDetailsJson;
 
@@ -132,16 +132,15 @@ public class ShellContext {
     private OutputTransformer outputTransformer;
 
     public ShellContext() {
-        this.focus = getRootFocus();
-        this.hint = Hints.NONE;
-        this.instanceGroups = new HashMap<>();
-        this.hostGroups = new HashMap<>();
-        this.activeHostGroups = new HashSet<>();
-        this.activeInstanceGroups = new HashSet<>();
-        this.constraintTemplates = new HashSet<>();
-        this.marathonHostgroups = new HashMap<>();
-        this.yarnHostgroups = new HashMap<>();
-        this.azureAvailabilitySets = new HashMap<>();
+        focus = getRootFocus();
+        hint = Hints.NONE;
+        instanceGroups = new HashMap<>();
+        hostGroups = new HashMap<>();
+        activeHostGroups = new HashSet<>();
+        activeInstanceGroups = new HashSet<>();
+        constraintTemplates = new HashSet<>();
+        marathonHostgroups = new HashMap<>();
+        yarnHostgroups = new HashMap<>();
     }
 
     public ResponseTransformer responseTransformer() {
@@ -175,13 +174,13 @@ public class ShellContext {
     }
 
     public void resetFileSystemConfiguration() {
-        this.fileSystemParameters = new HashMap<>();
-        this.defaultFileSystem = null;
-        this.defaultFileSystem = null;
+        fileSystemParameters = new HashMap<>();
+        defaultFileSystem = null;
+        defaultFileSystem = null;
     }
 
     public String getActiveCloudPlatform() {
-        return this.activeCloudPlatform == null ? "" : this.activeCloudPlatform;
+        return activeCloudPlatform == null ? "" : activeCloudPlatform;
     }
 
     public boolean isAzureActiveCredential() {
@@ -193,7 +192,7 @@ public class ShellContext {
     }
 
     public Map<String, InstanceGroupEntry> getInstanceGroups() {
-        return this.instanceGroups;
+        return instanceGroups;
     }
 
     public Map<String, HostgroupEntry> getHostGroups() {
@@ -201,13 +200,13 @@ public class ShellContext {
     }
 
     public Map<String, InstanceGroupEntry> putInstanceGroup(String name, InstanceGroupEntry value) {
-        this.instanceGroups.put(name, value);
-        return this.instanceGroups;
+        instanceGroups.put(name, value);
+        return instanceGroups;
     }
 
     public Map<String, HostgroupEntry> putHostGroup(String name, HostgroupEntry hostgroupEntry) {
-        this.hostGroups.put(name, hostgroupEntry);
-        return this.hostGroups;
+        hostGroups.put(name, hostgroupEntry);
+        return hostGroups;
     }
 
     public Set<String> getActiveTemplates() {
@@ -228,11 +227,11 @@ public class ShellContext {
 
     public void addBlueprint(String id) throws Exception {
         if (getStackId() == null) {
-            this.instanceGroups = new HashMap<>();
-            this.activeInstanceGroups = new HashSet<>();
+            instanceGroups = new HashMap<>();
+            activeInstanceGroups = new HashSet<>();
         }
-        this.hostGroups = new HashMap<>();
-        this.activeHostGroups = new HashSet<>();
+        hostGroups = new HashMap<>();
+        activeHostGroups = new HashSet<>();
         String blueprintText = getBlueprintText(id);
         JsonNode hostGroups = objectMapper.readTree(blueprintText.getBytes()).get("host_groups");
         for (JsonNode hostGroup : hostGroups) {
@@ -250,10 +249,10 @@ public class ShellContext {
     }
 
     public void prepareInstanceGroups(StackResponse stack) {
-        this.instanceGroups = new HashMap<>();
-        this.activeInstanceGroups = new HashSet<>();
+        instanceGroups = new HashMap<>();
+        activeInstanceGroups = new HashSet<>();
         for (InstanceGroupResponse instanceGroup : stack.getInstanceGroups()) {
-            this.activeInstanceGroups.add(instanceGroup.getGroup());
+            activeInstanceGroups.add(instanceGroup.getGroup());
             instanceGroups.put(
                     instanceGroup.getGroup(),
                     new InstanceGroupEntry(
@@ -292,7 +291,7 @@ public class ShellContext {
     }
 
     public void resetMarathonHostGroups() {
-        this.marathonHostgroups = new HashMap<>();
+        marathonHostgroups = new HashMap<>();
     }
 
     public Long getSelectedYarnStackId() {
@@ -320,7 +319,7 @@ public class ShellContext {
     }
 
     public void resetYarnHostGroups() {
-        this.yarnHostgroups = new HashMap<>();
+        yarnHostgroups = new HashMap<>();
     }
 
     public Set<String> getConstraints() {
@@ -343,7 +342,7 @@ public class ShellContext {
     }
 
     public boolean isPlatformAvailable(String platform) {
-        return getEnabledPlatforms() == null || getEnabledPlatforms().contains(platform);
+        return enabledPlatforms == null || enabledPlatforms.contains(platform);
     }
 
     public void setEnabledPlatforms(Set<String> enabledPlatforms) {
@@ -351,8 +350,8 @@ public class ShellContext {
     }
 
     public Map<String, MarathonHostgroupEntry> putMarathonHostGroup(String name, MarathonHostgroupEntry hostgroupEntry) {
-        this.marathonHostgroups.put(name, hostgroupEntry);
-        return this.marathonHostgroups;
+        marathonHostgroups.put(name, hostgroupEntry);
+        return marathonHostgroups;
     }
 
     public Map<String, MarathonHostgroupEntry> getMarathonHostGroups() {
@@ -360,8 +359,8 @@ public class ShellContext {
     }
 
     public Map<String, AvailabilitySetEntry> putAzureAvailabilitySet(String name, AvailabilitySetEntry azureAvailabilitySetEntry) {
-        this.azureAvailabilitySets.put(name, azureAvailabilitySetEntry);
-        return this.azureAvailabilitySets;
+        azureAvailabilitySets.put(name, azureAvailabilitySetEntry);
+        return azureAvailabilitySets;
     }
 
     public Map<String, AvailabilitySetEntry> getAzureAvailabilitySets() {
@@ -369,8 +368,8 @@ public class ShellContext {
     }
 
     public Map<String, YarnHostgroupEntry> putYarnHostGroup(String name, YarnHostgroupEntry hostgroupEntry) {
-        this.yarnHostgroups.put(name, hostgroupEntry);
-        return this.yarnHostgroups;
+        yarnHostgroups.put(name, hostgroupEntry);
+        return yarnHostgroups;
     }
 
     public Map<String, YarnHostgroupEntry> getYarnHostGroups() {
@@ -383,16 +382,16 @@ public class ShellContext {
 
     public void setCredential(String id) {
         CredentialResponse credential = cloudbreakClient.credentialEndpoint().get(Long.valueOf(id));
-        this.activeCloudPlatform = credential.getCloudPlatform();
+        activeCloudPlatform = credential.getCloudPlatform();
         List<TemplateResponse> templateResponses = new ArrayList<>();
         for (TemplateResponse templateResponse : cloudbreakClient.templateEndpoint().getPublics()) {
-            if (this.activeCloudPlatform.equals(templateResponse.getCloudPlatform())) {
+            if (activeCloudPlatform.equals(templateResponse.getCloudPlatform())) {
                 templateResponses.add(templateResponse);
             }
         }
         fillTemplates(templateResponses);
         addProperty(PropertyKey.CREDENTIAL_ID, id);
-        if (credential.getCloudPlatform().equals("BYOS")) {
+        if ("BYOS".equals(credential.getCloudPlatform())) {
             byosOrchestrator = credential.getParameters().get("type").toString();
             byosEndpoint = credential.getParameters().get("apiEndpoint").toString();
         } else {
@@ -421,8 +420,8 @@ public class ShellContext {
     private void fillTemplates(List<TemplateResponse> templateList) {
         for (TemplateResponse t : templateList) {
             templateMap.put(t.getId(), t);
-            this.activeTemplateNames.add(t.getName());
-            this.activeTemplates.add(t.getId().toString());
+            activeTemplateNames.add(t.getName());
+            activeTemplates.add(t.getId().toString());
         }
     }
 
@@ -633,11 +632,11 @@ public class ShellContext {
     }
 
     public void putLdapConfig(Long id, String name) {
-        this.ldapConfigs.put(id, name);
+        ldapConfigs.put(id, name);
     }
 
     public void putSecurityGroup(Long id, String name) {
-        this.securityGroups.put(id, name);
+        securityGroups.put(id, name);
     }
 
     public Map<Long, String> getSecurityGroups() {
@@ -660,7 +659,7 @@ public class ShellContext {
      * Sets the focus to the root.
      */
     public void resetFocus() {
-        this.focus = getRootFocus();
+        focus = getRootFocus();
     }
 
     /**
@@ -670,7 +669,7 @@ public class ShellContext {
      * @param type type of the focus
      */
     public void setFocus(String id, FocusType type) {
-        this.focus = new Focus(id, type);
+        focus = new Focus(id, type);
     }
 
     public FocusType getFocusType() {
@@ -709,7 +708,7 @@ public class ShellContext {
     }
 
     private String formatPrompt(String prefix, String postfix) {
-        return prefix + (postfix == null ? "" : ":" + postfix) + ">";
+        return prefix + (postfix == null ? "" : ':' + postfix) + '>';
     }
 
     private boolean isPropertyAvailable(PropertyKey key) {
@@ -763,7 +762,7 @@ public class ShellContext {
     }
 
     public void setAmbariDatabaseDetailsJson(AmbariDatabaseDetailsJson details) {
-        this.ambariDatabaseDetailsJson = details;
+        ambariDatabaseDetailsJson = details;
     }
 
     public AmbariDatabaseDetailsJson getAmbariDatabaseDetailsJson() {
@@ -771,7 +770,7 @@ public class ShellContext {
     }
 
     public void resetAmbariDatabaseDetailsJson() {
-        this.ambariDatabaseDetailsJson = null;
+        ambariDatabaseDetailsJson = null;
     }
 
     public SmartSenseSubscriptionJson getSmartSenseSubscription() {

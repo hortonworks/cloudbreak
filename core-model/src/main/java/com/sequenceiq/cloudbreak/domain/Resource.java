@@ -56,7 +56,7 @@ public class Resource implements ProvisionEntity {
         this.resourceType = resourceType;
         this.resourceName = resourceName;
         this.resourceReference = resourceReference;
-        this.resourceStatus = status;
+        resourceStatus = status;
         this.instanceGroup = instanceGroup;
         this.stack = stack;
     }

@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Service
 public class ScimAccountGroupReaderFilter extends OncePerRequestFilter {

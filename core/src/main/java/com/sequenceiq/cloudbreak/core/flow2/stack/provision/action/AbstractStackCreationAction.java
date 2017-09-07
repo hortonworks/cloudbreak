@@ -40,6 +40,7 @@ public abstract class AbstractStackCreationAction<P extends Payload> extends Abs
         super(payloadClass);
     }
 
+    @Override
     protected StackContext createFlowContext(String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, P payload) {
         Stack stack = stackService.getById(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);

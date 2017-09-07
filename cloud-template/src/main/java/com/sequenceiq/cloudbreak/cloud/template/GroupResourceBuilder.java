@@ -77,7 +77,7 @@ public interface GroupResourceBuilder<C extends ResourceBuilderContext> extends 
     /**
      * This functionality is not in use currently, but in the future it will be possible to update an existing resource.
      */
-    CloudResourceStatus update(C context, AuthenticatedContext auth, Group group, Network network, Security security, CloudResource resource) throws Exception;
+    CloudResourceStatus update(C context, AuthenticatedContext auth, Group group, Network network, Security security, CloudResource resource);
 
     /**
      * Responsible to delete the provided cloud resource by {@link #create(ResourceBuilderContext, AuthenticatedContext, Network)} from the

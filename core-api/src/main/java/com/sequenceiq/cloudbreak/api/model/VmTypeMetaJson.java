@@ -7,17 +7,14 @@ import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class VmTypeMetaJson {
+@JsonInclude(Include.NON_NULL)
+public class VmTypeMetaJson implements JsonEntity {
     private List<VolumeParameterConfigJson> configs = new ArrayList<>();
 
     private Map<String, String> properties = new HashMap<>();
-
-    public VmTypeMetaJson() {
-
-    }
 
     public List<VolumeParameterConfigJson> getConfigs() {
         return configs;

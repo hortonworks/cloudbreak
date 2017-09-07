@@ -41,7 +41,7 @@ public class ClusterTerminationHandler implements ReactorEventHandler<ClusterTer
         try {
             Boolean allowed = clusterTerminationService.deleteClusterContainers(request.getClusterId());
             result = new ClusterTerminationResult(request, allowed);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Failed to delete cluster containers: {}", e);
             result = new ClusterTerminationResult(e.getMessage(), e, request);
         }

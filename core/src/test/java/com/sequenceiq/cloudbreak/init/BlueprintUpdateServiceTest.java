@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -60,7 +61,7 @@ public class BlueprintUpdateServiceTest {
 
     @Test
     public void updateDefaultBlueprintTestWhenOnlyOneDefaultIsConfigure() throws IOException {
-        when(blueprintRepository.findAll()).thenReturn(Arrays.asList(TestUtil.blueprint("testloader1")));
+        when(blueprintRepository.findAll()).thenReturn(Collections.singletonList(TestUtil.blueprint("testloader1")));
         ReflectionTestUtils.setField(underTest, "blueprintArray", Arrays.asList("testloader1", "testloader", "testloader"));
         when(blueprintUtils.readDefaultBlueprintFromFile(anyObject())).thenReturn(JSON);
         when(blueprintUtils.countHostGroups(anyObject())).thenReturn(2);

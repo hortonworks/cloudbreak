@@ -13,7 +13,7 @@ public enum StackDownscaleEvent implements FlowEvent {
     DOWNSCALE_FINALIZED_EVENT("DOWNSCALESTACKFINALIZED"),
     DOWNSCALE_FAIL_HANDLED_EVENT("DOWNSCALEFAILHANDLED");
 
-    private String event;
+    private final String event;
 
     StackDownscaleEvent(String event) {
         this.event = event;

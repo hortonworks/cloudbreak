@@ -21,9 +21,6 @@ public class ConfigSpecification {
     @JsonProperty("maximumNumber")
     private String maximumNumber;
 
-    public ConfigSpecification() {
-    }
-
     public String getVolumeParameterType() {
         return volumeParameterType;
     }
@@ -61,7 +58,7 @@ public class ConfigSpecification {
     }
 
     public Integer getMaximumNumberWithLimit() {
-        int maxNumber = Integer.valueOf(maximumNumber);
+        int maxNumber = Integer.parseInt(maximumNumber);
         return maxNumber > LIMIT ? LIMIT : maxNumber;
     }
 

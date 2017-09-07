@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.domain.json;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Collections;
 import java.util.Map;
 
@@ -10,9 +11,9 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
-public class Json {
+public class Json implements Serializable {
 
-    private String value;
+    private final String value;
 
     Json(String value) {
         this.value = value;

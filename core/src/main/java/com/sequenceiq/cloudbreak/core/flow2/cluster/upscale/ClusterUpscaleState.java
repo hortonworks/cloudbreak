@@ -14,10 +14,7 @@ enum ClusterUpscaleState implements FlowState {
     CLUSTER_UPSCALE_FAILED_STATE,
     FINAL_STATE;
 
-    private Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
-
-    ClusterUpscaleState() {
-    }
+    private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     @Override
     public Class<? extends RestartAction> restartAction() {

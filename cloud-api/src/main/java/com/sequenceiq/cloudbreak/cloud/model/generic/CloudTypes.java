@@ -7,7 +7,7 @@ public abstract class CloudTypes<T> {
 
     private final T defaultType;
 
-    public CloudTypes(Collection<T> types, T defaultType) {
+    protected CloudTypes(Collection<T> types, T defaultType) {
         this.types = types;
         this.defaultType = defaultType;
     }

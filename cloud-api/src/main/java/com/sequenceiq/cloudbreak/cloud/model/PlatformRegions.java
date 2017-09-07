@@ -24,10 +24,10 @@ public class PlatformRegions {
     }
 
     public PlatformRegions() {
-        this.regions = new HashMap<>();
-        this.availabiltyZones = new HashMap<>();
-        this.defaultRegions = new HashMap<>();
-        this.regionDisplayNames = new HashMap<>();
+        regions = new HashMap<>();
+        availabiltyZones = new HashMap<>();
+        defaultRegions = new HashMap<>();
+        regionDisplayNames = new HashMap<>();
     }
 
     public Map<Platform, Collection<Region>> getRegions() {

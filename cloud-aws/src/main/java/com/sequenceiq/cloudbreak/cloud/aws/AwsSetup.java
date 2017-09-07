@@ -155,10 +155,10 @@ public class AwsSetup implements Setup {
             if (ex.getCause() != null && (ex.getCause() instanceof AmazonEC2Exception)) {
                 AmazonEC2Exception e = (AmazonEC2Exception) ex.getCause();
                 String errorMessage = e.getErrorMessage();
-                if (e.getErrorCode().equals("OptInRequired")) {
+                if ("OptInRequired".equals(e.getErrorCode())) {
                     int marketplaceLinkIndex = errorMessage.indexOf(MARKETPLACE_HTTP_LINK);
                     if (marketplaceLinkIndex != -1) {
-                        errorMessage = IMAGE_OPT_IN_REQUIRED_MSG + " " + LINK_TO_MARKETPLACE_MSG + errorMessage.substring(marketplaceLinkIndex);
+                        errorMessage = IMAGE_OPT_IN_REQUIRED_MSG + ' ' + LINK_TO_MARKETPLACE_MSG + errorMessage.substring(marketplaceLinkIndex);
                     } else {
                         errorMessage = IMAGE_OPT_IN_REQUIRED_MSG;
                     }
@@ -166,7 +166,7 @@ public class AwsSetup implements Setup {
                 }
             }
             LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), ex);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error(String.format("Image opt-in could not be validated for AMI '%s'.", imageName), e);
         }
     }
@@ -226,7 +226,7 @@ public class AwsSetup implements Setup {
             for (int j = 0; j < action.size(); j++) {
                 String actionEntry = action.get(j).textValue().replaceAll(" ", "").toLowerCase();
                 if ("iam:createrole".equals(actionEntry) || "iam:*".equals(actionEntry)) {
-                    LOGGER.info("Role has able to operate on iam resources: {}.", action.get(j).toString());
+                    LOGGER.info("Role has able to operate on iam resources: {}.", action.get(j));
                     return true;
                 }
             }
@@ -294,7 +294,7 @@ public class AwsSetup implements Setup {
                 AmazonEC2Client client = awsClient.createAccess(credentialView, region);
                 DescribeKeyPairsResult describeKeyPairsResult = client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
                 keyPairIsPresentOnEC2 = describeKeyPairsResult.getKeyPairs().stream().findFirst().isPresent();
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 String errorMessage = String.format("Failed to get the key pair [name: '%s'] from EC2 [roleArn:'%s'], detailed message: %s.",
                         keyPairName, credentialView.getRoleArn(), e.getMessage());
                 LOGGER.error(errorMessage, e);

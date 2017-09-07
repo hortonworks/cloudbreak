@@ -84,6 +84,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     @Inject
     private HeartbeatService heartbeatService;
 
+    @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         heartbeatService.heartbeat();
         List<Long> stackIdsUnderOperation = restartOrUpdateUnassignedDisruptedFlows();
@@ -162,7 +163,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                     try {
                         flow2Handler.restartFlow(flowId);
                         stackIds.add(stackId);
-                    } catch (Exception e) {
+                    } catch (RuntimeException e) {
                         LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
                         flowLogService.terminate(stackId, flowId);
                     }
@@ -202,7 +203,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                 try {
                     flow2Handler.restartFlow(flowId);
                     stackIds.add(stackId);
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     LOGGER.error(String.format("Failed to restart flow %s on stack %s", flowId, stackId), e);
                     flowLogService.terminate(stackId, flowId);
                 }

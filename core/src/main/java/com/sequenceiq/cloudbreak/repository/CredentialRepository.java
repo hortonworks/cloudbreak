@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.Topology;
 public interface CredentialRepository extends CrudRepository<Credential, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
+    @Override
     Credential findOne(@Param("id") Long id);
 
     @PostAuthorize("hasPermission(returnObject,'read')")

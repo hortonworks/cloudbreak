@@ -25,7 +25,7 @@ public abstract class ITResponse implements Route {
 
     private static final String MOCKRESPONSE = "/mockresponse/";
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     protected static String responseFromJsonFile(String path) {
         try (InputStream inputStream = ITResponse.class.getResourceAsStream(MOCKRESPONSE + path)) {

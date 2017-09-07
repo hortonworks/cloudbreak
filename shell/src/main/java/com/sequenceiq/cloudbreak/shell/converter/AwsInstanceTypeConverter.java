@@ -14,9 +14,6 @@ public class AwsInstanceTypeConverter extends AbstractConverter<AwsInstanceType>
     @Autowired
     private ShellContext context;
 
-    public AwsInstanceTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return AwsInstanceType.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class AwsInstanceTypeConverter extends AbstractConverter<AwsInstanceType>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getInstanceTypeNamesByPlatform("AWS"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

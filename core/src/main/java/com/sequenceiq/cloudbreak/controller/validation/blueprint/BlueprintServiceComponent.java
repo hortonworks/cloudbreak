@@ -6,16 +6,17 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 
 public class BlueprintServiceComponent {
-    private String name;
+
+    private final String name;
 
     private int nodeCount;
 
-    private List<String> hostgroups;
+    private final List<String> hostgroups;
 
     BlueprintServiceComponent(String name, String hostgroup, int nodeCount) {
         this.name = name;
         this.nodeCount = nodeCount;
-        this.hostgroups = Lists.newArrayList(hostgroup);
+        hostgroups = Lists.newArrayList(hostgroup);
     }
 
     public void update(HostGroup hostGroup) {

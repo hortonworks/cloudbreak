@@ -3,11 +3,12 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 
 public class RecipeScript {
-    private String script;
+
+    private final String script;
 
     private ExecutionType executionType;
 
-    private ClusterLifecycleEvent clusterLifecycleEvent;
+    private final ClusterLifecycleEvent clusterLifecycleEvent;
 
     public RecipeScript(String script, ClusterLifecycleEvent clusterLifecycleEvent) {
         this.script = script;

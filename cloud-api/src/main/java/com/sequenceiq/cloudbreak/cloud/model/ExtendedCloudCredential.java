@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ExtendedCloudCredential extends CloudCredential {
 
@@ -28,7 +29,7 @@ public class ExtendedCloudCredential extends CloudCredential {
             boolean publicInAccount) {
         super(cloudCredential.getId(), cloudCredential.getName(), cloudCredential.getPublicKey(), cloudCredential.getLoginUserName());
         Map<String, Object> parameters = cloudCredential.getParameters();
-        for (Map.Entry<String, Object> parameter : parameters.entrySet()) {
+        for (Entry<String, Object> parameter : parameters.entrySet()) {
             putParameter(parameter.getKey(), parameter.getValue());
         }
         this.cloudPlatform = cloudPlatform;

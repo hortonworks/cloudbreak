@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.VIEW_DEFINITIONS;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,7 @@ public class AmbariViewProvider {
         Object viewDefinitions = cluster.getAttributes().getMap().get(VIEW_DEFINITIONS.name());
         Object legacyViewDefinitions = cluster.getAttributes().getMap().get("viewDefinitions");
 
-        if (legacyViewDefinitions != null && (viewDefinitions == null || ((List<String>) viewDefinitions).isEmpty())) {
+        if (legacyViewDefinitions != null && (viewDefinitions == null || ((Collection<String>) viewDefinitions).isEmpty())) {
             Map<String, Object> obj = cluster.getAttributes().getMap();
             if (obj == null || obj.isEmpty()) {
                 obj = new HashMap<>();
@@ -60,10 +61,10 @@ public class AmbariViewProvider {
             }
             cluster = clusterRepository.save(cluster);
             viewDefinitions = cluster.getAttributes().getMap().get(VIEW_DEFINITIONS.name());
-            return ((List<String>) viewDefinitions).isEmpty();
+            return ((Collection<String>) viewDefinitions).isEmpty();
         }
         if (viewDefinitions != null) {
-            return ((List<String>) viewDefinitions).isEmpty();
+            return ((Collection<String>) viewDefinitions).isEmpty();
         }
         return true;
     }

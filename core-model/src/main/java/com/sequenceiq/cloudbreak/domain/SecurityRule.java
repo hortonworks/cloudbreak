@@ -29,8 +29,6 @@ public class SecurityRule implements ProvisionEntity {
     @Column(nullable = false)
     private boolean modifiable;
 
-    public SecurityRule() { }
-
     public Long getId() {
         return id;
     }

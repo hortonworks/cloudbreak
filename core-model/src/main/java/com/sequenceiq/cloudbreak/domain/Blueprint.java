@@ -19,9 +19,7 @@ import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Entity
-@Table(name = "Blueprint", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" })
-})
+@Table(name = "Blueprint", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class Blueprint implements ProvisionEntity {
 
     @Id
@@ -59,10 +57,6 @@ public class Blueprint implements ProvisionEntity {
     @Convert(converter = EncryptedJsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json inputParameters;
-
-    public Blueprint() {
-
-    }
 
     public String getDescription() {
         return description;

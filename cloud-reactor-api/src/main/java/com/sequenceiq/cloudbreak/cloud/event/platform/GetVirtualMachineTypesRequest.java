@@ -3,7 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.event.platform;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 
 public class GetVirtualMachineTypesRequest extends CloudPlatformRequest<GetVirtualMachineTypesResult> {
-    private Boolean extended;
+
+    private final Boolean extended;
 
     public GetVirtualMachineTypesRequest(Boolean extended) {
         super(null, null);

@@ -125,7 +125,7 @@ public class AzureUtils {
                         break;
                     }
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 armResourceStatus = new CloudResourceStatus(resource, AzureStackStatus.mapResourceStatus(status), e.getMessage());
             }
         } else {
@@ -144,7 +144,7 @@ public class AzureUtils {
     }
 
     private boolean isListNotEmpty(Collection<String> c) {
-        return c != null && c.size() > 0;
+        return c != null && !c.isEmpty();
     }
 
     public boolean isPrivateIp(Network network) {
@@ -188,7 +188,7 @@ public class AzureUtils {
     public List<String> getCustomSubnetIds(Network network) {
         String subnetIds = network.getStringParameter(CloudInstance.SUBNET_ID);
         if (StringUtils.isBlank(subnetIds)) {
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return Arrays.asList(network.getStringParameter(CloudInstance.SUBNET_ID).split(","));
     }
@@ -205,7 +205,7 @@ public class AzureUtils {
                     if (networkSecurityGroup != null) {
                         validateSecurityGroup(client, networkSecurityGroup);
                     }
-                } catch (Exception e) {
+                } catch (RuntimeException e) {
                     throw new CloudConnectorException("Subnet validation failed, cause: " + e.getMessage(), e);
                 }
             }
@@ -252,7 +252,7 @@ public class AzureUtils {
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new CloudConnectorException("Validating security group failed.", e);
         }
         throw new CloudConnectorException("The specified subnet's security group does not allow traffic for port 22 and/or 443");

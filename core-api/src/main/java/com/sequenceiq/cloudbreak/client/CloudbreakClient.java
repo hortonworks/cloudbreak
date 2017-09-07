@@ -113,23 +113,23 @@ public class CloudbreakClient {
     private EndpointWrapper<FlexSubscriptionEndpoint> flexSubscriptionEndpoint;
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
-        this.client = RestClientUtil.get(configKey);
+        client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
-        this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
+        identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.user = user;
         this.password = password;
-        this.tokenCache = configTokenCache();
+        tokenCache = configTokenCache();
         refresh();
         LOGGER.info("CloudbreakClient has been created with user / pass. cloudbreak: {}, identity: {}, clientId: {}, configKey: {}", cloudbreakAddress,
                 identityServerAddress, clientId, configKey);
     }
 
     private CloudbreakClient(String cloudbreakAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
-        this.client = RestClientUtil.get(configKey);
+        client = RestClientUtil.get(configKey);
         this.cloudbreakAddress = cloudbreakAddress;
-        this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
+        identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.secret = secret;
-        this.tokenCache = configTokenCache();
+        tokenCache = configTokenCache();
         refresh();
         LOGGER.info("CloudbreakClient has been created with a secret. cloudbreak: {}, identity: {}, clientId: {}, configKey: {}", cloudbreakAddress,
                 identityServerAddress, clientId, configKey);
@@ -163,35 +163,35 @@ public class CloudbreakClient {
     private void renewEndpoints(String token) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Bearer " + token);
-        this.t = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
-        this.credentialEndpoint = newResource(this.credentialEndpoint, CredentialEndpoint.class, headers);
-        this.templateEndpoint = newResource(this.templateEndpoint, TemplateEndpoint.class, headers);
-        this.topologyEndpoint = newResource(this.topologyEndpoint, TopologyEndpoint.class, headers);
-        this.usageEndpoint = newResource(this.usageEndpoint, UsageEndpoint.class, headers);
-        this.eventEndpoint = newResource(this.eventEndpoint, EventEndpoint.class, headers);
-        this.securityGroupEndpoint = newResource(this.securityGroupEndpoint, SecurityGroupEndpoint.class, headers);
-        this.stackEndpoint = newResource(this.stackEndpoint, StackEndpoint.class, headers);
-        this.subscriptionEndpoint = newResource(this.subscriptionEndpoint, SubscriptionEndpoint.class, headers);
-        this.networkEndpoint = newResource(this.networkEndpoint, NetworkEndpoint.class, headers);
-        this.recipeEndpoint = newResource(this.recipeEndpoint, RecipeEndpoint.class, headers);
-        this.rdsConfigEndpoint = newResource(this.rdsConfigEndpoint, RdsConfigEndpoint.class, headers);
-        this.accountPreferencesEndpoint = newResource(this.accountPreferencesEndpoint, AccountPreferencesEndpoint.class, headers);
-        this.blueprintEndpoint = newResource(this.blueprintEndpoint, BlueprintEndpoint.class, headers);
-        this.clusterEndpoint = newResource(this.clusterEndpoint, ClusterEndpoint.class, headers);
-        this.connectorEndpoint = newResource(this.connectorEndpoint, ConnectorEndpoint.class, headers);
-        this.userEndpoint = newResource(this.userEndpoint, UserEndpoint.class, headers);
-        this.constraintTemplateEndpoint = newResource(this.constraintTemplateEndpoint, ConstraintTemplateEndpoint.class, headers);
-        this.utilEndpoint = newResource(this.utilEndpoint, UtilEndpoint.class, headers);
-        this.ldapConfigEndpoint = newResource(this.ldapConfigEndpoint, LdapConfigEndpoint.class, headers);
-        this.smartSenseSubscriptionEndpoint = newResource(this.smartSenseSubscriptionEndpoint, SmartSenseSubscriptionEndpoint.class, headers);
-        this.flexSubscriptionEndpoint = newResource(this.flexSubscriptionEndpoint, FlexSubscriptionEndpoint.class, headers);
+        t = client.target(cloudbreakAddress).path(CoreApi.API_ROOT_CONTEXT);
+        credentialEndpoint = newResource(credentialEndpoint, CredentialEndpoint.class, headers);
+        templateEndpoint = newResource(templateEndpoint, TemplateEndpoint.class, headers);
+        topologyEndpoint = newResource(topologyEndpoint, TopologyEndpoint.class, headers);
+        usageEndpoint = newResource(usageEndpoint, UsageEndpoint.class, headers);
+        eventEndpoint = newResource(eventEndpoint, EventEndpoint.class, headers);
+        securityGroupEndpoint = newResource(securityGroupEndpoint, SecurityGroupEndpoint.class, headers);
+        stackEndpoint = newResource(stackEndpoint, StackEndpoint.class, headers);
+        subscriptionEndpoint = newResource(subscriptionEndpoint, SubscriptionEndpoint.class, headers);
+        networkEndpoint = newResource(networkEndpoint, NetworkEndpoint.class, headers);
+        recipeEndpoint = newResource(recipeEndpoint, RecipeEndpoint.class, headers);
+        rdsConfigEndpoint = newResource(rdsConfigEndpoint, RdsConfigEndpoint.class, headers);
+        accountPreferencesEndpoint = newResource(accountPreferencesEndpoint, AccountPreferencesEndpoint.class, headers);
+        blueprintEndpoint = newResource(blueprintEndpoint, BlueprintEndpoint.class, headers);
+        clusterEndpoint = newResource(clusterEndpoint, ClusterEndpoint.class, headers);
+        connectorEndpoint = newResource(connectorEndpoint, ConnectorEndpoint.class, headers);
+        userEndpoint = newResource(userEndpoint, UserEndpoint.class, headers);
+        constraintTemplateEndpoint = newResource(constraintTemplateEndpoint, ConstraintTemplateEndpoint.class, headers);
+        utilEndpoint = newResource(utilEndpoint, UtilEndpoint.class, headers);
+        ldapConfigEndpoint = newResource(ldapConfigEndpoint, LdapConfigEndpoint.class, headers);
+        smartSenseSubscriptionEndpoint = newResource(smartSenseSubscriptionEndpoint, SmartSenseSubscriptionEndpoint.class, headers);
+        flexSubscriptionEndpoint = newResource(flexSubscriptionEndpoint, FlexSubscriptionEndpoint.class, headers);
         LOGGER.info("Endpoints have been renewed for CloudbreakClient");
     }
 
-    private <C> EndpointWrapper<C> newResource(EndpointWrapper<C> endpointWrapper, final Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
+    private <C> EndpointWrapper<C> newResource(EndpointWrapper<C> endpointWrapper, Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
         EndpointWrapper<C> result = endpointWrapper;
         if (result == null) {
-            result = new EndpointWrapper<C>(resourceInterface);
+            result = new EndpointWrapper<>(resourceInterface);
         }
         result.setEndpoint(WebResourceFactory.newResource(resourceInterface, t, false, headers, Collections.emptyList(), EMPTY_FORM));
         return result;
@@ -302,13 +302,14 @@ public class CloudbreakClient {
     }
 
     private class EndpointWrapper<C> {
-        private Class<C> endpointType;
+
+        private final Class<C> endpointType;
 
         private C endpoint;
 
-        private C endPointProxy;
+        private final C endPointProxy;
 
-        private InvocationHandler invocationHandler = new InvocationHandler() {
+        private final InvocationHandler invocationHandler = new InvocationHandler() {
             @Override
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 Object result;

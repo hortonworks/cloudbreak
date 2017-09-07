@@ -31,7 +31,7 @@ public class ScalingUtil {
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
         int nodeCount = 0;
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            if (!instanceGroup.getGroup().equals("cbgateway")) {
+            if (!"cbgateway".equals(instanceGroup.getGroup())) {
                 nodeCount += instanceGroup.getNodeCount();
             }
         }
@@ -82,7 +82,7 @@ public class ScalingUtil {
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
 
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            if (!instanceGroup.getGroup().equals("cbgateway")) {
+            if (!"cbgateway".equals(instanceGroup.getGroup())) {
                 instanceCount.put(instanceGroup.getGroup(), instanceGroup.getNodeCount());
             }
         }
@@ -96,9 +96,9 @@ public class ScalingUtil {
 
         if (itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class) != null) {
             tmpInstanceCount = itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class);
-            tmpInstanceCount.add(ScalingUtil.getNodeCountByHostgroup(stackResponse));
+            tmpInstanceCount.add(getNodeCountByHostgroup(stackResponse));
         } else {
-            tmpInstanceCount.add(ScalingUtil.getNodeCountByHostgroup(stackResponse));
+            tmpInstanceCount.add(getNodeCountByHostgroup(stackResponse));
         }
         itContext.putContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, tmpInstanceCount);
     }

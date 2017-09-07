@@ -23,13 +23,13 @@ public class ResourcePersistenceHandler implements Consumer<Event<ResourceNotifi
     private Persister<ResourceNotification> cloudResourcePersisterService;
 
     @Override
-    public void accept(final Event<ResourceNotification> event) {
+    public void accept(Event<ResourceNotification> event) {
         LOGGER.info("Resource notification event received: {}", event);
-        final ResourceNotification notification = event.getData();
+        ResourceNotification notification = event.getData();
 
         RetryUtil.withDefaultRetries()
                 .retry(() -> {
-                    ResourceNotification notificationPersisted = null;
+                    ResourceNotification notificationPersisted;
                     switch (notification.getType()) {
                         case CREATE:
                             notificationPersisted = cloudResourcePersisterService.persist(notification);

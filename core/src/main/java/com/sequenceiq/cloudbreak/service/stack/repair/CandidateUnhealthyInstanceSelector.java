@@ -33,7 +33,7 @@ public class CandidateUnhealthyInstanceSelector {
         Map<String, String> hostStatuses = clusterService.getHostStatuses(stack.getId());
         LOGGER.info("HostStatuses: {}", hostStatuses);
         Set<InstanceMetaData> candidateUnhealthyInstances = new HashSet<>();
-        hostStatuses.keySet().stream().filter(hostName -> hostName != null && hostStatuses.get(hostName).equals("UNKNOWN")).forEach(hostName -> {
+        hostStatuses.keySet().stream().filter(hostName -> hostName != null && "UNKNOWN".equals(hostStatuses.get(hostName))).forEach(hostName -> {
             InstanceMetaData instanceMetaData = instanceMetaDataRepository.findHostInStack(stack.getId(), hostName);
             if (isAWorker(instanceMetaData)) {
                 candidateUnhealthyInstances.add(instanceMetaData);

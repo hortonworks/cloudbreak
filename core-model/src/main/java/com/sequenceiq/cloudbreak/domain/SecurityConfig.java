@@ -59,9 +59,6 @@ public class SecurityConfig implements ProvisionEntity {
     @Column(nullable = false)
     private boolean usePrivateIpToTls;
 
-    public SecurityConfig() {
-    }
-
     public Long getId() {
         return id;
     }

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.cloudbreak.config.ITProps;
@@ -104,7 +105,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
-        CloudbreakClient cloudbreakClient = new CloudbreakClient.CloudbreakClientBuilder(cloudbreakServer + cbRootContextPath, identity, "cloudbreak_shell")
+        CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cloudbreakServer + cbRootContextPath, identity, "cloudbreak_shell")
                 .withCertificateValidation(false).withDebug(true).withCredential(user, password).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         if (cleanUpBeforeStart) {
@@ -147,9 +148,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
         if (StringUtils.hasLength(blueprintName)) {
             String resourceId = endpoint.getPublic(blueprintName).getId().toString();
-            if (resourceId != null) {
-                itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
-            }
+            itContext.putContextParam(CloudbreakITContextConstants.BLUEPRINT_ID, resourceId);
         }
     }
 
@@ -191,7 +190,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             try {
                 Long resourceId = endpoint.getPublic(securityGroupName).getId();
                 itContext.putContextParam(CloudbreakITContextConstants.SECURITY_GROUP_ID, resourceId.toString());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LOG.warn("Could not set security group id", e);
             }
         }

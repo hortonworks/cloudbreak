@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.EventOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,14 +26,14 @@ public interface EventEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.EventOpDescription.GET_BY_TIMESTAMP, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
+    @ApiOperation(value = EventOpDescription.GET_BY_TIMESTAMP, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
             nickname = "getEvents")
     List<CloudbreakEventsJson> get(@QueryParam("since") Long since);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.EventOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
+    @ApiOperation(value = EventOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
             nickname = "getEventsBySTackId")
-    List<CloudbreakEventsJson> getByStack(@PathParam(value = "stackId") Long stackId);
+    List<CloudbreakEventsJson> getByStack(@PathParam("stackId") Long stackId);
 }

@@ -7,12 +7,12 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Disks.Insert;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -43,9 +43,9 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Disk disk = new Disk();
         disk.setSizeGb(DEFAULT_ROOT_DISK_SIZE);
         disk.setName(buildableResources.get(0).getName());
-        disk.setKind(GcpPlatformParameters.GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
+        disk.setKind(GcpDiskType.HDD.getUrl(projectId, location.getAvailabilityZone()));
 
-        Compute.Disks.Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
+        Insert insDisk = context.getCompute().disks().insert(projectId, location.getAvailabilityZone().value(), disk);
         insDisk.setSourceImage(GcpStackUtil.getAmbariImage(projectId, image.getImageName()));
         try {
             Operation operation = insDisk.execute();

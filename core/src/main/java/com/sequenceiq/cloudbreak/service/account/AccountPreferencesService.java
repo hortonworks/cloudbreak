@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.account;
 
 
-import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.domain.AccountPreferences;
 
 public interface AccountPreferencesService {
 

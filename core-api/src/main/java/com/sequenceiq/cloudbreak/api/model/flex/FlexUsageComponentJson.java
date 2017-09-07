@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.api.model.flex;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FlexUsageComponentJson {
+public class FlexUsageComponentJson implements JsonEntity {
 
     private String componentId;
 

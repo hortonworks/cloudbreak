@@ -122,7 +122,7 @@ public class ClusterCreationEvaluator implements Runnable {
         }
     }
 
-    private class AmbariHealtCheckFailed extends RuntimeException {
+    private static class AmbariHealtCheckFailed extends RuntimeException {
         AmbariHealtCheckFailed(String message) {
             super(message);
         }

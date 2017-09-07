@@ -33,11 +33,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<ClusterCreationState, ClusterCreationEvent> {
     private static final List<Transition<ClusterCreationState, ClusterCreationEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
+            new Builder<ClusterCreationState, ClusterCreationEvent>().defaultFailureEvent(CLUSTER_CREATION_FAILED_EVENT)
             .from(INIT_STATE).to(BOOTSTRAPPING_MACHINES_STATE).event(CLUSTER_CREATION_EVENT).noFailureEvent()
             .from(INIT_STATE).to(INSTALLING_CLUSTER_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
             .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)

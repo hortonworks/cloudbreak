@@ -24,7 +24,7 @@ public class RdsConfigCommands implements BaseCommands {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = { "rdsconfig create" })
+    @CliAvailabilityIndicator("rdsconfig create")
     public boolean createAvailable() {
         return true;
     }
@@ -57,13 +57,13 @@ public class RdsConfigCommands implements BaseCommands {
                 id = shellContext.cloudbreakClient().rdsConfigEndpoint().postPrivate(rdsConfig).getId();
             }
             return String.format("RDS config created with id: '%d' and name: '%s'", id, rdsConfig.getName());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
 
     @Override
-    @CliAvailabilityIndicator(value = { "rdsconfig select --id", "rdsconfig select --name" })
+    @CliAvailabilityIndicator({"rdsconfig select --id", "rdsconfig select --name"})
     public boolean selectAvailable() {
         return shellContext.isRdsConfigAccessible();
     }
@@ -146,7 +146,7 @@ public class RdsConfigCommands implements BaseCommands {
         return show(null, name, outPutType);
     }
 
-    @CliAvailabilityIndicator(value = { "rdsconfig delete --id", "rdsconfig delete --name" })
+    @CliAvailabilityIndicator({"rdsconfig delete --id", "rdsconfig delete --name"})
     @Override
     public boolean deleteAvailable() {
         return true;
@@ -180,7 +180,7 @@ public class RdsConfigCommands implements BaseCommands {
         return delete(null, name);
     }
 
-    @CliAvailabilityIndicator(value = "rdsconfig list")
+    @CliAvailabilityIndicator("rdsconfig list")
     @Override
     public boolean listAvailable() {
         return true;

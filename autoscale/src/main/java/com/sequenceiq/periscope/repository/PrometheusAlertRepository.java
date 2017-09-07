@@ -11,6 +11,7 @@ import com.sequenceiq.periscope.domain.PrometheusAlert;
 public interface PrometheusAlertRepository extends CrudRepository<PrometheusAlert, Long> {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
+    @Override
     PrometheusAlert findOne(@Param("id") Long id);
 
     @PostAuthorize("hasPermission(returnObject,'read')")

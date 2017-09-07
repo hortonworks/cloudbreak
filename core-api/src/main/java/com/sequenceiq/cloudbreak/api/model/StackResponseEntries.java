@@ -6,7 +6,7 @@ public enum StackResponseEntries {
     USAGES("usages"),
     EVENTS("events");
 
-    private String entryName;
+    private final String entryName;
 
     StackResponseEntries(String entryName) {
         this.entryName = entryName;

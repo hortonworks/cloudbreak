@@ -39,7 +39,7 @@ import freemarker.template.TemplateException;
 
 public class UserDataBuilderTest {
 
-    private static UserDataBuilder userDataBuilder = new UserDataBuilder();
+    private static final UserDataBuilder USER_DATA_BUILDER = new UserDataBuilder();
 
     @Before
     public void setup() throws IOException, TemplateException {
@@ -48,19 +48,19 @@ public class UserDataBuilderTest {
         factoryBean.setTemplateLoaderPath("classpath:/");
         factoryBean.afterPropertiesSet();
         Configuration configuration = factoryBean.getObject();
-        userDataBuilder.setFreemarkerConfiguration(configuration);
+        USER_DATA_BUILDER.setFreemarkerConfiguration(configuration);
 
         UserDataBuilderParams params = new UserDataBuilderParams();
         params.setCustomData("date >> /tmp/time.txt");
 
-        ReflectionTestUtils.setField(userDataBuilder, "userDataBuilderParams", params);
+        ReflectionTestUtils.setField(USER_DATA_BUILDER, "userDataBuilderParams", params);
     }
 
     @Test
     public void testBuildUserDataAzure() throws IOException {
         String expectedGwScript = FileReaderUtils.readFileFromClasspath("azure-gateway-init.sh");
         String expectedCoreScript = FileReaderUtils.readFileFromClasspath("azure-core-init.sh");
-        Map<InstanceGroupType, String> userdata = userDataBuilder.buildUserData(Platform.platform("AZURE"), "ssh-rsa public", "priv-key".getBytes(),
+        Map<InstanceGroupType, String> userdata = USER_DATA_BUILDER.buildUserData(Platform.platform("AZURE"), "ssh-rsa public", "priv-key".getBytes(),
                 "ssh-rsa test", "cloudbreak", getPlatformParameters(), "pass");
         Assert.assertEquals(expectedGwScript, userdata.get(InstanceGroupType.GATEWAY));
         Assert.assertEquals(expectedCoreScript, userdata.get(InstanceGroupType.CORE));

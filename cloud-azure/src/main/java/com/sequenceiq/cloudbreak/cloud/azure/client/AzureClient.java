@@ -63,15 +63,15 @@ public class AzureClient {
 
     private Azure azure;
 
-    private String tenantId;
+    private final String tenantId;
 
-    private String clientId;
+    private final String clientId;
 
-    private String secretKey;
+    private final String secretKey;
 
-    private String subscriptionId;
+    private final String subscriptionId;
 
-    public AzureClient(String tenantId, String clientId, String secretKey, String subscriptionId) throws IOException {
+    public AzureClient(String tenantId, String clientId, String secretKey, String subscriptionId) {
         this.tenantId = tenantId;
         this.clientId = clientId;
         this.secretKey = secretKey;
@@ -79,7 +79,7 @@ public class AzureClient {
         connect();
     }
 
-    private void connect() throws IOException {
+    private void connect() {
         AzureTokenCredentials creds = new ApplicationTokenCredentials(clientId, tenantId, secretKey, AzureEnvironment.AZURE)
                 .withDefaultSubscriptionId(subscriptionId);
         azure = Azure
@@ -242,7 +242,7 @@ public class AzureClient {
                 resourceGroup, storageName, containerName, sourceBlob);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf("/") + 1));
+            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
             String copyId = cloudPageBlob.startCopy(new URI(sourceBlob));
             LOGGER.info("image copy started, copy id: %s", copyId);
         } catch (URISyntaxException e) {
@@ -257,7 +257,7 @@ public class AzureClient {
                 resourceGroup, storageName, containerName, sourceBlob);
         CloudBlobContainer container = getBlobContainer(resourceGroup, storageName, containerName);
         try {
-            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf("/") + 1));
+            CloudPageBlob cloudPageBlob = container.getPageBlobReference(sourceBlob.substring(sourceBlob.lastIndexOf('/') + 1));
             container.downloadAttributes();
             cloudPageBlob.downloadAttributes();
             return cloudPageBlob.getCopyState();
@@ -376,7 +376,7 @@ public class AzureClient {
 
     public String getCustomImageId(String resourceGroup, String fromVhdUri, String region) {
         String vhdName = fromVhdUri.substring(fromVhdUri.lastIndexOf('/') + 1);
-        String imageName = vhdName + "-" + region.toLowerCase().replaceAll("\\s", "");
+        String imageName = vhdName + '-' + region.toLowerCase().replaceAll("\\s", "");
         PagedList<VirtualMachineCustomImage> customImageList = getCustomImageList(resourceGroup);
         Optional<VirtualMachineCustomImage> virtualMachineCustomImage = customImageList.stream()
                 .filter(customImage -> customImage.name().equals(imageName) && customImage.region().label().equals(region)).findFirst();
@@ -454,7 +454,7 @@ public class AzureClient {
     }
 
     public List<String> getLoadBalancerIps(String name, String loadBalancerName) {
-        List<String> ipList = new ArrayList<String>();
+        List<String> ipList = new ArrayList<>();
         List<String> publicIpAddressIds = getLoadBalancer(name, loadBalancerName).publicIPAddressIds();
         for (String publicIpAddressId : publicIpAddressIds) {
             PublicIPAddress publicIpAddress = getPublicIpAddressById(publicIpAddressId);

@@ -30,7 +30,7 @@ public abstract class AbstractMockIntegrationTest extends AbstractCloudbreakInte
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMockIntegrationTest.class);
 
-    private Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
     private Map<Call, Response> requestResponseMap;
 
@@ -45,7 +45,7 @@ public abstract class AbstractMockIntegrationTest extends AbstractCloudbreakInte
     }
 
     public Gson gson() {
-        return gson;
+        return GSON;
     }
 
     protected void initSpark() {

@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.azure.view;
 
 public class AzureInstanceGroupView {
 
-    private String name;
+    private final String name;
 
-    private String compressedName;
+    private final String compressedName;
 
     private Integer platformFaultDomainCount;
 
@@ -16,7 +16,7 @@ public class AzureInstanceGroupView {
 
     public AzureInstanceGroupView(String name) {
         this.name = name;
-        this.compressedName = name.replaceAll("_", "");
+        compressedName = name.replaceAll("_", "");
     }
 
     public AzureInstanceGroupView(String name, Integer platformFaultDomainCount, Integer platformUpdateDomainCount, String availabilitySetName) {
@@ -24,7 +24,7 @@ public class AzureInstanceGroupView {
         this.platformFaultDomainCount = platformFaultDomainCount;
         this.platformUpdateDomainCount = platformUpdateDomainCount;
         this.availabilitySetName = availabilitySetName;
-        this.compressedName = name.replaceAll("_", "");
+        compressedName = name.replaceAll("_", "");
     }
 
     public String getName() {

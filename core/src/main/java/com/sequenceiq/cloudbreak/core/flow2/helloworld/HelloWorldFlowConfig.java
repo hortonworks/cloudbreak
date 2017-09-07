@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.helloworld;
 
-import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.FINALIZE_HELLO_WORLD_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.HELLO_WORLD_SOMETHING_WENT_WRONG;
 import static com.sequenceiq.cloudbreak.core.flow2.helloworld.HelloWorldEvent.START_HELLO_WORLD_EVENT;
@@ -16,10 +16,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldState, HelloWorldEvent> {
-    private static final List<Transition<HelloWorldState, HelloWorldEvent>> TRANSITIONS = new Transition.Builder<HelloWorldState, HelloWorldEvent>()
+    private static final List<Transition<HelloWorldState, HelloWorldEvent>> TRANSITIONS = new Builder<HelloWorldState, HelloWorldEvent>()
             .defaultFailureEvent(HELLO_WORLD_SOMETHING_WENT_WRONG)
             .from(INIT_STATE).to(HELLO_WORLD_START_STATE).event(START_HELLO_WORLD_EVENT).noFailureEvent()
             .from(HELLO_WORLD_START_STATE).to(HELLO_WORLD_FINISHED_STATE).event(HELLO_WORLD_FINISHED_EVENT).defaultFailureEvent()
@@ -41,7 +42,7 @@ public class HelloWorldFlowConfig extends AbstractFlowConfiguration<HelloWorldSt
     @Override
     public HelloWorldEvent[] getInitEvents() {
         return new HelloWorldEvent[] {
-                HelloWorldEvent.START_HELLO_WORLD_EVENT
+                START_HELLO_WORLD_EVENT
         };
     }
 

@@ -14,9 +14,6 @@ public class HostGroupConverter extends AbstractConverter<HostGroup> {
     @Autowired
     private ShellContext context;
 
-    public HostGroupConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String s) {
         return HostGroup.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class HostGroupConverter extends AbstractConverter<HostGroup> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getActiveHostGroups());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import static org.springframework.ui.freemarker.FreeMarkerTemplateUtils.processTemplateIntoString;
 
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,14 +18,12 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 
 import freemarker.template.Configuration;
 
@@ -55,18 +52,10 @@ public class EmailSenderService {
     private JavaMailSender mailSender;
 
     @Inject
-    private ImageService imageService;
-
-    @Inject
     private Configuration freemarkerConfiguration;
 
     @Inject
     private UserDetailsService userDetailsService;
-
-    @Inject
-    private ComponentConfigProvider componentConfigProvider;
-
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private enum State {
         PROVISIONING_SUCCESS("SUCCESS", "Cluster Install Success",

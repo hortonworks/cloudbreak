@@ -11,10 +11,6 @@ public class BlueprintParameterJson implements JsonEntity {
 
     private String referenceConfiguration;
 
-    public BlueprintParameterJson() {
-
-    }
-
     public String getName() {
         return name;
     }

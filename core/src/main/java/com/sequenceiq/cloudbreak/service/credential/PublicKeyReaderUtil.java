@@ -10,6 +10,8 @@ import java.util.StringTokenizer;
 
 import org.apache.commons.codec.binary.Base64;
 
+import com.sequenceiq.cloudbreak.service.credential.PublicKeyReaderUtil.PublicKeyParseException.ErrorCode;
+
 public final class PublicKeyReaderUtil {
     private static final String BEGIN_PUB_KEY = "---- BEGIN SSH2 PUBLIC KEY ----";
 
@@ -22,83 +24,83 @@ public final class PublicKeyReaderUtil {
     private PublicKeyReaderUtil() {
     }
 
-    public static PublicKey load(final String key) throws PublicKeyParseException {
-        final int c = key.charAt(0);
+    public static PublicKey load(String key) throws PublicKeyParseException {
+        int c = key.charAt(0);
 
-        final String base64;
+        String base64;
 
         if (c == 's') {
-            base64 = PublicKeyReaderUtil.extractOpenSSHBase64(key);
+            base64 = extractOpenSSHBase64(key);
         } else if (c == '-') {
-            base64 = PublicKeyReaderUtil.extractSecSHBase64(key);
+            base64 = extractSecSHBase64(key);
         } else {
-            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.UNKNOWN_PUBLIC_KEY_FILE_FORMAT);
+            throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_FILE_FORMAT);
         }
 
-        final SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
-        final String type = buf.readString();
-        final PublicKey ret;
-        if (PublicKeyReaderUtil.SSH2_DSA_KEY.equals(type)) {
+        SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
+        String type = buf.readString();
+        PublicKey ret;
+        if (SSH2_DSA_KEY.equals(type)) {
             ret = decodeDSAPublicKey(buf);
-        } else if (PublicKeyReaderUtil.SSH2_RSA_KEY.equals(type)) {
+        } else if (SSH2_RSA_KEY.equals(type)) {
             ret = decodePublicKey(buf);
         } else {
-            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
+            throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
         }
 
         return ret;
     }
 
-    public static PublicKey loadOpenSsh(final String key) throws PublicKeyParseException {
-        final int c = key.charAt(0);
+    public static PublicKey loadOpenSsh(String key) throws PublicKeyParseException {
+        int c = key.charAt(0);
 
-        final String base64;
+        String base64;
 
         if (c == 's') {
-            base64 = PublicKeyReaderUtil.extractOpenSSHBase64(key);
+            base64 = extractOpenSSHBase64(key);
         } else {
-            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.UNKNOWN_PUBLIC_KEY_FILE_FORMAT);
+            throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_FILE_FORMAT);
         }
 
-        final SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
-        final String type = buf.readString();
-        final PublicKey ret;
-        if (PublicKeyReaderUtil.SSH2_RSA_KEY.equals(type)) {
+        SSH2DataBuffer buf = new SSH2DataBuffer(Base64.decodeBase64(base64.getBytes()));
+        String type = buf.readString();
+        PublicKey ret;
+        if (SSH2_RSA_KEY.equals(type)) {
             ret = decodePublicKey(buf);
         } else {
-            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
+            throw new PublicKeyParseException(ErrorCode.UNKNOWN_PUBLIC_KEY_CERTIFICATE_FORMAT);
         }
 
         return ret;
     }
 
-    public static String extractOpenSSHBase64(final String key)
+    public static String extractOpenSSHBase64(String key)
             throws PublicKeyParseException {
-        final String base64;
+        String base64;
         try {
-            final StringTokenizer st = new StringTokenizer(key);
+            StringTokenizer st = new StringTokenizer(key);
             st.nextToken();
             base64 = st.nextToken();
-        } catch (final NoSuchElementException e) {
-            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.CORRUPT_OPENSSH_PUBLIC_KEY_STRING);
+        } catch (NoSuchElementException e) {
+            throw new PublicKeyParseException(ErrorCode.CORRUPT_OPENSSH_PUBLIC_KEY_STRING);
         }
 
         return base64;
     }
 
-    private static String extractSecSHBase64(final String key) throws PublicKeyParseException {
-        final StringBuilder base64Data = new StringBuilder();
+    private static String extractSecSHBase64(String key) throws PublicKeyParseException {
+        StringBuilder base64Data = new StringBuilder();
 
         boolean startKey = false;
         boolean startKeyBody = false;
         boolean endKey = false;
         boolean nextLineIsHeader = false;
-        for (final String line : key.split("\n")) {
-            final String trimLine = line.trim();
-            if (!startKey && trimLine.equals(PublicKeyReaderUtil.BEGIN_PUB_KEY)) {
+        for (String line : key.split("\n")) {
+            String trimLine = line.trim();
+            if (!startKey && trimLine.equals(BEGIN_PUB_KEY)) {
                 startKey = true;
             } else if (startKey) {
-                if (trimLine.equals(PublicKeyReaderUtil.END_PUB_KEY)) {
+                if (trimLine.equals(END_PUB_KEY)) {
                     endKey = true;
                     break;
                 } else if (nextLineIsHeader) {
@@ -107,7 +109,7 @@ public final class PublicKeyReaderUtil {
                     }
                 } else if (trimLine.indexOf(':') > 0) {
                     if (startKeyBody) {
-                        throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.CORRUPT_SECSSH_PUBLIC_KEY_STRING);
+                        throw new PublicKeyParseException(ErrorCode.CORRUPT_SECSSH_PUBLIC_KEY_STRING);
                     } else if (trimLine.endsWith("\\")) {
                         nextLineIsHeader = true;
                     }
@@ -120,42 +122,42 @@ public final class PublicKeyReaderUtil {
 
         if (!endKey) {
             throw new PublicKeyParseException(
-                    PublicKeyParseException.ErrorCode.CORRUPT_SECSSH_PUBLIC_KEY_STRING);
+                    ErrorCode.CORRUPT_SECSSH_PUBLIC_KEY_STRING);
         }
 
         return base64Data.toString();
     }
 
-    private static PublicKey decodeDSAPublicKey(final SSH2DataBuffer buffer) throws PublicKeyParseException {
-        final BigInteger p = buffer.readMPint();
-        final BigInteger q = buffer.readMPint();
-        final BigInteger g = buffer.readMPint();
-        final BigInteger y = buffer.readMPint();
+    private static PublicKey decodeDSAPublicKey(SSH2DataBuffer buffer) throws PublicKeyParseException {
+        BigInteger p = buffer.readMPint();
+        BigInteger q = buffer.readMPint();
+        BigInteger g = buffer.readMPint();
+        BigInteger y = buffer.readMPint();
 
         try {
-            final KeyFactory dsaKeyFact = KeyFactory.getInstance("DSA");
-            final DSAPublicKeySpec dsaPubSpec = new DSAPublicKeySpec(y, p, q, g);
+            KeyFactory dsaKeyFact = KeyFactory.getInstance("DSA");
+            DSAPublicKeySpec dsaPubSpec = new DSAPublicKeySpec(y, p, q, g);
 
             return dsaKeyFact.generatePublic(dsaPubSpec);
 
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new PublicKeyParseException(
-                    PublicKeyParseException.ErrorCode.SSH2DSA_ERROR_DECODING_PUBLIC_KEY_BLOB, e);
+                    ErrorCode.SSH2DSA_ERROR_DECODING_PUBLIC_KEY_BLOB, e);
         }
     }
 
-    private static PublicKey decodePublicKey(final SSH2DataBuffer buffer) throws PublicKeyParseException {
-        final BigInteger e = buffer.readMPint();
-        final BigInteger n = buffer.readMPint();
+    private static PublicKey decodePublicKey(SSH2DataBuffer buffer) throws PublicKeyParseException {
+        BigInteger e = buffer.readMPint();
+        BigInteger n = buffer.readMPint();
 
         try {
-            final KeyFactory rsaKeyFact = KeyFactory.getInstance("RSA");
-            final RSAPublicKeySpec rsaPubSpec = new RSAPublicKeySpec(n, e);
+            KeyFactory rsaKeyFact = KeyFactory.getInstance("RSA");
+            RSAPublicKeySpec rsaPubSpec = new RSAPublicKeySpec(n, e);
 
             return rsaKeyFact.generatePublic(rsaPubSpec);
 
-        } catch (final Exception ex) {
-            throw new PublicKeyParseException(PublicKeyParseException.ErrorCode.SSH2RSA_ERROR_DECODING_PUBLIC_KEY_BLOB, ex);
+        } catch (Exception ex) {
+            throw new PublicKeyParseException(ErrorCode.SSH2RSA_ERROR_DECODING_PUBLIC_KEY_BLOB, ex);
         }
     }
 
@@ -171,12 +173,12 @@ public final class PublicKeyReaderUtil {
 
         private int pos;
 
-        SSH2DataBuffer(final byte[] data) {
+        SSH2DataBuffer(byte[] data) {
             this.data = data;
         }
 
         public BigInteger readMPint() throws PublicKeyParseException {
-            final byte[] raw = readByteArray();
+            byte[] raw = readByteArray();
             return (raw.length > 0) ? new BigInteger(raw) : BigInteger.valueOf(0);
         }
 
@@ -185,22 +187,22 @@ public final class PublicKeyReaderUtil {
         }
 
         private int readUInt32() {
-            final int byte1 = this.data[this.pos++];
-            final int byte2 = this.data[this.pos++];
-            final int byte3 = this.data[this.pos++];
-            final int byte4 = this.data[this.pos++];
+            int byte1 = data[pos++];
+            int byte2 = data[pos++];
+            int byte3 = data[pos++];
+            int byte4 = data[pos++];
             return (byte1 << INT1) + (byte2 << INT2) + (byte3 << INT3) + (byte4 << 0);
         }
 
         private byte[] readByteArray() throws PublicKeyParseException {
-            final int len = readUInt32();
-            if ((len < 0) || (len > (this.data.length - this.pos))) {
+            int len = readUInt32();
+            if ((len < 0) || (len > (data.length - pos))) {
                 throw new PublicKeyParseException(
-                        PublicKeyParseException.ErrorCode.CORRUPT_BYTE_ARRAY_ON_READ);
+                        ErrorCode.CORRUPT_BYTE_ARRAY_ON_READ);
             }
-            final byte[] str = new byte[len];
-            System.arraycopy(this.data, this.pos, str, 0, len);
-            this.pos += len;
+            byte[] str = new byte[len];
+            System.arraycopy(data, pos, str, 0, len);
+            pos += len;
             return str;
         }
     }
@@ -209,19 +211,19 @@ public final class PublicKeyReaderUtil {
 
         private final ErrorCode errorCode;
 
-        private PublicKeyParseException(final ErrorCode errorCode) {
+        private PublicKeyParseException(ErrorCode errorCode) {
             super(errorCode.message);
             this.errorCode = errorCode;
         }
 
-        private PublicKeyParseException(final ErrorCode errorCode,
-                final Throwable cause) {
+        private PublicKeyParseException(ErrorCode errorCode,
+                Throwable cause) {
             super(errorCode.message, cause);
             this.errorCode = errorCode;
         }
 
         public ErrorCode getErrorCode() {
-            return this.errorCode;
+            return errorCode;
         }
 
         public enum ErrorCode {
@@ -241,7 +243,7 @@ public final class PublicKeyReaderUtil {
 
             private final String message;
 
-            ErrorCode(final String message) {
+            ErrorCode(String message) {
                 this.message = message;
             }
         }

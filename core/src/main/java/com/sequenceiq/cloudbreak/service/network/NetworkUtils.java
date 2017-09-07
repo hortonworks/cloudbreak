@@ -35,9 +35,10 @@ import static com.sequenceiq.cloudbreak.api.model.ExposedService.ZEPPELIN_WEB_SO
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
-import com.google.common.base.Optional;
 import com.sequenceiq.cloudbreak.api.model.EndpointRule;
+import com.sequenceiq.cloudbreak.api.model.EndpointRule.Action;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.api.model.Port;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -46,40 +47,40 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 
 public final class NetworkUtils {
 
-    private static List<Port> ports = new ArrayList<>();
+    private static final List<Port> PORTS = new ArrayList<>(30);
 
     static {
-        ports.add(new Port(SSH, "22", "tcp"));
-        ports.add(new Port(HTTPS, "443", "tcp"));
-        ports.add(new Port(AMBARI, "8080", "tcp"));
-        ports.add(new Port(CONSUL, "8500", "tcp"));
-        ports.add(new Port(NAMENODE, "50070", "tcp"));
-        ports.add(new Port(RESOURCEMANAGER_WEB, "8088", "tcp"));
-        ports.add(new Port(RESOURCEMANAGER_SCHEDULER, "8030", "tcp"));
-        ports.add(new Port(RESOURCEMANAGER_IPC, "8050", "tcp"));
-        ports.add(new Port(JOB_HISTORY_SERVER, "19888", "tcp"));
-        ports.add(new Port(HBASE_MASTER_WEB, "16010", "tcp"));
-        ports.add(new Port(HBASE_MASTER, "60000", "tcp"));
-        ports.add(new Port(HBASE_REGION, "16020", "tcp"));
-        ports.add(new Port(HBASE_REGION_INFO, "16030", "tcp"));
-        ports.add(new Port(HIVE_METASTORE, "9083", "tcp"));
-        ports.add(new Port(HIVE_SERVER, "10000", "tcp"));
-        ports.add(new Port(HIVE_SERVER_HTTP, "10001", "tcp"));
-        ports.add(new Port(ACCUMULO_MASTER, "9999", "tcp"));
-        ports.add(new Port(ACCUMULO_TSERVER, "9997", "tcp"));
-        ports.add(new Port(ATLAS, "21000", "tcp"));
-        ports.add(new Port(KNOX_GW, "8443", "tcp"));
-        ports.add(new Port(FALCON, "15000", "tcp"));
-        ports.add(new Port(STORM, "8744", "tcp"));
-        ports.add(new Port(OOZIE, "11000", "tcp"));
-        ports.add(new Port(SPARK_HISTORY_SERVER, "18080", "tcp"));
-        ports.add(new Port(CONTAINER_LOGS, "8042", "tcp"));
-        ports.add(new Port(ZEPPELIN_WEB_SOCKET, "9996", "tcp"));
-        ports.add(new Port(ZEPPELIN_UI, "9995", "tcp"));
-        ports.add(new Port(RANGER, "6080", "tcp"));
-        ports.add(new Port(KIBANA, "3080", "tcp"));
-        ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
-        ports.add(new Port(DRUID_SUPERSET, "9088", "tcp"));
+        PORTS.add(new Port(SSH, "22", "tcp"));
+        PORTS.add(new Port(HTTPS, "443", "tcp"));
+        PORTS.add(new Port(AMBARI, "8080", "tcp"));
+        PORTS.add(new Port(CONSUL, "8500", "tcp"));
+        PORTS.add(new Port(NAMENODE, "50070", "tcp"));
+        PORTS.add(new Port(RESOURCEMANAGER_WEB, "8088", "tcp"));
+        PORTS.add(new Port(RESOURCEMANAGER_SCHEDULER, "8030", "tcp"));
+        PORTS.add(new Port(RESOURCEMANAGER_IPC, "8050", "tcp"));
+        PORTS.add(new Port(JOB_HISTORY_SERVER, "19888", "tcp"));
+        PORTS.add(new Port(HBASE_MASTER_WEB, "16010", "tcp"));
+        PORTS.add(new Port(HBASE_MASTER, "60000", "tcp"));
+        PORTS.add(new Port(HBASE_REGION, "16020", "tcp"));
+        PORTS.add(new Port(HBASE_REGION_INFO, "16030", "tcp"));
+        PORTS.add(new Port(HIVE_METASTORE, "9083", "tcp"));
+        PORTS.add(new Port(HIVE_SERVER, "10000", "tcp"));
+        PORTS.add(new Port(HIVE_SERVER_HTTP, "10001", "tcp"));
+        PORTS.add(new Port(ACCUMULO_MASTER, "9999", "tcp"));
+        PORTS.add(new Port(ACCUMULO_TSERVER, "9997", "tcp"));
+        PORTS.add(new Port(ATLAS, "21000", "tcp"));
+        PORTS.add(new Port(KNOX_GW, "8443", "tcp"));
+        PORTS.add(new Port(FALCON, "15000", "tcp"));
+        PORTS.add(new Port(STORM, "8744", "tcp"));
+        PORTS.add(new Port(OOZIE, "11000", "tcp"));
+        PORTS.add(new Port(SPARK_HISTORY_SERVER, "18080", "tcp"));
+        PORTS.add(new Port(CONTAINER_LOGS, "8042", "tcp"));
+        PORTS.add(new Port(ZEPPELIN_WEB_SOCKET, "9996", "tcp"));
+        PORTS.add(new Port(ZEPPELIN_UI, "9995", "tcp"));
+        PORTS.add(new Port(RANGER, "6080", "tcp"));
+        PORTS.add(new Port(KIBANA, "3080", "tcp"));
+        PORTS.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
+        PORTS.add(new Port(DRUID_SUPERSET, "9088", "tcp"));
     }
 
     private NetworkUtils() {
@@ -87,7 +88,7 @@ public final class NetworkUtils {
     }
 
     public static List<Port> getPortsWithoutAclRules() {
-        return ports;
+        return PORTS;
     }
 
     public static List<Port> getPorts(Optional<Stack> stack) {
@@ -107,7 +108,7 @@ public final class NetworkUtils {
                 }
             }
         } else {
-            result.addAll(ports);
+            result.addAll(PORTS);
         }
 
         return result;
@@ -117,17 +118,17 @@ public final class NetworkUtils {
         List<EndpointRule> rules = new LinkedList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             for (SecurityRule rule : instanceGroup.getSecurityGroup().getSecurityRules()) {
-                rules.add(new EndpointRule(EndpointRule.Action.PERMIT.getText(), rule.getCidr()));
+                rules.add(new EndpointRule(Action.PERMIT.getText(), rule.getCidr()));
             }
         }
-        EndpointRule internalRule = new EndpointRule(EndpointRule.Action.PERMIT.toString(), stack.getNetwork().getSubnetCIDR());
+        EndpointRule internalRule = new EndpointRule(Action.PERMIT.toString(), stack.getNetwork().getSubnetCIDR());
         rules.add(internalRule);
         rules.add(EndpointRule.DENY_RULE);
         return rules;
     }
 
     private static Port getPortByPortNumberAndProtocol(String portNumber, String protocol) {
-        for (Port port : ports) {
+        for (Port port : PORTS) {
             if (portNumber.equals(port.getPort()) && protocol.equals(port.getProtocol())) {
                 return port;
             }
@@ -136,7 +137,7 @@ public final class NetworkUtils {
     }
 
     public static Port getPortByServiceName(ExposedService exposedService) {
-        for (Port port : ports) {
+        for (Port port : PORTS) {
             if (port.getExposedService().equals(exposedService)) {
                 return port;
             }

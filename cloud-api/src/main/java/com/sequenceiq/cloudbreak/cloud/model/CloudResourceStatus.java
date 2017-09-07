@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudResourceStatus {
 
-    private CloudResource cloudResource;
+    private final CloudResource cloudResource;
 
     private ResourceStatus status;
 
-    private String statusReason;
+    private final String statusReason;
 
     private Long privateId;
 
@@ -59,7 +59,7 @@ public class CloudResourceStatus {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudResourceStatus{");
+        StringBuilder sb = new StringBuilder("CloudResourceStatus{");
         sb.append("cloudResource=").append(cloudResource);
         sb.append(", status=").append(status);
         sb.append(", statusReason='").append(statusReason).append('\'');

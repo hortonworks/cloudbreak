@@ -37,7 +37,7 @@ public class DatabaseMigrationConfig {
 
     private static final String PENDING_OPERATION_SUBFOLDER = "/app";
 
-    @Value("${periscope.schema.scripts.location:" + DEFAULT_SCHEMA_LOCATION_IN_SOURCE + "}")
+    @Value("${periscope.schema.scripts.location:" + DEFAULT_SCHEMA_LOCATION_IN_SOURCE + '}')
     private String schemaLocation;
 
     @Value("${periscope.schema.migration.auto:true}")
@@ -82,7 +82,7 @@ public class DatabaseMigrationConfig {
         if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
             schemaLoc = DEFAULT_SCHEMA_LOCATION_IN_CONTAINER;
         }
-        schemaLoc = schemaLoc + UP_OPERATION_SUBFOLDER;
+        schemaLoc += UP_OPERATION_SUBFOLDER;
         LOGGER.info("Creating up operation migration loader for location: '{}'.....", schemaLoc);
         File scriptsDir = new File(schemaLoc);
         Properties emptyProperties = new Properties();
@@ -96,7 +96,7 @@ public class DatabaseMigrationConfig {
         if (SCHEMA_IN_CONTAINER.equals(schemaLocation)) {
             schemaLoc = DEFAULT_SCHEMA_LOCATION_IN_CONTAINER;
         }
-        schemaLoc = schemaLoc + PENDING_OPERATION_SUBFOLDER;
+        schemaLoc += PENDING_OPERATION_SUBFOLDER;
         LOGGER.info("Creating pending operation migration loader for location: '{}'.....", schemaLoc);
         File scriptsDir = new File(schemaLoc);
         Properties emptyProperties = new Properties();

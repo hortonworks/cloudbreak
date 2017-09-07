@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
 public class StateConverterAdapter<S extends FlowState> implements StateConverter<S> {
-    private Class<S> type;
+
+    private final Class<S> type;
 
     public StateConverterAdapter(Class<S> clazz) {
         type = clazz;

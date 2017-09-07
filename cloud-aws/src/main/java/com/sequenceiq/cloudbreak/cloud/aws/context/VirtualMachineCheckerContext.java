@@ -4,11 +4,11 @@ import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 
 public class VirtualMachineCheckerContext extends AwsStatusCheckerContext {
 
-    private String groupName;
+    private final String groupName;
 
-    private String virtualMachine;
+    private final String virtualMachine;
 
-    private String status;
+    private final String status;
 
     public VirtualMachineCheckerContext(AwsCredentialView awsCredentialView, String groupName, String virtualMachine, String status) {
         super(awsCredentialView);
@@ -21,7 +21,7 @@ public class VirtualMachineCheckerContext extends AwsStatusCheckerContext {
         super(awsCredentialView);
         this.groupName = groupName;
         this.virtualMachine = virtualMachine;
-        this.status = "deleted";
+        status = "deleted";
     }
 
     public String getGroupName() {

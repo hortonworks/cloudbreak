@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -41,7 +42,7 @@ public class GetPlatformImagesHandler implements CloudPlatformEventHandler<GetPl
             Map<Platform, Collection<CustomImage>> platformCollectionHashMap = Maps.newHashMap();
             Map<Platform, String> platformRegexCollectionHashMap = Maps.newHashMap();
 
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+            for (Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 PlatformImage platformImage = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().images();
 
                 platformCollectionHashMap.put(connector.getKey(), platformImage.types());
@@ -51,7 +52,7 @@ public class GetPlatformImagesHandler implements CloudPlatformEventHandler<GetPl
                     new PlatformImages(platformCollectionHashMap, platformRegexCollectionHashMap));
             request.getResult().onNext(getPlatformImagesResult);
             LOGGER.info("Query platform images types finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformImagesResult(e.getMessage(), e, request));
         }
     }

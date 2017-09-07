@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -18,7 +19,7 @@ public class CloudNetworksToPlatformNetworksResponseConverter extends AbstractCo
     @Override
     public PlatformNetworksResponse convert(CloudNetworks source) {
         Map<String, Set<PlatformNetworkResponse>> result = new HashMap<>();
-        for (Map.Entry<String, Set<CloudNetwork>> entry : source.getCloudNetworkResponses().entrySet()) {
+        for (Entry<String, Set<CloudNetwork>> entry : source.getCloudNetworkResponses().entrySet()) {
             Set<PlatformNetworkResponse> networks = new HashSet<>();
             for (CloudNetwork cloudNetwork : entry.getValue()) {
                 PlatformNetworkResponse actual = new PlatformNetworkResponse(cloudNetwork.getName(), cloudNetwork.getSubnetIds(), cloudNetwork.getProperties());

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.google.common.collect.Maps;
 
 import reactor.bus.Event;
+import reactor.bus.Event.Headers;
 
 /**
  * Event factory that registers an error handler into the event.
@@ -24,7 +25,7 @@ public class ErrorHandlerAwareFlowEventFactory {
     }
 
     public <P> Event<P> createEventWithErrHandler(Map<String, Object> headers, P payLoad) {
-        return new Event<>(new Event.Headers(headers), payLoad, errorHandler);
+        return new Event<>(new Headers(headers), payLoad, errorHandler);
     }
 
     public <P> Event<P> createEvent(P payLoad) {
@@ -32,6 +33,6 @@ public class ErrorHandlerAwareFlowEventFactory {
     }
 
     public <P> Event<P> createEvent(Map<String, Object> headers, P payLoad) {
-        return new Event<>(new Event.Headers(headers), payLoad);
+        return new Event<>(new Headers(headers), payLoad);
     }
 }

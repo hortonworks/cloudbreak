@@ -10,11 +10,11 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class TerminateStackRequest<T> extends CloudStackRequest<T> {
 
-    private List<CloudResource> cloudResources;
+    private final List<CloudResource> cloudResources;
 
     public TerminateStackRequest(CloudContext cloudContext, CloudStack cloudStack, CloudCredential cloudCredential, List<CloudResource> resources) {
         super(cloudContext, cloudCredential, cloudStack);
-        this.cloudResources = new ArrayList<>(resources);
+        cloudResources = new ArrayList<>(resources);
     }
 
     public List<CloudResource> getCloudResources() {

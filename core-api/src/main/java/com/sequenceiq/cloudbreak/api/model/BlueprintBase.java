@@ -16,14 +16,14 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 public abstract class BlueprintBase implements JsonEntity {
 
-    @ApiModelProperty(value = BlueprintModelDescription.AMBARI_BLUEPRINT)
+    @ApiModelProperty(BlueprintModelDescription.AMBARI_BLUEPRINT)
     private String ambariBlueprint;
 
     @Size(max = 1000)
-    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(value = BlueprintModelDescription.INPUTS)
+    @ApiModelProperty(BlueprintModelDescription.INPUTS)
     private Set<BlueprintParameterJson> inputs = new HashSet<>();
 
     @JsonRawValue

@@ -254,7 +254,7 @@ public class AwsResourceConnectorTest {
         when(describeVpcsResult.getVpcs()).thenReturn(singletonList(vpc));
         when(vpc.getCidrBlock()).thenReturn("10.0.0.0/24");
         when(ec2Client.describeSubnets(any())).thenReturn(subnetsResult);
-        when(subnetsResult.getSubnets()).thenReturn(Arrays.asList(subnet1));
+        when(subnetsResult.getSubnets()).thenReturn(singletonList(subnet1));
         when(subnet1.getCidrBlock()).thenReturn("10.0.0.0/24");
 
         underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);

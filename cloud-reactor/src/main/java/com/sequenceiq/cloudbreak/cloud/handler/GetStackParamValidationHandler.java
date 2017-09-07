@@ -35,7 +35,7 @@ public class GetStackParamValidationHandler implements CloudPlatformEventHandler
                     aDefault.parameters().additionalStackParameters());
             request.getResult().onNext(getStackParamValidationResult);
             LOGGER.info("Query platform stack parameters finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetStackParamValidationResult(e.getMessage(), e, request));
         }
     }

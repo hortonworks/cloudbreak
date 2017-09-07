@@ -51,7 +51,7 @@ public class CloudFailureHandler {
     private void doRollback(AuthenticatedContext auth, List<CloudResourceStatus> failuresList, Group group, Integer fullNodeCount,
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, ScaleContext stx) {
         Set<Long> failures = failureCount(failuresList);
-        if (stx.getAdjustmentType() == null && failures.size() > 0) {
+        if (stx.getAdjustmentType() == null && !failures.isEmpty()) {
             LOGGER.info("Failure policy is null so error will throw");
             throwError(failuresList);
         }
@@ -60,7 +60,7 @@ public class CloudFailureHandler {
                 if (stx.getThreshold() > fullNodeCount - failures.size()) {
                     LOGGER.info("Number of failures is more than the threshold so error will throw");
                     throwError(failuresList);
-                } else if (failures.size() != 0) {
+                } else if (!failures.isEmpty()) {
                     LOGGER.info("Decrease node counts because threshold was higher");
                     handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, stx.getUpscale());
                 }
@@ -69,7 +69,7 @@ public class CloudFailureHandler {
                 if (Double.valueOf(stx.getThreshold()) > calculatePercentage(failures.size(), fullNodeCount)) {
                     LOGGER.info("Number of failures is more than the threshold so error will throw");
                     throwError(failuresList);
-                } else if (failures.size() != 0) {
+                } else if (!failures.isEmpty()) {
                     LOGGER.info("Decrease node counts because threshold was higher");
                     handleExceptions(auth, failuresList, group, ctx, resourceBuilders, failures, stx.getUpscale());
                 }
@@ -86,7 +86,7 @@ public class CloudFailureHandler {
     }
 
     private Set<Long> failureCount(List<CloudResourceStatus> failedResourceRequestResults) {
-        Set<Long> ids = new HashSet<>();
+        Set<Long> ids = new HashSet<>(failedResourceRequestResults.size());
         for (CloudResourceStatus failedResourceRequestResult : failedResourceRequestResults) {
             if (ResourceStatus.FAILED.equals(failedResourceRequestResult.getStatus())) {
                 ids.add(failedResourceRequestResult.getPrivateId());
@@ -96,12 +96,12 @@ public class CloudFailureHandler {
     }
 
     private double calculatePercentage(Integer failedResourceRequestResults, Integer fullNodeCount) {
-        return (double) ((fullNodeCount + failedResourceRequestResults) / fullNodeCount) * ONE_HUNDRED;
+        return ((fullNodeCount + failedResourceRequestResults) / fullNodeCount) * ONE_HUNDRED;
     }
 
     private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,
             ResourceBuilderContext ctx, ResourceBuilders resourceBuilders, Set<Long> ids, Boolean upscale) {
-        List<CloudResource> resources = new ArrayList<>();
+        List<CloudResource> resources = new ArrayList<>(cloudResourceStatuses.size());
         for (CloudResourceStatus exception : cloudResourceStatuses) {
             if (ResourceStatus.FAILED.equals(exception.getStatus()) || ids.contains(exception.getPrivateId())) {
                 LOGGER.error("Failed to create instance: " + exception.getStatusReason());

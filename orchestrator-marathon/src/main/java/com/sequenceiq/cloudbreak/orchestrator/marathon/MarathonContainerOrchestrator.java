@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Callable;
@@ -88,7 +89,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     public List<ContainerInfo> runContainer(ContainerConfig config, OrchestrationCredential cred, ContainerConstraint constraint,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
 
-        String image = config.getName() + ":" + config.getVersion();
+        String image = config.getName() + ':' + config.getVersion();
         String name = constraint.getContainerName().getName().replace("_", "-");
         String appName = constraint.getAppName();
 
@@ -140,9 +141,8 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     public void deleteContainer(List<ContainerInfo> containerInfo, OrchestrationCredential cred) throws CloudbreakOrchestratorException {
         try {
             Marathon client = MarathonClient.getInstance(cred.getApiEndpoint());
-            List<Future<Boolean>> futures = new ArrayList<>();
 
-            Map<String, Set<String>> containersPerApp = new HashMap<>();
+            Map<String, Set<String>> containersPerApp = new HashMap<>(containerInfo.size());
             for (ContainerInfo info : containerInfo) {
                 if (!containersPerApp.containsKey(info.getName())) {
                     containersPerApp.put(info.getName(), Sets.newHashSet(info.getId()));
@@ -151,13 +151,14 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
                 }
             }
 
-            for (String appName : containersPerApp.keySet()) {
-                App app = client.getApp(appName).getApp();
+            List<Future<Boolean>> futures = new ArrayList<>(containersPerApp.size());
+            for (Entry<String, Set<String>> entry : containersPerApp.entrySet()) {
+                App app = client.getApp(entry.getKey()).getApp();
                 Set<String> tasksInApp = app.getTasks().stream().map(Task::getId).collect(Collectors.toSet());
-                if (containersPerApp.get(appName).containsAll(tasksInApp)) {
-                    deleteEntireApp(client, futures, appName);
+                if (entry.getValue().containsAll(tasksInApp)) {
+                    deleteEntireApp(client, futures, entry.getKey());
                 } else {
-                    deleteTasksFromApp(client, futures, containersPerApp, appName);
+                    deleteTasksFromApp(client, futures, containersPerApp, entry.getKey());
                 }
             }
 
@@ -199,13 +200,11 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
     }
 
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel) {
     }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException {
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) {
     }
 
     @Override
@@ -249,7 +248,7 @@ public class MarathonContainerOrchestrator extends SimpleContainerOrchestrator {
         container.setDocker(docker);
 
         List<Volume> volumes = new ArrayList<>();
-        for (Map.Entry<String, String> volumeBind : constraint.getVolumeBinds().entrySet()) {
+        for (Entry<String, String> volumeBind : constraint.getVolumeBinds().entrySet()) {
             Volume sharedVolume = new Volume();
             sharedVolume.setHostPath(volumeBind.getKey());
             sharedVolume.setContainerPath(volumeBind.getValue());

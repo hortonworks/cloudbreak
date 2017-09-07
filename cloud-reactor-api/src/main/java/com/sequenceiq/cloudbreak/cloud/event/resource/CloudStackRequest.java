@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class CloudStackRequest<T> extends CloudPlatformRequest<T> {
 
-    private CloudStack cloudStack;
+    private final CloudStack cloudStack;
 
     public CloudStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack) {
         super(cloudContext, cloudCredential);

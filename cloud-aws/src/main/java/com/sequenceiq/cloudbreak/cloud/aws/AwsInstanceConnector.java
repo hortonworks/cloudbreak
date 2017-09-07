@@ -81,13 +81,13 @@ public class AwsInstanceConnector implements InstanceConnector {
             }
             try {
                 instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Running");
-                if (instances.size() > 0) {
+                if (!instances.isEmpty()) {
                     amazonEC2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances));
                 }
                 for (CloudInstance cloudInstance : cloudInstances) {
                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 for (CloudInstance cloudInstance : cloudInstances) {
                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, e.getMessage()));
                 }
@@ -114,13 +114,13 @@ public class AwsInstanceConnector implements InstanceConnector {
             }
             try {
                 instances = removeInstanceIdsWhichAreNotInCorrectState(instances, amazonEC2Client, "Stopped");
-                if (instances.size() > 0) {
+                if (!instances.isEmpty()) {
                     amazonEC2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances));
                 }
                 for (CloudInstance cloudInstance : cloudInstances) {
                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 for (CloudInstance cloudInstance : cloudInstances) {
                     statuses.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.FAILED, e.getMessage()));
                 }

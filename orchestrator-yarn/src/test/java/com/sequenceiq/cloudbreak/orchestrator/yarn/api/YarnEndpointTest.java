@@ -8,8 +8,8 @@ public class YarnEndpointTest {
 
     @Test
     public void testRemoveLeadingAndTrailingSlash() throws Exception {
-        final String testString = "//test/";
-        final String expectedString = "test";
+        String testString = "//test/";
+        String expectedString = "test";
         YarnEndpoint yarnEndpoint = new YarnEndpoint("", "");
         assertEquals(expectedString, yarnEndpoint.removeLeadingAndTrailingSlash(testString));
     }

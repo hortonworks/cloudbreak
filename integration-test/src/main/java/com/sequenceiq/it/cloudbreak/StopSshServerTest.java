@@ -20,7 +20,7 @@ public class StopSshServerTest extends AbstractCloudbreakIntegrationTest {
     private MockSshServer mockSshServer;
 
     @Test
-    @Parameters({ "sshPort" })
+    @Parameters("sshPort")
     public void stopSshServer(@Optional("22") Integer sshPort) {
         try {
             mockSshServer.stop(sshPort);

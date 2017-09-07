@@ -18,10 +18,8 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "account", "name" }),
-})
-public class Template {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+public class Template implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "template_generator")

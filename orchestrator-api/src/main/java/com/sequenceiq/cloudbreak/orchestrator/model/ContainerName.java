@@ -4,9 +4,9 @@ import java.util.Date;
 
 public class ContainerName {
 
-    private String namePrefix;
+    private final String namePrefix;
 
-    private String name;
+    private final String name;
 
     public ContainerName(String name, String namePrefix) {
         this.namePrefix = namePrefix;

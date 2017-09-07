@@ -22,6 +22,7 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         this.adjustment = adjustment;
     }
 
+    @Override
     public String getHostGroupName() {
         return hostGroup;
     }

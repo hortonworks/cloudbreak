@@ -13,7 +13,7 @@ import javax.persistence.SequenceGenerator;
  */
 @Entity
 @Deprecated
-public class Plugin {
+public class Plugin implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "plugin_generator")

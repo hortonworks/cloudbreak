@@ -97,7 +97,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
             Assert.assertFalse(recipeIds == null || recipeIds.isEmpty());
             hostGroupsWithRecipe = Arrays.asList(runRecipesOnHosts.split(","));
         }
-        Set<HostGroupRequest> hgMaps = new HashSet<>();
+        Set<HostGroupRequest> hgMaps = new HashSet<>(hostGroups.size());
         for (HostGroup hostgroup : hostGroups) {
             HostGroupRequest hostGroupBase = new HostGroupRequest();
             hostGroupBase.setName(hostgroup.getName());

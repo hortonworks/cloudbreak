@@ -25,7 +25,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     private UserDetailsService userDetailsService;
 
     @Override
-    public boolean hasPermission(Authentication authentication, final Object targetDomainObject, Object permission) {
+    public boolean hasPermission(Authentication authentication, Object targetDomainObject, Object permission) {
         if (targetDomainObject == null) {
             throw new NotFoundException("Resource not found.");
         }

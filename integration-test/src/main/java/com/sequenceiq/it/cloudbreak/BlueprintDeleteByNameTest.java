@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class BlueprintDeleteByNameTest extends AbstractCloudbreakIntegrationTest {
     @Test
-    @Parameters({ "blueprintName" })
+    @Parameters("blueprintName")
     public void testDeleteBlueprintByName(String blueprintName) throws Exception {
         // GIVEN
         // WHEN

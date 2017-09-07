@@ -4,17 +4,17 @@ import java.util.Collection;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ConnectorModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PlatformOrchestratorsJson implements JsonEntity {
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.ORCHESTRATORS)
+    @ApiModelProperty(ConnectorModelDescription.ORCHESTRATORS)
     private Map<String, Collection<String>> orchestrators;
 
-    @ApiModelProperty(ModelDescriptions.ConnectorModelDescription.DEFAULT_ORCHESTRATORS)
+    @ApiModelProperty(ConnectorModelDescription.DEFAULT_ORCHESTRATORS)
     private Map<String, String> defaults;
 
     public Map<String, Collection<String>> getOrchestrators() {

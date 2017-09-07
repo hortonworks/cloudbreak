@@ -164,13 +164,13 @@ public class SmartSenseConfigProvider {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class HSTMetadataInstanceInfoJson {
-        private String flexSubscriptionId;
+        private final String flexSubscriptionId;
 
-        private String guid;
+        private final String guid;
 
-        private String name;
+        private final String name;
 
-        private String parentGuid;
+        private final String parentGuid;
 
         HSTMetadataInstanceInfoJson(String flexSubscriptionId, String guid, String name, String parentGuid) {
             this.flexSubscriptionId = flexSubscriptionId;
@@ -198,17 +198,18 @@ public class SmartSenseConfigProvider {
 
     @JsonIgnoreProperties(ignoreUnknown = true)
     class HSTMetadataJson {
-        private String componentId;
 
-        private HSTMetadataInstanceInfoJson instanceInfo;
+        private static final String SCHEMA_VERSION = "1.0.0";
 
-        private String productId;
+        private static final String TYPE = "cluster";
 
-        private String productVersion;
+        private final String componentId;
 
-        private String schemaVersion = "1.0.0";
+        private final HSTMetadataInstanceInfoJson instanceInfo;
 
-        private String type = "cluster";
+        private final String productId;
+
+        private final String productVersion;
 
         HSTMetadataJson(String componentId, HSTMetadataInstanceInfoJson instanceInfo, String productId, String productVersion) {
             this.componentId = componentId;
@@ -234,11 +235,11 @@ public class SmartSenseConfigProvider {
         }
 
         public String getSchemaVersion() {
-            return schemaVersion;
+            return SCHEMA_VERSION;
         }
 
         public String getType() {
-            return type;
+            return TYPE;
         }
     }
 }

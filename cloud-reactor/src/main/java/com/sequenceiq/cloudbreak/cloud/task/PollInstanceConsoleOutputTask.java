@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.InstanceConsoleOutputResult;
-import com.sequenceiq.cloudbreak.cloud.handler.GetSSHFingerprintsHandler;
+import com.sequenceiq.cloudbreak.cloud.handler.GetSSHFingerprintsHandler.FingerprintParserUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 
 @Component(PollInstanceConsoleOutputTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class PollInstanceConsoleOutputTask extends AbstractPollTask<InstanceConsoleOutputResult> {
     public static final String NAME = "pollInstanceConsoleOutputTask";
 
@@ -46,7 +46,7 @@ public class PollInstanceConsoleOutputTask extends AbstractPollTask<InstanceCons
         if (contains) {
             return true;
         }
-        Set<String> fingerprints = GetSSHFingerprintsHandler.FingerprintParserUtil.parseFingerprints(output);
+        Set<String> fingerprints = FingerprintParserUtil.parseFingerprints(output);
         return !fingerprints.isEmpty();
     }
 }

@@ -35,7 +35,7 @@ public class AwsTagPreparationService {
     @PostConstruct
     public void init() {
         customTags = new HashMap<>();
-        if (customCloudformationTags != null && customCloudformationTags.size() != 0) {
+        if (customCloudformationTags != null && !customCloudformationTags.isEmpty()) {
             customCloudformationTags.stream().filter(field -> !field.isEmpty()).forEach(field -> {
                 String[] splittedField = field.split(":");
                 customTags.put(splittedField[0], splittedField[1]);

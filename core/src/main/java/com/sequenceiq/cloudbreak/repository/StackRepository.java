@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 @EntityType(entityClass = Stack.class)
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
+    @Override
     Stack findOne(@Param("id") Long id);
 
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")

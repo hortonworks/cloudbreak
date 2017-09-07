@@ -15,7 +15,6 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 
-import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.SuiteContext;
 import com.sequenceiq.it.config.IntegrationTestConfiguration;
 
@@ -63,8 +62,6 @@ public class CloudProviderParamsInitializer extends AbstractTestNGSpringContextT
     @Inject
     private SuiteContext suiteContext;
 
-    private IntegrationTestContext itContext;
-
     private Map<String, String> cloudProviderParams;
 
     @BeforeSuite(dependsOnGroups = "suiteInit")
@@ -73,7 +70,6 @@ public class CloudProviderParamsInitializer extends AbstractTestNGSpringContextT
         springTestContextBeforeTestClass();
         springTestContextPrepareTestInstance();
 
-        itContext = suiteContext.getItContext(testContext.getSuite().getName());
         cloudProviderParams = new HashMap<>();
         suiteContext.getItContext(testContext.getSuite().getName()).putContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, cloudProviderParams);
     }

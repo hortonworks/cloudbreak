@@ -3,40 +3,40 @@ package com.sequenceiq.cloudbreak.api.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.GatewayModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class GatewayJson {
+public class GatewayJson implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.ENABLE_KNOX_GATEWAY)
+    @ApiModelProperty(GatewayModelDescription.ENABLE_KNOX_GATEWAY)
     private Boolean enableGateway;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_PATH)
+    @ApiModelProperty(GatewayModelDescription.KNOX_PATH)
     private String path;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_TOPOLOGY_NAME)
+    @ApiModelProperty(GatewayModelDescription.KNOX_TOPOLOGY_NAME)
     private String topologyName;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.EXPOSED_KNOX_SERVICES)
+    @ApiModelProperty(GatewayModelDescription.EXPOSED_KNOX_SERVICES)
     private List<String> exposedServices;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_SSO_PROVIDER)
+    @ApiModelProperty(GatewayModelDescription.KNOX_SSO_PROVIDER)
     private String ssoProvider;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_SSO_CERT)
+    @ApiModelProperty(GatewayModelDescription.KNOX_SSO_CERT)
     private String signCert;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_SSO_PUB_KEY)
+    @ApiModelProperty(GatewayModelDescription.KNOX_SSO_PUB_KEY)
     private String signPub;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_GATEWAY_TYPE)
+    @ApiModelProperty(GatewayModelDescription.KNOX_GATEWAY_TYPE)
     private GatewayType gatewayType;
 
-    @ApiModelProperty(value = ModelDescriptions.GatewayModelDescription.KNOX_SSO_TYPE)
+    @ApiModelProperty(GatewayModelDescription.KNOX_SSO_TYPE)
     private SSOType ssoType;
 
     public Boolean getEnableGateway() {

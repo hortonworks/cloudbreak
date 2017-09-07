@@ -109,7 +109,7 @@ public interface ResourceConnector<R> {
      * @return the status of updated resources
      * @throws Exception in case of any error
      */
-    List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception;
+    List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources);
 
     /**
      * Update of infrastructure on Cloud platform, delete instances. It does not need to wait/block until the infrastructure update is

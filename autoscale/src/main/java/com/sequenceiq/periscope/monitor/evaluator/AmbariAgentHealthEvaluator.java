@@ -52,7 +52,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
 
     @Override
     public void setContext(Map<String, Object> context) {
-        this.clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
+        clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
     }
 
     @Override
@@ -74,7 +74,7 @@ public class AmbariAgentHealthEvaluator extends AbstractEventPublisher implement
                     }
                 }
                 if (!hostNamesToRecover.isEmpty()) {
-                    hostNamesToRecover.stream().forEach(hn -> LOGGER.info("Host to recover: {}", hn));
+                    hostNamesToRecover.forEach(hn -> LOGGER.info("Host to recover: {}", hn));
                     CloudbreakClient cbClient = cloudbreakClientConfiguration.cloudbreakClient();
                     FailureReport failureReport = new FailureReport();
                     failureReport.setFailedNodes(hostNamesToRecover);

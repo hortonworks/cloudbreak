@@ -4,7 +4,7 @@ public class ServerAddressGenerator {
 
     public static final int ADDRESS_RANGE = 254;
 
-    private int numberOfServers;
+    private final int numberOfServers;
 
     private String prefix;
 
@@ -12,7 +12,7 @@ public class ServerAddressGenerator {
 
     public ServerAddressGenerator(int numberOfServers) {
         this.numberOfServers = numberOfServers;
-        this.prefix = "192.168.";
+        prefix = "192.168.";
     }
 
     public void iterateOver(ServerAddressGeneratorFunction serverAddressGeneratorFunction) {
@@ -22,7 +22,7 @@ public class ServerAddressGenerator {
         for (; i <= serverProduceCount / ADDRESS_RANGE; i++) {
             int subAddress = Integer.min(ADDRESS_RANGE, serverProduceCount - i * ADDRESS_RANGE);
             for (; j <= subAddress; j++) {
-                serverAddressGeneratorFunction.doSomething(prefix + i + "." + j);
+                serverAddressGeneratorFunction.doSomething(prefix + i + '.' + j);
             }
             j = 1;
         }
@@ -36,7 +36,7 @@ public class ServerAddressGenerator {
         for (; i <= serverProduceCount / ADDRESS_RANGE; i++) {
             int subAddress = Integer.min(ADDRESS_RANGE, serverProduceCount - i * ADDRESS_RANGE);
             for (; j <= subAddress; j++) {
-                serverAddressGeneratorWithNumberFunction.doSomething(prefix + i + "." + j, k);
+                serverAddressGeneratorWithNumberFunction.doSomething(prefix + i + '.' + j, k);
                 k++;
             }
             j = 1;

@@ -35,8 +35,8 @@ import com.icegreen.greenmail.util.GreenMail;
 import com.icegreen.greenmail.util.ServerSetup;
 import com.icegreen.greenmail.util.ServerSetupTest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
@@ -51,9 +51,7 @@ public class EmailSenderHostServiceTypeTest {
     private UserDetailsService userDetailsService;
 
     @InjectMocks
-    private EmailSenderService emailSenderService = new EmailSenderService();
-
-    private IdentityUser identityUser;
+    private final EmailSenderService emailSenderService = new EmailSenderService();
 
     @Mock
     private EmailMimeMessagePreparator emailMimeMessagePreparator;
@@ -64,7 +62,7 @@ public class EmailSenderHostServiceTypeTest {
         greenMail.setUser("demouser", "demopwd");
         greenMail.start();
 
-        identityUser = new IdentityUser("sdf", "testuser", "testaccount", new ArrayList<>(), "familyname", "givenName", new Date());
+        IdentityUser identityUser = new IdentityUser("sdf", "testuser", "testaccount", new ArrayList<>(), "familyname", "givenName", new Date());
         ReflectionTestUtils.setField(emailSenderService, "freemarkerConfiguration", freemarkerConfiguration());
 
         ReflectionTestUtils.setField(emailSenderService, "successClusterMailTemplatePath", "templates/cluster-installer-mail-success.ftl");

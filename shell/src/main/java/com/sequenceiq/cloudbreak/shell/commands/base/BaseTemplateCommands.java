@@ -28,7 +28,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = "template list")
+    @CliAvailabilityIndicator("template list")
     @Override
     public boolean listAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -45,7 +45,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = "template show")
+    @CliAvailabilityIndicator("template show")
     @Override
     public boolean showAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -107,7 +107,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
         return select(null, name);
     }
 
-    @CliAvailabilityIndicator(value = "template delete")
+    @CliAvailabilityIndicator("template delete")
     @Override
     public boolean deleteAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -193,9 +193,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
             shellContext.setHint(Hints.SELECT_CREDENTIAL);
         } else if (shellContext.isCredentialAvailable()
                 && (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
-                && shellContext.getActiveHostGroups().size() != 0)) {
-            shellContext.setHint(Hints.CREATE_STACK);
-        } else if (shellContext.isStackAccessible()) {
+                && !shellContext.getActiveHostGroups().isEmpty()) || shellContext.isStackAccessible()) {
             shellContext.setHint(Hints.CREATE_STACK);
         } else {
             shellContext.setHint(Hints.NONE);

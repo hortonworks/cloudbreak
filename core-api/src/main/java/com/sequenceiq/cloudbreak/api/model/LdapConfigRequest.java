@@ -5,6 +5,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,7 +19,7 @@ public class LdapConfigRequest extends LdapConfigBase {
     private String name;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_PASSWORD, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.BIND_PASSWORD, required = true)
     private String bindPassword;
 
     public String getName() {

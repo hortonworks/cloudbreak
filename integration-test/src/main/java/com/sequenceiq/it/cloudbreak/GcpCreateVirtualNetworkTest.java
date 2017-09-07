@@ -24,6 +24,9 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Builder;
+import com.google.api.services.compute.Compute.Networks;
+import com.google.api.services.compute.Compute.Subnetworks.Insert;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.Operation;
@@ -49,8 +52,6 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
     @Value("${integrationtest.gcpcredential.p12File}")
     private String defaultP12File;
 
-    private JacksonFactory jsonFactory;
-
     @Test
     @Parameters({"networkName", "description", "publicInAccount", "resourceGroupName", "vpcName", "vpcSubnet", "subnetCIDR", "networkType"})
     public void createNetwork(String networkName, @Optional("") String description, @Optional("false") boolean publicInAccount,
@@ -60,7 +61,7 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         PrivateKey privateKey = SecurityUtils.loadPrivateKeyFromKeyStore(SecurityUtils.getPkcs12KeyStore(),
                 new ByteArrayInputStream(Base64.decodeBase64(serviceAccountPrivateKey)), "notasecret", "privatekey", "notasecret");
-        jsonFactory = JacksonFactory.getDefaultInstance();
+        JacksonFactory jsonFactory = JacksonFactory.getDefaultInstance();
         GoogleCredential googleCredential = new GoogleCredential.Builder().setTransport(httpTransport)
                 .setJsonFactory(jsonFactory)
                 .setServiceAccountId(defaultServiceAccountId)
@@ -68,7 +69,7 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
                 .setServiceAccountPrivateKey(privateKey)
                 .build();
 
-        Compute compute = new Compute.Builder(httpTransport, jsonFactory, null)
+        Compute compute = new Builder(httpTransport, jsonFactory, null)
                 .setApplicationName(defaultName)
                 .setHttpRequestInitializer(googleCredential)
                 .build();
@@ -79,7 +80,7 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
             gcpNetwork.setAutoCreateSubnetworks(false);
         }
 
-        Compute.Networks.Insert networkInsert = compute.networks().insert(defaultProjectId, gcpNetwork);
+        Networks.Insert networkInsert = compute.networks().insert(defaultProjectId, gcpNetwork);
 
         Operation networkInsertResponse = networkInsert.execute();
 
@@ -94,7 +95,7 @@ public class GcpCreateVirtualNetworkTest extends AbstractCloudbreakIntegrationTe
             gcpSubnet.setName(vpcSubnet);
             gcpSubnet.setIpCidrRange(subnetCIDR);
             gcpSubnet.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", defaultProjectId, vpcName));
-            Compute.Subnetworks.Insert subNetworkInsert = compute.subnetworks().insert(defaultProjectId, subnetRegion, gcpSubnet);
+            Insert subNetworkInsert = compute.subnetworks().insert(defaultProjectId, subnetRegion, gcpSubnet);
             Operation subNetInsertResponse = subNetworkInsert.execute();
             if (subNetInsertResponse.getHttpErrorStatusCode() != null) {
                 throw new IllegalStateException("gcp subnetwork operation failed: " + subNetInsertResponse.getHttpErrorMessage());

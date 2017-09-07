@@ -80,8 +80,8 @@ public class Cluster {
 
     public Cluster(PeriscopeUser user, AmbariStack ambariStack) {
         this.user = user;
-        this.stackId = ambariStack.getStackId();
-        this.ambari = ambariStack.getAmbari();
+        stackId = ambariStack.getStackId();
+        ambari = ambariStack.getAmbari();
     }
 
     public void update(AmbariStack ambariStack) {
@@ -205,19 +205,19 @@ public class Cluster {
     }
 
     public synchronized void setLastScalingActivityCurrent() {
-        this.lastScalingActivity = System.currentTimeMillis();
+        lastScalingActivity = System.currentTimeMillis();
     }
 
     public boolean isRunning() {
-        return ClusterState.RUNNING == getState();
+        return ClusterState.RUNNING == state;
     }
 
     public void addMetricAlert(MetricAlert alert) {
-        this.metricAlerts.add(alert);
+        metricAlerts.add(alert);
     }
 
     public void addTimeAlert(TimeAlert alert) {
-        this.timeAlerts.add(alert);
+        timeAlerts.add(alert);
     }
 
     public Set<PrometheusAlert> getPrometheusAlerts() {
@@ -229,7 +229,7 @@ public class Cluster {
     }
 
     public void addPrometheusAlert(PrometheusAlert alert) {
-        this.prometheusAlerts.add(alert);
+        prometheusAlerts.add(alert);
     }
 
     public boolean isAutoscalingEnabled() {

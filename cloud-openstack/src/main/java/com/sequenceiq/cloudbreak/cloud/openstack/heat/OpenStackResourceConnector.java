@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -32,9 +33,11 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.openstack.auth.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
+import com.sequenceiq.cloudbreak.cloud.openstack.heat.HeatTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
 
 @Service
 public class OpenStackResourceConnector implements ResourceConnector<Object> {
@@ -65,7 +68,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnetCidr != null);
         modelContext.withGroups(stack.getGroups());
@@ -91,17 +94,17 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                     .create(Builders.stack().name(stackName).template(heatTemplate).disableRollback(false)
                             .parameters(parameters).timeoutMins(OPERATION_TIMEOUT).build());
 
-            CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
+            CloudResource cloudResource = new Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
             try {
                 notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 //Rollback
                 terminate(authenticatedContext, stack, Collections.singletonList(cloudResource));
             }
             resources = check(authenticatedContext, Collections.singletonList(cloudResource));
         } else {
             LOGGER.info("Heat stack already exists: {}", existingStack.getName());
-            CloudResource cloudResource = new CloudResource.Builder().type(ResourceType.HEAT_STACK).name(existingStack.getId()).build();
+            CloudResource cloudResource = new Builder().type(ResourceType.HEAT_STACK).name(existingStack.getId()).build();
             resources = Collections.singletonList(new CloudResourceStatus(cloudResource, ResourceStatus.CREATED));
         }
         LOGGER.debug("Launched resources: {}", resources);
@@ -110,7 +113,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> check(AuthenticatedContext authenticatedContext, List<CloudResource> resources) {
-        List<CloudResourceStatus> result = new ArrayList<>();
+        List<CloudResourceStatus> result = new ArrayList<>(resources.size());
         OSClient client = openStackClient.createOSClient(authenticatedContext);
 
         for (CloudResource resource : resources) {
@@ -144,12 +147,12 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                         retryService.testWith2SecDelayMax5Times(() -> {
                             boolean exists = client.heat().stacks().getStackByName(resource.getName()) != null;
                             if (!exists) {
-                                throw new Retry.ActionWentFail();
+                                throw new ActionWentFail("Stack not exists");
                             }
                             return exists;
                         });
                         client.heat().stacks().delete(stackName, heatStackId);
-                    } catch (Retry.ActionWentFail af) {
+                    } catch (ActionWentFail af) {
                         LOGGER.info(String.format("Stack not found with name: %s", resource.getName()));
                     }
                     break;
@@ -167,7 +170,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnetCidr != null);
         modelContext.withGroups(stack.getGroups());
@@ -199,7 +202,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnetCidr != null);
         modelContext.withGroups(stack.getGroups());
@@ -233,7 +236,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         boolean existingNetwork = neutronNetworkView.isExistingNetwork();
         String existingSubnetCidr = getExistingSubnetCidr(authenticatedContext, stack);
 
-        HeatTemplateBuilder.ModelContext modelContext = new HeatTemplateBuilder.ModelContext();
+        ModelContext modelContext = new ModelContext();
         modelContext.withExistingNetwork(existingNetwork);
         modelContext.withExistingSubnet(existingSubnetCidr != null);
         modelContext.withGroups(stack.getGroups());
@@ -265,7 +268,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
     }
 
     private CloudStack removeDeleteRequestedInstances(CloudStack stack) {
-        List<Group> groups = new ArrayList<>();
+        List<Group> groups = new ArrayList<>(stack.getGroups().size());
         for (Group group : stack.getGroups()) {
             List<CloudInstance> instances = new ArrayList<>(group.getInstances());
             for (CloudInstance instance : group.getInstances()) {

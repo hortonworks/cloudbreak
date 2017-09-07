@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.springframework.stereotype.Component;
 
@@ -26,9 +27,9 @@ public class PlatformDiskTypesToJsonConverter extends AbstractConversionServiceA
 
     private Map<String, Map<String, String>> diskMappingsConvert(Map<Platform, Map<String, VolumeParameterType>> diskMappings) {
         Map<String, Map<String, String>> map = new HashMap<>();
-        for (Map.Entry<Platform, Map<String, VolumeParameterType>> platformMapEntry : diskMappings.entrySet()) {
+        for (Entry<Platform, Map<String, VolumeParameterType>> platformMapEntry : diskMappings.entrySet()) {
             Map<String, String> map1 = new HashMap<>();
-            for (Map.Entry<String, VolumeParameterType> stringVolumeParameterTypeEntry : platformMapEntry.getValue().entrySet()) {
+            for (Entry<String, VolumeParameterType> stringVolumeParameterTypeEntry : platformMapEntry.getValue().entrySet()) {
                 map1.put(stringVolumeParameterTypeEntry.getKey(), stringVolumeParameterTypeEntry.getValue().name());
             }
             map.put(platformMapEntry.getKey().value(), map1);

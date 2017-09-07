@@ -4,10 +4,10 @@ import java.util.Map;
 
 public class PlatformResourceSshKeyFilterView {
 
-    private String keyName;
+    private final String keyName;
 
     public PlatformResourceSshKeyFilterView(Map<String, String> filters) {
-        this.keyName = filters.get("keyName");
+        keyName = filters.get("keyName");
     }
 
     public String getKeyName() {

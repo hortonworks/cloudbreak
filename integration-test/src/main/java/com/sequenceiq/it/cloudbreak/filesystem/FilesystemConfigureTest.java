@@ -17,11 +17,10 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
-import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 
 public class FilesystemConfigureTest extends AbstractCloudbreakIntegrationTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakUtil.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FilesystemConfigureTest.class);
 
     @BeforeMethod
     public void setContextParameters() {

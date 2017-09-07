@@ -95,7 +95,7 @@ public class FlexUsageGenerator {
         result.setController(getFlexUsageControllerJson(usages, aUsage));
         result.setProducts(Collections.emptyList());
         if (controllerCreated == null || isValidFrom(fromDate)) {
-            result.setProducts(getFlexUsageProductJsons(usages, aUsage, fromDate));
+            result.setProducts(getFlexUsageProductJsons(usages, fromDate));
         }
         return result;
     }
@@ -134,7 +134,7 @@ public class FlexUsageGenerator {
         return cbUser;
     }
 
-    private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Optional<CloudbreakUsage> aUsage, Long fromDate) {
+    private List<FlexUsageProductJson> getFlexUsageProductJsons(List<CloudbreakUsage> usages, Long fromDate) {
         List<FlexUsageProductJson> flexUsageProducts = new ArrayList<>();
         FlexUsageProductJson flexUsageProductJson = new FlexUsageProductJson();
         flexUsageProductJson.setProductId(productId);

@@ -39,14 +39,9 @@ public class IdentityClient {
 
     private final WebTarget tokenWebTarget;
 
-    private final ConfigKey configKey;
-
-    private String tokenName = "token";
-
     public IdentityClient(String identityServerAddress, String clientId, ConfigKey configKey) {
         this.identityServerAddress = identityServerAddress;
         this.clientId = clientId;
-        this.configKey = configKey;
         WebTarget identityWebTarget = RestClientUtil.get(configKey).target(identityServerAddress);
         authorizeWebTarget = identityWebTarget.path("/oauth/authorize").queryParam("response_type", "token").queryParam("client_id", clientId);
         tokenWebTarget = identityWebTarget.path("/oauth/token").queryParam("grant_type", "client_credentials");
@@ -87,7 +82,7 @@ public class IdentityClient {
             throw new TokenUnavailableException("Error occurred while getting token from identity server", e);
         } catch (TokenUnavailableException e) {
             throw e;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new TokenUnavailableException("Error occurred while getting token from identity server", e);
         }
     }
@@ -95,9 +90,9 @@ public class IdentityClient {
     public AccessToken getToken(String secret) {
         try {
             MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-            headers.add("Authorization", "Basic " + Base64.encodeBase64String((clientId + ":" + secret).getBytes()));
+            headers.add("Authorization", "Basic " + Base64.encodeBase64String((clientId + ':' + secret).getBytes()));
             return tokenWebTarget.request().accept(MediaType.APPLICATION_JSON_TYPE).headers(headers).post(Entity.json(null), AccessToken.class);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new TokenUnavailableException("Error occurred while getting token from identity server", e);
         }
     }
@@ -105,9 +100,10 @@ public class IdentityClient {
     // Based on this implementation org.springframework.security.oauth2.provider.token.RemoteTokenServices because we need specific headers
     public Map<String, Object> loadAuthentication(String accessToken, String clientSecret) throws AuthenticationException, InvalidTokenException {
         MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
+        String tokenName = "token";
         formData.add(tokenName, accessToken);
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-        headers.add("Authorization", "Basic " + Base64.encodeBase64String((clientId + ":" + clientSecret).getBytes()));
+        headers.add("Authorization", "Basic " + Base64.encodeBase64String((clientId + ':' + clientSecret).getBytes()));
 
         Map<String, Object> response;
         try {

@@ -16,7 +16,7 @@ public class GenericResponses {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SaltBootResponses{");
+        StringBuilder sb = new StringBuilder("SaltBootResponses{");
         sb.append("responses=").append(responses);
         sb.append('}');
         return sb.toString();

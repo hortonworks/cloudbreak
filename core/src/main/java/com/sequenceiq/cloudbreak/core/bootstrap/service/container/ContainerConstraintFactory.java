@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
+import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint.Builder;
 import com.sequenceiq.cloudbreak.orchestrator.model.port.TcpPortBinding;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
@@ -54,7 +55,7 @@ public class ContainerConstraintFactory {
     private HostGroupRepository hostGroupRepository;
 
     public ContainerConstraint getAmbariServerDbConstraint(String gatewayHostname, String clusterName, String identifier) {
-        ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
+        Builder builder = new Builder()
                 .withName(createContainerInstanceName(AMBARI_DB.getName(), clusterName, identifier))
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
@@ -69,7 +70,7 @@ public class ContainerConstraintFactory {
     public ContainerConstraint getAmbariServerConstraint(String dbHostname, String gatewayHostname, String cloudPlatform,
             String clusterName, String identifier) {
         String env = String.format("/usr/sbin/init systemd.setenv=POSTGRES_DB=%s systemd.setenv=CLOUD_PLATFORM=%s", dbHostname, cloudPlatform);
-        ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
+        Builder builder = new Builder()
                 .withName(createContainerInstanceName(AMBARI_SERVER.getName(), clusterName, identifier))
                 .instances(1)
                 .networkMode(HOST_NETWORK_MODE)
@@ -79,7 +80,7 @@ public class ContainerConstraintFactory {
         if (!StringUtils.isEmpty(gatewayHostname)) {
             builder.addHosts(ImmutableList.of(gatewayHostname));
         } else {
-            env = env.concat(" systemd.setenv=USE_CONSUL_DNS=false");
+            env += " systemd.setenv=USE_CONSUL_DNS=false";
         }
         builder.cmd(new String[]{env});
         return builder.build();
@@ -88,13 +89,11 @@ public class ContainerConstraintFactory {
     public ContainerConstraint getAmbariAgentConstraint(String ambariServerHost, String ambariAgentApp, String cloudPlatform,
             HostGroup hostGroup, Integer adjustment, List<String> hostBlackList, String identifier) {
         String containerInstanceName;
-        if (YARN.equals(hostGroup.getCluster().getStack().getOrchestrator().getType())) {
-            containerInstanceName = createContainerInstanceNameForYarn(hostGroup, AMBARI_AGENT.getName(), identifier);
-        } else {
-            containerInstanceName = createContainerInstanceName(hostGroup, AMBARI_AGENT.getName(), identifier);
-        }
+        containerInstanceName = YARN.equals(hostGroup.getCluster().getStack().getOrchestrator().getType())
+                ? createContainerInstanceNameForYarn(hostGroup, AMBARI_AGENT.getName(), identifier)
+                : createContainerInstanceName(hostGroup, AMBARI_AGENT.getName(), identifier);
         Constraint hgConstraint = hostGroup.getConstraint();
-        ContainerConstraint.Builder builder = new ContainerConstraint.Builder()
+        Builder builder = new Builder()
                 .withNamePrefix(containerInstanceName)
                 .withAppName(ambariAgentApp)
                 .networkMode(HOST_NETWORK_MODE);

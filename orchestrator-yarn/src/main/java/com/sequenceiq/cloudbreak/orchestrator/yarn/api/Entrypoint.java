@@ -5,7 +5,7 @@ public enum Entrypoint {
     AMBARISERVER("/docker-entrypoint"),
     AMBARIAGENT("/docker-entrypoint");
 
-    private String entryPoint;
+    private final String entryPoint;
 
     Entrypoint(String entryPoint) {
         this.entryPoint = entryPoint;

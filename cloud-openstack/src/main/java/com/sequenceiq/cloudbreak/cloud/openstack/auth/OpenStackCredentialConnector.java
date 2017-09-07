@@ -57,7 +57,7 @@ public class OpenStackCredentialConnector implements CredentialConnector {
             try {
                 Keypair keyPair = client.compute().keypairs().create(keyPairName, keystoneCredential.getPublicKey());
                 LOGGER.info("Credential has been created: {}, kp: {}", auth.getCloudCredential(), keyPair);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LOGGER.error("Failed to create credential", e);
                 return new CloudCredentialStatus(auth.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
             }

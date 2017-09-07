@@ -1,25 +1,26 @@
 package com.sequenceiq.cloudbreak.domain;
 
 public class CbUsageFilterParameters {
-    private String account;
 
-    private String owner;
+    private final String account;
 
-    private Long since;
+    private final String owner;
 
-    private String cloud;
+    private final Long since;
 
-    private String region;
+    private final String cloud;
 
-    private Long filterEndDate;
+    private final String region;
+
+    private final Long filterEndDate;
 
     private CbUsageFilterParameters(Builder builder) {
-        this.account = builder.account;
-        this.owner = builder.owner;
-        this.since = builder.since;
-        this.cloud = builder.cloud;
-        this.region = builder.region;
-        this.filterEndDate = builder.filterEndDate;
+        account = builder.account;
+        owner = builder.owner;
+        since = builder.since;
+        cloud = builder.cloud;
+        region = builder.region;
+        filterEndDate = builder.filterEndDate;
     }
 
     public String getAccount() {

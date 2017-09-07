@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
 public class StackDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
 
-    private Long stackId;
+    private final Long stackId;
 
     public StackDeletionBasedExitCriteriaModel(Long stackId) {
         this.stackId = stackId;

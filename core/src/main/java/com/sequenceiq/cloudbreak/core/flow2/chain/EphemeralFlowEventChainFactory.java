@@ -38,7 +38,7 @@ public class EphemeralFlowEventChainFactory implements FlowEventChainFactory<Eph
         for (Stack stack : ephemeralStacks) {
             try {
                 flowManager.triggerEphemeralUpdate(stack.getId());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LOGGER.error("Cannot trigger ephemeral cluster update for stack: " + stack.getName(), e);
             }
         }

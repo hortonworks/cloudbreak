@@ -8,13 +8,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.Banner;
+import org.springframework.boot.Banner.Mode;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -27,6 +28,7 @@ import org.springframework.shell.CommandLine;
 import org.springframework.shell.core.CommandResult;
 import org.springframework.shell.core.JLineShellComponent;
 import org.springframework.shell.event.ShellStatus;
+import org.springframework.shell.event.ShellStatus.Status;
 import org.springframework.shell.event.ShellStatusListener;
 
 import com.sequenceiq.cloudbreak.api.model.AccountPreferencesJson;
@@ -80,11 +82,11 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
 
     @Override
     public void run(String... arg) throws Exception {
-        if ("".equals(user)) {
+        if (user != null && user.isEmpty()) {
             System.out.println("Missing 'sequenceiq.user' parameter!");
             return;
         }
-        if ("".equals(password)) {
+        if (password != null && password.isEmpty()) {
             System.out.println("Missing 'sequenceiq.password' parameter!");
             return;
         }
@@ -125,10 +127,10 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
 
     @Override
     public void onShellStatusChange(ShellStatus oldStatus, ShellStatus newStatus) {
-        if (newStatus.getStatus() == ShellStatus.Status.STARTED) {
+        if (newStatus.getStatus() == Status.STARTED) {
             try {
                 init();
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 System.out.println("Can't connect to Cloudbreak");
                 e.printStackTrace();
                 shell.executeCommand("quit");
@@ -168,8 +170,8 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         } else {
             if (!VersionedApplication.versionedApplication().showVersionInfo(args)) {
                 try {
-                    new SpringApplicationBuilder(CloudbreakShell.class).web(false).bannerMode(Banner.Mode.OFF).run(args);
-                } catch (Exception e) {
+                    new SpringApplicationBuilder(CloudbreakShell.class).web(false).bannerMode(Mode.OFF).run(args);
+                } catch (RuntimeException e) {
                     e.printStackTrace();
                     System.out.println("Cloudbreak shell cannot be started");
                 }
@@ -244,7 +246,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
             volumeTypes = cloudbreakClient.connectorEndpoint().getDisktypes().getDiskTypes();
             orchestrators = cloudbreakClient.connectorEndpoint().getOrchestratortypes().getOrchestrators();
             PlatformVirtualMachinesJson platformVirtualMachines = cloudbreakClient.connectorEndpoint().getVmTypes(true);
-            for (Map.Entry<String, Collection<VmTypeJson>> vmCloud : platformVirtualMachines.getVirtualMachines().entrySet()) {
+            for (Entry<String, Collection<VmTypeJson>> vmCloud : platformVirtualMachines.getVirtualMachines().entrySet()) {
                 List<Map<String, String>> tmp = new ArrayList<>();
                 for (VmTypeJson vmTypeJson : vmCloud.getValue()) {
                     Map<String, String> map = responseTransformer.transformObjectToStringMap(vmTypeJson);
@@ -254,7 +256,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
             }
             vmTypesPerZones = platformVirtualMachines.getVmTypesPerZones();
             defaultVmTypePerZones = platformVirtualMachines.getDefaultVmTypePerZones();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             System.out.println("Error during retrieving platform variants");
         } finally {
             context.setPlatformToVariantsMap(platformToVariants);

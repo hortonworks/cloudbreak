@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import net.schmizz.sshj.SSHClient;
 import net.schmizz.sshj.common.IOUtils;
 import net.schmizz.sshj.connection.channel.direct.Session;
+import net.schmizz.sshj.connection.channel.direct.Session.Command;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
 
 
@@ -26,7 +27,7 @@ public class SshUtil {
             sshClient.connect(host, 22);
             sshClient.authPublickey("cloudbreak", defaultPrivateKeyFile);
             Pair<Integer, String> cmdOut = execute(sshClient, sshCommand);
-            LOGGER.info("Ssh command status code and output: " + cmdOut.toString());
+            LOGGER.info("Ssh command status code and output: " + cmdOut);
             return cmdOut.getLeft() == 0 && checkCommandOutput(cmdOut, checkType, value);
         }
     }
@@ -40,7 +41,7 @@ public class SshUtil {
     private static Pair<Integer, String> execute(SSHClient ssh, String command) throws IOException {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh)) {
-            try (Session.Command cmd = session.exec(command)) {
+            try (Command cmd = session.exec(command)) {
                 String stdout = IOUtils.readFully(cmd.getInputStream()).toString();
                 cmd.join(10, TimeUnit.SECONDS);
                 return Pair.of(cmd.getExitStatus(), stdout);
@@ -48,7 +49,7 @@ public class SshUtil {
         }
     }
 
-    private static boolean checkCommandOutput(Pair<Integer, String> cmdOut, String checkType, String value) throws IOException {
+    private static boolean checkCommandOutput(Pair<Integer, String> cmdOut, String checkType, String value) {
         switch (checkType) {
             case "contains":
                 return cmdOut.getRight().contains(value);

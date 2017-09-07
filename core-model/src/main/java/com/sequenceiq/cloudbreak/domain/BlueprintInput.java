@@ -11,10 +11,6 @@ public class BlueprintInput implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private String propertyValue;
 
-    public BlueprintInput() {
-
-    }
-
     public String getName() {
         return name;
     }

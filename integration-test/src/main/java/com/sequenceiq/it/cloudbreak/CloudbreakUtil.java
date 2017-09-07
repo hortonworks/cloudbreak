@@ -8,13 +8,14 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.testng.Assert;
 
@@ -33,7 +34,6 @@ import com.sequenceiq.periscope.api.endpoint.HistoryEndpoint;
 import com.sequenceiq.periscope.api.model.HistoryJson;
 import com.sequenceiq.periscope.client.AutoscaleClient;
 
-import groovyx.net.http.HttpResponseException;
 
 public class CloudbreakUtil {
 
@@ -47,7 +47,7 @@ public class CloudbreakUtil {
     }
 
     public static void checkResponse(String operation, Response response) {
-        if (Response.Status.Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
+        if (Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
             String errormsg = "Error happened during " + operation + " rest operation: status: " + response.getStatus() + ", error: "
                     + response.readEntity(String.class);
             LOGGER.error(errormsg);
@@ -153,7 +153,7 @@ public class CloudbreakUtil {
         try {
             String ambariHealth = ambariClient.healthCheck();
             return "RUNNING".equals(ambariHealth);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }
@@ -184,14 +184,8 @@ public class CloudbreakUtil {
                 for (String statusPath : desiredStatuses.keySet()) {
                     currentStatuses.put(statusPath, (String) statusResult.get(statusPath));
                 }
-            } catch (Exception exception) {
-                if (exception instanceof HttpResponseException && ((HttpResponseException) exception).getStatusCode() == HttpStatus.NOT_FOUND.value()) {
-                    for (String statusPath : desiredStatuses.keySet()) {
-                        currentStatuses.put(statusPath, "DELETE_COMPLETED");
-                    }
-                } else {
-                    continue;
-                }
+            } catch (RuntimeException ignore) {
+                continue;
             }
 
             retryCount++;
@@ -244,7 +238,7 @@ public class CloudbreakUtil {
             HistoryEndpoint historyEndpoint = autoscaleClient.historyEndpoint();
             List<HistoryJson> historyJson = historyEndpoint.getHistory(clusterId);
             for (HistoryJson elem : historyJson) {
-                if ((elem.getTimestamp() > currentTime) && elem.getScalingStatus().toString().equals("SUCCESS")) {
+                if ((elem.getTimestamp() > currentTime) && "SUCCESS".equals(elem.getScalingStatus().toString())) {
                     exitCriteria = Boolean.TRUE;
                 }
             }
@@ -262,7 +256,7 @@ public class CloudbreakUtil {
 
     private static boolean checkStatuses(Map<String, String> currentStatuses, Map<String, String> desiredStatuses) {
         boolean result = true;
-        for (Map.Entry<String, String> desiredStatus: desiredStatuses.entrySet()) {
+        for (Entry<String, String> desiredStatus: desiredStatuses.entrySet()) {
             if (!desiredStatus.getValue().equals(currentStatuses.get(desiredStatus.getKey()))) {
                 result = false;
                 break;
@@ -274,7 +268,7 @@ public class CloudbreakUtil {
     private static boolean checkFailedStatuses(Map<String, String> currentStatuses) {
         boolean result = false;
         List<String> failedStatuses = Arrays.asList("FAILED", "DELETE_COMPLETED");
-        for (Map.Entry<String, String> desiredStatus: currentStatuses.entrySet()) {
+        for (Entry<String, String> desiredStatus: currentStatuses.entrySet()) {
             if (failedStatuses.contains(desiredStatus.getValue())) {
                 result = true;
                 break;
@@ -285,8 +279,8 @@ public class CloudbreakUtil {
 
     private static boolean checkNotExpectedDelete(Map<String, String> currentStatuses, Map<String, String> desiredStatuses) {
         boolean result = false;
-        for (Map.Entry<String, String> desiredStatus: desiredStatuses.entrySet()) {
-            if (!desiredStatus.getValue().equals("DELETE_COMPLETED") && currentStatuses.get(desiredStatus.getKey()).equals("DELETE_COMPLETED")) {
+        for (Entry<String, String> desiredStatus: desiredStatuses.entrySet()) {
+            if (!"DELETE_COMPLETED".equals(desiredStatus.getValue()) && "DELETE_COMPLETED".equals(currentStatuses.get(desiredStatus.getKey()))) {
                 result = true;
                 break;
             }
@@ -306,7 +300,7 @@ public class CloudbreakUtil {
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
         int nodeCount = 0;
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
-            if (!instanceGroup.getGroup().equals("cbgateway")) {
+            if (!"cbgateway".equals(instanceGroup.getGroup())) {
                 nodeCount += instanceGroup.getNodeCount();
             }
         }

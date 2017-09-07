@@ -30,7 +30,7 @@ public class AzureCredentialConnector implements CredentialConnector {
         try {
             AzureClient client = authenticatedContext.getParameter(AzureClient.class);
             client.getStorageAccounts().list();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error(e.getMessage(), e);
             return new CloudCredentialStatus(authenticatedContext.getCloudCredential(), CredentialStatus.FAILED, e, e.getMessage());
         }

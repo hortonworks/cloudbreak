@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,9 +9,9 @@ import java.util.List;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Artifact;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Dependency;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Resource;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 
 public class ComponentTest {
 

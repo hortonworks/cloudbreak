@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -23,7 +25,6 @@ import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.api.client.repackaged.com.google.common.base.Strings;
-import com.google.common.base.Optional;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
@@ -46,7 +47,6 @@ import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValida
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ExposedServices;
@@ -94,9 +94,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     @Inject
     private JsonHelper jsonHelper;
-
-    @Inject
-    private OrchestratorTypeResolver orchestratorTypeResolver;
 
     @Inject
     private ClusterComponentConfigProvider componentConfigProvider;
@@ -173,7 +170,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 AmbariRepoDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariRepo, AmbariRepoDetailsJson.class);
                 response.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Failed to convert dynamic component.", e);
         }
 
@@ -187,7 +184,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 AmbariDatabaseDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariDatabase, AmbariDatabaseDetailsJson.class);
                 response.setAmbariDatabaseDetails(ambariRepoDetailsJson);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Failed to convert dynamic component.", e);
         }
 
@@ -253,7 +250,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                 Map<String, String> map = customContainerDefinition.get(Map.class);
                 Map<String, String> result = new HashMap<>();
 
-                for (Map.Entry<String, String> stringStringEntry : map.entrySet()) {
+                for (Entry<String, String> stringStringEntry : map.entrySet()) {
                     result.put(stringStringEntry.getKey(), stringStringEntry.getValue());
                 }
                 clusterResponse.setCustomContainers(new CustomContainerResponse(result));
@@ -286,7 +283,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         try {
             if (inputs != null && inputs.getValue() != null) {
                 Map<String, String> is = inputs.get(Map.class);
-                for (Map.Entry<String, String> stringStringEntry : is.entrySet()) {
+                for (Entry<String, String> stringStringEntry : is.entrySet()) {
                     BlueprintInputJson blueprintInputJson = new BlueprintInputJson();
                     blueprintInputJson.setName(stringStringEntry.getKey());
                     blueprintInputJson.setPropertyValue(stringStringEntry.getValue());
@@ -313,7 +310,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         Blueprint blueprint = cluster.getBlueprint();
 
         Map<String, String> result = new HashMap<>();
-        List<Port> ports = NetworkUtils.getPorts(Optional.absent());
+        List<Port> ports = NetworkUtils.getPorts(Optional.empty());
         try {
             JsonNode hostGroupsNode = blueprintValidator.getHostGroupNode(blueprint);
             Map<String, HostGroup> hostGroupMap = blueprintValidator.createHostGroupMap(hostGroups);

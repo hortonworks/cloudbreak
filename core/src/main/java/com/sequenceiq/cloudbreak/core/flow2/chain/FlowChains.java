@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import reactor.bus.Event;
+import reactor.bus.Event.Headers;
 import reactor.bus.EventBus;
 
 @Component
@@ -29,9 +30,9 @@ public class FlowChains {
     @Inject
     private FlowLogService flowLogService;
 
-    private Map<String, Queue<Selectable>> flowChainMap = new ConcurrentHashMap<>();
+    private final Map<String, Queue<Selectable>> flowChainMap = new ConcurrentHashMap<>();
 
-    private Map<String, String> flowChainParentMap = new ConcurrentHashMap<>();
+    private final Map<String, String> flowChainParentMap = new ConcurrentHashMap<>();
 
     public void putFlowChain(String flowChainId, String parentFlowChainId, Queue<Selectable> flowChain) {
         flowChainMap.put(flowChainId, flowChain);
@@ -73,7 +74,7 @@ public class FlowChains {
         LOGGER.info("Triggering event: {}", selectable);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FLOW_CHAIN_ID, flowChainId);
-        eventBus.notify(selectable.selector(), new Event<>(new Event.Headers(headers), selectable));
+        eventBus.notify(selectable.selector(), new Event<>(new Headers(headers), selectable));
     }
 
     private void triggerParentFlowChain(String flowChainId) {

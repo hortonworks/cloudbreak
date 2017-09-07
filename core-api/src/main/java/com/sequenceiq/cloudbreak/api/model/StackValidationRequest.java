@@ -6,6 +6,7 @@ import java.util.Set;
 import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModel;
@@ -13,38 +14,38 @@ import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public class StackValidationRequest implements JsonEntity {
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.HOSTGROUPS, required = true)
+    @ApiModelProperty(value = ClusterModelDescription.HOSTGROUPS, required = true)
     private Set<HostGroupRequest> hostGroups = new HashSet<>();
 
     @ApiModelProperty(value = StackModelDescription.INSTANCE_GROUPS, required = true)
     private Set<InstanceGroupRequest> instanceGroups = new HashSet<>();
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.BLUEPRINT_ID)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.BLUEPRINT)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
     private BlueprintRequest blueprint;
 
-    @ApiModelProperty(value = StackModelDescription.NETWORK_ID)
+    @ApiModelProperty(StackModelDescription.NETWORK_ID)
     private Long networkId;
 
-    @ApiModelProperty(value = StackModelDescription.NETWORK)
+    @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkRequest network;
 
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String platform;
 
-    @ApiModelProperty(value = StackModelDescription.CREDENTIAL_ID)
+    @ApiModelProperty(StackModelDescription.CREDENTIAL_ID)
     private Long credentialId;
 
-    @ApiModelProperty(value = StackModelDescription.CREDENTIAL_NAME)
+    @ApiModelProperty(StackModelDescription.CREDENTIAL_NAME)
     private String credentialName;
 
-    @ApiModelProperty(value = StackModelDescription.CREDENTIAL)
+    @ApiModelProperty(StackModelDescription.CREDENTIAL)
     private CredentialRequest credential;
 
-    @ApiModelProperty(value = StackModelDescription.FILESYSTEM)
+    @ApiModelProperty(StackModelDescription.FILESYSTEM)
     private FileSystemRequest fileSystem;
 
     @ApiModelProperty(hidden = true)
@@ -82,7 +83,7 @@ public class StackValidationRequest implements JsonEntity {
     }
 
     public void setNetworkId(Long netWorkId) {
-        this.networkId = netWorkId;
+        networkId = netWorkId;
     }
 
     public FileSystemRequest getFileSystem() {

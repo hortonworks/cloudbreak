@@ -39,7 +39,7 @@ public class CloudbreakEventData {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakEventData{");
+        StringBuilder sb = new StringBuilder("CloudbreakEventData{");
         sb.append("entityId=").append(entityId);
         sb.append(", eventType='").append(eventType).append('\'');
         sb.append(", eventMessage='").append(eventMessage).append('\'');

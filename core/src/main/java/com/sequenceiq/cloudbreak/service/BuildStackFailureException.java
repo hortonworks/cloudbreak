@@ -11,12 +11,12 @@ public class BuildStackFailureException extends CloudbreakServiceException {
 
     public BuildStackFailureException(Exception ex) {
         super(ex);
-        this.resourceSet = new HashSet<>();
+        resourceSet = new HashSet<>();
     }
 
     public BuildStackFailureException(String message, Throwable cause) {
         super(message, cause);
-        this.resourceSet = new HashSet<>();
+        resourceSet = new HashSet<>();
     }
 
     public BuildStackFailureException(String message, Throwable cause, Set<Resource> resourceSet) {

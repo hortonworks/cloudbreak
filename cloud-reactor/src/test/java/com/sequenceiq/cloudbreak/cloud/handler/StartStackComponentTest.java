@@ -29,6 +29,7 @@ public class StartStackComponentTest extends AbstractComponentTest<StartInstance
         return "STARTINSTANCESREQUEST";
     }
 
+    @Override
     protected CloudPlatformRequest getRequest() {
         return new StartInstancesRequest(g().createCloudContext(), g().createCloudCredential(), g().createCloudResourceList(), g().createCloudInstances());
     }

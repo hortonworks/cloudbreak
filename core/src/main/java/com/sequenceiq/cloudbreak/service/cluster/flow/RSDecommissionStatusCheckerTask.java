@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +23,7 @@ public class RSDecommissionStatusCheckerTask extends ClusterBasedStatusCheckerTa
         MDCBuilder.buildMdcContext(t.getStack());
         AmbariClient ambariClient = t.getAmbariClient();
         Map<String, String> rs = ambariClient.getHBaseRegionServersState(t.getHostNames());
-        for (Map.Entry<String, String> entry : rs.entrySet()) {
+        for (Entry<String, String> entry : rs.entrySet()) {
             if (!FINAL_STATE.equals(entry.getValue())) {
                 LOGGER.info("RegionServer: {} decommission is in progress, current state: {}", entry.getKey(), entry.getValue());
                 return false;

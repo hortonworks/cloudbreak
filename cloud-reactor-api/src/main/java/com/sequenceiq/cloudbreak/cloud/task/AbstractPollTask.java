@@ -12,11 +12,11 @@ public abstract class AbstractPollTask<T> implements PollTask<T> {
 
     private final boolean cancellable;
 
-    public AbstractPollTask(AuthenticatedContext authenticatedContext) {
+    protected AbstractPollTask(AuthenticatedContext authenticatedContext) {
         this(authenticatedContext, true);
     }
 
-    public AbstractPollTask(AuthenticatedContext authenticatedContext, boolean cancellable) {
+    protected AbstractPollTask(AuthenticatedContext authenticatedContext, boolean cancellable) {
         this.authenticatedContext = authenticatedContext;
         this.cancellable = cancellable;
     }
@@ -31,7 +31,7 @@ public abstract class AbstractPollTask<T> implements PollTask<T> {
         if (!cancellable) {
             return false;
         }
-        PollGroup pollGroup = InMemoryStateStore.getStack(getAuthenticatedContext().getCloudContext().getId());
+        PollGroup pollGroup = InMemoryStateStore.getStack(authenticatedContext.getCloudContext().getId());
         return pollGroup != null && CANCELLED.equals(pollGroup);
     }
 }

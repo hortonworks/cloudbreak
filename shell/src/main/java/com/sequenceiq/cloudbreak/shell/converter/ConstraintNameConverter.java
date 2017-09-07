@@ -14,9 +14,6 @@ public class ConstraintNameConverter extends AbstractConverter<ConstraintName> {
     @Autowired
     private ShellContext shellContext;
 
-    public ConstraintNameConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String s) {
         return ConstraintName.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class ConstraintNameConverter extends AbstractConverter<ConstraintName> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, shellContext.getConstraints());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

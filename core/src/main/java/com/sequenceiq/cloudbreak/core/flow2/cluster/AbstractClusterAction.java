@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public abstract class AbstractClusterAction<P extends Payload> extends AbstractAction<FlowState, FlowEvent, ClusterContext, P> {
+
     @Inject
     private StackService stackService;
 
@@ -28,6 +29,7 @@ public abstract class AbstractClusterAction<P extends Payload> extends AbstractA
         super(payloadClass);
     }
 
+    @Override
     protected ClusterContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> clusterContext, P payload) {
         Stack stack = stackService.getById(payload.getStackId());
         Cluster cluster = clusterService.retrieveClusterByStackId(payload.getStackId());

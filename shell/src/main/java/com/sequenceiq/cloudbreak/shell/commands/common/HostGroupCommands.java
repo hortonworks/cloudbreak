@@ -26,14 +26,14 @@ public class HostGroupCommands implements CommandMarker {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = "hostgroup configure")
+    @CliAvailabilityIndicator("hostgroup configure")
     public boolean isCreateHostGroupAvailable() {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable() || shellContext.isStackAvailable())
                 && !shellContext.isMarathonMode()
                 && !shellContext.isYarnMode();
     }
 
-    @CliAvailabilityIndicator(value = "hostgroup show")
+    @CliAvailabilityIndicator("hostgroup show")
     public boolean isShowHostGroupAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
@@ -77,10 +77,10 @@ public class HostGroupCommands implements CommandMarker {
         ID, NAME
     }
 
-    private Set<Long> getRecipeIds(String inputs, final RecipeParameterType type) {
+    private Set<Long> getRecipeIds(String inputs, RecipeParameterType type) {
         return StreamSupport.stream(Splitter.on(",").omitEmptyStrings().trimResults().split(inputs).spliterator(), false).map(input -> {
             try {
-                RecipeResponse resp = null;
+                RecipeResponse resp;
                 switch (type) {
                     case ID:
                         resp = shellContext.cloudbreakClient().recipeEndpoint().get(Long.valueOf(input));
@@ -92,7 +92,7 @@ public class HostGroupCommands implements CommandMarker {
                         throw new UnsupportedOperationException();
                 }
                 return resp.getId();
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 throw new RuntimeException(e.getMessage());
             }
         }).collect(Collectors.toSet());

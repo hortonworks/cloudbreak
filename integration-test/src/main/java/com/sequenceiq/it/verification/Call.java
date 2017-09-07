@@ -17,7 +17,7 @@ public class Call {
 
     private String url;
 
-    private Map<String, String> headers = new HashMap<>();
+    private final Map<String, String> headers = new HashMap<>();
 
     private Map<String, String> parameters = new HashMap<>();
 
@@ -29,7 +29,7 @@ public class Call {
     /**
      * Factory method
      */
-    public static Call fromRequest(final Request request) {
+    public static Call fromRequest(Request request) {
         Call call = new Call();
 
         call.request = request;

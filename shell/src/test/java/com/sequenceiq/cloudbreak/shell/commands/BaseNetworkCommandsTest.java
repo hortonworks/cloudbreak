@@ -57,7 +57,7 @@ public class BaseNetworkCommandsTest {
     @Mock
     private ExceptionTransformer exceptionTransformer;
 
-    private RuntimeException expectedException = new RuntimeException("something not found");
+    private final RuntimeException expectedException = new RuntimeException("something not found");
 
     @Before
     public void setUp() throws Exception {
@@ -105,7 +105,7 @@ public class BaseNetworkCommandsTest {
 
         String select = underTest.select(null, "test1");
 
-        Assert.assertEquals(select, "Network is selected with name: test1");
+        Assert.assertEquals("Network is selected with name: test1", select);
     }
 
     @Test(expected = RuntimeException.class)

@@ -24,7 +24,7 @@ public class SyncGrainsRunner extends BaseSaltJobRunner {
 
     @Override
     public String toString() {
-        return "SyncGrainsChecker{" + super.toString() + "}";
+        return "SyncGrainsChecker{" + super.toString() + '}';
     }
 
 }

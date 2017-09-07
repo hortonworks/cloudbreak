@@ -23,6 +23,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.net.util.SubnetUtils;
+import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -67,6 +68,7 @@ import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationTemplateBuilder.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsInstanceProfileView;
@@ -76,6 +78,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -88,6 +91,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
 
 import freemarker.template.Configuration;
 
@@ -179,7 +183,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             cfClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
             LOGGER.info("Stack already exists: {}", cFStackName);
         } catch (AmazonServiceException e) {
-            CloudResource cloudFormationStack = new CloudResource.Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
+            CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
             String cidr = stack.getNetwork().getSubnet().getCidr();
@@ -187,7 +191,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             String inboundSecurityGroup = deployingToSameVPC(awsNetworkView, existingVPC)
                     ? defaultInboundSecurityGroup : "";
             AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
-            CloudFormationTemplateBuilder.ModelContext modelContext = new CloudFormationTemplateBuilder.ModelContext()
+            ModelContext modelContext = new ModelContext()
                     .withAuthenticatedContext(ac)
                     .withStack(stack)
                     .withExistingVpc(existingVPC)
@@ -217,7 +221,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             if (!task.completed(statePollerResult)) {
                 syncPollingScheduler.schedule(task);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new CloudConnectorException(e.getMessage(), e);
         }
 
@@ -270,7 +274,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         if (awsInstanceProfileView.isEnableInstanceProfileStrategy() && !awsInstanceProfileView.isInstanceProfileAvailable()) {
             String s3AccessRoleArn = getCreatedS3AccessRoleArn(cFStackName, client);
-            CloudResource s3AccessRoleArnCloudResource = new CloudResource.Builder().type(ResourceType.S3_ACCESS_ROLE_ARN).name(s3AccessRoleArn).build();
+            CloudResource s3AccessRoleArnCloudResource = new Builder().type(ResourceType.S3_ACCESS_ROLE_ARN).name(s3AccessRoleArn).build();
             resourceNotifier.notifyAllocation(s3AccessRoleArnCloudResource, ac.getCloudContext());
         }
     }
@@ -280,21 +284,21 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         if (awsNetworkView.isExistingVPC()) {
             String vpcId = awsNetworkView.getExistingVPC();
-            CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
+            CloudResource vpc = new Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
         } else {
             String vpcId = getCreatedVpc(cFStackName, client);
-            CloudResource vpc = new CloudResource.Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
+            CloudResource vpc = new Builder().type(ResourceType.AWS_VPC).name(vpcId).build();
             resourceNotifier.notifyAllocation(vpc, ac.getCloudContext());
         }
 
         if (awsNetworkView.isExistingSubnet()) {
             String subnetId = awsNetworkView.getExistingSubnet();
-            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
         } else {
             String subnetId = getCreatedSubnet(cFStackName, client);
-            CloudResource subnet = new CloudResource.Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
+            CloudResource subnet = new Builder().type(ResourceType.AWS_SUBNET).name(subnetId).build();
             resourceNotifier.notifyAllocation(subnet, ac.getCloudContext());
         }
     }
@@ -483,11 +487,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                         if (!e.getErrorMessage().contains(cFStackName + " does not exist")) {
                             throw e;
                         }
-                        throw new Retry.ActionWentFail();
+                        throw new ActionWentFail("Stack not exists");
                     }
                     return Boolean.TRUE;
                 });
-            } catch (Retry.ActionWentFail af) {
+            } catch (ActionWentFail af) {
                 LOGGER.info(String.format("Stack not found with name: %s", cFStackName));
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
                 releaseReservedIp(amazonEC2Client, resources);
@@ -769,9 +773,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     private String calculateSubnet(String stackName, Vpc vpc, List<String> subnetCidrs) {
-        SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
+        SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
         String[] cidrParts = vpcInfo.getCidrSignature().split("/");
-        int netmask = Integer.valueOf(cidrParts[cidrParts.length - 1]);
+        int netmask = Integer.parseInt(cidrParts[cidrParts.length - 1]);
         int netmaskBits = CIDR_PREFIX - netmask;
         if (netmaskBits <= 0) {
             throw new CloudConnectorException("The selected VPC has to be in a bigger CIDR range than /24");
@@ -796,7 +800,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     private String getSubnetCidrInRange(Vpc vpc, List<String> subnetCidrs, int start, int end) {
-        SubnetUtils.SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
+        SubnetInfo vpcInfo = new SubnetUtils(vpc.getCidrBlock()).getInfo();
         String lowProbe = incrementIp(vpcInfo.getLowAddress());
         String highProbe = new SubnetUtils(toSubnetCidr(lowProbe)).getInfo().getHighAddress();
         // start from the target subnet
@@ -808,7 +812,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         for (int i = start; i < end; i++) {
             boolean overlapping = false;
             for (String subnetCidr : subnetCidrs) {
-                SubnetUtils.SubnetInfo subnetInfo = new SubnetUtils(subnetCidr).getInfo();
+                SubnetInfo subnetInfo = new SubnetUtils(subnetCidr).getInfo();
                 if (isInRange(lowProbe, subnetInfo) || isInRange(highProbe, subnetInfo)) {
                     overlapping = true;
                     break;
@@ -841,7 +845,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return InetAddresses.fromInteger(ipValue).getHostAddress();
     }
 
-    private boolean isInRange(String address, SubnetUtils.SubnetInfo subnetInfo) {
+    private boolean isInRange(String address, SubnetInfo subnetInfo) {
         int low = InetAddresses.coerceToInteger(InetAddresses.forString(subnetInfo.getLowAddress()));
         int high = InetAddresses.coerceToInteger(InetAddresses.forString(subnetInfo.getHighAddress()));
         int currentAddress = InetAddresses.coerceToInteger(InetAddresses.forString(address));

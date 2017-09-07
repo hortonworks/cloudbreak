@@ -6,32 +6,25 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
-import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
 
 @Component(CreateSnapshotReadyStatusCheckerTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class CreateSnapshotReadyStatusCheckerTask extends PollBooleanStateTask {
     public static final String NAME = "createSnapshotReadyStatusCheckerTask";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateSnapshotReadyStatusCheckerTask.class);
 
-    private AuthenticatedContext authenticatedContext;
+    private final String snapshotId;
 
-    private CreateSnapshotResult snapshotResult;
+    private final AmazonEC2Client ec2Client;
 
-    private String snapshotId;
-
-    private AmazonEC2Client ec2Client;
-
-    public CreateSnapshotReadyStatusCheckerTask(AuthenticatedContext authenticatedContext, CreateSnapshotResult snapshotResult, String snapshotId,
-            AmazonEC2Client ec2Client) {
+    public CreateSnapshotReadyStatusCheckerTask(AuthenticatedContext authenticatedContext, String snapshotId, AmazonEC2Client ec2Client) {
         super(authenticatedContext, true);
         this.snapshotId = snapshotId;
-        this.snapshotResult = snapshotResult;
         this.ec2Client = ec2Client;
     }
 

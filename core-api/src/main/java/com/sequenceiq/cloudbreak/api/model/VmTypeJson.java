@@ -2,10 +2,11 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
-public class VmTypeJson {
+@JsonInclude(Include.NON_NULL)
+public class VmTypeJson implements JsonEntity {
     private String value;
 
     private VmTypeMetaJson vmTypeMetaJson;

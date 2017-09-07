@@ -1,6 +1,6 @@
 package com.sequenceiq.periscope.rest.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.sequenceiq.periscope.service.NotFoundException;
@@ -9,7 +9,7 @@ import com.sequenceiq.periscope.service.NotFoundException;
 public class NotFoundExceptionMapper extends BaseExceptionMapper<NotFoundException> {
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.NOT_FOUND;
+    Status getResponseStatus() {
+        return Status.NOT_FOUND;
     }
 }

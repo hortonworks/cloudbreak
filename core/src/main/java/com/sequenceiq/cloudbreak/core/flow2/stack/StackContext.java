@@ -7,13 +7,14 @@ import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
 
 public class StackContext extends CommonContext {
-    private Stack stack;
 
-    private CloudContext cloudContext;
+    private final Stack stack;
 
-    private CloudCredential cloudCredential;
+    private final CloudContext cloudContext;
 
-    private CloudStack cloudStack;
+    private final CloudCredential cloudCredential;
+
+    private final CloudStack cloudStack;
 
     public StackContext(String flowId, Stack stack, CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack) {
         super(flowId);

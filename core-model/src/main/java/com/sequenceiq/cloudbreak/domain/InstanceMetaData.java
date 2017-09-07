@@ -63,9 +63,6 @@ public class InstanceMetaData implements ProvisionEntity {
 
     private String subnetId;
 
-    public InstanceMetaData() {
-    }
-
     public InstanceGroup getInstanceGroup() {
         return instanceGroup;
     }
@@ -234,14 +231,14 @@ public class InstanceMetaData implements ProvisionEntity {
     }
 
     public String getDomain() {
-        if (discoveryFQDN == null || discoveryFQDN.length() == 0) {
+        if (discoveryFQDN == null || discoveryFQDN.isEmpty()) {
             return null;
         }
-        return discoveryFQDN.contains(".") ? discoveryFQDN.substring(discoveryFQDN.indexOf(".") + 1) : null;
+        return discoveryFQDN.contains(".") ? discoveryFQDN.substring(discoveryFQDN.indexOf('.') + 1) : null;
     }
 
     public String getShortHostname() {
-        if (discoveryFQDN == null || discoveryFQDN.length() == 0) {
+        if (discoveryFQDN == null || discoveryFQDN.isEmpty()) {
             return null;
         }
         return discoveryFQDN.split("\\.")[0];

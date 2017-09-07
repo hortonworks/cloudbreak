@@ -2,9 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonInclude(Include.NON_NULL)
 public class AmbariRepo {
 
     private Boolean predefined;
@@ -14,9 +15,6 @@ public class AmbariRepo {
     private String baseUrl;
 
     private String gpgKeyUrl;
-
-    public AmbariRepo() {
-    }
 
     public Boolean getPredefined() {
         return predefined;

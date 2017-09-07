@@ -14,11 +14,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterSyncFlowConfig extends AbstractFlowConfiguration<ClusterSyncState, ClusterSyncEvent> {
     private static final List<Transition<ClusterSyncState, ClusterSyncEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterSyncState, ClusterSyncEvent>()
+            new Builder<ClusterSyncState, ClusterSyncEvent>()
                     .from(INIT_STATE).to(CLUSTER_SYNC_STATE).event(CLUSTER_SYNC_EVENT).noFailureEvent()
                     .from(CLUSTER_SYNC_STATE).to(ClusterSyncState.CLUSTER_SYNC_FINISHED_STATE).event(ClusterSyncEvent.CLUSTER_SYNC_FINISHED_EVENT)
                     .failureEvent(ClusterSyncEvent.CLUSTER_SYNC_FINISHED_FAILURE_EVENT)
@@ -38,7 +39,7 @@ public class ClusterSyncFlowConfig extends AbstractFlowConfiguration<ClusterSync
     }
 
     @Override
-    protected AbstractFlowConfiguration.FlowEdgeConfig<ClusterSyncState, ClusterSyncEvent> getEdgeConfig() {
+    protected FlowEdgeConfig<ClusterSyncState, ClusterSyncEvent> getEdgeConfig() {
         return EDGE_CONFIG;
     }
 

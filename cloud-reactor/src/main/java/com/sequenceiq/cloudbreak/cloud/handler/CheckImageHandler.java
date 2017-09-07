@@ -54,7 +54,7 @@ public class CheckImageHandler implements CloudPlatformEventHandler<CheckImageRe
             CheckImageResult imageResult = new CheckImageResult(request, progress.getImageStatus(), progress.getStatusProgressValue());
             request.getResult().onNext(imageResult);
             LOGGER.info("Provision setup finished for {}", cloudContext);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             CheckImageResult failure = new CheckImageResult(e, request, ImageStatus.CREATE_FAILED);
             request.getResult().onNext(failure);
         }

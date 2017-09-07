@@ -4,7 +4,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -13,14 +13,14 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ConstraintJson {
 
-    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.INSTANCE_GROUP)
+    @ApiModelProperty(HostGroupModelDescription.INSTANCE_GROUP)
     private String instanceGroupName;
 
-    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.CONSTRAINT_NAME)
+    @ApiModelProperty(HostGroupModelDescription.CONSTRAINT_NAME)
     private String constraintTemplateName;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.HostGroupModelDescription.HOST_COUNT, required = true)
+    @ApiModelProperty(value = HostGroupModelDescription.HOST_COUNT, required = true)
     private Integer hostCount;
 
     public String getInstanceGroupName() {

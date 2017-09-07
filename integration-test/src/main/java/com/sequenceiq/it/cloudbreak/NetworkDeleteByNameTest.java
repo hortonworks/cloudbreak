@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class NetworkDeleteByNameTest extends AbstractCloudbreakIntegrationTest {
     @Test
-    @Parameters({ "networkName" })
+    @Parameters("networkName")
     public void testDeleteTemplateByName(String networkName) throws Exception {
         // GIVEN
         // WHEN

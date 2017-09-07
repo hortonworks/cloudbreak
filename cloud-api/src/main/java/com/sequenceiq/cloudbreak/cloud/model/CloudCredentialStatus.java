@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudCredentialStatus {
 
-    private CloudCredential cloudCredential;
+    private final CloudCredential cloudCredential;
 
-    private CredentialStatus status;
+    private final CredentialStatus status;
 
-    private String statusReason;
+    private final String statusReason;
 
-    private Exception exception;
+    private final Exception exception;
 
     public CloudCredentialStatus(CloudCredential cloudResource, CredentialStatus status) {
         this(cloudResource, status, null, null);

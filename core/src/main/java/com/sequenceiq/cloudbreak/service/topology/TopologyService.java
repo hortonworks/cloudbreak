@@ -4,6 +4,7 @@ import java.util.Date;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,7 +62,7 @@ public class TopologyService {
         }
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Topology create(IdentityUser user, Topology topology) {
         LOGGER.debug("Creating topology: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         Topology savedTopology;

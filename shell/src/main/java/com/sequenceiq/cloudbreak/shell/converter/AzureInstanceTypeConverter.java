@@ -13,9 +13,6 @@ public class AzureInstanceTypeConverter extends AbstractConverter<AzureInstanceT
     @Autowired
     private ShellContext context;
 
-    public AzureInstanceTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return AzureInstanceType.class.isAssignableFrom(type);
@@ -25,7 +22,7 @@ public class AzureInstanceTypeConverter extends AbstractConverter<AzureInstanceT
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getInstanceTypeNamesByPlatform("AZURE"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

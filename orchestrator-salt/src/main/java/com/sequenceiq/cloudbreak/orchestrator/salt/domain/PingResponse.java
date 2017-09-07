@@ -23,7 +23,7 @@ public class PingResponse {
 
     public Map<String, Boolean> getResultByMinionId() {
         Map<String, Boolean> res = new HashMap<>();
-        result.stream().forEach(map -> map.forEach((k, v) -> res.put(k, v)));
+        result.forEach(map -> map.forEach((k, v) -> res.put(k, v)));
         return res;
     }
 }

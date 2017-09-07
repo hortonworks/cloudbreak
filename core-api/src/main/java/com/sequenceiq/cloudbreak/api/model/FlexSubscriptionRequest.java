@@ -26,11 +26,11 @@ public class FlexSubscriptionRequest implements JsonEntity {
     private Long smartSenseSubscriptionId;
 
     //CHECKSTYLE:OFF
-    @ApiModelProperty(value = ModelDescriptions.FlexSubscriptionModelDescription.IS_DEFAULT)
+    @ApiModelProperty(FlexSubscriptionModelDescription.IS_DEFAULT)
     private boolean isDefault;
     //CHECKSTYLE:ON
 
-    @ApiModelProperty(value = ModelDescriptions.FlexSubscriptionModelDescription.USED_FOR_CONTROLLER)
+    @ApiModelProperty(FlexSubscriptionModelDescription.USED_FOR_CONTROLLER)
     private boolean usedForController;
 
     public String getName() {

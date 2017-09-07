@@ -21,7 +21,7 @@ public class OutputTransformerTest {
     private OutputTransformer underTest;
 
     @Spy
-    private TableRenderer tableRenderer = new TableRenderer();
+    private final TableRenderer tableRenderer = new TableRenderer();
 
     @Mock
     private JsonRenderer jsonRenderer;

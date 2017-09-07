@@ -21,7 +21,7 @@ public class DownscaleStackRequest extends CloudStackRequest<DownscaleStackResul
         super(cloudContext, cloudCredential, cloudStack);
         this.cloudResources = cloudResources;
         this.instances = instances;
-        this.resourcesToScale = null;
+        resourcesToScale = null;
     }
 
     public DownscaleStackRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudResource> cloudResources,

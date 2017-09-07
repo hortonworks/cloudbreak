@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -74,7 +75,7 @@ public class AmbariClusterUpscaleService {
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
         if (orchestratorType.containerOrchestrator()) {
             Map<String, List<Container>> containers = containerRunner.addClusterContainers(stackId, hostGroupName, scalingAdjustment);
-            for (Map.Entry<String, List<Container>> containersEntry : containers.entrySet()) {
+            for (Entry<String, List<Container>> containersEntry : containers.entrySet()) {
                 List<String> hostNames = containersEntry.getValue().stream().map(Container::getHost).collect(Collectors.toList());
                 hostsPerHostGroup.put(containersEntry.getKey(), hostNames);
             }
@@ -93,7 +94,7 @@ public class AmbariClusterUpscaleService {
             throw new CloudbreakException(String.format("Please implement %s orchestrator because it is not on classpath.", orchestrator.getType()));
         }
         Set<String> allHosts = new HashSet<>();
-        for (Map.Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
+        for (Entry<String, List<String>> hostsPerHostGroupEntry : hostsPerHostGroup.entrySet()) {
             allHosts.addAll(hostsPerHostGroupEntry.getValue());
         }
         clusterService.updateHostCountWithAdjustment(stack.getCluster().getId(), hostGroupName, allHosts.size());

@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
@@ -44,9 +43,6 @@ public class RecipeEngine {
     public static final Set<String> DEFAULT_RECIPES =  Sets.newHashSet("hdfs-home", "smartsense-capture-schedule");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
-
-    @Inject
-    private TlsSecurityService tlsSecurityService;
 
     @Inject
     private OrchestratorTypeResolver orchestratorTypeResolver;

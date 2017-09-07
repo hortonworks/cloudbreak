@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -60,11 +60,11 @@ public class BlueprintUtils {
     public List<BlueprintParameter> prepareInputs(JsonNode inputs) throws com.fasterxml.jackson.core.JsonProcessingException {
         Set<BlueprintParameter> blueprintParameters = new HashSet<>();
         if (inputs.isArray()) {
-            for (final JsonNode objNode : inputs) {
+            for (JsonNode objNode : inputs) {
                 BlueprintParameter blueprintParameter = JsonUtil.treeToValue(objNode, BlueprintParameter.class);
                 blueprintParameters.add(blueprintParameter);
             }
         }
-        return blueprintParameters.stream().collect(Collectors.toList());
+        return new ArrayList<>(blueprintParameters);
     }
 }

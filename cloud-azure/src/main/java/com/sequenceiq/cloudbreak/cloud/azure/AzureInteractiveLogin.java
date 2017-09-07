@@ -11,11 +11,12 @@ import javax.inject.Inject;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Form;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
  * Created by perdos on 9/22/16.
  */
 @Service
-@Scope(value = "singleton")
+@Scope("singleton")
 public class AzureInteractiveLogin {
 
     public static final String XPLAT_CLI_CLIENT_ID = "04b07795-8ddb-461a-bbee-02f9e1bf7b46";
@@ -64,7 +65,7 @@ public class AzureInteractiveLogin {
             CredentialNotifier credentialNotifier) {
         Response deviceCodeResponse = getDeviceCode();
 
-        if (deviceCodeResponse.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+        if (deviceCodeResponse.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             LOGGER.info("Successful device code response: " + deviceCodeResponse.getStatus());
             String jsonString = deviceCodeResponse.readEntity(String.class);
             LOGGER.info("Device code json response: " + jsonString);
@@ -124,7 +125,7 @@ public class AzureInteractiveLogin {
         form.param("resource", MANAGEMENT_CORE_WINDOWS);
         form.param("mkt", "en-us");
 
-        Invocation.Builder request = resource.path("devicecode").queryParam("api-version", "1.0").request();
+        Builder request = resource.path("devicecode").queryParam("api-version", "1.0").request();
         request.accept(MediaType.APPLICATION_JSON);
         return request.post(Entity.entity(form, MediaType.APPLICATION_FORM_URLENCODED_TYPE));
     }

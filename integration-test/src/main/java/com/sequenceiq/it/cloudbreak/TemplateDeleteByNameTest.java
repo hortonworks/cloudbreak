@@ -5,7 +5,7 @@ import org.testng.annotations.Test;
 
 public class TemplateDeleteByNameTest extends AbstractCloudbreakIntegrationTest {
     @Test
-    @Parameters({ "templateName" })
+    @Parameters("templateName")
     public void testDeleteTemplateByName(String templateName) throws Exception {
         // GIVEN
         // WHEN

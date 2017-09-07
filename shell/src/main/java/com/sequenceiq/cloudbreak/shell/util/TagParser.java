@@ -12,7 +12,7 @@ public class TagParser {
 
     public static Map<String, String> parseTagsIntoMap(String tagString) {
         try {
-            if (tagString == null || "".equals(tagString)) {
+            if (tagString == null || tagString.isEmpty()) {
                 return new HashMap<>();
             }
             return Stream.of(tagString.split(",")).map(kv -> kv.split("=")).collect(Collectors.toMap(kv -> kv[0].trim(), kv -> kv[1].trim()));

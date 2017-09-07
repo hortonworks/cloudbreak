@@ -1,5 +1,19 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
+import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
+import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.handler.InstanceStateQuery;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -11,18 +25,6 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConver
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import org.springframework.stereotype.Component;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
-import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
-import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 
 @Component
 public class UnhealthyInstancesFinalizer {
@@ -46,7 +48,7 @@ public class UnhealthyInstancesFinalizer {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = instanceStateQuery.getCloudVmInstanceStatuses(
                 cloudCredential, cloudContext, cloudInstances);
         Map<String, CloudVmInstanceStatus> cloudVmInstanceStatusesById = new HashMap<>();
-        cloudVmInstanceStatuses.stream().forEach(c -> cloudVmInstanceStatusesById.put(c.getCloudInstance().getInstanceId(), c));
+        cloudVmInstanceStatuses.forEach(c -> cloudVmInstanceStatusesById.put(c.getCloudInstance().getInstanceId(), c));
 
         Set<String> unhealthyInstances = new HashSet<>();
         for (InstanceMetaData i : candidateUnhealthyInstances) {

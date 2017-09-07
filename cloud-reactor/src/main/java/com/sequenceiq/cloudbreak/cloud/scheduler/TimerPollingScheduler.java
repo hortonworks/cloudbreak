@@ -16,7 +16,7 @@ import reactor.fn.Pausable;
 import reactor.fn.timer.Timer;
 
 @Component
-@Scope(value = "prototype")
+@Scope("prototype")
 public class TimerPollingScheduler implements Consumer<Long> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TimerPollingScheduler.class);
@@ -43,7 +43,7 @@ public class TimerPollingScheduler implements Consumer<Long> {
     }
 
     public void schedule(int count, int period) {
-        this.latch = new CountDownLatch(count);
+        latch = new CountDownLatch(count);
         selfSchedule = timer.schedule(this, period, TimeUnit.SECONDS);
     }
 

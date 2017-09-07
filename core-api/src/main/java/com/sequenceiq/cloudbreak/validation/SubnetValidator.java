@@ -6,6 +6,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import org.apache.commons.net.util.SubnetUtils;
+import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 
 public class SubnetValidator implements ConstraintValidator<ValidSubnet, String> {
 
@@ -21,7 +22,7 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
             return false;
         }
         try {
-            SubnetUtils.SubnetInfo info = new SubnetUtils(value).getInfo();
+            SubnetInfo info = new SubnetUtils(value).getInfo();
             long addr = toLong(info.getAddress());
             long lowerAddr = toLong(info.getLowAddress()) - 1;
             if (addr != lowerAddr) {
@@ -44,7 +45,7 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
         private final int[] parts;
 
         Ip(String ip) {
-            parts = Arrays.asList(ip.split("\\.")).stream().mapToInt(Integer::parseInt).toArray();
+            parts = Arrays.stream(ip.split("\\.")).mapToInt(Integer::parseInt).toArray();
         }
 
         @Override

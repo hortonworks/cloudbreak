@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class TopologyRecord {
+public class TopologyRecord implements Serializable {
     @Column(columnDefinition = "TEXT", nullable = false)
     private String hypervisor;
 

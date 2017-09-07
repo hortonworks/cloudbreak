@@ -25,26 +25,26 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.FAILURE_POLICY)
     private FailurePolicyRequest failurePolicy;
 
-    @ApiModelProperty(value = StackModelDescription.CREDENTIAL)
+    @ApiModelProperty(StackModelDescription.CREDENTIAL)
     private CredentialRequest credential;
 
-    @ApiModelProperty(value = StackModelDescription.NETWORK)
+    @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkRequest network;
 
-    @ApiModelProperty(value = StackModelDescription.IMAGE_CATALOG)
+    @ApiModelProperty(StackModelDescription.IMAGE_CATALOG)
     private String imageCatalog;
 
-    @ApiModelProperty(value = StackModelDescription.CUSTOM_IMAGE)
+    @ApiModelProperty(StackModelDescription.CUSTOM_IMAGE)
     private String customImage;
 
-    @ApiModelProperty(value = StackModelDescription.FLEX_ID)
+    @ApiModelProperty(StackModelDescription.FLEX_ID)
     private Long flexId;
 
-    @ApiModelProperty(value = StackModelDescription.SOURCE_CREDENTIAL)
+    @ApiModelProperty(StackModelDescription.SOURCE_CREDENTIAL)
     private CredentialSourceRequest credentialSource;
 
     @Valid
-    @ApiModelProperty(value = StackModelDescription.CLUSTER_REQUEST)
+    @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
     private ClusterRequest clusterRequest;
 
     @ApiModelProperty(hidden = true)

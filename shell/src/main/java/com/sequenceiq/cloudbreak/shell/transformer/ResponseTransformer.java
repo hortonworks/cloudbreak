@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class ResponseTransformer {
 
@@ -49,8 +50,8 @@ public class ResponseTransformer {
                         field.setAccessible(true);
                         try {
                             Map<?, ?> o1 = (Map<?, ?>) field.get(o);
-                            for (Map.Entry<?, ?> objectObjectEntry : o1.entrySet()) {
-                                result.put(field.getName() + "." + objectObjectEntry.getKey(),
+                            for (Entry<?, ?> objectObjectEntry : o1.entrySet()) {
+                                result.put(field.getName() + '.' + objectObjectEntry.getKey(),
                                         objectObjectEntry.getValue() == null ? "" : objectObjectEntry.getValue().toString());
                             }
                         } catch (IllegalAccessException e) {
@@ -69,7 +70,7 @@ public class ResponseTransformer {
                             try {
                                 result.put(field1.getName(), field1.get(o) == null ? null : field1.get(o).toString());
                             } catch (IllegalAccessException e) {
-                                result.put(field.getName() + "." + field1.getName(), "undefined");
+                                result.put(field.getName() + '.' + field1.getName(), "undefined");
                             }
                         }
                     }

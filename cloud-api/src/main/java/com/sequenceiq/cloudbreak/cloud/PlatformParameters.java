@@ -7,7 +7,6 @@ import static org.springframework.util.StringUtils.isEmpty;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -171,7 +170,7 @@ public interface PlatformParameters {
                 for (String s : regionSpecification.getZones()) {
                     av.add(AvailabilityZone.availabilityZone(s));
                 }
-                Collections.sort(av, new StringTypesCompare());
+                av.sort(new StringTypesCompare());
                 regions.put(Region.region(regionSpecification.getName()), av);
             }
         } catch (IOException e) {

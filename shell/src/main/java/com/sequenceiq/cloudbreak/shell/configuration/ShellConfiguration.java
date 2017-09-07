@@ -95,7 +95,7 @@ public class ShellConfiguration {
 
     @Bean
     CommandLine commandLine() throws Exception {
-        String[] args = cmdFile.length() > 0 ? new String[]{"--cmdfile", cmdFile} : new String[0];
+        String[] args = !cmdFile.isEmpty() ? new String[]{"--cmdfile", cmdFile} : new String[0];
         return SimpleShellCommandLineOptions.parseCommandLine(args);
     }
 

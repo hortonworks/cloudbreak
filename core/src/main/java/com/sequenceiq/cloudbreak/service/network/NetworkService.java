@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +12,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -38,7 +39,7 @@ public class NetworkService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Network create(IdentityUser user, Network network) {
         LOGGER.info("Creating network: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         network.setOwner(user.getUserId());
@@ -79,15 +80,10 @@ public class NetworkService {
         return network;
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public void delete(Long id, IdentityUser user) {
         LOGGER.info("Deleting network with id: {}", id);
-        Network network = get(id);
-        if (network == null) {
-            throw new NotFoundException(String.format("Network '%s' not found.", id));
-        }
-
-        delete(network);
+        delete(get(id));
     }
 
     public void delete(String name, IdentityUser user) {

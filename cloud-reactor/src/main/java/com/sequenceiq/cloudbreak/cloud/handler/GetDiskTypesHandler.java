@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -45,7 +46,7 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
             Map<Platform, Map<String, VolumeParameterType>> diskMappings = Maps.newHashMap();
             Map<Platform, Map<DiskType, DisplayName>> diskDisplayNames = Maps.newHashMap();
 
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+            for (Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 DiskTypes diskTypes = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().diskTypes();
                 defaultDiskTypes.put(connector.getKey(), diskTypes.defaultType());
                 platformDiskTypes.put(connector.getKey(), diskTypes.types());
@@ -56,7 +57,7 @@ public class GetDiskTypesHandler implements CloudPlatformEventHandler<GetDiskTyp
                     new PlatformDisks(platformDiskTypes, defaultDiskTypes, diskMappings, diskDisplayNames));
             request.getResult().onNext(getDiskTypesResult);
             LOGGER.info("Query platform disk types finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetDiskTypesResult(e.getMessage(), e, request));
         }
     }

@@ -13,7 +13,7 @@ public enum ClusterCredentialChangeEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERCREDENTIALCHANGEFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERCREDENTIALCHANGEFAILHANDLEDEVENT");
 
-    private String event;
+    private final String event;
 
     ClusterCredentialChangeEvent(String event) {
         this.event = event;

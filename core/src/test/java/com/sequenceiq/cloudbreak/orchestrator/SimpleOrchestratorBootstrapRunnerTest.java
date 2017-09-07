@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.orchestrator;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Map;
-
 import org.junit.Test;
 import org.slf4j.MDC;
 
@@ -16,23 +14,20 @@ public class SimpleOrchestratorBootstrapRunnerTest {
     @Test
     public void bootstrapSuccessWithoutException() throws Exception {
         MDC.put("test", "test");
-        Boolean call = new OrchestratorBootstrapRunner(new MockBootstrapRunner(1, MDC.getCopyOfContextMap()),
+        Boolean call = new OrchestratorBootstrapRunner(new MockBootstrapRunner(1),
                 new MockExitCriteria(),
                 new MockExitCriteriaModel(),
                 MDC.getCopyOfContextMap()).call();
         assertEquals(true, call);
     }
 
-    public class MockBootstrapRunner implements OrchestratorBootstrap {
+    private static class MockBootstrapRunner implements OrchestratorBootstrap {
 
         private int count;
 
         private int retryOk = 2;
 
-        private final Map<String, String> mdcMap;
-
-        public MockBootstrapRunner(int retryOk, Map<String, String> mdcMap) {
-            this.mdcMap = mdcMap;
+        private MockBootstrapRunner(int retryOk) {
             this.retryOk = retryOk;
         }
 
@@ -48,13 +43,11 @@ public class SimpleOrchestratorBootstrapRunnerTest {
 
     }
 
-    public class MockExitCriteriaModel extends ExitCriteriaModel {
-        public MockExitCriteriaModel() {
+    private class MockExitCriteriaModel extends ExitCriteriaModel {
 
-        }
     }
 
-    public class MockExitCriteria implements ExitCriteria {
+    private class MockExitCriteria implements ExitCriteria {
 
         @Override
         public boolean isExitNeeded(ExitCriteriaModel exitCriteriaModel) {

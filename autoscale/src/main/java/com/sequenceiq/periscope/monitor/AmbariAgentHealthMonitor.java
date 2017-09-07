@@ -12,7 +12,7 @@ import com.sequenceiq.periscope.monitor.evaluator.AmbariAgentHealthEvaluator;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 
 @Component
-public class AmbariAgentHealthMonitor extends AbstractMonitor implements Monitor {
+public class AmbariAgentHealthMonitor extends AbstractMonitor {
 
     @Override
     public String getIdentifier() {
@@ -34,6 +34,7 @@ public class AmbariAgentHealthMonitor extends AbstractMonitor implements Monitor
         return Collections.singletonMap(EvaluatorContext.CLUSTER_ID.name(), cluster.getId());
     }
 
+    @Override
     List<Cluster> getClusters() {
         return getClusterService().findAll(ClusterState.RUNNING);
     }

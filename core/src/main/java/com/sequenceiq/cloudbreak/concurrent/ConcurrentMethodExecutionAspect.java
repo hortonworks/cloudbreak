@@ -25,7 +25,7 @@ public class ConcurrentMethodExecutionAspect {
 
     private static final int STRIPES = 10;
 
-    private Striped<Lock> locks = Striped.lazyWeakLock(STRIPES);
+    private final Striped<Lock> locks = Striped.lazyWeakLock(STRIPES);
 
     @Pointcut("execution(@com.sequenceiq.cloudbreak.concurrent.GuardedMethod * *(..))")
     public void guardedMethod() {

@@ -50,9 +50,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
-@Table(name = "Stack", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"})
-})
+@Table(name = "Stack", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class Stack implements ProvisionEntity {
 
     @Id

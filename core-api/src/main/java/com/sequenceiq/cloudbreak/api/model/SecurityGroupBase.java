@@ -5,17 +5,18 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SecurityGroupModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class SecurityGroupBase {
+public abstract class SecurityGroupBase implements JsonEntity {
 
-    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     @Size(max = 1000)
     private String description;
 
-    @ApiModelProperty(value = ModelDescriptions.SecurityGroupModelDescription.SECURITY_GROUP_ID)
+    @ApiModelProperty(SecurityGroupModelDescription.SECURITY_GROUP_ID)
     private String securityGroupId;
 
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)

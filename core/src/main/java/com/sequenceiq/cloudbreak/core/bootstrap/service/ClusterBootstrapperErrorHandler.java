@@ -25,18 +25,16 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.ResourceRepository;
-import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @Component
 public class ClusterBootstrapperErrorHandler {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterBootstrapperErrorHandler.class);
 
     @Inject
@@ -49,22 +47,13 @@ public class ClusterBootstrapperErrorHandler {
     private InstanceGroupRepository instanceGroupRepository;
 
     @Inject
-    private HostMetadataRepository hostMetadataRepository;
-
-    @Inject
     private CloudbreakEventService eventService;
 
     @Inject
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Inject
-    private TlsSecurityService tlsSecurityService;
-
-    @Inject
     private ServiceProviderConnectorAdapter connector;
-
-    @Inject
-    private ServiceProviderMetadataAdapter metadata;
 
     private enum Msg {
 
@@ -72,8 +61,7 @@ public class ClusterBootstrapperErrorHandler {
         BOOTSTRAPPER_ERROR_DELETING_NODE("bootstrapper.error.deleting.node"),
         BOOTSTRAPPER_ERROR_INVALID_NODECOUNT("bootstrapper.error.invalide.nodecount");
 
-
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;
@@ -94,7 +82,7 @@ public class ClusterBootstrapperErrorHandler {
             allAvailableNode = containerOrchestrator.getAvailableNodes(gatewayConfig, nodes);
         }
         List<Node> missingNodes = selectMissingNodes(nodes, allAvailableNode);
-        if (missingNodes.size() > 0) {
+        if (!missingNodes.isEmpty()) {
             String message = cloudbreakMessagesService.getMessage(Msg.BOOTSTRAPPER_ERROR_BOOTSTRAP_FAILED_ON_NODES.code(),
                     Collections.singletonList(missingNodes.size()));
             LOGGER.info(message);

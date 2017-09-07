@@ -11,7 +11,7 @@ public enum StackTerminationEvent implements FlowEvent {
     TERMINATION_FINALIZED_EVENT("TERMINATESTACKFINALIZED"),
     STACK_TERMINATION_FAIL_HANDLED_EVENT("TERMINATIONFAILHANDLED");
 
-    private String event;
+    private final String event;
 
     StackTerminationEvent(String event) {
         this.event = event;

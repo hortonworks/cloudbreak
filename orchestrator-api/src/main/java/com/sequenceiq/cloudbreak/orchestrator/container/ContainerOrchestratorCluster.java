@@ -7,7 +7,8 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 
 public class ContainerOrchestratorCluster {
-    private GatewayConfig gatewayConfig;
+
+    private final GatewayConfig gatewayConfig;
 
     private Set<Node> nodes = new HashSet<>();
 

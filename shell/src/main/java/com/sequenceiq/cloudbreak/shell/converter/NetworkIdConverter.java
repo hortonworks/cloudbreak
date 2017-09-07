@@ -14,9 +14,6 @@ public class NetworkIdConverter extends AbstractConverter<NetworkId> {
     @Autowired
     private ShellContext context;
 
-    public NetworkIdConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return NetworkId.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class NetworkIdConverter extends AbstractConverter<NetworkId> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getNetworksByProvider().keySet());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

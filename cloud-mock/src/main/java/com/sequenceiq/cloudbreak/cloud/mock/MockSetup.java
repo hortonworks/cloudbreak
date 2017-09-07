@@ -43,12 +43,14 @@ public class MockSetup implements Setup {
     }
 
     private void setObjectMapper() {
-        final Gson gson = new Gson();
+        Gson gson = new Gson();
         Unirest.setObjectMapper(new ObjectMapper() {
+            @Override
             public <T> T readValue(String value, Class<T> valueType) {
                 return gson.fromJson(value, valueType);
             }
 
+            @Override
             public String writeValue(Object value) {
                 return gson.toJson(value);
             }

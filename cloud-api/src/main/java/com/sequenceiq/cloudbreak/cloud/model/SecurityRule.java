@@ -30,7 +30,7 @@ public class SecurityRule {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SecurityRule{");
+        StringBuilder sb = new StringBuilder("SecurityRule{");
         sb.append("cidr='").append(cidr).append('\'');
         sb.append(", ports='").append(Arrays.toString(ports)).append('\'');
         sb.append(", protocol='").append(protocol).append('\'');

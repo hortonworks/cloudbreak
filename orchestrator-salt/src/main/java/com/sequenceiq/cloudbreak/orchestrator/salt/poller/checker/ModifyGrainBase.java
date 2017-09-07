@@ -5,25 +5,26 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound;
+import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Compound.CompoundType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.BaseSaltJobRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
 public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
-    private String key;
+    private final String key;
 
-    private String value;
+    private final String value;
 
-    private Compound.CompoundType compoundType;
+    private final CompoundType compoundType;
 
-    private boolean addGrain;
+    private final boolean addGrain;
 
-    public ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, Compound.CompoundType type, boolean addGrain) {
+    protected ModifyGrainBase(Set<String> target, Set<Node> allNode, String key, String value, CompoundType type, boolean addGrain) {
         super(target, allNode);
         this.key = key;
         this.value = value;
-        this.compoundType = type;
+        compoundType = type;
         this.addGrain = addGrain;
     }
 
@@ -42,7 +43,7 @@ public abstract class ModifyGrainBase extends BaseSaltJobRunner {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ModifyGrainBase{");
+        StringBuilder sb = new StringBuilder("ModifyGrainBase{");
         sb.append("key='").append(key).append('\'');
         sb.append(", value='").append(value).append('\'');
         sb.append(", compoundType=").append(compoundType);

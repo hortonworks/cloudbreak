@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,22 +27,24 @@ public class BlueprintTemplateModelContextBuilder {
 
     private String clusterName;
 
-    private Map<String, String> customProperties = new HashMap<>();
+    private final Map<String, String> customProperties = new HashMap<>();
 
     public BlueprintTemplateModelContextBuilder withRdsConfig(RDSConfig rdsConfig) {
-        Optional<RdsView> rdsView = Optional.ofNullable(rdsConfig == null ? null : new RdsView(rdsConfig));
-        switch (rdsConfig.getType()) {
-            case HIVE:
-                hiveRds = rdsView;
-                break;
-            case RANGER:
-                rangerRds = rdsView;
-                break;
-            case DRUID:
-                druidRds = rdsView;
-                break;
-            default:
-                break;
+        if (rdsConfig != null) {
+            Optional<RdsView> rdsView = Optional.of(new RdsView(rdsConfig));
+            switch (rdsConfig.getType()) {
+                case HIVE:
+                    hiveRds = rdsView;
+                    break;
+                case RANGER:
+                    rangerRds = rdsView;
+                    break;
+                case DRUID:
+                    druidRds = rdsView;
+                    break;
+                default:
+                    break;
+            }
         }
         return this;
     }
@@ -54,7 +57,7 @@ public class BlueprintTemplateModelContextBuilder {
     }
 
     public BlueprintTemplateModelContextBuilder withLdap(LdapConfig ldapConfig) {
-        this.ldap = Optional.ofNullable(ldapConfig == null ? null : new LdapView(ldapConfig));
+        ldap = Optional.ofNullable(ldapConfig == null ? null : new LdapView(ldapConfig));
         return this;
     }
 
@@ -69,12 +72,12 @@ public class BlueprintTemplateModelContextBuilder {
     }
 
     public BlueprintTemplateModelContextBuilder withCustomProperty(String key, String value) {
-        this.customProperties.put(key, value);
+        customProperties.put(key, value);
         return this;
     }
 
     public BlueprintTemplateModelContextBuilder withCustomProperties(Map<String, Object> customProperties) {
-        for (Map.Entry<String, Object> customProperty : customProperties.entrySet()) {
+        for (Entry<String, Object> customProperty : customProperties.entrySet()) {
             withCustomProperty(customProperty.getKey(), customProperty.getValue().toString());
         }
         return this;
@@ -82,15 +85,15 @@ public class BlueprintTemplateModelContextBuilder {
 
     public Map<String, Object> build() {
         Map<String, Object> blueprintTemplateModelContext = new HashMap<>();
-        blueprintTemplateModelContext.put("ldapConfig", this.ldap.orElse(null));
-        blueprintTemplateModelContext.put("hiveRds", this.hiveRds.orElse(null));
-        blueprintTemplateModelContext.put("rangerRds", this.rangerRds.orElse(null));
-        blueprintTemplateModelContext.put("druidRds", this.druidRds.orElse(null));
-        blueprintTemplateModelContext.put("ambariDatabase", this.ambariDatabase.orElse(null));
-        for (Map.Entry<String, String> customEntry : this.customProperties.entrySet()) {
+        blueprintTemplateModelContext.put("ldapConfig", ldap.orElse(null));
+        blueprintTemplateModelContext.put("hiveRds", hiveRds.orElse(null));
+        blueprintTemplateModelContext.put("rangerRds", rangerRds.orElse(null));
+        blueprintTemplateModelContext.put("druidRds", druidRds.orElse(null));
+        blueprintTemplateModelContext.put("ambariDatabase", ambariDatabase.orElse(null));
+        for (Entry<String, String> customEntry : customProperties.entrySet()) {
             blueprintTemplateModelContext.put(customEntry.getKey(), customEntry.getValue());
         }
-        blueprintTemplateModelContext.put("cluster_name", this.clusterName);
+        blueprintTemplateModelContext.put("cluster_name", clusterName);
         blueprintTemplateModelContext.put("stack_version", "{{stack_version}}");
         return blueprintTemplateModelContext;
     }

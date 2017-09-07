@@ -11,10 +11,11 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
-public class ClusterResponse {
+public class ClusterResponse implements JsonEntity {
 
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
@@ -46,13 +47,13 @@ public class ClusterResponse {
     @ApiModelProperty(ClusterModelDescription.STATUS_REASON)
     private String statusReason;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_IP)
+    @ApiModelProperty(StackModelDescription.AMBARI_IP)
     private String ambariServerIp;
 
-    @ApiModelProperty(ModelDescriptions.StackModelDescription.AMBARI_URL)
+    @ApiModelProperty(StackModelDescription.AMBARI_URL)
     private String ambariServerUrl;
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.USERNAME)
+    @ApiModelProperty(StackModelDescription.USERNAME)
     private String userName;
 
     private boolean secure;
@@ -71,40 +72,40 @@ public class ClusterResponse {
     @ApiModelProperty(ClusterModelDescription.CONFIG_STRATEGY)
     private ConfigStrategy configStrategy;
 
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG_ID)
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
 
-    @ApiModelProperty(value = ClusterModelDescription.LDAP_CONFIG)
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
     private LdapConfigResponse ldapConfig;
 
     @ApiModelProperty(ClusterModelDescription.CLUSTER_ATTRIBUTES)
     private Map<String, Object> attributes = new HashMap<>();
 
-    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_INPUTS)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_INPUTS)
     private Set<BlueprintInputJson> blueprintInputs = new HashSet<>();
 
-    @ApiModelProperty(value = ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_CUSTOM_PROPERTIES)
     private String blueprintCustomProperties;
 
-    @ApiModelProperty(value = ClusterModelDescription.EXECUTOR_TYPE)
+    @ApiModelProperty(ClusterModelDescription.EXECUTOR_TYPE)
     private ExecutorType executorType;
 
     private GatewayJson gateway;
 
-    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_CONTAINERS)
+    @ApiModelProperty(ClusterModelDescription.CUSTOM_CONTAINERS)
     private CustomContainerResponse customContainers;
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_STACK_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_STACK_DETAILS)
     private AmbariStackDetailsJson ambariStackDetails;
 
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_REPO_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_REPO_DETAILS)
     private AmbariRepoDetailsJson ambariRepoDetailsJson;
 
     @Valid
-    @ApiModelProperty(value = ModelDescriptions.ClusterModelDescription.AMBARI_DATABASE_DETAILS)
+    @ApiModelProperty(ClusterModelDescription.AMBARI_DATABASE_DETAILS)
     private AmbariDatabaseDetailsJson ambariDatabaseDetails;
 
-    @ApiModelProperty(value = ClusterModelDescription.CUSTOM_QUEUE)
+    @ApiModelProperty(ClusterModelDescription.CUSTOM_QUEUE)
     private String customQueue;
 
     public String getDescription() {
@@ -169,7 +170,7 @@ public class ClusterResponse {
     }
 
     public void setCluster(JsonNode node) {
-        this.cluster = node.toString();
+        cluster = node.toString();
     }
 
     public Long getBlueprintId() {

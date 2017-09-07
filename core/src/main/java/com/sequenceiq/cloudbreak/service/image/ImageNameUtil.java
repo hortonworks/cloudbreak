@@ -50,9 +50,9 @@ public class ImageNameUtil {
     }
 
     private String getDefaultImage(String platform, String region) {
-        String image = getImage(platform + "." + region);
+        String image = getImage(platform + '.' + region);
         if (image == null) {
-            image = getImage(platform + "." + DEFAULT);
+            image = getImage(platform + '.' + DEFAULT);
         }
         return image;
     }

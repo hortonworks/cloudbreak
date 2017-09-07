@@ -52,19 +52,19 @@ public class AzureCommands implements CommandMarker {
 
     private ShellContext shellContext;
 
-    private CredentialCommands baseCredentialCommands;
+    private final CredentialCommands baseCredentialCommands;
 
-    private NetworkCommands baseNetworkCommands;
+    private final NetworkCommands baseNetworkCommands;
 
-    private SecurityGroupCommands baseSecurityGroupCommands;
+    private final SecurityGroupCommands baseSecurityGroupCommands;
 
-    private TemplateCommands baseTemplateCommands;
+    private final TemplateCommands baseTemplateCommands;
 
-    private PlatformCommands basePlatformCommands;
+    private final PlatformCommands basePlatformCommands;
 
-    private StackCommands stackCommands;
+    private final StackCommands stackCommands;
 
-    private InstanceGroupCommands baseInstanceGroupCommands;
+    private final InstanceGroupCommands baseInstanceGroupCommands;
 
     public AzureCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
@@ -84,47 +84,47 @@ public class AzureCommands implements CommandMarker {
         this.baseInstanceGroupCommands = baseInstanceGroupCommands;
     }
 
-    @CliAvailabilityIndicator(value = "stack create --AZURE")
+    @CliAvailabilityIndicator("stack create --AZURE")
     public boolean createStackAvailable() {
         return stackCommands.createStackAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "template create --AZURE")
+    @CliAvailabilityIndicator("template create --AZURE")
     public boolean createTemplateAvailable() {
         return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "platform create --AZURE")
+    @CliAvailabilityIndicator("platform create --AZURE")
     public boolean createPlatformAvailable() {
         return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = { "network create --AZURE --NEW", "network create --AZURE --EXISTING_SUBNET" })
+    @CliAvailabilityIndicator({"network create --AZURE --NEW", "network create --AZURE --EXISTING_SUBNET"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"securitygroup create --AZURE --NEW"})
+    @CliAvailabilityIndicator("securitygroup create --AZURE --NEW")
     public boolean createSecurityGroupAvailable() {
         return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "credential create --AZURE")
+    @CliAvailabilityIndicator("credential create --AZURE")
     public boolean createCredentialAvailable() {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "instancegroup configure --AZURE")
+    @CliAvailabilityIndicator("instancegroup configure --AZURE")
     public boolean configureInstanceGroupAvailable() {
         return baseInstanceGroupCommands.createInstanceGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"availabilityset list", "availabilityset create"})
+    @CliAvailabilityIndicator({"availabilityset list", "availabilityset create"})
     public boolean configureAvailabilitySetAvailable() {
         return shellContext.isCredentialAvailable() && shellContext.isPlatformAvailable(PLATFORM) && shellContext.getActiveCloudPlatform().equals(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"availabilityset delete"})
+    @CliAvailabilityIndicator("availabilityset delete")
     public boolean configureAvailabilitySetModificationAvailable() {
         return !shellContext.getAzureAvailabilitySets().isEmpty();
     }
@@ -251,15 +251,13 @@ public class AzureCommands implements CommandMarker {
         CredentialResponse credential;
         try {
             credential = shellContext.getCredentialById(credentialId);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer()
                     .transformToRuntimeException(e);
         }
         Map<String, Object> parameters = credential.getParameters();
         String tenantId = (String) parameters.get("tenantId");
         String accessKey = (String) parameters.get("accessKey");
-        String secretKey = (String) parameters.get("secretKey");
-
 
         Map<String, Object> props = new HashMap<>();
         props.put("accountName", accountName);
@@ -281,7 +279,7 @@ public class AzureCommands implements CommandMarker {
     ) {
         try {
             return basePlatformCommands.create(name, description, PLATFORM, Collections.emptyMap());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
@@ -290,7 +288,7 @@ public class AzureCommands implements CommandMarker {
     public String createAvailabilitySet(
             @CliOption(key = "name", mandatory = true, help = "Name of the availability set") String name,
             @CliOption(key = "platformFaultDomainCount", mandatory = true, help = "Number of fault domains")
-            final AvailabilitySetFaultDomainNumber platformFaultDomainCount) {
+                    AvailabilitySetFaultDomainNumber platformFaultDomainCount) {
         try {
             if (platformFaultDomainCount.number() > AvailabilitySetFaultDomainNumber.THREE.number()
                     || platformFaultDomainCount.number() < AvailabilitySetFaultDomainNumber.TWO.number()) {
@@ -332,7 +330,7 @@ public class AzureCommands implements CommandMarker {
             } else {
                 throw shellContext.exceptionTransformer().transformToRuntimeException(String.format("No availability set found with %s name", name));
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
@@ -346,8 +344,7 @@ public class AzureCommands implements CommandMarker {
             @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
             @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
             @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName,
-            @CliOption(key = "availabilitySetName", help = "Availability set name for the instanceGroup") AvailabilitySetName availabilitySetName)
-            throws Exception {
+            @CliOption(key = "availabilitySetName", help = "Availability set name for the instanceGroup") AvailabilitySetName availabilitySetName) {
 
         Map<String, Object> parameters = new HashMap<>();
 
@@ -360,8 +357,8 @@ public class AzureCommands implements CommandMarker {
                 }
                 if (otherIgEntry.getAttributes() != null && otherIgEntry.getAttributes().get("availabilitySet") != null) {
                     Object otherIgAs = otherIgEntry.getAttributes().get("availabilitySet");
-                    if (otherIgAs != null && otherIgAs instanceof HashMap) {
-                        String otherIgAsName =  (String) ((HashMap) otherIgAs).get("name");
+                    if (otherIgAs instanceof HashMap) {
+                        String otherIgAsName =  (String) ((Map) otherIgAs).get("name");
                         if (asName.equals(otherIgAsName)) {
                             throw shellContext.exceptionTransformer()
                                     .transformToRuntimeException("Cannot use the same availability set for two different instance groups!");
@@ -375,7 +372,7 @@ public class AzureCommands implements CommandMarker {
                 throw shellContext.exceptionTransformer()
                         .transformToRuntimeException("There is no availability set defined with the name " + availabilitySetName.getName());
             }
-            Map<String, Object> map = new HashMap<String, Object>();
+            Map<String, Object> map = new HashMap<>();
             map.put("name", as.getName());
             map.put("faultDomainCount", as.getFaultDomainCount().number());
             parameters.put("availabilitySet", map);
@@ -406,13 +403,13 @@ public class AzureCommands implements CommandMarker {
             String persistentStorage,
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout,
-            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack", mandatory = false) String customDomain,
-            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack", mandatory = false) String customHostname,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout,
+            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack") String customDomain,
+            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack") String customHostname,
             @CliOption(key = "clusterNameAsSubdomain", help = "Using the cluster name for subdomain", unspecifiedDefaultValue = "false",
-                    specifiedDefaultValue = "true", mandatory = false) boolean clusterNameAsSubdomain,
+                    specifiedDefaultValue = "true") boolean clusterNameAsSubdomain,
             @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
-                    specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
+                    specifiedDefaultValue = "true") boolean hostgroupNameAsHostname) {
 
             orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
             Map<String, String> params = new HashMap<>();

@@ -48,7 +48,7 @@ public class ProvisionValidationHandler implements CloudPlatformEventHandler<Val
                 v.validate(ac, cloudStack);
             }
             result = new ValidationResult(request);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             result = new ValidationResult(e, request);
         }
         request.getResult().onNext(result);

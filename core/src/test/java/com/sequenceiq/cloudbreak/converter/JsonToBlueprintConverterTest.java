@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
+import java.util.Collections;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -42,7 +42,7 @@ public class JsonToBlueprintConverterTest extends AbstractJsonConverterTest<Blue
         // WHEN
         Blueprint result = underTest.convert(getRequest("stack/blueprint.json"));
         // THEN
-        assertAllFieldsNotNull(result, Arrays.asList("inputParameters"));
+        assertAllFieldsNotNull(result, Collections.singletonList("inputParameters"));
     }
 
     @Override

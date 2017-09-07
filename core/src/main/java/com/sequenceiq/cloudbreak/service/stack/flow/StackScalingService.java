@@ -78,7 +78,7 @@ public class StackScalingService {
         STACK_SCALING_HOST_NOT_FOUND("stack.scaling.host.not.found"),
         STACK_SCALING_BILLING_CHANGED("stack.scaling.billing.changed");
 
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;
@@ -143,7 +143,7 @@ public class StackScalingService {
         Map<String, String> instanceIds = new HashMap<>();
         int i = 0;
         List<InstanceMetaData> instanceMetaDatas = new ArrayList<>(stack.getInstanceGroupByInstanceGroupName(instanceGroupName).getInstanceMetaData());
-        Collections.sort(instanceMetaDatas, Comparator.comparing(InstanceMetaData::getStartDate));
+        instanceMetaDatas.sort(Comparator.comparing(InstanceMetaData::getStartDate));
         for (InstanceMetaData metaData : instanceMetaDatas) {
             if (!metaData.getAmbariServer()
                     && (metaData.isDecommissioned() || metaData.isUnRegistered() || metaData.isCreated() || metaData.isFailed())) {

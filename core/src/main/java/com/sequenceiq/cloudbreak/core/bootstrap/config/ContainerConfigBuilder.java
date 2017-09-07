@@ -9,7 +9,7 @@ public class ContainerConfigBuilder {
     private final ContainerConfig containerConfig;
 
     private ContainerConfigBuilder(Builder builder) {
-        this.containerConfig = new ContainerConfig(builder.name, builder.version, builder.queue);
+        containerConfig = new ContainerConfig(builder.name, builder.version, builder.queue);
     }
 
     private ContainerConfig getContainerConfig() {
@@ -26,8 +26,8 @@ public class ContainerConfigBuilder {
 
         public Builder(String imageNameAndVersion, Optional<String> queue) {
             String[] image = imageNameAndVersion.split(":");
-            this.name = image[0];
-            this.version = image.length > 1 ? image[1] : "latest";
+            name = image[0];
+            version = image.length > 1 ? image[1] : "latest";
             this.queue = queue.isPresent() ? queue.get() : "default";
 
         }

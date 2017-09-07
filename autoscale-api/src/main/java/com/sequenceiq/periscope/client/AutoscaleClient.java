@@ -64,23 +64,23 @@ public class AutoscaleClient {
     private PolicyEndpoint policyEndpoint;
 
     private AutoscaleClient(String autoscaleAddress, String identityServerAddress, String user, String password, String clientId, ConfigKey configKey) {
-        this.client = RestClientUtil.get(configKey);
+        client = RestClientUtil.get(configKey);
         this.autoscaleAddress = autoscaleAddress;
-        this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
+        identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.user = user;
         this.password = password;
-        this.tokenCache = configTokenCache();
+        tokenCache = configTokenCache();
         refresh();
         LOGGER.info("AutoscaleClient has been created with user / pass. autoscale: {}, identity: {}, clientId: {}, configKey: {}", autoscaleAddress,
                 identityServerAddress, clientId, configKey);
     }
 
     private AutoscaleClient(String autoscaleAddress, String identityServerAddress, String secret, String clientId, ConfigKey configKey) {
-        this.client = RestClientUtil.get(configKey);
+        client = RestClientUtil.get(configKey);
         this.autoscaleAddress = autoscaleAddress;
-        this.identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
+        identityClient = new IdentityClient(identityServerAddress, clientId, configKey);
         this.secret = secret;
-        this.tokenCache = configTokenCache();
+        tokenCache = configTokenCache();
         refresh();
         LOGGER.info("AutoscaleClient has been created with a secret. autoscale: {}, identity: {}, clientId: {}, configKey: {}", autoscaleAddress,
                 identityServerAddress, clientId, configKey);
@@ -110,16 +110,16 @@ public class AutoscaleClient {
     private void renewEndpoints(String token) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
         headers.add("Authorization", "Bearer " + token);
-        this.t = client.target(autoscaleAddress).path(AutoscaleApi.API_ROOT_CONTEXT);
-        this.alertEndpoint = newResource(AlertEndpoint.class, headers);
-        this.clusterEndpoint = newResource(ClusterEndpoint.class, headers);
-        this.configurationEndpoint = newResource(ConfigurationEndpoint.class, headers);
-        this.historyEndpoint = newResource(HistoryEndpoint.class, headers);
-        this.policyEndpoint = newResource(PolicyEndpoint.class, headers);
+        t = client.target(autoscaleAddress).path(AutoscaleApi.API_ROOT_CONTEXT);
+        alertEndpoint = newResource(AlertEndpoint.class, headers);
+        clusterEndpoint = newResource(ClusterEndpoint.class, headers);
+        configurationEndpoint = newResource(ConfigurationEndpoint.class, headers);
+        historyEndpoint = newResource(HistoryEndpoint.class, headers);
+        policyEndpoint = newResource(PolicyEndpoint.class, headers);
         LOGGER.info("Endpoints have been renewed for AutoscaleClient");
     }
 
-    private <C> C newResource(final Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
+    private <C> C newResource(Class<C> resourceInterface, MultivaluedMap<String, Object> headers) {
         return WebResourceFactory.newResource(resourceInterface, t, false, headers, Collections.emptyList(), EMPTY_FORM);
     }
 

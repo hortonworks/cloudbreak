@@ -31,6 +31,6 @@ public class AmbariStartupPollerObject extends StackContext {
     }
 
     public void setAmbariClients(List<AmbariClient> ambariClient) {
-        this.ambariClients = ambariClient;
+        ambariClients = ambariClient;
     }
 }

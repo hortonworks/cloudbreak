@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class CloudbreakShellUtil {
     private CloudbreakClient cloudbreakClient;
 
     public void checkResponse(String operation, Response response) {
-        if (Response.Status.Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
+        if (Family.SUCCESSFUL != response.getStatusInfo().getFamily()) {
             String errormsg = "Error happened during " + operation + " rest operation: status: " + response.getStatus() + ", error: "
                     + response.readEntity(String.class);
             LOGGER.error(errormsg);
@@ -79,9 +80,7 @@ public class CloudbreakShellUtil {
         LOGGER.info("Status {} for {} is in desired status {}", statusPath, stackId, status);
         if (status.contains("FAILED") || (!Status.DELETE_COMPLETED.name().equals(desiredStatus) && Status.DELETE_COMPLETED.name().equals(status))) {
             waitResult = new WaitResult(WaitResultStatus.FAILED, statusReason);
-        } else if (retryCount == MAX_RETRY) {
-            waitResult = new WaitResult(WaitResultStatus.FAILED, "Timeout while trying to fetch status.");
-        } else if (timeout != null && fullTime >= timeout) {
+        } else if (retryCount == MAX_RETRY || timeout != null && fullTime >= timeout) {
             waitResult = new WaitResult(WaitResultStatus.FAILED, "Timeout while trying to fetch status.");
         }
         return waitResult;
@@ -107,13 +106,13 @@ public class CloudbreakShellUtil {
         FAILED
     }
 
-    public class WaitResult {
+    public static class WaitResult {
 
-        private WaitResultStatus waitResultStatus;
+        private final WaitResultStatus waitResultStatus;
 
-        private String reason;
+        private final String reason;
 
-        public WaitResult(WaitResultStatus waitResultStatus, String reason) {
+        private WaitResult(WaitResultStatus waitResultStatus, String reason) {
             this.waitResultStatus = waitResultStatus;
             this.reason = reason;
         }

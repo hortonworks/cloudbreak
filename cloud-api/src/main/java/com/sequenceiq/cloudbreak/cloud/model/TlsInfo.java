@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public class TlsInfo {
 
-    private boolean usePrivateIpToTls;
+    private final boolean usePrivateIpToTls;
 
     public TlsInfo(boolean usePrivateIpToTls) {
         this.usePrivateIpToTls = usePrivateIpToTls;

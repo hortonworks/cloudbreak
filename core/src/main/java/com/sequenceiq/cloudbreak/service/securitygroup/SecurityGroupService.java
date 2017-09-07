@@ -4,6 +4,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,12 +12,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
@@ -38,7 +39,7 @@ public class SecurityGroupService {
     @Inject
     private AuthorizationService authorizationService;
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public SecurityGroup create(IdentityUser user, SecurityGroup securityGroup) {
         LOGGER.info("Creating SecurityGroup: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         securityGroup.setOwner(user.getUserId());
@@ -77,11 +78,7 @@ public class SecurityGroupService {
 
     public void delete(Long id, IdentityUser user) {
         LOGGER.info("Deleting SecurityGroup with id: {}", id);
-        SecurityGroup securityGroup = get(id);
-        if (securityGroup == null) {
-            throw new NotFoundException(String.format("SecurityGroup '%s' not found.", id));
-        }
-        delete(securityGroup);
+        delete(get(id));
     }
 
     public void delete(String name, IdentityUser user) {

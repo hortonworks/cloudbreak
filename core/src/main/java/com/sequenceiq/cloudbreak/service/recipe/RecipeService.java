@@ -5,16 +5,17 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
+import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
@@ -42,7 +43,7 @@ public class RecipeService {
         recipeMigration.migrate();
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Recipe create(IdentityUser user, Recipe recipe) {
         recipe.setOwner(user.getUserId());
         recipe.setAccount(user.getAccount());
@@ -91,11 +92,7 @@ public class RecipeService {
     }
 
     public void delete(Long id, IdentityUser user) {
-        Recipe recipe = get(id);
-        if (recipe == null) {
-            throw new NotFoundException(String.format("Recipe '%s' not found.", id));
-        }
-        delete(recipe);
+        delete(get(id));
     }
 
     public void delete(String name, IdentityUser user) {

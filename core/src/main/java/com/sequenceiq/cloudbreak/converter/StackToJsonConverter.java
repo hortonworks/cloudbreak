@@ -83,8 +83,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setRegion(source.getRegion());
         stackJson.setAvailabilityZone(source.getAvailabilityZone());
         stackJson.setOnFailureAction(source.getOnFailureActionAction());
-        List<InstanceGroupResponse> templateGroups = new ArrayList<>();
-        templateGroups.addAll(convertInstanceGroups(source.getInstanceGroups()));
+        List<InstanceGroupResponse> templateGroups = new ArrayList<>(convertInstanceGroups(source.getInstanceGroups()));
         stackJson.setInstanceGroups(templateGroups);
         if (source.getCluster() != null) {
             stackJson.setCluster(getConversionService().convert(source.getCluster(), ClusterResponse.class));
@@ -196,7 +195,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
             if (cloudbreakDetails != null) {
                 stackJson.setCloudbreakDetails(getConversionService().convert(cloudbreakDetails, CloudbreakDetailsJson.class));
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Failed to convert dynamic component.", e);
         }
 

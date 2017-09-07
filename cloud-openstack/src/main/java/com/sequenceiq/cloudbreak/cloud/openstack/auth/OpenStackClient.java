@@ -134,7 +134,7 @@ public class OpenStackClient {
             throw new CloudConnectorException("Unsupported keystone version");
         } else if (token != null) {
             authenticatedContext.putParameter(Token.class, token);
-        } else if (access != null) {
+        } else {
             authenticatedContext.putParameter(Access.class, access);
         }
     }

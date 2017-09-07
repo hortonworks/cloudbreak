@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
-public class VersionComparator implements Comparator<Versioned> {
+public class VersionComparator implements Comparator<Versioned>, Serializable {
 
     @Override
     public int compare(Versioned o1, Versioned o2) {

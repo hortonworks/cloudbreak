@@ -23,7 +23,7 @@ public class RdsConfigIdConverter extends AbstractConverter<RdsConfigId> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getRdsConfigs().keySet());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

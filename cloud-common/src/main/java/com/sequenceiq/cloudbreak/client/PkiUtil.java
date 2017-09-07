@@ -229,9 +229,9 @@ public class PkiUtil {
     private static String convertToString(Object o) throws IOException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         OutputStreamWriter output = new OutputStreamWriter(bos);
-        JcaPEMWriter pem = new JcaPEMWriter(output);
-        pem.writeObject(o);
-        pem.close();
+        try (JcaPEMWriter pem = new JcaPEMWriter(output)) {
+            pem.writeObject(o);
+        }
         return bos.toString();
     }
 

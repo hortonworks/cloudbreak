@@ -14,9 +14,6 @@ public class PlatformVariantConverter extends AbstractConverter<PlatformVariant>
     @Autowired
     private ShellContext context;
 
-    public PlatformVariantConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return PlatformVariant.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class PlatformVariantConverter extends AbstractConverter<PlatformVariant>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVariantsByPlatform(context.getActiveCloudPlatform()));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

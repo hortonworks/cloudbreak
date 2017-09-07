@@ -23,9 +23,14 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.SecurityUtils;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.GlobalOperations;
+import com.google.api.services.compute.Compute.RegionOperations.Get;
+import com.google.api.services.compute.Compute.ZoneOperations;
 import com.google.api.services.compute.ComputeScopes;
 import com.google.api.services.compute.model.Operation;
+import com.google.api.services.compute.model.Operation.Error.Errors;
 import com.google.api.services.storage.Storage;
+import com.google.api.services.storage.Storage.Builder;
 import com.google.api.services.storage.StorageScopes;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
@@ -124,7 +129,7 @@ public final class GcpStackUtil {
         if (operation.getError() != null) {
             StringBuilder error = new StringBuilder();
             if (operation.getError().getErrors() != null) {
-                for (Operation.Error.Errors errors : operation.getError().getErrors()) {
+                for (Errors errors : operation.getError().getErrors()) {
                     error.append(String.format("code: %s -> message: %s %s", errors.getCode(), errors.getMessage(), System.lineSeparator()));
                 }
                 msg = error.toString();
@@ -138,16 +143,16 @@ public final class GcpStackUtil {
         return msg;
     }
 
-    public static Compute.GlobalOperations.Get globalOperations(Compute compute, String projectId, String operationName) throws IOException {
+    public static GlobalOperations.Get globalOperations(Compute compute, String projectId, String operationName) throws IOException {
         return compute.globalOperations().get(projectId, operationName);
     }
 
-    public static Compute.ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, AvailabilityZone region)
+    public static ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, AvailabilityZone region)
             throws IOException {
         return compute.zoneOperations().get(projectId, region.value(), operationName);
     }
 
-    public static Compute.RegionOperations.Get regionOperations(Compute compute, String projectId, String operationName, Region region) throws IOException {
+    public static Get regionOperations(Compute compute, String projectId, String operationName, Region region) throws IOException {
         return compute.regionOperations().get(projectId, region.value(), operationName);
     }
 
@@ -155,7 +160,7 @@ public final class GcpStackUtil {
         try {
             HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
             GoogleCredential credential = buildCredential(gcpCredential, httpTransport);
-            return new Storage.Builder(
+            return new Builder(
                     httpTransport, JSON_FACTORY, null).setApplicationName(name)
                     .setHttpRequestInitializer(credential)
                     .build();
@@ -201,7 +206,7 @@ public final class GcpStackUtil {
         } catch (NumberFormatException nfe) {
             LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName);
             return null;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName, e);
             return null;
         }

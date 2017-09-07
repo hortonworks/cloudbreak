@@ -8,7 +8,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
 @Entity
-public class Container {
+public class Container implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "container_generator")

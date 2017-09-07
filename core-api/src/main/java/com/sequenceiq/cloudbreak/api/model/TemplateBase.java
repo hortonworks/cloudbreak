@@ -8,6 +8,7 @@ import javax.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -17,18 +18,18 @@ public abstract class TemplateBase implements JsonEntity {
     @ApiModelProperty(value = ModelDescriptions.CLOUD_PLATFORM, required = true)
     private String cloudPlatform;
 
-    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.PARAMETERS)
+    @ApiModelProperty(TemplateModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
     @Size(max = 1000)
     @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
-    @ApiModelProperty(ModelDescriptions.TemplateModelDescription.VOLUME_TYPE)
+    @ApiModelProperty(TemplateModelDescription.VOLUME_TYPE)
     private String volumeType;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.INSTANCE_TYPE, required = true)
+    @ApiModelProperty(value = TemplateModelDescription.INSTANCE_TYPE, required = true)
     private String instanceType;
 
     @ApiModelProperty(ModelDescriptions.TOPOLOGY_ID)
@@ -47,7 +48,7 @@ public abstract class TemplateBase implements JsonEntity {
     }
 
     public void setCloudPlatform(String type) {
-        this.cloudPlatform = type;
+        cloudPlatform = type;
     }
 
     public Map<String, Object> getParameters() {

@@ -11,7 +11,7 @@ public enum SaltEndpoint {
     BOOT_HOSTNAME_ENDPOINT("saltboot/hostname/distribute"),
     SALT_RUN("saltapi/run");
 
-    private String contextPath;
+    private final String contextPath;
 
     SaltEndpoint(String contextPath) {
         this.contextPath = contextPath;

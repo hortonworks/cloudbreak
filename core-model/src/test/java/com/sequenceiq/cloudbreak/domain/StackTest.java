@@ -1,13 +1,14 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.sequenceiq.cloudbreak.domain.json.JsonToString;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 public class StackTest {
 

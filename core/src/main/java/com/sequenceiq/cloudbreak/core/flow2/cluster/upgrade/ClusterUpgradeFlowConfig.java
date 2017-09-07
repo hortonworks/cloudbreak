@@ -17,11 +17,12 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterUpgradeState, ClusterUpgradeEvent> {
     private static final List<Transition<ClusterUpgradeState, ClusterUpgradeEvent>> TRANSITIONS =
-            new Transition.Builder<ClusterUpgradeState, ClusterUpgradeEvent>()
+            new Builder<ClusterUpgradeState, ClusterUpgradeEvent>()
                     .from(INIT_STATE).to(CLUSTER_UPGRADE_STATE).event(CLUSTER_UPGRADE_EVENT)
                     .noFailureEvent()
 

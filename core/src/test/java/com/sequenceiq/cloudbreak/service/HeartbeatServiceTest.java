@@ -21,7 +21,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -399,9 +398,8 @@ public class HeartbeatServiceTest {
                 addAll(Collections.singletonList(suspendedFlows.get(1)));
         when(flowDistributor.distribute(any(), any())).thenReturn(distribution);
 
-        Set<FlowLog> myNewFlowLogs = new HashSet<>();
-        myNewFlowLogs.addAll(node1FlowLogs.stream().filter(fl -> fl.getFlowId().equalsIgnoreCase(suspendedFlows.get(0))).collect(Collectors.toList()));
-        when(flowLogRepository.findAllByCloudbreakNodeId(MY_ID)).thenReturn(myNewFlowLogs);
+        List<FlowLog> myNewFlowLogs = node1FlowLogs.stream().filter(fl -> fl.getFlowId().equalsIgnoreCase(suspendedFlows.get(0))).collect(Collectors.toList());
+        when(flowLogRepository.findAllByCloudbreakNodeId(MY_ID)).thenReturn(new HashSet<>(myNewFlowLogs));
 
         when(runningFlows.get(any())).thenReturn(null);
 
@@ -441,7 +439,7 @@ public class HeartbeatServiceTest {
 
         // In case of exception the instance should terminate the flows which are in running state
         for (Long myStackId : myStackIds) {
-            Assert.assertEquals(PollGroup.POLLABLE, InMemoryStateStore.getStack(myStackId));
+            assertEquals(PollGroup.POLLABLE, InMemoryStateStore.getStack(myStackId));
         }
         // There was no action on InMemoryStateStore
         verify(flowLogRepository, times(0)).findAllByCloudbreakNodeId(anyString());
@@ -453,7 +451,7 @@ public class HeartbeatServiceTest {
 
             @Override
             public Boolean testWith2SecDelayMax5Times(Supplier<Boolean> action) throws ActionWentFail {
-                throw new Retry.ActionWentFail("Test failed");
+                throw new ActionWentFail("Test failed");
             }
         }
 
@@ -472,7 +470,7 @@ public class HeartbeatServiceTest {
 
         // In case of exception the instance should terminate the flows which are in running state
         for (Long myStackId : myStackIds) {
-            Assert.assertEquals(PollGroup.CANCELLED, InMemoryStateStore.getStack(myStackId));
+            assertEquals(PollGroup.CANCELLED, InMemoryStateStore.getStack(myStackId));
         }
     }
 

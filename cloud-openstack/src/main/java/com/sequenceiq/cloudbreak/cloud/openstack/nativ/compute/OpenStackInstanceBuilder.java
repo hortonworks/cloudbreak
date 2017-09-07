@@ -16,6 +16,7 @@ import org.openstack4j.model.compute.BDMSourceType;
 import org.openstack4j.model.compute.BlockDeviceMappingCreate;
 import org.openstack4j.model.compute.Flavor;
 import org.openstack4j.model.compute.Server;
+import org.openstack4j.model.compute.Server.Status;
 import org.openstack4j.model.compute.ServerCreate;
 import org.openstack4j.model.compute.builder.BlockDeviceMappingBuilder;
 import org.openstack4j.model.compute.builder.ServerCreateBuilder;
@@ -154,24 +155,24 @@ public class OpenStackInstanceBuilder extends AbstractOpenStackComputeResourceBu
 
     @Override
     protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
-        Server.Status status = getStatus(auth, resource.getReference());
+        Status status = getStatus(auth, resource.getReference());
         if (status != null && context.isBuild()) {
-            if (Server.Status.ERROR == status) {
+            if (Status.ERROR == status) {
                 CloudContext cloudContext = auth.getCloudContext();
                 throw new OpenStackResourceException("Instance in failed state", resource.getType(), resource.getName(), cloudContext.getId(),
                         status.name());
             }
-            return status == Server.Status.ACTIVE;
+            return status == Status.ACTIVE;
         } else if (status == null && !context.isBuild()) {
             return true;
         }
         return false;
     }
 
-    private Server.Status getStatus(AuthenticatedContext auth, String serverId) {
+    private Status getStatus(AuthenticatedContext auth, String serverId) {
         OSClient osClient = createOSClient(auth);
         Server server = osClient.compute().servers().get(serverId);
-        Server.Status status = null;
+        Status status = null;
         if (server != null) {
             status = server.getStatus();
         }

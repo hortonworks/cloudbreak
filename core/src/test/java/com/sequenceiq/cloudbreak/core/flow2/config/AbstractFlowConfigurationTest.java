@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowFinalizeAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfigurationTest.FlowConfiguration.NotAcceptedException;
 
 public class AbstractFlowConfigurationTest {
 
@@ -52,7 +54,7 @@ public class AbstractFlowConfigurationTest {
         underTest = new FlowConfiguration();
         MockitoAnnotations.initMocks(this);
         given(applicationContext.getBean(anyString(), any(Class.class))).willReturn(action);
-        transitions = new AbstractFlowConfiguration.Transition.Builder<State, Event>()
+        transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()
                 .from(State.DO).to(State.DO2).event(Event.CONTINUE).defaultFailureEvent()
@@ -90,26 +92,26 @@ public class AbstractFlowConfigurationTest {
         flow.sendEvent(Event.FAIL_HANDLED.name(), null);
     }
 
-    @Test(expected = FlowConfiguration.NotAcceptedException.class)
+    @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration1() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.FINISHED.name(), null);
     }
 
-    @Test(expected = FlowConfiguration.NotAcceptedException.class)
+    @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration2() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.FAILURE2.name(), null);
     }
 
-    @Test(expected = FlowConfiguration.NotAcceptedException.class)
+    @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration3() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.CONTINUE.name(), null);
         flow.sendEvent(Event.FAIL_HANDLED.name(), null);
     }
 
-    @Test(expected = FlowConfiguration.NotAcceptedException.class)
+    @Test(expected = NotAcceptedException.class)
     public void testUnacceptedFlowConfiguration4() {
         flow.sendEvent(Event.START.name(), null);
         flow.sendEvent(Event.CONTINUE.name(), null);
@@ -128,6 +130,7 @@ public class AbstractFlowConfigurationTest {
     enum Event implements FlowEvent {
         START, CONTINUE, FINISHED, FAILURE, FAILURE2, FINALIZED, FAIL_HANDLED;
 
+        @Override
         public String event() {
             return name();
         }

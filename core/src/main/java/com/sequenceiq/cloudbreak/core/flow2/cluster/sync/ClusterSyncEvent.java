@@ -13,7 +13,7 @@ public enum ClusterSyncEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERSYNCFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERSYNCFAILHANDLEDEVENT");
 
-    private String event;
+    private final String event;
 
     ClusterSyncEvent(String event) {
         this.event = event;

@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -28,7 +27,7 @@ public class EphemeralClusterService {
     private FlowMessageService flowMessageService;
 
     public void updateClusterStarted(Stack stack) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
+        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, "Ephemeral cluster update started");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_DATALAKE_UPDATE, UPDATE_IN_PROGRESS.name());
     }

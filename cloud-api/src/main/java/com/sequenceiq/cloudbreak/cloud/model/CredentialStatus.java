@@ -2,16 +2,16 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 public enum CredentialStatus {
 
-    CREATED(StatusGroup.PERMANENT),
-    VERIFIED(StatusGroup.PERMANENT),
-    DELETED(StatusGroup.PERMANENT),
-    UPDATED(StatusGroup.PERMANENT),
-    FAILED(StatusGroup.PERMANENT);
+    CREATED(),
+    VERIFIED(),
+    DELETED(),
+    UPDATED(),
+    FAILED();
 
-    private StatusGroup statusGroup;
+    private final StatusGroup statusGroup;
 
-    CredentialStatus(StatusGroup statusGroup) {
-        this.statusGroup = statusGroup;
+    CredentialStatus() {
+        statusGroup = StatusGroup.PERMANENT;
     }
 
     public StatusGroup getStatusGroup() {

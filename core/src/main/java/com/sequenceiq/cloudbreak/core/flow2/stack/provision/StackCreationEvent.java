@@ -36,7 +36,7 @@ public enum StackCreationEvent implements FlowEvent {
     STACK_CREATION_FINISHED_EVENT("STACK_CREATION_FINISHED"),
     STACKCREATION_FAILURE_HANDLED_EVENT("STACK_CREATION_FAILHANDLED");
 
-    private String event;
+    private final String event;
 
     StackCreationEvent(String event) {
         this.event = event;

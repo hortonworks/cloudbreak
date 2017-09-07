@@ -16,9 +16,7 @@ public class SubscriptionController implements SubscriptionEndpoint {
     @Autowired
     private SubscriptionService subscriptionService;
 
-    @Autowired
-    private AuthenticatedUserService authenticatedUserService;
-
+    @Override
     public IdJson subscribe(SubscriptionRequest subscriptionRequest) {
         Subscription subscription = new Subscription(SecurityContextHolder.getContext().getAuthentication().getPrincipal().toString(),
                 subscriptionRequest.getEndpointUrl());

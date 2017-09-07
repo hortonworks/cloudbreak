@@ -19,7 +19,6 @@ dependencies {
     compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
     compile group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
     compile group: 'commons-codec',                 name: 'commons-codec',                  version: '1.10'
-    compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
 
     testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
     testCompile group: 'junit',                     name: 'junit',                          version: junitVersion

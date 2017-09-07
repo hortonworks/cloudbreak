@@ -23,7 +23,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
 
     private final SaltConnector saltConnector;
 
-    private SaltJobRunner saltJobRunner;
+    private final SaltJobRunner saltJobRunner;
 
     private final boolean retryOnFail;
 
@@ -89,7 +89,7 @@ public class SaltJobIdTracker implements OrchestratorBootstrap {
         if (saltJobRunner.getNodesWithError() != null) {
             for (String host : saltJobRunner.getNodesWithError().keySet()) {
                 Collection<String> errorMessages = saltJobRunner.getNodesWithError().get(host);
-                errorMessageBuilder.append("\n").append("Node: ").append(host).append(" Error(s): ").append(String.join(" | ", errorMessages));
+                errorMessageBuilder.append('\n').append("Node: ").append(host).append(" Error(s): ").append(String.join(" | ", errorMessages));
             }
         }
         return errorMessageBuilder.toString();

@@ -47,7 +47,7 @@ public class StackStatus implements ProvisionEntity {
         this.status = status;
         this.statusReason = statusReason;
         this.detailedStackStatus = detailedStackStatus;
-        this.created = new Date().getTime();
+        created = new Date().getTime();
     }
 
     public void setId(Long id) {

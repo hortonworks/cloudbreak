@@ -17,7 +17,8 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.periscope.api.model.ScalingPolicyJson;
-import com.sequenceiq.periscope.doc.ApiDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.PolicyNotes;
+import com.sequenceiq.periscope.doc.ApiDescription.PolicyOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,25 +30,25 @@ public interface PolicyEndpoint {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.PolicyOpDescription.POLICY_POST, produces = JSON, notes = ApiDescription.PolicyNotes.NOTES)
-    ScalingPolicyJson addScaling(@PathParam(value = "clusterId") Long clusterId, @Valid ScalingPolicyJson json);
+    @ApiOperation(value = PolicyOpDescription.POLICY_POST, produces = JSON, notes = PolicyNotes.NOTES)
+    ScalingPolicyJson addScaling(@PathParam("clusterId") Long clusterId, @Valid ScalingPolicyJson json);
 
     @PUT
     @Path("{policyId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.PolicyOpDescription.POLICY_PUT, produces = JSON, notes = ApiDescription.PolicyNotes.NOTES)
-    ScalingPolicyJson setScaling(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "policyId") Long policyId,
+    @ApiOperation(value = PolicyOpDescription.POLICY_PUT, produces = JSON, notes = PolicyNotes.NOTES)
+    ScalingPolicyJson setScaling(@PathParam("clusterId") Long clusterId, @PathParam("policyId") Long policyId,
             @Valid ScalingPolicyJson scalingPolicy);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.PolicyOpDescription.POLICY_GET, produces = JSON, notes = ApiDescription.PolicyNotes.NOTES)
-    List<ScalingPolicyJson> getScaling(@PathParam(value = "clusterId") Long clusterId);
+    @ApiOperation(value = PolicyOpDescription.POLICY_GET, produces = JSON, notes = PolicyNotes.NOTES)
+    List<ScalingPolicyJson> getScaling(@PathParam("clusterId") Long clusterId);
 
     @DELETE
     @Path("{policyId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.PolicyOpDescription.POLICY_DELETE, produces = JSON, notes = ApiDescription.PolicyNotes.NOTES)
-    void deletePolicy(@PathParam(value = "clusterId") Long clusterId, @PathParam(value = "policyId") Long policyId);
+    @ApiOperation(value = PolicyOpDescription.POLICY_DELETE, produces = JSON, notes = PolicyNotes.NOTES)
+    void deletePolicy(@PathParam("clusterId") Long clusterId, @PathParam("policyId") Long policyId);
 
 }

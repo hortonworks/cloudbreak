@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
-import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
+import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.service.user.UserDetailsService;
 
 @Component
 public class DruidSupersetConfigProvider {

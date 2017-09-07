@@ -3,11 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.event.instance;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
 
-public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequest> implements Payload {
+public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequest> {
 
-    private CloudContext cloudContext;
+    private final CloudContext cloudContext;
 
     private InstancesStatusResult results;
 
@@ -19,7 +18,7 @@ public class StartInstancesResult extends CloudPlatformResult<StartInstancesRequ
 
     public StartInstancesResult(String statusReason, Exception errorDetails, StartInstancesRequest request) {
         super(statusReason, errorDetails, request);
-        this.cloudContext = request.getCloudContext();
+        cloudContext = request.getCloudContext();
     }
 
     public CloudContext getCloudContext() {

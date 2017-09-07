@@ -77,7 +77,7 @@ public final class ApplicationUtils {
                 return "ambariserver";
             case AMBARIAGENT:
                 String[] containerNameParts = constraint.getContainerName().getName().split("%");
-                String componentBaseName = containerNameParts[2].substring(0, containerNameParts[2].lastIndexOf("-")).replaceAll("[^a-zA-Z0-9 ]", "");
+                String componentBaseName = containerNameParts[2].substring(0, containerNameParts[2].lastIndexOf('-')).replaceAll("[^a-zA-Z0-9 ]", "");
                 return String.format("%s-%s", componentBaseName, componentNumber);
             default:
                 throw new CloudbreakOrchestratorFailedException("Unknown component type");

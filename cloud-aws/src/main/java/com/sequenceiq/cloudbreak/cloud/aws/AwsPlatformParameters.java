@@ -14,6 +14,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -29,7 +31,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.InstanceProfileStrategy;
@@ -53,6 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
@@ -101,11 +103,11 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
-    private Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
+    private final Map<AvailabilityZone, List<VmType>> vmTypes = new HashMap<>();
 
     private Map<AvailabilityZone, List<VmType>> sortListOfVmTypes = new HashMap<>();
 
-    private Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
+    private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
     private Region defaultRegion;
 
@@ -113,12 +115,12 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        this.regions = readRegions(resourceDefinition("zone"));
-        this.regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
+        regions = readRegions(resourceDefinition("zone"));
+        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-displaynames"));
         readVmTypes();
-        this.sortListOfVmTypes = refineList();
-        this.defaultRegion = getDefaultRegion();
-        this.defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
+        sortListOfVmTypes = refineList();
+        defaultRegion = getDefaultRegion();
+        defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
     }
 
     private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
@@ -142,7 +144,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         try {
             VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
             for (VmSpecification vmSpecification : oVms.getItems()) {
-                VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
                         .withCpuAndMemory(vmSpecification.getMetaSpecification().getProperties().getCpu(),
                                 vmSpecification.getMetaSpecification().getProperties().getMemory())
                         .withPrice(vmSpecification.getMetaSpecification().getProperties().getPrice());
@@ -170,7 +172,7 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private Map<AvailabilityZone, List<VmType>> refineList() {
         Map<AvailabilityZone, List<VmType>> resultMap = new HashMap<>();
-        for (Map.Entry<AvailabilityZone, List<VmType>> availabilityZoneListEntry : this.vmTypes.entrySet()) {
+        for (Entry<AvailabilityZone, List<VmType>> availabilityZoneListEntry : vmTypes.entrySet()) {
             List<VmType> tmpList = new ArrayList<>();
             for (VmType vmType : availabilityZoneListEntry.getValue()) {
                 if (!vmType.getExtended()) {
@@ -182,7 +184,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         return sortMap(resultMap);
     }
 
-    private void addConfig(VmTypeMeta.VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
+    private void addConfig(VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
         if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.AUTO_ATTACHED.name())) {
             builder.withAutoAttachedConfig(volumeParameterConfig(configSpecification));
         } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.EPHEMERAL.name())) {
@@ -271,11 +273,11 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.absent()));
-        additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.empty()));
+        additionalStackParameterValidations.add(new StackParamValidation(DEDICATED_INSTANCES, false, Boolean.class, Optional.empty()));
         additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE_STRATEGY, false, InstanceProfileStrategy.class,
-                Optional.absent()));
-        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE, false, String.class, Optional.absent()));
+                Optional.empty()));
+        additionalStackParameterValidations.add(new StackParamValidation(INSTANCE_PROFILE, false, String.class, Optional.empty()));
         return additionalStackParameterValidations;
     }
 
@@ -314,7 +316,7 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Override
     public PlatformImage images() {
         List<CustomImage> customImages = new ArrayList<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
             String property = environment.getProperty("aws." + regionListEntry.getKey().value());
             customImages.add(customImage(regionListEntry.getKey().value(), property));
         }

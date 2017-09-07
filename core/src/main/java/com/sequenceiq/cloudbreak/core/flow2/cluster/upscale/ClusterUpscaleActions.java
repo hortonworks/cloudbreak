@@ -51,7 +51,7 @@ public class ClusterUpscaleActions {
             }
 
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final ClusterScaleTriggerEvent payload, Map<Object, Object> variables)
+            protected void doExecute(ClusterUpscaleContext context, ClusterScaleTriggerEvent payload, Map<Object, Object> variables)
                     throws Exception {
                 clusterUpscaleFlowService.upscalingAmbari(context.getStack());
                 sendEvent(context);
@@ -69,7 +69,7 @@ public class ClusterUpscaleActions {
     public Action executingPrerecipesAction() {
         return new AbstractClusterUpscaleAction<UpscaleAmbariResult>(UpscaleAmbariResult.class) {
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final UpscaleAmbariResult payload, Map<Object, Object> variables)
+            protected void doExecute(ClusterUpscaleContext context, UpscaleAmbariResult payload, Map<Object, Object> variables)
                     throws Exception {
                 sendEvent(context);
             }
@@ -86,7 +86,7 @@ public class ClusterUpscaleActions {
         return new AbstractClusterUpscaleAction<UpscalePreRecipesResult>(UpscalePreRecipesResult.class) {
 
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final UpscalePreRecipesResult payload, Map<Object, Object> variables)
+            protected void doExecute(ClusterUpscaleContext context, UpscalePreRecipesResult payload, Map<Object, Object> variables)
                     throws Exception {
                 sendEvent(context);
             }
@@ -103,7 +103,7 @@ public class ClusterUpscaleActions {
         return new AbstractClusterUpscaleAction<UpscaleClusterResult>(UpscaleClusterResult.class) {
 
             @Override
-            protected void doExecute(final ClusterUpscaleContext context, final UpscaleClusterResult payload, Map<Object, Object> variables)
+            protected void doExecute(ClusterUpscaleContext context, UpscaleClusterResult payload, Map<Object, Object> variables)
                     throws Exception {
                 sendEvent(context);
             }

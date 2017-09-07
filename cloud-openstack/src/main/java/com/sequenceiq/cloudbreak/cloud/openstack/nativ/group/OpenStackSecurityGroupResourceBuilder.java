@@ -9,6 +9,7 @@ import org.openstack4j.api.exceptions.OS4JException;
 import org.openstack4j.model.common.ActionResponse;
 import org.openstack4j.model.compute.IPProtocol;
 import org.openstack4j.model.compute.SecGroupExtension;
+import org.openstack4j.model.compute.SecGroupExtension.Rule;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 @Service
 public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGroupResourceBuilder {
+
     private static final int MAX_PORT = 65535;
 
     private static final int MIN_PORT = 1;
@@ -46,8 +48,8 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
                 IPProtocol osProtocol = getProtocol(rule.getProtocol());
                 String cidr = rule.getCidr();
                 for (PortDefinition portStr : rule.getPorts()) {
-                    int from = Integer.valueOf(portStr.getFrom());
-                    int to = Integer.valueOf(portStr.getTo());
+                    int from = Integer.parseInt(portStr.getFrom());
+                    int to = Integer.parseInt(portStr.getTo());
                     securityGroupService.createRule(createRule(securityGroupId, osProtocol, cidr, from, to));
                 }
             }
@@ -83,7 +85,7 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
         return true;
     }
 
-    private SecGroupExtension.Rule createRule(String securityGroupId, IPProtocol protocol, String cidr, int fromPort, int toPort) {
+    private Rule createRule(String securityGroupId, IPProtocol protocol, String cidr, int fromPort, int toPort) {
         return Builders.secGroupRule()
                 .parentGroupId(securityGroupId)
                 .protocol(protocol)
@@ -92,7 +94,7 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
                 .build();
     }
 
-    private SecGroupExtension.Rule createRule(String securityGroupId, IPProtocol protocol, String cidr) {
+    private Rule createRule(String securityGroupId, IPProtocol protocol, String cidr) {
         return Builders.secGroupRule()
                 .parentGroupId(securityGroupId)
                 .protocol(protocol)

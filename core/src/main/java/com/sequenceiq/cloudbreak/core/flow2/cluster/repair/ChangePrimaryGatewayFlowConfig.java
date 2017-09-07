@@ -22,12 +22,13 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class ChangePrimaryGatewayFlowConfig extends AbstractFlowConfiguration<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent> {
 
     private static final List<Transition<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>> TRANSITIONS =
-            new Transition.Builder<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>()
+            new Builder<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>()
                     .defaultFailureEvent(CHANGE_PRIMARY_GATEWAY_FAILED)
                     .from(INIT_STATE).to(CHANGE_PRIMARY_GATEWAY_STATE).event(CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT).noFailureEvent()
                     .from(CHANGE_PRIMARY_GATEWAY_STATE).to(WAITING_FOR_AMBARI_SERVER_STATE).event(CHANGE_PRIMARY_GATEWAY_FINISHED).defaultFailureEvent()

@@ -14,7 +14,7 @@ import mesosphere.marathon.client.model.v2.Task;
 import mesosphere.marathon.client.utils.MarathonException;
 
 public class MarathonTaskDeletion implements OrchestratorBootstrap {
-    private static final Logger LOGGER = LoggerFactory.getLogger(MarathonAppDeletion.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MarathonTaskDeletion.class);
 
     private static final Integer STATUS_NOT_FOUND = 404;
 

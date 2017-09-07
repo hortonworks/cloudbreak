@@ -31,26 +31,26 @@ import io.swagger.annotations.ApiOperation;
 public interface TopologyEndpoint {
 
     @GET
-    @Path(value = "account")
+    @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES, nickname = "getPublicsTopology")
     Set<TopologyResponse> getPublics();
 
     @GET
-    @Path(value = "account/{id}")
+    @Path("account/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.GET_BY_ID, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES, nickname = "getTopology")
-    TopologyResponse get(@PathParam(value = "id") Long id);
+    TopologyResponse get(@PathParam("id") Long id);
 
     @POST
-    @Path(value = "account")
+    @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES, nickname = "postPublicTopology")
     TopologyResponse postPublic(@Valid TopologyRequest topologyRequest);
 
     @DELETE
-    @Path(value = "account/{id}")
+    @Path("account/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = TopologyOpDesctiption.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.TOPOLOGY_NOTES, nickname = "deleteTopology")
-    void delete(@PathParam(value = "id")Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+    void delete(@PathParam("id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced);
 }

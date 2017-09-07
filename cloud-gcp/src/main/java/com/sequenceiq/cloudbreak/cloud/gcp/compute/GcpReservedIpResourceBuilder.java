@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Addresses.Insert;
 import com.google.api.services.compute.model.Address;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
@@ -49,7 +50,7 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             Address address = new Address();
             address.setName(resource.getName());
 
-            Compute.Addresses.Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
+            Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
             try {
                 Operation operation = networkInsert.execute();
                 if (operation.getHttpErrorStatusCode() != null) {

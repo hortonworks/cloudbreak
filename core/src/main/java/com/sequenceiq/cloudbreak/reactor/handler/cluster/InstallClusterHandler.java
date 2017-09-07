@@ -35,7 +35,7 @@ public class InstallClusterHandler implements ReactorEventHandler<InstallCluster
         try {
             ambariClusterCreationService.buildAmbariCluster(stackId);
             response = new InstallClusterSuccess(stackId);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             response = new InstallClusterFailed(stackId, e);
         }
         eventBus.notify(response.selector(), new Event(event.getHeaders(), response));

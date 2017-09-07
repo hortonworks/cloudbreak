@@ -15,10 +15,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration;
+import com.sequenceiq.cloudbreak.core.flow2.config.AbstractFlowConfiguration.Transition.Builder;
 
 @Component
 public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncState, StackSyncEvent> {
-    private static final List<Transition<StackSyncState, StackSyncEvent>> TRANSITIONS = new Transition.Builder<StackSyncState, StackSyncEvent>()
+    private static final List<Transition<StackSyncState, StackSyncEvent>> TRANSITIONS = new Builder<StackSyncState, StackSyncEvent>()
             .defaultFailureEvent(StackSyncEvent.SYNC_FAILURE_EVENT)
             .from(INIT_STATE).to(SYNC_STATE).event(STACK_SYNC_EVENT).noFailureEvent()
             .from(SYNC_STATE).to(SYNC_FINISHED_STATE).event(SYNC_FINISHED_EVENT).defaultFailureEvent()
@@ -40,7 +41,7 @@ public class StackSyncFlowConfig extends AbstractFlowConfiguration<StackSyncStat
     @Override
     public StackSyncEvent[] getInitEvents() {
         return new StackSyncEvent[] {
-                StackSyncEvent.STACK_SYNC_EVENT
+                STACK_SYNC_EVENT
         };
     }
 

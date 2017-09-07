@@ -104,7 +104,7 @@ public class AmbariClusterStatusUpdater {
         AMBARI_CLUSTER_COULD_NOT_SYNC("ambari.cluster.could.not.sync"),
         AMBARI_CLUSTER_SYNCHRONIZED("ambari.cluster.synchronized");
 
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;

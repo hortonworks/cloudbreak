@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class UnhealthyInstances {
 
-    private Map<String, List<String>> instancesByGroup = new HashMap<>();
+    private final Map<String, List<String>> instancesByGroup = new HashMap<>();
 
     public void addInstance(String instanceId, String groupName) {
         if (!instancesByGroup.containsKey(groupName)) {
@@ -17,7 +17,7 @@ public class UnhealthyInstances {
         instanceIds.add(instanceId);
     }
 
-    public Iterable<? extends String> getHostGroups() {
+    public Iterable<String> getHostGroups() {
         return instancesByGroup.keySet();
     }
 

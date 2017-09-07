@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 public class CloudbreakApiExceptionMapper extends SendNotificationExceptionMapper<CloudbreakApiException> {
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.CONFLICT;
+    Status getResponseStatus() {
+        return Status.CONFLICT;
     }
 }

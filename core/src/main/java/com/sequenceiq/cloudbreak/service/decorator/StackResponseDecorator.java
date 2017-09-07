@@ -5,8 +5,6 @@ import java.util.Set;
 
 import javax.annotation.Resource;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -15,8 +13,6 @@ import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProv
 
 @Service
 public class StackResponseDecorator implements Decorator<StackResponse> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackResponseDecorator.class);
 
     @Resource
     private Map<String, ResponseProvider> responseProviders;

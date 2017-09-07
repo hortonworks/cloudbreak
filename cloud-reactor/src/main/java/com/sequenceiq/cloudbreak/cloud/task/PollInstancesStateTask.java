@@ -15,15 +15,15 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @Component(PollInstancesStateTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class PollInstancesStateTask extends AbstractPollTask<InstancesStatusResult> {
     public static final String NAME = "pollInstancesStateTask";
 
-    private List<CloudInstance> instances;
+    private final List<CloudInstance> instances;
 
-    private InstanceConnector instanceConnector;
+    private final InstanceConnector instanceConnector;
 
-    private Set<InstanceStatus> completedStatuses;
+    private final Set<InstanceStatus> completedStatuses;
 
     public PollInstancesStateTask(AuthenticatedContext authenticatedContext, InstanceConnector instanceConnector, List<CloudInstance> instances) {
         this(authenticatedContext, instanceConnector, instances, Sets.newHashSet());

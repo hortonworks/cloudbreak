@@ -9,39 +9,39 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
 public class RdsView {
 
-    private String connectionURL;
+    private final String connectionURL;
 
-    private String connectionUserName;
+    private final String connectionUserName;
 
-    private String connectionPassword;
+    private final String connectionPassword;
 
-    private String databaseName;
+    private final String databaseName;
 
-    private String host;
+    private final String host;
 
-    private String connectionHost;
+    private final String connectionHost;
 
     private Map<String, Object> properties = new HashMap<>();
 
     public RdsView(RDSConfig rdsConfig) {
-        this.connectionURL = rdsConfig.getConnectionURL();
-        this.connectionUserName = rdsConfig.getConnectionUserName();
-        this.connectionPassword = rdsConfig.getConnectionPassword();
+        connectionURL = rdsConfig.getConnectionURL();
+        connectionUserName = rdsConfig.getConnectionUserName();
+        connectionPassword = rdsConfig.getConnectionPassword();
 
         String port = "";
         String[] split = connectionURL.split("//");
         String withoutJDBCPrefix = split[split.length - 1];
         String hostWithPort = withoutJDBCPrefix.split("/")[0];
-        int portDelimiterIndex = hostWithPort.indexOf(":");
+        int portDelimiterIndex = hostWithPort.indexOf(':');
         if (portDelimiterIndex > 0) {
-            this.host = hostWithPort.substring(0, portDelimiterIndex);
+            host = hostWithPort.substring(0, portDelimiterIndex);
             port = hostWithPort.substring(portDelimiterIndex + 1);
         } else {
-            this.host = hostWithPort;
+            host = hostWithPort;
         }
 
-        this.databaseName = getDatabaseName(connectionURL);
-        this.connectionHost = createConnectionHost(port);
+        databaseName = getDatabaseName(connectionURL);
+        connectionHost = createConnectionHost(port);
         if (rdsConfig.getAttributes() != null) {
             properties = rdsConfig.getAttributes().getMap();
         }
@@ -85,9 +85,9 @@ public class RdsView {
     }
 
     private String createConnectionHost(String port) {
-        String result = this.host;
+        String result = host;
         if (!StringUtils.isEmpty(port)) {
-            result = this.host + ":" + port;
+            result = host + ':' + port;
         }
         return result;
     }

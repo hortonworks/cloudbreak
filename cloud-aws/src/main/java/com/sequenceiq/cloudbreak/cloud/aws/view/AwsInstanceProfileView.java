@@ -10,10 +10,10 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class AwsInstanceProfileView {
 
-    private Map<String, String> parameters;
+    private final Map<String, String> parameters;
 
     public AwsInstanceProfileView(CloudStack stack) {
-        this.parameters = stack.getParameters();
+        parameters = stack.getParameters();
     }
 
     public boolean isEnableInstanceProfileStrategy() {

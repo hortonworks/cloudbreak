@@ -8,7 +8,7 @@ public class ExposedServices {
     private List<String> services;
 
     public ExposedServices() {
-        this.services = new ArrayList<>();
+        services = new ArrayList<>();
     }
 
     public List<String> getServices() {

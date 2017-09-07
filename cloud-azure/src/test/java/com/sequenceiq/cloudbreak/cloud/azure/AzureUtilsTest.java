@@ -11,14 +11,14 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 
 public class AzureUtilsTest {
 
-    private AzureUtils subject;
+    private static final String MAX_RESOURCE_NAME_LENGTH = "50";
 
-    private final String maxResourceNameLength = "50";
+    private AzureUtils subject;
 
     @Before
     public void setUp() {
         subject = new AzureUtils();
-        ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(maxResourceNameLength));
+        ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
     }
 
     @Test
@@ -32,7 +32,7 @@ public class AzureUtilsTest {
         //THEN
         Assert.assertNotNull("The generated name must not be null!", testResult);
         assertEquals("The resource name is not the excepted one!", "thisisaverylongazureresourcenamewhichneedstobe7899", testResult);
-        Assert.assertTrue("The resource name length is wrong", testResult.length() == Integer.parseInt(maxResourceNameLength));
+        Assert.assertTrue("The resource name length is wrong", testResult.length() == Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
 
     }
 }

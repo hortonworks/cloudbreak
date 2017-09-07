@@ -3,9 +3,10 @@ package com.sequenceiq.cloudbreak.cloud.aws.context;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 
 public abstract class AwsStatusCheckerContext {
-    private AwsCredentialView awsCredentialView;
 
-    public AwsStatusCheckerContext(AwsCredentialView awsCredentialView) {
+    private final AwsCredentialView awsCredentialView;
+
+    protected AwsStatusCheckerContext(AwsCredentialView awsCredentialView) {
         this.awsCredentialView = awsCredentialView;
     }
 

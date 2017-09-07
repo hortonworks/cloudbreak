@@ -105,7 +105,7 @@ public class AzureStorage {
         name = name.length() > MAX_LENGTH_OF_NAME_SLICE ? name.substring(0, MAX_LENGTH_OF_NAME_SLICE) : name;
         try {
             MessageDigest messageDigest = MessageDigest.getInstance("MD5");
-            String storageAccountId = acv.getId().toString() + "#" + cloudContext.getId() + "#" + cloudContext.getOwner();
+            String storageAccountId = acv.getId() + "#" + cloudContext.getId() + '#' + cloudContext.getOwner();
             LOGGER.info("Storage account internal id: {}", storageAccountId);
             byte[] digest = messageDigest.digest(storageAccountId.getBytes());
             String paddedId = "";
@@ -161,7 +161,7 @@ public class AzureStorage {
                     return true;
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
         return false;

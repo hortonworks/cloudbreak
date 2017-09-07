@@ -23,6 +23,7 @@ import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.PrometheusAlert;
 import com.sequenceiq.periscope.log.MDCBuilder;
 import com.sequenceiq.periscope.model.PrometheusResponse;
+import com.sequenceiq.periscope.model.PrometheusResponse.Result;
 import com.sequenceiq.periscope.model.TlsConfiguration;
 import com.sequenceiq.periscope.monitor.event.ScalingEvent;
 import com.sequenceiq.periscope.monitor.event.UpdateFailedEvent;
@@ -49,7 +50,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
 
     @Override
     public void setContext(Map<String, Object> context) {
-        this.clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
+        clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
     }
 
     @Override
@@ -84,7 +85,7 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
                         break;
 
                     case CRITICAL:
-                        for (PrometheusResponse.Result alertResult : prometheusResponse.getData().getResult()) {
+                        for (Result alertResult : prometheusResponse.getData().getResult()) {
                             if ("firing".equals(alertResult.getMetric().getAlertstate())) {
                                 List<Object> lastSample = alertResult.getValues().get(alertResult.getValues().size() - 1);
                                 Object alertValue = lastSample.get(1);

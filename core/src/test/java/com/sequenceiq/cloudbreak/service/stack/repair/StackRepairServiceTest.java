@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService.StackRepairFlowSubmitter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackRepairServiceTest {
@@ -63,7 +64,7 @@ public class StackRepairServiceTest {
 
     @Test
     public void shouldIgnoreIfNoInstancesToRepair() {
-        underTest.add(stack, Collections.EMPTY_SET);
+        underTest.add(stack, Collections.emptySet());
 
         verifyZeroInteractions(executorService);
         verify(flowMessageService).fireEventAndLog(stack.getId(), Msg.STACK_REPAIR_COMPLETE_CLEAN, Status.AVAILABLE.name());
@@ -120,20 +121,20 @@ public class StackRepairServiceTest {
         when(instanceMetaDataRepository.findByInstanceId(stackId, instanceId)).thenReturn(imd1);
     }
 
-    private class StackRepairFlowSubmitterMatcher extends ArgumentMatcher<StackRepairService.StackRepairFlowSubmitter> {
+    private class StackRepairFlowSubmitterMatcher extends ArgumentMatcher<StackRepairFlowSubmitter> {
 
         private final Long expectedStackId;
 
         private final UnhealthyInstances expectedInstances;
 
-        StackRepairFlowSubmitterMatcher(Long expectedStackId, UnhealthyInstances expectedInstances) {
+        private StackRepairFlowSubmitterMatcher(Long expectedStackId, UnhealthyInstances expectedInstances) {
             this.expectedStackId = expectedStackId;
             this.expectedInstances = expectedInstances;
         }
 
         @Override
         public boolean matches(Object argument) {
-            StackRepairService.StackRepairFlowSubmitter stackRepairFlowSubmitter = (StackRepairService.StackRepairFlowSubmitter) argument;
+            StackRepairFlowSubmitter stackRepairFlowSubmitter = (StackRepairFlowSubmitter) argument;
             return stackRepairFlowSubmitter.getStackId().equals(expectedStackId) && expectedInstances.equals(stackRepairFlowSubmitter.getUnhealthyInstances());
         }
     }

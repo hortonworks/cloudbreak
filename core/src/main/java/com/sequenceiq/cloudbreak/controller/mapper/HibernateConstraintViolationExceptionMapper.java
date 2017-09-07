@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import org.hibernate.exception.ConstraintViolationException;
 
 @Provider
-public class HibernateConstraintViolationException extends SendNotificationExceptionMapper<ConstraintViolationException> {
+public class HibernateConstraintViolationExceptionMapper extends SendNotificationExceptionMapper<ConstraintViolationException> {
 
     @Override
     protected Object getEntity(ConstraintViolationException exception) {
@@ -14,7 +14,7 @@ public class HibernateConstraintViolationException extends SendNotificationExcep
     }
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.BAD_REQUEST;
+    Status getResponseStatus() {
+        return Status.BAD_REQUEST;
     }
 }

@@ -19,21 +19,21 @@ public class Verification {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Verification.class);
 
-    private String path;
+    private final String path;
 
-    private boolean regex;
+    private final boolean regex;
 
-    private String httpMethod;
+    private final String httpMethod;
 
-    private Map<Call, Response> requestResponseMap;
+    private final Map<Call, Response> requestResponseMap;
 
     private Integer atLeast;
 
     private Integer exactTimes;
 
-    private List<Pattern> patternList = new ArrayList<>();
+    private final List<Pattern> patternList = new ArrayList<>();
 
-    private Map<String, Integer> bodyContainsList = new HashMap<>();
+    private final Map<String, Integer> bodyContainsList = new HashMap<>();
 
     public Verification(String path, String httpMethod, Map<Call, Response> requestResponseMap, boolean regex) {
         this.path = path;
@@ -43,12 +43,12 @@ public class Verification {
     }
 
     public Verification atLeast(int times) {
-        this.atLeast = times;
+        atLeast = times;
         return this;
     }
 
     public Verification exactTimes(int times) {
-        this.exactTimes = times;
+        exactTimes = times;
         return this;
     }
 
@@ -106,9 +106,9 @@ public class Verification {
             boolean pathMatched = isPathMatched(call);
             if (call.getMethod().equals(httpMethod) && pathMatched) {
                 int bodyContainsNumber = 0;
-                for (String bodyContains : bodyContainsList.keySet()) {
-                    int count = StringUtils.countMatches(call.getPostBody(), bodyContains);
-                    int required = bodyContainsList.get(bodyContains);
+                for (Map.Entry<String, Integer> stringIntegerEntry : bodyContainsList.entrySet()) {
+                    int count = StringUtils.countMatches(call.getPostBody(), stringIntegerEntry.getKey());
+                    int required = stringIntegerEntry.getValue();
                     if ((required < 0 && count > 0) || (count == required)) {
                         bodyContainsNumber++;
                     }
@@ -140,7 +140,7 @@ public class Verification {
 
     private void logRequests() {
         LOGGER.info("Request received: ");
-        requestResponseMap.keySet().stream().forEach(call -> LOGGER.info("Request: " + call.toString()));
+        requestResponseMap.keySet().forEach(call -> LOGGER.info("Request: " + call));
     }
 
 }

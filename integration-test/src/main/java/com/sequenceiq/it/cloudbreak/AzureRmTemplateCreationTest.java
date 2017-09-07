@@ -19,7 +19,7 @@ public class AzureRmTemplateCreationTest extends AbstractCloudbreakIntegrationTe
     private List<TemplateAddition> additions;
 
     @BeforeMethod
-    @Parameters({ "templateAdditions" })
+    @Parameters("templateAdditions")
     public void setup(@Optional("master,1;slave_1,3") String templateAdditions) {
         additions = templateAdditionHelper.parseTemplateAdditions(templateAdditions);
     }

@@ -14,10 +14,6 @@ public class AvailabilitySetNameConverter extends AbstractConverter<Availability
     @Autowired
     private ShellContext context;
 
-    public AvailabilitySetNameConverter() {
-
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return AvailabilitySetName.class.isAssignableFrom(type);
@@ -27,7 +23,7 @@ public class AvailabilitySetNameConverter extends AbstractConverter<Availability
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getAzureAvailabilitySets().keySet());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

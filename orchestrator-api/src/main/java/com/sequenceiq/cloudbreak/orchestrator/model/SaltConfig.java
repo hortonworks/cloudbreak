@@ -4,9 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SaltConfig {
-    private Map<String, SaltPillarProperties> servicePillarConfig;
+    private final Map<String, SaltPillarProperties> servicePillarConfig;
 
-    private Map<String, Map<String, String>> grainsProperties;
+    private final Map<String, Map<String, String>> grainsProperties;
 
     public SaltConfig() {
         servicePillarConfig = new HashMap<>();

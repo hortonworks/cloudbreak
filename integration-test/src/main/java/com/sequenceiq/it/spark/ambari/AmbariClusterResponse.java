@@ -18,7 +18,7 @@ import spark.Response;
 
 public class AmbariClusterResponse extends ITResponse {
 
-    private Map<String, CloudVmMetaDataStatus> instanceMap;
+    private final Map<String, CloudVmMetaDataStatus> instanceMap;
 
     public AmbariClusterResponse(Map<String, CloudVmMetaDataStatus> instanceMap) {
         this.instanceMap = instanceMap;

@@ -5,7 +5,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import reactor.rx.Promise;
 
 public class StackSyncTriggerEvent extends StackEvent {
-    private Boolean statusUpdateEnabled;
+
+    private final Boolean statusUpdateEnabled;
 
     public StackSyncTriggerEvent(String selector, Long stackId, Boolean statusUpdateEnabled) {
         super(selector, stackId);

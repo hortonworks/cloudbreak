@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.CloudTypes;
 
 public class PlatformImage extends CloudTypes<CustomImage> {
 
-    private String regex;
+    private final String regex;
 
     public PlatformImage(Collection<CustomImage> images, String regex) {
         super(images, null);

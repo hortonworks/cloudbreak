@@ -8,6 +8,8 @@
 gradle
 .idea
 .vscode
+.nb-gradle-properties
+.nb-gradle
 *.iml
 .apib
 .DS_Store

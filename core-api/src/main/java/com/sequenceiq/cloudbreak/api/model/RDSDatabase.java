@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.api.model;
 public enum RDSDatabase {
     POSTGRES("postgres", "org.postgresql.Driver", "Existing PostgreSQL Database");
 
-    private String dbName;
-    private String dbDriver;
-    private String ambariDbOption;
+    private final String dbName;
+
+    private final String dbDriver;
+
+    private final String ambariDbOption;
 
     RDSDatabase(String dbName, String dbDriver, String ambariDbOption) {
         this.dbName = dbName;

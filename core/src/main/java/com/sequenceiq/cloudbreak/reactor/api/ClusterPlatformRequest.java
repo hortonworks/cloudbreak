@@ -1,14 +1,13 @@
 package com.sequenceiq.cloudbreak.reactor.api;
 
-import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 
-public abstract class ClusterPlatformRequest implements Payload, Selectable {
+public abstract class ClusterPlatformRequest implements Selectable {
 
     private final Long stackId;
 
-    public ClusterPlatformRequest(Long stackId) {
+    protected ClusterPlatformRequest(Long stackId) {
         this.stackId = stackId;
     }
 

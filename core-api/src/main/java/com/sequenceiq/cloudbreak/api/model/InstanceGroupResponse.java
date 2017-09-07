@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -18,13 +19,13 @@ public class InstanceGroupResponse extends InstanceGroupBase {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(ModelDescriptions.InstanceGroupModelDescription.METADATA)
+    @ApiModelProperty(InstanceGroupModelDescription.METADATA)
     private Set<InstanceMetaDataJson> metadata = new HashSet<>();
 
-    @ApiModelProperty(ModelDescriptions.InstanceGroupModelDescription.TEMPLATE)
+    @ApiModelProperty(InstanceGroupModelDescription.TEMPLATE)
     private TemplateResponse template;
 
-    @ApiModelProperty(ModelDescriptions.InstanceGroupModelDescription.SECURITYGROUP)
+    @ApiModelProperty(InstanceGroupModelDescription.SECURITYGROUP)
     private SecurityGroupResponse securityGroup;
 
     @JsonProperty("id")

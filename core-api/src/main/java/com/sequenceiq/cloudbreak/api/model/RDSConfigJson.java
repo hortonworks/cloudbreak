@@ -8,33 +8,33 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.common.type.RdsType;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.RDSConfig;
 
 import io.swagger.annotations.ApiModelProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public abstract class RDSConfigJson {
+public abstract class RDSConfigJson implements JsonEntity {
 
     @NotNull
     @Pattern(regexp = "^jdbc:postgresql://[-\\w\\.]*:\\d{1,5}/?\\w*", message = "Connection URL is not valid")
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.CONNECTION_URL, required = true)
+    @ApiModelProperty(value = RDSConfig.CONNECTION_URL, required = true)
     private String connectionURL;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.DB_TYPE, required = true)
+    @ApiModelProperty(value = RDSConfig.DB_TYPE, required = true)
     private RDSDatabase databaseType;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.HDPVERSION, required = true)
+    @ApiModelProperty(value = RDSConfig.HDPVERSION, required = true)
     private String hdpVersion;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.VALIDATED)
+    @ApiModelProperty(RDSConfig.VALIDATED)
     private boolean validated = true;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDSTYPE)
+    @ApiModelProperty(RDSConfig.RDSTYPE)
     private RdsType type = RdsType.HIVE;
 
-    @ApiModelProperty(value = ModelDescriptions.RDSConfig.RDS_PROPERTIES)
+    @ApiModelProperty(RDSConfig.RDS_PROPERTIES)
     private Set<RdsConfigPropertyJson> properties = new HashSet<>();
 
     public String getConnectionURL() {

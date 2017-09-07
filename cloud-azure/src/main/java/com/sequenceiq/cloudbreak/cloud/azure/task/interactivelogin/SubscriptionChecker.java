@@ -6,10 +6,11 @@ import java.io.IOException;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class SubscriptionChecker {
         }
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(AZURE_MANAGEMENT);
-        Invocation.Builder request = resource.path("/subscriptions/" + subscriptionId)
+        Builder request = resource.path("/subscriptions/" + subscriptionId)
                 .queryParam("api-version", "2016-06-01")
                 .request();
         request.accept(MediaType.APPLICATION_JSON);
@@ -38,10 +39,10 @@ public class SubscriptionChecker {
         request.header("Authorization", "Bearer " + accessToken);
         Response response = request.get();
 
-        if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             AzureSubscription subscription = response.readEntity(AzureSubscription.class);
             if (!subscription.getState().equals(SubscriptionState.ENABLED)) {
-                throw new InteractiveLoginException("Subscription specified in Profile is in incorrect state:" + "" + subscription.getState().toString());
+                throw new InteractiveLoginException("Subscription specified in Profile is in incorrect state:" + "" + subscription.getState());
             }
             LOGGER.debug("Subscription definitions successfully retrieved:" + subscription.getDisplayName());
         } else {

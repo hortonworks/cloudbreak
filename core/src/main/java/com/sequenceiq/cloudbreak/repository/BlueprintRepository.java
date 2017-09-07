@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 @EntityType(entityClass = Blueprint.class)
 public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
+    @Override
     Blueprint findOne(@Param("id") Long id);
 
     @Query("SELECT b FROM Blueprint b WHERE b.name= :name and b.account= :account AND b.status <> 'DEFAULT_DELETED'")

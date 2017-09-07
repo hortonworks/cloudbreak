@@ -39,13 +39,11 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
     private Stack stack;
 
-    private Cluster cluster;
-
     @Before
     public void setUp() {
         stack = mock(Stack.class);
         when(stack.getId()).thenReturn(1L);
-        cluster = mock(Cluster.class);
+        Cluster cluster = mock(Cluster.class);
         when(stack.getCluster()).thenReturn(cluster);
         when(cluster.getId()).thenReturn(2L);
     }

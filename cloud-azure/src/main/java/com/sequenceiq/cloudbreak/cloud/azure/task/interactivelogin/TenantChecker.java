@@ -4,13 +4,15 @@ import static com.sequenceiq.cloudbreak.cloud.azure.task.interactivelogin.AzureI
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.Invocation.Builder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,7 @@ public class TenantChecker {
         }
         Client client = ClientBuilder.newClient();
         WebTarget resource = client.target(AZURE_MANAGEMENT);
-        Invocation.Builder request = resource.path("/tenants")
+        Builder request = resource.path("/tenants")
                 .queryParam("api-version", "2016-06-01")
                 .request();
         request.accept(MediaType.APPLICATION_JSON);
@@ -41,7 +43,7 @@ public class TenantChecker {
         request.header("Authorization", "Bearer " + accessToken);
         Response response = request.get();
 
-        if (response.getStatusInfo().getFamily() == Response.Status.Family.SUCCESSFUL) {
+        if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             String entity = response.readEntity(String.class);
             try {
                 ObjectMapper mapper = new ObjectMapper();
@@ -49,7 +51,7 @@ public class TenantChecker {
                 ObjectReader reader = mapper.readerFor(new TypeReference<ArrayList<AzureTenant>>() {
                 });
 
-                ArrayList<AzureTenant> tenants = reader.readValue(tenantArray);
+                List<AzureTenant> tenants = reader.readValue(tenantArray);
                 for (AzureTenant tenant: tenants) {
                     if (tenant.getTenantId().equals(tenantId)) {
                         LOGGER.debug("Tenant definitions successfully retrieved:" + tenant.getTenantId());

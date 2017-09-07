@@ -90,6 +90,6 @@ public class ScalingPolicy {
     }
 
     public long getAlertId() {
-        return this.alert.getId();
+        return alert.getId();
     }
 }

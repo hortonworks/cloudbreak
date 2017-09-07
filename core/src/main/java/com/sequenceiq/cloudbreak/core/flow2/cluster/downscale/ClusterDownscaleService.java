@@ -87,7 +87,7 @@ public class ClusterDownscaleService {
                 stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
             }
         }
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
+        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
     }
 

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.inject.Inject;
 
@@ -44,7 +45,7 @@ public class GetRegionsHandler implements CloudPlatformEventHandler<GetPlatformR
             Map<Platform, Map<Region, DisplayName>> platformRegionsDisplayName = Maps.newHashMap();
             Map<Platform, Map<Region, List<AvailabilityZone>>> platformAvailabilityZones = Maps.newHashMap();
             Map<Platform, Region> platformDefaultRegion = Maps.newHashMap();
-            for (Map.Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
+            for (Entry<Platform, Collection<Variant>> connector : cloudPlatformConnectors.getPlatformVariants().getPlatformToVariants().entrySet()) {
                 Region defaultRegion = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().regions().defaultType();
                 Map<Region, DisplayName> displayNames = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().regions().displayNames();
                 Collection<Region> regions = cloudPlatformConnectors.getDefault(connector.getKey()).parameters().regions().types();
@@ -59,7 +60,7 @@ public class GetRegionsHandler implements CloudPlatformEventHandler<GetPlatformR
             GetPlatformRegionsResult getPlatformRegionsResult = new GetPlatformRegionsResult(request, pv);
             request.getResult().onNext(getPlatformRegionsResult);
             LOGGER.info("Query platform machine types types finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             request.getResult().onNext(new GetPlatformRegionsResult(e.getMessage(), e, request));
         }
     }

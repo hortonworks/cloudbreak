@@ -12,7 +12,7 @@ public interface YarnClient {
 
     ResponseContext createApplication(
             CreateApplicationRequest createApplicationRequest)
-            throws CloudbreakOrchestratorFailedException, MalformedURLException;
+            throws MalformedURLException;
 
     void deleteApplication(DeleteApplicationRequest deleteApplicationRequest)
             throws CloudbreakOrchestratorFailedException, MalformedURLException;
@@ -21,5 +21,5 @@ public interface YarnClient {
 
     ResponseContext getApplicationDetail(
             ApplicationDetailRequest applicationDetailRequest)
-            throws CloudbreakOrchestratorFailedException, MalformedURLException;
+            throws MalformedURLException;
 }

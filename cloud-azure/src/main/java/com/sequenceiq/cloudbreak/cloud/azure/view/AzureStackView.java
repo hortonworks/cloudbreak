@@ -19,11 +19,11 @@ public class AzureStackView {
 
     private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
 
-    private Map<String, List<AzureInstanceView>> groups = new HashMap<>();
+    private final Map<String, List<AzureInstanceView>> groups = new HashMap<>();
 
-    private List<AzureInstanceGroupView> instanceGroups = new ArrayList<>();
+    private final List<AzureInstanceGroupView> instanceGroups = new ArrayList<>();
 
-    private List<String> instanceGroupNames = new ArrayList<>();
+    private final List<String> instanceGroupNames = new ArrayList<>();
 
     public AzureStackView(String stackName, int stackNamePrefixLength, List<Group> groupList, AzureStorageView armStorageView,
             AzureSubnetStrategy subnetStrategy) {
@@ -83,7 +83,7 @@ public class AzureStackView {
 
     public Map<String, AzureDiskType> getStorageAccounts() {
         Map<String, AzureDiskType> storageAccounts = new HashMap<>();
-        for (List<AzureInstanceView> list : getGroups().values()) {
+        for (List<AzureInstanceView> list : groups.values()) {
             for (AzureInstanceView armInstanceView : list) {
                 storageAccounts.put(armInstanceView.getAttachedDiskStorageName(), AzureDiskType.getByValue(armInstanceView.getAttachedDiskStorageType()));
             }

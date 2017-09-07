@@ -14,9 +14,6 @@ public class ConfigsRequest {
     @ApiModelProperty(value = ModelDescriptions.REQUESTS, required = true)
     private Set<BlueprintParameterJson> requests = new HashSet<>();
 
-    public ConfigsRequest() {
-    }
-
     public Set<BlueprintParameterJson> getRequests() {
         return requests;
     }

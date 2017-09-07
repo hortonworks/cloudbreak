@@ -247,6 +247,7 @@ public class ComputeResourceService {
 
         private List<Group> getOrderedCopy(List<Group> groups) {
             Ordering<Group> byLengthOrdering = new Ordering<Group>() {
+                @Override
                 public int compare(Group left, Group right) {
                     return Ints.compare(left.getInstances().size(), right.getInstances().size());
                 }

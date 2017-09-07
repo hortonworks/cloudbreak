@@ -4,9 +4,9 @@ import java.util.Map;
 
 public class OrchestrationCredential {
 
-    private String apiEndpoint;
+    private final String apiEndpoint;
 
-    private Map<String, Object> properties;
+    private final Map<String, Object> properties;
 
     public OrchestrationCredential(String apiEndpoint, Map<String, Object> properties) {
         this.apiEndpoint = apiEndpoint;

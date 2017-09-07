@@ -1,11 +1,12 @@
 package com.sequenceiq.it.cloudbreak;
 
 public class TemplateAddition {
-    private String groupName;
 
-    private int nodeCount;
+    private final String groupName;
 
-    private String type;
+    private final int nodeCount;
+
+    private final String type;
 
     public TemplateAddition(String groupName, int nodeCount, String type) {
         this.groupName = groupName;

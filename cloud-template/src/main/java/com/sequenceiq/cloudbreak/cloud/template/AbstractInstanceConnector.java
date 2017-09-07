@@ -28,7 +28,7 @@ public abstract class AbstractInstanceConnector implements InstanceConnector {
     private ContextBuilders contextBuilders;
 
     @Override
-    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
+    public List<CloudVmInstanceStatus> stop(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         CloudContext cloudContext = ac.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 
@@ -40,7 +40,7 @@ public abstract class AbstractInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) throws Exception {
+    public List<CloudVmInstanceStatus> start(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms) {
         CloudContext cloudContext = ac.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 

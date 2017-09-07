@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.converter;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,7 +48,7 @@ public class RDSConfigToJsonConverter extends AbstractConversionServiceAwareConv
         try {
             if (inputs.getValue() != null) {
                 Map<String, String> is = inputs.get(Map.class);
-                for (Map.Entry<String, String> stringStringEntry : is.entrySet()) {
+                for (Entry<String, String> stringStringEntry : is.entrySet()) {
                     RdsConfigPropertyJson rdsConfigPropertyJson = new RdsConfigPropertyJson();
                     rdsConfigPropertyJson.setName(stringStringEntry.getKey());
                     rdsConfigPropertyJson.setValue(stringStringEntry.getValue());

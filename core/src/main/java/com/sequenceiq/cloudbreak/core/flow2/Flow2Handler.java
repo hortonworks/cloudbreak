@@ -104,7 +104,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     @Inject
     private FlowLogRepository flowLogRepository;
 
-    private Lock lock = new ReentrantLock(true);
+    private final Lock lock = new ReentrantLock(true);
 
     @Override
     public void accept(Event<? extends Payload> event) {

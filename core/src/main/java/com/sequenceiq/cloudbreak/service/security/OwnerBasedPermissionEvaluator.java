@@ -35,7 +35,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     private UserDetailsService userDetailsService;
 
     @Override
-    public boolean hasPermission(Authentication authentication, final Object target, Object permission) {
+    public boolean hasPermission(Authentication authentication, Object target, Object permission) {
         Permission p = Permission.valueOf(permission.toString().toUpperCase());
         if (target == null) {
             throw new NotFoundException("Resource not found.");
@@ -63,9 +63,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
     }
 
     private boolean hasPermission(IdentityUser user, Permission p, Object targetDomainObject) throws IllegalAccessException {
-        if (getOwner(targetDomainObject).equals(user.getUserId())) {
-            return true;
-        } else if (getAccount(targetDomainObject).equals(user.getAccount())
+        if (getOwner(targetDomainObject).equals(user.getUserId()) || getAccount(targetDomainObject).equals(user.getAccount())
                 && (user.getRoles().contains(IdentityUserRole.ADMIN) || (p == Permission.READ && isPublicInAccount(targetDomainObject)))) {
             return true;
         }

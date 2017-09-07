@@ -14,7 +14,7 @@ public class DecommissionResult extends AbstractClusterScaleResult<DecommissionR
 
     public DecommissionResult(String statusReason, Exception errorDetails, DecommissionRequest request) {
         super(statusReason, errorDetails, request);
-        this.hostNames = Collections.emptySet();
+        hostNames = Collections.emptySet();
     }
 
     public Set<String> getHostNames() {

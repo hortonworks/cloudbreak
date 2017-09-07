@@ -4,7 +4,7 @@ public enum HostResolution {
     PUBLIC("public"),
     PRIVATE("private");
 
-    private String name;
+    private final String name;
 
     HostResolution(String name) {
         this.name = name;

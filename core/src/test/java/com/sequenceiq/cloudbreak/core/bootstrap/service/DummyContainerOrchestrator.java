@@ -76,12 +76,10 @@ public class DummyContainerOrchestrator implements ContainerOrchestrator {
     }
 
     @Override
-    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException { }
+    public void bootstrap(GatewayConfig gatewayConfig, ContainerConfig config, Set<Node> nodes, int consulServerCount, ExitCriteriaModel exitCriteriaModel) { }
 
     @Override
-    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorException { }
+    public void bootstrapNewNodes(GatewayConfig gatewayConfig, ContainerConfig containerConfig, Set<Node> nodes, ExitCriteriaModel exitCriteriaModel) { }
 
     @Override
     public boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig) {

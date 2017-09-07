@@ -45,7 +45,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
 
     @Override
     public void setContext(Map<String, Object> context) {
-        this.clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
+        clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
     }
 
     @Override
@@ -77,7 +77,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
                     }
                 }
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Failed to retrieve alert history", e);
             publishEvent(new UpdateFailedEvent(clusterId));
         }

@@ -1,13 +1,14 @@
 package com.sequenceiq.it.cloudbreak;
 
 public class InstanceGroup {
-    private String templateId;
 
-    private String name;
+    private final String templateId;
 
-    private int nodeCount;
+    private final String name;
 
-    private String type;
+    private final int nodeCount;
+
+    private final String type;
 
     public InstanceGroup(String templateId, String name, int nodeCount, String type) {
         this.templateId = templateId;

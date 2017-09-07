@@ -20,7 +20,7 @@ import javax.persistence.SequenceGenerator;
 import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 
 @Entity
-public class HostGroup {
+public class HostGroup implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "hostgroup_generator")
@@ -95,7 +95,7 @@ public class HostGroup {
     }
 
     public void addRecipe(Recipe recipe) {
-        this.recipes.add(recipe);
+        recipes.add(recipe);
     }
 
     public RecoveryMode getRecoveryMode() {

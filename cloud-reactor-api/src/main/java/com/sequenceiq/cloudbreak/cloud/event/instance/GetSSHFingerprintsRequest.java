@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 
 public class GetSSHFingerprintsRequest<T> extends CloudPlatformRequest<T> {
 
-    private CloudInstance cloudInstance;
+    private final CloudInstance cloudInstance;
 
     public GetSSHFingerprintsRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudInstance cloudInstance) {
         super(cloudContext, cloudCredential);

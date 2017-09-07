@@ -4,10 +4,10 @@ import java.util.Map;
 
 public class PlatformResourceVpcFilterView {
 
-    private String vpcId;
+    private final String vpcId;
 
     public PlatformResourceVpcFilterView(Map<String, String> filters) {
-        this.vpcId = filters.get("vpcId");
+        vpcId = filters.get("vpcId");
     }
 
     public String getVpcId() {

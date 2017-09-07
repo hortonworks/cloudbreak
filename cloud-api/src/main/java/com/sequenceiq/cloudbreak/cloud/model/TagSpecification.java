@@ -10,7 +10,7 @@ public class TagSpecification {
 
     private final Integer valueLength;
 
-    private String valueValidator;
+    private final String valueValidator;
 
     public TagSpecification(Integer maxAmount, Integer keyLength, String keyValidator, Integer valueLength, String valueValidator) {
         this.maxAmount = maxAmount;

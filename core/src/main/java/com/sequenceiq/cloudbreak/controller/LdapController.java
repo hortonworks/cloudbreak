@@ -68,14 +68,12 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public LdapConfigResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         LdapConfig config = ldapConfigService.get(id);
         return conversionService.convert(config, LdapConfigResponse.class);
     }
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         ldapConfigService.delete(id);
     }
 

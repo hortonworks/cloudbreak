@@ -70,7 +70,6 @@ public class RecipeController implements RecipeEndpoint {
 
     @Override
     public RecipeResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         Recipe recipe = recipeService.get(id);
         return conversionService.convert(recipe, RecipeResponse.class);
     }

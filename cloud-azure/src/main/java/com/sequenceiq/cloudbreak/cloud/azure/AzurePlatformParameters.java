@@ -15,6 +15,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -27,7 +29,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
@@ -53,19 +54,20 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.ZoneVmSpecifications;
-import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Service
 public class AzurePlatformParameters implements PlatformParameters {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AzurePlatformParameters.class);
 
     private static final int START_LABEL = 98;
@@ -85,24 +87,21 @@ public class AzurePlatformParameters implements PlatformParameters {
     private String armZoneParameterDefault;
 
     @Inject
-    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
-
-    @Inject
     private Environment environment;
 
     @Inject
     @Qualifier("AzureTagSpecification")
     private TagSpecification tagSpecification;
 
-    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+    private Map<Region, List<AvailabilityZone>> regions;
 
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+    private Map<Region, DisplayName> regionDisplayNames;
 
-    private List<VmType> vmTypes = new ArrayList<>();
+    private final List<VmType> vmTypes = new ArrayList<>();
 
-    private Map<AvailabilityZone, List<VmType>> vmTypesForZones = new HashMap<>();
+    private final Map<AvailabilityZone, List<VmType>> vmTypesForZones = new HashMap<>();
 
-    private Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
+    private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
     private Region defaultRegion;
 
@@ -110,11 +109,11 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        this.regions = readRegions(resourceDefinition("zone"));
-        this.regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone"));
+        regions = readRegions(resourceDefinition("zone"));
+        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone"));
         readVmTypes();
-        this.defaultRegion = getDefaultRegion();
-        this.defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
+        defaultRegion = getDefaultRegion();
+        defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
     }
 
     private Map<Region, DisplayName> readRegionDisplayNames(String zone) {
@@ -122,7 +121,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         try {
             RegionsSpecification oRegions = JsonUtil.readValue(zone, RegionsSpecification.class);
             for (RegionSpecification regionSpecification : oRegions.getItems()) {
-                regionsWithDisplayName.put(Region.region(regionSpecification.getName()), DisplayName.displayName(regionSpecification.getName()));
+                regionsWithDisplayName.put(Region.region(regionSpecification.getName()), displayName(regionSpecification.getName()));
             }
         } catch (IOException e) {
             return regionsWithDisplayName;
@@ -138,7 +137,7 @@ public class AzurePlatformParameters implements PlatformParameters {
             VmsSpecification oVms = JsonUtil.readValue(vm, VmsSpecification.class);
             for (VmSpecification vmSpecification : oVms.getItems()) {
 
-                VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
+                VmTypeMetaBuilder builder = VmTypeMetaBuilder.builder()
                         .withCpuAndMemory(vmSpecification.getMetaSpecification().getProperties().getCpu(),
                                 vmSpecification.getMetaSpecification().getProperties().getMemory());
 
@@ -172,7 +171,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         } catch (IOException e) {
             LOGGER.error("Cannot initialize platform parameters for arm", e);
         }
-        Collections.sort(vmTypes, new StringTypesCompare());
+        vmTypes.sort(new StringTypesCompare());
     }
 
     private VolumeParameterConfig volumeParameterConfig(ConfigSpecification configSpecification) {
@@ -182,25 +181,6 @@ public class AzurePlatformParameters implements PlatformParameters {
                 Integer.valueOf(configSpecification.getMaximumSize()),
                 Integer.valueOf(configSpecification.getMinimumNumber()),
                 configSpecification.getMaximumNumberWithLimit());
-    }
-
-    private Map<Region, List<AvailabilityZone>> readRegions() {
-        Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
-        String zone = getDefinition(armZoneParameterDefinitionPath, "zone");
-        try {
-            RegionsSpecification oRegions = JsonUtil.readValue(zone, RegionsSpecification.class);
-            for (RegionSpecification regionSpecification : oRegions.getItems()) {
-                List<AvailabilityZone> av = new ArrayList<>();
-                for (String s : regionSpecification.getZones()) {
-                    av.add(AvailabilityZone.availabilityZone(s));
-                }
-                Collections.sort(av, new StringTypesCompare());
-                regions.put(Region.region(regionSpecification.getName()), av);
-            }
-        } catch (IOException e) {
-            return regions;
-        }
-        return sortMap(regions);
     }
 
     private String getDefinition(String parameter, String type) {
@@ -267,11 +247,11 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL, false, String.class, Optional.absent()));
-        additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL, false, String.class, Optional.empty()));
+        additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.empty()));
         additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
-                Optional.absent()));
+                Optional.empty()));
         return additionalStackParameterValidations;
     }
 
@@ -283,7 +263,7 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
         Map<AvailabilityZone, VmTypes> result = new HashMap<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
             for (AvailabilityZone zone : zones.getValue()) {
                 result.put(zone, new VmTypes(vmTypesForZones.get(zone), defaultVmTypes.get(zone)));
             }
@@ -299,7 +279,7 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public PlatformImage images() {
         List<CustomImage> customImages = new ArrayList<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
             String property = environment.getProperty("azure." + regionListEntry.getKey().value());
             customImages.add(customImage(regionListEntry.getKey().value(), property));
         }

@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.orchestrator.executor.ParallelOrchestratorCompo
 
 public class ExecutorBasedParallelOrchestratorComponentRunner implements ParallelOrchestratorComponentRunner {
 
-    private AsyncTaskExecutor asyncTaskExecutor;
+    private final AsyncTaskExecutor asyncTaskExecutor;
 
     public ExecutorBasedParallelOrchestratorComponentRunner(AsyncTaskExecutor asyncTaskExecutor) {
         this.asyncTaskExecutor = asyncTaskExecutor;

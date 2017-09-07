@@ -27,7 +27,7 @@ public class NovaInstanceView {
         this.stackName = stackName;
         this.instance = instance;
         this.type = type;
-        this.tags = Collections.emptyMap();
+        tags = Collections.emptyMap();
     }
 
     public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type, Map<String, String> tags) {
@@ -46,13 +46,13 @@ public class NovaInstanceView {
     }
 
     public String getInstanceId() {
-        return instance.getGroupName().replaceAll("[_-]", "") + "_" + instance.getPrivateId();
+        return instance.getGroupName().replaceAll("[_-]", "") + '_' + instance.getPrivateId();
     }
 
     public String getName() {
         String stackName = this.stackName.replaceAll("_", "-");
         String shortenedGroupName = instance.getGroupName().replaceAll("host|group|[_-]", "").trim();
-        return stackName + "-" + shortenedGroupName + "-" + instance.getPrivateId();
+        return stackName + '-' + shortenedGroupName + '-' + instance.getPrivateId();
     }
 
     public long getPrivateId() {
@@ -94,8 +94,7 @@ public class NovaInstanceView {
     }
 
     private Map<String, String> generateMetadata() {
-        Map<String, String> metadata = new HashMap<>();
-        metadata.putAll(tags);
+        Map<String, String> metadata = new HashMap<>(tags);
         metadata.put(OpenStackUtils.CB_INSTANCE_GROUP_NAME, instance.getGroupName());
         metadata.put(OpenStackUtils.CB_INSTANCE_PRIVATE_ID, Long.toString(getPrivateId()));
         return metadata;

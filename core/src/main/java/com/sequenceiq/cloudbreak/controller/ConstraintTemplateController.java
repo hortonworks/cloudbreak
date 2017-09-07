@@ -56,7 +56,6 @@ public class ConstraintTemplateController implements ConstraintTemplateEndpoint 
 
     @Override
     public ConstraintTemplateResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         ConstraintTemplate template = constraintTemplateService.get(id);
         return convert(template);
     }

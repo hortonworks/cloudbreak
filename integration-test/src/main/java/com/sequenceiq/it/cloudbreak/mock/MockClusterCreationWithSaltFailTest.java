@@ -23,7 +23,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
@@ -128,7 +128,7 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
 
     private void addSaltMappings(Map<String, CloudVmMetaDataStatus> instanceMap) {
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
+        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap) {
             @Override
             protected Object jobsLookupJid() {

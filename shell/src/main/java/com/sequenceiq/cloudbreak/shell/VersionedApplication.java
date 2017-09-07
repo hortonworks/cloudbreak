@@ -38,17 +38,17 @@ public class VersionedApplication {
 
     private String readVersionFromClasspath(String fileName, boolean onlyVersion) throws IOException {
         StringBuilder sb = new StringBuilder();
-        BufferedReader br;
-        br = new BufferedReader(new InputStreamReader(new ClassPathResource(fileName).getInputStream(), "UTF-8"));
-        String line;
-        while ((line = br.readLine()) != null) {
-            if (onlyVersion) {
-                if (line.startsWith("info.app.version=")) {
-                    line = line.replaceAll("info.app.version=", "");
-                    return line;
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(new ClassPathResource(fileName).getInputStream(), "UTF-8"))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                if (onlyVersion) {
+                    if (line.startsWith("info.app.version=")) {
+                        line = line.replaceAll("info.app.version=", "");
+                        return line;
+                    }
+                } else {
+                    sb.append(line).append('\n');
                 }
-            } else {
-                sb.append(line).append("\n");
             }
         }
         return sb.toString();

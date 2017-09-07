@@ -38,7 +38,7 @@ public class StackCreationTest extends AbstractCloudbreakIntegrationTest {
     "userDefinedTags"})
     public void testStackCreation(@Optional("testing1") String stackName, @Optional("europe-west1") String region,
             @Optional("DO_NOTHING") String onFailureAction, @Optional("4") Long threshold, @Optional("EXACT") String adjustmentType,
-            @Optional("")String variant, @Optional() String availabilityZone, @Optional() String persistentStorage,  @Optional("SALT") String orchestrator,
+            @Optional("")String variant, @Optional String availabilityZone, @Optional String persistentStorage,  @Optional("SALT") String orchestrator,
             @Optional ("") String userDefinedTags)
             throws Exception {
         // GIVEN

@@ -70,7 +70,6 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
 
     @Override
     public ClusterTemplateResponse get(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
         ClusterTemplate clusterTemplate = clusterTemplateService.get(id);
         return conversionService.convert(clusterTemplate, ClusterTemplateResponse.class);
     }

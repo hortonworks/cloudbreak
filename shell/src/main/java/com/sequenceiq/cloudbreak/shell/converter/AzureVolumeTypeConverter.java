@@ -14,9 +14,6 @@ public class AzureVolumeTypeConverter extends AbstractConverter<AzureVolumeType>
     @Autowired
     private ShellContext context;
 
-    public AzureVolumeTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return AzureVolumeType.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class AzureVolumeTypeConverter extends AbstractConverter<AzureVolumeType>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVolumeTypesByPlatform("AZURE"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

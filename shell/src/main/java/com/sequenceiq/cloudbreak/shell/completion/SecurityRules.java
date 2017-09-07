@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 public class SecurityRules extends AbstractCompletion {
-    private List<Map<String, String>> rules = new ArrayList<>();
+
+    private  final List<Map<String, String>> rules = new ArrayList<>();
 
     public SecurityRules(String rulesString) {
         super(rulesString);

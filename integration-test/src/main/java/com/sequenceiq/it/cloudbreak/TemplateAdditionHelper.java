@@ -15,7 +15,7 @@ public class TemplateAdditionHelper {
         for (String additionsString : additionsArray) {
             String[] additionArray = additionsString.split(",");
             String type = additionArray.length == WITH_TYPE_LENGTH ? additionArray[WITH_TYPE_LENGTH - 1] : "CORE";
-            additions.add(new TemplateAddition(additionArray[0], Integer.valueOf(additionArray[1]), type));
+            additions.add(new TemplateAddition(additionArray[0], Integer.parseInt(additionArray[1]), type));
         }
         return additions;
     }

@@ -40,19 +40,19 @@ public class OpenStackCommands implements CommandMarker {
 
     private ShellContext shellContext;
 
-    private CredentialCommands baseCredentialCommands;
+    private final CredentialCommands baseCredentialCommands;
 
-    private NetworkCommands baseNetworkCommands;
+    private final NetworkCommands baseNetworkCommands;
 
-    private SecurityGroupCommands baseSecurityGroupCommands;
+    private final SecurityGroupCommands baseSecurityGroupCommands;
 
-    private TemplateCommands baseTemplateCommands;
+    private final TemplateCommands baseTemplateCommands;
 
-    private PlatformCommands basePlatformCommands;
+    private final PlatformCommands basePlatformCommands;
 
-    private StackCommands stackCommands;
+    private final StackCommands stackCommands;
 
-    private InstanceGroupCommands baseInstanceGroupCommands;
+    private final InstanceGroupCommands baseInstanceGroupCommands;
 
     public OpenStackCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
@@ -72,38 +72,38 @@ public class OpenStackCommands implements CommandMarker {
         this.baseInstanceGroupCommands = baseInstanceGroupCommands;
     }
 
-    @CliAvailabilityIndicator(value = "stack create --OPENSTACK")
+    @CliAvailabilityIndicator("stack create --OPENSTACK")
     public boolean createStackAvailable() {
         return stackCommands.createStackAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "template create --OPENSTACK")
+    @CliAvailabilityIndicator("template create --OPENSTACK")
     public boolean createTemplateAvailable() {
         return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "platform create --OPENSTACK")
+    @CliAvailabilityIndicator("platform create --OPENSTACK")
     public boolean createPlatformAvailable() {
         return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"network create --OPENSTACK --NEW", "network create --OPENSTACK --EXISTING_SUBNET",
+    @CliAvailabilityIndicator({"network create --OPENSTACK --NEW", "network create --OPENSTACK --EXISTING_SUBNET",
             "network create --OPENSTACK --NEW_SUBNET"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"securitygroup create --OPENSTACK --NEW"})
+    @CliAvailabilityIndicator("securitygroup create --OPENSTACK --NEW")
     public boolean createSecurityGroupAvailable() {
         return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "credential create --OPENSTACK")
+    @CliAvailabilityIndicator("credential create --OPENSTACK")
     public boolean createCredentialAvailable() {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "instancegroup configure --OPENSTACK")
+    @CliAvailabilityIndicator("instancegroup configure --OPENSTACK")
     public boolean configureInstanceGroupAvailable() {
         return baseInstanceGroupCommands.createInstanceGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
@@ -280,7 +280,7 @@ public class OpenStackCommands implements CommandMarker {
     ) {
         try {
             return basePlatformCommands.create(name, description, "OPENSTACK", basePlatformCommands.convertMappingFile(file, url));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
@@ -293,8 +293,7 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
             @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
             @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
-            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName)
-            throws Exception {
+            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName) {
 
         Map<String, Object> parameters = new HashMap<>();
 
@@ -320,13 +319,13 @@ public class OpenStackCommands implements CommandMarker {
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout,
-            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack", mandatory = false) String customDomain,
-            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack", mandatory = false) String customHostname,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout,
+            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack") String customDomain,
+            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack") String customHostname,
             @CliOption(key = "clusterNameAsSubdomain", help = "Using the cluster name for subdomain", unspecifiedDefaultValue = "false",
-                    specifiedDefaultValue = "true", mandatory = false) boolean clusterNameAsSubdomain,
+                    specifiedDefaultValue = "true") boolean clusterNameAsSubdomain,
             @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
-                    specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
+                    specifiedDefaultValue = "true") boolean hostgroupNameAsHostname) {
         Map<String, String> params = new HashMap<>();
         return stackCommands.create(name, region, availabilityZone, publicInAccount, onFailureAction, adjustmentType, threshold,
                 wait, platformVariant, orchestratorType == null ? "SALT" : orchestratorType.getName(), PLATFORM,

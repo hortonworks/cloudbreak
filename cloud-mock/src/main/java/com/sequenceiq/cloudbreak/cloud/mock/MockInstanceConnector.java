@@ -30,8 +30,7 @@ public class MockInstanceConnector implements InstanceConnector {
     private String mockServerAddress;
 
     @Override
-    public List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms)
-            throws Exception {
+    public List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance instance : vms) {
             CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.CREATED);
@@ -41,8 +40,7 @@ public class MockInstanceConnector implements InstanceConnector {
     }
 
     @Override
-    public List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms)
-            throws Exception {
+    public List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = new ArrayList<>();
         for (CloudInstance instance : vms) {
             CloudVmInstanceStatus instanceStatus = new CloudVmInstanceStatus(instance, InstanceStatus.STOPPED);

@@ -19,7 +19,7 @@ public class JacksonBlueprintProcessorTest {
 
     private static final String HOST_GROUPS_NODE = "host_groups";
 
-    private JacksonBlueprintProcessor underTest = new JacksonBlueprintProcessor();
+    private final JacksonBlueprintProcessor underTest = new JacksonBlueprintProcessor();
 
     @Test
     public void testAddConfigEntriesAddsRootConfigurationsNodeIfMissing() throws Exception {

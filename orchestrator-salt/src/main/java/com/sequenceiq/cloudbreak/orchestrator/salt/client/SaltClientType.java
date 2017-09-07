@@ -6,7 +6,7 @@ public enum SaltClientType {
     RUNNER("runner"),
     LOCAL_ASYNC("local_async");
 
-    private String type;
+    private final String type;
 
     SaltClientType(String type) {
         this.type = type;

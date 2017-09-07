@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Disks.Insert;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -47,34 +48,34 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         InstanceTemplate template = instance.getTemplate();
         GcpResourceNameService resourceNameService = getResourceNameService();
         String groupName = group.getName();
-        final CloudContext cloudContext = auth.getCloudContext();
-        final String stackName = cloudContext.getName();
+        CloudContext cloudContext = auth.getCloudContext();
+        String stackName = cloudContext.getName();
         for (int i = 0; i < template.getVolumes().size(); i++) {
-            final String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
+            String resourceName = resourceNameService.resourceName(resourceType(), stackName, groupName, privateId, i);
             cloudResources.add(createNamedResource(resourceType(), resourceName));
         }
         return cloudResources;
     }
 
     @Override
-    public List<CloudResource> build(GcpContext context, long privateId, final AuthenticatedContext auth, Group group, Image image,
+    public List<CloudResource> build(GcpContext context, long privateId, AuthenticatedContext auth, Group group, Image image,
             List<CloudResource> buildableResource, Map<String, String> tags) throws Exception {
         CloudInstance instance = group.getReferenceInstanceConfiguration();
         InstanceTemplate template = instance.getTemplate();
         Volume volume = template.getVolumes().get(0);
 
         List<CloudResource> resources = new ArrayList<>();
-        final List<CloudResource> syncedResources = Collections.synchronizedList(resources);
-        final String projectId = context.getProjectId();
-        final Location location = context.getLocation();
-        final Compute compute = context.getCompute();
+        List<CloudResource> syncedResources = Collections.synchronizedList(resources);
+        String projectId = context.getProjectId();
+        Location location = context.getLocation();
+        Compute compute = context.getCompute();
         List<Future<Void>> futures = new ArrayList<>();
-        for (final CloudResource cloudResource : buildableResource) {
-            final Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName());
+        for (CloudResource cloudResource : buildableResource) {
+            Disk disk = createDisk(volume, projectId, location.getAvailabilityZone(), cloudResource.getName());
             Future<Void> submit = intermediateBuilderExecutor.submit(new Callable<Void>() {
                 @Override
                 public Void call() throws Exception {
-                    Compute.Disks.Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
+                    Insert insDisk = compute.disks().insert(projectId, location.getAvailabilityZone().value(), disk);
                     try {
                         Operation operation = insDisk.execute();
                         syncedResources.add(createOperationAwareCloudResource(cloudResource, operation));

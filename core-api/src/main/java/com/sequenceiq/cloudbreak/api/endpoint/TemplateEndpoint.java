@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.TemplateOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,70 +30,70 @@ public interface TemplateEndpoint {
     @POST
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.POST_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "postPrivateTemplate")
     TemplateResponse postPrivate(@Valid TemplateRequest templateRequest);
 
     @POST
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.POST_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "postPublicTemplate")
     TemplateResponse postPublic(@Valid TemplateRequest templateRequest);
 
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "getPrivatesTemplate")
     Set<TemplateResponse> getPrivates();
 
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "getPublicsTemplate")
     Set<TemplateResponse> getPublics();
 
     @GET
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "getPrivateTemplate")
-    TemplateResponse getPrivate(@PathParam(value = "name") String name);
+    TemplateResponse getPrivate(@PathParam("name") String name);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "getPublicTemplate")
-    TemplateResponse getPublic(@PathParam(value = "name") String name);
+    TemplateResponse getPublic(@PathParam("name") String name);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "getTemplate")
-    TemplateResponse get(@PathParam(value = "id") Long id);
+    TemplateResponse get(@PathParam("id") Long id);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "deleteTemplate")
-    void delete(@PathParam(value = "id") Long id);
+    void delete(@PathParam("id") Long id);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "deletePublicTemplate")
-    void deletePublic(@PathParam(value = "name") String name);
+    void deletePublic(@PathParam("name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.TemplateOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
+    @ApiOperation(value = TemplateOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.TEMPLATE_NOTES,
             nickname = "deletePrivateTemplate")
-    void deletePrivate(@PathParam(value = "name") String name);
+    void deletePrivate(@PathParam("name") String name);
 }

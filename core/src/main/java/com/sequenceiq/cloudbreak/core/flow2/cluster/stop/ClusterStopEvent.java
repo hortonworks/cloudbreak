@@ -13,7 +13,7 @@ public enum ClusterStopEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERSTOPFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERSTOPFAILHANDLEDEVENT");
 
-    private String event;
+    private final String event;
 
     ClusterStopEvent(String event) {
         this.event = event;

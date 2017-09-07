@@ -26,19 +26,19 @@ public class KeyStoreUtil {
         throw new IllegalAccessException("KeyStoreUtil could not be initialized");
     }
 
-    public static KeyStore createKeyStore(final String clientCert, String clientKey) throws Exception {
+    public static KeyStore createKeyStore(String clientCert, String clientKey) throws Exception {
         KeyPair keyPair = createKeyPair(clientKey);
         Certificate privateCertificate = convertCertificate(clientCert);
 
         KeyStore keyStore = KeyStore.getInstance("JKS");
         keyStore.load(null);
 
-        Certificate[] cert = new Certificate[]{privateCertificate};
+        Certificate[] cert = {privateCertificate};
         keyStore.setKeyEntry("client", keyPair.getPrivate(), "consul".toCharArray(), cert);
         return keyStore;
     }
 
-    public static KeyStore createTrustStore(final String serverCert) throws Exception {
+    public static KeyStore createTrustStore(String serverCert) throws Exception {
         Reader reader = null;
         PEMParser pemParser = null;
 
@@ -64,7 +64,7 @@ public class KeyStoreUtil {
         }
     }
 
-    private static Certificate convertCertificate(final String cert) throws IOException, CertificateException {
+    private static Certificate convertCertificate(String cert) throws IOException, CertificateException {
         Reader reader = null;
         PEMParser pemParser = null;
 
@@ -85,7 +85,7 @@ public class KeyStoreUtil {
 
     }
 
-    public static KeyPair createKeyPair(final String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
+    public static KeyPair createKeyPair(String clientKey) throws IOException, InvalidKeySpecException, NoSuchAlgorithmException {
         Reader reader = null;
         PEMParser pemParser = null;
 

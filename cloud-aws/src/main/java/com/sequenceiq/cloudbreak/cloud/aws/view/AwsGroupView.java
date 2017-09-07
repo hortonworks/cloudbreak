@@ -2,33 +2,34 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsPlatformParameters.AwsDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.SecurityRule;
 
 public class AwsGroupView {
-    private Integer instanceCount;
 
-    private String type;
+    private final Integer instanceCount;
 
-    private String flavor;
+    private final String type;
 
-    private String groupName;
+    private final String flavor;
 
-    private Integer volumeCount;
+    private final String groupName;
 
-    private Integer volumeSize;
+    private final Integer volumeCount;
 
-    private Boolean ebsEncrypted;
+    private final Integer volumeSize;
 
-    private String volumeType;
+    private final Boolean ebsEncrypted;
 
-    private Double spotPrice;
+    private final String volumeType;
 
-    private List<SecurityRule> rules;
+    private final Double spotPrice;
 
-    private String cloudSecurityId;
+    private final List<SecurityRule> rules;
 
-    private String subnetId;
+    private final String cloudSecurityId;
+
+    private final String subnetId;
 
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount,
             Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId, String subnetId) {
@@ -87,7 +88,7 @@ public class AwsGroupView {
     }
 
     public Boolean getEbsOptimized() {
-        return AwsPlatformParameters.AwsDiskType.St1.value().equals(volumeType);
+        return AwsDiskType.St1.value().equals(volumeType);
     }
 
     public String getCloudSecurityId() {

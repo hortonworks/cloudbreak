@@ -44,7 +44,6 @@ public class ClusterUpgradeService {
     }
 
     public void handleUpgradeClusterFailure(Stack stack, String errorReason) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_FAILED, errorReason);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_UPGRADE_FAILED, Status.UPDATE_FAILED.name(), errorReason);

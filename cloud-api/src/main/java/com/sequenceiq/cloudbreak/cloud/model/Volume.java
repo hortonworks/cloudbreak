@@ -28,7 +28,7 @@ public class Volume {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Volume{");
+        StringBuilder sb = new StringBuilder("Volume{");
         sb.append("mount='").append(mount).append('\'');
         sb.append(", type='").append(type).append('\'');
         sb.append(", size=").append(size);

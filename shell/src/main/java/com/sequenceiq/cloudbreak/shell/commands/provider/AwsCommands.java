@@ -43,19 +43,19 @@ public class AwsCommands implements CommandMarker {
 
     private ShellContext shellContext;
 
-    private CredentialCommands baseCredentialCommands;
+    private final CredentialCommands baseCredentialCommands;
 
-    private NetworkCommands baseNetworkCommands;
+    private final NetworkCommands baseNetworkCommands;
 
-    private SecurityGroupCommands baseSecurityGroupCommands;
+    private final SecurityGroupCommands baseSecurityGroupCommands;
 
-    private TemplateCommands baseTemplateCommands;
+    private final TemplateCommands baseTemplateCommands;
 
-    private PlatformCommands basePlatformCommands;
+    private final PlatformCommands basePlatformCommands;
 
-    private StackCommands stackCommands;
+    private final StackCommands stackCommands;
 
-    private InstanceGroupCommands baseInstanceGroupCommands;
+    private final InstanceGroupCommands baseInstanceGroupCommands;
 
     public AwsCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
@@ -75,37 +75,37 @@ public class AwsCommands implements CommandMarker {
         this.baseInstanceGroupCommands = baseInstanceGroupCommands;
     }
 
-    @CliAvailabilityIndicator(value = "stack create --AWS")
+    @CliAvailabilityIndicator("stack create --AWS")
     public boolean createStackAvailable() {
         return stackCommands.createStackAvailable(PLATFORM)  && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "template create --AWS")
+    @CliAvailabilityIndicator("template create --AWS")
     public boolean createTemplateAvailable() {
         return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "platform create --AWS")
+    @CliAvailabilityIndicator("platform create --AWS")
     public boolean createPlatformAvailable() {
         return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"network create --AWS --NEW_SUBNET", "network create --AWS --NEW", "network create --AWS --EXISTING_SUBNET"})
+    @CliAvailabilityIndicator({"network create --AWS --NEW_SUBNET", "network create --AWS --NEW", "network create --AWS --EXISTING_SUBNET"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"securitygroup create --AWS --NEW", "securitygroup create --AWS --EXISTING"})
+    @CliAvailabilityIndicator({"securitygroup create --AWS --NEW", "securitygroup create --AWS --EXISTING"})
     public boolean createSecurityGroupAvailable() {
         return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"credential create --AWS", "template create --EC2"})
+    @CliAvailabilityIndicator({"credential create --AWS", "template create --EC2"})
     public boolean createCredentialAvailable() {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "instancegroup configure --AWS")
+    @CliAvailabilityIndicator("instancegroup configure --AWS")
     public boolean configureInstanceGroupAvailable() {
         return baseInstanceGroupCommands.createInstanceGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
@@ -252,7 +252,7 @@ public class AwsCommands implements CommandMarker {
                 joiner.add("--volumeSize");
             }
 
-            throw shellContext.exceptionTransformer().transformToRuntimeException("You should specify option (" + joiner.toString() + ")");
+            throw shellContext.exceptionTransformer().transformToRuntimeException("You should specify option (" + joiner + ')');
         }
 
         Map<String, Object> params = new HashMap<>();
@@ -274,8 +274,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
             @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
             @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
-            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName)
-            throws Exception {
+            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName) {
 
         Map<String, Object> parameters = new HashMap<>();
 
@@ -289,7 +288,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "description", help = "Description of the platform") String description) {
         try {
             return basePlatformCommands.create(name, description, PLATFORM, Collections.emptyMap());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
@@ -317,13 +316,13 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "instanceProfile", help = "instance profile which will attached to the instance", specifiedDefaultValue = "false")
                     String instanceProfile,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout,
-            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack", mandatory = false) String customDomain,
-            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack", mandatory = false) String customHostname,
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout,
+            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack") String customDomain,
+            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack") String customHostname,
             @CliOption(key = "clusterNameAsSubdomain", help = "Using the cluster name for subdomain", unspecifiedDefaultValue = "false",
-                    specifiedDefaultValue = "true", mandatory = false) boolean clusterNameAsSubdomain,
+                    specifiedDefaultValue = "true") boolean clusterNameAsSubdomain,
             @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
-            specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
+            specifiedDefaultValue = "true") boolean hostgroupNameAsHostname) {
 
         Map<String, String> params = new HashMap<>();
         if (dedicatedInstances != null) {

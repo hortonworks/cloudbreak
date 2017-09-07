@@ -22,8 +22,6 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @RunWith(MockitoJUnitRunner.class)
 public class HdpInfoSearchServiceTest {
 
-    private CloudbreakImageCatalog cloudbreakImageCatalog;
-
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
@@ -33,7 +31,7 @@ public class HdpInfoSearchServiceTest {
     @Before
     public void setup() throws IOException {
         String catalogJson = FileReaderUtils.readFileFromClasspath("image/cb-image-catalog.json");
-        cloudbreakImageCatalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalog.class);
+        CloudbreakImageCatalog cloudbreakImageCatalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalog.class);
 
         given(imageCatalogProvider.getImageCatalog(null)).willReturn(cloudbreakImageCatalog);
     }

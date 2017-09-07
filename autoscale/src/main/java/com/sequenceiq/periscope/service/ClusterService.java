@@ -181,7 +181,7 @@ public class ClusterService {
                     Ambari ambari = cluster.getAmbari();
                     Ambari newAmbari = stack.getAmbari();
                     boolean ambariObjectsNotNull = ambari != null && newAmbari != null;
-                    boolean ambariHostsNotEmpty = !isEmpty(ambari.getHost()) && !isEmpty(newAmbari.getHost());
+                    boolean ambariHostsNotEmpty = ambariObjectsNotNull && !isEmpty(ambari.getHost()) && !isEmpty(newAmbari.getHost());
                     boolean equalityOfAmbariHost = ambariObjectsNotNull && ambariHostsNotEmpty && ambari.getHost().equals(newAmbari.getHost());
                     return equalityOfStackId && equalityOfAmbariHost;
                 });

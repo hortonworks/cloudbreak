@@ -27,7 +27,7 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
         if (stack.getPlatformVariant().equals(GCP)) {
             flowLogService.terminate(stackPayload.getStackId(), flowId);
         } else {
-            super.restart(flowId, flowChainId, event, payload, stack);
+            restart(flowId, flowChainId, event, payload, stack);
         }
     }
 }

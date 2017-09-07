@@ -4,7 +4,7 @@ import java.util.Set;
 
 public class BootstrapNewNodesRequest extends AbstractClusterBootstrapRequest {
 
-    private Set<String> hostNames;
+    private final Set<String> hostNames;
 
     public BootstrapNewNodesRequest(Long stackId, Set<String> upscaleCandidateAddresses, Set<String> hostNames) {
         super(stackId, upscaleCandidateAddresses);

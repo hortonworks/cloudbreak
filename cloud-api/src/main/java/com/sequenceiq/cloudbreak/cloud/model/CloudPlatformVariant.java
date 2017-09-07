@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 public class CloudPlatformVariant {
-    private Platform platform;
 
-    private Variant variant;
+    private final Platform platform;
+
+    private final Variant variant;
 
     public CloudPlatformVariant(Platform platform, Variant variant) {
         this.platform = platform;
@@ -43,7 +44,7 @@ public class CloudPlatformVariant {
 
     @Override
     public String toString() {
-        return "{"
+        return '{'
                 + "platform='" + platform.value() + '\''
                 + ", variant='" + variant.value() + '\''
                 + '}';

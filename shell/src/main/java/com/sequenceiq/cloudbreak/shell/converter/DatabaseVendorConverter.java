@@ -11,10 +11,10 @@ import com.sequenceiq.cloudbreak.shell.completion.DatabaseVendor;
 
 public class DatabaseVendorConverter extends AbstractConverter<DatabaseVendor> {
 
-    private static Collection<String> values;
+    private static final Collection<String> VALUES;
 
-    {
-        values = Collections2.transform(com.sequenceiq.cloudbreak.api.model.DatabaseVendor.availableVendors(), Enum::name);
+    static {
+        VALUES = Collections2.transform(com.sequenceiq.cloudbreak.api.model.DatabaseVendor.availableVendors(), Enum::name);
     }
 
     @Override
@@ -24,6 +24,6 @@ public class DatabaseVendorConverter extends AbstractConverter<DatabaseVendor> {
 
     @Override
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
-        return getAllPossibleValues(completions, values);
+        return getAllPossibleValues(completions, VALUES);
     }
 }

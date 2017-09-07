@@ -14,9 +14,6 @@ public class InstanceGroupTemplateNameConverter extends AbstractConverter<Instan
     @Autowired
     private ShellContext context;
 
-    public InstanceGroupTemplateNameConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String s) {
         return InstanceGroupTemplateName.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class InstanceGroupTemplateNameConverter extends AbstractConverter<Instan
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getActiveTemplateNames());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

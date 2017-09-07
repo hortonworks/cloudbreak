@@ -4,11 +4,11 @@ import com.sequenceiq.cloudbreak.common.type.RecipeType;
 
 public class RecipeModel {
 
-    private String name;
+    private final String name;
 
-    private RecipeType recipeType;
+    private final RecipeType recipeType;
 
-    private String script;
+    private final String script;
 
     public RecipeModel(String name, RecipeType recipeType, String script) {
         this.name = name;
@@ -30,7 +30,7 @@ public class RecipeModel {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("RecipeModel{");
+        StringBuilder sb = new StringBuilder("RecipeModel{");
         sb.append(", name='").append(name).append('\'');
         sb.append(", script=").append(script);
         sb.append(", recipeType=").append(recipeType);

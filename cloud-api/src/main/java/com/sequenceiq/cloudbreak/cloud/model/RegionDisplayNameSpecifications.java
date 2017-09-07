@@ -8,9 +8,6 @@ public class RegionDisplayNameSpecifications {
     @JsonProperty("items")
     private List<RegionDisplayNameSpecification> items;
 
-    public RegionDisplayNameSpecifications() {
-    }
-
     public List<RegionDisplayNameSpecification> getItems() {
         return items;
     }

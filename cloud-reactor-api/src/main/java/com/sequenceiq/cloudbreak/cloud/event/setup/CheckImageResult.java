@@ -23,7 +23,7 @@ public class CheckImageResult extends CloudPlatformResult<CloudPlatformRequest> 
     public CheckImageResult(String statusReason, Exception errorDetails, CloudPlatformRequest<?> request, ImageStatus imageStatus) {
         super(statusReason, errorDetails, request);
         this.imageStatus = imageStatus;
-        this.statusProgressValue = null;
+        statusProgressValue = null;
     }
 
     public ImageStatus getImageStatus() {

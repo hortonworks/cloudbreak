@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.sequenceiq.cloudbreak.controller.SmartSenseNotFoundException;
@@ -9,8 +9,8 @@ import com.sequenceiq.cloudbreak.controller.SmartSenseNotFoundException;
 public class SmartSenseNotFoundExceptionMapper extends BaseExceptionMapper<SmartSenseNotFoundException> {
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.NOT_FOUND;
+    Status getResponseStatus() {
+        return Status.NOT_FOUND;
     }
 
     @Override

@@ -15,12 +15,12 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.periscope.api.model.ClusterRequestJson;
 import com.sequenceiq.periscope.api.model.ClusterAutoscaleState;
 import com.sequenceiq.periscope.api.model.ClusterJson;
+import com.sequenceiq.periscope.api.model.ClusterRequestJson;
 import com.sequenceiq.periscope.api.model.StateJson;
-import com.sequenceiq.periscope.doc.ApiDescription;
 import com.sequenceiq.periscope.doc.ApiDescription.ClusterNotes;
+import com.sequenceiq.periscope.doc.ApiDescription.ClusterOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -32,41 +32,41 @@ public interface ClusterEndpoint {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_POST, produces = JSON, notes = ClusterNotes.NOTES)
+    @ApiOperation(value = ClusterOpDescription.CLUSTER_POST, produces = JSON, notes = ClusterNotes.NOTES)
     ClusterJson addCluster(ClusterRequestJson ambariServer);
 
     @PUT
-    @Path(value = "{clusterId}")
+    @Path("{clusterId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_PUT, produces = JSON, notes = ClusterNotes.NOTES)
-    ClusterJson modifyCluster(ClusterRequestJson ambariServer, @PathParam(value = "clusterId") Long clusterId);
+    @ApiOperation(value = ClusterOpDescription.CLUSTER_PUT, produces = JSON, notes = ClusterNotes.NOTES)
+    ClusterJson modifyCluster(ClusterRequestJson ambariServer, @PathParam("clusterId") Long clusterId);
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_GET_ALL, produces = JSON, notes = ClusterNotes.NOTES)
+    @ApiOperation(value = ClusterOpDescription.CLUSTER_GET_ALL, produces = JSON, notes = ClusterNotes.NOTES)
     List<ClusterJson> getClusters();
 
     @GET
     @Path("{clusterId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_GET, produces = JSON, notes = ClusterNotes.NOTES)
-    ClusterJson getCluster(@PathParam(value = "clusterId") Long clusterId);
+    @ApiOperation(value = ClusterOpDescription.CLUSTER_GET, produces = JSON, notes = ClusterNotes.NOTES)
+    ClusterJson getCluster(@PathParam("clusterId") Long clusterId);
 
     @DELETE
     @Path("{clusterId}")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_DELETE, produces = JSON, notes = ClusterNotes.NOTES)
-    void deleteCluster(@PathParam(value = "clusterId") Long clusterId);
+    @ApiOperation(value = ClusterOpDescription.CLUSTER_DELETE, produces = JSON, notes = ClusterNotes.NOTES)
+    void deleteCluster(@PathParam("clusterId") Long clusterId);
 
     @POST
     @Path("{clusterId}/state")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_SET_STATE, produces = JSON, notes = ClusterNotes.NOTES)
-    ClusterJson setState(@PathParam(value = "clusterId") Long clusterId, StateJson stateJson);
+    @ApiOperation(value = ClusterOpDescription.CLUSTER_SET_STATE, produces = JSON, notes = ClusterNotes.NOTES)
+    ClusterJson setState(@PathParam("clusterId") Long clusterId, StateJson stateJson);
 
     @POST
     @Path("{clusterId}/autoscale")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ClusterOpDescription.CLUSTER_SET_AUTOSCALE_STATE, produces = JSON, notes = ClusterNotes.NOTES)
-    ClusterJson setAutoscaleState(@PathParam(value = "clusterId") Long clusterId, ClusterAutoscaleState autoscaleState);
+    @ApiOperation(value = ClusterOpDescription.CLUSTER_SET_AUTOSCALE_STATE, produces = JSON, notes = ClusterNotes.NOTES)
+    ClusterJson setAutoscaleState(@PathParam("clusterId") Long clusterId, ClusterAutoscaleState autoscaleState);
 }

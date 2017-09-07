@@ -16,7 +16,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 
 @Entity
-public class HostMetadata {
+public class HostMetadata implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "hostmetadata_generator")
@@ -32,10 +32,6 @@ public class HostMetadata {
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private HostMetadataState hostMetadataState = HostMetadataState.HEALTHY;
-
-    public HostMetadata() {
-
-    }
 
     public Long getId() {
         return id;

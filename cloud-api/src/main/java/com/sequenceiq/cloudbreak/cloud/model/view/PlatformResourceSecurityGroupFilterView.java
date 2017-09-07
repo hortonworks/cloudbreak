@@ -4,16 +4,16 @@ import java.util.Map;
 
 public class PlatformResourceSecurityGroupFilterView {
 
-    private String vpcId;
+    private final String vpcId;
 
-    private String groupName;
+    private final String groupName;
 
-    private String groupId;
+    private final String groupId;
 
     public PlatformResourceSecurityGroupFilterView(Map<String, String> filters) {
-        this.vpcId = filters.get("vpcId");
-        this.groupName = filters.get("groupName");
-        this.groupId = filters.get("groupId");
+        vpcId = filters.get("vpcId");
+        groupName = filters.get("groupName");
+        groupId = filters.get("groupId");
     }
 
     public String getVpcId() {

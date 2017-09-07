@@ -8,10 +8,6 @@ import com.sequenceiq.cloudbreak.shell.completion.SecurityRules;
 
 public class SecurityRulesConverter extends AbstractConverter {
 
-    public SecurityRulesConverter() {
-
-    }
-
     @Override
     public boolean supports(Class type, String optionContext) {
         return SecurityRules.class.isAssignableFrom(type);

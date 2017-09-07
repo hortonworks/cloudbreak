@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.api.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostMetadataModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,10 +11,10 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HostMetadataResponse extends HostMetadataBase {
 
-    @ApiModelProperty(value = ModelDescriptions.ID)
+    @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(value = ModelDescriptions.HostMetadataModelDescription.STATE)
+    @ApiModelProperty(HostMetadataModelDescription.STATE)
     private String state;
 
     public Long getId() {

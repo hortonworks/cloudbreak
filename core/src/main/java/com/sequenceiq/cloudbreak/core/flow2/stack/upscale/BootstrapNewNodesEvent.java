@@ -5,7 +5,8 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 public class BootstrapNewNodesEvent extends StackEvent {
-    private Set<String> upscaleCandidateAddresses;
+
+    private final Set<String> upscaleCandidateAddresses;
 
     public BootstrapNewNodesEvent(Long stackId, Set<String> upscaleCandidateAddresses) {
         super(stackId);

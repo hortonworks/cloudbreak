@@ -11,7 +11,7 @@ public enum ManualStackRepairTriggerEvent implements FlowEvent {
     MANUAL_STACK_REPAIR_TRIGGER_FAILURE_EVENT(EventSelectorUtil.failureSelector(UnhealthyInstancesDetectionResult.class)),
     MANUAL_STACK_REPAIR_TRIGGER_FAILURE_HANDLED_EVENT("MANUAL_STACK_REPAIR_TRIGGER_FAILURE_HANDLED_EVENT");
 
-    private String event;
+    private final String event;
 
     ManualStackRepairTriggerEvent(String event) {
         this.event = event;

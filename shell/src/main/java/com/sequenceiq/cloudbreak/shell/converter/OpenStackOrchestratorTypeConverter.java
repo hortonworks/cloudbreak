@@ -14,9 +14,6 @@ public class OpenStackOrchestratorTypeConverter extends AbstractConverter<OpenSt
     @Autowired
     private ShellContext context;
 
-    public OpenStackOrchestratorTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return OpenStackOrchestratorType.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class OpenStackOrchestratorTypeConverter extends AbstractConverter<OpenSt
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getOrchestratorNamesByPlatform("OPENSTACK"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

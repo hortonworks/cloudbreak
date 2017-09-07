@@ -14,19 +14,19 @@ public class BlueprintResponse extends BlueprintBase {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.ID)
+    @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(value = BlueprintModelDescription.BLUEPRINT_NAME)
+    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
 
-    @ApiModelProperty(value = BlueprintModelDescription.HOST_GROUP_COUNT)
+    @ApiModelProperty(BlueprintModelDescription.HOST_GROUP_COUNT)
     private Integer hostGroupCount;
 
-    @ApiModelProperty(value = ModelDescriptions.PUBLIC_IN_ACCOUNT)
+    @ApiModelProperty(ModelDescriptions.PUBLIC_IN_ACCOUNT)
     private boolean publicInAccount;
 
-    @ApiModelProperty(value = BlueprintModelDescription.STATUS)
+    @ApiModelProperty(BlueprintModelDescription.STATUS)
     private ResourceStatus status;
 
     public String getBlueprintName() {

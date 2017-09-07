@@ -16,9 +16,9 @@ import com.sequenceiq.it.util.ServerAddressGenerator;
  */
 public class MockInstanceUtil {
 
-    private String mockServerAddress;
+    private final String mockServerAddress;
 
-    private int sshPort;
+    private final int sshPort;
 
     public MockInstanceUtil(String mockServerAddress, int sshPort) {
         this.mockServerAddress = mockServerAddress;

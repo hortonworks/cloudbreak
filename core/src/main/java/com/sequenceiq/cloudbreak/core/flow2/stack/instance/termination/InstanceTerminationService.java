@@ -54,7 +54,7 @@ public class InstanceTerminationService {
                 HostMetadata hostMetadata = hostMetadataRepository.findHostInClusterByName(stack.getCluster().getId(), hostName);
                 if (hostMetadata == null) {
                     LOGGER.info("Nothing to remove since hostmetadata is null");
-                } else if (hostMetadata != null && HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
+                } else if (HostMetadataState.HEALTHY.equals(hostMetadata.getHostMetadataState())) {
                     throw new ScalingFailedException(String.format("Host (%s) is in HEALTHY state. Cannot be removed.", hostName));
                 }
             }

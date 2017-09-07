@@ -6,7 +6,8 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopState;
 
 public class StateConverterAdapterTest {
-    private StateConverterAdapter<StackStopState> stateConverterAdapter = new StateConverterAdapter<>(StackStopState.class);
+
+    private final StateConverterAdapter<StackStopState> stateConverterAdapter = new StateConverterAdapter<>(StackStopState.class);
 
     @Test
     public void convertTest() {

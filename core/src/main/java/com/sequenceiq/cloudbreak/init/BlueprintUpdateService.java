@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintUtils;
 
 @Component
 public class BlueprintUpdateService implements ApplicationListener<ContextRefreshedEvent> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintUpdateService.class);
 
     @Value("#{'${cb.blueprint.defaults:}'.split(';')}")
@@ -33,6 +34,7 @@ public class BlueprintUpdateService implements ApplicationListener<ContextRefres
     @Inject
     private BlueprintUtils blueprintUtils;
 
+    @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
         Iterable<Blueprint> allBlueprint = blueprintRepository.findAll();
         for (String blueprintStrings : blueprintArray) {

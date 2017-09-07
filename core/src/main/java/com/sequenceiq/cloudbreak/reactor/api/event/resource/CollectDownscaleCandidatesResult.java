@@ -14,7 +14,7 @@ public class CollectDownscaleCandidatesResult extends AbstractClusterScaleResult
 
     public CollectDownscaleCandidatesResult(String statusReason, Exception errorDetails, CollectDownscaleCandidatesRequest request) {
         super(statusReason, errorDetails, request);
-        this.hostNames = Collections.emptySet();
+        hostNames = Collections.emptySet();
     }
 
     public Set<String> getHostNames() {

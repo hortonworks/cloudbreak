@@ -14,7 +14,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.periscope.api.model.ScalingConfigurationJson;
-import com.sequenceiq.periscope.doc.ApiDescription;
+import com.sequenceiq.periscope.doc.ApiDescription.ConfigurationOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -27,13 +27,13 @@ public interface ConfigurationEndpoint {
     @POST
     @Path("scaling")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ConfigurationOpDescription.CONFIGURATION_POST, produces = JSON, notes = NOTES)
-    ScalingConfigurationJson setScalingConfiguration(@PathParam(value = "clusterId") Long clusterId, @Valid ScalingConfigurationJson json);
+    @ApiOperation(value = ConfigurationOpDescription.CONFIGURATION_POST, produces = JSON, notes = NOTES)
+    ScalingConfigurationJson setScalingConfiguration(@PathParam("clusterId") Long clusterId, @Valid ScalingConfigurationJson json);
 
     @GET
     @Path("scaling")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ApiDescription.ConfigurationOpDescription.CONFIGURATION_GET, produces = JSON, notes = NOTES)
-    ScalingConfigurationJson getScalingConfiguration(@PathParam(value = "clusterId") Long clusterId);
+    @ApiOperation(value = ConfigurationOpDescription.CONFIGURATION_GET, produces = JSON, notes = NOTES)
+    ScalingConfigurationJson getScalingConfiguration(@PathParam("clusterId") Long clusterId);
 
 }

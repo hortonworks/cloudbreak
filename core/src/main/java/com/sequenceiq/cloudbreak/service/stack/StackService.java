@@ -13,6 +13,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -289,7 +290,7 @@ public class StackService {
         forceDelete(stack, deleteDependencies);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Stack create(IdentityUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> customImage) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
@@ -368,7 +369,7 @@ public class StackService {
         flowManager.triggerStackRemoveInstance(stackId, instanceId);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest status) {
         Stack stack = getById(stackId);
         Cluster cluster = null;
@@ -507,9 +508,7 @@ public class StackService {
     public void validateOrchestrator(Orchestrator orchestrator) {
         try {
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
-            if (containerOrchestrator != null) {
-                containerOrchestrator.validateApiEndpoint(new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap()));
-            }
+            containerOrchestrator.validateApiEndpoint(new OrchestrationCredential(orchestrator.getApiEndpoint(), orchestrator.getAttributes().getMap()));
         } catch (CloudbreakException e) {
             throw new BadRequestException(String.format("Invalid orchestrator type: %s", e.getMessage()));
         } catch (CloudbreakOrchestratorException e) {
@@ -517,7 +516,7 @@ public class StackService {
         }
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }
@@ -546,7 +545,7 @@ public class StackService {
         }
     }
 
-    private void validateHostGroupAdjustment(final InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
+    private void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
         HostGroup hostGroup = stack.getCluster().getHostGroups().stream().filter(input -> {
             return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
@@ -597,7 +596,7 @@ public class StackService {
         STACK_START_IGNORED("stack.start.ignored"),
         STACK_STOP_REQUESTED("stack.stop.requested");
 
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;

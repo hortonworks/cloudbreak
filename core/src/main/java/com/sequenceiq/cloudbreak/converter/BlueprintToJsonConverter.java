@@ -45,7 +45,7 @@ public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConv
         }
         try {
             blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.error("Blueprint cannot be converted to JSON.", e);
             blueprintJson.setAmbariBlueprint(new TextNode(e.getMessage()));
         }

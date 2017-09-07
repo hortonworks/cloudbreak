@@ -19,7 +19,7 @@ public class CloudbreakResourceReaderService {
     private String etcConfigDir;
 
     public String resourceDefinition(String prefix, String resource) {
-        String fileName = prefix + "-" + resource + ".json";
+        String fileName = prefix + '-' + resource + ".json";
         File customResourceFile = new File(etcConfigDir, fileName);
         try {
             if (customResourceFile.exists() && customResourceFile.isFile()) {

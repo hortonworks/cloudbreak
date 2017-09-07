@@ -20,7 +20,7 @@ public enum ChangePrimaryGatewayEvent implements FlowEvent {
     CHANGE_PRIMARY_GATEWAY_FLOW_FINISHED("CHANGE_PRIMARY_GATEWAY_FLOW_FINISHED"),
     CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED("CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED");
 
-    private String event;
+    private final String event;
 
     ChangePrimaryGatewayEvent(String event) {
         this.event = event;

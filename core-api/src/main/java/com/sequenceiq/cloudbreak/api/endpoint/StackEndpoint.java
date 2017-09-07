@@ -67,55 +67,55 @@ public interface StackEndpoint {
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getPrivateStack")
-    StackResponse getPrivate(@PathParam(value = "name") String name, @QueryParam("entry") Set<String> entries);
+    StackResponse getPrivate(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
 
     @GET
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getPublicStack")
-    StackResponse getPublic(@PathParam(value = "name") String name, @QueryParam("entry") Set<String> entries);
+    StackResponse getPublic(@PathParam("name") String name, @QueryParam("entry") Set<String> entries);
 
     @GET
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStack")
-    StackResponse get(@PathParam(value = "id") Long id, @QueryParam("entry") Set<String> entries);
+    StackResponse get(@PathParam("id") Long id, @QueryParam("entry") Set<String> entries);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deletePublicStack")
-    void deletePublic(@PathParam(value = "name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void deletePublic(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deletePrivateStack")
-    void deletePrivate(@PathParam(value = "name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void deletePrivate(@PathParam("name") String name, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteStack")
-    void delete(@PathParam(value = "id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced,
+    void delete(@PathParam("id") Long id, @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @PUT
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "putStack")
-    Response put(@PathParam(value = "id")Long id, @Valid UpdateStackJson updateRequest);
+    Response put(@PathParam("id") Long id, @Valid UpdateStackJson updateRequest);
 
     @GET
-    @Path(value = "{id}/status")
+    @Path("{id}/status")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STATUS_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "statusStack")
-    Map<String, Object> status(@PathParam(value = "id") Long id);
+    Map<String, Object> status(@PathParam("id") Long id);
 
     @GET
-    @Path(value = "platformVariants")
+    @Path("platformVariants")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_PLATFORM_VARIANTS, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "variantsStack")
     PlatformVariantsJson variants();
@@ -124,13 +124,13 @@ public interface StackEndpoint {
     @Path("{stackId}/{instanceId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.DELETE_INSTANCE_BY_ID, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "deleteInstanceStack")
-    Response deleteInstance(@PathParam(value = "stackId") Long stackId, @PathParam(value = "instanceId") String instanceId);
+    Response deleteInstance(@PathParam("stackId") Long stackId, @PathParam("instanceId") String instanceId);
 
     @GET
-    @Path(value = "{id}/certificate")
+    @Path("{id}/certificate")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_STACK_CERT, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getCertificateStack")
-    CertificateResponse getCertificate(@PathParam(value = "id") Long stackId);
+    CertificateResponse getCertificate(@PathParam("id") Long stackId);
 
     @POST
     @Path("validate")
@@ -139,13 +139,13 @@ public interface StackEndpoint {
     Response validate(@Valid StackValidationRequest stackValidationRequest);
 
     @POST
-    @Path(value = "ambari")
+    @Path("ambari")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_BY_AMBARI_ADDRESS, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getStackForAmbari")
     StackResponse getStackForAmbari(@Valid AmbariAddressJson json);
 
     @GET
-    @Path(value = "all")
+    @Path("all")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.STACK_NOTES, nickname = "getAllStack")
     Set<AutoscaleStackResponse> getAllForAutoscale();

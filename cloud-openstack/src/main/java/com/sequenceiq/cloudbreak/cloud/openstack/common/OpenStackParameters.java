@@ -12,6 +12,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
@@ -24,7 +26,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -71,9 +72,9 @@ public class OpenStackParameters implements PlatformParameters {
     @Qualifier("OpenStackTagSpecification")
     private TagSpecification tagSpecification;
 
-    private Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
+    private Map<Region, List<AvailabilityZone>> regions;
 
-    private Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
+    private final Map<Region, DisplayName> regionDisplayNames = new HashMap<>();
 
     private Region defaultRegion;
 
@@ -86,8 +87,8 @@ public class OpenStackParameters implements PlatformParameters {
             zone = openstackRegionDefinition;
         }
         LOGGER.info("Zone definition for OpenStack: {}", zone);
-        this.regions = readRegions(zone);
-        this.defaultRegion = getDefaultRegion();
+        regions = readRegions(zone);
+        defaultRegion = getDefaultRegion();
     }
 
     @Override
@@ -132,7 +133,7 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public List<StackParamValidation> additionalStackParameters() {
         List<StackParamValidation> additionalStackParameterValidations = Lists.newArrayList();
-        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation(TTL, false, String.class, Optional.empty()));
         return additionalStackParameterValidations;
     }
 
@@ -144,7 +145,7 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public PlatformImage images() {
         List<CustomImage> customImages = new ArrayList<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
             String property = environment.getProperty("openstack." + "default");
             customImages.add(customImage(regionListEntry.getKey().value(), property));
         }
@@ -184,7 +185,7 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public Map<AvailabilityZone, VmTypes> vmTypesPerAvailabilityZones(Boolean extended) {
         Map<AvailabilityZone, VmTypes> result = new HashMap<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> zones : regions.entrySet()) {
             for (AvailabilityZone zone : zones.getValue()) {
                 result.put(zone, new VmTypes(virtualMachines(extended), defaultVirtualMachine()));
             }

@@ -11,11 +11,11 @@ public class CloudbreakEventSpecifications {
     private CloudbreakEventSpecifications() {
     }
 
-    public static Specification<CloudbreakEvent> eventsForUser(final String user) {
+    public static Specification<CloudbreakEvent> eventsForUser(String user) {
         return (cloudbreakEventRoot, query, cb) -> cb.equal(cloudbreakEventRoot.get("owner"), user);
     }
 
-    public static Specification<CloudbreakEvent> eventsSince(final Long since) {
+    public static Specification<CloudbreakEvent> eventsSince(Long since) {
         return (cloudbreakEventRoot, query, cb) -> {
             if (since != null) {
                 return cb.greaterThanOrEqualTo(cloudbreakEventRoot.get("eventTimestamp"), new Date(since));

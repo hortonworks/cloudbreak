@@ -47,7 +47,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica,
             int maxRetryCount, int sleepTime) {
         this.orchestratorBootstrap = orchestratorBootstrap;
-        this.mdcMap = mdcReplica;
+        mdcMap = mdcReplica;
         this.exitCriteria = exitCriteria;
         this.exitCriteriaModel = exitCriteriaModel;
         this.maxRetryCount = maxRetryCount;

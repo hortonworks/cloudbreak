@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.api.model.RecoveryMode;
 
 public class HostgroupEntry implements NodeCountEntry {
 
-    private Integer nodeCount;
+    private final Integer nodeCount;
 
     private Set<Long> recipeIdSet = new HashSet<>();
 

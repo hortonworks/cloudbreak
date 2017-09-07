@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.orchestrator.yarn.api.Entrypoint;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnHttpClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Artifact;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Resource;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.CreateApplicationRequest;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ApplicationErrorResponse;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.response.ResponseContext;
@@ -91,7 +91,7 @@ public class ApplicationSubmissionHandler {
         YarnClient yarnHttpClient = new YarnHttpClient(cred.getApiEndpoint());
         try {
             submitCreateApplicationRequest(createApplicationRequest, yarnHttpClient);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new CloudbreakOrchestratorFailedException(e);
         }
     }

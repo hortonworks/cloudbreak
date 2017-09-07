@@ -10,20 +10,20 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
 
 public class GcpResourceNameServiceTest {
 
+    private static final String MAX_RESOURCE_NAME_LENGTH = "63";
+
     private ResourceNameService subject;
 
-    private final String maxResourceNameLength = "63";
-
-    @Before
+        @Before
     public void setUp() throws Exception {
         subject = new GcpResourceNameService();
-        ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(maxResourceNameLength));
+        ReflectionTestUtils.setField(subject, "maxResourceNameLength", Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
     }
 
     @Test
     public void shouldGenerateNetworkResourceNameWhenStackNameProvided() throws Exception {
         // GIVEN
-        String[] parts = new String[]{"gcp Network"};
+        String[] parts = {"gcp Network"};
 
         // WHEN
         String networkResourceName = subject.resourceName(ResourceType.GCP_NETWORK, (Object[]) parts);
@@ -64,7 +64,7 @@ public class GcpResourceNameServiceTest {
     @Test
     public void shouldShortenReservedIpResourceNameWhenLongResourceNameProvided() throws Exception {
         //GIVEN
-        Object[] parts = new Object[]{"thisisaverylongtextwhichneedstobeshortenedbythespecificmethod",
+        Object[] parts = {"thisisaverylongtextwhichneedstobeshortenedbythespecificmethod",
                 "thisisaverylonginstanceGroup", 8999};
 
         // WHEN
@@ -76,13 +76,13 @@ public class GcpResourceNameServiceTest {
         Assert.assertEquals("The resource name suffix is not the excepted one!", "thisisaverylongtextw", resourceName.split("-")[0]);
         Assert.assertEquals("The instance group name is not the excepted one!", "t", resourceName.split("-")[1]);
         Assert.assertEquals("The private id is not the excepted one!", "8999", resourceName.split("-")[2]);
-        Assert.assertTrue("The resource name length is wrong", resourceName.length() < Integer.parseInt(maxResourceNameLength));
+        Assert.assertTrue("The resource name length is wrong", resourceName.length() < Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
     }
 
     @Test
     public void shouldGenerateGcpAttachedDiskResourceWhenPartsProvided() throws Exception {
         // GIVEN
-        Object[] parts = new Object[]{"stack", "group", 3, 2};
+        Object[] parts = {"stack", "group", 3, 2};
 
         // WHEN
         String resourceName = subject.resourceName(ResourceType.GCP_ATTACHED_DISK, parts);
@@ -98,7 +98,7 @@ public class GcpResourceNameServiceTest {
     @Test
     public void shouldShortenGcpInstanceNameWhenLongResourceNameProvided() throws Exception {
         //GIVEN
-        Object[] parts = new Object[]{"thisisaverylongtextwhichneedstobeshortenedbythespecificmethod",
+        Object[] parts = {"thisisaverylongtextwhichneedstobeshortenedbythespecificmethod",
                 "thisisaverylonginstanceGroup", 8999};
 
         //WHEN
@@ -110,13 +110,13 @@ public class GcpResourceNameServiceTest {
         Assert.assertEquals("The resource name suffix is not the excepted one!", "thisisaverylongtextw", resourceName.split("-")[0]);
         Assert.assertEquals("The instance group name is not the excepted one!", "t", resourceName.split("-")[1]);
         Assert.assertEquals("The private is not the excepted one!", "8999", resourceName.split("-")[2]);
-        Assert.assertTrue("The resource name length is wrong", resourceName.length() < Integer.parseInt(maxResourceNameLength));
+        Assert.assertTrue("The resource name length is wrong", resourceName.length() < Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
     }
 
     @Test
     public void shouldShortenGcpInstanceGroupNameWhenLongResourceNameProvided() throws Exception {
         //GIVEN
-        Object[] parts = new Object[]{"stackname", "thisisareallylonginstancenamewhichwillbeshortenedbythemethod", 8999};
+        Object[] parts = {"stackname", "thisisareallylonginstancenamewhichwillbeshortenedbythemethod", 8999};
 
         //WHEN
 
@@ -128,7 +128,7 @@ public class GcpResourceNameServiceTest {
         Assert.assertEquals("The resource name suffix is not the excepted one!", "stackname", resourceName.split("-")[0]);
         Assert.assertEquals("The instance group name is not the excepted one!", "t", resourceName.split("-")[1]);
         Assert.assertEquals("The private is not the excepted one!", "8999", resourceName.split("-")[2]);
-        Assert.assertTrue("The resource name length is wrong", resourceName.length() < Integer.parseInt(maxResourceNameLength));
+        Assert.assertTrue("The resource name length is wrong", resourceName.length() < Integer.parseInt(MAX_RESOURCE_NAME_LENGTH));
 
     }
 }

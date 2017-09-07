@@ -5,7 +5,7 @@ public enum AlertState {
     WARN("WARNING"),
     CRITICAL("CRITICAL");
 
-    private String value;
+    private final String value;
 
     AlertState(String value) {
         this.value = value;

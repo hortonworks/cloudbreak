@@ -41,7 +41,7 @@ public interface FlexSubscriptionEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_BY_ID, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deleteFlexSubscriptionById")
-    void delete(@PathParam(value = "id") Long id);
+    void delete(@PathParam("id") Long id);
 
     @POST
     @Path("account")
@@ -62,35 +62,35 @@ public interface FlexSubscriptionEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.GET_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "getPublicFlexSubscriptionByName")
-    FlexSubscriptionResponse getPublic(@PathParam(value = "name") String name);
+    FlexSubscriptionResponse getPublic(@PathParam("name") String name);
 
     @DELETE
     @Path("account/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_PUBLIC_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deletePublicFlexSubscriptionByName")
-    void deletePublic(@PathParam(value = "name") String name);
+    void deletePublic(@PathParam("name") String name);
 
     @DELETE
     @Path("user/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.DELETE_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "deletePrivateFlexSubscriptionByName")
-    void deletePrivate(@PathParam(value = "name") String name);
+    void deletePrivate(@PathParam("name") String name);
 
     @PUT
     @Path("account/setdefault/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putPublicDefaultFlexSubscriptionByName")
-    void setDefaultInAccount(@PathParam(value = "name") String name);
+    void setDefaultInAccount(@PathParam("name") String name);
 
     @PUT
     @Path("account/setusedforcontroller/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putPublicUsedForControllerFlexSubscriptionByName")
-    void setUsedForControllerInAccount(@PathParam(value = "name") String name);
+    void setUsedForControllerInAccount(@PathParam("name") String name);
 
     @POST
     @Path("user")
@@ -111,19 +111,19 @@ public interface FlexSubscriptionEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.GET_PRIVATE_BY_NAME, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "getPrivateFlexSubscriptionByName")
-    FlexSubscriptionResponse getPrivate(@PathParam(value = "name") String name);
+    FlexSubscriptionResponse getPrivate(@PathParam("name") String name);
 
     @PUT
     @Path("setdefault/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_DEFAULT_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putDefaultFlexSubscriptionById")
-    void setDefaultInAccount(@PathParam(value = "id") Long id);
+    void setDefaultInAccount(@PathParam("id") Long id);
 
     @PUT
     @Path("setusedforcontroller/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = FlexSubOpDescription.SET_USED_FOR_CONTROLLER_IN_ACCOUNT, produces = ContentType.JSON, notes = FLEX_SUBSCRIPTION_NOTES,
             nickname = "putUsedForControllerFlexSubscriptionById")
-    void setUsedForControllerInAccount(@PathParam(value = "id") Long id);
+    void setUsedForControllerInAccount(@PathParam("id") Long id);
 }

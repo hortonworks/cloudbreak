@@ -7,7 +7,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 
 public class AwsInstanceView {
 
-    private InstanceTemplate instanceTemplate;
+    private final InstanceTemplate instanceTemplate;
 
     public AwsInstanceView(InstanceTemplate instanceTemplate) {
         this.instanceTemplate = instanceTemplate;
@@ -40,9 +40,8 @@ public class AwsInstanceView {
     public boolean isEncryptedVolumes() {
         Object ev = instanceTemplate.getParameter("encrypted", Object.class);
         if (ev instanceof Boolean) {
-            return ((Boolean) ev).booleanValue();
-        }
-        if (ev instanceof String) {
+            return (Boolean) ev;
+        } else if (ev instanceof String) {
             return Boolean.parseBoolean((String) ev);
         }
         return false;
@@ -52,12 +51,10 @@ public class AwsInstanceView {
         Object sv = instanceTemplate.getParameter("spotPrice", Object.class);
         if (sv instanceof Double) {
             return (Double) sv;
-        }
-        if (sv instanceof Integer) {
-            return ((Integer) sv).doubleValue();
-        }
-        if (sv instanceof String) {
-            return Double.parseDouble((String) sv);
+        } else if (sv instanceof Integer) {
+            return ((Number) sv).doubleValue();
+        } else if (sv instanceof String) {
+            return Double.valueOf((String) sv);
         }
         return null;
     }

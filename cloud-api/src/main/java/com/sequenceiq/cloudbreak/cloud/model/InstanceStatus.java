@@ -12,7 +12,7 @@ public enum InstanceStatus {
     DELETE_REQUESTED(StatusGroup.PERMANENT),
     IN_PROGRESS(StatusGroup.TRANSIENT);
 
-    private StatusGroup statusGroup;
+    private final StatusGroup statusGroup;
 
     InstanceStatus(StatusGroup statusGroup) {
         this.statusGroup = statusGroup;

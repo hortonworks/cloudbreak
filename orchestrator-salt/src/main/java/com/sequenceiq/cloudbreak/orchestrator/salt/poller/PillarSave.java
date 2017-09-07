@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,41 +43,41 @@ public class PillarSave implements OrchestratorBootstrap {
         Map<String, Map<String, Object>> fqdn = hosts
                 .stream()
                 .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp())));
-        this.pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn), targets);
+        pillar = new Pillar("/nodes/hosts.sls", singletonMap("hosts", fqdn), targets);
         this.targets = targets;
-        this.originalTargets = targets;
+        originalTargets = targets;
     }
 
     public PillarSave(SaltConnector sc, Set<String> targets, Map<String, List<RecipeModel>> recipes) {
         this.sc = sc;
-        Map<String, Map<String, List<String>>> scripts = new HashMap<>();
-        for (String hostGroup : recipes.keySet()) {
-            List<String> pre = recipes.get(hostGroup).stream().
+        Map<String, Map<String, List<String>>> scripts = new HashMap<>(recipes.size());
+        for (Entry<String, List<RecipeModel>> entry : recipes.entrySet()) {
+            List<String> pre = entry.getValue().stream().
                     filter(h -> h.getRecipeType() == RecipeType.PRE).map(RecipeModel::getName).collect(Collectors.toList());
-            List<String> post = recipes.get(hostGroup).stream().
+            List<String> post = entry.getValue().stream().
                     filter(h -> h.getRecipeType() == RecipeType.POST).map(RecipeModel::getName).collect(Collectors.toList());
             Map<String, List<String>> prePostScripts = new HashMap<>();
             prePostScripts.put("pre", pre);
             prePostScripts.put("post", post);
-            scripts.put(hostGroup, prePostScripts);
+            scripts.put(entry.getKey(), prePostScripts);
         }
-        this.pillar = new Pillar("/recipes/init.sls", singletonMap("recipes", scripts), targets);
+        pillar = new Pillar("/recipes/init.sls", singletonMap("recipes", scripts), targets);
         this.targets = targets;
-        this.originalTargets = targets;
+        originalTargets = targets;
     }
 
     public PillarSave(SaltConnector sc, Set<String> targets, SaltPillarProperties pillarProperties) {
         this.sc = sc;
-        this.pillar = new Pillar(pillarProperties.getPath(), pillarProperties.getProperties(), targets);
+        pillar = new Pillar(pillarProperties.getPath(), pillarProperties.getProperties(), targets);
         this.targets = targets;
-        this.originalTargets = targets;
+        originalTargets = targets;
     }
 
     private Map<String, Object> discovery(String hostname, String publicAddress) {
         Map<String, Object> map = new HashMap<>();
         map.put("fqdn", hostname);
         map.put("hostname", hostname.split("\\.")[0]);
-        map.put("domain", hostname.replaceFirst(hostname.split("\\.")[0] + ".", ""));
+        map.put("domain", hostname.replaceFirst(hostname.split("\\.")[0] + '.', ""));
         // Deprecated: this is just for backward compatibility, it is no longer in use
         map.put("custom_domain", true);
         map.put("public_address", StringUtils.isEmpty(publicAddress) ? Boolean.FALSE : Boolean.TRUE);

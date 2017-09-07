@@ -110,19 +110,15 @@ public class AmbariClusterConnectorTest {
 
     @InjectMocks
     @Spy
-    private AmbariClusterConnector underTest = new AmbariClusterConnector();
+    private final AmbariClusterConnector underTest = new AmbariClusterConnector();
 
     private Stack stack;
-
-    private Cluster cluster;
-
-    private Blueprint blueprint;
 
     @Before
     public void setUp() throws CloudbreakSecuritySetupException, HttpResponseException, InvalidHostGroupHostAssociation {
         stack = TestUtil.stack();
-        blueprint = TestUtil.blueprint();
-        cluster = TestUtil.cluster(blueprint, stack, 1L);
+        Blueprint blueprint = TestUtil.blueprint();
+        Cluster cluster = TestUtil.cluster(blueprint, stack, 1L);
         stack.setCluster(cluster);
         cluster.setHostGroups(new HashSet<>());
         cluster.setConfigStrategy(ConfigStrategy.NEVER_APPLY);

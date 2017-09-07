@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,8 @@ import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResult;
+import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResultStatus;
 
 public class BaseStackCommands implements BaseCommands, StackCommands {
 
@@ -50,20 +53,21 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     private ShellContext shellContext;
 
-    private CloudbreakShellUtil cloudbreakShellUtil;
+    private final CloudbreakShellUtil cloudbreakShellUtil;
 
     public BaseStackCommands(ShellContext shellContext, CloudbreakShellUtil cloudbreakShellUtil) {
         this.shellContext = shellContext;
         this.cloudbreakShellUtil = cloudbreakShellUtil;
     }
 
-    @CliAvailabilityIndicator(value = "stack list")
+    @CliAvailabilityIndicator("stack list")
     @Override
     public boolean listAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack list", help = "Shows all of your stacks")
+    @Override
     public String list() {
         try {
             Set<StackResponse> publics = shellContext.cloudbreakClient().stackEndpoint().getPublics();
@@ -110,7 +114,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = {"stack delete --id", "stack delete --name"})
+    @CliAvailabilityIndicator({"stack delete --id", "stack delete --name"})
     @Override
     public boolean deleteAvailable() {
         return true;
@@ -130,7 +134,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String deleteByName(
             @CliOption(key = "", mandatory = true) Long id,
             @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         return delete(id, null, wait, timeout);
     }
 
@@ -138,7 +142,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String deleteById(
             @CliOption(key = "", mandatory = true) String name,
             @CliOption(key = "wait", help = "Wait for stack termination", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         return delete(null, name, wait, timeout);
     }
 
@@ -154,8 +158,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 shellContext.setHint(Hints.CREATE_CLUSTER);
                 shellContext.removeStack();
                 if (wait) {
-                    CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.DELETE_COMPLETED.name(), timeout);
-                    if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
+                    WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(id, Status.DELETE_COMPLETED.name(), timeout);
+                    if (WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                         throw shellContext.exceptionTransformer().transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
                     } else {
                         return "Stack terminated with id: " + id;
@@ -169,9 +173,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 shellContext.setHint(Hints.CREATE_CLUSTER);
 
                 if (wait) {
-                    CloudbreakShellUtil.WaitResult waitResult =
+                    WaitResult waitResult =
                             cloudbreakShellUtil.waitAndCheckStackStatus(response.getId(), Status.DELETE_COMPLETED.name(), timeout);
-                    if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
+                    if (WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
                         throw shellContext.exceptionTransformer()
                                 .transformToRuntimeException("Stack termination failed: " + waitResult.getReason());
                     } else {
@@ -187,7 +191,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = {"stack select --id", "stack select --name"})
+    @CliAvailabilityIndicator({"stack select --id", "stack select --name"})
     @Override
     public boolean selectAvailable() {
         return shellContext.isStackAccessible() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -253,7 +257,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 && shellContext.getActiveCloudPlatform().equals(platform)
                 && shellContext.getActiveNetworkId() != null
                 && (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
-                && shellContext.getActiveHostGroups().size() != 0) && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+                && !shellContext.getActiveHostGroups().isEmpty()) && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -296,7 +300,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             orchestratorRequest.setType(orchestrator);
             stackRequest.setOrchestrator(orchestratorRequest);
             List<InstanceGroupRequest> instanceGroupRequestList = new ArrayList<>();
-            for (Map.Entry<String, InstanceGroupEntry> stringObjectEntry : shellContext.getInstanceGroups().entrySet()) {
+            for (Entry<String, InstanceGroupEntry> stringObjectEntry : shellContext.getInstanceGroups().entrySet()) {
                 InstanceGroupEntry instanceGroupEntry = stringObjectEntry.getValue();
                 InstanceGroupRequest instanceGroupRequest = new InstanceGroupRequest();
                 instanceGroupRequest.setType(InstanceGroupType.valueOf(instanceGroupEntry.getType()));
@@ -396,7 +400,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack stop --name", help = "Stop the stack by its name")
-    public String stopByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+    public String stopByName(@CliOption(key = "", mandatory = true) String name) {
         return stop(null, name);
     }
 
@@ -435,7 +439,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     @CliCommand(value = "stack start --name", help = "Start the stack by its name")
-    public String startByName(@CliOption(key = "", mandatory = true) String name) throws Exception {
+    public String startByName(@CliOption(key = "", mandatory = true) String name) {
         return start(null, name);
     }
 
@@ -447,7 +451,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean withClusterUpScale,
             @CliOption(key = "wait", help = "Wait until the operation completes",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         try {
             if (adjustment < 1) {
                 throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node addition should be at least 1");
@@ -483,7 +487,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             @CliOption(key = "adjustment", mandatory = true, help = "Count of the nodes which will be removed from the stack") Integer adjustment,
             @CliOption(key = "wait", help = "Wait until the operation completes",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
-            @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
+            @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout) {
         try {
             if (adjustment > -1) {
                 throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node removal should be negative");
@@ -507,7 +511,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = "stack metadata")
+    @CliAvailabilityIndicator("stack metadata")
     public boolean metadataAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
@@ -532,7 +536,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = "stack sync")
+    @CliAvailabilityIndicator("stack sync")
     public boolean syncAvailable() {
         return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
@@ -564,8 +568,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         return null;
     }
 
-    private Map<String, InstanceMetaDataJson> collectMetadata(List<InstanceGroupResponse> instanceGroups, final String group) {
-        final Map<String, InstanceMetaDataJson> returnValues = new HashMap<>();
+    private Map<String, InstanceMetaDataJson> collectMetadata(List<InstanceGroupResponse> instanceGroups, String group) {
+        Map<String, InstanceMetaDataJson> returnValues = new HashMap<>();
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
             for (InstanceMetaDataJson instanceMetaDataJson : instanceGroup.getMetadata()) {
                 if (everyGroupDataNeeded(group) || instanceMetaDataJson.getInstanceGroup().equals(group)) {
@@ -577,7 +581,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     }
 
     private boolean everyGroupDataNeeded(String group) {
-        return group == null || "".equals(group);
+        return group == null || group.isEmpty();
     }
 
     private void validateAvailabilityZone(StackRegion region, StackAvailabilityZone availabilityZone) {
@@ -611,10 +615,10 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             Map<Long, TemplateResponse> templateMap = shellContext.getTemplateMap();
             String azone = availabilityZone == null ? shellContext.getAvailabilityZonesByRegion(platform, region).iterator().next() : availabilityZone;
             Collection<VmTypeJson> vmTypes = vmTypesPerZones.get(azone);
-            for (Map.Entry<String, InstanceGroupEntry> ig : shellContext.getInstanceGroups().entrySet()) {
+            for (Entry<String, InstanceGroupEntry> ig : shellContext.getInstanceGroups().entrySet()) {
                 TemplateResponse template = templateMap.get(ig.getValue().getTemplateId());
                 String instanceType = template.getInstanceType();
-                if (!vmTypes.stream().anyMatch(vm -> vm.getValue().equals(instanceType))) {
+                if (vmTypes.stream().noneMatch(vm -> vm.getValue().equals(instanceType))) {
                     throw new ValidationException("The " + instanceType + " instencetype is not supported for the " + ig.getKey() + " instancegroup which using "
                             + template.getName() + " template in [" + region + "] region and [" + availabilityZone + "] availabilty zone"
                             + " Supported instancetypes in this region / availability zone: "
@@ -644,7 +648,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
      * @throws RuntimeException if the operation fails
      */
     public void waitUntilStackAvailable(Long stackId, String errorMessagePrefix, Long timeout) {
-        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(stackId, Status.AVAILABLE.name(), timeout);
+        WaitResult waitResult = cloudbreakShellUtil.waitAndCheckStackStatus(stackId, Status.AVAILABLE.name(), timeout);
         throwIfWaitFailed(errorMessagePrefix, waitResult);
     }
 
@@ -654,12 +658,12 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
      * @throws RuntimeException if the operation fails
      */
     public void waitUntilClusterAvailable(Long stackId, String errorMessagePrefix, Long timeout) {
-        CloudbreakShellUtil.WaitResult waitResult = cloudbreakShellUtil.waitAndCheckClusterStatus(stackId, Status.AVAILABLE.name(), timeout);
+        WaitResult waitResult = cloudbreakShellUtil.waitAndCheckClusterStatus(stackId, Status.AVAILABLE.name(), timeout);
         throwIfWaitFailed(errorMessagePrefix, waitResult);
     }
 
-    private void throwIfWaitFailed(String errorMessagePrefix, CloudbreakShellUtil.WaitResult waitResult) {
-        if (CloudbreakShellUtil.WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
+    private void throwIfWaitFailed(String errorMessagePrefix, WaitResult waitResult) {
+        if (WaitResultStatus.FAILED.equals(waitResult.getWaitResultStatus())) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(errorMessagePrefix + waitResult.getReason());
         }
     }

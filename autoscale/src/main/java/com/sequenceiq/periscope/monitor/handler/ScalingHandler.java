@@ -66,9 +66,9 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     }
 
     private long getRemainingCooldownTime(Cluster cluster) {
-        int coolDown = cluster.getCoolDown();
+        long coolDown = cluster.getCoolDown();
         long lastScalingActivity = cluster.getLastScalingActivity();
-        return lastScalingActivity == 0 ? 0 : (coolDown * ClusterUtils.MIN_IN_MS) - (System.currentTimeMillis() - lastScalingActivity);
+        return lastScalingActivity == 0L ? 0L : (coolDown * ClusterUtils.MIN_IN_MS) - (System.currentTimeMillis() - lastScalingActivity);
     }
 
     private int getDesiredNodeCount(Cluster cluster, ScalingPolicy policy, int totalNodes) {

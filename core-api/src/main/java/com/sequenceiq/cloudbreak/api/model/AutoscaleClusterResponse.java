@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public class AutoscaleClusterResponse extends ClusterResponse {
 
-    @ApiModelProperty(value = ModelDescriptions.StackModelDescription.PASSWORD)
+    @ApiModelProperty(StackModelDescription.PASSWORD)
     private String password;
 
     public String getPassword() {

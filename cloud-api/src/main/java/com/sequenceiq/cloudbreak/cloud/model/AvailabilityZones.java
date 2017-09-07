@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
 
@@ -11,7 +12,8 @@ import com.google.common.collect.Lists;
  * @see Region,Platform,AvailabilityZone
  */
 public class AvailabilityZones {
-    private Map<Region, List<AvailabilityZone>> availabiltyZones;
+
+    private final Map<Region, List<AvailabilityZone>> availabiltyZones;
 
     public AvailabilityZones(Map<Region, List<AvailabilityZone>> availabiltyZones) {
         this.availabiltyZones = availabiltyZones;
@@ -23,7 +25,7 @@ public class AvailabilityZones {
 
     public List<AvailabilityZone> getAllAvailabilityZone() {
         List<AvailabilityZone> result = Lists.newArrayList();
-        for (Map.Entry<Region, List<AvailabilityZone>> entry : availabiltyZones.entrySet()) {
+        for (Entry<Region, List<AvailabilityZone>> entry : availabiltyZones.entrySet()) {
             result.addAll(entry.getValue());
         }
         return result;

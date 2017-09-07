@@ -40,9 +40,6 @@ public class Notification {
 
     private Status clusterStatus;
 
-    public Notification() {
-    }
-
     public String getEventType() {
         return eventType;
     }

@@ -40,7 +40,7 @@ public class AzureInstanceConnector implements InstanceConnector {
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
                 azureClient.startVirtualMachine(stackName, vm.getInstanceId());
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getMessage()));
             }
         }
@@ -57,7 +57,7 @@ public class AzureInstanceConnector implements InstanceConnector {
                 AzureClient azureClient = ac.getParameter(AzureClient.class);
                 azureClient.deallocateVirtualMachine(stackName, vm.getInstanceId());
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.IN_PROGRESS));
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.FAILED, e.getMessage()));
             }
         }
@@ -85,7 +85,7 @@ public class AzureInstanceConnector implements InstanceConnector {
                 } else {
                     statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
                 }
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
             }
         }

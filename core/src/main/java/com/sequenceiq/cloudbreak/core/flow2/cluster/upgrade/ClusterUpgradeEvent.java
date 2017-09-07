@@ -18,7 +18,7 @@ public enum ClusterUpgradeEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERUPGRADEFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERUPGRADEFAILHANDLEDEVENT");
 
-    private String event;
+    private final String event;
 
     ClusterUpgradeEvent(String event) {
         this.event = event;

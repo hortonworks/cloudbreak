@@ -16,7 +16,7 @@ public enum ClusterStartEvent implements FlowEvent {
     FAILURE_EVENT("CLUSTERSTARTFAILUREEVENT"),
     FAIL_HANDLED_EVENT("CLUSTERSTARTFAILHANDLEDEVENT");
 
-    private String event;
+    private final String event;
 
     ClusterStartEvent(String event) {
         this.event = event;

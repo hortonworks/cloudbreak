@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -64,7 +65,7 @@ public class AccountPreferencesController implements AccountPreferencesEndpoint 
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
             validator.validate();
         }
-        return Response.status(Response.Status.ACCEPTED).build();
+        return Response.status(Status.ACCEPTED).build();
     }
 
     private AccountPreferencesJson convert(AccountPreferences preferences) {

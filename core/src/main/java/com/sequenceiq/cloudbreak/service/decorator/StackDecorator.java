@@ -15,9 +15,9 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
@@ -32,7 +32,7 @@ import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
-import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils;
+import com.sequenceiq.cloudbreak.service.stack.flow.ConsulUtils.ConsulServers;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Service
@@ -178,7 +178,7 @@ public class StackDecorator implements Decorator<Stack> {
         if (instanceGroups == 0 && !BYOS.equals(stack.cloudPlatform())) {
             throw new BadRequestException("Gateway instance group not configured");
         }
-        int minNodeCount = ConsulUtils.ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();
+        int minNodeCount = ConsulServers.SINGLE_NODE_COUNT_LOW.getMin();
         int fullNodeCount = stack.getFullNodeCount();
         if (fullNodeCount < minNodeCount) {
             throw new BadRequestException(String.format("At least %s nodes are required to launch the stack", minNodeCount));

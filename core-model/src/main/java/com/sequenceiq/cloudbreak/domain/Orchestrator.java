@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
 @Entity
-public class Orchestrator {
+public class Orchestrator implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "orchestrator_generator")
     @SequenceGenerator(name = "orchestrator_generator", sequenceName = "orchestrator_id_seq", allocationSize = 1)

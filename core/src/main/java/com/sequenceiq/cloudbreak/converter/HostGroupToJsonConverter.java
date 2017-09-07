@@ -30,7 +30,7 @@ public class HostGroupToJsonConverter extends AbstractConversionServiceAwareConv
         return hostGroupBase;
     }
 
-    private Set<HostMetadataResponse> getHostMetadata(final Set<HostMetadata> hostMetadataCollection) {
+    private Set<HostMetadataResponse> getHostMetadata(Set<HostMetadata> hostMetadataCollection) {
         Set<HostMetadataResponse> hostMetadataResponses = new HashSet<>();
         for (HostMetadata hostMetadata : hostMetadataCollection) {
             hostMetadataResponses.add(getConversionService().convert(hostMetadata, HostMetadataResponse.class));

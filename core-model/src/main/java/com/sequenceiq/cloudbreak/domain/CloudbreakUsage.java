@@ -273,7 +273,7 @@ public class CloudbreakUsage implements ProvisionEntity {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakUsage{");
+        StringBuilder sb = new StringBuilder("CloudbreakUsage{");
         sb.append("id=").append(id);
         sb.append(", owner='").append(owner).append('\'');
         sb.append(", account='").append(account).append('\'');

@@ -11,7 +11,7 @@ import org.hibernate.annotations.Type;
 
 @Entity
 @Table(name = "KerberosConfig")
-public class KerberosConfig {
+public class KerberosConfig implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "kerberosconfig_generator")

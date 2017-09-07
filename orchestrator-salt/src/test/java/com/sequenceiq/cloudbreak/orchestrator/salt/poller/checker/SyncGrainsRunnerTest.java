@@ -28,17 +28,13 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 @PrepareForTest(SaltStates.class)
 public class SyncGrainsRunnerTest {
 
-    private Set<String> targets;
-
-    private Set<Node> allNode;
-
     @Test
     public void submit() {
-        targets = new HashSet<>();
+        Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
         targets.add("10.0.0.3");
-        allNode = new HashSet<>();
+        Set<Node> allNode = new HashSet<>();
         allNode.add(new Node("10.0.0.1", "5.5.5.1", "10-0-0-1.example.com", "hg"));
         allNode.add(new Node("10.0.0.2", "5.5.5.2", "10-0-0-2.example.com", "hg"));
         allNode.add(new Node("10.0.0.3", "5.5.5.3", "10-0-0-3.example.com", "hg"));

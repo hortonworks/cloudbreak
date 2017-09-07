@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.sequenceiq.cloudbreak.controller.json.ExceptionResult;
@@ -15,8 +15,8 @@ public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<Dupli
     }
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.CONFLICT;
+    Status getResponseStatus() {
+        return Status.CONFLICT;
     }
 
     public static String errorMessage(DuplicateKeyValueException exception) {

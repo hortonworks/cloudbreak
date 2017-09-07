@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingDoesNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -36,7 +37,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
         List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         for (Group group : stack.getGroups()) {
             for (int i = 0; i < group.getInstancesSize(); i++) {
-                CloudResource cloudResource = new CloudResource.Builder()
+                CloudResource cloudResource = new Builder()
                         .type(ResourceType.MOCK_INSTANCE)
                         .status(CommonStatus.CREATED)
                         .name("cloudinstance" + cloudResourceStatuses.size())
@@ -66,7 +67,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) throws Exception {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         List<CloudResourceStatus> cloudResourceStatuses = new ArrayList<>();
         for (CloudResource cloudResource : resources) {
             CloudResourceStatus cloudResourceStatus = new CloudResourceStatus(cloudResource, CREATED);
@@ -79,7 +80,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
         createResourceCount -= resources.size();
         if (createResourceCount > 0) {
             for (int i = 0; i < createResourceCount; i++) {
-                CloudResource cloudResource = new CloudResource.Builder()
+                CloudResource cloudResource = new Builder()
                         .type(ResourceType.MOCK_INSTANCE)
                         .status(CommonStatus.CREATED)
                         .name("cloudinstance" + cloudResourceStatuses.size())

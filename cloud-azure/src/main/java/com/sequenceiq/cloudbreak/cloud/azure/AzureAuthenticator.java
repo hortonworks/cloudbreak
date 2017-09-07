@@ -23,6 +23,7 @@ public class AzureAuthenticator implements Authenticator {
     @Inject
     private AzureClientService azureClient;
 
+    @Override
     public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         try {
             LOGGER.info("Authenticating to Azure ...");
@@ -32,10 +33,12 @@ public class AzureAuthenticator implements Authenticator {
         }
     }
 
+    @Override
     public Platform platform() {
         return AzureConstants.PLATFORM;
     }
 
+    @Override
     public Variant variant() {
         return AzureConstants.VARIANT;
     }

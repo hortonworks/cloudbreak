@@ -25,6 +25,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -57,7 +58,6 @@ import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.ClusterException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -334,7 +334,7 @@ public class AmbariClusterConnector {
 
             triggerSmartSenseCapture(ambariClient, blueprintText);
             cluster = ambariViewProvider.provideViewInformation(ambariClient, cluster);
-            cluster = handleClusterCreationSuccess(stack, cluster);
+            handleClusterCreationSuccess(stack, cluster);
         } catch (CancellationException cancellationException) {
             throw cancellationException;
         } catch (HttpResponseException hre) {
@@ -347,7 +347,7 @@ public class AmbariClusterConnector {
     }
 
     private String updateBlueprintConfiguration(Stack stack, String blueprintText, Set<RDSConfig> rdsConfigs, FileSystem fs)
-            throws IOException, CloudbreakImageNotFoundException, CloudbreakException {
+            throws IOException, CloudbreakException {
         if (fs != null) {
             blueprintText = extendBlueprintWithFsConfig(blueprintText, fs, stack);
         }
@@ -374,7 +374,7 @@ public class AmbariClusterConnector {
     }
 
     public String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint, Set<RDSConfig> rdsConfigs)
-            throws CloudbreakSecuritySetupException, IOException {
+            throws IOException {
         String blueprintText = blueprint.getBlueprintText();
         return blueprintTemplateProcessor.process(blueprintText, cluster, rdsConfigs);
     }
@@ -445,7 +445,7 @@ public class AmbariClusterConnector {
     private AmbariClient createAmbariUser(String newUserName, String newPassword, Stack stack, AmbariClient ambariClient) {
         try {
             ambariClient.createUser(newUserName, newPassword, true);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             try {
                 ambariClient = getAmbariClient(stack, newUserName, newPassword);
                 ambariClient.ambariServerVersion();
@@ -466,7 +466,7 @@ public class AmbariClusterConnector {
     private AmbariClient changeAmbariPassword(String userName, String oldPassword, String newPassword, Stack stack, AmbariClient ambariClient) {
         try {
             ambariClient.changePassword(userName, oldPassword, newPassword, true);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             try {
                 ambariClient = getAmbariClient(stack, userName, newPassword);
                 ambariClient.ambariServerVersion();
@@ -660,7 +660,7 @@ public class AmbariClusterConnector {
             try {
                 LOGGER.info("Triggering SmartSense data capture.");
                 ambariClient.smartSenseCapture(0);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LOGGER.error("Triggering SmartSense capture is failed.", e);
             }
         }
@@ -724,7 +724,7 @@ public class AmbariClusterConnector {
         return stopped;
     }
 
-    private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws IOException, CloudbreakImageNotFoundException, CloudbreakException {
+    private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
         HDPRepo hdpRepo = null;
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             hdpRepo = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
@@ -743,11 +743,11 @@ public class AmbariClusterConnector {
                 if (typeVersion.length > 1) {
                     version = typeVersion[1];
                 }
-                for (String os : stackRepo.keySet()) {
-                    addRepository(ambariClient, stackType, version, os, stackRepoId, stackRepo.get(os), hdpRepo.isVerify());
+                for (Entry<String, String> entry : stackRepo.entrySet()) {
+                    addRepository(ambariClient, stackType, version, entry.getKey(), stackRepoId, entry.getValue(), hdpRepo.isVerify());
                 }
-                for (String os : utilRepo.keySet()) {
-                    addRepository(ambariClient, stackType, version, os, utilRepoId, utilRepo.get(os), hdpRepo.isVerify());
+                for (Entry<String, String> entry : utilRepo.entrySet()) {
+                    addRepository(ambariClient, stackType, version, entry.getKey(), utilRepoId, entry.getValue(), hdpRepo.isVerify());
                 }
             } catch (HttpResponseException e) {
                 String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
@@ -783,7 +783,7 @@ public class AmbariClusterConnector {
                 if (stack.getInstanceGroups() != null && !stack.getInstanceGroups().isEmpty()) {
                     Integer propagationPort = stack.getGatewayInstanceMetadata().size() > 1 ? KERBEROS_DB_PROPAGATION_PORT : null;
                     gatewayHost = stack.getPrimaryGatewayInstance().getDiscoveryFQDN();
-                    String domain = gatewayHost.substring(gatewayHost.indexOf(".") + 1);
+                    String domain = gatewayHost.substring(gatewayHost.indexOf('.') + 1);
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
                             kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),
                             kerberosHostResolver.resolveHostForKerberos(cluster, gatewayHost),
@@ -909,7 +909,7 @@ public class AmbariClusterConnector {
                                     hostInfo.put("rack", meta.getLocalityIndicator());
                                     // Openstack
                                 } else {
-                                    hostInfo.put("rack", "/" + meta.getLocalityIndicator());
+                                    hostInfo.put("rack", '/' + meta.getLocalityIndicator());
                                 }
                                 // With topology mapping
                             } else {
@@ -951,7 +951,7 @@ public class AmbariClusterConnector {
     }
 
     private PollingResult waitForClusterInstall(Stack stack, AmbariClient ambariClient) {
-        Map<String, Integer> clusterInstallRequest = new HashMap<>();
+        Map<String, Integer> clusterInstallRequest = new HashMap<>(1);
         clusterInstallRequest.put("CLUSTER_INSTALL", 1);
         return ambariOperationService.waitForOperations(stack, ambariClient, clusterInstallRequest, INSTALL_AMBARI_PROGRESS_STATE);
     }
@@ -962,7 +962,7 @@ public class AmbariClusterConnector {
             String blueprintName = cluster.getBlueprint().getBlueprintName();
             // In case If we changed the blueprintName field we need to query the blueprint name information from ambari
             Map<String, String> blueprintsMap = ambariClient.getBlueprintsMap();
-            if (blueprintsMap.entrySet().size() != 0) {
+            if (!blueprintsMap.entrySet().isEmpty()) {
                 blueprintName = blueprintsMap.keySet().iterator().next();
             }
             return singletonMap("UPSCALE_REQUEST", ambariClient.addHostsWithBlueprint(blueprintName, hostGroup, hosts));
@@ -994,7 +994,7 @@ public class AmbariClusterConnector {
         AMBARI_CLUSTER_SERVICES_STOPPING("ambari.cluster.services.stopping"),
         AMBARI_CLUSTER_SERVICES_STOPPED("ambari.cluster.services.stopped");
 
-        private String code;
+        private final String code;
 
         Msg(String msgCode) {
             code = msgCode;

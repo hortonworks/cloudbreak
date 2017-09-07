@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.client;
 
 public class HttpClientConfig {
-    private String apiAddress;
+
+    private final String apiAddress;
 
     private String serverCert;
 

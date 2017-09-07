@@ -4,16 +4,16 @@ import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 
 public class DatabaseView {
 
-    private String connectionURL;
+    private final String connectionURL;
 
-    private String connectionUserName;
+    private final String connectionUserName;
 
-    private String connectionPassword;
+    private final String connectionPassword;
 
     public DatabaseView(AmbariDatabase ambariDatabase) {
-        this.connectionURL = ambariDatabase.getHost() + ":" + ambariDatabase.getPort() + "/" + ambariDatabase.getName();
-        this.connectionUserName = ambariDatabase.getUserName();
-        this.connectionPassword = ambariDatabase.getPassword();
+        connectionURL = ambariDatabase.getHost() + ':' + ambariDatabase.getPort() + '/' + ambariDatabase.getName();
+        connectionUserName = ambariDatabase.getUserName();
+        connectionPassword = ambariDatabase.getPassword();
     }
 
     public String getConnectionURL() {

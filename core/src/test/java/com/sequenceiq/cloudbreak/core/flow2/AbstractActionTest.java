@@ -109,6 +109,7 @@ public class AbstractActionTest {
     enum Event implements FlowEvent {
         DOIT, FAILURE;
 
+        @Override
         public String event() {
             return name();
         }

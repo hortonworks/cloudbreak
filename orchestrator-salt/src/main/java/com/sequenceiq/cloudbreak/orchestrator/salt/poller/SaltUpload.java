@@ -32,7 +32,7 @@ public class SaltUpload implements OrchestratorBootstrap {
 
     public SaltUpload(SaltConnector sc, Set<String> targets, String path, String fileName, byte[] content) {
         this.sc = sc;
-        this.originalTargets = targets;
+        originalTargets = targets;
         this.targets = targets;
         this.path = path;
         this.fileName = fileName;
@@ -71,7 +71,7 @@ public class SaltUpload implements OrchestratorBootstrap {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SaltUpload{");
+        StringBuilder sb = new StringBuilder("SaltUpload{");
         sb.append("sc=").append(sc);
         sb.append(", originalTargets=").append(originalTargets);
         sb.append(", path='").append(path).append('\'');

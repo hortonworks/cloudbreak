@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model.core;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Container {
+public class Container implements Serializable {
 
     private String uri;
 

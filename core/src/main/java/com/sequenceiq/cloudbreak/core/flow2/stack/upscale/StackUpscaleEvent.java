@@ -30,7 +30,7 @@ public enum StackUpscaleEvent implements FlowEvent {
     UPSCALE_FINALIZED_EVENT("UPSCALESTACKFINALIZED"),
     UPSCALE_FAIL_HANDLED_EVENT("UPSCALEFAILHANDLED");
 
-    private String event;
+    private final String event;
 
     StackUpscaleEvent(String event) {
         this.event = event;

@@ -12,11 +12,11 @@ public class AuthorizationService {
 
     @PreAuthorize("hasPermission(#target,'read')")
     public void hasReadPermission(Object target) {
-        LOGGER.debug("User has permission to read resource: {}", target.toString());
+        LOGGER.debug("User has permission to read resource: {}", target);
     }
 
     @PreAuthorize("hasPermission(#target,'write')")
     public void hasWritePermission(Object target) {
-        LOGGER.debug("User has permission to write resource: {}", target.toString());
+        LOGGER.debug("User has permission to write resource: {}", target);
     }
 }

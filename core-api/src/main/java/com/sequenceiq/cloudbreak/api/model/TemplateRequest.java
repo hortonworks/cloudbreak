@@ -4,6 +4,7 @@ import javax.validation.constraints.Pattern;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,10 +18,10 @@ public class TemplateRequest extends TemplateBase {
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_COUNT)
+    @ApiModelProperty(TemplateModelDescription.VOLUME_COUNT)
     private Integer volumeCount;
 
-    @ApiModelProperty(value = ModelDescriptions.TemplateModelDescription.VOLUME_SIZE)
+    @ApiModelProperty(TemplateModelDescription.VOLUME_SIZE)
     private Integer volumeSize;
 
     public Integer getVolumeSize() {

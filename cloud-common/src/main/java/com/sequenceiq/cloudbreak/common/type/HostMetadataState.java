@@ -5,5 +5,5 @@ public enum HostMetadataState {
     SERVICES_RUNNING,
     HEALTHY,
     UNHEALTHY,
-    WAITING_FOR_REPAIR;
+    WAITING_FOR_REPAIR
 }

@@ -139,6 +139,6 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
 
     @Override
     public int compareTo(InstanceGroup o) {
-        return this.groupName.compareTo(o.groupName);
+        return groupName.compareTo(o.groupName);
     }
 }

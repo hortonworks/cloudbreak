@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
 import reactor.bus.Event;
+import reactor.bus.Event.Headers;
 
 public class Flow2HandlerTest {
 
@@ -67,7 +68,7 @@ public class Flow2HandlerTest {
 
     private Event<? extends Payload> dummyEvent;
 
-    private Payload payload = () -> 1L;
+    private final Payload payload = () -> 1L;
 
     @Before
     public void setUp() {
@@ -75,7 +76,7 @@ public class Flow2HandlerTest {
         MockitoAnnotations.initMocks(this);
         Map<String, Object> headers = new HashMap<>();
         headers.put(Flow2Handler.FLOW_ID, FLOW_ID);
-        dummyEvent = new Event<>(new Event.Headers(headers), payload);
+        dummyEvent = new Event<>(new Headers(headers), payload);
         flowState = new OwnFlowState();
     }
 

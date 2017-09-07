@@ -47,19 +47,19 @@ public class GcpCommands implements CommandMarker {
 
     private ShellContext shellContext;
 
-    private CredentialCommands baseCredentialCommands;
+    private final CredentialCommands baseCredentialCommands;
 
-    private NetworkCommands baseNetworkCommands;
+    private final NetworkCommands baseNetworkCommands;
 
-    private SecurityGroupCommands baseSecurityGroupCommands;
+    private final SecurityGroupCommands baseSecurityGroupCommands;
 
-    private TemplateCommands baseTemplateCommands;
+    private final TemplateCommands baseTemplateCommands;
 
-    private PlatformCommands basePlatformCommands;
+    private final PlatformCommands basePlatformCommands;
 
-    private StackCommands stackCommands;
+    private final StackCommands stackCommands;
 
-    private InstanceGroupCommands baseInstanceGroupCommands;
+    private final InstanceGroupCommands baseInstanceGroupCommands;
 
     public GcpCommands(ShellContext shellContext,
             CredentialCommands baseCredentialCommands,
@@ -79,38 +79,38 @@ public class GcpCommands implements CommandMarker {
         this.baseInstanceGroupCommands = baseInstanceGroupCommands;
     }
 
-    @CliAvailabilityIndicator(value = "stack create --GCP")
+    @CliAvailabilityIndicator("stack create --GCP")
     public boolean createStackAvailable() {
         return stackCommands.createStackAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "template create --GCP")
+    @CliAvailabilityIndicator("template create --GCP")
     public boolean createTemplateAvailable() {
         return baseTemplateCommands.createTemplateAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "platform create --GCP")
+    @CliAvailabilityIndicator("platform create --GCP")
     public boolean createPlatformAvailable() {
         return basePlatformCommands.createPlatformAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"network create --GCP --NEW", "network create --GCP --NEW_SUBNET",
+    @CliAvailabilityIndicator({"network create --GCP --NEW", "network create --GCP --NEW_SUBNET",
             "network create --GCP --EXISTING_SUBNET", "network create --GCP --LEGACY"})
     public boolean createNetworkAvailable() {
         return baseNetworkCommands.createNetworkAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = {"securitygroup create --GCP --NEW"})
+    @CliAvailabilityIndicator("securitygroup create --GCP --NEW")
     public boolean createSecurityGroupAvailable() {
         return baseSecurityGroupCommands.createSecurityGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "credential create --GCP")
+    @CliAvailabilityIndicator("credential create --GCP")
     public boolean createCredentialAvailable() {
         return baseCredentialCommands.createCredentialAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
 
-    @CliAvailabilityIndicator(value = "instancegroup configure --GCP")
+    @CliAvailabilityIndicator("instancegroup configure --GCP")
     public boolean configureInstanceGroupAvailable() {
         return baseInstanceGroupCommands.createInstanceGroupAvailable(PLATFORM) && shellContext.isPlatformAvailable(PLATFORM);
     }
@@ -258,8 +258,7 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "templateId", help = "TemplateId of the instanceGroup") InstanceGroupTemplateId instanceGroupTemplateId,
             @CliOption(key = "templateName", help = "TemplateName of the instanceGroup") InstanceGroupTemplateName instanceGroupTemplateName,
             @CliOption(key = "securityGroupId", help = "SecurityGroupId of the instanceGroup") SecurityGroupId instanceGroupSecurityGroupId,
-            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName)
-            throws Exception {
+            @CliOption(key = "securityGroupName", help = "SecurityGroupName of the instanceGroup") SecurityGroupName instanceGroupSecurityGroupName) {
 
         Map<String, Object> parameters = new HashMap<>();
 
@@ -292,7 +291,7 @@ public class GcpCommands implements CommandMarker {
     ) {
         try {
             return basePlatformCommands.create(name, description, PLATFORM, Collections.emptyMap());
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(e);
         }
     }
@@ -316,12 +315,12 @@ public class GcpCommands implements CommandMarker {
             @CliOption(key = "tags", help = "created resources will be tagged with these key=value pairs, format: key1=value1,key2=value2") String tags,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout,
-            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack", mandatory = false) String customDomain,
-            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack", mandatory = false) String customHostname,
+            @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack") String customDomain,
+            @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack") String customHostname,
             @CliOption(key = "clusterNameAsSubdomain", help = "Using the cluster name for subdomain", unspecifiedDefaultValue = "false",
-                    specifiedDefaultValue = "true", mandatory = false) boolean clusterNameAsSubdomain,
+                    specifiedDefaultValue = "true") boolean clusterNameAsSubdomain,
             @CliOption(key = "hostgroupNameAsHostname", help = "Using the hostgroup names to create hostnames", unspecifiedDefaultValue = "false",
-                    specifiedDefaultValue = "true", mandatory = false) boolean hostgroupNameAsHostname) {
+                    specifiedDefaultValue = "true") boolean hostgroupNameAsHostname) {
         Map<String, String> params = new HashMap<>();
         if (availabilityZone == null) {
             Collection<String> availabilityZonesByRegion = shellContext.getAvailabilityZonesByRegion(shellContext.getActiveCloudPlatform(), region.getName());

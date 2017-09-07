@@ -13,9 +13,9 @@ import spark.Response;
 
 public class AmbariServiceConfigResponse extends ITResponse {
 
-    private String resourceManagerAddress;
+    private final String resourceManagerAddress;
 
-    private int port;
+    private final int port;
 
     public AmbariServiceConfigResponse(String resourceManagerAddress, int port) {
         this.resourceManagerAddress = resourceManagerAddress;
@@ -35,9 +35,9 @@ public class AmbariServiceConfigResponse extends ITResponse {
         dfsReplication.put("type", "something");
         Map<String, String> propertyMap = new HashMap<>();
         propertyMap.put("dfs.replication", "2");
-        propertyMap.put("dfs.namenode.http-address", resourceManagerAddress + ":" + port);
-        propertyMap.put("dfs.namenode.secondary.http-address", resourceManagerAddress + ":" + port);
-        propertyMap.put("yarn.resourcemanager.webapp.address", resourceManagerAddress + ":" + port);
+        propertyMap.put("dfs.namenode.http-address", resourceManagerAddress + ':' + port);
+        propertyMap.put("dfs.namenode.secondary.http-address", resourceManagerAddress + ':' + port);
+        propertyMap.put("yarn.resourcemanager.webapp.address", resourceManagerAddress + ':' + port);
         dfsReplication.put("properties", propertyMap);
         configList.add(dfsReplication);
 

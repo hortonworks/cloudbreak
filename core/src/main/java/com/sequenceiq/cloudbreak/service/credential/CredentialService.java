@@ -7,6 +7,7 @@ import java.util.UUID;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
+import javax.transaction.Transactional.TxType;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -88,7 +89,7 @@ public class CredentialService {
         }
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Map<String, String> interactiveLogin(IdentityUser user, Credential credential) {
         LOGGER.debug("Interactive login: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
@@ -96,7 +97,7 @@ public class CredentialService {
         return credentialAdapter.interactiveLogin(credential);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Credential create(IdentityUser user, Credential credential) {
         LOGGER.debug("Creating credential: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());
         credential.setOwner(user.getUserId());
@@ -104,7 +105,7 @@ public class CredentialService {
         return saveCredential(credential);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Credential create(String userId, String account, Credential credential) {
         LOGGER.debug("Creating credential: [UserId: '{}', Account: '{}']", userId, account);
         credential.setOwner(userId);
@@ -112,7 +113,7 @@ public class CredentialService {
         return saveCredential(credential);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     @Retryable(value = BadRequestException.class, maxAttempts = 10, backoff = @Backoff(delay = 2000))
     public Credential createWithRetry(String userId, String account, Credential credential) {
         return create(userId, account, credential);
@@ -170,7 +171,7 @@ public class CredentialService {
         }
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public void delete(Long id, IdentityUser user) {
         Credential credential = credentialRepository.findByIdInAccount(id, user.getAccount());
         if (credential == null) {
@@ -179,7 +180,7 @@ public class CredentialService {
         delete(credential);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public void delete(String name, IdentityUser user) {
         Credential credential = credentialRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
         if (credential == null) {
@@ -188,14 +189,9 @@ public class CredentialService {
         delete(credential);
     }
 
-    @Transactional(Transactional.TxType.NEVER)
+    @Transactional(TxType.NEVER)
     public Credential update(Long id) {
-        Credential credential = get(id);
-        if (credential == null) {
-            throw new NotFoundException(String.format("Credential '%s' not found.", id));
-        } else {
-            return credentialAdapter.update(credential);
-        }
+        return credentialAdapter.update(get(id));
     }
 
     private void delete(Credential credential) {
@@ -224,6 +220,6 @@ public class CredentialService {
 
     private String generateArchiveName(String name) {
         //generate new name for the archived credential to by pass unique constraint
-        return new StringBuilder().append(name).append("_").append(UUID.randomUUID()).toString();
+        return new StringBuilder().append(name).append('_').append(UUID.randomUUID()).toString();
     }
 }

@@ -18,15 +18,15 @@ public class PlatformVirtualMachines {
             Map<Platform, Map<AvailabilityZone, Collection<VmType>>> vmPerZones, Map<Platform, Map<AvailabilityZone, VmType>> defaultVmPerZones) {
         this.virtualMachines = virtualMachines;
         this.defaultVirtualMachines = defaultVirtualMachines;
-        this.vmTypesPerZones = vmPerZones;
-        this.defaultVmTypePerZones = defaultVmPerZones;
+        vmTypesPerZones = vmPerZones;
+        defaultVmTypePerZones = defaultVmPerZones;
     }
 
     public PlatformVirtualMachines() {
-        this.virtualMachines = new HashMap<>();
-        this.defaultVirtualMachines = new HashMap<>();
-        this.vmTypesPerZones = new HashMap<>();
-        this.defaultVmTypePerZones = new HashMap<>();
+        virtualMachines = new HashMap<>();
+        defaultVirtualMachines = new HashMap<>();
+        vmTypesPerZones = new HashMap<>();
+        defaultVmTypePerZones = new HashMap<>();
     }
 
     public Map<Platform, Collection<VmType>> getVirtualMachines() {

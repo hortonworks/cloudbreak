@@ -13,9 +13,6 @@ public class GcpInstanceTypeConverter extends AbstractConverter<GcpInstanceType>
     @Autowired
     private ShellContext context;
 
-    public GcpInstanceTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return GcpInstanceType.class.isAssignableFrom(type);
@@ -25,7 +22,7 @@ public class GcpInstanceTypeConverter extends AbstractConverter<GcpInstanceType>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getInstanceTypeNamesByPlatform("GCP"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

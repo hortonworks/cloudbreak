@@ -9,9 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.orchestrator.yarn.converter.request.CreateApplicationRequestToJsonConverter;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Artifact;
-import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Dependency;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Resource;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.CreateApplicationRequest;
 
 public class CreateApplicationToJsonConverterTest {

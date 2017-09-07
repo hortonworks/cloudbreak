@@ -14,9 +14,6 @@ public class AwsVolumeTypeConverter extends AbstractConverter<AwsVolumeType> {
     @Autowired
     private ShellContext context;
 
-    public AwsVolumeTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return AwsVolumeType.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class AwsVolumeTypeConverter extends AbstractConverter<AwsVolumeType> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVolumeTypesByPlatform("AWS"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

@@ -31,21 +31,21 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = "instancegroup configure")
+    @CliAvailabilityIndicator("instancegroup configure")
     public boolean createAvailable() {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())
                 && !shellContext.isMarathonMode()
                 && !shellContext.isYarnMode();
     }
 
-    @CliAvailabilityIndicator(value = "instancegroup delete")
+    @CliAvailabilityIndicator("instancegroup delete")
     public boolean deleteAvailable() {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())
                 && !shellContext.isMarathonMode()
                 && !shellContext.isYarnMode();
     }
 
-    @CliAvailabilityIndicator(value = "instancegroup show")
+    @CliAvailabilityIndicator("instancegroup show")
     public boolean showAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
@@ -98,7 +98,7 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
                         new InstanceGroupEntry(parsedTemplateId, parsedsecurityGroupId, nodeCount, ambariServer ? "GATEWAY" : "CORE", parameters));
                 shellContext.putHostGroup(instanceGroup.getName(), new HostgroupEntry(nodeCount, new HashSet<>(), RecoveryMode.MANUAL));
                 if (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
-                        && shellContext.getActiveHostGroups().size() != 0) {
+                        && !shellContext.getActiveHostGroups().isEmpty()) {
                     shellContext.setHint(Hints.SELECT_NETWORK);
                 } else {
                     shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);

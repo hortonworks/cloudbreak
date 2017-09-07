@@ -12,17 +12,18 @@ import com.sequenceiq.cloudbreak.common.type.ResourceType;
  * Cloudbreak handles the entities on the Cloud provider side as Generic resources, and this class represent a generic resource.
  */
 public class CloudResource extends DynamicModel {
-    private ResourceType type;
 
-    private CommonStatus status;
+    private final ResourceType type;
 
-    private String name;
+    private final CommonStatus status;
 
-    private String reference;
+    private final String name;
 
-    private String group;
+    private final String reference;
 
-    private boolean persistent;
+    private final String group;
+
+    private final boolean persistent;
 
     private CloudResource(ResourceType type, CommonStatus status, String name, String reference, String group, boolean persistent, Map<String, Object> params) {
         super(params);
@@ -60,7 +61,7 @@ public class CloudResource extends DynamicModel {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudResource{");
+        StringBuilder sb = new StringBuilder("CloudResource{");
         sb.append("type=").append(type);
         sb.append(", status=").append(status);
         sb.append(", name='").append(name).append('\'');
@@ -87,12 +88,12 @@ public class CloudResource extends DynamicModel {
         private Map<String, Object> parameters = new HashMap<>();
 
         public Builder cloudResource(CloudResource cloudResource) {
-            this.type = cloudResource.getType();
-            this.status = cloudResource.getStatus();
-            this.name = cloudResource.getName();
-            this.reference = cloudResource.getReference();
-            this.persistent = cloudResource.isPersistent();
-            this.group = cloudResource.getGroup();
+            type = cloudResource.getType();
+            status = cloudResource.getStatus();
+            name = cloudResource.getName();
+            reference = cloudResource.getReference();
+            persistent = cloudResource.isPersistent();
+            group = cloudResource.getGroup();
             return this;
         }
 

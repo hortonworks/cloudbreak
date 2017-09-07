@@ -14,9 +14,10 @@ import spark.Request;
 import spark.Response;
 
 public class AmbariClustersHostsResponse extends ITResponse {
-    private Map<String, CloudVmMetaDataStatus> instanceMap;
 
-    private String state;
+    private final Map<String, CloudVmMetaDataStatus> instanceMap;
+
+    private final String state;
 
     public  AmbariClustersHostsResponse(Map<String, CloudVmMetaDataStatus> instanceMap, String state) {
         this.instanceMap = instanceMap;
@@ -29,8 +30,8 @@ public class AmbariClustersHostsResponse extends ITResponse {
         ObjectNode rootNode = JsonNodeFactory.instance.objectNode();
         ArrayNode items = rootNode.putArray("items");
 
-        for (String instanceId : instanceMap.keySet()) {
-            CloudVmMetaDataStatus status = instanceMap.get(instanceId);
+        for (Map.Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+            CloudVmMetaDataStatus status = stringCloudVmMetaDataStatusEntry.getValue();
             if (InstanceStatus.STARTED == status.getCloudVmInstanceStatus().getStatus()) {
                 ObjectNode item = items.addObject();
                 item.putObject("Hosts").put("host_name", HostNameUtil.generateHostNameByIp(status.getMetaData().getPrivateIp()));

@@ -17,9 +17,7 @@ import org.hibernate.annotations.Type;
 import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 
 @Entity
-@Table(name = "ldapconfig", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"})
-})
+@Table(name = "ldapconfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
 public class LdapConfig implements ProvisionEntity {
 
     @Id

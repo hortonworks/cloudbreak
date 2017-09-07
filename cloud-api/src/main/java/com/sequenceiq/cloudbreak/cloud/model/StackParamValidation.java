@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
-import com.google.common.base.Optional;
+import java.util.Optional;
 
 public class StackParamValidation {
 

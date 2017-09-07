@@ -30,7 +30,7 @@ public class CachingConfig implements CachingConfigurer {
     @Inject
     private List<CacheDefinition> cacheDefinitions;
 
-    private Map<Class, CacheDefinition> classCacheDefinitionMap = new HashMap<>();
+    private final Map<Class, CacheDefinition> classCacheDefinitionMap = new HashMap<>();
 
     @PostConstruct
     public void postCachDefinition() {

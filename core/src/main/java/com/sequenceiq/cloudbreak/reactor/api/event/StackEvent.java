@@ -8,11 +8,11 @@ import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import reactor.rx.Promise;
 
 public class StackEvent implements Selectable, Acceptable {
-    private String selector;
+    private final String selector;
 
-    private Long stackId;
+    private final Long stackId;
 
-    private Promise<Boolean> accepted;
+    private final Promise<Boolean> accepted;
 
     public StackEvent(Long stackId) {
         this(null, stackId);
@@ -21,7 +21,7 @@ public class StackEvent implements Selectable, Acceptable {
     public StackEvent(String selector, Long stackId) {
         this.selector = selector;
         this.stackId = stackId;
-        this.accepted = new Promise<>();
+        accepted = new Promise<>();
     }
 
     public StackEvent(String selector, Long stackId, Promise<Boolean> accepted) {

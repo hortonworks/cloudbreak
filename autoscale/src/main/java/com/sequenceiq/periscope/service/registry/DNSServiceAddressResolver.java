@@ -14,6 +14,7 @@ import org.xbill.DNS.Type;
 public class DNSServiceAddressResolver implements ServiceAddressResolver {
     private static final Logger LOGGER = LoggerFactory.getLogger(DNSServiceAddressResolver.class);
 
+    @Override
     public String resolveUrl(String serviceUrl, String protocol, String serviceId)  throws ServiceAddressResolvingException {
         String resolvedAddress;
         if (!StringUtils.isEmpty(serviceUrl)) {
@@ -26,10 +27,11 @@ public class DNSServiceAddressResolver implements ServiceAddressResolver {
         return resolvedAddress;
     }
 
+    @Override
     public String resolveHostPort(String serviceHost, String servicePort, String serviceId) throws ServiceAddressResolvingException {
         String resolvedAddress;
         if (!StringUtils.isEmpty(serviceHost) && !StringUtils.isEmpty(servicePort)) {
-            resolvedAddress = serviceHost + ":" + servicePort;
+            resolvedAddress = serviceHost + ':' + servicePort;
         } else if (!StringUtils.isEmpty(serviceId)) {
             resolvedAddress = dnsSrvLookup(serviceId);
         } else {
@@ -44,7 +46,7 @@ public class DNSServiceAddressResolver implements ServiceAddressResolver {
             Record[] records = new Lookup(query, Type.SRV).run();
             if (records != null && records.length > 0) {
                 SRVRecord srv = (SRVRecord) records[0];
-                result = srv.getTarget().toString().replaceFirst("\\.$", "") + ":" + srv.getPort();
+                result = srv.getTarget().toString().replaceFirst("\\.$", "") + ':' + srv.getPort();
             } else {
                 throw new ServiceAddressResolvingException("The Service " + query + " cannot be resolved");
             }

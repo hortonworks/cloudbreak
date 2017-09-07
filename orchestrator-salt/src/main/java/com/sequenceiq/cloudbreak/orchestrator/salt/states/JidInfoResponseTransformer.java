@@ -5,8 +5,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.RunNumComparator;
 
 public class JidInfoResponseTransformer {
 
@@ -21,7 +23,7 @@ public class JidInfoResponseTransformer {
             stringObjectMap = ((Map<String, List<Map<String, Object>>>) map).get("return").get(0);
         }
         Map<String, List<RunnerInfo>> result = new HashMap<>();
-        for (Map.Entry<String, Object> stringObjectEntry : stringObjectMap.entrySet()) {
+        for (Entry<String, Object> stringObjectEntry : stringObjectMap.entrySet()) {
             if (stringObjectEntry.getValue() instanceof Map) {
                 Map<String, Map<String, Object>> mapValue = (Map<String, Map<String, Object>>) stringObjectEntry.getValue();
                 result.put(stringObjectEntry.getKey(), runnerInfoObjects(mapValue));
@@ -46,7 +48,7 @@ public class JidInfoResponseTransformer {
         Map<String, Map<String, Map<String, Object>>> stringMapMap =
                 ((Map<String, List<Map<String, Map<String, Map<String, Object>>>>>) map).get("return").get(0);
         Map<String, List<RunnerInfo>> result = new HashMap<>();
-        for (Map.Entry<String, Map<String, Map<String, Object>>> stringMapEntry : stringMapMap.entrySet()) {
+        for (Entry<String, Map<String, Map<String, Object>>> stringMapEntry : stringMapMap.entrySet()) {
             result.put(stringMapEntry.getKey(), runnerInfoObjects(stringMapEntry.getValue()));
         }
 
@@ -55,7 +57,7 @@ public class JidInfoResponseTransformer {
 
     private static List<RunnerInfo> runnerInfoObjects(Map<String, Map<String, Object>> map) {
         List<RunnerInfo> runnerInfoList = new ArrayList<>();
-        for (Map.Entry<String, Map<String, Object>> stringMapEntry : map.entrySet()) {
+        for (Entry<String, Map<String, Object>> stringMapEntry : map.entrySet()) {
             Map<String, Object> value = stringMapEntry.getValue();
             RunnerInfo runnerInfo = new RunnerInfo();
             runnerInfo.setStateId(stringMapEntry.getKey());
@@ -73,11 +75,11 @@ public class JidInfoResponseTransformer {
             runnerInfo.setName(String.valueOf(value.get("name")));
             runnerInfo.setResult(Boolean.valueOf(String.valueOf(value.get("result"))));
             String runNum = String.valueOf(value.get("__run_num__"));
-            runnerInfo.setRunNum(runNum == null ? -1 : Integer.parseInt(runNum));
+            runnerInfo.setRunNum(Integer.parseInt(runNum));
             runnerInfo.setStartTime(String.valueOf(value.get("start_time")));
             runnerInfoList.add(runnerInfo);
         }
-        Collections.sort(runnerInfoList, new RunnerInfo.RunNumComparator());
+        runnerInfoList.sort(new RunNumComparator());
         return runnerInfoList;
     }
 }

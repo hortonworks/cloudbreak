@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.shell.model;
 
 public class YarnHostgroupEntry implements NodeCountEntry {
 
-    private Integer nodeCount;
+    private final Integer nodeCount;
 
-    private String constraintName;
+    private final String constraintName;
 
     public YarnHostgroupEntry(Integer nodeCount, String constraintName) {
         this.nodeCount = nodeCount;

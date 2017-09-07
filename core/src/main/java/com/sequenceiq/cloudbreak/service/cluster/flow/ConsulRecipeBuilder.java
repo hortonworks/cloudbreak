@@ -19,7 +19,7 @@ public class ConsulRecipeBuilder implements RecipeBuilder {
         for (RecipeScript script : recipeScripts) {
             Recipe recipe = new Recipe();
             if (recipeScripts.size() > 1) {
-                recipe.setName(recipeName + "-" + index);
+                recipe.setName(recipeName + '-' + index);
             } else {
                 recipe.setName(recipeName);
             }

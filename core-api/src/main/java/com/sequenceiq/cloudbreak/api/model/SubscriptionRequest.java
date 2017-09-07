@@ -4,7 +4,7 @@ package com.sequenceiq.cloudbreak.api.model;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.SubscriptionModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
@@ -16,7 +16,7 @@ public class SubscriptionRequest {
     @NotNull
     @Pattern(regexp = SIMPLE_URL_PATTERN,
             message = "The notification hook URL must be proper and valid!")
-    @ApiModelProperty(value = ModelDescriptions.SubscriptionModelDescription.ENDPOINT, required = true)
+    @ApiModelProperty(value = SubscriptionModelDescription.ENDPOINT, required = true)
     private String endpointUrl;
 
     public String getEndpointUrl() {

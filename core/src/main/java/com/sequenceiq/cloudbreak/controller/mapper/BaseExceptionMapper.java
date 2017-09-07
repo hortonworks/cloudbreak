@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BaseExceptionMapper.class);
 
+    @Override
     public Response toResponse(E exception) {
         if (logException()) {
             LOGGER.error(getErrorMessage(exception), exception);
@@ -31,5 +33,5 @@ abstract class BaseExceptionMapper<E extends Throwable> implements ExceptionMapp
         return true;
     }
 
-    abstract Response.Status getResponseStatus();
+    abstract Status getResponseStatus();
 }

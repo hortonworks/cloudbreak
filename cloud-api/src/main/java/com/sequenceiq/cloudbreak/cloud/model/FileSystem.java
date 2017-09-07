@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Map;
+import java.util.Map.Entry;
 
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 
@@ -16,8 +17,8 @@ public class FileSystem extends DynamicModel {
         this.name = name;
         this.type = type;
         this.defaultFs = defaultFs;
-        for (String key : parameters.keySet()) {
-            putParameter(key, parameters.get(key));
+        for (Entry<String, String> entry : parameters.entrySet()) {
+            putParameter(entry.getKey(), entry.getValue());
         }
     }
 
@@ -47,7 +48,7 @@ public class FileSystem extends DynamicModel {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("FileSystem{");
+        StringBuilder sb = new StringBuilder("FileSystem{");
         sb.append("name='").append(name).append('\'');
         sb.append(", type='").append(type).append('\'');
         sb.append(", defaultFs=").append(defaultFs);

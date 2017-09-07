@@ -4,7 +4,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 public class AzureCredentialView {
 
-    private CloudCredential cloudCredential;
+    private final CloudCredential cloudCredential;
 
     public AzureCredentialView(CloudCredential cloudCredential) {
         this.cloudCredential = cloudCredential;

@@ -10,7 +10,7 @@ import com.sequenceiq.periscope.monitor.evaluator.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.MetricEvaluator;
 
 @Component
-public class MetricMonitor extends AbstractMonitor implements Monitor {
+public class MetricMonitor extends AbstractMonitor {
 
     @Override
     public String getIdentifier() {

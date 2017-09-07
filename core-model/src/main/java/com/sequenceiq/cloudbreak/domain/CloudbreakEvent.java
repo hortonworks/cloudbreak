@@ -239,7 +239,7 @@ public class CloudbreakEvent implements ProvisionEntity {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("CloudbreakEvent{");
+        StringBuilder sb = new StringBuilder("CloudbreakEvent{");
         sb.append("id=").append(id);
         sb.append(", eventType='").append(eventType).append('\'');
         sb.append(", eventTimestamp=").append(eventTimestamp);

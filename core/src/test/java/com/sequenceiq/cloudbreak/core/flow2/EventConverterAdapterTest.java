@@ -6,7 +6,8 @@ import org.junit.Test;
 import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent;
 
 public class EventConverterAdapterTest {
-    private EventConverterAdapter<StackStopEvent> eventConverter = new EventConverterAdapter<>(StackStopEvent.class);
+
+    private final EventConverterAdapter<StackStopEvent> eventConverter = new EventConverterAdapter<>(StackStopEvent.class);
 
     @Test
     public void convertTest() {

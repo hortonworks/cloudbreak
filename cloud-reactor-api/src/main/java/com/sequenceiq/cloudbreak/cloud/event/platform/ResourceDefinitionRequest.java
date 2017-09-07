@@ -25,7 +25,7 @@ public class ResourceDefinitionRequest extends CloudPlatformRequest<ResourceDefi
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("GetResourceDefinition{");
+        StringBuilder sb = new StringBuilder("GetResourceDefinition{");
         sb.append("platform='").append(platform).append('\'');
         sb.append(", resource='").append(resource).append('\'');
         sb.append('}');

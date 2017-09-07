@@ -11,10 +11,6 @@ public class RegionSpecification {
     @JsonProperty("zones")
     private List<String> zones;
 
-    public RegionSpecification() {
-
-    }
-
     public String getName() {
         return name;
     }

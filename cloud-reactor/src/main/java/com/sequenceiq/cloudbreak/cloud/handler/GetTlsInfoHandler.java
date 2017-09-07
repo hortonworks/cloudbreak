@@ -49,7 +49,7 @@ public class GetTlsInfoHandler implements CloudPlatformEventHandler<GetTlsInfoRe
             tlsInfoRequest.getResult().onNext(getTlsInfoResult);
             eventBus.notify(getTlsInfoResult.selector(), new Event(getTlsInfoRequestEvent.getHeaders(), getTlsInfoResult));
             LOGGER.info("GetTlsInfoHandler finished.");
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             String errorMsg = "Failed to get Tls info from cloud connector!";
             LOGGER.error(errorMsg, e);
             GetTlsInfoResult failure = new GetTlsInfoResult(errorMsg, e, tlsInfoRequest);

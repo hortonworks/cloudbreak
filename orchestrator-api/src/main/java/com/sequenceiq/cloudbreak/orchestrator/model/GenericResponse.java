@@ -57,7 +57,7 @@ public class GenericResponse {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("SaltBootResponse{");
+        StringBuilder sb = new StringBuilder("SaltBootResponse{");
         sb.append("status='").append(status).append('\'');
         sb.append(", address='").append(address).append('\'');
         sb.append(", statusCode=").append(statusCode);

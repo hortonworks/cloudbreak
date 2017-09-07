@@ -5,21 +5,21 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.OrchestratorModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
 public abstract class OrchestratorBase implements JsonEntity {
-    @ApiModelProperty(value = ModelDescriptions.OrchestratorModelDescription.PARAMETERS)
+    @ApiModelProperty(OrchestratorModelDescription.PARAMETERS)
     private Map<String, Object> parameters = new HashMap<>();
 
-    @ApiModelProperty(value = ModelDescriptions.OrchestratorModelDescription.ENDPOINT)
+    @ApiModelProperty(OrchestratorModelDescription.ENDPOINT)
     private String apiEndpoint;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.OrchestratorModelDescription.TYPE, required = true)
+    @ApiModelProperty(value = OrchestratorModelDescription.TYPE, required = true)
     private String type;
 
     public Map<String, Object> getParameters() {

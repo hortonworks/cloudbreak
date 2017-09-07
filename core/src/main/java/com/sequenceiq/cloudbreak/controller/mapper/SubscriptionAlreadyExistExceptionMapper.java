@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import com.sequenceiq.cloudbreak.service.subscription.SubscriptionAlreadyExistException;
@@ -9,7 +9,7 @@ import com.sequenceiq.cloudbreak.service.subscription.SubscriptionAlreadyExistEx
 public class SubscriptionAlreadyExistExceptionMapper extends BaseExceptionMapper<SubscriptionAlreadyExistException> {
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.CONFLICT;
+    Status getResponseStatus() {
+        return Status.CONFLICT;
     }
 }

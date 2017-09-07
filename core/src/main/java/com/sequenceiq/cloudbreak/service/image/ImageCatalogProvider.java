@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudbreakImageCatalog;
 @Service
 public class ImageCatalogProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogProvider.class);
 
     @Value("${cb.image.catalog.url}")
     private String defaultCatalogUrl;
@@ -37,7 +37,7 @@ public class ImageCatalogProvider {
             } else {
                 LOGGER.warn("Image catalog URL is not valid: {}", catalogUrl);
             }
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.warn("Failed to get image catalog", e);
         }
         return null;

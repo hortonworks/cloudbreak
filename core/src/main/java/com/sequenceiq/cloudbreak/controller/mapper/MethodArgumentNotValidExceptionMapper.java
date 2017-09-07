@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.mapper;
 
-import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
 
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
@@ -21,7 +21,7 @@ public class MethodArgumentNotValidExceptionMapper extends BaseExceptionMapper<M
     }
 
     @Override
-    Response.Status getResponseStatus() {
-        return Response.Status.BAD_REQUEST;
+    Status getResponseStatus() {
+        return Status.BAD_REQUEST;
     }
 }

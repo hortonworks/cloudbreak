@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.Calendar;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 
 @Service
@@ -36,13 +34,9 @@ public class MetadataSetupService {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    @Inject
-    private ClusterService clusterService;
-
     public int saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         int newInstances = 0;
         boolean ambariServerFound = false;
-        Set<InstanceMetaData> updatedInstanceMetadata = new HashSet<>();
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
         boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
         for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
@@ -94,7 +88,6 @@ public class MetadataSetupService {
                 instanceMetaDataEntry.setInstanceStatus(status);
             }
             instanceMetaDataRepository.save(instanceMetaDataEntry);
-            updatedInstanceMetadata.add(instanceMetaDataEntry);
         }
         return newInstances;
     }

@@ -22,6 +22,7 @@ import reactor.fn.Consumer;
 
 @Component
 public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
+
     @Resource
     private Map<String, FlowEventChainFactory> flowChainConfigMap;
 

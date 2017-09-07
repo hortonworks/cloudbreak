@@ -14,9 +14,6 @@ public class AwsOrchestratorTypeConverter extends AbstractConverter<AwsOrchestra
     @Autowired
     private ShellContext context;
 
-    public AwsOrchestratorTypeConverter() {
-    }
-
     @Override
     public boolean supports(Class<?> type, String optionContext) {
         return AwsOrchestratorType.class.isAssignableFrom(type);
@@ -26,7 +23,7 @@ public class AwsOrchestratorTypeConverter extends AbstractConverter<AwsOrchestra
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getOrchestratorNamesByPlatform("AWS"));
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return false;
         }
     }

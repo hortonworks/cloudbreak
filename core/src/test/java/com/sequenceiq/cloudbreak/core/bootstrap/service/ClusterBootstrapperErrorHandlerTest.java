@@ -81,7 +81,7 @@ public class ClusterBootstrapperErrorHandlerTest {
 
     @Test(expected = CloudbreakOrchestratorFailedException.class)
     public void clusterBootstrapErrorHandlerWhenNodeCountLessThanOneAfterTheRollbackThenClusterProvisionFailed() throws CloudbreakOrchestratorFailedException {
-        final Stack stack = TestUtil.stack();
+        Stack stack = TestUtil.stack();
 
         doNothing().when(eventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
@@ -121,7 +121,7 @@ public class ClusterBootstrapperErrorHandlerTest {
     @Test
     public void clusterBootstrapErrorHandlerWhenNodeCountHigherThanZeroAfterTheRollbackThenClusterProvisionFailed()
             throws CloudbreakOrchestratorFailedException {
-        final Stack stack = TestUtil.stack();
+        Stack stack = TestUtil.stack();
 
         doNothing().when(eventService).fireCloudbreakEvent(anyLong(), anyString(), anyString());
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());

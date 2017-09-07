@@ -30,7 +30,7 @@ public class RecipeCommands implements BaseCommands {
         this.shellContext = shellContext;
     }
 
-    @CliAvailabilityIndicator(value = "recipe list")
+    @CliAvailabilityIndicator("recipe list")
     @Override
     public boolean listAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -115,7 +115,7 @@ public class RecipeCommands implements BaseCommands {
         }
     }
 
-    @CliAvailabilityIndicator(value = {"recipe show --id", "recipe show --name"})
+    @CliAvailabilityIndicator({"recipe show --id", "recipe show --name"})
     @Override
     public boolean showAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
@@ -160,7 +160,7 @@ public class RecipeCommands implements BaseCommands {
         return show(null, name, outPutType);
     }
 
-    @CliAvailabilityIndicator(value = {"recipe delete --id", "recipe delete --name"})
+    @CliAvailabilityIndicator({"recipe delete --id", "recipe delete --name"})
     @Override
     public boolean deleteAvailable() {
         return !shellContext.isMarathonMode() && !shellContext.isYarnMode();

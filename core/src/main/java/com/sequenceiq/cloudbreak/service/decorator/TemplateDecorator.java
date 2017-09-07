@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.decorator;
 import java.util.Collection;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.function.Supplier;
 
 import javax.inject.Inject;
 
@@ -10,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -27,14 +27,14 @@ public class TemplateDecorator implements Decorator<Template> {
     @Inject
     private CloudParameterService cloudParameterService;
 
-    private Supplier<Map<Platform, Collection<VmType>>> virtualMachines =
+    private final Supplier<Map<Platform, Collection<VmType>>> virtualMachines =
             Suppliers.memoize(() -> cloudParameterService.getVmtypes(true).getVirtualMachines());
 
-    private Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
+    private final Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 
     @Override
-    public Template decorate(final Template subject, Object... data) {
+    public Template decorate(Template subject, Object... data) {
         Supplier<VolumeParameterConfig> config = Suppliers.memoize(() -> {
             try {
                 Platform platform = Platform.platform(subject.cloudPlatform());

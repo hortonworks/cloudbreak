@@ -8,10 +8,6 @@ public class BlueprintParameter implements ProvisionEntity {
 
     private String referenceConfiguration;
 
-    public BlueprintParameter() {
-
-    }
-
     public String getName() {
         return name;
     }

@@ -36,7 +36,7 @@ public final class ConsulUtils {
     public static List<CatalogService> getService(ConsulClient client, String serviceName) {
         try {
             return client.getCatalogService(serviceName, QueryParams.DEFAULT).getValue();
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             return Collections.emptyList();
         }
     }
@@ -58,7 +58,7 @@ public final class ConsulUtils {
         } catch (OperationException e) {
             LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Status code: {}, Message: {}", key, e.getStatusCode(), e.getStatusMessage());
             return null;
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             LOGGER.info("Failed to get entry '{}' from Consul's key-value store. Error message: {}", key, e.getMessage());
             return null;
         }

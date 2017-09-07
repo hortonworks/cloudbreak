@@ -5,6 +5,7 @@ import org.openstack4j.model.compute.Server;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
 
+@FunctionalInterface
 public interface CloudInstanceMetaDataExtractor {
     CloudInstanceMetaData extractMetadata(OSClient client, Server server, String instanceId);
 }

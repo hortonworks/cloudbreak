@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.orchestrator.model;
 
 public class ContainerInfo {
 
-    private String id;
+    private final String id;
 
-    private String name;
+    private final String name;
 
-    private String host;
+    private final String host;
 
-    private String image;
+    private final String image;
 
     public ContainerInfo(String id, String name, String host, String image) {
         this.id = id;

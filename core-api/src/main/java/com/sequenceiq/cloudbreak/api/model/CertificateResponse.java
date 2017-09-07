@@ -6,13 +6,13 @@ import io.swagger.annotations.ApiModelProperty;
 
 public class CertificateResponse {
 
-    @ApiModelProperty(value = StackModelDescription.CERTIFICATE)
+    @ApiModelProperty(StackModelDescription.CERTIFICATE)
     private byte[] serverCert;
 
-    @ApiModelProperty(value = StackModelDescription.CLIENT_KEY)
+    @ApiModelProperty(StackModelDescription.CLIENT_KEY)
     private byte[] clientKey;
 
-    @ApiModelProperty(value = StackModelDescription.CLIENT_CERT)
+    @ApiModelProperty(StackModelDescription.CLIENT_CERT)
     private byte[] clientCert;
 
     public CertificateResponse() {

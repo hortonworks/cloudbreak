@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 
 public class StackServiceComponentDescriptor {
+
     private static final String MASTER = "MASTER";
 
-    private String name;
+    private final String name;
 
-    private String category;
+    private final String category;
 
-    private int minCardinality;
+    private final int minCardinality;
 
-    private int maxCardinality;
+    private final int maxCardinality;
 
     public StackServiceComponentDescriptor(String name, String category, int minCardinality, int maxCardinality) {
         this.name = name;

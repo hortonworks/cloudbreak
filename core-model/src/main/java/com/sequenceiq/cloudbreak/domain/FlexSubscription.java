@@ -11,10 +11,8 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 @Entity
-@Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"account", "name"})
-})
-public class FlexSubscription {
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+public class FlexSubscription implements ProvisionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "flexsubscription_generator")
@@ -124,7 +122,7 @@ public class FlexSubscription {
         return "FlexSubscription{" + "id=" + id
                 + ", name='" + name + '\''
                 + ", subscriptionId='" + subscriptionId + '\''
-                + ", smartSenseSubscription='" + smartSenseSubscription.toString() + '\''
+                + ", smartSenseSubscription='" + smartSenseSubscription + '\''
                 + ", owner='" + owner + '\''
                 + ", account='" + account + '\''
                 + ", publicInAccount=" + publicInAccount + '}';

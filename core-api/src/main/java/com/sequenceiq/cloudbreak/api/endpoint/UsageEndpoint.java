@@ -9,12 +9,12 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
+import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
-import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
+import com.sequenceiq.cloudbreak.doc.OperationDescriptions.UsagesOpDescription;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,7 +26,7 @@ public interface UsageEndpoint {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+    @ApiOperation(value = UsagesOpDescription.GET_ALL, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
             nickname = "getDeployerUsage")
     List<CloudbreakUsageJson> getDeployer(
             @QueryParam("since") Long since,
@@ -39,7 +39,7 @@ public interface UsageEndpoint {
     @GET
     @Path("account")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+    @ApiOperation(value = UsagesOpDescription.GET_PUBLIC, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
             nickname = "getAccountUsage")
     List<CloudbreakUsageJson> getAccount(
             @QueryParam("since") Long since,
@@ -51,7 +51,7 @@ public interface UsageEndpoint {
     @GET
     @Path("user")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+    @ApiOperation(value = UsagesOpDescription.GET_PRIVATE, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
             nickname = "getUserUsage")
     List<CloudbreakUsageJson> getUser(
             @QueryParam("since") Long since,
@@ -62,14 +62,14 @@ public interface UsageEndpoint {
     @GET
     @Path("flex/daily")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_FLEX_DAILY, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+    @ApiOperation(value = UsagesOpDescription.GET_FLEX_DAILY, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
             nickname = "getDailyFlexUsage")
     CloudbreakFlexUsageJson getDailyFlexUsages();
 
     @GET
     @Path("flex/latest")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = OperationDescriptions.UsagesOpDescription.GET_FLEX_LATEST, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
+    @ApiOperation(value = UsagesOpDescription.GET_FLEX_LATEST, produces = ContentType.JSON, notes = Notes.USAGE_NOTES,
             nickname = "getLatestFlexUsage")
     CloudbreakFlexUsageJson getLatestFlexUsages();
 

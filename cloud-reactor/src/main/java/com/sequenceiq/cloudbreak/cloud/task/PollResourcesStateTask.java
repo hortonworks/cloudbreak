@@ -15,13 +15,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceStatusLists;
 
 @Component(PollResourcesStateTask.NAME)
-@Scope(value = "prototype")
+@Scope("prototype")
 public class PollResourcesStateTask extends AbstractPollTask<ResourcesStatePollerResult> {
     public static final String NAME = "pollResourcesStateTask";
 
-    private List<CloudResource> cloudResource;
+    private final List<CloudResource> cloudResource;
 
-    private ResourceConnector resourceConnector;
+    private final ResourceConnector resourceConnector;
 
     @Inject
     public PollResourcesStateTask(AuthenticatedContext authenticatedContext, ResourceConnector resourceConnector,

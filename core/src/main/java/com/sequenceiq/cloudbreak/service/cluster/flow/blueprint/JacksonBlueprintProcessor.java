@@ -76,7 +76,7 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
                         recoveryEntry.put(configurationEntry.getKey(), configurationEntry.getValue());
                     } else {
                         ObjectNode recoveryEntry = ((ArrayNode) configFileNode).addObject();
-                        ((ObjectNode) recoveryEntry).put(configurationEntry.getKey(), configurationEntry.getValue());
+                        recoveryEntry.put(configurationEntry.getKey(), configurationEntry.getValue());
                     }
                 }
             }
@@ -175,7 +175,7 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
             ObjectNode blueprintsNode = (ObjectNode) root.path(BLUEPRINTS);
             blueprintsNode.remove(STACK_VERSION);
             String[] split = hdpVersion.split("\\.");
-            blueprintsNode.put(STACK_VERSION, split[0] + "." + split[1]);
+            blueprintsNode.put(STACK_VERSION, split[0] + '.' + split[1]);
             return JsonUtil.writeValueAsString(root);
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to modify hdp version.", e);
@@ -214,7 +214,7 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
         return componentExists;
     }
 
-    private class ComponentElement {
+    private static class ComponentElement {
         private String name;
 
         private ComponentElement(String component) {

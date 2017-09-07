@@ -49,7 +49,7 @@ public class OpenStackNetworkResourceBuilder extends AbstractOpenStackNetworkRes
                         .build();
                 networkId = osClient.networking().network().create(osNetwork).getId();
             }
-            context.putParameter(OpenStackConstants.NETWORK_ID, networkId);
+            context.putParameter(NETWORK_ID, networkId);
             return createPersistedResource(buildableResource, networkId);
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("Network creation failed", resourceType(), buildableResource.getName(), ex);

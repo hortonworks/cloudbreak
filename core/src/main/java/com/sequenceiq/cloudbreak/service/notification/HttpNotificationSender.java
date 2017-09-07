@@ -19,12 +19,13 @@ import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
 
 @Service
 public class HttpNotificationSender implements NotificationSender {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSender.class);
 
     @Inject
     private SubscriptionRepository subscriptionRepository;
 
-    private Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
+    private final Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
 
     @Override
     public void send(Notification notification) {

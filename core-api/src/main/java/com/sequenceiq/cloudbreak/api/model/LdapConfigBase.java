@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Max;
 
 import com.sequenceiq.cloudbreak.common.type.DirectoryType;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.LdapConfigModelDescription;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -15,52 +16,52 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class LdapConfigBase implements JsonEntity {
 
     @Size(max = 1000)
-    @ApiModelProperty(value = ModelDescriptions.DESCRIPTION)
+    @ApiModelProperty(ModelDescriptions.DESCRIPTION)
     private String description;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.SERVER_HOST, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_HOST, required = true)
     private String serverHost;
 
     @NotNull
     @Max(65535)
     @Min(1)
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.SERVER_PORT, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.SERVER_PORT, required = true)
     private Integer serverPort;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.PROTOCOL)
+    @ApiModelProperty(LdapConfigModelDescription.PROTOCOL)
     private String protocol = "ldap";
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.BIND_DN, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.BIND_DN, required = true)
     private String bindDn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
+    @ApiModelProperty(value = LdapConfigModelDescription.USER_SEARCH_BASE, required = true)
     private String userSearchBase;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_SEARCH_BASE)
+    @ApiModelProperty(LdapConfigModelDescription.GROUP_SEARCH_BASE)
     private String groupSearchBase;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_NAME_ATTRIBUTE)
+    @ApiModelProperty(LdapConfigModelDescription.USER_NAME_ATTRIBUTE)
     private String userNameAttribute;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.DOMAIN)
+    @ApiModelProperty(LdapConfigModelDescription.DOMAIN)
     private String domain;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.DIRECTORY_TYPE)
+    @ApiModelProperty(LdapConfigModelDescription.DIRECTORY_TYPE)
     private DirectoryType directoryType;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.USER_OBJECT_CLASS)
+    @ApiModelProperty(LdapConfigModelDescription.USER_OBJECT_CLASS)
     private String userObjectClass;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_OBJECT_CLASS)
+    @ApiModelProperty(LdapConfigModelDescription.GROUP_OBJECT_CLASS)
     private String groupObjectClass;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_ID_ATTRIBUTE)
+    @ApiModelProperty(LdapConfigModelDescription.GROUP_ID_ATTRIBUTE)
     private String groupNameAttribute;
 
-    @ApiModelProperty(value = ModelDescriptions.LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
+    @ApiModelProperty(LdapConfigModelDescription.GROUP_MEMBER_ATTRIBUTE)
     private String groupMemberAttribute;
 
     public String getDescription() {

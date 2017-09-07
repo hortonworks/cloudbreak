@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.NetworkInterfaceResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo.DurationComparator;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltAction;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
@@ -85,7 +87,7 @@ public class SaltStates {
 
     private static Multimap<String, String> collectMissingTargets(Map<String, List<RunnerInfo>> stringRunnerInfoObjectMap) {
         Multimap<String, String> missingTargetsWithErrors = ArrayListMultimap.create();
-        for (Map.Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
+        for (Entry<String, List<RunnerInfo>> stringMapEntry : stringRunnerInfoObjectMap.entrySet()) {
             LOGGER.info("Collect missing targets from host: {}", stringMapEntry.getKey());
             logRunnerInfos(stringMapEntry);
             for (RunnerInfo targetObject : stringMapEntry.getValue()) {
@@ -100,9 +102,9 @@ public class SaltStates {
         return missingTargetsWithErrors;
     }
 
-    private static void logRunnerInfos(Map.Entry<String, List<RunnerInfo>> stringMapEntry) {
+    private static void logRunnerInfos(Entry<String, List<RunnerInfo>> stringMapEntry) {
         List<RunnerInfo> runnerInfos = stringMapEntry.getValue();
-        Collections.sort(runnerInfos, Collections.reverseOrder(new RunnerInfo.DurationComparator()));
+        runnerInfos.sort(Collections.reverseOrder(new DurationComparator()));
         double sum = runnerInfos.stream().mapToDouble(runnerInfo -> runnerInfo.getDuration()).sum();
         try {
             LOGGER.info("Salt states executed on: {} within: {} sec, details {}", stringMapEntry.getKey(),
@@ -117,7 +119,7 @@ public class SaltStates {
         RunningJobsResponse runningInfo = sc.run("jobs.active", RUNNER, RunningJobsResponse.class);
         LOGGER.info("Active salt jobs: {}", runningInfo);
         for (Map<String, Map<String, Object>> results : runningInfo.getResult()) {
-            for (Map.Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
+            for (Entry<String, Map<String, Object>> stringMapEntry : results.entrySet()) {
                 if (stringMapEntry.getKey().equals(jid)) {
                     return true;
                 }
@@ -136,7 +138,7 @@ public class SaltStates {
 
     public static void stopMinions(SaltConnector sc, Map<String, String> privateIPsByFQDN) {
         SaltAction saltAction = new SaltAction(SaltActionType.STOP);
-        for (Map.Entry<String, String> entry : privateIPsByFQDN.entrySet()) {
+        for (Entry<String, String> entry : privateIPsByFQDN.entrySet()) {
             Minion minion = new Minion();
             minion.setAddress(entry.getValue());
             saltAction.addMinion(minion);

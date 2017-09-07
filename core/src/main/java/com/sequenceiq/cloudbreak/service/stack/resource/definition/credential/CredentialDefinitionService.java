@@ -59,8 +59,7 @@ public class CredentialDefinitionService {
     }
 
     private Map<String, Object> processValues(Definition definition, Map<String, Object> properties, boolean revert, boolean remove) {
-        Map<String, Object> processed = new HashMap<>();
-        processed.putAll(processValues(properties, definition.getDefaultValues(), revert, remove));
+        Map<String, Object> processed = new HashMap<>(processValues(properties, definition.getDefaultValues(), revert, remove));
         Object selector = properties.get(SELECTOR);
         if (selector != null) {
             processed.put(SELECTOR, selector);

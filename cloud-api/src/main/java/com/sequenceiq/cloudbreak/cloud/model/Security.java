@@ -25,7 +25,7 @@ public class Security {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Security{");
+        StringBuilder sb = new StringBuilder("Security{");
         sb.append("rules=").append(rules);
         sb.append('}');
         return sb.toString();

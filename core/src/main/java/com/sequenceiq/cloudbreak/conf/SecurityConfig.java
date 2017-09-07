@@ -46,21 +46,21 @@ public class SecurityConfig {
     @Configuration
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
-        private static final String[] BLUEPRINT_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/blueprints/**"};
+        private static final String[] BLUEPRINT_URL_PATTERNS = {API_ROOT_CONTEXT + "/blueprints/**"};
 
-        private static final String[] TEMPLATE_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/templates/**"};
+        private static final String[] TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/templates/**"};
 
-        private static final String[] CREDENTIAL_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/credentials/**"};
+        private static final String[] CREDENTIAL_URL_PATTERNS = {API_ROOT_CONTEXT + "/credentials/**"};
 
-        private static final String[] RECIPE_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/recipes/**"};
+        private static final String[] RECIPE_URL_PATTERNS = {API_ROOT_CONTEXT + "/recipes/**"};
 
-        private static final String[] NETWORK_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/networks/**"};
+        private static final String[] NETWORK_URL_PATTERNS = {API_ROOT_CONTEXT + "/networks/**"};
 
-        private static final String[] SECURITYGROUP_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/securitygroups/**"};
+        private static final String[] SECURITYGROUP_URL_PATTERNS = {API_ROOT_CONTEXT + "/securitygroups/**"};
 
-        private static final String[] STACK_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/stacks/**"};
+        private static final String[] STACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/stacks/**"};
 
-        private static final String[] STACK_TEMPLATE_URL_PATTERNS = new String[]{API_ROOT_CONTEXT + "/clustertemplates/**"};
+        private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/clustertemplates/**"};
 
         private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/accountpreferences/**";
 

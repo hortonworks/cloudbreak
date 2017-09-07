@@ -7,11 +7,11 @@ import com.sequenceiq.cloudbreak.api.model.ExecutionType;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent;
 
 public class FileSystemScriptConfig {
-    private String scriptLocation;
+    private final String scriptLocation;
 
-    private ClusterLifecycleEvent clusterLifecycleEvent;
+    private final ClusterLifecycleEvent clusterLifecycleEvent;
 
-    private ExecutionType executionType;
+    private final ExecutionType executionType;
 
     private Map<String, String> properties = new HashMap<>();
 

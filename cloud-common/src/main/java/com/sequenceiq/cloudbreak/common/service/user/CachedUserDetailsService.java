@@ -72,7 +72,7 @@ public class CachedUserDetailsService {
 
         switch (filterField) {
             case USERNAME:
-                target = identityWebTarget.queryParam("filter", "userName eq \"" + username + "\"");
+                target = identityWebTarget.queryParam("filter", "userName eq \"" + username + '"');
                 break;
             case USERID:
                 target = identityWebTarget.path(username);

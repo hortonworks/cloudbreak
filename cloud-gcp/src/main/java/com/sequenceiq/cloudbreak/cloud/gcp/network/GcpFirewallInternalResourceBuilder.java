@@ -13,8 +13,11 @@ import java.util.Collections;
 import org.springframework.stereotype.Service;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.Compute.Firewalls.Insert;
+import com.google.api.services.compute.Compute.Networks;
+import com.google.api.services.compute.Compute.Subnetworks.Get;
 import com.google.api.services.compute.model.Firewall;
+import com.google.api.services.compute.model.Firewall.Allowed;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
@@ -44,14 +47,14 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         String projectId = context.getProjectId();
 
         Firewall firewall = new Firewall();
-        Firewall.Allowed allowed1 = new Firewall.Allowed();
+        Allowed allowed1 = new Allowed();
         allowed1.setIPProtocol("tcp");
         allowed1.setPorts(Collections.singletonList("1-65535"));
 
-        Firewall.Allowed allowed2 = new Firewall.Allowed();
+        Allowed allowed2 = new Allowed();
         allowed2.setIPProtocol("icmp");
 
-        Firewall.Allowed allowed3 = new Firewall.Allowed();
+        Allowed allowed3 = new Allowed();
         allowed3.setIPProtocol("udp");
         allowed3.setPorts(Collections.singletonList("1-65535"));
 
@@ -59,20 +62,20 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         firewall.setAllowed(Arrays.asList(allowed1, allowed2, allowed3));
         firewall.setName(buildableResource.getName());
         if (legacyNetwork(network)) {
-            Compute.Networks.Get networkRequest = context.getCompute().networks().get(projectId, getCustomNetworkId(network));
+            Networks.Get networkRequest = context.getCompute().networks().get(projectId, getCustomNetworkId(network));
             com.google.api.services.compute.model.Network existingNetwork = networkRequest.execute();
             firewall.setSourceRanges(Collections.singletonList(existingNetwork.getIPv4Range()));
         } else if (newNetworkAndSubnet(network) || newSubnetInExistingNetwork(network)) {
             firewall.setSourceRanges(Collections.singletonList(network.getSubnet().getCidr()));
         } else {
-            Compute.Subnetworks.Get sn = context.getCompute().subnetworks().get(projectId, context.getLocation().getRegion().value(), getSubnetId(network));
+            Get sn = context.getCompute().subnetworks().get(projectId, context.getLocation().getRegion().value(), getSubnetId(network));
             com.google.api.services.compute.model.Subnetwork existingSubnet = sn.execute();
             firewall.setSourceRanges(Collections.singletonList(existingSubnet.getIpCidrRange()));
         }
         firewall.setNetwork(String.format("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", projectId,
                 context.getParameter(GcpNetworkResourceBuilder.NETWORK_NAME, String.class)));
 
-        Compute.Firewalls.Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
+        Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
         try {
             Operation operation = firewallInsert.execute();
             if (operation.getHttpErrorStatusCode() != null) {

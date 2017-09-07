@@ -36,8 +36,6 @@ public class OpenStackPlatformResources implements PlatformResources {
         OSClient osClient = openStackClient.createOSClient(cloudCredential);
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
 
-        Map<String, Set<CloudNetwork>> result = new HashMap<>();
-
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
         for (Network network : osClient.networking().network().list()) {
             Map<String, Object> properties = new HashMap<>();
@@ -50,6 +48,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             cloudNetworks.add(cloudNetwork);
         }
 
+        Map<String, Set<CloudNetwork>> result = new HashMap<>(1);
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudNetworks);
         return new CloudNetworks(result);
     }
@@ -58,8 +57,6 @@ public class OpenStackPlatformResources implements PlatformResources {
     public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         OSClient osClient = openStackClient.createOSClient(cloudCredential);
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
-
-        Map<String, Set<CloudSshKey>> result = new HashMap<>();
 
         Set<CloudSshKey> cloudSshKeys = new HashSet<>();
         for (Keypair keypair : osClient.compute().keypairs().list()) {
@@ -75,6 +72,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             cloudSshKeys.add(cloudSshKey);
         }
 
+        Map<String, Set<CloudSshKey>> result = new HashMap<>();
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudSshKeys);
         return new CloudSshKeys(result);
     }
@@ -83,8 +81,6 @@ public class OpenStackPlatformResources implements PlatformResources {
     public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         OSClient osClient = openStackClient.createOSClient(cloudCredential);
         KeystoneCredentialView osCredential = openStackClient.createKeystoneCredential(cloudCredential);
-
-        Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
 
         Set<CloudSecurityGroup> cloudSecurityGroups = new HashSet<>();
         for (SecGroupExtension secGroup : osClient.compute().securityGroups().list()) {
@@ -96,6 +92,7 @@ public class OpenStackPlatformResources implements PlatformResources {
             cloudSecurityGroups.add(cloudSecurityGroup);
         }
 
+        Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         result.put(region.value() == null ? osCredential.getTenantName() : region.value(), cloudSecurityGroups);
         return new CloudSecurityGroups(result);
     }

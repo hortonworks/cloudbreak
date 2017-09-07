@@ -9,7 +9,7 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel("HostGroupAdjustment")
-public class HostGroupAdjustmentJson {
+public class HostGroupAdjustmentJson implements JsonEntity {
 
     @NotNull
     @ApiModelProperty(value = HostGroupModelDescription.HOST_GROUP_NAME, required = true)
@@ -24,9 +24,6 @@ public class HostGroupAdjustmentJson {
 
     @ApiModelProperty(HostGroupAdjustmentModelDescription.VALIDATE_NODE_COUNT)
     private Boolean validateNodeCount = Boolean.TRUE;
-
-    public HostGroupAdjustmentJson() {
-    }
 
     public String getHostGroup() {
         return hostGroup;

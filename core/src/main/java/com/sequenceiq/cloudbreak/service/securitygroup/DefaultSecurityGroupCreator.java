@@ -19,9 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.Port;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
@@ -76,7 +76,7 @@ public class DefaultSecurityGroupCreator {
         StringBuilder allPortsOpenDescBuilder = new StringBuilder();
         allPortsOpenDescBuilder.append("Open ports:");
         for (Port port : portsWithoutAclRules) {
-            allPortsOpenDescBuilder.append(" ").append(port.getPort()).append(" (").append(port.getName()).append(")");
+            allPortsOpenDescBuilder.append(' ').append(port.getPort()).append(" (").append(port.getName()).append(')');
         }
         return allPortsOpenDescBuilder.toString();
     }
@@ -110,7 +110,7 @@ public class DefaultSecurityGroupCreator {
             Port port = portsIterator.next();
             builder.append(port.getPort());
             if (portsIterator.hasNext()) {
-                builder.append(",");
+                builder.append(',');
             }
         }
         return builder.toString();
