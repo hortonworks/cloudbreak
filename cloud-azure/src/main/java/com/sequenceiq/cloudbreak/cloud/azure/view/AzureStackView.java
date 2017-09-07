@@ -26,7 +26,7 @@ public class AzureStackView {
     private List<String> instanceGroupNames = new ArrayList<>();
 
     public AzureStackView(String stackName, int stackNamePrefixLength, List<Group> groupList, AzureStorageView armStorageView,
-            AzureSubnetStrategy subnetStrategy) {
+            AzureSubnetStrategy subnetStrategy, Boolean encrytionNeeded) {
         for (Group group : groupList) {
             String groupName = group.getType().name();
             List<AzureInstanceView> existingInstances = groups.computeIfAbsent(groupName, k -> new ArrayList<>());
@@ -50,7 +50,7 @@ public class AzureStackView {
                 boolean managedDisk = Boolean.TRUE.equals(instance.getTemplate().getParameter("managedDisk", Boolean.class));
                 AzureInstanceView azureInstance = new AzureInstanceView(stackName, stackNamePrefixLength, instance, group.getType(), attachedDiskStorageName,
                         template.getVolumeType(), group.getName(), instanceGroupView.getAvailabilitySetName(), managedDisk,
-                        getInstanceSubnetId(instance, subnetStrategy));
+                        getInstanceSubnetId(instance, subnetStrategy), encrytionNeeded);
                 existingInstances.add(azureInstance);
             }
             boolean managedDisk = Boolean.TRUE.equals(group.getReferenceInstanceConfiguration().getTemplate()

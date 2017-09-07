@@ -86,6 +86,39 @@
         <input type="checkbox" id="encryptazure" ng-model="cluster.parameters.encryptStorage" name="encryptazure">
     </div>
 </div>
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE')">
+    <label class="col-sm-3 control-label" for="useAzureVault">Use Azure Vault On Datadisks</label>
+    <div class="col-sm-8">
+        <input type="checkbox" id="useAzureVault" ng-model="cluster.parameters.useAzureVault" name="useAzureVault">
+    </div>
+</div>
+
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' && cluster.parameters.useAzureVault)">
+    <label class="col-sm-3 control-label" for="vaultResourceGroupName">Azure Vault Resource Group Name</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" id="vaultResourceGroupName" ng-required="cluster.parameters.useAzureVault" ng-model="cluster.parameters.vaultResourceGroupName" name="vaultResourceGroupName">
+    </div>
+</div>
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' && cluster.parameters.useAzureVault)">
+    <label class="col-sm-3 control-label" for="vaultName">Azure Vault Name</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" id="vaultName" ng-required="cluster.parameters.useAzureVault" ng-model="cluster.parameters.vaultName" name="vaultName">
+    </div>
+</div>
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' && cluster.parameters.useAzureVault)">
+    <label class="col-sm-3 control-label" for="vaultSecretName">Azure Vault Secret Name</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" id="vaultSecretName" ng-required="cluster.parameters.useAzureVault" ng-model="cluster.parameters.vaultSecretName" name="vaultSecretName">
+    </div>
+</div>
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE' && cluster.parameters.useAzureVault)">
+    <label class="col-sm-3 control-label" for="encryptazure">Azure Vault Secret Version</label>
+    <div class="col-sm-8">
+        <input class="form-control" type="text" id="vaultSecretVersion" ng-required="cluster.parameters.useAzureVault" ng-model="cluster.parameters.vaultSecretVersion" name="vaultSecretVersion">
+    </div>
+</div>
+
+
 <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'WASB' && cluster.fileSystem.defaultFs">
     <label class="col-sm-3 control-label" for="wasbsecure">{{msg.filesystem_wasb_secure_label}}</label>
     <div class="col-sm-8">

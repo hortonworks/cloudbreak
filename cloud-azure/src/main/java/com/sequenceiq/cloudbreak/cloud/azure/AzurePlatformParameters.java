@@ -244,6 +244,11 @@ public class AzurePlatformParameters implements PlatformParameters {
         additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
                 Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("vaultName", false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("vaultSecretName", false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("vaultResourceGroupName", false, String.class, Optional.absent()));
+        additionalStackParameterValidations.add(new StackParamValidation("vaultSecretVersion", false, String.class, Optional.absent()));
+
         return additionalStackParameterValidations;
     }
 

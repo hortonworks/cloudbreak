@@ -68,6 +68,24 @@
            "defaultValue": "${subnet1Prefix}"
         },
         </#if>
+        <#if enableVault>
+        "vaultName": {
+           "type": "string",
+           "defaultValue": "${vaultName}"
+        },
+        "vaultSecretName": {
+           "type": "string",
+           "defaultValue": "${vaultSecretName}"
+        },
+        "vaultResourceGroupName": {
+           "type": "string",
+           "defaultValue": "${vaultResourceGroupName}"
+        },
+        "vaultSecretVersion": {
+           "type": "string",
+           "defaultValue": "${vaultSecretVersion}"
+        },
+        </#if>
         "sshIPConfigName": {
             "type": "string",
             "defaultValue": "${stackname}ipcn"
@@ -332,6 +350,17 @@
                        "storageProfile": {
                            "osDisk" : {
                                <#if instance.managedDisk == false>
+                               <#if enableVault == true>
+                               "encryptionSettings": {
+                                 "diskEncryptionKey": {
+                                    "secretUrl": "[concat('https://',parameters('vaultName'),'.vault.azure.net/secrets/',parameters('vaultSecretName'),'/',parameters('vaultSecretVersion'))]",
+                                    "sourceVault": {
+                                        "id": "[resourceId(parameters('vaultResourceGroupName'),'Microsoft.KeyVault/vaults',parameters('vaultName'))]"
+                                    }
+                                 },
+                                 "enabled": true
+                               },
+                               </#if>
                                "image" : {
                                     "uri" : "[variables('userImageName')]"
                                },

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureVaultView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -49,8 +50,8 @@ public class AzureTemplateBuilder {
     @Inject
     private AzureStorage azureStorage;
 
-    public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
-            CloudStack cloudStack) {
+    public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, AzureVaultView azureVaultView,
+            CloudContext cloudContext, CloudStack cloudStack) {
         try {
             String imageUrl = cloudStack.getImage().getImageName();
             String imageName = imageUrl.substring(imageUrl.lastIndexOf('/') + 1);
@@ -83,12 +84,21 @@ public class AzureTemplateBuilder {
             model.put("noPublicIp", azureUtils.isPrivateIp(network));
             model.put("noFirewallRules", azureUtils.isNoSecurityGroups(network));
             model.put("userDefinedTags", cloudStack.getTags());
+            addVaultIfRequired(model, azureVaultView);
             String generatedTemplate = processTemplateIntoString(getTemplate(cloudStack), model);
             LOGGER.debug("Generated Arm template: {}", generatedTemplate);
             return generatedTemplate;
         } catch (IOException | TemplateException e) {
             throw new CloudConnectorException("Failed to process the Arm TemplateBuilder", e);
         }
+    }
+
+    private void addVaultIfRequired(Map<String, Object> model, AzureVaultView azureVaultView) {
+        model.put("vaultName", azureVaultView.getVaultName());
+        model.put("vaultSecretName", azureVaultView.getVaultSecretName());
+        model.put("vaultResourceGroupName", azureVaultView.getVaultResourceGroupName());
+        model.put("vaultSecretVersion", azureVaultView.getVaultSecretVersion());
+        model.put("enableVault", azureVaultView.isEnableVault());
     }
 
     public String buildParameters(CloudCredential credential, Network network, Image image) {
