@@ -41,8 +41,8 @@ cloudbreak-conf-tags() {
     env-import DOCKER_TAG_CBD_SMARTSENSE 0.10.0
 
     env-import DOCKER_IMAGE_CLOUDBREAK hortonworks/cloudbreak
-    env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/cb-web
-    env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/cb-auth
+    env-import DOCKER_IMAGE_CLOUDBREAK_WEB hortonworks/hdc-web
+    env-import DOCKER_IMAGE_CLOUDBREAK_AUTH hortonworks/hdc-auth
     env-import DOCKER_IMAGE_CLOUDBREAK_PERISCOPE hortonworks/cloudbreak-autoscale
     env-import DOCKER_IMAGE_CLOUDBREAK_SHELL hortonworks/cloudbreak-shell
     env-import DOCKER_IMAGE_CBD_SMARTSENSE hortonworks/cbd-smartsense
