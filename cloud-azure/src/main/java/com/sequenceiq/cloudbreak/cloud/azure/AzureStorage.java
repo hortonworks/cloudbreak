@@ -20,6 +20,7 @@ import com.microsoft.azure.management.storage.StorageAccounts;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureVaultView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -49,6 +50,20 @@ public class AzureStorage {
             return ArmAttachedStorageOption.SINGLE;
         }
         return ArmAttachedStorageOption.valueOf(attachedStorageOption);
+    }
+
+    public AzureVaultView getAzureVaultView(Map<String, String> parameters) {
+        String vaultName = parameters.get("vaultName");
+        String vaultSecretName = parameters.get("vaultSecretName");
+        String vaultResourceGroupName = parameters.get("vaultResourceGroupName");
+        String vaultSecretVersion = parameters.get("vaultSecretVersion");
+
+        if (Strings.isNullOrEmpty(vaultName) || Strings.isNullOrEmpty(vaultSecretName)
+                || Strings.isNullOrEmpty(vaultResourceGroupName) || Strings.isNullOrEmpty(vaultSecretVersion)) {
+            return new AzureVaultView();
+        } else {
+            return new AzureVaultView(vaultName, vaultSecretName, vaultResourceGroupName, vaultSecretVersion, true);
+        }
     }
 
     public String getCustomImageId(AzureClient client, AuthenticatedContext ac, CloudStack stack) {
@@ -84,10 +99,10 @@ public class AzureStorage {
         return buildStorageName(armAttachedStorageOption, acv, vmId, cloudContext, storageType);
     }
 
-    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region)
+    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region, Boolean encrypted)
             throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
-            client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()));
+            client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()), encrypted);
         }
     }
 
@@ -140,6 +155,10 @@ public class AzureStorage {
 
     public String getPersistentStorageName(Map<String, String> parameters) {
         return parameters.get("persistentStorage");
+    }
+
+    public Boolean isEncrytionNeeded(Map<String, String> parameters) {
+        return Boolean.parseBoolean(parameters.get("encryptStorage"));
     }
 
     public boolean isPersistentStorage(String persistentStorageName) {

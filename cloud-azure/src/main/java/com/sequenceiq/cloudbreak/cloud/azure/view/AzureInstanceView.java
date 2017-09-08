@@ -37,10 +37,12 @@ public class AzureInstanceView {
 
     private boolean managedDisk;
 
+    private boolean encryption;
+
     private String subnetId;
 
     public AzureInstanceView(String stackName, int stackNamePrefixLength, CloudInstance instance, InstanceGroupType type, String attachedDiskStorage,
-            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId) {
+            String attachedDiskStorageType, String groupName, String availabilitySetName, boolean managedDisk, String subnetId, boolean encryption) {
         this.instance = instance;
         this.instanceTemplate = instance.getTemplate();
         this.stackNamePrefixLength = stackNamePrefixLength;
@@ -52,6 +54,7 @@ public class AzureInstanceView {
         this.availabilitySetName = availabilitySetName;
         this.managedDisk = managedDisk;
         this.subnetId = subnetId;
+        this.encryption = encryption;
     }
 
     /**
@@ -110,6 +113,10 @@ public class AzureInstanceView {
 
     public String getGroupName() {
         return groupName;
+    }
+
+    public boolean isEncryption() {
+        return encryption;
     }
 
     public boolean isManagedDisk() {

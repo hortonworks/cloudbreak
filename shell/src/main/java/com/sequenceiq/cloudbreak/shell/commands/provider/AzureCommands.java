@@ -11,6 +11,7 @@ import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
 import org.springframework.shell.core.annotation.CliOption;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ArmAttachedStorageOption;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
@@ -407,6 +408,12 @@ public class AzureCommands implements CommandMarker {
             String persistentStorage,
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "encryptStorage", help = "Encrypt Azure storage", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "false", mandatory = false) boolean encryptStorage,
+            @CliOption(key = "vaultName", help = "select name of your vault") String vaultName,
+            @CliOption(key = "vaultSecretName", help = "select name of your vault secret") String vaultSecretName,
+            @CliOption(key = "vaultResourceGroupName", help = "select resourcegroup of your vault") String vaultResourceGroupName,
+            @CliOption(key = "vaultSecretVersion", help = "select version of your vault secret") String vaultSecretVersion,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true", mandatory = false) Long timeout) {
 
             orchestratorType = (orchestratorType == null) ? new ArmOrchestratorType(SALT) : orchestratorType;
@@ -423,6 +430,19 @@ public class AzureCommands implements CommandMarker {
 
             if (diskPerStorage != null) {
                 params.put("diskPerStorage", diskPerStorage.toString());
+            }
+            params.put("encryptStorage", String.valueOf(encryptStorage));
+            if (!Strings.isNullOrEmpty(vaultName)) {
+                params.put("vaultName", vaultName);
+            }
+            if (!Strings.isNullOrEmpty(vaultSecretName)) {
+                params.put("vaultSecretName", vaultSecretName);
+            }
+            if (!Strings.isNullOrEmpty(vaultResourceGroupName)) {
+                params.put("vaultResourceGroupName", vaultResourceGroupName);
+            }
+            if (!Strings.isNullOrEmpty(vaultSecretVersion)) {
+                params.put("vaultSecretVersion", vaultSecretVersion);
             }
             if (attachedStorageOption != null && shellContext.isAzureActiveCredential()) {
                 params.put("attachedStorageOption", attachedStorageOption.name());

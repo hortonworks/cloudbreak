@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStorageView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureVaultView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -94,11 +95,13 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         AzureClient client = ac.getParameter(AzureClient.class);
         AzureStackView azureStackView = getAzureStack(azureCredentialView, ac.getCloudContext(), stack,
                 getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
+        AzureVaultView azureVaultView = azureStorage.getAzureVaultView(stack.getParameters());
         azureUtils.validateStorageType(stack);
 
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
-        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
+        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, azureVaultView, ac.getCloudContext(), stack);
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        Boolean encrytionNeeded = azureStorage.isEncrytionNeeded(stack.getParameters());
 
         azureUtils.validateSubnetRules(client, stack.getNetwork());
         try {
@@ -106,7 +109,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (AzureUtils.hasUnmanagedDisk(stack)) {
                 Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
                 for (String name : storageAccounts.keySet()) {
-                    azureStorage.createStorage(client, name, storageAccounts.get(name), resourceGroupName, region);
+                    azureStorage.createStorage(client, name, storageAccounts.get(name), resourceGroupName, region, encrytionNeeded);
                 }
             }
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
@@ -206,14 +209,14 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
     public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         AzureCredentialView azureCredentialView = new AzureCredentialView(authenticatedContext.getCloudCredential());
-
+        AzureVaultView azureVaultView = azureStorage.getAzureVaultView(stack.getParameters());
         String stackName = azureUtils.getStackName(authenticatedContext.getCloudContext());
 
         AzureStackView azureStackView = getAzureStack(azureCredentialView, authenticatedContext.getCloudContext(), stack,
                 getNumberOfAvailableIPsInSubnets(client, stack.getNetwork()));
 
         String customImageId = azureStorage.getCustomImageId(client, authenticatedContext, stack);
-        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView,
+        String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, azureVaultView,
                 authenticatedContext.getCloudContext(), stack);
 
         String parameters = azureTemplateBuilder.buildParameters(authenticatedContext.getCloudCredential(), stack.getNetwork(), stack.getImage());
@@ -223,7 +226,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             String region = authenticatedContext.getCloudContext().getLocation().getRegion().value();
             Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
             for (String name : storageAccounts.keySet()) {
-                azureStorage.createStorage(client, name, storageAccounts.get(name), resourceGroupName, region);
+                azureStorage.createStorage(client, name, storageAccounts.get(name), resourceGroupName, region,
+                        azureStorage.isEncrytionNeeded(stack.getParameters()));
             }
             Deployment templateDeployment = client.createTemplateDeployment(stackName, stackName, template, parameters);
             LOGGER.info("created template deployment for upscale: {}", templateDeployment.exportTemplate().template().toString());
@@ -388,9 +392,14 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
 
     private AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudContext cloudContext, CloudStack cloudStack,
             Map<String, Integer> availableIPs) {
-        return new AzureStackView(cloudContext.getName(), stackNamePrefixLength, cloudStack.getGroups(), new AzureStorageView(azureCredentialView, cloudContext,
-                azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
-                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs));
+        Boolean encrytionNeeded = azureStorage.isEncrytionNeeded(cloudStack.getParameters());
+
+        return new AzureStackView(cloudContext.getName(),
+                stackNamePrefixLength,
+                cloudStack.getGroups(),
+                new AzureStorageView(azureCredentialView, cloudContext, azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
+                AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(cloudStack.getNetwork()), availableIPs),
+                encrytionNeeded);
     }
 
     private void deleteContainer(AzureClient azureClient, String resourceGroup, String storageName, String container) {
