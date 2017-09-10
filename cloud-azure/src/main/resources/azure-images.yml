@@ -1,28 +1,28 @@
 
 azure:
-  East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  East US: https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  North Central US: https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  East US 2: https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Japan East: https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Japan West: https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Southeast Asia: https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  West US: https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  West Europe: https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Brazil South: https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Canada East: https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Canada Central: https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Australia East: https://hwxaustraliaeast.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Australia South East: https://hwxaustralisoutheast.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Central India: https://hwxcentralindia.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Korea Central: https://hwxkoreacentral.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  Korea South: https://hwxkoreasouth.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  South India: https://hwxsouthindia.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  UK South: https://hwxsouthuk.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  West Central US: https://hwxwestcentralus.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  UK West: https://hwxwestuk.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  West US 2: https://hwxwestus2.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
-  West India: https://hwxwestindia.blob.core.windows.net/images/hdc-hdp--1708011655.vhd
+  East Asia: https://sequenceiqeastasia2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  East US: https://sequenceiqeastus12.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Central US: https://sequenceiqcentralus2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  North Europe: https://sequenceiqnortheurope2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  South Central US: https://sequenceiqouthcentralus2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  North Central US: https://sequenceiqorthcentralus2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  East US 2: https://sequenceiqeastus22.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Japan East: https://sequenceiqjapaneast2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Japan West: https://sequenceiqjapanwest2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Southeast Asia: https://sequenceiqsoutheastasia2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  West US: https://sequenceiqwestus2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  West Europe: https://sequenceiqwesteurope2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Brazil South: https://sequenceiqbrazilsouth2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Canada East: https://sequenceiqcanadaeast.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Canada Central: https://sequenceiqcanadacentral.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Australia East: https://hwxaustraliaeast.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Australia South East: https://hwxaustralisoutheast.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Central India: https://hwxcentralindia.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Korea Central: https://hwxkoreacentral.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  Korea South: https://hwxkoreasouth.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  South India: https://hwxsouthindia.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  UK South: https://hwxsouthuk.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  West Central US: https://hwxwestcentralus.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  UK West: https://hwxwestuk.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  West US 2: https://hwxwestus2.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
+  West India: https://hwxwestindia.blob.core.windows.net/images/hdc-hdp--1709101030.vhd
