@@ -31,7 +31,7 @@ public interface EventEndpoint {
     List<CloudbreakEventsJson> get(@QueryParam("since") Long since);
 
     @GET
-    @Path("{id}")
+    @Path("{stackId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EventOpDescription.GET_BY_ID, produces = ContentType.JSON, notes = Notes.EVENT_NOTES,
             nickname = "getEventsBySTackId")
