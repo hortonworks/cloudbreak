@@ -42,11 +42,11 @@ public class AzurePlatformResources implements PlatformResources {
                 for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
                     subnets.add(subnet.getValue().name());
                 }
-                Map<Object, Object> properties = new HashMap<>();
+                Map<String, Object> properties = new HashMap<>();
                 properties.put("addressSpaces", network.addressSpaces());
                 properties.put("dnsServerIPs", network.dnsServerIPs());
                 properties.put("resourceGroupName", network.resourceGroupName());
-                CloudNetwork cloudNetwork = new CloudNetwork(network.name(), subnets, new HashMap<>());
+                CloudNetwork cloudNetwork = new CloudNetwork(network.name(), subnets, properties);
                 if (result.get(actualRegion) == null) {
                     result.put(actualRegion, new HashSet<>());
                 }
