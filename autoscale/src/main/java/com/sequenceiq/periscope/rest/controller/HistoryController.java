@@ -27,7 +27,7 @@ public class HistoryController implements HistoryEndpoint {
     }
 
     @Override
-    public HistoryJson getHistory(Long clusterId, Long historyId) {
+    public HistoryJson getHistoryById(Long clusterId, Long historyId) {
         History history = historyService.getHistory(clusterId, historyId);
         return historyConverter.convert(history);
     }
