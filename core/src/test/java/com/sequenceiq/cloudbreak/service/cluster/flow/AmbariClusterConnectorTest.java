@@ -139,7 +139,6 @@ public class AmbariClusterConnectorTest {
                 any(AmbariOperationType.class))).thenReturn(PollingResult.SUCCESS);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         when(instanceMetadataRepository.save(anyCollection())).thenReturn(stack.getRunningInstanceMetaData());
-        when(ambariClient.recommendAssignments(anyString())).thenReturn(createStringListMap());
         when(ambariClient.deleteUser(anyString())).thenReturn("");
         when(ambariClient.createUser(anyString(), anyString(), anyBoolean())).thenReturn("");
         when(ambariClient.changePassword(anyString(), anyString(), anyString(), anyBoolean())).thenReturn("");

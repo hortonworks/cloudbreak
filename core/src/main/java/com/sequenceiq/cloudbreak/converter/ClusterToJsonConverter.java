@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class ClusterToJsonConverter extends AbstractConversionServiceAwareConverter<Cluster, ClusterResponse> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterToJsonConverter.class);
 
     private static final int SECONDS_PER_MINUTE = 60;
@@ -163,7 +165,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         return clusterResponse;
     }
 
-    private ClusterResponse convertComponentConfig(ClusterResponse response, Long clusterId) {
+    private void convertComponentConfig(ClusterResponse response, Long clusterId) {
         try {
             AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(clusterId);
             if (ambariRepo != null) {
@@ -174,10 +176,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             LOGGER.error("Failed to convert dynamic component.", e);
         }
 
-        return response;
     }
 
-    private ClusterResponse convertAmbariDatabaseComponentConfig(ClusterResponse response, Long clusterId) {
+    private void convertAmbariDatabaseComponentConfig(ClusterResponse response, Long clusterId) {
         try {
             AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(clusterId);
             if (ambariDatabase != null) {
@@ -188,7 +189,6 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             LOGGER.error("Failed to convert dynamic component.", e);
         }
 
-        return response;
     }
 
     private void convertCustomQueue(Cluster source, ClusterResponse clusterResponse) {
@@ -203,7 +203,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
     }
 
-    private void convertRdsIds(ClusterResponse clusterResponse, Set<RDSConfig> rdsConfigs) {
+    private void convertRdsIds(ClusterResponse clusterResponse, Collection<RDSConfig> rdsConfigs) {
         if (rdsConfigs != null && !rdsConfigs.isEmpty()) {
             for (RDSConfig rdsConfig : rdsConfigs) {
                 clusterResponse.getRdsConfigIds().add(rdsConfig.getId());
@@ -290,14 +290,14 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                     blueprintInputJsons.add(blueprintInputJson);
                 }
             }
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
             LOGGER.error("Could not convert blueprintinputs json to Set.");
         }
         return blueprintInputJsons;
 
     }
 
-    private Set<HostGroupResponse> convertHostGroupsToJson(Set<HostGroup> hostGroups) {
+    private Set<HostGroupResponse> convertHostGroupsToJson(Iterable<HostGroup> hostGroups) {
         Set<HostGroupResponse> jsons = new HashSet<>();
         for (HostGroup hostGroup : hostGroups) {
             jsons.add(getConversionService().convert(hostGroup, HostGroupResponse.class));
@@ -331,13 +331,13 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
                     collectServicePorts(result, ports, ambariIp, serviceAddress, componentDescriptor, cluster);
                 }
             }
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             return result;
         }
         return result;
     }
 
-    private void collectServicePorts(Map<String, String> result, List<Port> ports, String ambariIp, String serviceAddress,
+    private void collectServicePorts(Map<String, String> result, Iterable<Port> ports, String ambariIp, String serviceAddress,
             StackServiceComponentDescriptor componentDescriptor, Cluster cluster) throws IOException {
         if (componentDescriptor != null && componentDescriptor.isMaster()) {
             List<String> exposedServices = new ArrayList<>();
@@ -353,7 +353,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
     }
 
     private void collectServicePort(Map<String, String> result, Port port, String serviceAddress, String ambariIp,
-            StackServiceComponentDescriptor componentDescriptor, List<String> exposedServices, Gateway gateway) {
+            StackServiceComponentDescriptor componentDescriptor, Collection<String> exposedServices, Gateway gateway) {
         if (port.getExposedService().getServiceName().equals(componentDescriptor.getName())) {
             if (gateway.getEnableGateway() && ambariIp != null) {
                 String url;
@@ -400,5 +400,4 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         }
         return url;
     }
-
 }
