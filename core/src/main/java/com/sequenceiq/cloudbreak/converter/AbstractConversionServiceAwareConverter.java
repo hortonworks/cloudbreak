@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.converter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -13,6 +12,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.core.convert.converter.ConverterRegistry;
 
 public abstract class AbstractConversionServiceAwareConverter<S, T> implements Converter<S, T> {
+
     @Inject
     @Qualifier("conversionService")
     private ConversionService conversionService;
@@ -30,7 +30,7 @@ public abstract class AbstractConversionServiceAwareConverter<S, T> implements C
         }
     }
 
-    public List<T> convert(Collection<S> sources) {
+    public List<T> convert(Iterable<S> sources) {
         List<T> targets = new ArrayList<>();
         if (sources != null) {
             for (S source : sources) {

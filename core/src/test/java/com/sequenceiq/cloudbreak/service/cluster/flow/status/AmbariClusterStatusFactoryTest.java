@@ -79,7 +79,6 @@ public class AmbariClusterStatusFactoryTest {
     public void testCreateClusterStatusShouldReturnAvailabelStackWithStoppedClusterWhenAllServerComponentsAreInstalled() {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
-        BDDMockito.given(ambariClient.getComponentsCategory(TEST_BLUEPRINT)).willReturn(createComponentCategories());
         BDDMockito.given(ambariClient.getHostComponentsStates()).willReturn(createHostComponentsStates("INSTALLED"));
         // WHEN
         ClusterStatus actualResult = underTest.createClusterStatus(ambariClient, TEST_BLUEPRINT);
@@ -93,7 +92,6 @@ public class AmbariClusterStatusFactoryTest {
     public void testCreateClusterStatusShouldReturnAvailableClusterWhenAllServerComponentsAreStarted() {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
-        BDDMockito.given(ambariClient.getComponentsCategory(TEST_BLUEPRINT)).willReturn(createComponentCategories());
         BDDMockito.given(ambariClient.getHostComponentsStates()).willReturn(createHostComponentsStates("STARTED"));
         // WHEN
         ClusterStatus actualResult = underTest.createClusterStatus(ambariClient, TEST_BLUEPRINT);
@@ -107,7 +105,6 @@ public class AmbariClusterStatusFactoryTest {
     public void testCreateClusterStatusShouldReturnInstallingStatusWhenOneServerComponentIsBeingInstalled() {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
-        BDDMockito.given(ambariClient.getComponentsCategory(TEST_BLUEPRINT)).willReturn(createComponentCategories());
         BDDMockito.given(ambariClient.getHostComponentsStates()).willReturn(createInstallingHostComponentsStates());
         // WHEN
         ClusterStatus actualResult = underTest.createClusterStatus(ambariClient, TEST_BLUEPRINT);
@@ -119,7 +116,6 @@ public class AmbariClusterStatusFactoryTest {
     public void testCreateClusterStatusShouldReturnAmbiguousWhenThereAreStartedAndInstalledComps() {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
-        BDDMockito.given(ambariClient.getComponentsCategory(TEST_BLUEPRINT)).willReturn(createComponentCategories());
         BDDMockito.given(ambariClient.getHostComponentsStates()).willReturn(createInstalledAndStartedHostComponentsStates());
         // WHEN
         ClusterStatus actualResult = underTest.createClusterStatus(ambariClient, TEST_BLUEPRINT);
@@ -131,7 +127,6 @@ public class AmbariClusterStatusFactoryTest {
     public void testCreateClusterStatusShouldReturnAmbiguousStatusWhenThereAreCompsInUnsupportedStates() {
         // GIVEN
         BDDMockito.given(ambariClient.healthCheck()).willReturn("RUNNING");
-        BDDMockito.given(ambariClient.getComponentsCategory(TEST_BLUEPRINT)).willReturn(createComponentCategories());
         BDDMockito.given(ambariClient.getHostComponentsStates()).willReturn(createHostComponentsStates("Unsupported"));
         // WHEN
         ClusterStatus actualResult = underTest.createClusterStatus(ambariClient, TEST_BLUEPRINT);

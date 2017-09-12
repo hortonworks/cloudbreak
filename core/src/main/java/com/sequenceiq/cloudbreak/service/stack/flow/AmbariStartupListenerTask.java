@@ -25,7 +25,7 @@ public class AmbariStartupListenerTask extends ClusterBasedStatusCheckerTask<Amb
                     ambariRunning = true;
                     break;
                 }
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 LOGGER.info("Ambari health check failed: {}", e.getMessage());
             }
         }
