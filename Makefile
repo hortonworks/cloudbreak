@@ -52,15 +52,15 @@ generate-swagger:
 	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
 
 generate-swagger-docker:
-	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.5.0 \
-	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.11.0 \
+	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
 
 generate-swagger-autoscale:
 	swagger generate client -f http://$(CB_IP):8085/as/api/v1/swagger.json -c client_autoscale -m models_autoscale
 
 generate-swagger-autoscale-docker:
-	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.5.0 \
-	swagger generate client -f http://$(CB_IP):8085/as/api/v1/swagger.json -c client_autoscale -m models_autoscale
+	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.11.0 \
+	generate client -f http://$(CB_IP):8085/as/api/v1/swagger.json -c client_autoscale -m models_autoscale
 
 release: build
 	rm -rf release
