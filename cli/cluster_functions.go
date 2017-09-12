@@ -39,11 +39,11 @@ func (c *InstanceConfig) Yaml() string {
 }
 
 func (c *InstanceConfig) fill(instanceGroup *models_cloudbreak.InstanceGroupResponse, template *models_cloudbreak.TemplateResponse) error {
-	c.InstanceCount = instanceGroup.NodeCount
-	c.InstanceType = template.InstanceType
-	c.VolumeType = SafeStringConvert(template.VolumeType)
-	c.VolumeSize = &template.VolumeSize
-	c.VolumeCount = &template.VolumeCount
+	c.InstanceCount = *instanceGroup.NodeCount
+	c.InstanceType = *template.InstanceType
+	c.VolumeType = SafeStringConvert(&template.VolumeType)
+	c.VolumeSize = template.VolumeSize
+	c.VolumeCount = template.VolumeCount
 	parameters := template.Parameters
 	if len(parameters) > 0 {
 		if encrypted, ok := parameters[ENCRYPTED]; ok {
@@ -106,7 +106,7 @@ func (c *ClusterSkeletonResult) fill(
 	if stack == nil {
 		return errors.New("Stack definition is not returned from Cloudbreak")
 	}
-	c.ClusterName = stack.Name
+	c.ClusterName = *stack.Name
 
 	parameters := stack.Parameters
 	if len(parameters) > 0 && len(parameters["instanceProfileStrategy"]) > 0 {
@@ -117,11 +117,11 @@ func (c *ClusterSkeletonResult) fill(
 		}
 	}
 
-	c.Status = SafeStringConvert(stack.Status)
-	c.StatusReason = SafeStringConvert(stack.StatusReason)
+	c.Status = SafeStringConvert(&stack.Status)
+	c.StatusReason = SafeStringConvert(&stack.StatusReason)
 	if stack.Cluster != nil {
-		clusterStatus := SafeStringConvert(stack.Cluster.Status)
-		clusterStatusReason := SafeStringConvert(stack.Cluster.StatusReason)
+		clusterStatus := SafeStringConvert(&stack.Cluster.Status)
+		clusterStatusReason := SafeStringConvert(&stack.Cluster.StatusReason)
 		if clusterStatus != "AVAILABLE" {
 			c.Status = clusterStatus
 		}
@@ -129,30 +129,30 @@ func (c *ClusterSkeletonResult) fill(
 			c.StatusReason = clusterStatusReason
 		}
 
-		c.ClusterAndAmbariUser = SafeStringConvert(stack.Cluster.UserName)
+		c.ClusterAndAmbariUser = SafeStringConvert(&stack.Cluster.UserName)
 		c.Worker.RecoveryMode = recoveryModeMap[WORKER]
 		c.Compute.RecoveryMode = recoveryModeMap[COMPUTE]
 
 		fillWebAccess(stack.Cluster, c)
 
 		if stack.Cluster.LdapConfig != nil {
-			c.Ldap = &stack.Cluster.LdapConfig.Name
+			c.Ldap = stack.Cluster.LdapConfig.Name
 		}
 
 		if stack.Cluster.AmbariDatabaseDetails != nil {
 			db := stack.Cluster.AmbariDatabaseDetails
-			if db.Host != "localhost" {
+			if *db.Host != "localhost" {
 				c.AmbariDatabase = &AmbariDatabase{
-					DatabaseName: db.Name,
-					Host:         db.Host,
-					Port:         db.Port,
-					DatabaseType: db.Vendor,
+					DatabaseName: *db.Name,
+					Host:         *db.Host,
+					Port:         *db.Port,
+					DatabaseType: *db.Vendor,
 				}
 			}
 		}
 	}
 
-	c.HDPVersion = SafeStringConvert(stack.HdpVersion)
+	c.HDPVersion = SafeStringConvert(&stack.HdpVersion)
 	if len(c.HDPVersion) > 3 {
 		c.HDPVersion = c.HDPVersion[0:3]
 	}
@@ -167,18 +167,16 @@ func (c *ClusterSkeletonResult) fill(
 	}
 
 	for _, rds := range rdsConfigs {
-		if rds.Type != nil {
-			if *rds.Type == HIVE_RDS {
-				rdsConfig := HiveMetastoreResult{
-					Name: rds.Name,
-				}
-				c.HiveMetastore = &rdsConfig
-			} else if *rds.Type == DRUID_RDS {
-				rdsConfig := DruidMetastoreResult{
-					Name: rds.Name,
-				}
-				c.DruidMetastore = &rdsConfig
+		if rds.Type == HIVE_RDS {
+			rdsConfig := HiveMetastoreResult{
+				Name: *rds.Name,
 			}
+			c.HiveMetastore = &rdsConfig
+		} else if rds.Type == DRUID_RDS {
+			rdsConfig := DruidMetastoreResult{
+				Name: *rds.Name,
+			}
+			c.DruidMetastore = &rdsConfig
 		}
 	}
 
@@ -211,16 +209,16 @@ func (c *ClusterSkeletonResult) fill(
 	if securityMap != nil {
 		if stack.InstanceGroups != nil {
 			for _, v := range stack.InstanceGroups {
-				if v.Group == MASTER {
-					c.Master.fill(v, templateMap[v.Group])
+				if v.Group == &MASTER {
+					c.Master.fill(v, templateMap[*v.Group])
 				}
-				if v.Group == WORKER {
-					c.Worker.fill(v, templateMap[v.Group])
+				if v.Group == &WORKER {
+					c.Worker.fill(v, templateMap[*v.Group])
 				}
-				if v.Group == COMPUTE {
-					c.Compute.fill(v, templateMap[v.Group])
-					if templateMap[v.Group].Parameters != nil && templateMap[v.Group].Parameters["spotPrice"] != nil {
-						c.Compute.SpotPrice = string(templateMap[v.Group].Parameters["spotPrice"].(json.Number))
+				if v.Group == &COMPUTE {
+					c.Compute.fill(v, templateMap[*v.Group])
+					if templateMap[*v.Group].Parameters != nil && templateMap[*v.Group].Parameters["spotPrice"] != nil {
+						c.Compute.SpotPrice = string(templateMap[*v.Group].Parameters["spotPrice"].(json.Number))
 					}
 				}
 			}
@@ -239,19 +237,19 @@ func (c *ClusterSkeletonResult) fill(
 	}
 	c.RemoteAccess = strings.Join(keys, ",")
 
-	if stack.Cluster != nil && stack.Cluster.BlueprintCustomProperties != nil {
-		c.Configurations = stack.Cluster.BlueprintCustomProperties
+	if stack.Cluster != nil {
+		//c.Configurations = stack.Cluster.BlueprintCustomProperties // que? TODO?
 	}
 
-	var tags = make(map[string]string, 0)
-	if len(stack.Tags) > 0 {
-		userTags := stack.Tags[USER_TAGS]
-		if userTags != nil {
-			for k, v := range userTags.(map[string]interface{}) {
-				tags[k] = v.(string)
-			}
-		}
-	}
+	var tags = stack.UserDefinedTags
+	//if len(stack.Tags) > 0 {
+	//	userTags := stack.Tags[USER_TAGS]
+	//	if userTags != nil {
+	//		for k, v := range userTags.(map[string]interface{}) {
+	//			tags[k] = v.(string)
+	//		}
+	//	}
+	//}
 	c.Tags = tags
 
 	if autoscaling != nil && (autoscaling.Configuration != nil || len(autoscaling.Policies) > 0) {
@@ -259,7 +257,7 @@ func (c *ClusterSkeletonResult) fill(
 	}
 
 	if stack.FlexSubscription != nil {
-		c.FlexSubscription = &FlexSubscriptionBase{stack.FlexSubscription.Name}
+		c.FlexSubscription = &FlexSubscriptionBase{*stack.FlexSubscription.Name}
 	}
 
 	return nil
@@ -295,7 +293,7 @@ func fillWebAccess(cluster *models_cloudbreak.ClusterResponse, skeleton *Cluster
 func convertRecipes(recipes []*models_cloudbreak.RecipeResponse) []Recipe {
 	var convertedRecipes []Recipe = []Recipe{}
 	for _, resp := range recipes {
-		convertedRecipes = append(convertedRecipes, Recipe{URI: *resp.URI, Phase: strings.ToLower(resp.RecipeType)})
+		convertedRecipes = append(convertedRecipes, Recipe{URI: resp.URI, Phase: strings.ToLower(*resp.RecipeType)})
 	}
 	return convertedRecipes
 }
@@ -318,8 +316,8 @@ func waitForClusterToFinishImpl(stackId int64, getStack func(params *stacks.GetS
 		}
 
 		desiredStatus := "AVAILABLE"
-		stackStatus := *resp.Payload.Status
-		clusterStatus := *resp.Payload.Cluster.Status
+		stackStatus := resp.Payload.Status
+		clusterStatus := resp.Payload.Cluster.Status
 		log.Infof("[WaitForClusterToFinish] stack status: %s, cluster status: %s", stackStatus, clusterStatus)
 
 		if stackStatus == desiredStatus && clusterStatus == desiredStatus {
@@ -357,7 +355,7 @@ func waitForClusterToTerminateImpl(clusterName string, getStack func(*stacks.Get
 			logErrorAndExit(errors.New(errorMessage))
 		}
 
-		stackStatus := *resp.Payload.Status
+		stackStatus := resp.Payload.Status
 		log.Infof("[waitForClusterToTerminate] stack status: %s", stackStatus)
 
 		if strings.Contains(stackStatus, "FAILED") {

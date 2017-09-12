@@ -15,10 +15,9 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/ernesto-jimenez/httplogger"
-	swaggerclient "github.com/go-swagger/go-swagger/client"
-	"github.com/go-swagger/go-swagger/httpkit"
-	httptransport "github.com/go-swagger/go-swagger/httpkit/client"
-	"github.com/go-swagger/go-swagger/strfmt"
+	"github.com/go-openapi/runtime"
+	"github.com/go-openapi/runtime/client"
+	"github.com/go-openapi/strfmt"
 	asapiclient "github.com/hortonworks/hdc-cli/client_autoscale"
 	apiclient "github.com/hortonworks/hdc-cli/client_cloudbreak"
 )
@@ -57,8 +56,8 @@ func NewCloudbreakOAuth2HTTPClient(address string, username string, password str
 		logErrorAndExit(err)
 	}
 
-	cbTransport := &transport{httptransport.New(address, "/cb/api/v1", []string{"https"})}
-	cbTransport.Runtime.DefaultAuthentication = httptransport.BearerToken(token)
+	cbTransport := &transport{client.New(address, "/cb/api/v1", []string{"https"})}
+	cbTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
 	cbTransport.Runtime.Transport = LoggedTransportConfig
 	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}
 }
@@ -73,8 +72,8 @@ func NewAutoscalingOAuth2HTTPClient(address string, username string, password st
 		logErrorAndExit(err)
 	}
 
-	asTransport := &transport{httptransport.New(address, "/as/api/v1", []string{"https"})}
-	asTransport.Runtime.DefaultAuthentication = httptransport.BearerToken(token)
+	asTransport := &transport{client.New(address, "/as/api/v1", []string{"https"})}
+	asTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
 	asTransport.Runtime.Transport = LoggedTransportConfig
 
 	return &Autoscaling{AutoScaling: asapiclient.New(asTransport, strfmt.Default)}
@@ -90,12 +89,12 @@ func NewOAuth2HTTPClients(address string, username string, password string) (*Cl
 		logErrorAndExit(err)
 	}
 
-	cbTransport := &transport{httptransport.New(address, "/cb/api/v1", []string{"https"})}
-	cbTransport.Runtime.DefaultAuthentication = httptransport.BearerToken(token)
+	cbTransport := &transport{client.New(address, "/cb/api/v1", []string{"https"})}
+	cbTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
 	cbTransport.Runtime.Transport = LoggedTransportConfig
 
-	asTransport := &transport{httptransport.New(address, "/as/api/v1", []string{"https"})}
-	asTransport.Runtime.DefaultAuthentication = httptransport.BearerToken(token)
+	asTransport := &transport{client.New(address, "/as/api/v1", []string{"https"})}
+	asTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
 	asTransport.Runtime.Transport = LoggedTransportConfig
 
 	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}, &Autoscaling{AutoScaling: asapiclient.New(asTransport, strfmt.Default)}
@@ -139,17 +138,17 @@ func getOAuth2Token(identityUrl string, username string, password string, client
 }
 
 type transport struct {
-	Runtime *httptransport.Runtime
+	Runtime *client.Runtime
 }
 
-func (t *transport) Submit(operation *swaggerclient.Operation) (interface{}, error) {
+func (t *transport) Submit(operation *runtime.ClientOperation) (interface{}, error) {
 	operation.Reader = &noContentSafeResponseReader{OriginalReader: operation.Reader}
 	response, err := t.Runtime.Submit(operation)
 	return response, err
 }
 
 type noContentSafeResponseReader struct {
-	OriginalReader swaggerclient.ResponseReader
+	OriginalReader runtime.ClientResponseReader
 }
 
 type ErrorMessage struct {
@@ -171,7 +170,7 @@ func (e *ErrorMessage) String() string {
 	return result
 }
 
-func (r *noContentSafeResponseReader) ReadResponse(response swaggerclient.Response, consumer httpkit.Consumer) (interface{}, error) {
+func (r *noContentSafeResponseReader) ReadResponse(response runtime.ClientResponse, consumer runtime.Consumer) (interface{}, error) {
 	resp, err := r.OriginalReader.ReadResponse(response, consumer)
 	if err != nil {
 		switch response.Code() {

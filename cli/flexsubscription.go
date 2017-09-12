@@ -55,8 +55,8 @@ func createFlexSubscriptionImpl(
 	smartSenseSubscriptionId := ss.ID
 	fa := false
 	resp, err := postPrivateFlexSubscription(&f.PostPrivateFlexSubscriptionParams{Body: &models_cloudbreak.FlexSubscriptionRequest{
-		Name:                     name,
-		SubscriptionID:           &subscriptionId,
+		Name:                     &name,
+		SubscriptionID:           subscriptionId,
 		SmartSenseSubscriptionID: smartSenseSubscriptionId,
 		Default:                  &fa,
 		UsedForController:        &fa}})
@@ -117,8 +117,8 @@ func listFlexSubscriptionImpl(
 	var tableRows []Row
 	for _, subscription := range resp.Payload {
 		row := &FlexSubscription{
-			Name:              subscription.Name,
-			SubscriptionId:    *subscription.SubscriptionID,
+			Name:              *subscription.Name,
+			SubscriptionId:    subscription.SubscriptionID,
 			IsDefault:         strconv.FormatBool(*subscription.Default),
 			UsedForController: strconv.FormatBool(*subscription.UsedForController)}
 		tableRows = append(tableRows, row)

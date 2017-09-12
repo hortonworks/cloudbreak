@@ -42,7 +42,7 @@ func createSmartSenseSubscriptionImpl(subscriptionId string,
 
 	log.Infof("[createSmartSenseSubscription] create SmartSense subscription for: %s ", subscriptionId)
 	resp, err := postPrivateSmartSenseSubscription(
-		&s.PostPrivateSmartSenseSubscriptionParams{Body: &models_cloudbreak.SmartSenseSubscriptionJSON{SubscriptionID: subscriptionId}})
+		&s.PostPrivateSmartSenseSubscriptionParams{Body: &models_cloudbreak.SmartSenseSubscriptionJSON{SubscriptionID: &subscriptionId}})
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -95,7 +95,7 @@ func describeSmartSenseSubscriptionImpl(
 	}
 
 	log.Infof("[describeSmartSenseSubscription] describe SmartSense subscription for: %v ", ss.Payload.SubscriptionID)
-	output.Write(SmartSenseSubscriptionHeader, &SmartSenseSubscription{Id: strconv.FormatInt(*ss.Payload.ID, 10), SubscriptionId: ss.Payload.SubscriptionID})
+	output.Write(SmartSenseSubscriptionHeader, &SmartSenseSubscription{Id: strconv.FormatInt(ss.Payload.ID, 10), SubscriptionId: *ss.Payload.SubscriptionID})
 }
 
 func getAvailableSmartSenseSubscription(c *cli.Context) (*models_cloudbreak.SmartSenseSubscriptionJSON, error) {

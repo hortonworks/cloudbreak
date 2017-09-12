@@ -116,20 +116,20 @@ func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetPrivateSt
 		metadataArray := instanceGroup.Metadata
 		for _, metadata := range metadataArray {
 			data := *metadata
-			if data.DiscoveryFQDN == nil {
-				continue
-			}
-			nodeType := *data.InstanceGroup
+			//if data.DiscoveryFQDN == nil {
+			//	continue
+			//}
+			nodeType := data.InstanceGroup
 			if nodeType == MASTER {
 				nodeType = "master - ambari server"
 			}
 			var hostStatus string = getHostStatus(respStack.Payload, metadata)
 			row := &ClusterNode{
-				InstanceId:     SafeStringConvert(data.InstanceID),
-				Hostname:       SafeStringConvert(data.DiscoveryFQDN),
-				PublicIP:       SafeStringConvert(data.PublicIP),
-				PrivateIP:      SafeStringConvert(data.PrivateIP),
-				InstanceStatus: SafeStringConvert(data.InstanceStatus),
+				InstanceId:     SafeStringConvert(&data.InstanceID),
+				Hostname:       SafeStringConvert(&data.DiscoveryFQDN),
+				PublicIP:       SafeStringConvert(&data.PublicIP),
+				PrivateIP:      SafeStringConvert(&data.PrivateIP),
+				InstanceStatus: SafeStringConvert(&data.InstanceStatus),
 				HostStatus:     hostStatus,
 				Type:           nodeType,
 			}
@@ -142,12 +142,12 @@ func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetPrivateSt
 
 func getHostStatus(stack *models_cloudbreak.StackResponse, imd *models_cloudbreak.InstanceMetaData) string {
 	var result string = ""
-	if stack.Cluster != nil && imd.DiscoveryFQDN != nil {
+	if stack.Cluster != nil {
 		for _, hg := range stack.Cluster.HostGroups {
-			if hg.Name == *imd.InstanceGroup {
+			if *hg.Name == imd.InstanceGroup {
 				for _, hmd := range hg.Metadata {
-					if hmd.Name == *imd.DiscoveryFQDN {
-						result = *hmd.State
+					if *hmd.Name == imd.DiscoveryFQDN {
+						result = hmd.State
 						break
 					}
 				}

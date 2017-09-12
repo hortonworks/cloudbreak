@@ -38,8 +38,9 @@ func (c *Cloudbreak) cleanupBlueprints(wg *sync.WaitGroup) {
 
 func cleanupBlueprintsImpl(getBlueprints func() []*models_cloudbreak.BlueprintResponse, deleteBlueprint func(string) error) {
 	for _, bp := range getBlueprints() {
-		if bp.Name[0] == 'b' && len(BlueprintMap[*bp.AmbariBlueprint.Blueprint.Name]) > 0 {
-			if err := deleteBlueprint(bp.Name); err != nil {
+		//if (*bp.Name)[0] == 'b' && len(BlueprintMap[*bp.AmbariBlueprint.Blueprint.Name]) > 0 { // que? TODO?
+		if (*bp.Name)[0] == 'b' && len(BlueprintMap[bp.AmbariBlueprint]) > 0 {
+			if err := deleteBlueprint(*bp.Name); err != nil {
 				log.Warnf("[cleanupBlueprints] failed to delete blueprint: %s", bp.Name)
 				continue
 			}
@@ -55,8 +56,8 @@ func (c *Cloudbreak) cleanupTemplates(wg *sync.WaitGroup) {
 
 func cleanupTemplatesImpl(getTemplates func() []*models_cloudbreak.TemplateResponse, deleteTemplate func(string) error) {
 	for _, template := range getTemplates() {
-		if strings.Contains(template.Name, "mtempl") || strings.Contains(template.Name, "wtempl") || strings.Contains(template.Name, "ctempl") {
-			if err := deleteTemplate(template.Name); err != nil {
+		if strings.Contains(*template.Name, "mtempl") || strings.Contains(*template.Name, "wtempl") || strings.Contains(*template.Name, "ctempl") {
+			if err := deleteTemplate(*template.Name); err != nil {
 				log.Warnf("[cleanupTemplates] failed to delete template: %s", template.Name)
 				continue
 			}
@@ -73,8 +74,8 @@ func (c *Cloudbreak) cleanupCredentials(wg *sync.WaitGroup) {
 func cleanupCredentialsImpl(getCredentials func() []*models_cloudbreak.CredentialResponse, deleteCredential func(string) error) {
 	for _, cred := range getCredentials() {
 		credName := cred.Name
-		if len(credName) > 5 && credName[0:4] == "cred" {
-			if err := deleteCredential(credName); err != nil {
+		if len(*credName) > 5 && (*credName)[0:4] == "cred" {
+			if err := deleteCredential(*credName); err != nil {
 				log.Warnf("[cleanupCredentials] failed to delete credential: %s", credName)
 				continue
 			}
@@ -91,8 +92,8 @@ func (c *Cloudbreak) cleanupNetworks(wg *sync.WaitGroup) {
 func cleanupNetworksImpl(getNetworks func() []*models_cloudbreak.NetworkResponse, deleteNetwork func(string) error) {
 	for _, network := range getNetworks() {
 		netName := network.Name
-		if len(netName) > 4 && netName[0:3] == "net" {
-			if err := deleteNetwork(netName); err != nil {
+		if len(*netName) > 4 && (*netName)[0:3] == "net" {
+			if err := deleteNetwork(*netName); err != nil {
 				log.Warnf("[cleanupNetworks] failed to delete network: %s", netName)
 				continue
 			}

@@ -43,7 +43,7 @@ func createNetworkImpl(skeleton ClusterSkeleton, channel chan int64,
 	}
 
 	log.Infof("[CreateNetwork] network created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	channel <- resp.Payload.ID
 }
 
 func createNetworkRequest(skeleton ClusterSkeleton, getNetwork func(string) models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkRequest {
@@ -61,8 +61,8 @@ func createNetworkRequest(skeleton ClusterSkeleton, getNetwork func(string) mode
 	}
 
 	network := models_cloudbreak.NetworkRequest{
-		Name:          networkName,
-		CloudPlatform: "AWS",
+		Name:          &networkName,
+		CloudPlatform: &(&stringWrapper{"AWS"}).s,
 		Parameters:    vpcParams,
 	}
 
@@ -93,13 +93,13 @@ func createNetworkCommandImpl(finder func(string) string, postNetwork func(*netw
 		vpcParams["subnetId"] = subnet
 	}
 	network := models_cloudbreak.NetworkRequest{
-		Name:          networkName,
-		CloudPlatform: "AWS",
+		Name:          &networkName,
+		CloudPlatform: &(&stringWrapper{"AWS"}).s,
 		Parameters:    vpcParams,
 	}
 	subnetCidr := finder(FlSubnetCidr.Name)
 	if len(subnetCidr) > 0 {
-		network.SubnetCIDR = &subnetCidr
+		network.SubnetCIDR = subnetCidr
 	}
 
 	resp, err := postNetwork(&networks.PostPublicNetworkParams{Body: &network})
@@ -177,7 +177,7 @@ func listPrivateNetworksImpl(getNetworks func() []*models_cloudbreak.NetworkResp
 
 	var tableRows []Row
 	for _, net := range networkResp {
-		row := &NetworkList{Id: *net.ID, Name: net.Name}
+		row := &NetworkList{Id: net.ID, Name: *net.Name}
 		tableRows = append(tableRows, row)
 	}
 

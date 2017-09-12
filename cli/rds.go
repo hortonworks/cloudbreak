@@ -72,12 +72,12 @@ func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetPublicsRdsParams) (*rdsco
 	var tableRows []Row
 	for _, rds := range resp.Payload {
 		row := &RdsConfig{
-			HDPVersion: rds.HdpVersion,
-			Type:       *rds.Type,
+			HDPVersion: *rds.HdpVersion,
+			Type:       rds.Type,
 			MetaStore: MetaStore{
-				Name:         rds.Name,
-				URL:          rawRdsUrl(rds.ConnectionURL),
-				DatabaseType: rds.DatabaseType,
+				Name:         *rds.Name,
+				URL:          rawRdsUrl(*rds.ConnectionURL),
+				DatabaseType: *rds.DatabaseType,
 			},
 		}
 		tableRows = append(tableRows, row)
@@ -112,15 +112,17 @@ func CreateRDSConfig(c *cli.Context) error {
 
 func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig func(*rdsconfigs.PostPublicRdsParams) (*rdsconfigs.PostPublicRdsOK, error)) error {
 	validate := false
+	name, username, password := finder(FlRdsName.Name), finder(FlRdsUsername.Name), finder(FlRdsPassword.Name)
+	dbType, hdpVersion := finder(FlRdsDbType.Name), finder(FlHdpVersion.Name)
 	rdsConfig := models_cloudbreak.RDSConfig{
-		Name:               finder(FlRdsName.Name),
-		ConnectionUserName: finder(FlRdsUsername.Name),
-		ConnectionPassword: finder(FlRdsPassword.Name),
+		Name:               &name,
+		ConnectionUserName: &username,
+		ConnectionPassword: &password,
 		ConnectionURL:      extendRdsUrl(finder(FlRdsUrl.Name)),
-		DatabaseType:       finder(FlRdsDbType.Name),
+		DatabaseType:       &dbType,
 		Validated:          &validate,
-		HdpVersion:         finder(FlHdpVersion.Name),
-		Type:               &rdsType,
+		HdpVersion:         &hdpVersion,
+		Type:               rdsType,
 	}
 
 	resp, err := postConfig(&rdsconfigs.PostPublicRdsParams{Body: &rdsConfig})
@@ -156,23 +158,23 @@ func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params
 func createRDSRequest(metastore MetaStore, rdsType string, hdpVersion string, properties []*models_cloudbreak.RdsConfigProperty) *models_cloudbreak.RDSConfig {
 	validate := false
 	return &models_cloudbreak.RDSConfig{
-		Name:               metastore.Name,
-		ConnectionUserName: metastore.Username,
-		ConnectionPassword: metastore.Password,
+		Name:               &metastore.Name,
+		ConnectionUserName: &metastore.Username,
+		ConnectionPassword: &metastore.Password,
 		ConnectionURL:      extendRdsUrl(metastore.URL),
-		DatabaseType:       metastore.DatabaseType,
-		HdpVersion:         hdpVersion,
+		DatabaseType:       &metastore.DatabaseType,
+		HdpVersion:         &hdpVersion,
 		Validated:          &validate,
-		Type:               &rdsType,
+		Type:               rdsType,
 		Properties:         properties,
 	}
 }
 
-func extendRdsUrl(url string) string {
+func extendRdsUrl(url string) *string {
 	if strings.Contains(url, "jdbc:") {
-		return url
+		return &url
 	}
-	return "jdbc:postgresql://" + url
+	return &(&stringWrapper{"jdbc:postgresql://" + url}).s
 }
 
 func rawRdsUrl(url string) string {

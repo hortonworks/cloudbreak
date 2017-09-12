@@ -65,41 +65,41 @@ func CreateLDAP(c *cli.Context) error {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	return createLDAPImpl(cbClient.Cloudbreak.Ldap.PostPublicLdap, name, server, int32(serverPort), protocol, domain, bindDn, bindPassword, directoryType,
-		userSearchBase, userNameAttribute, userObjectClass,
-		groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass)
+	return createLDAPImpl(cbClient.Cloudbreak.Ldap.PostPublicLdap, name, server, protocol, domain, bindDn, bindPassword, directoryType,
+		userSearchBase, userNameAttribute, userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass, int32(serverPort))
 }
 
 func createLDAPImpl(createLDAP func(*ldap.PostPublicLdapParams) (*ldap.PostPublicLdapOK, error),
-	name string, server string, port int32, protocol string, domain string, bindDn string, bindPassword string, directoryType string,
-	userSearchBase string, userNameAttribute string, userObjectClass string,
-	groupSearchBase string, groupMemberAttribute string, groupNameAttribute string, groupObjectClass string) error {
+	name, server, protocol, domain, bindDn, bindPassword, directoryType, userSearchBase, userNameAttribute,
+	userObjectClass, groupSearchBase, groupMemberAttribute, groupNameAttribute, groupObjectClass string,
+	port int32) error {
 
 	log.Infof("[createLDAPImpl] create ldap with name: %s", name)
+	var serverHost = server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")]
 	resp, err := createLDAP(&ldap.PostPublicLdapParams{
 		Body: &models_cloudbreak.LdapConfigRequest{
-			Name:                 name,
-			ServerHost:           server[strings.LastIndex(server, "/")+1 : strings.LastIndex(server, ":")],
-			ServerPort:           port,
-			Protocol:             &protocol,
-			Domain:               &domain,
-			BindDn:               bindDn,
-			BindPassword:         bindPassword,
-			DirectoryType:        &directoryType,
-			UserSearchBase:       userSearchBase,
-			UserNameAttribute:    &userNameAttribute,
-			UserObjectClass:      &userObjectClass,
-			GroupMemberAttribute: &groupMemberAttribute,
-			GroupNameAttribute:   &groupNameAttribute,
-			GroupObjectClass:     &groupObjectClass,
-			GroupSearchBase:      &groupSearchBase,
+			Name:                 &name,
+			ServerHost:           &serverHost,
+			ServerPort:           &port,
+			Protocol:             protocol,
+			Domain:               domain,
+			BindDn:               &bindDn,
+			BindPassword:         &bindPassword,
+			DirectoryType:        directoryType,
+			UserSearchBase:       &userSearchBase,
+			UserNameAttribute:    userNameAttribute,
+			UserObjectClass:      userObjectClass,
+			GroupMemberAttribute: groupMemberAttribute,
+			GroupNameAttribute:   groupNameAttribute,
+			GroupObjectClass:     groupObjectClass,
+			GroupSearchBase:      groupSearchBase,
 		}})
 
 	if err != nil {
 		logErrorAndExit(err)
 	}
 
-	log.Infof("[createLDAPImpl] ldap created with name: %s, id: %d", name, *resp.Payload.ID)
+	log.Infof("[createLDAPImpl] ldap created with name: %s, id: %d", name, resp.Payload.ID)
 	return nil
 }
 
@@ -122,18 +122,18 @@ func ListLdapsImpl(getLdaps func(*ldap.GetPublicsLdapParams) (*ldap.GetPublicsLd
 	var tableRows []Row
 	for _, l := range resp.Payload {
 		row := &Ldap{
-			Name:                 l.Name,
-			Server:               fmt.Sprintf("%s://%s:%d", *l.Protocol, l.ServerHost, l.ServerPort),
-			Domain:               SafeStringConvert(l.Domain),
-			BindDn:               l.BindDn,
-			DirectoryType:        SafeStringConvert(l.DirectoryType),
-			UserSearchBase:       l.UserSearchBase,
-			UserNameAttribute:    SafeStringConvert(l.UserNameAttribute),
-			UserObjectClass:      SafeStringConvert(l.UserObjectClass),
-			GroupMemberAttribute: SafeStringConvert(l.GroupMemberAttribute),
-			GroupNameAttribute:   SafeStringConvert(l.GroupNameAttribute),
-			GroupObjectClass:     SafeStringConvert(l.GroupObjectClass),
-			GroupSearchBase:      SafeStringConvert(l.GroupSearchBase),
+			Name:                 *l.Name,
+			Server:               fmt.Sprintf("%s://%s:%d", l.Protocol, l.ServerHost, l.ServerPort),
+			Domain:               SafeStringConvert(&l.Domain),
+			BindDn:               *l.BindDn,
+			DirectoryType:        SafeStringConvert(&l.DirectoryType),
+			UserSearchBase:       *l.UserSearchBase,
+			UserNameAttribute:    SafeStringConvert(&l.UserNameAttribute),
+			UserObjectClass:      SafeStringConvert(&l.UserObjectClass),
+			GroupMemberAttribute: SafeStringConvert(&l.GroupMemberAttribute),
+			GroupNameAttribute:   SafeStringConvert(&l.GroupNameAttribute),
+			GroupObjectClass:     SafeStringConvert(&l.GroupObjectClass),
+			GroupSearchBase:      SafeStringConvert(&l.GroupSearchBase),
 		}
 		tableRows = append(tableRows, row)
 	}
@@ -151,7 +151,7 @@ func (c *Cloudbreak) GetLdapByName(name string) *models_cloudbreak.LdapConfigRes
 		logErrorAndExit(err)
 	}
 
-	id64 := *resp.Payload.ID
+	id64 := resp.Payload.ID
 	log.Infof("[GetLdapByName] '%s' ldap id: %d", name, id64)
 	return resp.Payload
 }

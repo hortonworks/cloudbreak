@@ -79,7 +79,7 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 
 	validDefinition := false
 	for _, alertDef := range asClient.getAlertDefinitions() {
-		if *alertDef.Name == definitionName {
+		if alertDef.Name == definitionName {
 			validDefinition = true
 			break
 		}
@@ -88,7 +88,7 @@ func AddAutoscalingPolicy(c *cli.Context) error {
 		logErrorAndExit(errors.New(fmt.Sprintf("the provided scaling definition name '%s' is not valid", definitionName)))
 	}
 
-	clusterId := *cbClient.GetClusterByName(clusterName).ID
+	clusterId := cbClient.GetClusterByName(clusterName).ID
 	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		log.Warn(err)
@@ -115,7 +115,7 @@ func RemoveAutoscalingPolicy(c *cli.Context) error {
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	clusterId := *cbClient.GetClusterByName(clusterName).ID
+	clusterId := cbClient.GetClusterByName(clusterName).ID
 	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		logErrorAndExit(err)
@@ -124,7 +124,7 @@ func RemoveAutoscalingPolicy(c *cli.Context) error {
 	alert := asClient.getAlertByName(policyName, asClusterId)
 	if alert != nil {
 		log.Infof("[RemoveAutoscalingPolicy] remove autoscaling policy: %s", policyName)
-		asClient.AutoScaling.Alerts.DeletePrometheusAlarm(&alerts.DeletePrometheusAlarmParams{ClusterID: asClusterId, AlertID: *alert.ID})
+		asClient.AutoScaling.Alerts.DeletePrometheusAlarm(&alerts.DeletePrometheusAlarmParams{ClusterID: asClusterId, AlertID: alert.ID})
 	} else {
 		logErrorAndExit(errors.New(fmt.Sprintf("autoscaling policy '%s' not found", policyName)))
 	}
@@ -161,7 +161,7 @@ func ConfigureAutoscaling(c *cli.Context) error {
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 
-	clusterId := *cbClient.GetClusterByName(clusterName).ID
+	clusterId := cbClient.GetClusterByName(clusterName).ID
 	asClusterId, err := asClient.getAutoscalingClusterIdByStackId(clusterName, clusterId)
 	if err != nil {
 		log.Warn(err)
@@ -238,19 +238,19 @@ func setClusterState(clusterName string, state string,
 	setState func(*clusters.SetStateParams) (*clusters.SetStateOK, error)) {
 
 	log.Infof("[setClusterState] set cluster: %s state to %s", clusterName, state)
-	clusterId := *getCluster(clusterName).ID
+	clusterId := getCluster(clusterName).ID
 	asClusterId, err := getAsCluster(clusterName, clusterId)
 	if err != nil {
 		logErrorAndExit(err)
 	}
 
-	resp, err := setState(&clusters.SetStateParams{ClusterID: asClusterId, Body: &models_autoscale.ClusterState{State: &state}})
+	resp, err := setState(&clusters.SetStateParams{ClusterID: asClusterId, Body: &models_autoscale.ClusterState{State: state}})
 
 	if err != nil {
 		logErrorAndExit(err)
 	}
 
-	log.Infof("[setClusterState] cluster: %s state set %s", clusterName, *resp.Payload.State)
+	log.Infof("[setClusterState] cluster: %s state set %s", clusterName, resp.Payload.State)
 }
 
 func setClusterAutoscaleState(clusterName string, autoscaleState bool,
@@ -259,7 +259,7 @@ func setClusterAutoscaleState(clusterName string, autoscaleState bool,
 	setAutoscaleState func(params *clusters.SetAutoscaleStateParams) (*clusters.SetAutoscaleStateOK, error)) {
 
 	log.Infof("[setClusterAutoscaleState] set cluster: %s Autoscale state to %t", clusterName, autoscaleState)
-	clusterId := *getCluster(clusterName).ID
+	clusterId := getCluster(clusterName).ID
 	asClusterId, err := getAsCluster(clusterName, clusterId)
 	if err != nil {
 		logErrorAndExit(err)
@@ -282,7 +282,7 @@ func (autosScaling *Autoscaling) getAlertByName(name string, asClusterId int64) 
 	log.Infof("[getAlertByName] get autoscaling alert by name: %s", name)
 
 	for _, a := range autosScaling.getAlerts(asClusterId) {
-		if a.AlertName != nil && *a.AlertName == name {
+		if a.AlertName == name {
 			log.Infof("[getAlertByName] found alert by name: %s", name)
 			return a
 		}
@@ -342,25 +342,25 @@ func (autosScaling *Autoscaling) getAutoscaling(clusterName string, stackId int6
 		return nil
 	}
 
-	asClusterId := *asCluster.ID
+	asClusterId := asCluster.ID
 	policyList := make([]AutoscalingPolicy, 0)
 	for _, alert := range autosScaling.getAlerts(asClusterId) {
 		for _, policy := range autosScaling.getPolicies(asClusterId) {
-			if alert.ID != nil && policy.AlertID != nil && *alert.ID == *policy.AlertID {
+			if alert.ID == policy.AlertID {
 				asp := AutoscalingPolicy{
-					PolicyName:        *policy.Name,
-					NodeType:          *policy.HostGroup,
-					Period:            *alert.Period,
-					ScalingAdjustment: *policy.ScalingAdjustment,
-					Threshold:         *alert.Threshold,
-					Operator:          getOperator(*alert.AlertOperator),
+					PolicyName:        policy.Name,
+					NodeType:          policy.HostGroup,
+					Period:            alert.Period,
+					ScalingAdjustment: policy.ScalingAdjustment,
+					Threshold:         alert.Threshold,
+					Operator:          getOperator(alert.AlertOperator),
 				}
 				policyList = append(policyList, asp)
 			}
 		}
 	}
 
-	log.Infof("[getAutoscaling] autoscaling state: %s for cluster: %s", *asCluster.State, clusterName)
+	log.Infof("[getAutoscaling] autoscaling state: %s for cluster: %s", asCluster.State, clusterName)
 
 	scaleConfig := autosScaling.getConfiguration(asClusterId)
 	skeleton := AutoscalingSkeletonResult{}
@@ -375,7 +375,7 @@ func (autosScaling *Autoscaling) deleteCluster(clusterName string, getCluster fu
 	defer timeTrack(time.Now(), "delete autoscaling cluster")
 
 	log.Infof("[deleteCluster] delete autoscaling cluster, name: %s", clusterName)
-	clusterId := *getCluster(clusterName).ID
+	clusterId := getCluster(clusterName).ID
 	if asClusterId, err := autosScaling.getAutoscalingClusterIdByStackId(clusterName, clusterId); err == nil {
 		autosScaling.AutoScaling.Clusters.DeleteCluster(&clusters.DeleteClusterParams{ClusterID: asClusterId})
 	} else {
@@ -388,7 +388,7 @@ func (autosScaling *Autoscaling) getAutoscalingClusterIdByStackId(clusterName st
 	if err != nil {
 		return 0, err
 	}
-	return *asCluster.ID, nil
+	return asCluster.ID, nil
 }
 
 func (autosScaling *Autoscaling) getAutoscalingClusterByStackId(clusterName string, stackId int64) (*models_autoscale.ClusterSummary, error) {
@@ -421,8 +421,8 @@ func listDefinitionsImpl(getAlertDefinitions func() []*models_autoscale.AlertRul
 	tableRows := make([]Row, len(alertDefinitions))
 	for i, a := range alertDefinitions {
 		tableRows[i] = &AlertListElement{
-			Name:  SafeStringConvert(a.Name),
-			Label: SafeStringConvert(a.Label),
+			Name:  SafeStringConvert(&a.Name),
+			Label: SafeStringConvert(&a.Label),
 		}
 	}
 	writer(AlertListHeader, tableRows)
@@ -444,17 +444,16 @@ func (autosScaling *Autoscaling) createBaseAutoscalingCluster(stackId int64, ena
 	log.Infof("[createBaseAutoscalingCluster] add cluster to autoscaling, id: %d", stackId)
 	resp, err := autosScaling.AutoScaling.Clusters.AddCluster(
 		&clusters.AddClusterParams{
-			Body: &models_autoscale.AmbariConnectionDetails{
-				EnableAutoscaling: &enableAutoscaling,
-				StackID:           stackId,
+			Body: &models_autoscale.ClusterRequestJSON{
+				StackID:           &stackId,
 			}})
 
 	if err != nil {
 		logErrorAndExit(err)
 	}
 
-	log.Infof("[createBaseAutoscalingCluster] base autoscale cluster created, id: %d", *resp.Payload.ID)
-	return *resp.Payload.ID
+	log.Infof("[createBaseAutoscalingCluster] base autoscale cluster created, id: %d", resp.Payload.ID)
+	return resp.Payload.ID
 }
 
 func (autosScaling *Autoscaling) setConfiguration(asClusterId int64, config AutoscalingConfiguration) {
@@ -484,11 +483,11 @@ func (autosScaling *Autoscaling) addPrometheusAlert(asClusterId int64, policy Au
 	resp, err := autosScaling.AutoScaling.Alerts.CreatePrometheusAlert(
 		&alerts.CreatePrometheusAlertParams{
 			Body: &models_autoscale.PromhetheusAlert{
-				AlertName:     &policy.PolicyName,
-				AlertOperator: &operatorString,
-				AlertRuleName: policy.ScalingDefinition,
-				Period:        &policy.Period,
-				Threshold:     &policy.Threshold,
+				AlertName:     policy.PolicyName,
+				AlertOperator: operatorString,
+				AlertRuleName: *policy.ScalingDefinition,
+				Period:        policy.Period,
+				Threshold:     policy.Threshold,
 			},
 			ClusterID: asClusterId,
 		})
@@ -496,8 +495,8 @@ func (autosScaling *Autoscaling) addPrometheusAlert(asClusterId int64, policy Au
 		logErrorAndExit(err)
 	}
 
-	log.Infof("[addPrometheusAlert] prometheus alert added, id: %d", *resp.Payload.ID)
-	return *resp.Payload.ID
+	log.Infof("[addPrometheusAlert] prometheus alert added, id: %d", resp.Payload.ID)
+	return resp.Payload.ID
 }
 
 func (autosScaling *Autoscaling) addScalingPolicy(asClusterId int64, policy AutoscalingPolicy, alertId int64) int64 {
@@ -509,11 +508,11 @@ func (autosScaling *Autoscaling) addScalingPolicy(asClusterId int64, policy Auto
 	resp, err := autosScaling.AutoScaling.Policies.AddScaling(
 		&policies.AddScalingParams{
 			Body: &models_autoscale.ScalingPolicy{
-				AdjustmentType:    &adjustmentType,
-				AlertID:           &alertId,
-				HostGroup:         &policy.NodeType,
-				Name:              &policy.PolicyName,
-				ScalingAdjustment: &policy.ScalingAdjustment,
+				AdjustmentType:    adjustmentType,
+				AlertID:           alertId,
+				HostGroup:         policy.NodeType,
+				Name:              policy.PolicyName,
+				ScalingAdjustment: policy.ScalingAdjustment,
 			},
 			ClusterID: asClusterId,
 		})
@@ -521,8 +520,8 @@ func (autosScaling *Autoscaling) addScalingPolicy(asClusterId int64, policy Auto
 		logErrorAndExit(err)
 	}
 
-	log.Infof("[addScalingPolicy] scaling policy added, id: %d", *resp.Payload.ID)
-	return *resp.Payload.ID
+	log.Infof("[addScalingPolicy] scaling policy added, id: %d", resp.Payload.ID)
+	return resp.Payload.ID
 }
 
 func getOperator(operatorName string) string {

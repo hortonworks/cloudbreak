@@ -62,8 +62,8 @@ func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostPubli
 		logErrorAndExit(err)
 	}
 
-	log.Infof("[createRecipe] recipe created, name: %s, uri: %s, id: %d", resp.Payload.Name, recipe.URI, *resp.Payload.ID)
-	return *resp.Payload.ID
+	log.Infof("[createRecipe] recipe created, name: %s, uri: %s, id: %d", resp.Payload.Name, recipe.URI, resp.Payload.ID)
+	return resp.Payload.ID
 }
 
 func createRecipeRequests(recipes []Recipe) []*models_cloudbreak.RecipeRequest {
@@ -77,9 +77,10 @@ func createRecipeRequests(recipes []Recipe) []*models_cloudbreak.RecipeRequest {
 }
 
 func createRecipeRequest(recipe Recipe) *models_cloudbreak.RecipeRequest {
+	recipeType := strings.ToUpper(recipe.Phase)
 	recipeRequest := models_cloudbreak.RecipeRequest{
-		URI:        &recipe.URI,
-		RecipeType: strings.ToUpper(recipe.Phase),
+		URI:        recipe.URI,
+		RecipeType: &recipeType,
 	}
 
 	return &recipeRequest

@@ -31,7 +31,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
 	}
 
 	log.Infof("[CreateTemplate] master template created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	channel <- resp.Payload.ID
 
 	log.Infof("[CreateTemplate] sending worker template create request with name: %s", workerTemplateReqBody.Name)
 	resp, err = postTemplate(&templates.PostPublicTemplateParams{Body: workerTemplateReqBody})
@@ -41,7 +41,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
 	}
 
 	log.Infof("[CreateTemplate] worker template created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	channel <- resp.Payload.ID
 
 	log.Infof("[CreateTemplate] sending compute template create request with name: %s", computeTemplateReqBody.Name)
 	resp, err = postTemplate(&templates.PostPublicTemplateParams{Body: computeTemplateReqBody})
@@ -51,7 +51,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
 	}
 
 	log.Infof("[CreateTemplate] compute template created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	channel <- resp.Payload.ID
 }
 
 func createMasterTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest {
@@ -64,12 +64,12 @@ func createMasterTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.Te
 	}
 
 	masterTemplateReqBody := models_cloudbreak.TemplateRequest{
-		Name:          masterTemplateName,
-		CloudPlatform: "AWS",
-		InstanceType:  skeleton.Master.InstanceType,
-		VolumeType:    &skeleton.Master.VolumeType,
-		VolumeSize:    skeleton.Master.VolumeSize,
-		VolumeCount:   skeleton.Master.VolumeCount,
+		Name:          &masterTemplateName,
+		CloudPlatform: &(&stringWrapper{"AWS"}).s,
+		InstanceType:  &skeleton.Master.InstanceType,
+		VolumeType:    skeleton.Master.VolumeType,
+		VolumeSize:    *skeleton.Master.VolumeSize,
+		VolumeCount:   *skeleton.Master.VolumeCount,
 		Parameters:    parameters,
 	}
 
@@ -86,12 +86,12 @@ func createWorkerTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.Te
 	}
 
 	workerTemplateReqBody := models_cloudbreak.TemplateRequest{
-		Name:          workerTemplateName,
-		CloudPlatform: "AWS",
-		InstanceType:  skeleton.Worker.InstanceType,
-		VolumeType:    &skeleton.Worker.VolumeType,
-		VolumeSize:    skeleton.Worker.VolumeSize,
-		VolumeCount:   skeleton.Worker.VolumeCount,
+		Name:          &workerTemplateName,
+		CloudPlatform: &(&stringWrapper{"AWS"}).s,
+		InstanceType:  &skeleton.Worker.InstanceType,
+		VolumeType:    skeleton.Worker.VolumeType,
+		VolumeSize:    *skeleton.Worker.VolumeSize,
+		VolumeCount:   *skeleton.Worker.VolumeCount,
 		Parameters:    parameters,
 	}
 
@@ -112,12 +112,12 @@ func createComputeTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.T
 	}
 
 	computeTemplateReqBody := models_cloudbreak.TemplateRequest{
-		Name:          computeTemplateName,
-		CloudPlatform: "AWS",
-		InstanceType:  skeleton.Compute.InstanceType,
-		VolumeType:    &skeleton.Compute.VolumeType,
-		VolumeSize:    skeleton.Compute.VolumeSize,
-		VolumeCount:   skeleton.Compute.VolumeCount,
+		Name:          &computeTemplateName,
+		CloudPlatform: &(&stringWrapper{"AWS"}).s,
+		InstanceType:  &skeleton.Compute.InstanceType,
+		VolumeType:    skeleton.Compute.VolumeType,
+		VolumeSize:    *skeleton.Compute.VolumeSize,
+		VolumeCount:   *skeleton.Compute.VolumeCount,
 		Parameters:    parameters,
 	}
 

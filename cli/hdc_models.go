@@ -1,7 +1,5 @@
 package cli
 
-import "github.com/hortonworks/hdc-cli/models_cloudbreak"
-
 var (
 	MASTER      = "master"
 	WORKER      = "worker"
@@ -30,6 +28,8 @@ var SUPPORTED_HDP_VERSIONS = [...]float64{2.5, 2.6}
 
 var ClusterSkeletonHeader []string = []string{"Cluster Name", "HDP Version", "Cluster Type", "Master", "Worker", "Compute",
 	"SSH Key Name", "Remote Access", "WebAccess", "User", "Status", "Status Reason"}
+
+type Configurations map[string]map[string]string
 
 type ClusterSkeletonBase struct {
 	ClusterName              string                `json:"ClusterName" yaml:"ClusterName"`
@@ -61,7 +61,7 @@ type ClusterSkeleton struct {
 	HiveMetastore   *HiveMetastore                     `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
 	DruidMetastore  *DruidMetastore                    `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
 	RangerMetastore *RangerMetastore                   `json:"RangerMetastore,omitempty" yaml:"RangerMetastore,omitempty"`
-	Configurations  []models_cloudbreak.Configurations `json:"Configurations" yaml:"Configurations"`
+	Configurations  []Configurations 				   `json:"Configurations" yaml:"Configurations"`
 	ClusterInputs   map[string]string                  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
 }
 
@@ -70,7 +70,7 @@ type ClusterSkeletonResult struct {
 	Autoscaling    *AutoscalingSkeletonResult         `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
 	HiveMetastore  *HiveMetastoreResult               `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
 	DruidMetastore *DruidMetastoreResult              `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []models_cloudbreak.Configurations `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Configurations []Configurations 				  `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
 	Nodes          string                             `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
 	Status         string                             `json:"Status,omitempty" yaml:"Status,omitempty"`
 	StatusReason   string                             `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`

@@ -49,7 +49,7 @@ func createCredential(finder func(string) string, getResponse func(string) (*htt
 	credentialMap["roleArn"] = finder(FlRoleARN.Name)
 	defaultCredential := models_cloudbreak.CredentialResponse{
 		Parameters: credentialMap,
-		PublicKey:  &sshKeyString,
+		PublicKey:  sshKeyString,
 	}
 
 	return createCredential(finder(FlCredentialName.Name), defaultCredential, finder(FlSSHKeyPair.Name), true)
@@ -95,13 +95,13 @@ func createCredentialImpl(name string, defaultCredential models_cloudbreak.Crede
 		if err != nil {
 			logErrorAndExit(err)
 		}
-		id = *resp.Payload.ID
+		id = resp.Payload.ID
 	} else {
 		resp, err := postUserCredential(&credentials.PostPrivateCredentialParams{Body: credReq})
 		if err != nil {
 			logErrorAndExit(err)
 		}
-		id = *resp.Payload.ID
+		id = resp.Payload.ID
 	}
 
 	log.Infof("[CreateCredential] credential created, id: %d", id)
@@ -115,8 +115,8 @@ func createCredentialRequest(name string, defaultCredential models_cloudbreak.Cr
 	credentialMap["existingKeyPairName"] = existingKey
 
 	credReq := models_cloudbreak.CredentialRequest{
-		Name:          name,
-		CloudPlatform: "AWS",
+		Name:          &(&stringWrapper{name}).s,
+		CloudPlatform: &(&stringWrapper{"AWS"}).s,
 		PublicKey:     defaultCredential.PublicKey,
 		Parameters:    credentialMap,
 	}
@@ -179,7 +179,7 @@ func listPrivateCredentialsImpl(getPrivateCredentials func() []*models_cloudbrea
 
 	var tableRows []Row
 	for _, cred := range credResp {
-		row := &Credential{Id: *cred.ID, Name: cred.Name}
+		row := &Credential{Id: cred.ID, Name: *cred.Name}
 		tableRows = append(tableRows, row)
 	}
 

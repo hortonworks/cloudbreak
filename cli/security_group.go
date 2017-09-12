@@ -35,7 +35,7 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, group string, channel cha
 	}
 
 	log.Infof("[CreateSecurityGroup] security group created, id: %d", resp.Payload.ID)
-	channel <- *resp.Payload.ID
+	channel <- resp.Payload.ID
 }
 
 func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models_cloudbreak.SecurityGroupRequest {
@@ -51,19 +51,20 @@ func createSecurityGroupRequest(skeleton ClusterSkeleton, group string) *models_
 	}
 
 	modifiable := false
+	ports := strings.Join(openPorts, ",")
 	secRules := []*models_cloudbreak.SecurityRuleRequest{
 		{
-			Subnet:     skeleton.RemoteAccess,
-			Protocol:   "tcp",
-			Ports:      strings.Join(openPorts, ","),
+			Subnet:     &skeleton.RemoteAccess,
+			Protocol:   &(&stringWrapper{"tcp"}).s,
+			Ports:      &ports,
 			Modifiable: &modifiable,
 		},
 	}
 
 	secGroup := models_cloudbreak.SecurityGroupRequest{
-		Name:          secGroupName,
+		Name:          &secGroupName,
 		SecurityRules: secRules,
-		CloudPlatform: "AWS",
+		CloudPlatform: &(&stringWrapper{"AWS"}).s,
 	}
 
 	return &secGroup
@@ -79,10 +80,10 @@ func getSecurityDetailsImpl(stack *models_cloudbreak.StackResponse,
 	getIds func(*securitygroups.GetSecurityGroupParams) (*securitygroups.GetSecurityGroupOK, error)) (securityMap map[string][]*models_cloudbreak.SecurityRuleResponse, err error) {
 	securityMap = make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	for _, v := range stack.InstanceGroups {
-		if respSecurityGroup, err := getIds(&securitygroups.GetSecurityGroupParams{ID: *v.SecurityGroupID}); err == nil {
+		if respSecurityGroup, err := getIds(&securitygroups.GetSecurityGroupParams{ID: v.SecurityGroupID}); err == nil {
 			securityGroup := respSecurityGroup.Payload
 			for _, sr := range securityGroup.SecurityRules {
-				securityMap[sr.Subnet] = append(securityMap[sr.Subnet], sr)
+				securityMap[*sr.Subnet] = append(securityMap[*sr.Subnet], sr)
 			}
 		}
 	}

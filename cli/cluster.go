@@ -13,6 +13,7 @@ import (
 	"encoding/json"
 	"errors"
 	"strings"
+	"strconv"
 )
 
 var BASE_EXPOSED_SERVICES = []string{"AMBARI", "AMBARIUI", "ZEPPELINWS", "ZEPPELINUI"}
@@ -44,7 +45,7 @@ func fetchClusterImpl(stack *models_cloudbreak.StackResponse, autoscaling *Autos
 
 	var templateMap = make(map[string]*models_cloudbreak.TemplateResponse)
 	for _, v := range stack.InstanceGroups {
-		templateMap[v.Group] = v.Template
+		templateMap[*v.Group] = v.Template
 	}
 
 	var recipeMap = make(map[string][]*models_cloudbreak.RecipeResponse)
@@ -52,16 +53,16 @@ func fetchClusterImpl(stack *models_cloudbreak.StackResponse, autoscaling *Autos
 	if stack.Cluster != nil {
 		for _, hg := range stack.Cluster.HostGroups {
 			for _, recipe := range hg.Recipes {
-				recipeMap[hg.Name] = append(recipeMap[hg.Name], recipe)
+				recipeMap[*hg.Name] = append(recipeMap[*hg.Name], recipe)
 			}
-			recoveryModeMap[hg.Name] = *hg.RecoveryMode
+			recoveryModeMap[*hg.Name] = hg.RecoveryMode
 		}
 	}
 
 	var securityMap = make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	for _, v := range stack.InstanceGroups {
 		for _, sr := range v.SecurityGroup.SecurityRules {
-			securityMap[sr.Subnet] = append(securityMap[sr.Subnet], sr)
+			securityMap[*sr.Subnet] = append(securityMap[*sr.Subnet], sr)
 		}
 	}
 
@@ -98,7 +99,7 @@ func describeClusterImpl(clusterName string, format string,
 	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error),
 	getAutoscaling func(string, int64) *AutoscalingSkeletonResult) *ClusterSkeletonResult {
 	stack := getCluster(clusterName)
-	autoscalingSkeleton := getAutoscaling(clusterName, *stack.ID)
+	autoscalingSkeleton := getAutoscaling(clusterName, stack.ID)
 	clusterSkeleton, _ := fetchCluster(stack, autoscalingSkeleton)
 	if format == "table" {
 		clusterSkeleton.Master.Recipes = []Recipe{}
@@ -195,10 +196,10 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	hostGroupAndSubDomainHostname := false
 	var connectedClusterRequest *models_cloudbreak.ConnectedClusterRequest = nil
 	bpName := blueprint.BlueprintName
-	if bpName != nil && *bpName == "hdp26-shared-services" {
+	if bpName == "hdp26-shared-services" {
 		dataLake = true
 	}
-	if bpName != nil && *bpName == "hdp26-shared-services-ha" {
+	if bpName == "hdp26-shared-services-ha" {
 		dataLake = true
 		hostGroupAndSubDomainHostname = true
 	}
@@ -207,7 +208,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 	} else if len(skeleton.SharedClusterName) > 0 {
 		log.Infof("[CreateStack] ephemeral cluster name: %s", skeleton.ClusterName)
 		fillSharedParameters(&skeleton, getBlueprint, getCluster)
-		connectedClusterRequest = &models_cloudbreak.ConnectedClusterRequest{SourceClusterName: &skeleton.SharedClusterName}
+		connectedClusterRequest = &models_cloudbreak.ConnectedClusterRequest{SourceClusterName: skeleton.SharedClusterName}
 	}
 
 	// create stack
@@ -221,23 +222,23 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		instanceGroups := []*models_cloudbreak.InstanceGroups{
 			{
-				Group:         MASTER,
-				NodeCount:     1,
-				Type:          &masterType,
+				Group:         &MASTER,
+				NodeCount:     &(&int32Wrapper{1}).i,
+				Type:          masterType,
 				Template:      createMasterTemplateRequest(skeleton),
 				SecurityGroup: createSecurityGroupRequest(skeleton, MASTER),
 			},
 			{
-				Group:         WORKER,
-				NodeCount:     skeleton.Worker.InstanceCount,
-				Type:          &workerType,
+				Group:         &WORKER,
+				NodeCount:     &skeleton.Worker.InstanceCount,
+				Type:          workerType,
 				Template:      createWorkerTemplateRequest(skeleton),
 				SecurityGroup: createSecurityGroupRequest(skeleton, WORKER),
 			},
 			{
-				Group:         COMPUTE,
-				NodeCount:     skeleton.Compute.InstanceCount,
-				Type:          &computeType,
+				Group:         &COMPUTE,
+				NodeCount:     &skeleton.Compute.InstanceCount,
+				Type:          computeType,
 				Template:      createComputeTemplateRequest(skeleton),
 				SecurityGroup: createSecurityGroupRequest(skeleton, COMPUTE),
 			},
@@ -254,7 +255,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			}
 		}
 
-		orchestrator := models_cloudbreak.OrchestratorRequest{Type: "SALT"}
+		orchestrator := models_cloudbreak.OrchestratorRequest{Type: &(&stringWrapper{"SALT"}).s}
 
 		log.Infof("[CreateStack] selected HDPVersion %s", skeleton.HDPVersion)
 
@@ -265,37 +266,33 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		log.Infof("[CreateStack] selected ambariVersion %s", ambariVersion)
 
-		credReq := &models_cloudbreak.CredentialSourceRequest{SourceName: "aws-access"}
-		tags := make(map[string]interface{})
+		credReq := &models_cloudbreak.CredentialSourceRequest{SourceName: &(&stringWrapper{"aws-access"}).s}
+		tags := make(map[string]string)
 		if dataLake {
 			tags["type"] = "datalake"
 		}
-		if len(skeleton.Tags) > 0 {
-			tags[USER_TAGS] = skeleton.Tags
-		}
-
 		if len(skeleton.SharedClusterName) > 0 {
 			tags["datalakeName"] = skeleton.SharedClusterName
-			tags["datalakeId"] = *getCluster(skeleton.SharedClusterName).ID
+			tags["datalakeId"] = strconv.FormatInt((getCluster(skeleton.SharedClusterName).ID), 10)
 			log.Infof("[CreateStack] tags added for datalake: %s", tags)
 		}
 
 		stackReq := models_cloudbreak.StackRequest{
-			Name:                    skeleton.ClusterName,
+			Name:                    &skeleton.ClusterName,
 			CredentialSource:        credReq,
-			FailurePolicy:           &models_cloudbreak.FailurePolicyRequest{AdjustmentType: "BEST_EFFORT"},
-			OnFailureAction:         &failureAction,
+			FailurePolicy:           &models_cloudbreak.FailurePolicyRequest{AdjustmentType: &(&stringWrapper{"BEST_EFFORT"}).s},
+			OnFailureAction:         failureAction,
 			InstanceGroups:          instanceGroups,
 			Parameters:              stackParameters,
-			CloudPlatform:           &platform,
-			PlatformVariant:         &platform,
+			CloudPlatform:           platform,
+			PlatformVariant:         platform,
 			Network:                 createNetworkRequest(skeleton, getNetwork),
-			AmbariVersion:           &ambariVersion,
-			HdpVersion:              &skeleton.HDPVersion,
+			AmbariVersion:           ambariVersion,
+			HdpVersion:              skeleton.HDPVersion,
 			Orchestrator:            &orchestrator,
 			HostgroupNameAsHostname: &hostGroupAndSubDomainHostname,
 			ClusterNameAsSubdomain:  &hostGroupAndSubDomainHostname,
-			Tags: tags,
+			UserDefinedTags:         skeleton.Tags,
 		}
 
 		// flex subscription
@@ -315,25 +312,25 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		log.Infof("[CreateStack] stack created, id: %d", resp.Payload.ID)
-		return *resp.Payload.ID
+		return resp.Payload.ID
 	}()
 
 	// create cluster
 
 	func() {
 		masterConstraint := models_cloudbreak.Constraint{
-			InstanceGroupName: &MASTER,
-			HostCount:         int32(1),
+			InstanceGroupName: MASTER,
+			HostCount:         &(&int32Wrapper{1}).i,
 		}
 
 		workerConstraint := models_cloudbreak.Constraint{
-			InstanceGroupName: &WORKER,
-			HostCount:         int32(skeleton.Worker.InstanceCount),
+			InstanceGroupName: WORKER,
+			HostCount:         &(&int32Wrapper{skeleton.Worker.InstanceCount}).i,
 		}
 
 		computeConstraint := models_cloudbreak.Constraint{
-			InstanceGroupName: &COMPUTE,
-			HostCount:         int32(skeleton.Compute.InstanceCount),
+			InstanceGroupName: COMPUTE,
+			HostCount:         &(&int32Wrapper{skeleton.Compute.InstanceCount}).i,
 		}
 
 		var workerRecoveryMode string
@@ -355,21 +352,21 @@ func createClusterImpl(skeleton ClusterSkeleton,
 
 		hostGroups := []*models_cloudbreak.HostGroupRequest{
 			{
-				Name:       MASTER,
+				Name:       &MASTER,
 				Constraint: &masterConstraint,
 				Recipes:    createRecipeRequests(skeleton.Master.Recipes),
 			},
 			{
-				Name:         WORKER,
+				Name:         &WORKER,
 				Constraint:   &workerConstraint,
 				Recipes:      createRecipeRequests(skeleton.Worker.Recipes),
-				RecoveryMode: &workerRecoveryMode,
+				RecoveryMode: workerRecoveryMode,
 			},
 			{
-				Name:         COMPUTE,
+				Name:         &COMPUTE,
 				Constraint:   &computeConstraint,
 				Recipes:      createRecipeRequests(skeleton.Compute.Recipes),
-				RecoveryMode: &computeRecoveryMode,
+				RecoveryMode: computeRecoveryMode,
 			},
 		}
 
@@ -382,7 +379,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 				hiveRds := createRDSRequest(hiveMetastore.MetaStore, HIVE_RDS, skeleton.HDPVersion, nil)
 				rdsConfigs = append(rdsConfigs, hiveRds)
 			} else if len(hiveMetastore.Name) > 0 {
-				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(hiveMetastore.Name).ID)
+				rdsConfigIds = append(rdsConfigIds, getRdsConfig(hiveMetastore.Name).ID)
 			}
 		}
 		// druid metastore
@@ -392,7 +389,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 				druidRds := createRDSRequest(druidMetastore.MetaStore, DRUID_RDS, skeleton.HDPVersion, nil)
 				rdsConfigs = append(rdsConfigs, druidRds)
 			} else if len(druidMetastore.Name) > 0 {
-				rdsConfigIds = append(rdsConfigIds, *getRdsConfig(druidMetastore.Name).ID)
+				rdsConfigIds = append(rdsConfigIds, getRdsConfig(druidMetastore.Name).ID)
 			}
 		}
 		// ranger metastore
@@ -401,8 +398,8 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			if len(rangerMetastore.URL) > 0 {
 				properties := []*models_cloudbreak.RdsConfigProperty{
 					&models_cloudbreak.RdsConfigProperty{
-						Name:  &(&stringWrapper{"rangerAdminPassword"}).s,
-						Value: &(&stringWrapper{skeleton.ClusterAndAmbariPassword}).s,
+						Name: "rangerAdminPassword",
+						Value: skeleton.ClusterAndAmbariPassword,
 					},
 				}
 				rangerRds := createRDSRequest(rangerMetastore.MetaStore, RANGER_RDS, skeleton.HDPVersion, properties)
@@ -414,12 +411,12 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		for key, value := range skeleton.ClusterInputs {
 			newKey := key
 			newValue := value
-			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &newKey, PropertyValue: &newValue})
+			inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: newKey, PropertyValue: newValue})
 		}
 		var ldapConfigId *int64 = nil
 		if skeleton.Ldap != nil && len(*skeleton.Ldap) > 0 {
 			ldap := getLdapConfig(*skeleton.Ldap)
-			ldapConfigId = ldap.ID
+			ldapConfigId = &ldap.ID
 		}
 
 		exposedServices := []string{}
@@ -444,12 +441,12 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		if skeleton.AmbariDatabase != nil {
 			db := skeleton.AmbariDatabase
 			ambariDatabase = &models_cloudbreak.AmbariDatabaseDetails{
-				Host:     db.Host,
-				Port:     db.Port,
-				UserName: db.Username,
-				Password: db.Password,
-				Name:     db.DatabaseName,
-				Vendor:   db.DatabaseType,
+				Host:     &db.Host,
+				Port:     &db.Port,
+				UserName: &db.Username,
+				Password: &db.Password,
+				Name:     &db.DatabaseName,
+				Vendor:   &db.DatabaseType,
 			}
 		}
 
@@ -457,22 +454,22 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		gatewayType := "CENTRAL"
 
 		clusterReq := models_cloudbreak.ClusterRequest{
-			Name:                      skeleton.ClusterName,
+			Name:                      &skeleton.ClusterName,
 			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
 			ConnectedCluster:          connectedClusterRequest,
 			HostGroups:                hostGroups,
-			UserName:                  skeleton.ClusterAndAmbariUser,
-			Password:                  skeleton.ClusterAndAmbariPassword,
+			UserName:                  &skeleton.ClusterAndAmbariUser,
+			Password:                  &skeleton.ClusterAndAmbariPassword,
 			RdsConfigJsons:            rdsConfigs,
 			RdsConfigIds:              rdsConfigIds,
 			BlueprintInputs:           inputs,
-			LdapConfigID:              ldapConfigId,
+			LdapConfigID:              *ldapConfigId,
 			ValidateBlueprint:         &(&boolWrapper{false}).b,
-			BlueprintCustomProperties: skeleton.Configurations,
+			//BlueprintCustomProperties: skeleton.Configurations, // que? TODO?
 			Gateway: &models_cloudbreak.GatewayJSON{
 				EnableGateway:   &enableKnoxGateway,
 				ExposedServices: exposedServices,
-				GatewayType:     &gatewayType,
+				GatewayType:     gatewayType,
 			},
 			AmbariDatabaseDetails: ambariDatabase,
 		}
@@ -542,7 +539,7 @@ func repairClusterImp(clusterName string, nodeType string, removeOnly bool,
 	stack := getStack(clusterName)
 
 	repairBody := &models_cloudbreak.ClusterRepairRequest{HostGroups: []string{nodeType}, RemoveOnly: &removeOnly}
-	if err := repairCluster(&cluster.RepairClusterParams{Body: repairBody, ID: *stack.ID}); err != nil {
+	if err := repairCluster(&cluster.RepairClusterParams{Body: repairBody, ID: stack.ID}); err != nil {
 		logErrorAndExit(err)
 	}
 }
@@ -569,7 +566,7 @@ func ResizeCluster(c *cli.Context) error {
 		oAuth2Client.Cloudbreak.Stacks.PutStack,
 		oAuth2Client.Cloudbreak.Cluster.PutCluster)
 
-	oAuth2Client.waitForClusterToFinish(*stack.ID, c)
+	oAuth2Client.waitForClusterToFinish(stack.ID, c)
 
 	return nil
 }
@@ -585,18 +582,18 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 		withClusterScale := true
 		update := &models_cloudbreak.UpdateStack{
 			InstanceGroupAdjustment: &models_cloudbreak.InstanceGroupAdjustment{
-				InstanceGroup:     nodeType,
-				ScalingAdjustment: adjustment,
+				InstanceGroup:     &nodeType,
+				ScalingAdjustment: &adjustment,
 				WithClusterEvent:  &withClusterScale,
 			},
 		}
-		if err := putStack(&stacks.PutStackParams{ID: *stack.ID, Body: update}); err != nil {
+		if err := putStack(&stacks.PutStackParams{ID: stack.ID, Body: update}); err != nil {
 			logErrorAndExit(err)
 		}
 	} else {
 		validateNodeCount := true
 		for _, v := range stack.InstanceGroups {
-			if nodeType == v.Group {
+			if nodeType == *v.Group {
 				if WORKER == nodeType {
 					if len(v.Metadata)+int(adjustment) < 3 {
 						logErrorAndExit(errors.New("You cannot scale down the worker host group below 3, because it can cause data loss"))
@@ -612,13 +609,13 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 		withStackScale := true
 		update := &models_cloudbreak.UpdateCluster{
 			HostGroupAdjustment: &models_cloudbreak.HostGroupAdjustment{
-				ScalingAdjustment: adjustment,
-				HostGroup:         nodeType,
+				ScalingAdjustment: &adjustment,
+				HostGroup:         &nodeType,
 				WithStackUpdate:   &withStackScale,
 				ValidateNodeCount: &validateNodeCount,
 			},
 		}
-		if err := putCluster(&cluster.PutClusterParams{ID: *stack.ID, Body: update}); err != nil {
+		if err := putCluster(&cluster.PutClusterParams{ID: stack.ID, Body: update}); err != nil {
 			logErrorAndExit(err)
 		}
 	}
@@ -670,7 +667,7 @@ func fillSharedParameters(skeleton *ClusterSkeleton,
 	getCluster func(string) *models_cloudbreak.StackResponse) {
 
 	stack := getCluster(skeleton.SharedClusterName)
-	if *stack.Status != "AVAILABLE" && *stack.Cluster.Status != "AVAILABLE" {
+	if stack.Status != "AVAILABLE" && stack.Cluster.Status != "AVAILABLE" {
 		logErrorAndExit(errors.New("the cluster is not 'AVAILABLE' yet, please try again later"))
 		return
 	}
@@ -680,14 +677,14 @@ func fillSharedParameters(skeleton *ClusterSkeleton,
 	skeleton.Ldap = &(&stringWrapper{" "}).s
 	var inputs = make(map[string]string)
 	for _, input := range ambariBp.Inputs {
-		if !strings.Contains(*input.Name, "LDAP") {
-			inputs[*input.Name] = ""
+		if !strings.Contains(input.Name, "LDAP") {
+			inputs[input.Name] = ""
 		}
 	}
 	skeleton.ClusterInputs = inputs
 
 	if stack.Cluster != nil && stack.Cluster.LdapConfig != nil {
-		skeleton.Ldap = &stack.Cluster.LdapConfig.Name
+		skeleton.Ldap = stack.Cluster.LdapConfig.Name
 	}
 
 	network := stack.Network
@@ -697,15 +694,13 @@ func fillSharedParameters(skeleton *ClusterSkeleton,
 
 	if stack.Cluster != nil && len(stack.Cluster.RdsConfigs) > 0 {
 		for _, rds := range stack.Cluster.RdsConfigs {
-			if rds.Type != nil {
-				if *rds.Type == HIVE_RDS {
-					skeleton.HiveMetastore = &HiveMetastore{
-						MetaStore: MetaStore{Name: rds.Name},
-					}
-				} else if *rds.Type == DRUID_RDS {
-					skeleton.DruidMetastore = &DruidMetastore{
-						MetaStore: MetaStore{Name: rds.Name},
-					}
+			if rds.Type == HIVE_RDS {
+				skeleton.HiveMetastore = &HiveMetastore{
+					MetaStore: MetaStore{Name: *rds.Name},
+				}
+			} else if rds.Type == DRUID_RDS {
+				skeleton.DruidMetastore = &DruidMetastore{
+					MetaStore: MetaStore{Name: *rds.Name},
 				}
 			}
 		}
@@ -771,6 +766,6 @@ func getBaseSkeleton() *ClusterSkeleton {
 		},
 		HiveMetastore:  &HiveMetastore{},
 		DruidMetastore: &DruidMetastore{},
-		Configurations: []models_cloudbreak.Configurations{},
+		Configurations: []Configurations{}, // que? TODO?
 	}
 }
