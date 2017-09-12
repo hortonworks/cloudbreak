@@ -43,6 +43,9 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
+import com.sequenceiq.ambari.client.services.BlueprintService;
+import com.sequenceiq.ambari.client.services.ServiceAndHostService;
+import com.sequenceiq.ambari.client.services.StackService;
 import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
@@ -119,6 +122,7 @@ import groovyx.net.http.HttpResponseException;
 
 @Service
 public class AmbariClusterConnector {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AmbariClusterConnector.class);
 
     private static final String REALM = "NODE.DC1.CONSUL";
@@ -131,7 +135,7 @@ public class AmbariClusterConnector {
 
     private static final String ADMIN = "admin";
 
-    private static final int KERBEROS_DB_PROPAGATION_PORT = 6318;
+    private static final Integer KERBEROS_DB_PROPAGATION_PORT = 6318;
 
     @Inject
     private StackRepository stackRepository;
@@ -194,7 +198,7 @@ public class AmbariClusterConnector {
     private CloudbreakMessagesService cloudbreakMessagesService;
 
     @Resource
-    private Map<FileSystemType, FileSystemConfigurator> fileSystemConfigurators;
+    private Map<FileSystemType, FileSystemConfigurator<FileSystemConfiguration>> fileSystemConfigurators;
 
     @Inject
     private BlueprintProcessor blueprintProcessor;
@@ -374,8 +378,7 @@ public class AmbariClusterConnector {
         return blueprintText;
     }
 
-    public String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint, Set<RDSConfig> rdsConfigs)
-            throws IOException {
+    private String updateBlueprintWithInputs(Cluster cluster, Blueprint blueprint, Set<RDSConfig> rdsConfigs) throws IOException {
         String blueprintText = blueprint.getBlueprintText();
         return blueprintTemplateProcessor.process(blueprintText, cluster, rdsConfigs);
     }
@@ -405,8 +408,8 @@ public class AmbariClusterConnector {
         waitForHosts(stack, ambariClient, hostMetadata);
     }
 
-    public void installServices(Stack stack, HostGroup hostGroup, Set<HostMetadata> hostMetadata)
-            throws CloudbreakException {
+    public void installServices(Stack stack, HostGroup hostGroup, Collection<HostMetadata> hostMetadata)
+            throws CloudbreakSecuritySetupException, ClusterException {
         AmbariClient ambariClient = getAmbariClient(stack);
         List<String> existingHosts = ambariClient.getClusterHosts();
         List<String> upscaleHostNames = getHostNames(hostMetadata).stream().filter(hostName -> !existingHosts.contains(hostName)).collect(Collectors.toList());
@@ -435,7 +438,7 @@ public class AmbariClusterConnector {
         return ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), user, password);
     }
 
-    public void credentialReplaceAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakSecuritySetupException {
+    public void credentialReplaceAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         AmbariClient ambariClient = getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
@@ -443,42 +446,42 @@ public class AmbariClusterConnector {
         ambariClient.deleteUser(cluster.getUserName());
     }
 
-    private AmbariClient createAmbariUser(String newUserName, String newPassword, Stack stack, AmbariClient ambariClient) {
+    private AmbariClient createAmbariUser(String newUserName, String newPassword, Stack stack, AmbariClient ambariClient) throws CloudbreakException {
         try {
             ambariClient.createUser(newUserName, newPassword, true);
         } catch (RuntimeException e) {
             try {
                 ambariClient = getAmbariClient(stack, newUserName, newPassword);
                 ambariClient.ambariServerVersion();
-            } catch (Exception ie) {
-                throw e;
+            } catch (Exception ignored) {
+                throw new CloudbreakException(e);
             }
         }
         return ambariClient;
     }
 
-    public void credentialUpdateAmbariCluster(Long stackId, String newPassword) throws CloudbreakSecuritySetupException {
+    public void credentialUpdateAmbariCluster(Long stackId, String newPassword) throws CloudbreakException {
         Stack stack = stackRepository.findOneWithLists(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         AmbariClient ambariClient = getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
         changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, ambariClient);
     }
 
-    private AmbariClient changeAmbariPassword(String userName, String oldPassword, String newPassword, Stack stack, AmbariClient ambariClient) {
+    private void changeAmbariPassword(String userName, String oldPassword, String newPassword, Stack stack, AmbariClient ambariClient)
+            throws CloudbreakException {
         try {
             ambariClient.changePassword(userName, oldPassword, newPassword, true);
         } catch (RuntimeException e) {
             try {
                 ambariClient = getAmbariClient(stack, userName, newPassword);
                 ambariClient.ambariServerVersion();
-            } catch (Exception ie) {
-                throw e;
+            } catch (Exception ignored) {
+                throw new CloudbreakException(e);
             }
         }
-        return ambariClient;
     }
 
-    public void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakSecuritySetupException {
+    public void changeOriginalAmbariCredentialsAndCreateCloudbreakUser(Stack stack) throws CloudbreakException {
         Cluster cluster = stack.getCluster();
         LOGGER.info("Changing ambari credentials for cluster: {}, ambari ip: {}", cluster.getName(), cluster.getAmbariIp());
         String userName = cluster.getUserName();
@@ -500,13 +503,13 @@ public class AmbariClusterConnector {
     public void stopCluster(Stack stack) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         try {
-            if (!allServiceStopped(ambariClient.getHostComponentsStates())) {
+            if (!isAllServiceStopped(ambariClient.getHostComponentsStates())) {
                 stopAllServices(stack, ambariClient);
             }
 //            if (!"BYOS".equals(stack.cloudPlatform())) {
 //                stopAmbariAgents(stack, null);
 //            }
-        } catch (AmbariConnectionException ex) {
+        } catch (AmbariConnectionException ignored) {
             LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
         }
     }
@@ -525,15 +528,14 @@ public class AmbariClusterConnector {
         waitForAllServices(stack, ambariClient, requestId);
     }
 
-    public boolean isAmbariAvailable(Stack stack) throws CloudbreakException {
+    public boolean isAmbariAvailable(Stack stack) throws CloudbreakSecuritySetupException {
         boolean result = false;
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
+        if (stack.getCluster() != null) {
             AmbariClient ambariClient = getAmbariClient(stack);
             AmbariClientPollerObject ambariClientPollerObject = new AmbariClientPollerObject(stack, ambariClient);
             try {
                 result = ambariHealthCheckerTask.checkStatus(ambariClientPollerObject);
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
                 result = false;
             }
         }
@@ -541,9 +543,10 @@ public class AmbariClusterConnector {
     }
 
     private String extendBlueprintWithFsConfig(String blueprintText, FileSystem fs, Stack stack) throws IOException {
-        FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
+        FileSystemType fileSystemType = FileSystemType.valueOf(fs.getType());
+        FileSystemConfigurator<FileSystemConfiguration> fsConfigurator = fileSystemConfigurators.get(fileSystemType);
         String json = JsonUtil.writeValueAsString(fs.getProperties());
-        FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
+        FileSystemConfiguration fsConfiguration = JsonUtil.readValue(json, fileSystemType.getClazz());
         decorateFsConfigurationProperties(fsConfiguration, stack);
         Map<String, String> resourceProperties = fsConfigurator.createResources(fsConfiguration);
         List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration, resourceProperties);
@@ -605,7 +608,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private int startAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+    private int startAllServices(Stack stack, ServiceAndHostService ambariClient) throws CloudbreakException {
         LOGGER.info("Start all Hadoop services");
         eventService.fireCloudbreakEvent(stack.getId(), Status.UPDATE_IN_PROGRESS.name(),
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTING.code()));
@@ -630,12 +633,13 @@ public class AmbariClusterConnector {
                 cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_SERVICES_STARTED.code()));
     }
 
-    private Cluster handleClusterCreationSuccess(Stack stack, Cluster cluster) {
+    private void handleClusterCreationSuccess(Stack stack, Cluster cluster) {
         LOGGER.info("Cluster created successfully. Cluster name: {}", cluster.getName());
-        cluster.setCreationFinished(new Date().getTime());
-        cluster.setUpSince(new Date().getTime());
+        Long now = new Date().getTime();
+        cluster.setCreationFinished(now);
+        cluster.setUpSince(now);
         cluster = clusterRepository.save(cluster);
-        List<InstanceMetaData> updatedInstances = new ArrayList<>();
+        Collection<InstanceMetaData> updatedInstances = new ArrayList<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             Set<InstanceMetaData> instances = instanceGroup.getAllInstanceMetaData();
             for (InstanceMetaData instanceMetaData : instances) {
@@ -646,17 +650,16 @@ public class AmbariClusterConnector {
             }
         }
         instanceMetadataRepository.save(updatedInstances);
-        List<HostMetadata> hostMetadata = new ArrayList<>();
+        Collection<HostMetadata> hostMetadata = new ArrayList<>();
         for (HostMetadata host : hostMetadataRepository.findHostsInCluster(cluster.getId())) {
             host.setHostMetadataState(HostMetadataState.HEALTHY);
             hostMetadata.add(host);
         }
         hostMetadataRepository.save(hostMetadata);
-        return cluster;
 
     }
 
-    private void triggerSmartSenseCapture(AmbariClient ambariClient, String blueprintText) {
+    private void triggerSmartSenseCapture(ServiceAndHostService ambariClient, String blueprintText) {
         if (smartSenseConfigProvider.smartSenseIsConfigurable(blueprintText)) {
             try {
                 LOGGER.info("Triggering SmartSense data capture.");
@@ -667,7 +670,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private List<String> getHostNames(Set<HostMetadata> hostMetadata) {
+    private Collection<String> getHostNames(Collection<HostMetadata> hostMetadata) {
         return hostMetadata.stream().map(HostMetadata::getHostName).collect(Collectors.toList());
     }
 
@@ -692,7 +695,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void startAmbariAgents(Stack stack) throws CloudbreakException {
+    private void startAmbariAgents(Stack stack) throws CloudbreakSecuritySetupException {
         LOGGER.info("Starting Ambari agents on the hosts.");
         PollingResult hostsJoinedResult = waitForHostsToJoin(stack);
         if (PollingResult.EXIT.equals(hostsJoinedResult)) {
@@ -712,7 +715,7 @@ public class AmbariClusterConnector {
                 AmbariOperationService.MAX_FAILURE_COUNT);
     }
 
-    private boolean allServiceStopped(Map<String, Map<String, String>> hostComponentsStates) {
+    private boolean isAllServiceStopped(Map<String, Map<String, String>> hostComponentsStates) {
         boolean stopped = true;
         Collection<Map<String, String>> values = hostComponentsStates.values();
         for (Map<String, String> value : values) {
@@ -725,7 +728,7 @@ public class AmbariClusterConnector {
         return stopped;
     }
 
-    private void setBaseRepoURL(Stack stack, AmbariClient ambariClient) throws CloudbreakException {
+    private void setBaseRepoURL(Stack stack, StackService ambariClient) throws CloudbreakException {
         HDPRepo hdpRepo = null;
         Orchestrator orchestrator = stack.getOrchestrator();
         if (!orchestratorTypeResolver.resolveType(orchestrator).containerOrchestrator() || "YARN".equals(orchestrator.getType())) {
@@ -761,7 +764,7 @@ public class AmbariClusterConnector {
         }
     }
 
-    private void addRepository(AmbariClient client, String stack, String version, String os,
+    private void addRepository(StackService client, String stack, String version, String os,
             String repoId, String repoUrl, boolean verify) throws HttpResponseException {
         client.addStackRepository(stack, version, os, repoId, repoUrl, verify);
     }
@@ -808,19 +811,19 @@ public class AmbariClusterConnector {
             }
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText, cluster.getTopologyValidation());
+        } catch (HttpResponseException hre) {
+            String errorMessage = AmbariClientExceptionUtil.getErrorMessage(hre);
+            throw new CloudbreakServiceException("Ambari Blueprint could not be added: " + errorMessage, hre);
         } catch (IOException e) {
             if ("Conflict".equals(e.getMessage())) {
                 LOGGER.info("Ambari blueprint already exists for stack: {}", stack.getId());
-            } else if (e instanceof HttpResponseException) {
-                String errorMessage = AmbariClientExceptionUtil.getErrorMessage((HttpResponseException) e);
-                throw new CloudbreakServiceException("Ambari Blueprint could not be added: " + errorMessage, e);
             } else {
                 throw new CloudbreakServiceException(e);
             }
         }
     }
 
-    private String addHDFConfigToBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {
+    private String addHDFConfigToBlueprint(Stack stack, BlueprintService ambariClient, String blueprintText) {
         List<String> nifiFqdns = stack.getInstanceGroupByInstanceGroupName("NiFi").getAllInstanceMetaData().stream()
                 .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toList());
         AtomicInteger index = new AtomicInteger(0);
@@ -869,7 +872,7 @@ public class AmbariClusterConnector {
         return processingBlueprint;
     }
 
-    private String extendHiveConfig(AmbariClient ambariClient, String processingBlueprint) {
+    private String extendHiveConfig(BlueprintService ambariClient, String processingBlueprint) {
         Map<String, Map<String, String>> config = new HashMap<>();
         Map<String, String> hiveSite = new HashMap<>();
         hiveSite.put("hive.server2.authentication.kerberos.keytab", "/etc/security/keytabs/hive2.service.keytab");
@@ -884,7 +887,7 @@ public class AmbariClusterConnector {
                 AMBARI_POLLING_INTERVAL, MAX_ATTEMPTS_FOR_HOSTS);
     }
 
-    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Set<HostGroup> hostGroups) {
+    private Map<String, List<Map<String, String>>> buildHostGroupAssociations(Iterable<HostGroup> hostGroups) {
         Map<String, List<Map<String, String>>> hostGroupMappings = new HashMap<>();
         LOGGER.info("Computing host - hostGroup mappings based on hostGroup - instanceGroup associations");
         for (HostGroup hostGroup : hostGroups) {
@@ -937,7 +940,7 @@ public class AmbariClusterConnector {
     }
 
     private Map<String, String> getTopologyMapping(HostGroup hg) {
-        Map<String, String> result = new HashMap();
+        Map<String, String> result = new HashMap<>();
         LOGGER.info("Computing hypervisor - rack mapping based on topology");
         Topology topology = hg.getCluster().getStack().getCredential().getTopology();
         if (topology == null) {
