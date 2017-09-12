@@ -6,13 +6,13 @@ public enum FileSystemType {
     WASB(WasbFileSystemConfiguration.class),
     ADLS(AdlsFileSystemConfiguration.class);
 
-    private final Class clazz;
+    private final Class<? extends FileSystemConfiguration> clazz;
 
-    FileSystemType(Class clazz) {
+    FileSystemType(Class<? extends FileSystemConfiguration> clazz) {
         this.clazz = clazz;
     }
 
-    public Class getClazz() {
+    public Class<? extends FileSystemConfiguration> getClazz() {
         return clazz;
     }
 }
