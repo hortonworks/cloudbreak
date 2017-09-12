@@ -110,17 +110,17 @@ public final class GcpStackUtil {
         return credential.getParameter(PROJECT_ID, String.class).toLowerCase().replaceAll("[^A-Za-z0-9 ]", "-");
     }
 
-    public static boolean analyzeOperation(Operation operation) throws Exception {
+    public static boolean isOperationFinished(Operation operation) throws Exception {
         String errorMessage = checkForErrors(operation);
         if (errorMessage != null) {
             throw new Exception(errorMessage);
         } else {
             Integer progress = operation.getProgress();
-            return progress == FINISHED;
+            return FINISHED == progress;
         }
     }
 
-    public static String checkForErrors(Operation operation) {
+    private static String checkForErrors(Operation operation) {
         if (operation == null) {
             LOGGER.error("Operation is null!");
             return null;
@@ -203,28 +203,25 @@ public final class GcpStackUtil {
     public static Long getPrivateId(String resourceName) {
         try {
             return Long.valueOf(resourceName.split("-")[PRIVATE_ID_PART]);
-        } catch (NumberFormatException nfe) {
-            LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName);
-            return null;
         } catch (RuntimeException e) {
             LOGGER.warn("Cannot determine the private id of GCP instance, name: " + resourceName, e);
-            return null;
         }
+        return null;
     }
 
     public static boolean isExistingNetwork(Network network) {
         return isNoneEmpty(getCustomNetworkId(network));
     }
 
-    public static boolean newSubnetInExistingNetwork(Network network) {
+    public static boolean isNewSubnetInExistingNetwork(Network network) {
         return isExistingNetwork(network) && isNoneEmpty(network.getSubnet().getCidr());
     }
 
-    public static boolean newNetworkAndSubnet(Network network) {
+    public static boolean isNewNetworkAndSubnet(Network network) {
         return !isExistingNetwork(network);
     }
 
-    public static boolean legacyNetwork(Network network) {
+    public static boolean isLegacyNetwork(Network network) {
         return isAnyEmpty(network.getSubnet().getCidr()) && isAnyEmpty(getSubnetId(network));
     }
 

@@ -191,7 +191,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
                         return exists;
                     });
                     client.deleteResourceGroup(resource.getName());
-                } catch (ActionWentFail af) {
+                } catch (ActionWentFail ignored) {
                     LOGGER.info(String.format("Resource group not found with name: %s", resource.getName()));
                 }
                 if (azureStorage.isPersistentStorage(azureStorage.getPersistentStorageName(stack.getParameters()))) {

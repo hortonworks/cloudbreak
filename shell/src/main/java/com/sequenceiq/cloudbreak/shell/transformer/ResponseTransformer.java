@@ -29,7 +29,7 @@ public class ResponseTransformer {
                                 value = o.toString();
                             }
                         }
-                    } catch (IllegalAccessException e) {
+                    } catch (IllegalAccessException ignored) {
                         value = "undefined";
                     }
                 }
@@ -54,14 +54,14 @@ public class ResponseTransformer {
                                 result.put(field.getName() + '.' + objectObjectEntry.getKey(),
                                         objectObjectEntry.getValue() == null ? "" : objectObjectEntry.getValue().toString());
                             }
-                        } catch (IllegalAccessException e) {
+                        } catch (IllegalAccessException ignored) {
                             result.put(field.getName(), "undefined");
                         }
                     } else if (!field.getType().isLocalClass()) {
                         field.setAccessible(true);
                         try {
                             result.put(field.getName(), field.get(o) == null ? null : field.get(o).toString());
-                        } catch (IllegalAccessException e) {
+                        } catch (IllegalAccessException ignored) {
                             result.put(field.getName(), "undefined");
                         }
                     } else {
@@ -69,7 +69,7 @@ public class ResponseTransformer {
                             field1.setAccessible(true);
                             try {
                                 result.put(field1.getName(), field1.get(o) == null ? null : field1.get(o).toString());
-                            } catch (IllegalAccessException e) {
+                            } catch (IllegalAccessException ignored) {
                                 result.put(field.getName() + '.' + field1.getName(), "undefined");
                             }
                         }

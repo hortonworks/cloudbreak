@@ -42,11 +42,7 @@ public class GcpMetadataCollector implements MetadataCollector {
         for (CloudInstance cloudInstance : vms) {
             String instanceId = cloudInstance.getInstanceId();
             CloudResource cloudResource;
-            if (instanceId != null) {
-                cloudResource = instanceNameMap.get(instanceId);
-            } else {
-                cloudResource = privateIdMap.get(cloudInstance.getTemplate().getPrivateId());
-            }
+            cloudResource = instanceId != null ? instanceNameMap.get(instanceId) : privateIdMap.get(cloudInstance.getTemplate().getPrivateId());
             CloudVmMetaDataStatus cloudVmMetaDataStatus = getCloudVmMetaDataStatus(authenticatedContext, cloudResource, cloudInstance);
             instanceMetaData.add(cloudVmMetaDataStatus);
         }
@@ -90,7 +86,7 @@ public class GcpMetadataCollector implements MetadataCollector {
 
     }
 
-    private Map<String, CloudResource> groupByInstanceName(List<CloudResource> resources) {
+    private Map<String, CloudResource> groupByInstanceName(Iterable<CloudResource> resources) {
         Map<String, CloudResource> instanceNameMap = new HashMap<>();
         for (CloudResource resource : resources) {
             if (ResourceType.GCP_INSTANCE == resource.getType()) {
@@ -101,7 +97,7 @@ public class GcpMetadataCollector implements MetadataCollector {
         return instanceNameMap;
     }
 
-    private Map<Long, CloudResource> groupByPrivateId(List<CloudResource> resources) {
+    private Map<Long, CloudResource> groupByPrivateId(Iterable<CloudResource> resources) {
         Map<Long, CloudResource> privateIdMap = new HashMap<>();
         for (CloudResource resource : resources) {
             if (ResourceType.GCP_INSTANCE == resource.getType()) {
@@ -120,5 +116,4 @@ public class GcpMetadataCollector implements MetadataCollector {
         return compute.instances().get(GcpStackUtil.getProjectId(credential),
                 context.getLocation().getAvailabilityZone().value(), instanceName).execute();
     }
-
 }

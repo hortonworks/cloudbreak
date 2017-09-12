@@ -38,7 +38,7 @@ public class JsonToAccountPreferencesConverter extends AbstractConversionService
                 return new Json(new HashMap<>());
             }
             return new Json(tags);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }

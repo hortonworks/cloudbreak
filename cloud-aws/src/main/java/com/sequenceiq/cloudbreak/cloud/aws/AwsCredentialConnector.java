@@ -81,7 +81,7 @@ public class AwsCredentialConnector implements CredentialConnector {
                 try {
                     client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
                     LOGGER.info("Key-pair already exists: {}", keyPairName);
-                } catch (AmazonServiceException e) {
+                } catch (AmazonServiceException ignored) {
                     client.importKeyPair(importKeyPairRequest);
                 }
             } catch (RuntimeException e) {

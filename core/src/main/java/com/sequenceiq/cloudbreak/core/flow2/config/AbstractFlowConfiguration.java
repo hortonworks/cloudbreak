@@ -157,7 +157,7 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
     private AbstractAction getAction(String name) {
         try {
             return applicationContext.getBean(name, AbstractAction.class);
-        } catch (NoSuchBeanDefinitionException ex) {
+        } catch (NoSuchBeanDefinitionException ignored) {
             return null;
         }
     }

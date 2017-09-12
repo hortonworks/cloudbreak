@@ -23,7 +23,7 @@ public class AvailabilitySetNameConverter extends AbstractConverter<Availability
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getAzureAvailabilitySets().keySet());
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

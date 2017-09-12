@@ -38,7 +38,7 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
         String trimmed = part;
         try {
             trimmed = StringUtils.collectionToDelimitedString(Arrays.asList(Arrays.copyOf(parts, parts.length - 1)), DELIMITER);
-        } catch (NumberFormatException nfe) {
+        } catch (NumberFormatException ignored) {
             LOGGER.debug("No need to trim hash: {}", part);
         }
 

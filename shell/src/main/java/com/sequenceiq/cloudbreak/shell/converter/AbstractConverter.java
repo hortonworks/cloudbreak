@@ -20,7 +20,7 @@ public abstract class AbstractConverter<T extends AbstractCompletion> implements
         try {
             Constructor<?> constructor = clazz.getDeclaredConstructor(String.class);
             return (T) constructor.newInstance(value);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             return null;
         }
     }

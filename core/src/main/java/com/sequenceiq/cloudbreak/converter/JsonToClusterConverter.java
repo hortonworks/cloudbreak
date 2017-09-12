@@ -80,13 +80,13 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
             } else {
                 cluster.setBlueprintCustomProperties(null);
             }
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             cluster.setBlueprintInputs(null);
         }
         try {
             Json json = new Json(convertContainerConfigs(source.getCustomContainer()));
             cluster.setCustomContainerDefinition(json);
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             cluster.setCustomContainerDefinition(null);
         }
         return cluster;

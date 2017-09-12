@@ -22,7 +22,7 @@ public class GcpVolumeTypeConverter extends AbstractConverter<GcpVolumeType> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVolumeTypesByPlatform("GCP"));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

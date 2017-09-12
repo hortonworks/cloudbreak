@@ -89,7 +89,7 @@ public class ConcurrentMethodExecutionAspect {
     private String getGuardedMethodLockPrefix(JoinPoint joinPoint) {
         try {
             return getAnnotation(GuardedMethod.class, joinPoint).lockPrefix();
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             return "";
         }
     }
@@ -97,7 +97,7 @@ public class ConcurrentMethodExecutionAspect {
     private String getLockedMethodLockPrefix(JoinPoint joinPoint) {
         try {
             return getAnnotation(LockedMethod.class, joinPoint).lockPrefix();
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             return "";
         }
     }

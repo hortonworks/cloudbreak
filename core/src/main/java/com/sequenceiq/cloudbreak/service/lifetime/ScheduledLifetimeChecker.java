@@ -40,7 +40,7 @@ public class ScheduledLifetimeChecker {
                         if (Status.DELETE_IN_PROGRESS != stack.getStatus() && stack.getCluster() != null && stack.getCluster().getCreationFinished() != null) {
                             preferencesValidator.validateClusterTimeToLive(stack.getCluster().getCreationFinished(), ttl.toMillis());
                         }
-                    } catch (AccountPreferencesValidationFailed avf) {
+                    } catch (AccountPreferencesValidationFailed ignored) {
                         terminateStack(stack);
                     }
                 });

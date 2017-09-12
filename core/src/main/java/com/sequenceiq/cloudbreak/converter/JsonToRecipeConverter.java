@@ -53,7 +53,7 @@ public class JsonToRecipeConverter extends AbstractConversionServiceAwareConvert
         try {
             String script = URLUtils.readUrl(url);
             return Base64.encodeBase64String(script.getBytes());
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             throw new BadRequestException("Cannot download script from URL: " + url);
         }
     }

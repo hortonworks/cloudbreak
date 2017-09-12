@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.shell.commands.common;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -77,24 +78,20 @@ public class HostGroupCommands implements CommandMarker {
         ID, NAME
     }
 
-    private Set<Long> getRecipeIds(String inputs, RecipeParameterType type) {
+    private Collection<Long> getRecipeIds(String inputs, RecipeParameterType type) {
         return StreamSupport.stream(Splitter.on(",").omitEmptyStrings().trimResults().split(inputs).spliterator(), false).map(input -> {
-            try {
-                RecipeResponse resp;
-                switch (type) {
-                    case ID:
-                        resp = shellContext.cloudbreakClient().recipeEndpoint().get(Long.valueOf(input));
-                        break;
-                    case NAME:
-                        resp = shellContext.cloudbreakClient().recipeEndpoint().getPublic(input);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException();
-                }
-                return resp.getId();
-            } catch (RuntimeException e) {
-                throw new RuntimeException(e.getMessage());
+            RecipeResponse resp;
+            switch (type) {
+                case ID:
+                    resp = shellContext.cloudbreakClient().recipeEndpoint().get(Long.valueOf(input));
+                    break;
+                case NAME:
+                    resp = shellContext.cloudbreakClient().recipeEndpoint().getPublic(input);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Recipe parameter type not supported");
             }
+            return resp.getId();
         }).collect(Collectors.toSet());
     }
 }

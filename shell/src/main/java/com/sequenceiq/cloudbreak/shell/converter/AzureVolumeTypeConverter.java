@@ -23,7 +23,7 @@ public class AzureVolumeTypeConverter extends AbstractConverter<AzureVolumeType>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVolumeTypesByPlatform("AZURE"));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

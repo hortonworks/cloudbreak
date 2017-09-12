@@ -61,11 +61,11 @@ public class ClusterService {
         return cluster;
     }
 
-    public Cluster update(long clusterId, AmbariStack stack, boolean enableAutoscaling) {
+    public Cluster update(Long clusterId, AmbariStack stack, boolean enableAutoscaling) {
         return update(clusterId, stack, true, null, enableAutoscaling);
     }
 
-    public Cluster update(long clusterId, AmbariStack stack, boolean withPermissionCheck, ClusterState clusterState, boolean enableAutoscaling) {
+    public Cluster update(Long clusterId, AmbariStack stack, boolean withPermissionCheck, ClusterState clusterState, boolean enableAutoscaling) {
         Cluster cluster = withPermissionCheck ? findOneById(clusterId) : find(clusterId);
         ClusterState newState = clusterState != null ? clusterState : cluster.getState();
         cluster.setState(newState);
@@ -94,7 +94,7 @@ public class ClusterService {
         return clusterRepository.findByUserId(user.getId());
     }
 
-    public Cluster findOneById(long clusterId) {
+    public Cluster findOneById(Long clusterId) {
         return clusterRepository.findOne(clusterId);
     }
 
@@ -102,21 +102,21 @@ public class ClusterService {
         return clusterRepository.save(cluster);
     }
 
-    public Cluster find(long clusterId) {
+    public Cluster find(Long clusterId) {
         return clusterRepository.findById(clusterId);
     }
 
-    public void removeOne(long clusterId) {
+    public void removeOne(Long clusterId) {
         Cluster cluster = findOneById(clusterId);
         clusterRepository.delete(cluster);
     }
 
-    public void removeById(long clusterId) {
+    public void removeById(Long clusterId) {
         Cluster cluster = find(clusterId);
         clusterRepository.delete(cluster);
     }
 
-    public void updateScalingConfiguration(long clusterId, ScalingConfigurationJson scalingConfiguration) {
+    public void updateScalingConfiguration(Long clusterId, ScalingConfigurationJson scalingConfiguration) {
         Cluster cluster = findOneById(clusterId);
         cluster.setMinSize(scalingConfiguration.getMinSize());
         cluster.setMaxSize(scalingConfiguration.getMaxSize());
@@ -124,7 +124,7 @@ public class ClusterService {
         save(cluster);
     }
 
-    public ScalingConfigurationJson getScalingConfiguration(long clusterId) {
+    public ScalingConfigurationJson getScalingConfiguration(Long clusterId) {
         Cluster cluster = findOneById(clusterId);
         ScalingConfigurationJson configuration = new ScalingConfigurationJson();
         configuration.setCoolDown(cluster.getCoolDown());
@@ -133,7 +133,7 @@ public class ClusterService {
         return configuration;
     }
 
-    public Cluster setState(long clusterId, ClusterState state) {
+    public Cluster setState(Long clusterId, ClusterState state) {
         Cluster cluster = findOneById(clusterId);
         cluster.setState(state);
         addPrometheusAlertsToConsul(cluster);

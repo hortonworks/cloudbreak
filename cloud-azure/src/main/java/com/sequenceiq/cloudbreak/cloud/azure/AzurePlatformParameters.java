@@ -123,7 +123,7 @@ public class AzurePlatformParameters implements PlatformParameters {
             for (RegionSpecification regionSpecification : oRegions.getItems()) {
                 regionsWithDisplayName.put(Region.region(regionSpecification.getName()), displayName(regionSpecification.getName()));
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             return regionsWithDisplayName;
         }
         return sortMap(regionsWithDisplayName);

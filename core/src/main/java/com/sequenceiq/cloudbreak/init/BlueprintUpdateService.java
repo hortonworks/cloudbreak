@@ -48,7 +48,7 @@ public class BlueprintUpdateService implements ApplicationListener<ContextRefres
                             readAndUpdateBlueprint(bpDefaultText, blueprint);
                         }
                     }
-                } catch (FileNotFoundException e) {
+                } catch (FileNotFoundException ignored) {
                     LOGGER.error("Failed to update blueprint because file not found on path: {}.", split[0]);
                 } catch (Exception e) {
                     LOGGER.error("Updating default blueprint with name '{}' wasn't successful because error occurred under the update process: {}.",

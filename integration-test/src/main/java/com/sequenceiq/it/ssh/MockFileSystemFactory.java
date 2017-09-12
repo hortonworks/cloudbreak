@@ -40,7 +40,7 @@ public class MockFileSystemFactory implements FileSystemFactory {
                         LOGGER.error("can't write " + fileName, e);
                     }
                     return tempFile.toPath();
-                } catch (IOException e) {
+                } catch (IOException ignored) {
                     LOGGER.info("can't retrieve path from classpath, let's return with a file path from working directory");
                     return new File(first).toPath().getFileName();
                 }

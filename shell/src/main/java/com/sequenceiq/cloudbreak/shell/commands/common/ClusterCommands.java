@@ -539,7 +539,7 @@ public class ClusterCommands implements BaseCommands {
             ClusterResponse clusterResponse = shellContext.cloudbreakClient().clusterEndpoint().get(Long.valueOf(stackId));
             return shellContext.outputTransformer().render(outPutType,
                     shellContext.responseTransformer().transformObjectToStringMap(clusterResponse), "FIELD", "VALUE");
-        } catch (IndexOutOfBoundsException ex) {
+        } catch (IndexOutOfBoundsException ignored) {
             throw shellContext.exceptionTransformer().transformToRuntimeException("There was no cluster for this account");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -707,7 +707,7 @@ public class ClusterCommands implements BaseCommands {
                 }
                 map.put(hostGroup.get("name").asText(), components);
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             map = new HashMap<>();
         }
         return map;

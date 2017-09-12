@@ -51,7 +51,7 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
                 credential.setName(missingResourceNameGenerator.generateName(APIResourceType.CREDENTIAL));
                 try {
                     credential.setAttributes(new Json(map));
-                } catch (JsonProcessingException e) {
+                } catch (JsonProcessingException ignored) {
                     throw new BadRequestException("Could not create credential from source credential!");
                 }
             }

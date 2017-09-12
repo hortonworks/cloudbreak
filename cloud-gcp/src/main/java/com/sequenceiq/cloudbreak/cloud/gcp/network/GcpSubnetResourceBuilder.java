@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isExistingSubnet;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.legacyNetwork;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newNetworkAndSubnet;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newSubnetInExistingNetwork;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isLegacyNetwork;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewNetworkAndSubnet;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewSubnetInExistingNetwork;
 import static com.sequenceiq.cloudbreak.common.type.ResourceType.GCP_SUBNET;
 
 import org.springframework.stereotype.Service;
@@ -31,7 +31,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public CloudResource create(GcpContext context, AuthenticatedContext auth, Network network) {
-        if (legacyNetwork(network)) {
+        if (isLegacyNetwork(network)) {
             throw new ResourceNotNeededException("Legacy GCP networks doesn't support subnets. Subnet won't be created.");
         }
         String resourceName = isExistingSubnet(network) ? getSubnetId(network) : getResourceNameService().resourceName(resourceType(), context.getName());
@@ -40,7 +40,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public CloudResource build(GcpContext context, AuthenticatedContext auth, Network network, Security security, CloudResource resource) throws Exception {
-        if (newNetworkAndSubnet(network) || newSubnetInExistingNetwork(network)) {
+        if (isNewNetworkAndSubnet(network) || isNewSubnetInExistingNetwork(network)) {
             Compute compute = context.getCompute();
             String projectId = context.getProjectId();
 
@@ -69,7 +69,7 @@ public class GcpSubnetResourceBuilder extends AbstractGcpNetworkBuilder {
 
     @Override
     public CloudResource delete(GcpContext context, AuthenticatedContext auth, CloudResource resource, Network network) throws Exception {
-        if (newNetworkAndSubnet(network) || newSubnetInExistingNetwork(network)) {
+        if (isNewNetworkAndSubnet(network) || isNewSubnetInExistingNetwork(network)) {
             Compute compute = context.getCompute();
             String projectId = context.getProjectId();
             try {

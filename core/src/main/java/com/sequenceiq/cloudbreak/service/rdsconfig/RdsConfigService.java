@@ -100,7 +100,7 @@ public class RdsConfigService {
     public RDSConfig createIfNotExists(IdentityUser user, RDSConfig rdsConfig) {
         try {
             return getPrivateRdsConfig(rdsConfig.getName(), user);
-        } catch (NotFoundException e) {
+        } catch (NotFoundException ignored) {
             return create(user, rdsConfig);
         }
     }

@@ -23,7 +23,7 @@ public class StackAvailabilityZoneConverter extends AbstractConverter<StackAvail
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getAvailabilityZonesByPlatform(context.getActiveCloudPlatform()));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

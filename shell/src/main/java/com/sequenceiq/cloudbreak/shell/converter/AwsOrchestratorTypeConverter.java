@@ -23,7 +23,7 @@ public class AwsOrchestratorTypeConverter extends AbstractConverter<AwsOrchestra
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getOrchestratorNamesByPlatform("AWS"));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

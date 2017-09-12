@@ -85,7 +85,7 @@ public class AzureInstanceConnector implements InstanceConnector {
                 } else {
                     statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
                 }
-            } catch (RuntimeException e) {
+            } catch (RuntimeException ignored) {
                 statuses.add(new CloudVmInstanceStatus(vm, InstanceStatus.UNKNOWN));
             }
         }

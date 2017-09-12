@@ -37,7 +37,7 @@ public class Json implements Serializable {
                 return Collections.emptyMap();
             }
             return get(Map.class);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             return Collections.emptyMap();
         }
     }

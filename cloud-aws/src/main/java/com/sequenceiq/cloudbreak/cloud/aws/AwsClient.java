@@ -113,7 +113,7 @@ public class AwsClient {
             } else if (!awsEnvironmentVariableChecker.isAwsAccessKeyAvailable() && !awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable()) {
                 try {
                     new InstanceProfileCredentialsProvider().getCredentials();
-                } catch (AmazonClientException e) {
+                } catch (AmazonClientException ignored) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("The 'AWS_ACCESS_KEY_ID' and 'AWS_SECRET_ACCESS_KEY' environment variables must be set ");
                     sb.append("or an instance profile role should be available.");

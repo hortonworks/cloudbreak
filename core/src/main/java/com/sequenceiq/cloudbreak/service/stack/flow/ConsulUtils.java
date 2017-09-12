@@ -20,7 +20,7 @@ public final class ConsulUtils {
     private static final int DEFAULT_TIMEOUT_MS = 5000;
 
     private ConsulUtils() {
-        throw new IllegalStateException();
+        throw new IllegalStateException("ConsulUtils not instancable");
     }
 
     public static List<CatalogService> getService(List<ConsulClient> clients, String serviceName) {
@@ -36,7 +36,7 @@ public final class ConsulUtils {
     public static List<CatalogService> getService(ConsulClient client, String serviceName) {
         try {
             return client.getCatalogService(serviceName, QueryParams.DEFAULT).getValue();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return Collections.emptyList();
         }
     }

@@ -45,7 +45,7 @@ public class JsonToCredentialConverter extends AbstractConversionServiceAwareCon
         if (parameters != null && !parameters.isEmpty()) {
             try {
                 credential.setAttributes(new Json(parameters));
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException ignored) {
                 throw new BadRequestException("Invalid parameters");
             }
         }

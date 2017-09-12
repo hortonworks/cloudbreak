@@ -637,7 +637,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             } else {
                 shellContext.removeBlueprintId();
             }
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             // ignore
         }
     }

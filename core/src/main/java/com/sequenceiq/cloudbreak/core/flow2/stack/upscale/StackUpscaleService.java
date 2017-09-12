@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Service
 public class StackUpscaleService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUpscaleService.class);
 
     @Inject

@@ -68,7 +68,7 @@ public class BlueprintLoaderService {
                     bp.setStatus(ResourceStatus.DEFAULT);
                     blueprintRepository.save(bp);
                     blueprints.add(bp);
-                } catch (ConstraintViolationException | DataIntegrityViolationException e) {
+                } catch (ConstraintViolationException | DataIntegrityViolationException ignored) {
                     LOGGER.info("Blueprint already added with name: '" + split[0] + "' for user: '" + user.getUsername() + "' user.");
                 } catch (Exception e) {
                     LOGGER.error("Blueprint is not available for '" + user.getUsername() + "' user.", e);

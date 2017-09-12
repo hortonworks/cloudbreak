@@ -182,7 +182,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         try {
             cfClient.describeStacks(new DescribeStacksRequest().withStackName(cFStackName));
             LOGGER.info("Stack already exists: {}", cFStackName);
-        } catch (AmazonServiceException e) {
+        } catch (AmazonServiceException ignored) {
             CloudResource cloudFormationStack = new Builder().type(ResourceType.CLOUDFORMATION_STACK).name(cFStackName).build();
             resourceNotifier.notifyAllocation(cloudFormationStack, ac.getCloudContext());
 
@@ -491,7 +491,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     }
                     return Boolean.TRUE;
                 });
-            } catch (ActionWentFail af) {
+            } catch (ActionWentFail ignored) {
                 LOGGER.info(String.format("Stack not found with name: %s", cFStackName));
                 AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
                 releaseReservedIp(amazonEC2Client, resources);

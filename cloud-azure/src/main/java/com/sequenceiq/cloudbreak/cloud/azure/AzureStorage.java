@@ -113,7 +113,7 @@ public class AzureStorage {
                 paddedId = String.format("%3s", Long.toString(vmId, RADIX)).replace(' ', '0');
             }
             result = name + storageType.getAbbreviation() + paddedId + new BigInteger(1, digest).toString(RADIX);
-        } catch (NoSuchAlgorithmException e) {
+        } catch (NoSuchAlgorithmException ignored) {
             result = name + acv.getId() + cloudContext.getId() + cloudContext.getOwner();
         }
         if (result.length() > MAX_LENGTH_OF_RESOURCE_NAME) {
@@ -161,7 +161,7 @@ public class AzureStorage {
                     return true;
                 }
             }
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
         return false;

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.template.context;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,7 +59,7 @@ public class ResourceBuilderContext extends DynamicModel {
         return parallelResourceRequest;
     }
 
-    public void addNetworkResources(List<CloudResource> resources) {
+    public void addNetworkResources(Collection<CloudResource> resources) {
         networkResources.addAll(resources);
     }
 
@@ -66,7 +67,7 @@ public class ResourceBuilderContext extends DynamicModel {
         return groupResources.get(groupName);
     }
 
-    public synchronized void addGroupResources(String groupName, List<CloudResource> resources) {
+    public synchronized void addGroupResources(String groupName, Collection<CloudResource> resources) {
         List<CloudResource> list = groupResources.get(groupName);
         if (list == null) {
             list = new ArrayList<>();
@@ -75,7 +76,7 @@ public class ResourceBuilderContext extends DynamicModel {
         list.addAll(resources);
     }
 
-    public synchronized void addComputeResources(long index, List<CloudResource> resources) {
+    public synchronized void addComputeResources(Long index, Collection<CloudResource> resources) {
         List<CloudResource> list = computeResources.get(index);
         if (list == null) {
             list = new ArrayList<>();
@@ -84,7 +85,7 @@ public class ResourceBuilderContext extends DynamicModel {
         list.addAll(resources);
     }
 
-    public List<CloudResource> getComputeResources(long index) {
+    public List<CloudResource> getComputeResources(Long index) {
         return computeResources.get(index);
     }
 

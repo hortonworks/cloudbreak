@@ -97,7 +97,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
             CloudResource cloudResource = new Builder().type(ResourceType.HEAT_STACK).name(heatStack.getId()).build();
             try {
                 notifier.notifyAllocation(cloudResource, authenticatedContext.getCloudContext());
-            } catch (RuntimeException e) {
+            } catch (RuntimeException ignored) {
                 //Rollback
                 terminate(authenticatedContext, stack, Collections.singletonList(cloudResource));
             }
@@ -152,7 +152,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                             return exists;
                         });
                         client.heat().stacks().delete(stackName, heatStackId);
-                    } catch (ActionWentFail af) {
+                    } catch (ActionWentFail ignored) {
                         LOGGER.info(String.format("Stack not found with name: %s", resource.getName()));
                     }
                     break;

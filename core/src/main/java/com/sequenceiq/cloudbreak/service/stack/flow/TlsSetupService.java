@@ -112,7 +112,7 @@ public class TlsSetupService {
             HostKeyVerifier hostKeyVerifier = new VerboseHostKeyVerifier(sshFingerprints);
             prepareSshConnection(ssh, publicIp, sshPort, hostKeyVerifier, user, privateKey, stack.getCredential());
             removeTemporarySShKey(ssh, user, stack.getCredential());
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             LOGGER.info("Unable to delete temporary SSH key for stack {}", stack.getId());
         } finally {
             try {

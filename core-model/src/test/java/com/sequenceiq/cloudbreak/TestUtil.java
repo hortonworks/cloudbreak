@@ -187,7 +187,7 @@ public class TestUtil {
         orchestrator.setApiEndpoint("endpoint");
         try {
             orchestrator.setAttributes(new Json("{\"test\": \"test\"}"));
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             orchestrator.setAttributes(null);
         }
         orchestrator.setId(1L);
@@ -374,14 +374,14 @@ public class TestUtil {
         inputs.put("S3_BUCKET", "testbucket");
         try {
             cluster.setBlueprintInputs(new Json(inputs));
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             cluster.setBlueprintInputs(null);
         }
 
         Map<String, String> map = new HashMap<>();
         try {
             cluster.setAttributes(new Json(map));
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             cluster.setAttributes(null);
         }
         return cluster;

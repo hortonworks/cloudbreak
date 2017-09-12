@@ -67,7 +67,7 @@ public class MockSetup implements Setup {
                     .setSSLSocketFactory(sslsf)
                     .build();
             Unirest.setHttpClient(httpclient);
-        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException e) {
+        } catch (NoSuchAlgorithmException | KeyManagementException | KeyStoreException ignored) {
             throw new RuntimeException("can't create ssl settings");
         }
     }

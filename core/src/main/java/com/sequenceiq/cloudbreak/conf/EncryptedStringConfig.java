@@ -38,7 +38,7 @@ public class EncryptedStringConfig {
                 } catch (EncryptionOperationNotPossibleException e) {
                     try {
                         return legacyEncryptor.decrypt(encryptedMessage);
-                    } catch (EncryptionOperationNotPossibleException el) {
+                    } catch (EncryptionOperationNotPossibleException ignored) {
                         return encryptedMessage;
                     }
                 }

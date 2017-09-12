@@ -134,7 +134,7 @@ public class GcpCommands implements CommandMarker {
 
         try {
             serviceAccountPrivateKey = Base64.encodeBase64String(Files.readAllBytes(serviceAccountPrivateKeyPath.toPath())).replaceAll("\n", "");
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(P12_FILE_NOT_FOUND);
         }
         Map<String, Object> parameters = new HashMap<>();

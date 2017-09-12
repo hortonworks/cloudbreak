@@ -23,7 +23,7 @@ public class AwsVolumeTypeConverter extends AbstractConverter<AwsVolumeType> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVolumeTypesByPlatform("AWS"));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

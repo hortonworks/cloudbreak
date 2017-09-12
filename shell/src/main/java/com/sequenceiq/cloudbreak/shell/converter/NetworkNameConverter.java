@@ -30,7 +30,7 @@ public class NetworkNameConverter extends AbstractConverter<NetworkName> {
         try {
             Map<String, String> networksMap = responseTransformer.transformToMap(cloudbreakClient.networkEndpoint().getPublics(), "id", "name");
             return getAllPossibleValues(completions, networksMap.values());
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

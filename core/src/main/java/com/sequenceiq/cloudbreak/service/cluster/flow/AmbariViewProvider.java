@@ -56,7 +56,7 @@ public class AmbariViewProvider {
             obj.put(VIEW_DEFINITIONS.name(), legacyViewDefinitions);
             try {
                 cluster.setAttributes(new Json(obj));
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException ignored) {
                 return true;
             }
             cluster = clusterRepository.save(cluster);

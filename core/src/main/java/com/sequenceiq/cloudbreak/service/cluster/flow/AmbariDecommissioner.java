@@ -537,7 +537,7 @@ public class AmbariDecommissioner {
                 int requestId = ambariClient.startService(service);
                 requests.put(service + "_START", requestId);
             }
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to start HDFS/YARN/HBASE services", e);
             throw new BadRequestException("Failed to start the HDFS, YARN and HBASE services, it's possible that some of the nodes are unavailable");
         }

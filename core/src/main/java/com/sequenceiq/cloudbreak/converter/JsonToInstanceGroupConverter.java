@@ -59,7 +59,7 @@ public class JsonToInstanceGroupConverter extends AbstractConversionServiceAware
         try {
             Json jsonProperties = new Json(json.getParameters());
             instanceGroup.setAttributes(jsonProperties);
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             instanceGroup.setAttributes(null);
         }
 

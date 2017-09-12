@@ -173,7 +173,7 @@ public interface PlatformParameters {
                 av.sort(new StringTypesCompare());
                 regions.put(Region.region(regionSpecification.getName()), av);
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             return regions;
         }
         return sortMap(regions);

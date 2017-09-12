@@ -81,7 +81,7 @@ public final class PublicKeyReaderUtil {
             StringTokenizer st = new StringTokenizer(key);
             st.nextToken();
             base64 = st.nextToken();
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException ignored) {
             throw new PublicKeyParseException(ErrorCode.CORRUPT_OPENSSH_PUBLIC_KEY_STRING);
         }
 

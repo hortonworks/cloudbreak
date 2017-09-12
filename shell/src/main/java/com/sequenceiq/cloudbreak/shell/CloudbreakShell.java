@@ -256,7 +256,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
             }
             vmTypesPerZones = platformVirtualMachines.getVmTypesPerZones();
             defaultVmTypePerZones = platformVirtualMachines.getDefaultVmTypePerZones();
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             System.out.println("Error during retrieving platform variants");
         } finally {
             context.setPlatformToVariantsMap(platformToVariants);

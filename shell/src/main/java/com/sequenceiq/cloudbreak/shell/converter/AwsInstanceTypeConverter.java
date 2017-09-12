@@ -23,7 +23,7 @@ public class AwsInstanceTypeConverter extends AbstractConverter<AwsInstanceType>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getInstanceTypeNamesByPlatform("AWS"));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

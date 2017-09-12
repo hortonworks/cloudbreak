@@ -31,7 +31,7 @@ public class EncryptedJsonToString extends JsonToString {
         } catch (EncryptionOperationNotPossibleException e) {
             try {
                 json = LEGACY_ENCRYPTOR.decrypt(dbData);
-            } catch (EncryptionOperationNotPossibleException ex) {
+            } catch (EncryptionOperationNotPossibleException ignored) {
                 json = dbData;
             }
         }

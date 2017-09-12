@@ -46,11 +46,11 @@ public class PrometheusEvaluator extends AbstractEventPublisher implements Evalu
     @Inject
     private TlsSecurityService tlsSecurityService;
 
-    private long clusterId;
+    private Long clusterId;
 
     @Override
     public void setContext(Map<String, Object> context) {
-        clusterId = (long) context.get(EvaluatorContext.CLUSTER_ID.name());
+        clusterId = (Long) context.get(EvaluatorContext.CLUSTER_ID.name());
     }
 
     @Override

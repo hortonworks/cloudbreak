@@ -71,7 +71,7 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
                 } else {
                     fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, sshFingerprints);
                 }
-            } catch (CloudOperationNotSupportedException e) {
+            } catch (CloudOperationNotSupportedException ignored) {
                 fingerprintsResult = new GetSSHFingerprintsResult(fingerprintsRequest, new HashSet<>());
             }
             fingerprintsRequest.getResult().onNext(fingerprintsResult);

@@ -125,7 +125,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
                 return new Json(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
             }
             return new Json(tags);
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             throw new BadRequestException("Failed to convert dynamic tags.");
         }
     }
@@ -151,7 +151,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         boolean containerOrchestrator = false;
         try {
             containerOrchestrator = orchestratorTypeResolver.resolveType(source.getOrchestrator().getType()).containerOrchestrator();
-        } catch (CloudbreakException e) {
+        } catch (CloudbreakException ignored) {
             throw new BadRequestException("Orchestrator not supported.");
         }
         if (OrchestratorConstants.YARN.equals(source.getOrchestrator().getType())) {
@@ -218,7 +218,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         boolean containerOrchestrator = false;
         try {
             containerOrchestrator = orchestratorTypeResolver.resolveType(source.getOrchestrator().getType()).containerOrchestrator();
-        } catch (CloudbreakException e) {
+        } catch (CloudbreakException ignored) {
             throw new BadRequestException("Orchestrator not supported.");
         }
         if (!gatewaySpecified && !containerOrchestrator) {
