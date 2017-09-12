@@ -136,11 +136,8 @@ public class ClusterController implements ClusterEndpoint {
                 cluster = clusterService.create(cluster, user, ambariStack, PENDING);
             } else {
                 AmbariStack resolvedAmbari = clusterSecurityService.tryResolve(ambari);
-                if (clusterId == null) {
-                    cluster = clusterService.create(cluster, user, resolvedAmbari, RUNNING);
-                } else {
-                    cluster = clusterService.update(clusterId, resolvedAmbari, cluster.isAutoscalingEnabled());
-                }
+                cluster = clusterId == null ? clusterService.create(cluster, user, resolvedAmbari, RUNNING)
+                        : clusterService.update(clusterId, resolvedAmbari, cluster.isAutoscalingEnabled());
             }
             createHistoryAndNotification(cluster);
             return createClusterJsonResponse(cluster);
@@ -154,11 +151,9 @@ public class ClusterController implements ClusterEndpoint {
 
     private void createHistoryAndNotification(Cluster cluster) {
         History history;
-        if (cluster.isAutoscalingEnabled()) {
-            history = historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster);
-        } else {
-            history = historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", 0, cluster);
-        }
+        history = cluster.isAutoscalingEnabled()
+                ? historyService.createEntry(ScalingStatus.ENABLED, "Autoscaling has been enabled for the cluster.", 0, cluster)
+                : historyService.createEntry(ScalingStatus.DISABLED, "Autoscaling has been disabled for the cluster.", 0, cluster);
         notificationSender.send(history);
     }
 

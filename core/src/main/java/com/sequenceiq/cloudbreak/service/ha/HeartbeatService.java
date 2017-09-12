@@ -45,7 +45,7 @@ public class HeartbeatService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HeartbeatService.class);
 
-    private static final List DELETE_STATUSES = Arrays.asList(Status.DELETE_IN_PROGRESS, Status.DELETE_COMPLETED, Status.DELETE_FAILED);
+    private static final List<Status> DELETE_STATUSES = Arrays.asList(Status.DELETE_IN_PROGRESS, Status.DELETE_COMPLETED, Status.DELETE_FAILED);
 
     @Value("${cb.ha.heartbeat.threshold:60000}")
     private Integer heartbeatThresholdRate;
@@ -180,7 +180,7 @@ public class HeartbeatService {
      * Remove the node reference from the DB for those nodes that are failing and does not have any assigned flows.
      */
     @Transactional
-    public void cleanupNodes(List<CloudbreakNode> failedNodes) {
+    public void cleanupNodes(Collection<CloudbreakNode> failedNodes) {
         if (failedNodes != null && !failedNodes.isEmpty()) {
             LOGGER.info("Cleanup node candidates: {}", failedNodes);
             List<CloudbreakNode> cleanupNodes = failedNodes.stream()
@@ -219,7 +219,7 @@ public class HeartbeatService {
      * Returns all the FlowLogs that have a termination flow running on any of the nodes for the same stack.
      * This is required as we don't want to distribute flows that will be terminated anyways.
      */
-    private List<FlowLog> getInvalidFlows(List<FlowLog> flowLogs) {
+    private List<FlowLog> getInvalidFlows(Collection<FlowLog> flowLogs) {
         Set<Long> stackIds = flowLogs.stream().map(FlowLog::getStackId).distinct().collect(Collectors.toSet());
         if (!stackIds.isEmpty()) {
             Set<Long> deletingStackIds = stackRepository.findStackStatuses(stackIds).stream()
@@ -234,7 +234,7 @@ public class HeartbeatService {
         return Collections.emptyList();
     }
 
-    private boolean hasRunningNonTerminationFlowOnThisNode(Set<String> runningFlowIds) {
+    private boolean hasRunningNonTerminationFlowOnThisNode(Collection<String> runningFlowIds) {
         return runningFlowIds.stream().anyMatch(id -> runningFlows.getFlowChainId(id) != null);
     }
 

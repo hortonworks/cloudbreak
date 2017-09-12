@@ -55,7 +55,7 @@ public class RDSConfigToJsonConverter extends AbstractConversionServiceAwareConv
                     rdsConfigPropertyJsons.add(rdsConfigPropertyJson);
                 }
             }
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
             LOGGER.error("Could not convert rdsConfigPropertyJsons json to Set.");
         }
         return rdsConfigPropertyJsons;

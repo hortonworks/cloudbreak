@@ -22,7 +22,7 @@ public class GcpInstanceTypeConverter extends AbstractConverter<GcpInstanceType>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getInstanceTypeNamesByPlatform("GCP"));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

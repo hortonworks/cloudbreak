@@ -100,7 +100,7 @@ public class ClusterTerminationService {
                         cluster.getId(), cluster.getName()), e);
             }
             return Boolean.TRUE;
-        } catch (CloudbreakException e) {
+        } catch (CloudbreakException ignored) {
             return Boolean.FALSE;
         }
     }

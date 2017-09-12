@@ -15,7 +15,7 @@ public class AmbariClientExceptionUtil {
         try {
             String json = IOUtils.toString((Reader) e.getResponse().getData());
             return JsonUtil.readTree(json).get("message").asText();
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             return "Could not get error cause from exception of Ambari client: " + e;
         }
     }

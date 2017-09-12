@@ -33,7 +33,7 @@ public class Json {
                 return Collections.emptyMap();
             }
             return get(Map.class);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             return Collections.emptyMap();
         }
     }

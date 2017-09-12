@@ -187,13 +187,13 @@ public class BaseCredentialCommands implements BaseCommands, CredentialCommands 
         if (sshKeyPath != null) {
             try {
                 sshKey = IOUtils.toString(new FileReader(new File(sshKeyPath.getPath()))).replace("\n", "");
-            } catch (IOException ex) {
+            } catch (IOException ignored) {
                 throw shellContext.exceptionTransformer().transformToRuntimeException(FILE_NOT_FOUND);
             }
         } else if (sshKeyUrl != null) {
             try {
                 sshKey = readUrl(sshKeyUrl);
-            } catch (IOException ex) {
+            } catch (IOException ignored) {
                 throw shellContext.exceptionTransformer().transformToRuntimeException(URL_NOT_FOUND);
             }
         } else {

@@ -127,7 +127,7 @@ public class FlexUsageGenerator {
         String cbUser;
         try {
             cbUser = userDetailsService.getDetails(source.getOwner(), UserFilterField.USERID).getUsername();
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             LOGGER.warn(String.format("Expected user was not found with '%s' id. Maybe it was deleted by the admin user.", source.getOwner()));
             cbUser = source.getOwner();
         }

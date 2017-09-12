@@ -153,7 +153,7 @@ public class CloudbreakUtil {
         try {
             String ambariHealth = ambariClient.healthCheck();
             return "RUNNING".equals(ambariHealth);
-        } catch (RuntimeException e) {
+        } catch (Exception ignored) {
             return false;
         }
     }
@@ -292,7 +292,7 @@ public class CloudbreakUtil {
         try {
             Thread.sleep(POLLING_INTERVAL);
         } catch (InterruptedException e) {
-            LOGGER.warn("Ex during wait: {}", e);
+            LOGGER.warn("Ex during wait", e);
         }
     }
 

@@ -276,7 +276,7 @@ public class BlueprintCommands implements BaseCommands {
                 }
                 map.put(hostGroup.get("name").asText(), components);
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             map = new HashMap<>();
         }
         return map;

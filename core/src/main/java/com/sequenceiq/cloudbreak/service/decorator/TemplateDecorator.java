@@ -43,7 +43,7 @@ public class TemplateDecorator implements Decorator<Template> {
                 VolumeParameterType volumeParameterType = map.get(subject.getVolumeType());
 
                 return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
-            } catch (NoSuchElementException e) {
+            } catch (NoSuchElementException ignored) {
                 LOGGER.info("No VolumeParameterConfig found, which might be normal for platforms like OpenStack");
                 return VolumeParameterConfig.EMPTY;
             }

@@ -49,7 +49,7 @@ public class UserProfileService {
     private void addUiProperties(UserProfile userProfile) {
         try {
             userProfile.setUiProperties(new Json(new HashMap<>()));
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             userProfile.setUiProperties(null);
         }
     }
@@ -66,7 +66,7 @@ public class UserProfileService {
             try {
                 Credential credential = credentialRepository.findOneByName(request.getCredentialName(), userProfile.getAccount());
                 userProfile.setCredential(credential);
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
                 throw new NotFoundException(String.format("Credential '%s' not found in the specified account.", request.getCredentialName()));
             }
         }
@@ -78,7 +78,7 @@ public class UserProfileService {
             map.put(uiStringObjectEntry.getKey(), uiStringObjectEntry.getValue());
             try {
                 userProfile.setUiProperties(new Json(map));
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException ignored) {
                 throw new BadRequestException("The modification of the ui properties was unsuccesfull.");
             }
         }

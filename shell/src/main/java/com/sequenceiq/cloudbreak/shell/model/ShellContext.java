@@ -735,7 +735,7 @@ public class ShellContext {
     private String getLastPropertyValue(PropertyKey key) {
         try {
             return properties.get(key);
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             return "";
         }
     }
@@ -777,7 +777,7 @@ public class ShellContext {
         if (smartSenseSubscription == null) {
             try {
                 smartSenseSubscription = cloudbreakClient().smartSenseSubscriptionEndpoint().get();
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
                 smartSenseSubscription = new SmartSenseSubscriptionJson();
                 smartSenseSubscription.setId(Long.MIN_VALUE);
             }

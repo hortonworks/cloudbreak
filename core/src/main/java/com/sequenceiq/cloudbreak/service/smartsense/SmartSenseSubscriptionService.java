@@ -113,7 +113,7 @@ public class SmartSenseSubscriptionService {
                 subscription.setSubscriptionId(defaultSmartsenseId);
                 repository.save(subscription);
             }
-        } catch (NotFoundException nfe) {
+        } catch (NotFoundException ignored) {
             LOGGER.info("Default SmartSense subscription not found");
         }
         return Optional.ofNullable(subscription).orElseGet(() -> {

@@ -130,7 +130,7 @@ public class GcpProvisionSetup implements Setup {
                     return true;
                 }
             }
-        } catch (NullPointerException ex) {
+        } catch (NullPointerException ignored) {
             return false;
         }
         return false;

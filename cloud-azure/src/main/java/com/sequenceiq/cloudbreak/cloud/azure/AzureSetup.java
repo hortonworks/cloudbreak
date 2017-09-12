@@ -119,7 +119,7 @@ public class AzureSetup implements Setup {
                 LOGGER.info(String.format("CopyStatus Pending %s byte/%s byte: %.4s %%", copyState.getTotalBytes(), copyState.getBytesCopied(), percentage));
                 return new ImageStatusResult(ImageStatus.IN_PROGRESS, percentage);
             }
-        } catch (RuntimeException ex) {
+        } catch (RuntimeException ignored) {
             return new ImageStatusResult(ImageStatus.IN_PROGRESS, ImageStatusResult.HALF);
         }
     }

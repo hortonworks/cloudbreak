@@ -16,7 +16,7 @@ public class TagParser {
                 return new HashMap<>();
             }
             return Stream.of(tagString.split(",")).map(kv -> kv.split("=")).collect(Collectors.toMap(kv -> kv[0].trim(), kv -> kv[1].trim()));
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (ArrayIndexOutOfBoundsException ignored) {
             throw new IllegalArgumentException("Tags couldn't be parsed. Please use the proper format 'key1=value1,key2=value2'");
         }
     }

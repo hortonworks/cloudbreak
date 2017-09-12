@@ -22,7 +22,7 @@ public class ParametersTypeValidator implements ParameterValidator {
                 if (entry.getClazz().isEnum()) {
                     try {
                         entry.getClazz().getField(String.valueOf(parameters.get(entry.getName())));
-                    } catch (NoSuchFieldException e) {
+                    } catch (NoSuchFieldException ignored) {
                         throw new BadRequestException(String.format("%s is not valid type. The valid fields are [%s]",
                                 entry.getName(),
                                 fieldList(entry.getClazz().getFields())));
@@ -30,7 +30,7 @@ public class ParametersTypeValidator implements ParameterValidator {
                 } else {
                     try {
                         entry.getClazz().getConstructor(parameters.get(entry.getName()).getClass()).newInstance(parameters.get(entry.getName()));
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                         try {
                             entry.getClazz().getConstructor(String.class).newInstance(parameters.get(entry.getName()).toString());
                         } catch (Exception ex) {

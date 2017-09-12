@@ -28,7 +28,7 @@ public class JsonToFlexSubscriptionConverter extends AbstractConversionServiceAw
         try {
             SmartSenseSubscription smartSenseSubscription = smartSenseSubscriptionService.findOneById(smartSenseSubscriptionId);
             subscription.setSmartSenseSubscription(smartSenseSubscription);
-        } catch (NotFoundException nex) {
+        } catch (NotFoundException ignored) {
             throw new BadRequestException("SmartSense subscription could not be found with id: " + smartSenseSubscriptionId);
         }
         return subscription;

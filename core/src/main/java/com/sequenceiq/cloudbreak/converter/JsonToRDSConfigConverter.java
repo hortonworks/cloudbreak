@@ -45,7 +45,7 @@ public class JsonToRDSConfigConverter extends AbstractConversionServiceAwareConv
         try {
             Json json = new Json(convertPropertiesToJson(source.getProperties()));
             rdsConfig.setAttributes(source.getProperties() == null ? new Json(new HashMap<>()) : json);
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             rdsConfig.setAttributes(null);
         }
         return rdsConfig;

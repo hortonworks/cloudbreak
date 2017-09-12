@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RetryUtil implements Runnable {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(RetryUtil.class);
 
     private static final int DEFAULT_NUMBER_OF_RETRIES = 3;

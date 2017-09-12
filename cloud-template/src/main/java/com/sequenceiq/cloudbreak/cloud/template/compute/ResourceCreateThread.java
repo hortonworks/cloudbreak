@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -52,7 +53,7 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     @Inject
     private PersistenceNotifier resourceNotifier;
 
-    private final long privateId;
+    private final Long privateId;
 
     private final Group group;
 
@@ -77,21 +78,21 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
     @Override
     public ResourceRequestResult<List<CloudResourceStatus>> call() throws Exception {
         List<CloudResourceStatus> results = new ArrayList<>();
-        List<CloudResource> buildableResources = new ArrayList<>();
+        Collection<CloudResource> buildableResources = new ArrayList<>();
         try {
             for (ComputeResourceBuilder builder : resourceBuilders.compute(auth.getCloudContext().getPlatform())) {
                 LOGGER.info("Building {} resources of {} instance group", builder.resourceType(), group.getName());
-                List<CloudResource> list = builder.create(context, privateId, auth, group, image);
-                if (!list.isEmpty()) {
-                    buildableResources.addAll(list);
-                    createResource(auth, list);
+                List<CloudResource> cloudResources = builder.create(context, privateId, auth, group, image);
+                if (!cloudResources.isEmpty()) {
+                    buildableResources.addAll(cloudResources);
+                    createResource(auth, cloudResources);
 
                     PollGroup pollGroup = InMemoryStateStore.getStack(auth.getCloudContext().getId());
                     if (pollGroup != null && CANCELLED.equals(pollGroup)) {
-                        throw new CancellationException(format("Building of %s has been cancelled", list));
+                        throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
                     }
 
-                    List<CloudResource> resources = builder.build(context, privateId, auth, group, image, list, tags);
+                    List<CloudResource> resources = builder.build(context, privateId, auth, group, image, cloudResources, tags);
                     updateResource(auth, resources);
                     context.addComputeResources(privateId, resources);
                     PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
@@ -115,21 +116,19 @@ public class ResourceCreateThread implements Callable<ResourceRequestResult<List
         return new ResourceRequestResult<>(FutureResult.SUCCESS, results);
     }
 
-    private List<CloudResource> createResource(AuthenticatedContext auth, List<CloudResource> cloudResources) {
+    private void createResource(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
                 resourceNotifier.notifyAllocation(cloudResource, auth.getCloudContext());
             }
         }
-        return cloudResources;
     }
 
-    private List<CloudResource> updateResource(AuthenticatedContext auth, List<CloudResource> cloudResources) {
+    private void updateResource(AuthenticatedContext auth, Iterable<CloudResource> cloudResources) {
         for (CloudResource cloudResource : cloudResources) {
             if (cloudResource.isPersistent()) {
                 resourceNotifier.notifyUpdate(cloudResource, auth.getCloudContext());
             }
         }
-        return cloudResources;
     }
 }

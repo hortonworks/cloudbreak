@@ -77,7 +77,7 @@ public class MetricEvaluator extends AbstractEventPublisher implements Evaluator
                     }
                 }
             }
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to retrieve alert history", e);
             publishEvent(new UpdateFailedEvent(clusterId));
         }

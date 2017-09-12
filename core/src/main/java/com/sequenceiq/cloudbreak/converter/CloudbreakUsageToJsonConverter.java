@@ -36,7 +36,7 @@ public class CloudbreakUsageToJsonConverter extends AbstractConversionServiceAwa
         String cbUser;
         try {
             cbUser = userDetailsService.getDetails(entity.getOwner(), UserFilterField.USERID).getUsername();
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             LOGGER.warn(String.format("Expected user was not found with '%s' id. Maybe it was deleted by the admin user.", entity.getOwner()));
             cbUser = entity.getOwner();
         }

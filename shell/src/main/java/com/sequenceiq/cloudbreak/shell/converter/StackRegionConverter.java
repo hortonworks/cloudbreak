@@ -23,7 +23,7 @@ public class StackRegionConverter extends AbstractConverter<StackRegion> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getRegionsByPlatform(context.getActiveCloudPlatform()));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

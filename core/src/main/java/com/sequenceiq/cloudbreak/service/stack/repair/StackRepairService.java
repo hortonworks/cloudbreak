@@ -94,7 +94,7 @@ public class StackRepairService {
                     reactorFlowManager.triggerStackRepairFlow(stackId, unhealthyInstances);
                     flowMessageService.fireEventAndLog(stackId, Msg.STACK_REPAIR_TRIGGERED, Status.UPDATE_IN_PROGRESS.name());
                     submitted = true;
-                } catch (FlowsAlreadyRunningException fare) {
+                } catch (FlowsAlreadyRunningException ignored) {
                     trials++;
                     if (trials == RETRIES) {
                         LOGGER.error("Could not submit because other flows are running for stack " + stackId);

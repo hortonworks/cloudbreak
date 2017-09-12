@@ -98,7 +98,7 @@ public class CredentialDefinitionService {
                 if (revert) {
                     try {
                         property = encryptor.decrypt(property);
-                    } catch (EncryptionOperationNotPossibleException e) {
+                    } catch (EncryptionOperationNotPossibleException ignored) {
                         property = legacyEncryptor.decrypt(property);
                     }
                 } else {

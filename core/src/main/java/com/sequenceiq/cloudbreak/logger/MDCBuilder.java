@@ -75,7 +75,7 @@ public class MDCBuilder {
             Field privateStringField = ReflectionUtils.findField(o.getClass(), field);
             privateStringField.setAccessible(true);
             return privateStringField.get(o).toString();
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             return "undefined";
         }
     }

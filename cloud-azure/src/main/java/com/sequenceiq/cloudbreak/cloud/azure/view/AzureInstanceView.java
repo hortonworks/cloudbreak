@@ -133,7 +133,7 @@ public class AzureInstanceView {
     public String getMetadata() {
         try {
             return JsonUtil.writeValueAsString(generateMetadata());
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             return generateMetadata().toString();
         }
     }

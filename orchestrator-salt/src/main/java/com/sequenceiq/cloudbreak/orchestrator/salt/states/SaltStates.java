@@ -109,7 +109,7 @@ public class SaltStates {
         try {
             LOGGER.info("Salt states executed on: {} within: {} sec, details {}", stringMapEntry.getKey(),
                     TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)), JsonUtil.writeValueAsString(runnerInfos));
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             LOGGER.warn("Failed to serialise runnerInfos. Salt states executed on: {} within: {} sec", stringMapEntry.getKey(),
                     TimeUnit.MILLISECONDS.toSeconds(Math.round(sum)));
         }

@@ -41,7 +41,7 @@ public class TemplateHandler implements CloudPlatformEventHandler<GetPlatformTem
                 } else {
                     throw new TemplatingDoesNotSupportedException();
                 }
-            } catch (TemplatingDoesNotSupportedException e) {
+            } catch (TemplatingDoesNotSupportedException ignored) {
                 template = null;
             }
         }

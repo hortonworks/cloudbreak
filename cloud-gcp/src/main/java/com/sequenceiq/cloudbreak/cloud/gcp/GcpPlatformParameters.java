@@ -131,7 +131,7 @@ public class GcpPlatformParameters implements PlatformParameters {
                 regionDisplayNames.put(Region.region(regionDisplayNameSpecification.getName()),
                         displayName(regionDisplayNameSpecification.getDisplayName()));
             }
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
             return regionDisplayNames;
         }
         return sortMap(regionDisplayNames);
@@ -166,7 +166,7 @@ public class GcpPlatformParameters implements PlatformParameters {
                     vmTypes.get(availabilityZone).add(vmType);
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             return vmTypes;
         }
         for (Entry<AvailabilityZone, List<VmType>> availabilityZoneListEntry : vmTypes.entrySet()) {
@@ -196,7 +196,7 @@ public class GcpPlatformParameters implements PlatformParameters {
                 regions.get(regionObject).add(availabilityZoneObject);
 
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             return regions;
         }
         for (Entry<Region, List<AvailabilityZone>> availabilityZoneListEntry : regions.entrySet()) {

@@ -84,7 +84,7 @@ public class YarnApplicationPoller {
     private void sleep() {
         try {
             Thread.sleep(ONE_SECOND);
-        } catch (InterruptedException e) {
+        } catch (InterruptedException ignored) {
 
         }
     }

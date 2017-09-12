@@ -23,7 +23,7 @@ public class ConstraintNameConverter extends AbstractConverter<ConstraintName> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, shellContext.getConstraints());
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

@@ -45,7 +45,7 @@ public class JsonToTemplateConverter extends AbstractConversionServiceAwareConve
         if (parameters != null && !parameters.isEmpty()) {
             try {
                 template.setAttributes(new Json(parameters));
-            } catch (JsonProcessingException e) {
+            } catch (JsonProcessingException ignored) {
                 throw new BadRequestException("Invalid parameters");
             }
         }

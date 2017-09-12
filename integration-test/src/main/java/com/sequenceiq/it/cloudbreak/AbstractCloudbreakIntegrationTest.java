@@ -62,7 +62,7 @@ public abstract class AbstractCloudbreakIntegrationTest extends AbstractTestNGSp
             LOGGER.info("Sleeping {}ms after test...", sleepTime);
             try {
                 Thread.sleep(sleepTime);
-            } catch (Exception ex) {
+            } catch (Exception ignored) {
                 LOGGER.warn("Ex during sleep!");
             }
         }

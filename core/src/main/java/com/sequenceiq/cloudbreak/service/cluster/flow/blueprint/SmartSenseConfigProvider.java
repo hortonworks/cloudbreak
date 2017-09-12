@@ -141,7 +141,7 @@ public class SmartSenseConfigProvider {
         try {
             Json productInfoJson = new Json(productInfo);
             configs.add(new BlueprintConfigurationEntry(SMART_SENSE_PRODUCT_INFO_FILE, "product-info-content", productInfoJson.getValue()));
-        } catch (JsonProcessingException ex) {
+        } catch (JsonProcessingException ignored) {
             LOGGER.error("The 'product-info-content' SmartSense config could not be added to the Blueprint.");
         }
         return configs;

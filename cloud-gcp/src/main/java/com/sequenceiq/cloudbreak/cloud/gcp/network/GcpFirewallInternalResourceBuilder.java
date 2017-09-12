@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getCustomNetworkId;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.getSubnetId;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.legacyNetwork;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newNetworkAndSubnet;
-import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.newSubnetInExistingNetwork;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isLegacyNetwork;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewNetworkAndSubnet;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.isNewSubnetInExistingNetwork;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.noFirewallRules;
 
 import java.util.Arrays;
@@ -61,11 +61,11 @@ public class GcpFirewallInternalResourceBuilder extends AbstractGcpNetworkBuilde
         firewall.setTargetTags(Collections.singletonList(GcpStackUtil.getClusterTag(auth.getCloudContext())));
         firewall.setAllowed(Arrays.asList(allowed1, allowed2, allowed3));
         firewall.setName(buildableResource.getName());
-        if (legacyNetwork(network)) {
+        if (isLegacyNetwork(network)) {
             Networks.Get networkRequest = context.getCompute().networks().get(projectId, getCustomNetworkId(network));
             com.google.api.services.compute.model.Network existingNetwork = networkRequest.execute();
             firewall.setSourceRanges(Collections.singletonList(existingNetwork.getIPv4Range()));
-        } else if (newNetworkAndSubnet(network) || newSubnetInExistingNetwork(network)) {
+        } else if (isNewNetworkAndSubnet(network) || isNewSubnetInExistingNetwork(network)) {
             firewall.setSourceRanges(Collections.singletonList(network.getSubnet().getCidr()));
         } else {
             Get sn = context.getCompute().subnetworks().get(projectId, context.getLocation().getRegion().value(), getSubnetId(network));

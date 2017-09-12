@@ -37,6 +37,7 @@ import com.sequenceiq.it.util.CleanupService;
 
 @ContextConfiguration(classes = IntegrationTestConfiguration.class, initializers = ConfigFileApplicationContextInitializer.class)
 public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextTests {
+
     private static final int WITH_TYPE_LENGTH = 4;
 
     private static final Logger LOG = LoggerFactory.getLogger(CloudbreakTestSuiteInitializer.class);
@@ -216,7 +217,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         }
     }
 
-    private List<InstanceGroup> createInstanceGroups(TemplateEndpoint endpoint, List<String[]> instanceGroupStrings) {
+    private List<InstanceGroup> createInstanceGroups(TemplateEndpoint endpoint, Iterable<String[]> instanceGroupStrings) {
         List<InstanceGroup> instanceGroups = new ArrayList<>();
         for (String[] instanceGroupStr : instanceGroupStrings) {
             String type = instanceGroupStr.length == WITH_TYPE_LENGTH ? instanceGroupStr[WITH_TYPE_LENGTH - 1] : "CORE";
@@ -226,7 +227,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
         return instanceGroups;
     }
 
-    private List<HostGroup> createHostGroups(List<String[]> hostGroupStrings) {
+    private List<HostGroup> createHostGroups(Iterable<String[]> hostGroupStrings) {
         List<HostGroup> hostGroups = new ArrayList<>();
         for (String[] hostGroupStr : hostGroupStrings) {
             hostGroups.add(new HostGroup(hostGroupStr[0], hostGroupStr[1], Integer.valueOf(hostGroupStr[2])));

@@ -34,7 +34,7 @@ public class OwnerBasedPermissionEvaluator implements PermissionEvaluator {
             if (getUserId(targetDomainObject).equals(user.getId())) {
                 return true;
             }
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException ignored) {
             return false;
         }
         return false;

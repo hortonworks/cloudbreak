@@ -23,7 +23,7 @@ public class PlatformVariantConverter extends AbstractConverter<PlatformVariant>
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getVariantsByPlatform(context.getActiveCloudPlatform()));
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

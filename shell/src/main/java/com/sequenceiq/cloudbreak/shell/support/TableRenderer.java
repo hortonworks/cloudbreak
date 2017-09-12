@@ -126,7 +126,7 @@ public class TableRenderer {
                 if (method.getName().toLowerCase().endsWith(field.getName().toLowerCase())) {
                     try {
                         return method.invoke(o);
-                    } catch (Exception e) {
+                    } catch (Exception ignored) {
                         return null;
                     }
                 }

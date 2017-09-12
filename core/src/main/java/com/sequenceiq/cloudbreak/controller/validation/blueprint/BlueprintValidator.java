@@ -39,7 +39,7 @@ public class BlueprintValidator {
                 validateHostGroup(hostGroupNode, hostGroupMap, blueprintServiceComponentMap);
             }
             validateBlueprintServiceComponents(blueprintServiceComponentMap);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()));
         }
     }
@@ -92,7 +92,7 @@ public class BlueprintValidator {
                     break;
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()));
         }
     }

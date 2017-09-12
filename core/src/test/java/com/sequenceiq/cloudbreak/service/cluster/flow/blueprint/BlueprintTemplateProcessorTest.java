@@ -73,7 +73,7 @@ public class BlueprintTemplateProcessorTest {
         inputs.put("S3_BUCKET", "testbucket");
         try {
             cluster.setBlueprintInputs(new Json(inputs));
-        } catch (JsonProcessingException e) {
+        } catch (JsonProcessingException ignored) {
             cluster.setBlueprintInputs(null);
         }
         return cluster;

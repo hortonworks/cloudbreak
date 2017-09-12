@@ -48,7 +48,7 @@ public class ContainerConfigService {
                 LOGGER.info("Container component definition found in database: {}", component);
             }
             return component.getAttributes().get(ContainerConfig.class);
-        } catch (CloudbreakException | IOException e) {
+        } catch (CloudbreakException | IOException ignored) {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s", stack.getId(),
                     dc.getName()));
         }
@@ -77,7 +77,7 @@ public class ContainerConfigService {
 
             Component component = new Component(ComponentType.CONTAINER, dc.name(), new Json(config), stack);
             return componentConfigProvider.store(component);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             throw new CloudbreakServiceException(String.format("Failed to parse component ContainerConfig for stack: %d, container: %s",
                     stack.getId(), dc.getName()));
         }

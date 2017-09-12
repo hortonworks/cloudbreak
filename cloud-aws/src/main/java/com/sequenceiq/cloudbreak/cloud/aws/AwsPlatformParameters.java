@@ -131,7 +131,7 @@ public class AwsPlatformParameters implements PlatformParameters {
                 regionDisplayNames.put(Region.region(regionDisplayNameSpecification.getName()),
                         displayName(regionDisplayNameSpecification.getDisplayName()));
             }
-        } catch (IOException ex) {
+        } catch (IOException ignored) {
             return regionDisplayNames;
         }
         return sortMap(regionDisplayNames);

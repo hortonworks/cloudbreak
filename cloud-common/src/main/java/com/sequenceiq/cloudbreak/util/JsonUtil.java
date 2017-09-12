@@ -34,7 +34,7 @@ public class JsonUtil {
     public static String minify(String content) {
         try {
             return readTree(content).toString();
-        } catch (IOException e) {
+        } catch (IOException ignored) {
             return "INVALID_JSON_CONTENT";
         }
     }

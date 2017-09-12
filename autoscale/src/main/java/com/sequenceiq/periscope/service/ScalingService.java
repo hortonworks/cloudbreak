@@ -21,7 +21,7 @@ public class ScalingService {
     @Autowired
     private ScalingPolicyRepository policyRepository;
 
-    public ScalingPolicy createPolicy(long clusterId, long alertId, ScalingPolicy policy) {
+    public ScalingPolicy createPolicy(Long clusterId, Long alertId, ScalingPolicy policy) {
         BaseAlert alert = alertService.getBaseAlert(clusterId, alertId);
         policy.setAlert(alert);
         ScalingPolicy scalingPolicy = policyRepository.save(policy);
@@ -30,7 +30,7 @@ public class ScalingService {
         return scalingPolicy;
     }
 
-    public ScalingPolicy updatePolicy(long clusterId, long policyId, ScalingPolicy scalingPolicy) {
+    public ScalingPolicy updatePolicy(Long clusterId, Long policyId, ScalingPolicy scalingPolicy) {
         ScalingPolicy policy = getScalingPolicy(clusterId, policyId);
         policy.setName(scalingPolicy.getName());
         policy.setHostGroup(scalingPolicy.getHostGroup());
@@ -39,7 +39,7 @@ public class ScalingService {
         return policyRepository.save(policy);
     }
 
-    public void deletePolicy(long clusterId, long policyId) {
+    public void deletePolicy(Long clusterId, Long policyId) {
         ScalingPolicy policy = getScalingPolicy(clusterId, policyId);
         BaseAlert alert = policy.getAlert();
         alert.setScalingPolicy(null);
@@ -48,7 +48,7 @@ public class ScalingService {
         alertService.save(alert);
     }
 
-    public List<ScalingPolicy> getPolicies(long clusterId) {
+    public List<ScalingPolicy> getPolicies(Long clusterId) {
         clusterService.findOneById(clusterId);
         return policyRepository.findAllByCluster(clusterId);
     }
@@ -57,7 +57,7 @@ public class ScalingService {
         return policyRepository.save(policy);
     }
 
-    private ScalingPolicy getScalingPolicy(long clusterId, long policyId) {
+    private ScalingPolicy getScalingPolicy(Long clusterId, Long policyId) {
         ScalingPolicy policy = policyRepository.findByCluster(clusterId, policyId);
         if (policy == null) {
             throw new NotFoundException("Scaling policy not found");

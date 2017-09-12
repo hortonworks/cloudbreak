@@ -37,7 +37,7 @@ public class GetTlsInfoHandler implements CloudPlatformEventHandler<GetTlsInfoRe
     @Override
     public void accept(Event<GetTlsInfoRequest> getTlsInfoRequestEvent) {
         LOGGER.info("Received event: {}", getTlsInfoRequestEvent);
-        GetTlsInfoRequest tlsInfoRequest = getTlsInfoRequestEvent.getData();
+        GetTlsInfoRequest<?> tlsInfoRequest = getTlsInfoRequestEvent.getData();
         try {
             CloudContext cloudContext = tlsInfoRequest.getCloudContext();
             CloudCredential cloudCredential = tlsInfoRequest.getCloudCredential();

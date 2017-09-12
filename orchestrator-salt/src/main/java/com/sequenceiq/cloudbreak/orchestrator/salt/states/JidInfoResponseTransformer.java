@@ -68,7 +68,7 @@ public class JidInfoResponseTransformer {
             try {
                 String[] durationArray = String.valueOf(value.get("duration")).split(" ");
                 duration = Double.parseDouble(durationArray[0]);
-            } catch (NumberFormatException nfe) {
+            } catch (NumberFormatException ignored) {
                 duration = 0.0;
             }
             runnerInfo.setDuration(duration);

@@ -123,7 +123,7 @@ public class GcpInstanceResourceBuilderTest {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", true));
         List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
-        context.addComputeResources(0, buildableResources);
+        context.addComputeResources(0L, buildableResources);
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
@@ -144,7 +144,7 @@ public class GcpInstanceResourceBuilderTest {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of("preemptible", false));
         List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
-        context.addComputeResources(0, buildableResources);
+        context.addComputeResources(0L, buildableResources);
 
         // WHEN
         when(compute.instances()).thenReturn(instances);
@@ -165,7 +165,7 @@ public class GcpInstanceResourceBuilderTest {
         // GIVEN
         Group group = newGroupWithParams(ImmutableMap.of());
         List<CloudResource> buildableResources = builder.create(context, privateId, authenticatedContext, group, image);
-        context.addComputeResources(0, buildableResources);
+        context.addComputeResources(0L, buildableResources);
 
         // WHEN
         when(compute.instances()).thenReturn(instances);

@@ -41,7 +41,7 @@ public class AmbariClusterStatusFactory {
         boolean result;
         try {
             result = "RUNNING".equals(ambariClient.healthCheck());
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
             result = false;
         }
         return result;
@@ -102,7 +102,7 @@ public class AmbariClusterStatusFactory {
             } else {
                 unsupportedStatuses.add(componentStateStr);
             }
-        } catch (RuntimeException ex) {
+        } catch (RuntimeException ignored) {
             unsupportedStatuses.add(componentStateStr);
         }
     }

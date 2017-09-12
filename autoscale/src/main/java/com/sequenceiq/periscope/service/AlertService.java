@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.ambari.client.services.CommonService;
 import com.sequenceiq.periscope.api.model.AlertRuleDefinitionEntry;
 import com.sequenceiq.periscope.domain.BaseAlert;
 import com.sequenceiq.periscope.domain.Cluster;
@@ -74,7 +75,7 @@ public class AlertService {
     @Inject
     private ScalingService scalingPolicyService;
 
-    public MetricAlert createMetricAlert(long clusterId, MetricAlert alert) {
+    public MetricAlert createMetricAlert(Long clusterId, MetricAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
         MetricAlert metricAlert = (MetricAlert) save(alert);
@@ -83,7 +84,7 @@ public class AlertService {
         return metricAlert;
     }
 
-    public MetricAlert updateMetricAlert(long clusterId, long alertId, MetricAlert metricAlert) {
+    public MetricAlert updateMetricAlert(Long clusterId, Long alertId, MetricAlert metricAlert) {
         MetricAlert alert = findMetricAlertByCluster(clusterId, alertId);
         alert.setName(metricAlert.getName());
         alert.setDefinitionName(metricAlert.getDefinitionName());
@@ -93,11 +94,11 @@ public class AlertService {
         return metricAlertRepository.save(alert);
     }
 
-    public MetricAlert findMetricAlertByCluster(long clusterId, long alertId) {
+    public MetricAlert findMetricAlertByCluster(Long clusterId, Long alertId) {
         return metricAlertRepository.findByCluster(alertId, clusterId);
     }
 
-    public void deleteMetricAlert(long clusterId, long alertId) {
+    public void deleteMetricAlert(Long clusterId, Long alertId) {
         metricAlertRepository.findByCluster(alertId, clusterId);
         Cluster cluster = clusterRepository.findById(clusterId);
         cluster.setMetricAlerts(removeMetricAlert(cluster, alertId));
@@ -105,16 +106,16 @@ public class AlertService {
         clusterRepository.save(cluster);
     }
 
-    public Set<MetricAlert> removeMetricAlert(Cluster cluster, long alertId) {
+    public Set<MetricAlert> removeMetricAlert(Cluster cluster, Long alertId) {
         return cluster.getMetricAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
     }
 
-    public Set<MetricAlert> getMetricAlerts(long clusterId) {
+    public Set<MetricAlert> getMetricAlerts(Long clusterId) {
         Cluster cluster = clusterService.findOneById(clusterId);
         return cluster.getMetricAlerts();
     }
 
-    public TimeAlert createTimeAlert(long clusterId, TimeAlert alert) {
+    public TimeAlert createTimeAlert(Long clusterId, TimeAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
         alert = (TimeAlert) save(alert);
@@ -123,11 +124,11 @@ public class AlertService {
         return alert;
     }
 
-    public TimeAlert findTimeAlertByCluster(long clusterId, long alertId) {
+    public TimeAlert findTimeAlertByCluster(Long clusterId, Long alertId) {
         return timeAlertRepository.findByCluster(alertId, clusterId);
     }
 
-    public TimeAlert updateTimeAlert(long clusterId, long alertId, TimeAlert timeAlert) {
+    public TimeAlert updateTimeAlert(Long clusterId, Long alertId, TimeAlert timeAlert) {
         TimeAlert alert = timeAlertRepository.findByCluster(alertId, clusterId);
         alert.setDescription(timeAlert.getDescription());
         alert.setCron(timeAlert.getCron());
@@ -136,12 +137,12 @@ public class AlertService {
         return timeAlertRepository.save(alert);
     }
 
-    public Set<TimeAlert> getTimeAlerts(long clusterId) {
+    public Set<TimeAlert> getTimeAlerts(Long clusterId) {
         Cluster cluster = clusterService.findOneById(clusterId);
         return cluster.getTimeAlerts();
     }
 
-    public void deleteTimeAlert(long clusterId, long alertId) {
+    public void deleteTimeAlert(Long clusterId, Long alertId) {
         Cluster cluster = clusterService.findOneById(clusterId);
         timeAlertRepository.findByCluster(alertId, clusterId);
         cluster.setTimeAlerts(removeTimeAlert(cluster, alertId));
@@ -149,24 +150,24 @@ public class AlertService {
         clusterRepository.save(cluster);
     }
 
-    public Set<TimeAlert> removeTimeAlert(Cluster cluster, long alertId) {
+    public Set<TimeAlert> removeTimeAlert(Cluster cluster, Long alertId) {
         return cluster.getTimeAlerts().stream().filter(a -> a.getId() != alertId).collect(Collectors.toSet());
     }
 
-    public BaseAlert getBaseAlert(long clusterId, long alertId) {
+    public BaseAlert getBaseAlert(Long clusterId, Long alertId) {
         try {
             return findMetricAlertByCluster(clusterId, alertId);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             LOGGER.info("Could not found Metric alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
         try {
             return findTimeAlertByCluster(clusterId, alertId);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             LOGGER.info("Could not found Time alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
         try {
             return findPrometheusAlertByCluster(clusterId, alertId);
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             LOGGER.info("Could not found Prometheus alert with id: '{}', for cluster: '{}'!", alertId, clusterId);
         }
 
@@ -186,7 +187,7 @@ public class AlertService {
         return res;
     }
 
-    public List<Map<String, Object>> getAlertDefinitions(long clusterId) {
+    public List<Map<String, Object>> getAlertDefinitions(Long clusterId) {
         Cluster cluster = clusterService.findOneById(clusterId);
         List<Map<String, Object>> ret = new ArrayList<>();
         List<Map<String, String>> alertDefinitions = ambariClientProvider.createAmbariClient(cluster).getAlertDefinitions();
@@ -213,7 +214,7 @@ public class AlertService {
         }
     }
 
-    public PrometheusAlert createPrometheusAlert(long clusterId, PrometheusAlert alert) {
+    public PrometheusAlert createPrometheusAlert(Long clusterId, PrometheusAlert alert) {
         Cluster cluster = clusterService.findOneById(clusterId);
         alert.setCluster(cluster);
         PrometheusAlert savedAlert = (PrometheusAlert) save(alert);
@@ -224,7 +225,7 @@ public class AlertService {
         return savedAlert;
     }
 
-    public PrometheusAlert updatePrometheusAlert(long clusterId, long alertId, PrometheusAlert prometheusAlert) {
+    public PrometheusAlert updatePrometheusAlert(Long clusterId, Long alertId, PrometheusAlert prometheusAlert) {
         PrometheusAlert alert = findPrometheusAlertByCluster(clusterId, alertId);
         alert.setName(prometheusAlert.getName());
         alert.setAlertRule(prometheusAlert.getAlertRule());
@@ -238,11 +239,11 @@ public class AlertService {
         return savedAlert;
     }
 
-    public PrometheusAlert findPrometheusAlertByCluster(long clusterId, long alertId) {
+    public PrometheusAlert findPrometheusAlertByCluster(Long clusterId, Long alertId) {
         return prometheusAlertRepository.findByCluster(alertId, clusterId);
     }
 
-    public void deletePrometheusAlert(long clusterId, long alertId) {
+    public void deletePrometheusAlert(Long clusterId, Long alertId) {
         PrometheusAlert alert = prometheusAlertRepository.findByCluster(alertId, clusterId);
         Cluster cluster = clusterRepository.findById(clusterId);
         consulKeyValueService.deleteAlert(cluster, alert);
@@ -262,11 +263,11 @@ public class AlertService {
         return prometheusAlertService.getAlertDefinitions();
     }
 
-    public Set<PrometheusAlert> getPrometheusAlerts(long clusterId) {
+    public Set<PrometheusAlert> getPrometheusAlerts(Long clusterId) {
         return prometheusAlertRepository.findAllByCluster(clusterId);
     }
 
-    private String getAlertDefinition(AmbariClient client, String name) throws Exception {
+    private String getAlertDefinition(CommonService client, String name) throws Exception {
         Map<String, String> model = Collections.singletonMap("clusterName", client.getClusterName());
         return processTemplateIntoString(freemarkerConfiguration.getTemplate(ALERT_PATH + name, "UTF-8"), model);
     }
@@ -275,7 +276,7 @@ public class AlertService {
         try {
             client.createAlert(json);
             LOGGER.info("Alert: {} added to the cluster", alertName);
-        } catch (RuntimeException e) {
+        } catch (Exception ignored) {
             LOGGER.info("Cannot add '{}' to the cluster", alertName);
         }
     }

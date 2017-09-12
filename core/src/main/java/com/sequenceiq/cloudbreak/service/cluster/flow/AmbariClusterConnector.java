@@ -449,7 +449,7 @@ public class AmbariClusterConnector {
     private AmbariClient createAmbariUser(String newUserName, String newPassword, Stack stack, AmbariClient ambariClient) throws CloudbreakException {
         try {
             ambariClient.createUser(newUserName, newPassword, true);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             try {
                 ambariClient = getAmbariClient(stack, newUserName, newPassword);
                 ambariClient.ambariServerVersion();
@@ -471,7 +471,7 @@ public class AmbariClusterConnector {
             throws CloudbreakException {
         try {
             ambariClient.changePassword(userName, oldPassword, newPassword, true);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             try {
                 ambariClient = getAmbariClient(stack, userName, newPassword);
                 ambariClient.ambariServerVersion();
@@ -664,7 +664,7 @@ public class AmbariClusterConnector {
             try {
                 LOGGER.info("Triggering SmartSense data capture.");
                 ambariClient.smartSenseCapture(0);
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 LOGGER.error("Triggering SmartSense capture is failed.", e);
             }
         }

@@ -23,7 +23,7 @@ public class NetworkIdConverter extends AbstractConverter<NetworkId> {
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getNetworksByProvider().keySet());
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

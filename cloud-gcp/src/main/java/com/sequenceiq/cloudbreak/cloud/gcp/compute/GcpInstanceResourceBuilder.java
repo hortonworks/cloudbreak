@@ -151,11 +151,11 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         try {
             LOGGER.info("Checking instance: {}", cloudInstance);
             Operation operation = check(context, cloudInstance);
-            boolean finished = operation == null || GcpStackUtil.analyzeOperation(operation);
+            boolean finished = operation == null || GcpStackUtil.isOperationFinished(operation);
             InstanceStatus status = finished ? context.isBuild() ? InstanceStatus.STARTED : InstanceStatus.STOPPED : InstanceStatus.IN_PROGRESS;
             LOGGER.info("Instance: {} status: {}", instances, status);
             return Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, status));
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             LOGGER.info("Failed to check instance state of {}", cloudInstance);
             return Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS));
         }

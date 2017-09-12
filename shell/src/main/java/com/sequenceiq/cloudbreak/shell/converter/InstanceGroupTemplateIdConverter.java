@@ -23,7 +23,7 @@ public class InstanceGroupTemplateIdConverter extends AbstractConverter<Instance
     public boolean getAllPossibleValues(List<Completion> completions, Class<?> targetType, String existingData, String optionContext, MethodTarget target) {
         try {
             return getAllPossibleValues(completions, context.getActiveTemplates());
-        } catch (RuntimeException e) {
+        } catch (RuntimeException ignored) {
             return false;
         }
     }

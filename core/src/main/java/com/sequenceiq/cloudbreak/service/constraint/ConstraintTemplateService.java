@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.constraint;
 
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -48,11 +49,8 @@ public class ConstraintTemplateService {
     }
 
     public Set<ConstraintTemplate> retrieveAccountConstraintTemplates(IdentityUser user) {
-        if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return constraintTemplateRepository.findAllInAccount(user.getAccount());
-        } else {
-            return constraintTemplateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
-        }
+        return user.getRoles().contains(IdentityUserRole.ADMIN) ? constraintTemplateRepository.findAllInAccount(user.getAccount())
+                : constraintTemplateRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount());
     }
 
     @PostAuthorize("hasPermission(returnObject,'read')")
@@ -136,7 +134,7 @@ public class ConstraintTemplateService {
         }
     }
 
-    private boolean isRunningClusterReferToTemplate(List<Cluster> clusters) {
+    private boolean isRunningClusterReferToTemplate(Collection<Cluster> clusters) {
         return clusters.stream().anyMatch(c -> !c.isDeleteCompleted());
     }
 }
