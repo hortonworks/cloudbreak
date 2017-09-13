@@ -80,6 +80,12 @@
         <input type="checkbox" id="asdefaultfs" ng-model="cluster.fileSystem.defaultFs" ng-disabled="activeCredential.cloudPlatform == 'GCP'" name="asdefaultfs">
     </div>
 </div>
+<div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE')">
+    <label class="col-sm-3 control-label" for="encryptazure">Encrypt Azure Disks</label>
+    <div class="col-sm-8">
+        <input type="checkbox" id="encryptazure" ng-model="cluster.parameters.encryptStorage" name="encryptazure">
+    </div>
+</div>
 <div class="form-group" ng-show="(activeCredential.cloudPlatform == 'AZURE') && cluster.fileSystem.type == 'WASB' && cluster.fileSystem.defaultFs">
     <label class="col-sm-3 control-label" for="wasbsecure">{{msg.filesystem_wasb_secure_label}}</label>
     <div class="col-sm-8">

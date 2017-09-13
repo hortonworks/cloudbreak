@@ -39,6 +39,9 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.Deployments;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
+import com.microsoft.azure.management.storage.Encryption;
+import com.microsoft.azure.management.storage.EncryptionService;
+import com.microsoft.azure.management.storage.EncryptionServices;
 import com.microsoft.azure.management.storage.ProvisioningState;
 import com.microsoft.azure.management.storage.SkuName;
 import com.microsoft.azure.management.storage.StorageAccount;
@@ -161,14 +164,22 @@ public class AzureClient {
         azure.storageAccounts().deleteByResourceGroup(resourceGroup, storageName);
     }
 
-    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType) {
+    public StorageAccount createStorageAccount(String resourceGroup, String storageName, String storageLocation, SkuName accType, Boolean encryted) {
 
-        return azure.storageAccounts()
+        StorageAccount.DefinitionStages.WithCreate withCreate = azure.storageAccounts()
                 .define(storageName)
                 .withRegion(storageLocation)
                 .withExistingResourceGroup(resourceGroup)
-                .withSku(accType)
-                .create();
+                .withSku(accType);
+        if (encryted) {
+            EncryptionService encryptionService = new EncryptionService().withEnabled(true);
+            EncryptionServices encryptionServices = new EncryptionServices()
+                    .withBlob(encryptionService);
+            Encryption encryption = new Encryption().withKeySource("Microsoft.Storage").withServices(encryptionServices);
+            withCreate.withEncryption(encryption);
+        }
+
+        return withCreate.create();
     }
 
     public List<StorageAccountKey> getStorageAccountKeys(String resourceGroup, String storageName) {

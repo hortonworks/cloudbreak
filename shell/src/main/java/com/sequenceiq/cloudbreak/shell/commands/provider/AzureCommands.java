@@ -403,6 +403,8 @@ public class AzureCommands implements CommandMarker {
             String persistentStorage,
             @CliOption(key = "customImage", help = "select customImage for cluster") String customImage,
             @CliOption(key = "wait", help = "Wait for stack creation", unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean wait,
+            @CliOption(key = "encryptStorage", help = "Encrypt Azure storage", unspecifiedDefaultValue = "false",
+                    specifiedDefaultValue = "false", mandatory = false) boolean encryptStorage,
             @CliOption(key = "timeout", help = "Wait timeout if wait=true") Long timeout,
             @CliOption(key = "customDomain", help = "Custom domain for the nodes in the stack") String customDomain,
             @CliOption(key = "customHostname", help = "Custom hostname for the nodes in the stack") String customHostname,
@@ -417,6 +419,7 @@ public class AzureCommands implements CommandMarker {
             if (diskPerStorage != null) {
                 params.put("diskPerStorage", diskPerStorage.toString());
             }
+            params.put("encryptStorage", String.valueOf(encryptStorage));
             if (attachedStorageOption != null && shellContext.isAzureActiveCredential()) {
                 params.put("attachedStorageOption", attachedStorageOption.name());
             } else if (shellContext.isAzureActiveCredential()) {

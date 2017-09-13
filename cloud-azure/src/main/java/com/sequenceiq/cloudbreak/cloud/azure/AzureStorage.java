@@ -84,10 +84,10 @@ public class AzureStorage {
         return buildStorageName(armAttachedStorageOption, acv, vmId, cloudContext, storageType);
     }
 
-    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region)
+    public void createStorage(AzureClient client, String osStorageName, AzureDiskType storageType, String storageGroup, String region, Boolean encrypted)
             throws CloudException {
         if (!storageAccountExist(client, osStorageName)) {
-            client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()));
+            client.createStorageAccount(storageGroup, osStorageName, region, SkuName.fromString(storageType.value()), encrypted);
         }
     }
 
@@ -140,6 +140,10 @@ public class AzureStorage {
 
     public String getPersistentStorageName(Map<String, String> parameters) {
         return parameters.get("persistentStorage");
+    }
+
+    public Boolean isEncrytionNeeded(Map<String, String> parameters) {
+        return Boolean.parseBoolean(parameters.get("encryptStorage"));
     }
 
     public boolean isPersistentStorage(String persistentStorageName) {

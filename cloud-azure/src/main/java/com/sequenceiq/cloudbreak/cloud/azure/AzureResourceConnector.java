@@ -107,6 +107,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
         String customImageId = azureStorage.getCustomImageId(client, ac, stack);
         String template = azureTemplateBuilder.build(stackName, customImageId, azureCredentialView, azureStackView, ac.getCloudContext(), stack);
         String parameters = azureTemplateBuilder.buildParameters(ac.getCloudCredential(), stack.getNetwork(), stack.getImage());
+        Boolean encrytionNeeded = azureStorage.isEncrytionNeeded(stack.getParameters());
 
         azureUtils.validateSubnetRules(client, stack.getNetwork());
         try {
@@ -114,7 +115,7 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             if (AzureUtils.hasUnmanagedDisk(stack)) {
                 Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
                 for (Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
-                    azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region);
+                    azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region, encrytionNeeded);
                 }
             }
             if (!client.templateDeploymentExists(resourceGroupName, stackName)) {
@@ -239,7 +240,8 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             String region = authenticatedContext.getCloudContext().getLocation().getRegion().value();
             Map<String, AzureDiskType> storageAccounts = azureStackView.getStorageAccounts();
             for (Entry<String, AzureDiskType> entry : storageAccounts.entrySet()) {
-                azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region);
+                azureStorage.createStorage(client, entry.getKey(), entry.getValue(), resourceGroupName, region,
+                        azureStorage.isEncrytionNeeded(stack.getParameters()));
             }
             Deployment templateDeployment = client.createTemplateDeployment(stackName, stackName, template, parameters);
             LOGGER.info("created template deployment for upscale: {}", templateDeployment.exportTemplate().template());
