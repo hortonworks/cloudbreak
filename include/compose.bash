@@ -217,7 +217,7 @@ traefik:
         - uluwatu
     volumes:
         - /var/run/docker.sock:/var/run/docker.sock
-        - ./certs/traefik:/certs/traefik
+        - $CBD_CERT_ROOT_PATH/traefik:/certs/traefik
         - ./logs/traefik:/opt/traefik/log/
     log_opt:
         max-size: "10M"

@@ -379,30 +379,28 @@ gen-password() {
 
 cloudbreak-generate-cert() {
     cloudbreak-config
-    if [ -f "${CBD_CERT_ROOT_PATH}/client.pem" ] && [ -f "${CBD_CERT_ROOT_PATH}/client-key.pem" ]; then
+    if [ -f "${CBD_CERT_ROOT_PATH}/traefik/client.pem" ] && [ -f "${CBD_CERT_ROOT_PATH}/traefik/client-key.pem" ]; then
       debug "Cloudbreak certificate and private key already exist, won't generate new ones."
     else
-      info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH} with ${PUBLIC_IP}."
+      info "Generating Cloudbreak client certificate and private key in ${CBD_CERT_ROOT_PATH} with ${PUBLIC_IP} into ${CBD_CERT_ROOT_PATH}/traefik."
+      mkdir -p "${CBD_CERT_ROOT_PATH}/traefik"
       docker run \
           --label cbreak.sidekick=true \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs ca generate -o=local &> /dev/null
+          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs/traefik ca generate -o=local &> /dev/null
       docker run \
           --label cbreak.sidekick=true \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
-          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs client generate --common-name=${PUBLIC_IP} -o=local &> /dev/null
+          ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs/traefik client generate --common-name=${PUBLIC_IP} -o=local &> /dev/null
       owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)
       [[ "$owner" != "$(whoami)" ]] && sudo chown -R $(whoami):$(id -gn) ${CBD_CERT_ROOT_PATH}
-      mv "${CBD_CERT_ROOT_PATH}/cert.pem" "${CBD_CERT_ROOT_PATH}/client.pem"
-      cat "${CBD_CERT_ROOT_PATH}/ca.pem" >> "${CBD_CERT_ROOT_PATH}/client.pem"
-      mv "${CBD_CERT_ROOT_PATH}/key.pem" "${CBD_CERT_ROOT_PATH}/client-key.pem"
-      mv "${CBD_CERT_ROOT_PATH}/ca.pem" "${CBD_CERT_ROOT_PATH}/client-ca.pem"
-      mv "${CBD_CERT_ROOT_PATH}/ca-key.pem" "${CBD_CERT_ROOT_PATH}/client-ca-key.pem"
+      mv "${CBD_CERT_ROOT_PATH}/traefik/cert.pem" "${CBD_CERT_ROOT_PATH}/traefik/client.pem"
+      cat "${CBD_CERT_ROOT_PATH}/traefik/ca.pem" >> "${CBD_CERT_ROOT_PATH}/traefik/client.pem"
+      mv "${CBD_CERT_ROOT_PATH}/traefik/key.pem" "${CBD_CERT_ROOT_PATH}/traefik/client-key.pem"
+      mv "${CBD_CERT_ROOT_PATH}/traefik/ca.pem" "${CBD_CERT_ROOT_PATH}/traefik/client-ca.pem"
+      mv "${CBD_CERT_ROOT_PATH}/traefik/ca-key.pem" "${CBD_CERT_ROOT_PATH}/traefik/client-ca-key.pem"
       debug "Certificates successfully generated."
     fi
-    mkdir -p "${CBD_CERT_ROOT_PATH}/traefik"
-    cp "${CBD_CERT_ROOT_PATH}/client.pem" "${CBD_CERT_ROOT_PATH}/traefik/client.pem"
-    cp "${CBD_CERT_ROOT_PATH}/client-key.pem" "${CBD_CERT_ROOT_PATH}/traefik/client-key.pem"
 }
 
 generate_uaa_check_diff() {
