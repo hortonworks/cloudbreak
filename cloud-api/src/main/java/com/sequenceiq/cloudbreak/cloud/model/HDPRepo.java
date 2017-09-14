@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class HDPRepo {
+
     public static final String REPO_ID_TAG = "repoid";
 
     public static final String MPACK_TAG = "mpack";

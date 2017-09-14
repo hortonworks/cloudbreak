@@ -7,55 +7,77 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
+import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
+import com.sequenceiq.cloudbreak.repository.RdsConfigRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 import com.sequenceiq.cloudbreak.service.StatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
+import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.stack.flow.AmbariStartupPollerObject;
 
 import groovyx.net.http.HttpResponseException;
 import reactor.bus.EventBus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterConnectorTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private TlsSecurityService tlsSecurityService;
@@ -65,6 +87,39 @@ public class AmbariClusterConnectorTest {
 
     @Mock
     private AmbariClient ambariClient;
+
+    @Mock
+    private HostGroupService hostGroupService;
+
+    @Mock
+    private RecipeEngine recipeEngine;
+
+    @Mock
+    private RdsConfigRepository rdsConfigRepository;
+
+    @Mock
+    private BlueprintTemplateProcessor blueprintTemplateProcessor;
+
+    @Mock
+    private SmartSenseConfigProvider smartSenseConfigProvider;
+
+    @Mock
+    private ZeppelinConfigProvider zeppelinConfigProvider;
+
+    @Mock
+    private DruidSupersetConfigProvider druidSupersetConfigProvider;
+
+    @Mock
+    private LlapConfigProvider llapConfigProvider;
+
+    @Mock
+    private OrchestratorTypeResolver orchestratorTypeResolver;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private AutoRecoveryConfigProvider autoRecoveryConfigProvider;
 
     @Mock
     private HttpClientConfig httpClientConfig;
@@ -80,6 +135,15 @@ public class AmbariClusterConnectorTest {
 
     @Mock
     private PollingService<AmbariHostsCheckerContext> hostsPollingService;
+
+    @Mock
+    private PollingService<AmbariHostsCheckerContext> ambariHostJoin;
+
+    @Mock
+    private PollingService<AmbariHostsCheckerContext> ambariHealthChecker;
+
+    @Mock
+    private PollingService<AmbariStartupPollerObject> ambariStartupPollerObjectPollingService;
 
     @Mock
     private AmbariHostsStatusCheckerTask ambariHostsStatusCheckerTask;
@@ -108,8 +172,13 @@ public class AmbariClusterConnectorTest {
     @Mock
     private BlueprintProcessor blueprintProcessor;
 
+    @Mock
+    private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
+    @Mock
+    private CloudbreakMessagesService cloudbreakMessagesService;
+
     @InjectMocks
-    @Spy
     private final AmbariClusterConnector underTest = new AmbariClusterConnector();
 
     private Stack stack;
@@ -127,6 +196,7 @@ public class AmbariClusterConnectorTest {
         when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<>());
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
+        when(ambariClient.createCluster(anyString(), anyString(), any(Map.class), anyString(), anyString(), anyBoolean())).thenReturn("");
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<>());
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), anyString(), anyString())).thenReturn(ambariClient);
         when(ambariClientProvider.getDefaultAmbariClient(any(HttpClientConfig.class), anyInt())).thenReturn(ambariClient);
@@ -149,16 +219,28 @@ public class AmbariClusterConnectorTest {
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
     }
 
-    @Test(expected = AmbariOperationFailedException.class)
+    @Test
     public void testInstallAmbariWhenExceptionOccursShouldInstallationFailed() throws Exception {
-        doThrow(new IllegalArgumentException()).when(ambariClient).createCluster(anyString(), anyString(), anyMap(), anyString(), anyString(), anyBoolean());
+        doThrow(new IllegalArgumentException("Illegal Argument")).when(hostGroupService).getByCluster(anyLong());
+        thrown.expect(AmbariOperationFailedException.class);
+        thrown.expectMessage("Illegal Argument");
         underTest.buildAmbariCluster(stack);
     }
 
-    @Test(expected = AmbariOperationFailedException.class)
+    @Test
     public void testInstallAmbariWhenReachedMaxPollingEventsShouldInstallationFailed() throws Exception {
         when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
                 .thenReturn(PollingResult.TIMEOUT);
+        when(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
+        when(clusterComponentConfigProvider.getHDPRepo(any())).thenAnswer((Answer<HDPRepo>) invocation -> {
+            HDPRepo hdpRepo = new HDPRepo();
+            hdpRepo.setStack(new HashMap<>(Collections.singletonMap(HDPRepo.REPO_ID_TAG, "stackRepoId")));
+            hdpRepo.setUtil(new HashMap<>(Collections.singletonMap(HDPRepo.REPO_ID_TAG, "utilRepoId")));
+            return hdpRepo;
+        });
+        when(cloudbreakMessagesService.getMessage(eq("ambari.cluster.install.failed"))).thenReturn("ambari.cluster.install.failed");
+        thrown.expect(AmbariOperationFailedException.class);
+        thrown.expectMessage("ambari.cluster.install.failed");
         underTest.buildAmbariCluster(stack);
     }
 
