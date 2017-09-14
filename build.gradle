@@ -249,6 +249,8 @@ subprojects {
     configProperties = ['config_loc': "$rootDir/config/checkstyle"]
   }
 
+  test.testLogging.showStandardStreams = project.hasProperty('showStandardStreams')
+
   dependencies {
     checkstyle('com.puppycrawl.tools:checkstyle:6.11.1') {
       exclude group: 'com.google.guava'

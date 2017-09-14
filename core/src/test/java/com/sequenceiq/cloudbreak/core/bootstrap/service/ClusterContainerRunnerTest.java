@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -40,6 +42,10 @@ import com.sequenceiq.cloudbreak.service.cluster.ContainerService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterContainerRunnerTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @Mock
     private StackRepository stackRepository;
 
@@ -79,9 +85,8 @@ public class ClusterContainerRunnerTest {
     @InjectMocks
     private ClusterContainerRunner underTest;
 
-    @Test(expected = CloudbreakException.class)
-    public void runNewNodesClusterContainersWhenContainerRunnerFailed()
-            throws CloudbreakException {
+    @Test
+    public void runNewNodesClusterContainersWhenContainerRunnerFailed() throws CloudbreakException {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
@@ -89,6 +94,8 @@ public class ClusterContainerRunnerTest {
         hostGroupAdjustment.setHostGroup("agent");
         when(containerOrchestratorResolver.get(anyString())).thenReturn(new FailedMockContainerOrchestrator());
         when(clusterService.retrieveClusterByStackId(anyLong())).thenReturn(cluster);
+        thrown.expect(CloudbreakException.class);
+        thrown.expectMessage("com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException: failed");
 
         Set<Container> containers = new HashSet<>();
 

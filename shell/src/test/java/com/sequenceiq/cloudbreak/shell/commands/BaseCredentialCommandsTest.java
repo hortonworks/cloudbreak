@@ -10,9 +10,13 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.eq;
 
+import javax.ws.rs.BadRequestException;
+
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -32,6 +36,9 @@ public class BaseCredentialCommandsTest {
     private static final String DUMMY_NAME = "dummyName";
 
     private static final Long DUMMY_ID = 60L;
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private BaseCredentialCommands underTest;
@@ -85,9 +92,13 @@ public class BaseCredentialCommandsTest {
         verify(context, times(1)).setCredential(anyString());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testSelectCredentialByNameNotFound() throws Exception {
-        given(credentialEndpoint.getPublic(DUMMY_NAME)).willReturn(null);
+        Throwable exception = new BadRequestException("Credential not found");
+        given(credentialEndpoint.getPublic(DUMMY_NAME)).willThrow(exception);
+        given(exceptionTransformer.transformToRuntimeException(any(BadRequestException.class))).willThrow(exception);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Credential not found");
         underTest.select(null, DUMMY_NAME);
         verify(context, times(0)).setCredential(anyString());
     }
