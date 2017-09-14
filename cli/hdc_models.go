@@ -57,23 +57,23 @@ type ClusterSkeletonBase struct {
 
 type ClusterSkeleton struct {
 	ClusterSkeletonBase
-	Autoscaling     *AutoscalingSkeletonBase           `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
-	HiveMetastore   *HiveMetastore                     `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore  *DruidMetastore                    `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	RangerMetastore *RangerMetastore                   `json:"RangerMetastore,omitempty" yaml:"RangerMetastore,omitempty"`
-	Configurations  []Configurations 				   `json:"Configurations" yaml:"Configurations"`
-	ClusterInputs   map[string]string                  `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
+	Autoscaling     *AutoscalingSkeletonBase `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
+	HiveMetastore   *HiveMetastore           `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore  *DruidMetastore          `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	RangerMetastore *RangerMetastore         `json:"RangerMetastore,omitempty" yaml:"RangerMetastore,omitempty"`
+	Configurations  []Configurations         `json:"Configurations" yaml:"Configurations"`
+	ClusterInputs   map[string]string        `json:"ClusterInputs,omitempty" yaml:"ClusterInputs,omitempty"`
 }
 
 type ClusterSkeletonResult struct {
 	ClusterSkeletonBase
-	Autoscaling    *AutoscalingSkeletonResult         `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
-	HiveMetastore  *HiveMetastoreResult               `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
-	DruidMetastore *DruidMetastoreResult              `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
-	Configurations []Configurations 				  `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
-	Nodes          string                             `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
-	Status         string                             `json:"Status,omitempty" yaml:"Status,omitempty"`
-	StatusReason   string                             `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
+	Autoscaling    *AutoscalingSkeletonResult `json:"Autoscaling,omitempty" yaml:"Autoscaling,omitempty"`
+	HiveMetastore  *HiveMetastoreResult       `json:"HiveMetastore,omitempty" yaml:"HiveMetastore,omitempty"`
+	DruidMetastore *DruidMetastoreResult      `json:"DruidMetastore,omitempty" yaml:"DruidMetastore,omitempty"`
+	Configurations []Configurations           `json:"Configurations,omitempty" yaml:"Configurations,omitempty"`
+	Nodes          string                     `json:"NodesStatus,omitempty" yaml:"NodesStatus,omitempty"`
+	Status         string                     `json:"Status,omitempty" yaml:"Status,omitempty"`
+	StatusReason   string                     `json:"StatusReason,omitempty" yaml:"StatusReason,omitempty"`
 }
 
 type InstanceConfig struct {

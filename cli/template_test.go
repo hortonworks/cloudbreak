@@ -74,17 +74,17 @@ func validateTemplate(kind string, config InstanceConfig, expId int64, actual *m
 	}
 	if kind == "master" {
 		if m, _ := regexp.MatchString("mtempl([0-9]{10,20})", actual.Name); m == false {
-			t.Errorf("name not match mtempl([0-9]{10,20}) == %s", actual.Name)
+			t.Errorf("name not match mtempl([0-9]{10,20}) == %s", *actual.Name)
 		}
 	}
 	if kind == "worker" {
 		if m, _ := regexp.MatchString("wtempl([0-9]{10,20})", actual.Name); m == false {
-			t.Errorf("name not match wtempl([0-9]{10,20}) == %s", actual.Name)
+			t.Errorf("name not match wtempl([0-9]{10,20}) == %s", *actual.Name)
 		}
 	}
 	if kind == "compute" {
 		if m, _ := regexp.MatchString("ctempl([0-9]{10,20})", actual.Name); m == false {
-			t.Errorf("name not match ctempl([0-9]{10,20}) == %s", actual.Name)
+			t.Errorf("name not match ctempl([0-9]{10,20}) == %s", *actual.Name)
 		}
 	}
 	if actual.CloudPlatform != "AWS" {

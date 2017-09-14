@@ -6,12 +6,13 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/client_cloudbreak/cluster"
-	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
-	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/cluster"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 func TestCreateClusterImplFull(t *testing.T) {
@@ -161,7 +162,7 @@ func TestResizeClusterImplStack(t *testing.T) {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
 	if actualUpdate.InstanceGroupAdjustment.InstanceGroup != WORKER {
-		t.Errorf("type not match %s == %s", WORKER, actualUpdate.InstanceGroupAdjustment.InstanceGroup)
+		t.Errorf("type not match %s == %s", WORKER, *actualUpdate.InstanceGroupAdjustment.InstanceGroup)
 	}
 	if actualUpdate.InstanceGroupAdjustment.ScalingAdjustment != expectedAdjustment {
 		t.Errorf("type not match %d == %d", expectedAdjustment, actualUpdate.InstanceGroupAdjustment.ScalingAdjustment)
@@ -191,7 +192,7 @@ func TestResizeClusterImplCluster(t *testing.T) {
 		t.Errorf("id does not match %d == %d", expectedId, actualId)
 	}
 	if actualUpdate.HostGroupAdjustment.HostGroup != WORKER {
-		t.Errorf("type does not match %s == %s", WORKER, actualUpdate.HostGroupAdjustment.HostGroup)
+		t.Errorf("type does not match %s == %s", WORKER, *actualUpdate.HostGroupAdjustment.HostGroup)
 	}
 	if actualUpdate.HostGroupAdjustment.ScalingAdjustment != expectedAdjustment {
 		t.Errorf("type does not match %d == %d", expectedAdjustment, actualUpdate.HostGroupAdjustment.ScalingAdjustment)

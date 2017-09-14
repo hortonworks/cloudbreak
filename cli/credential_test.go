@@ -126,10 +126,10 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
 	if actualCredential.Name != "name" {
-		t.Errorf("name not match name == %s", actualCredential.Name)
+		t.Errorf("name not match name == %s", *actualCredential.Name)
 	}
 	if actualCredential.CloudPlatform != "AWS" {
-		t.Errorf("cloud platform not match AWS == %s", actualCredential.CloudPlatform)
+		t.Errorf("cloud platform not match AWS == %s", *actualCredential.CloudPlatform)
 	}
 	if actualCredential.PublicKey != defaultCredential.PublicKey {
 		t.Errorf("public key not match %s == %s", *defaultCredential.PublicKey, *actualCredential.PublicKey)

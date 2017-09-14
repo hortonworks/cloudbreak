@@ -34,21 +34,21 @@ func TestCreateSecurityGroupImplNoWebAccess(t *testing.T) {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
 	if m, _ := regexp.MatchString("hdc-sg-master-([0-9]{10,20})", actualGroup.Name); m == false {
-		t.Errorf("name not match hdc-sg-master-([0-9]{10,20}) == %s", actualGroup.Name)
+		t.Errorf("name not match hdc-sg-master-([0-9]{10,20}) == %s", *actualGroup.Name)
 	}
 	if len(actualGroup.SecurityRules) != 1 {
 		t.Fatal("missing security group rule")
 	}
 	rule := actualGroup.SecurityRules[0]
 	if rule.Subnet != skeleton.RemoteAccess {
-		t.Errorf("rule subnet not match %s == %s", skeleton.RemoteAccess, rule.Subnet)
+		t.Errorf("rule subnet not match %s == %s", skeleton.RemoteAccess, *rule.Subnet)
 	}
 	if rule.Protocol != "tcp" {
-		t.Errorf("rule protocol not match tcp == %s", rule.Protocol)
+		t.Errorf("rule protocol not match tcp == %s", *rule.Protocol)
 	}
 	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS)
 	if rule.Ports != strings.Join(expectedPorts, ",") {
-		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), rule.Ports)
+		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), *rule.Ports)
 	}
 	if *rule.Modifiable != false {
 		t.Error("rule is modifiable")
@@ -76,7 +76,7 @@ func TestCreateSecurityGroupImplWebAccess(t *testing.T) {
 	rule := actualGroup.SecurityRules[0]
 	expectedPorts := append(SECURITY_GROUP_DEFAULT_PORTS, "8443")
 	if rule.Ports != strings.Join(expectedPorts, ",") {
-		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), rule.Ports)
+		t.Errorf("rule ports not match %s == %s", strings.Join(expectedPorts, ","), *rule.Ports)
 	}
 }
 

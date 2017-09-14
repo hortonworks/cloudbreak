@@ -12,8 +12,8 @@ import (
 
 	"encoding/json"
 	"errors"
-	"strings"
 	"strconv"
+	"strings"
 )
 
 var BASE_EXPOSED_SERVICES = []string{"AMBARI", "AMBARIUI", "ZEPPELINWS", "ZEPPELINUI"}
@@ -398,7 +398,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			if len(rangerMetastore.URL) > 0 {
 				properties := []*models_cloudbreak.RdsConfigProperty{
 					&models_cloudbreak.RdsConfigProperty{
-						Name: "rangerAdminPassword",
+						Name:  "rangerAdminPassword",
 						Value: skeleton.ClusterAndAmbariPassword,
 					},
 				}
@@ -454,17 +454,17 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		gatewayType := "CENTRAL"
 
 		clusterReq := models_cloudbreak.ClusterRequest{
-			Name:                      &skeleton.ClusterName,
-			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
-			ConnectedCluster:          connectedClusterRequest,
-			HostGroups:                hostGroups,
-			UserName:                  &skeleton.ClusterAndAmbariUser,
-			Password:                  &skeleton.ClusterAndAmbariPassword,
-			RdsConfigJsons:            rdsConfigs,
-			RdsConfigIds:              rdsConfigIds,
-			BlueprintInputs:           inputs,
-			LdapConfigID:              *ldapConfigId,
-			ValidateBlueprint:         &(&boolWrapper{false}).b,
+			Name:              &skeleton.ClusterName,
+			Blueprint:         createBlueprintRequest(skeleton, blueprint),
+			ConnectedCluster:  connectedClusterRequest,
+			HostGroups:        hostGroups,
+			UserName:          &skeleton.ClusterAndAmbariUser,
+			Password:          &skeleton.ClusterAndAmbariPassword,
+			RdsConfigJsons:    rdsConfigs,
+			RdsConfigIds:      rdsConfigIds,
+			BlueprintInputs:   inputs,
+			LdapConfigID:      *ldapConfigId,
+			ValidateBlueprint: &(&boolWrapper{false}).b,
 			//BlueprintCustomProperties: skeleton.Configurations, // que? TODO?
 			Gateway: &models_cloudbreak.GatewayJSON{
 				EnableGateway:   &enableKnoxGateway,

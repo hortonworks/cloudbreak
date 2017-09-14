@@ -99,12 +99,12 @@ func (o GetPlatformSecurityGroupsOKBody) Validate(formats strfmt.Registry) error
 
 			//if o[k][i] != nil {
 
-				if err := o[k][i].Validate(formats); err != nil {
-					if ve, ok := err.(*errors.Validation); ok {
-						return ve.ValidateName("getPlatformSecurityGroupsOK" + "." + k + "." + strconv.Itoa(i))
-					}
-					return err
+			if err := o[k][i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("getPlatformSecurityGroupsOK" + "." + k + "." + strconv.Itoa(i))
 				}
+				return err
+			}
 			//}
 
 		}

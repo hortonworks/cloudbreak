@@ -445,7 +445,7 @@ func (autosScaling *Autoscaling) createBaseAutoscalingCluster(stackId int64, ena
 	resp, err := autosScaling.AutoScaling.Clusters.AddCluster(
 		&clusters.AddClusterParams{
 			Body: &models_autoscale.ClusterRequestJSON{
-				StackID:           &stackId,
+				StackID: &stackId,
 			}})
 
 	if err != nil {

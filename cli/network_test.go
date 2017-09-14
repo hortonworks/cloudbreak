@@ -35,10 +35,10 @@ func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
 	if m, _ := regexp.MatchString("net([0-9]{10,20})", actual.Name); m == false {
-		t.Errorf("name not match net([0-9]{10,20}) == %s", actual.Name)
+		t.Errorf("name not match net([0-9]{10,20}) == %s", *actual.Name)
 	}
 	if actual.CloudPlatform != "AWS" {
-		t.Errorf("cloud platform not match AWS == %s", actual.CloudPlatform)
+		t.Errorf("cloud platform not match AWS == %s", *actual.CloudPlatform)
 	}
 	expectedParams := make(map[string]interface{})
 	expectedParams["vpcId"] = skeleton.Network.VpcId
@@ -104,10 +104,10 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 	createNetworkCommandImpl(finder, postNetwork)
 
 	if actual.Name != finder(FlNetworkName.Name) {
-		t.Errorf("name not match %s == %s", finder(FlNetworkName.Name), actual.Name)
+		t.Errorf("name not match %s == %s", finder(FlNetworkName.Name), *actual.Name)
 	}
 	if actual.CloudPlatform != "AWS" {
-		t.Errorf("cloud platform not match AWS == %s", actual.CloudPlatform)
+		t.Errorf("cloud platform not match AWS == %s", *actual.CloudPlatform)
 	}
 	expectedParams := make(map[string]interface{})
 	expectedParams["vpcId"] = finder(FlVPC.Name)

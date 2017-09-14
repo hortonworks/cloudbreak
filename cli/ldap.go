@@ -5,12 +5,13 @@ import (
 
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/ldap"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
-	"strconv"
-	"strings"
 )
 
 var LdapHeader []string = []string{"Name", "Server", "Domain", "BindDn", "DirectoryType",
@@ -123,7 +124,7 @@ func ListLdapsImpl(getLdaps func(*ldap.GetPublicsLdapParams) (*ldap.GetPublicsLd
 	for _, l := range resp.Payload {
 		row := &Ldap{
 			Name:                 *l.Name,
-			Server:               fmt.Sprintf("%s://%s:%d", l.Protocol, l.ServerHost, l.ServerPort),
+			Server:               fmt.Sprintf("%s://%s:%d", l.Protocol, *l.ServerHost, l.ServerPort),
 			Domain:               SafeStringConvert(&l.Domain),
 			BindDn:               *l.BindDn,
 			DirectoryType:        SafeStringConvert(&l.DirectoryType),

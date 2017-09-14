@@ -47,7 +47,7 @@ func TestFillMinimumSet(t *testing.T) {
 	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
 	if skeleton.ClusterName != sr.Name {
-		t.Errorf("name not match %s == %s", sr.Name, skeleton.ClusterName)
+		t.Errorf("name not match %s == %s", *sr.Name, skeleton.ClusterName)
 	}
 	if skeleton.InstanceRole != "" {
 		t.Errorf("instance role not empty %s", skeleton.RemoteAccess)
@@ -62,7 +62,7 @@ func TestFillMinimumSet(t *testing.T) {
 		t.Errorf("HDP version not match hdp == %s", skeleton.HDPVersion)
 	}
 	if skeleton.ClusterType != br.Name {
-		t.Errorf("cluster type not match %s == %s", br.Name, skeleton.ClusterType)
+		t.Errorf("cluster type not match %s == %s", *br.Name, skeleton.ClusterType)
 	}
 	if skeleton.Network != nil {
 		t.Errorf("network not empty %s", *skeleton.Network)
@@ -174,7 +174,7 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 		t.Errorf("master instance count not match 1 == %d", skeleton.Master.InstanceCount)
 	}
 	if skeleton.Master.InstanceType != tm[MASTER].InstanceType {
-		t.Errorf("master instance type not match %s == %s", tm[MASTER].InstanceType, skeleton.Master.InstanceType)
+		t.Errorf("master instance type not match %s == %s", *tm[MASTER].InstanceType, skeleton.Master.InstanceType)
 	}
 	if skeleton.Master.VolumeType != *tm[MASTER].VolumeType {
 		t.Errorf("master volume type not match %s == %s", *tm[MASTER].VolumeType, skeleton.Master.VolumeType)
@@ -189,7 +189,7 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 		t.Errorf("worker instance count not match 2 == %d", skeleton.Worker.InstanceCount)
 	}
 	if skeleton.Worker.InstanceType != tm[WORKER].InstanceType {
-		t.Errorf("worker instance type not match %s == %s", tm[WORKER].InstanceType, skeleton.Worker.InstanceType)
+		t.Errorf("worker instance type not match %s == %s", *tm[WORKER].InstanceType, skeleton.Worker.InstanceType)
 	}
 	if skeleton.Worker.VolumeType != *tm[WORKER].VolumeType {
 		t.Errorf("worker volume type not match %s == %s", *tm[WORKER].VolumeType, skeleton.Worker.VolumeType)
