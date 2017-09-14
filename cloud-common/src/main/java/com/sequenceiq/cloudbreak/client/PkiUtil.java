@@ -21,6 +21,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.security.spec.X509EncodedKeySpec;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -31,7 +32,6 @@ import javax.security.auth.x500.X500Principal;
 import org.apache.commons.codec.binary.Base64;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
-import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.crypto.CryptoException;
@@ -63,17 +63,17 @@ public class PkiUtil {
 
     private static final int KEY_SIZE = 2048;
 
-    private static final long VALIDITY = 30 * 365 * 24 * 60 * 60 * 1000;
+    private static final int CERT_VALIDITY_YEAR = 10;
 
     private static final Integer SALT_LENGTH = 20;
 
-    private static final Integer MAX_SIZE = 20;
+    private static final Integer MAX_CACHE_SIZE = 200;
 
     private static final Map<String, RSAKeyParameters> CACHE =
-            Collections.synchronizedMap(new LinkedHashMap<String, RSAKeyParameters>(MAX_SIZE * 4 / 3, 0.75f, true) {
+            Collections.synchronizedMap(new LinkedHashMap<String, RSAKeyParameters>(MAX_CACHE_SIZE * 4 / 3, 0.75f, true) {
                 @Override
                 protected boolean removeEldestEntry(Map.Entry<String, RSAKeyParameters> eldest) {
-                    return size() > MAX_SIZE;
+                    return size() > MAX_CACHE_SIZE;
                 }
             });
 
@@ -136,7 +136,7 @@ public class PkiUtil {
     public static X509Certificate cert(KeyPair identity, String publicAddress, KeyPair signKey) {
         try {
             PKCS10CertificationRequest csr = generateCsr(identity, publicAddress);
-            return sign(csr, signKey, identity.getPublic());
+            return selfsign(csr, publicAddress, signKey);
 
         } catch (Exception e) {
             throw new PkiException("Failed to create signed cert for the cluster!", e);
@@ -191,7 +191,7 @@ public class PkiUtil {
         }
     }
 
-    private static X509Certificate sign(PKCS10CertificationRequest inputCSR, KeyPair signKey, PublicKey idenyityPublic)
+    private static X509Certificate selfsign(PKCS10CertificationRequest inputCSR, String publicAddress, KeyPair signKey)
             throws Exception {
 
         AlgorithmIdentifier sigAlgId = new DefaultSignatureAlgorithmIdentifierFinder()
@@ -201,12 +201,15 @@ public class PkiUtil {
 
         AsymmetricKeyParameter akp = PrivateKeyFactory.createKey(signKey.getPrivate()
                 .getEncoded());
-        SubjectPublicKeyInfo keyInfo = SubjectPublicKeyInfo.getInstance(idenyityPublic.getEncoded());
+
+        Calendar cal = Calendar.getInstance();
+        Date currentTime = cal.getTime();
+        cal.add(Calendar.YEAR, CERT_VALIDITY_YEAR);
+        Date expiryTime = cal.getTime();
 
         X509v3CertificateBuilder myCertificateGenerator = new X509v3CertificateBuilder(
-                new X500Name("CN=Cloudbreak"), new BigInteger("1"), new Date(
-                System.currentTimeMillis()), new Date(
-                System.currentTimeMillis() + VALIDITY), inputCSR.getSubject(), keyInfo);
+                new X500Name(String.format("cn=%s", publicAddress)), new BigInteger("1"), currentTime, expiryTime, inputCSR.getSubject(),
+                inputCSR.getSubjectPublicKeyInfo());
 
         ContentSigner sigGen = new BcRSAContentSignerBuilder(sigAlgId, digAlgId)
                 .build(akp);
@@ -220,7 +223,7 @@ public class PkiUtil {
 
     private static PKCS10CertificationRequest generateCsr(KeyPair identity, String publicAddress) throws Exception {
         PKCS10CertificationRequestBuilder p10Builder = new JcaPKCS10CertificationRequestBuilder(
-                new X500Principal(String.format("C=US, ST=CA, O=Hortonworks, OU=Cloudbreak, CN=%s", publicAddress)), identity.getPublic());
+                new X500Principal(String.format("cn=%s", publicAddress)), identity.getPublic());
         JcaContentSignerBuilder csBuilder = new JcaContentSignerBuilder("SHA256withRSA");
         ContentSigner signer = csBuilder.build(identity.getPrivate());
         return p10Builder.build(signer);

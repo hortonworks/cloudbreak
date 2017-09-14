@@ -3,15 +3,11 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
-import java.io.IOException;
-import java.nio.file.Paths;
 import java.security.KeyPair;
+import java.security.cert.X509Certificate;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.io.BaseEncoding;
@@ -28,18 +24,9 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
 public class TlsSecurityService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(TlsSecurityService.class);
-
-    @Value("#{'${cb.cert.dir:}/${cb.tls.cert.file:}'}")
-    private String clientCert;
-
-    @Value("#{'${cb.cert.dir:}/${cb.tls.private.key.file:}'}")
-    private String clientPrivateKey;
 
     @Inject
     private StackRepository stackRepository;
@@ -56,13 +43,15 @@ public class TlsSecurityService {
     }
 
     private void copyClientKeys(SecurityConfig securityConfig) throws CloudbreakSecuritySetupException {
-        try {
-            securityConfig.setClientKey(BaseEncoding.base64().encode(FileReaderUtils.readFileFromPath(Paths.get(clientPrivateKey)).getBytes()));
-            securityConfig.setClientCert(BaseEncoding.base64().encode(FileReaderUtils.readFileFromPath(Paths.get(clientCert)).getBytes()));
-        } catch (IOException e) {
-            throw new CloudbreakSecuritySetupException(String.format("Failed to copy client certificate."
-                    + " Check if '%s' and '%s' exist.", clientCert, clientPrivateKey), e);
-        }
+        KeyPair identity = PkiUtil.generateKeypair();
+        KeyPair signKey = PkiUtil.generateKeypair();
+        X509Certificate cert = PkiUtil.cert(identity, "cloudbreak", signKey);
+
+        String clientPrivateKey = PkiUtil.convert(identity.getPrivate());
+        String clientCert = PkiUtil.convert(cert);
+
+        securityConfig.setClientKey(BaseEncoding.base64().encode(clientPrivateKey.getBytes()));
+        securityConfig.setClientCert(BaseEncoding.base64().encode(clientCert.getBytes()));
     }
 
     public void generateTempSshKeypair(SecurityConfig securityConfig) {
