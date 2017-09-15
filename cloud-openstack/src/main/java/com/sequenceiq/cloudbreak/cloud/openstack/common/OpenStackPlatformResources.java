@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import org.openstack4j.api.OSClient;
 import org.openstack4j.model.compute.Keypair;
 import org.openstack4j.model.compute.SecGroupExtension;
 import org.openstack4j.model.network.Network;
+import org.openstack4j.model.network.Subnet;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
@@ -43,8 +45,16 @@ public class OpenStackPlatformResources implements PlatformResources {
             properties.put("providerPhyNet", network.getProviderPhyNet());
             properties.put("providerSegID", network.getProviderSegID());
             properties.put("tenantId", network.getTenantId());
+            properties.put("networkId", network.getId());
 
-            CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), new HashSet<>(network.getSubnets()), properties);
+            Map<String, String> subnets = new HashMap<>();
+
+            List<? extends Subnet> neutronSubnets = network.getNeutronSubnets();
+            for (Subnet neutronSubnet : neutronSubnets) {
+                subnets.put(neutronSubnet.getId(), neutronSubnet.getName());
+            }
+
+            CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), subnets, properties);
             cloudNetworks.add(cloudNetwork);
         }
 
