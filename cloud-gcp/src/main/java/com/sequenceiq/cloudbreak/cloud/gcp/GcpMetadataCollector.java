@@ -54,7 +54,7 @@ public class GcpMetadataCollector implements MetadataCollector {
             CloudInstance matchedInstance) {
         CloudVmMetaDataStatus cloudVmMetaDataStatus;
         if (cloudResource != null) {
-            CloudInstance cloudInstance = new CloudInstance(cloudResource.getName(), matchedInstance.getTemplate());
+            CloudInstance cloudInstance = new CloudInstance(cloudResource.getName(), matchedInstance.getTemplate(), matchedInstance.getAuthentication());
             try {
                 CloudCredential credential = authenticatedContext.getCloudCredential();
                 CloudContext cloudContext = authenticatedContext.getCloudContext();

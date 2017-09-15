@@ -312,16 +312,16 @@ public class StackService {
         setPlatformVariant(stack);
         MDCBuilder.buildMdcContext(stack);
         try {
-            if (!stack.passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getPublicKey())) {
-                rsaPublicKeyValidator.validate(stack.getPublicKey());
+            if (!stack.getStackAuthentication().passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getStackAuthentication().getPublicKey())) {
+                rsaPublicKeyValidator.validate(stack.getStackAuthentication().getPublicKey());
             }
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
             }
             if (stack.getCredential().getAttributes().getMap().get("keystoneVersion") != null) {
-                stack.setLoginUserName(SSH_USER_CENT);
+                stack.getStackAuthentication().setLoginUserName(SSH_USER_CENT);
             } else {
-                stack.setLoginUserName(SSH_USER_CB);
+                stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
             }
             String template = connector.getTemplate(stack);
             savedStack = stackRepository.save(stack);

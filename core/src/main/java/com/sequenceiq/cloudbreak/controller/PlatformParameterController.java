@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
@@ -62,7 +61,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
     public Map<String, JsonEntity> getPlatforms(Boolean extended) {
         PlatformVariants pv = cloudParameterService.getPlatformVariants();
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(extended);
+        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(null, extended);
         PlatformRegions regions = cloudParameterService.getRegions();
         PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
         PlatformImages images = cloudParameterService.getImages();
@@ -125,17 +124,9 @@ public class PlatformParameterController implements ConnectorEndpoint {
     }
 
     @Override
-    public PlatformVirtualMachinesJson getVmTypes(Boolean extended) {
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(extended);
+    public PlatformVirtualMachinesJson getVmTypes(String type, Boolean extended) {
+        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(type.toUpperCase(), extended);
         return conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class);
-    }
-
-    @Override
-    public Collection<VmTypeJson> getVmTypeByType(String type, Boolean extended) {
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(extended);
-        Collection<VmTypeJson> vmTypes = conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class)
-                .getVirtualMachines().get(type.toUpperCase());
-        return vmTypes == null ? new ArrayList<>() : vmTypes;
     }
 
     @Override

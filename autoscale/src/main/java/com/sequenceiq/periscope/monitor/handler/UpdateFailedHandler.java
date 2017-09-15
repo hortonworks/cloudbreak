@@ -58,7 +58,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
                 CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
                 StackResponse stackResponse = cloudbreakClient.stackEndpoint().get(cluster.getStackId(), new HashSet<>());
                 String stackStatus = stackResponse.getStatus().name();
-                String clusterStatus = stackResponse.getCluster().getStatus();
+                String clusterStatus = stackResponse.getCluster().getStatus().name();
                 if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {
                     clusterService.removeById(id);
                     LOGGER.info("Delete cluster due to failing update attempts and Cloudbreak stack status");

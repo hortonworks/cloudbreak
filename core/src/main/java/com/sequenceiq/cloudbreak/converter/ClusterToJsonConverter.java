@@ -116,7 +116,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         R clusterResponse = clazz.newInstance();
         clusterResponse.setId(source.getId());
         clusterResponse.setName(source.getName());
-        clusterResponse.setStatus(source.getStatus().name());
+        clusterResponse.setStatus(source.getStatus());
         clusterResponse.setStatusReason(source.getStatusReason());
         if (source.getBlueprint() != null) {
             clusterResponse.setBlueprintId(source.getBlueprint().getId());

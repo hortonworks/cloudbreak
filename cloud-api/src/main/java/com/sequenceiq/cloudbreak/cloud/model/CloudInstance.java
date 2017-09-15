@@ -14,15 +14,19 @@ public class CloudInstance extends DynamicModel {
 
     private final InstanceTemplate template;
 
-    public CloudInstance(String instanceId, InstanceTemplate template) {
+    private InstanceAuthentication authentication;
+
+    public CloudInstance(String instanceId, InstanceTemplate template, InstanceAuthentication authentication) {
         this.instanceId = instanceId;
         this.template = template;
+        this.authentication = authentication;
     }
 
-    public CloudInstance(String instanceId, InstanceTemplate template, Map<String, Object> params) {
+    public CloudInstance(String instanceId, InstanceTemplate template, InstanceAuthentication authentication, Map<String, Object> params) {
         super(params);
         this.instanceId = instanceId;
         this.template = template;
+        this.authentication = authentication;
     }
 
     public String getInstanceId() {
@@ -33,11 +37,16 @@ public class CloudInstance extends DynamicModel {
         return template;
     }
 
+    public InstanceAuthentication getAuthentication() {
+        return authentication;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder("CloudInstance{");
         sb.append("instanceId='").append(instanceId).append('\'');
         sb.append(", template=").append(template);
+        sb.append(", authentication=").append(authentication);
         sb.append('}');
         return sb.toString();
     }

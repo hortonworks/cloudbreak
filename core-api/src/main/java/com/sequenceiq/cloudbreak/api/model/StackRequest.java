@@ -28,6 +28,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.CREDENTIAL)
     private CredentialRequest credential;
 
+    @ApiModelProperty(StackModelDescription.AUTHENTICATION)
+    private StackAuthenticationRequest stackAuthentication;
+
     @ApiModelProperty(StackModelDescription.NETWORK)
     private NetworkRequest network;
 
@@ -149,4 +152,11 @@ public class StackRequest extends StackBase {
         this.account = account;
     }
 
+    public StackAuthenticationRequest getStackAuthentication() {
+        return stackAuthentication;
+    }
+
+    public void setStackAuthentication(StackAuthenticationRequest stackAuthentication) {
+        this.stackAuthentication = stackAuthentication;
+    }
 }

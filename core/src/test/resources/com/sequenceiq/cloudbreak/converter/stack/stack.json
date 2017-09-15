@@ -12,6 +12,9 @@
     "threshold": 10,
     "adjustmentType": "EXACT"
   },
+  "stackAuthentication": {
+    "publicKey": "ssh-key dsfsdfsdfsdf"
+  },
   "instanceGroups": [
     {
       "templateId": 1,

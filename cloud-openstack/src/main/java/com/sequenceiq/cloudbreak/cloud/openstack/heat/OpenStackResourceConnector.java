@@ -122,7 +122,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         String keyPairName = keystoneCredential.getKeyPairName();
         if (client.compute().keypairs().get(keyPairName) == null) {
             try {
-                Keypair keyPair = client.compute().keypairs().create(keyPairName, stack.getPublicKey());
+                Keypair keyPair = client.compute().keypairs().create(keyPairName, stack.getInstanceAuthentication().getPublicKey());
                 LOGGER.info("Keypair has been created: {}", keyPair);
             } catch (Exception e) {
                 LOGGER.error("Failed to create keypair", e);
@@ -307,11 +307,11 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                     instances.remove(instance);
                 }
             }
-            groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null,
-                    stack.getPublicKey(), stack.getLoginUserName()));
+            groups.add(new Group(group.getName(), group.getType(), instances, group.getSecurity(), null, stack.getInstanceAuthentication(),
+                    stack.getInstanceAuthentication().getLoginUserName(), stack.getInstanceAuthentication().getPublicKey()));
         }
         return new CloudStack(groups, stack.getNetwork(), stack.getImage(), stack.getParameters(), stack.getTags(), stack.getTemplate(),
-                stack.getPublicKey(), stack.getLoginUserName());
+                stack.getInstanceAuthentication(), stack.getInstanceAuthentication().getLoginUserName(), stack.getInstanceAuthentication().getPublicKey());
     }
 
     private String getExistingSubnetCidr(AuthenticatedContext authenticatedContext, CloudStack stack) {

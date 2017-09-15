@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -33,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.SecurityRuleRepository;
@@ -68,7 +70,7 @@ public class StackToCloudStackConverter {
 
     public CloudStack convert(Stack stack, Set<String> deleteRequestedInstances) {
         Image image = null;
-        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), deleteRequestedInstances);
+        List<Group> instanceGroups = buildInstanceGroups(stack.getInstanceGroupsAsList(), stack.getStackAuthentication(), deleteRequestedInstances);
         try {
             image = imageService.getImage(stack.getId());
         } catch (CloudbreakImageNotFoundException e) {
@@ -76,12 +78,13 @@ public class StackToCloudStackConverter {
         }
         Network network = buildNetwork(stack);
         StackTemplate stackTemplate = componentConfigProvider.getStackTemplate(stack.getId());
+        InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         String template = null;
         if (stackTemplate != null) {
             template = stackTemplate.getTemplate();
         }
         return new CloudStack(instanceGroups, network, image, stack.getParameters(), getUserDefinedTags(stack), template,
-                stack.getPublicKey(), stack.getLoginUserName());
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
     }
 
     public Map<String, String> getUserDefinedTags(Stack stack) {
@@ -105,7 +108,7 @@ public class StackToCloudStackConverter {
         }
     }
 
-    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, Set<String> deleteRequests) {
+    public List<Group> buildInstanceGroups(List<InstanceGroup> instanceGroups, StackAuthentication stackAuthentication, Set<String> deleteRequests) {
         // sort by name to avoid shuffling the different instance groups
         Collections.sort(instanceGroups);
         List<Group> groups = new ArrayList<>();
@@ -119,25 +122,32 @@ public class StackToCloudStackConverter {
                 // existing instances
                 for (InstanceMetaData metaData : instanceGroup.getInstanceMetaData()) {
                     InstanceStatus status = getInstanceStatus(metaData, deleteRequests);
-                    instances.add(buildInstance(metaData.getInstanceId(), template, instanceGroup.getGroupName(), metaData.getPrivateId(),
-                            metaData.getShortHostname(), status, metaData.getSubnetId()));
+                    instances.add(buildInstance(metaData, template, stackAuthentication, instanceGroup.getGroupName(), metaData.getPrivateId(), status));
                 }
                 // new instances
                 int existingNodesSize = instances.size();
                 if (existingNodesSize < desiredNodeCount) {
                     for (long i = 0; i < desiredNodeCount - existingNodesSize; i++) {
-                        instances.add(buildInstance(null, template, instanceGroup.getGroupName(), privateId++, null,
-                                InstanceStatus.CREATE_REQUESTED, null));
+                        instances.add(buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), privateId++,
+                                InstanceStatus.CREATE_REQUESTED));
                     }
                 }
                 if (existingNodesSize == desiredNodeCount && desiredNodeCount == 0) {
-                    skeleton = buildInstance(null, template, instanceGroup.getGroupName(), 0L, null,
-                            InstanceStatus.CREATE_REQUESTED, null);
+                    skeleton = buildInstance(null, template, stackAuthentication, instanceGroup.getGroupName(), 0L,
+                            InstanceStatus.CREATE_REQUESTED);
                 }
                 Json attributes = instanceGroup.getAttributes();
+                InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
                 Map<String, Object> fields = attributes == null ? Collections.emptyMap() : attributes.getMap();
-                groups.add(new Group(instanceGroup.getGroupName(), instanceGroup.getInstanceGroupType(), instances, buildSecurity(instanceGroup), skeleton,
-                        fields, instanceGroup.getStack().getPublicKey(), instanceGroup.getStack().getLoginUserName()));
+                groups.add(new Group(instanceGroup.getGroupName(),
+                        instanceGroup.getInstanceGroupType(),
+                        instances,
+                        buildSecurity(instanceGroup),
+                        skeleton,
+                        fields,
+                        instanceAuthentication,
+                        instanceAuthentication.getLoginUserName(),
+                        instanceAuthentication.getPublicKey()));
             }
         }
         return groups;
@@ -168,7 +178,7 @@ public class StackToCloudStackConverter {
     }
 
     public List<CloudInstance> buildInstances(Stack stack) {
-        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList(), Collections.emptySet());
+        List<Group> groups = buildInstanceGroups(stack.getInstanceGroupsAsList(), stack.getStackAuthentication(), Collections.emptySet());
         List<CloudInstance> cloudInstances = new ArrayList<>();
         for (Group group : groups) {
             cloudInstances.addAll(group.getInstances());
@@ -176,8 +186,14 @@ public class StackToCloudStackConverter {
         return cloudInstances;
     }
 
-    public CloudInstance buildInstance(String id, Template template, String name, Long privateId, String hostName, InstanceStatus status, String subnetId) {
+    public CloudInstance buildInstance(InstanceMetaData instanceMetaData, Template template,
+            StackAuthentication stackAuthentication, String name, Long privateId, InstanceStatus status) {
+        String id = instanceMetaData == null ? null : instanceMetaData.getId().toString();
+        String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
+        String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
+
         InstanceTemplate instanceTemplate = buildInstanceTemplate(template, name, privateId, status);
+        InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stackAuthentication);
         Map<String, Object> params = new HashMap<>();
         if (hostName != null) {
             params.put(CloudInstance.DISCOVERY_NAME, hostName);
@@ -185,7 +201,14 @@ public class StackToCloudStackConverter {
         if (subnetId != null) {
             params.put(CloudInstance.SUBNET_ID, subnetId);
         }
-        return new CloudInstance(id, instanceTemplate, params);
+        return new CloudInstance(id, instanceTemplate, instanceAuthentication, params);
+    }
+
+    public InstanceAuthentication buildInstanceAuthentication(StackAuthentication stackAuthentication) {
+        return new InstanceAuthentication(
+                stackAuthentication.getPublicKey(),
+                stackAuthentication.getPublicKeyId(),
+                stackAuthentication.getLoginUserName());
     }
 
     public InstanceTemplate buildInstanceTemplate(Template template, String name, Long privateId, InstanceStatus status) {

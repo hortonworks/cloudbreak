@@ -143,7 +143,7 @@ public abstract class AbstractGcpResourceBuilder implements CloudPlatformAware {
     }
 
     protected CloudInstance createOperationAwareCloudInstance(CloudInstance instance, Operation operation) {
-        return new CloudInstance(instance.getInstanceId(), instance.getTemplate(),
+        return new CloudInstance(instance.getInstanceId(), instance.getTemplate(), instance.getAuthentication(),
                 Collections.singletonMap(OPERATION_ID, operation.getName()));
     }
 

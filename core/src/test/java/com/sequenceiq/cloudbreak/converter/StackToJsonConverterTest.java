@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
+import com.sequenceiq.cloudbreak.api.model.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
@@ -42,6 +43,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -80,6 +82,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // GIVEN
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
+                .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
                 .willReturn(new ClusterResponse())
                 .willReturn(new FailurePolicyResponse())
@@ -99,6 +102,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         // GIVEN
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
+                .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
                 .willReturn(new ClusterResponse())
                 .willReturn(new FailurePolicyResponse())
@@ -120,6 +124,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         getSource().setCluster(null);
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
+                .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
                 .willReturn(new FailurePolicyResponse())
                 .willReturn(new NetworkResponse())
@@ -140,6 +145,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         getSource().setFailurePolicy(null);
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
+                .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
                 .willReturn(new ClusterResponse())
                 .willReturn(new NetworkResponse())
@@ -162,6 +168,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         getSource().setNetwork(null);
         given(conversionService.convert(any(Object.class), any(Class.class)))
                 .willReturn(new ImageJson())
+                .willReturn(new StackAuthenticationResponse())
                 .willReturn(new CredentialResponse())
                 .willReturn(new ClusterResponse())
                 .willReturn(new FailurePolicyResponse())
@@ -195,8 +202,9 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
         stack.setGatewayPort(9443);
         stack.setCustomDomain("custom.domain");
         stack.setCustomHostname("hostname");
-        stack.setPublicKey("rsakey");
-        stack.setLoginUserName("cloudbreak");
+        stack.setStackAuthentication(new StackAuthentication());
+        stack.getStackAuthentication().setPublicKey("rsakey");
+        stack.getStackAuthentication().setLoginUserName("cloudbreak");
         stack.setHostgroupNameAsHostname(false);
         stack.setClusterNameAsSubdomain(false);
         Resource s3ArnResource = new Resource(ResourceType.S3_ACCESS_ROLE_ARN, "s3Arn", stack);

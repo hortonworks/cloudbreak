@@ -384,7 +384,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                     blueprintId: cluster.blueprintId,
                     networkId: cluster.networkId,
                     fileSystem: cluster.fileSystem,
-                    publicKey: cluster.publicKey,
+                    publicKey: cluster.stackAuthentication.publicKey,
                     platform: platform,
                     credentialId: cluster.credentialId
                 }
@@ -411,7 +411,7 @@ uluwatuServices.factory('UluwatuCluster', ['StackValidation', 'UserStack', 'Acco
                         securityGroupId: cluster.securityGroupId,
                         availabilityZone: cluster.availabilityZone || null,
                         orchestrator: cluster.orchestrator || null,
-                        publicKey: cluster.publicKey,
+                        stackAuthentication: cluster.stackAuthentication,
                         tags: {
                             "userDefined": userDefined(cluster.userDefinedTags)
                         },

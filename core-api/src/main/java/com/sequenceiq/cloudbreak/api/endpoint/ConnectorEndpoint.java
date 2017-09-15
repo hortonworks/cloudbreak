@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -88,18 +87,11 @@ public interface ConnectorEndpoint {
     Collection<String> getOchestratorsByType(@PathParam("type") String type);
 
     @GET
-    @Path("connectors/vmtypes")
+    @Path("connectors/vmtypes/{type}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getVmTypes")
-    PlatformVirtualMachinesJson getVmTypes(@QueryParam("extended") Boolean extended);
-
-    @GET
-    @Path("vmtypes/{type}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_VM_TYPE_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getVmTypeByType")
-    Collection<VmTypeJson> getVmTypeByType(@PathParam("type") String type, @QueryParam("extended") Boolean extended);
+    PlatformVirtualMachinesJson getVmTypes(@PathParam("type") String type, @QueryParam("extended") Boolean extended);
 
     @GET
     @Path("connectors/regions")

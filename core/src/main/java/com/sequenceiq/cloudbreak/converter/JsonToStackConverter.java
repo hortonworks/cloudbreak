@@ -19,7 +19,9 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
@@ -55,6 +58,10 @@ import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 public class JsonToStackConverter extends AbstractConversionServiceAwareConverter<StackRequest, Stack> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JsonToStackConverter.class);
+
+    @Inject
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Inject
     private AuthenticatedUserService authenticatedUserService;
@@ -89,13 +96,9 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         if (sourceTags != null && sourceTags.get("datalakeId") != null) {
             stack.setDatalakeId(Long.valueOf(String.valueOf(sourceTags.get("datalakeId"))));
         }
-        stack.setPublicKey(source.getPublicKey());
-        if (!BYOS.equals(source.getCloudPlatform()) && Strings.isNullOrEmpty(source.getPublicKey())) {
-            throw new BadRequestException("You should define the publickey!");
-        }
-        if (source.getLoginUserName() != null) {
-            throw new BadRequestException("You can not modify the default user!");
-        }
+        StackAuthentication stackAuthentication = conversionService.convert(source.getStackAuthentication(), StackAuthentication.class);
+        stack.setStackAuthentication(stackAuthentication);
+        validateStackAuthentication(source);
         stack.setOwner(source.getOwner());
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
@@ -121,6 +124,22 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setUuid(UUID.randomUUID().toString());
         validateCustomImage(source);
         return stack;
+    }
+
+    private void validateStackAuthentication(StackRequest source) {
+        if (!BYOS.equals(source.getCloudPlatform())) {
+            if (source.getStackAuthentication() == null) {
+                throw new BadRequestException("You shoud define authentication for stack!");
+            } else {
+                if (Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKey())
+                        && Strings.isNullOrEmpty(source.getStackAuthentication().getPublicKeyId())) {
+                    throw new BadRequestException("You should define the publickey or publickeyid!");
+                }
+            }
+        }
+        if (source.getStackAuthentication() != null && source.getStackAuthentication().getLoginUserName() != null) {
+            throw new BadRequestException("You can not modify the default user!");
+        }
     }
 
     private void validateCustomImage(StackRequest source) {

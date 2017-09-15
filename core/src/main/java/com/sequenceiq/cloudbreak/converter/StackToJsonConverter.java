@@ -10,6 +10,8 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,7 @@ import com.sequenceiq.cloudbreak.api.model.ImageJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorResponse;
+import com.sequenceiq.cloudbreak.api.model.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
@@ -42,6 +45,10 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 @Component
 public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackToJsonConverter.class);
+
+    @Inject
+    @Qualifier("conversionService")
+    private ConversionService conversionService;
 
     @Inject
     private ImageService imageService;
@@ -69,8 +76,7 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
         stackJson.setOwner(source.getOwner());
         stackJson.setAccount(source.getAccount());
         stackJson.setPublicInAccount(source.isPublicInAccount());
-        stackJson.setPublicKey(source.getPublicKey());
-        stackJson.setLoginUserName(source.getLoginUserName());
+        stackJson.setStackAuthentication(conversionService.convert(source.getStackAuthentication(), StackAuthenticationResponse.class));
         stackJson.setId(source.getId());
         if (source.getCredential() == null) {
             stackJson.setCloudPlatform(null);

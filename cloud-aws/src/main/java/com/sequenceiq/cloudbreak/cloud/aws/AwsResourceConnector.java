@@ -237,14 +237,14 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     }
 
     private void createKeyPair(AuthenticatedContext ac, CloudStack stack) {
-        if (!awsClient.existingKeyPairNameSpecified(ac)) {
+        if (!awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
             AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
             try {
                 String region = ac.getCloudContext().getLocation().getRegion().value();
                 LOGGER.info(String.format("Importing public key to %s region on AWS", region));
                 AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
                 String keyPairName = awsClient.getKeyPairName(ac);
-                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getPublicKey());
+                ImportKeyPairRequest importKeyPairRequest = new ImportKeyPairRequest(keyPairName, stack.getInstanceAuthentication().getPublicKey());
                 try {
                     client.describeKeyPairs(new DescribeKeyPairsRequest().withKeyNames(keyPairName));
                     LOGGER.info("Key-pair already exists: {}", keyPairName);
@@ -424,8 +424,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         AwsNetworkView awsNetworkView = new AwsNetworkView(stack.getNetwork());
         AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
         String keyPairName = awsClient.getKeyPairName(ac);
-        if (awsClient.existingKeyPairNameSpecified(ac)) {
-            keyPairName = awsClient.getExistingKeyPairName(ac);
+        if (awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
+            keyPairName = awsClient.getExistingKeyPairName(stack.getInstanceAuthentication());
         }
 
         List<Parameter> parameters = new ArrayList<>(asList(
@@ -540,7 +540,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             }
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
-            deleteKeyPair(ac);
+            deleteKeyPair(ac, stack);
         } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
@@ -551,10 +551,10 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         return check(ac, resources);
     }
 
-    private void deleteKeyPair(AuthenticatedContext ac) {
+    private void deleteKeyPair(AuthenticatedContext ac, CloudStack stack) {
         AwsCredentialView awsCredential = new AwsCredentialView(ac.getCloudCredential());
         String region = ac.getCloudContext().getLocation().getRegion().value();
-        if (!awsClient.existingKeyPairNameSpecified(ac)) {
+        if (!awsClient.existingKeyPairNameSpecified(stack.getInstanceAuthentication())) {
             try {
                 AmazonEC2Client client = awsClient.createAccess(awsCredential, region);
                 DeleteKeyPairRequest deleteKeyPairRequest = new DeleteKeyPairRequest(awsClient.getKeyPairName(ac));

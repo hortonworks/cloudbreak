@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
+import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -85,7 +86,9 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
 
         publicKeyFile = StringUtils.hasLength(publicKeyFile) ? publicKeyFile : defaultPublicKeyFile;
         String publicKey = ResourceUtil.readStringFromResource(applicationContext, publicKeyFile).replaceAll("\n", "");
-        stackRequest.setPublicKey(publicKey);
+        StackAuthenticationRequest stackAuthenticationRequest = new StackAuthenticationRequest();
+        stackAuthenticationRequest.setPublicKey(publicKey);
+        stackRequest.setStackAuthentication(stackAuthenticationRequest);
 
         stackRequest.setName(stackName);
         stackRequest.setCredentialId(Long.valueOf(credentialId));

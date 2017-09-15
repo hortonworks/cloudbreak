@@ -70,7 +70,8 @@ public class OpenStackMetadataCollector implements MetadataCollector {
                 InstanceTemplate template = templateMap.get(privateInstanceId);
                 if (template != null) {
                     CloudInstanceMetaData md = cloudInstanceMetaDataExtractor.extractMetadata(client, server, instanceUUID);
-                    CloudInstance cloudInstance = new CloudInstance(instanceUUID, template);
+                    //TODO use here sshkey
+                    CloudInstance cloudInstance = new CloudInstance(instanceUUID, template, null);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                     results.add(new CloudVmMetaDataStatus(status, md));
                 }

@@ -24,7 +24,7 @@ public class ClusterResponse implements JsonEntity {
     private String name;
 
     @ApiModelProperty(ClusterModelDescription.STATUS)
-    private String status;
+    private Status status;
 
     @ApiModelProperty(ClusterModelDescription.HOURS)
     private int hoursUp;
@@ -132,11 +132,11 @@ public class ClusterResponse implements JsonEntity {
         this.name = name;
     }
 
-    public String getStatus() {
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
     }
 
