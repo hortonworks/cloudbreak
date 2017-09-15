@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -100,7 +101,10 @@ public class AwsMetaDataCollectorTest {
     public void collectMigratedExistingOneGroup() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
-        vms.add(new CloudInstance("i-1", new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null)));
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance("i-1",
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                instanceAuthentication));
 
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -141,7 +145,10 @@ public class AwsMetaDataCollectorTest {
     public void collectAlreadyTaggedOneGroup() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
-        vms.add(new CloudInstance("i-1", new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null)));
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance("i-1",
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                instanceAuthentication));
 
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -186,7 +193,10 @@ public class AwsMetaDataCollectorTest {
     public void collectNewOneGroup() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
-        vms.add(new CloudInstance(null, new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null)));
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance(null,
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                instanceAuthentication));
 
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -227,8 +237,13 @@ public class AwsMetaDataCollectorTest {
     public void collectNewAndExistingOneGroup() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
-        vms.add(new CloudInstance(null, new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null)));
-        vms.add(new CloudInstance("i-1", new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null)));
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance(null,
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                instanceAuthentication));
+        vms.add(new CloudInstance("i-1",
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                instanceAuthentication));
 
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
@@ -278,7 +293,10 @@ public class AwsMetaDataCollectorTest {
     public void collectNewOldIsTagged() {
         List<CloudInstance> vms = new ArrayList<>();
         List<Volume> volumes = new ArrayList<>();
-        vms.add(new CloudInstance(null, new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null)));
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        vms.add(new CloudInstance(null,
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonASClient);

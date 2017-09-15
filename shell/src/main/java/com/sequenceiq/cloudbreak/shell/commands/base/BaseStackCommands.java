@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
+import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.Status;
@@ -305,9 +306,10 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             validateRegion(region);
             validateInstanceGroups(platform, region.getName(), availabilityZone == null ? null : availabilityZone.getName());
             validateAvailabilityZone(region, availabilityZone);
-            Long id;
             StackRequest stackRequest = new StackRequest();
-            stackRequest.setPublicKey(sshKey);
+            StackAuthenticationRequest stackAuthenticationRequest = new StackAuthenticationRequest();
+            stackAuthenticationRequest.setPublicKey(sshKey);
+            stackRequest.setStackAuthentication(stackAuthenticationRequest);
             stackRequest.setName(name);
             stackRequest.setRegion(region.getName());
             if (availabilityZone != null) {
@@ -348,7 +350,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 instanceGroupRequestList.add(instanceGroupRequest);
             }
             stackRequest.setInstanceGroups(instanceGroupRequestList);
-
+            Long id;
             if (publicInAccount) {
                 id = shellContext.cloudbreakClient().stackEndpoint().postPublic(stackRequest).getId();
             } else {

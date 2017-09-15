@@ -110,13 +110,12 @@ public class ModelDescriptions {
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
         public static final String CUSTOM_IMAGE = "custom image for the cluster";
-        public static final String PUBLIC_KEY = "public key for accessing instances";
-        public static final String LOGIN_USERNAME = "authentication name for machines";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String APPLICATION_TAGS = "stack related application tags";
         public static final String DEFAULT_TAGS = "stack related default tags";
         public static final String USERDEFINED_TAGS = "stack related userdefined tags";
         public static final String CREDENTIAL = "stack related credential";
+        public static final String AUTHENTICATION = "stack related authentication";
         public static final String FILESYSTEM = "cluster related filesystem";
         public static final String NETWORK = "stack related network";
         public static final String FLEX_ID = "id of the related flex subscription";
@@ -425,5 +424,11 @@ public class ModelDescriptions {
         public static final String SMARTSENSE_SUBSCRIPTION = "The associated SmartSense subscription Cloudbreak domain object json representation.";
         public static final String IS_DEFAULT = "true if the flex subscription is the default one";
         public static final String USED_FOR_CONTROLLER = "true if the flex subscription was used for the controller";
+    }
+
+    public static class StackAuthenticationBase {
+        public static final String PUBLIC_KEY = "public key for accessing instances";
+        public static final String LOGIN_USERNAME = "authentication name for machines";
+        public static final String PUBLIC_KEY_ID = "public key id for accessing instances";
     }
 }

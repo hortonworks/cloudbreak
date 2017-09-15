@@ -83,7 +83,8 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
         function initDefaultSsh() {
             DefaultSsh.get(function (result) {
                 $scope.defautSshKey = result.defaultSshKey;
-                $scope.cluster.publicKey = $scope.defautSshKey;
+                $scope.cluster.stackAuthentication = {};
+                $scope.cluster.stackAuthentication.publicKey = $scope.defautSshKey;
             });
         }
 
@@ -1320,11 +1321,13 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
                   enableGateway: false,
                   exposedServices: ['ALL']
                 },
+                stackAuthentication: {
+                    publicKey: $scope.defautSshKey,
+                },
                 parameters: {},
                 failurePolicy: {
                     adjustmentType: "BEST_EFFORT",
                 },
-                publicKey: $scope.defautSshKey,
                 ambariRepoDetailsJson: {},
                 ambariStackDetails: {},
                 orchestrator: {},

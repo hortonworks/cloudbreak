@@ -6,13 +6,20 @@ public class GetVirtualMachineTypesRequest extends CloudPlatformRequest<GetVirtu
 
     private final Boolean extended;
 
-    public GetVirtualMachineTypesRequest(Boolean extended) {
+    private final String type;
+
+    public GetVirtualMachineTypesRequest(String type, Boolean extended) {
         super(null, null);
         this.extended = extended;
+        this.type = type;
     }
 
     public Boolean getExtended() {
         return extended;
+    }
+
+    public String getType() {
+        return type;
     }
 
     //BEGIN GENERATED CODE

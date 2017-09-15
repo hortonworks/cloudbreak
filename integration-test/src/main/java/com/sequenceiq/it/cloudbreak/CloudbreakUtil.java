@@ -116,7 +116,7 @@ public class CloudbreakUtil {
 
     public static void checkClusterFailed(StackEndpoint stackEndpoint, String stackId, String failMessage) {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
-        Assert.assertEquals(stackResponse.getCluster().getStatus(), "CREATE_FAILED");
+        Assert.assertNotEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE);
         Assert.assertTrue(stackResponse.getCluster().getStatusReason().contains(failMessage));
     }
 
@@ -124,7 +124,7 @@ public class CloudbreakUtil {
             boolean checkAmbari) {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
-        Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
+        Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE, "The cluster hasn't been started!");
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
 
         String ambariIp = stackResponse.getCluster().getAmbariServerIp();

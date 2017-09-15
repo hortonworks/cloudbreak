@@ -8,11 +8,13 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.Template;
 
 @Component
@@ -25,12 +27,17 @@ public class InstanceMetaDataToCloudInstanceConverter extends AbstractConversion
     public CloudInstance convert(InstanceMetaData metaDataEnity) {
         InstanceGroup group = metaDataEnity.getInstanceGroup();
         Template template = metaDataEnity.getInstanceGroup().getTemplate();
+        StackAuthentication stackAuthentication = group.getStack().getStackAuthentication();
         InstanceStatus status = getInstanceStatus(metaDataEnity);
         InstanceTemplate instanceTemplate = stackToCloudStackConverter.buildInstanceTemplate(
                 template, group.getGroupName(), metaDataEnity.getPrivateId(), status);
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication(
+                stackAuthentication.getPublicKey(),
+                stackAuthentication.getPublicKeyId(),
+                stackAuthentication.getLoginUserName());
         Map<String, Object> params = new HashMap<>();
         params.put(CloudInstance.SUBNET_ID, metaDataEnity.getSubnetId());
-        return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate, params);
+        return new CloudInstance(metaDataEnity.getInstanceId(), instanceTemplate, instanceAuthentication, params);
     }
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
@@ -78,6 +79,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(new StackAuthentication())
                 .willReturn(instanceGroup)
                 .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
@@ -107,6 +109,9 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(new StackAuthentication())
+                .willReturn(instanceGroup)
+                .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
@@ -157,12 +162,16 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
     public void testForNoRegionAndDefaultRegion() throws CloudbreakException {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+        StackAuthentication stackAuthentication = new StackAuthentication();
+        stackAuthentication.setPublicKey("ssh-key dsfsdfsdfsdf");
+        stackAuthentication.setLoginUserName("cloudbreak");
 
         // GIVEN
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1");
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(stackAuthentication)
                 .willReturn(instanceGroup)
                 .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())

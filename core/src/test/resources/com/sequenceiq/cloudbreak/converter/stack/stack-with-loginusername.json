@@ -6,12 +6,14 @@
   "image": "aws-image",
   "onFailureAction": "ROLLBACK",
   "availabilityZone": "avZone",
-  "publicKey": "ssh-key",
-  "loginUserName": "cloudbreak",
   "failurePolicy": {
     "id": 1,
     "threshold": 10,
     "adjustmentType": "EXACT"
+  },
+  "stackAuthentication": {
+    "publicKey": "ssh-key",
+    "loginUserName": "cloudbreak"
   },
   "instanceGroups": [
     {
@@ -33,7 +35,6 @@
       ]
     }
   ],
-  "cloudPlatform": "AWS",
   "securityGroupId": 52,
   "networkId": 53,
   "parameters": {

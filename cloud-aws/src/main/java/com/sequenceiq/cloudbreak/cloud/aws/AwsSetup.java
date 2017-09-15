@@ -49,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.FileSystem;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
@@ -121,7 +122,7 @@ public class AwsSetup implements Setup {
 
         }
         validateImageOptIn(awsCredentialView, region, stack.getImage().getImageName(), awsNetworkView);
-        validateExistingKeyPair(ac, credentialView, region);
+        validateExistingKeyPair(stack.getInstanceAuthentication(), credentialView, region);
         LOGGER.debug("setup has been executed");
     }
 
@@ -286,8 +287,8 @@ public class AwsSetup implements Setup {
     public void validateFileSystem(CloudCredential credential, FileSystem fileSystem) throws Exception {
     }
 
-    private void validateExistingKeyPair(AuthenticatedContext authenticatedContext, AwsCredentialView credentialView, String region) {
-        String keyPairName = awsClient.getExistingKeyPairName(authenticatedContext);
+    private void validateExistingKeyPair(InstanceAuthentication instanceAuthentication, AwsCredentialView credentialView, String region) {
+        String keyPairName = awsClient.getExistingKeyPairName(instanceAuthentication);
         if (StringUtils.isNoneEmpty(keyPairName)) {
             boolean keyPairIsPresentOnEC2 = false;
             try {

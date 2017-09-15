@@ -22,27 +22,31 @@ public class Group extends DynamicModel {
 
     private final String loginUserName;
 
+    private final InstanceAuthentication instanceAuthentication;
+
     private Optional<CloudInstance> skeleton = Optional.empty();
 
     public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
-            String publicKey, String loginUserName) {
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
         this.security = security;
         this.skeleton = Optional.ofNullable(skeleton);
+        this.instanceAuthentication = instanceAuthentication;
         this.publicKey = publicKey;
         this.loginUserName = loginUserName;
     }
 
     public Group(String name, InstanceGroupType type, List<CloudInstance> instances, Security security, CloudInstance skeleton,
-            Map<String, Object> parameters, String publicKey, String loginUserName) {
+            Map<String, Object> parameters, InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
         super(parameters);
         this.name = name;
         this.type = type;
         this.instances = ImmutableList.copyOf(instances);
         this.security = security;
         this.skeleton = Optional.ofNullable(skeleton);
+        this.instanceAuthentication = instanceAuthentication;
         this.publicKey = publicKey;
         this.loginUserName = loginUserName;
     }
@@ -80,5 +84,9 @@ public class Group extends DynamicModel {
 
     public String getLoginUserName() {
         return loginUserName;
+    }
+
+    public InstanceAuthentication getInstanceAuthentication() {
+        return instanceAuthentication;
     }
 }

@@ -142,8 +142,8 @@ public class TlsSetupService {
             String privateKeyString, Stack stack) throws CloudbreakException, IOException {
         ssh.addHostKeyVerifier(hostKeyVerifier);
         ssh.connect(ip, port);
-        if (stack.passwordAuthenticationRequired()) {
-            ssh.authPassword(user, stack.getLoginPassword());
+        if (stack.getStackAuthentication().passwordAuthenticationRequired()) {
+            ssh.authPassword(user, stack.getStackAuthentication().getLoginPassword());
         } else {
             try {
                 KeyPair keyPair = KeyStoreUtil.createKeyPair(privateKeyString);
@@ -160,9 +160,10 @@ public class TlsSetupService {
         LOGGER.info("Uploading tls-setup.sh to the gateway...");
         Map<String, Object> model = new HashMap<>();
         model.put("publicIp", publicIp);
-        model.put("username", stack.getLoginUserName());
-        model.put("sudopre", stack.passwordAuthenticationRequired() ? String.format("echo '%s'|", stack.getLoginPassword()) : "");
-        model.put("sudocheck", stack.passwordAuthenticationRequired() ? "-S" : "");
+        model.put("username", stack.getStackAuthentication().getLoginUserName());
+        model.put("sudopre", stack.getStackAuthentication().passwordAuthenticationRequired()
+                ? String.format("echo '%s'|", stack.getStackAuthentication().getLoginPassword()) : "");
+        model.put("sudocheck", stack.getStackAuthentication().passwordAuthenticationRequired() ? "-S" : "");
         model.put("sslPort", stack.getGatewayPort().toString());
 
 
@@ -212,7 +213,7 @@ public class TlsSetupService {
     }
 
     private void removeTemporarySShKey(SSHClient ssh, String user, Stack stack) throws IOException, CloudbreakException {
-        if (!stack.passwordAuthenticationRequired()) {
+        if (!stack.getStackAuthentication().passwordAuthenticationRequired()) {
             LOGGER.info("Removing temporary sshkey from the gateway...");
             String removeCommand = String.format("sudo sed -i '/#tmpssh_start/,/#tmpssh_end/{s/./ /g}' /home/%s/.ssh/authorized_keys", user);
             int exitStatus = executeSshCommand(ssh, removeCommand, false, "");

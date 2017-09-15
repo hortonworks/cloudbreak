@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -183,8 +184,10 @@ public class GcpInstanceResourceBuilderTest {
 
     public Group newGroupWithParams(Map<String, Object> params) {
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params);
-        CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate);
-        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null, null, null);
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+        CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
+        return new Group(name, InstanceGroupType.CORE, Collections.singletonList(cloudInstance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey());
     }
 
 }

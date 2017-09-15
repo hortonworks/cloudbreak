@@ -98,7 +98,8 @@ public class AzureMetadataCollector implements MetadataCollector {
                 if (template != null) {
                     Map<String, Object> params = new HashMap<>(1);
                     params.put(CloudInstance.SUBNET_ID, subnetId);
-                    CloudInstance cloudInstance = new CloudInstance(instanceId, template, params);
+                    //TODO use shhkey here
+                    CloudInstance cloudInstance = new CloudInstance(instanceId, template, null, params);
                     CloudVmInstanceStatus status = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.CREATED);
                     results.add(new CloudVmMetaDataStatus(status, md));
                 }

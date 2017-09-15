@@ -115,12 +115,12 @@ public class CloudParameterService {
         }
     }
 
-    public PlatformVirtualMachines getVmtypes(Boolean extended) {
+    public PlatformVirtualMachines getVmtypes(String type, Boolean extended) {
         if (extended == null) {
             extended = true;
         }
         LOGGER.debug("Get platform vm types");
-        GetVirtualMachineTypesRequest getVirtualMachineTypesRequest = new GetVirtualMachineTypesRequest(extended);
+        GetVirtualMachineTypesRequest getVirtualMachineTypesRequest = new GetVirtualMachineTypesRequest(type, extended);
         eventBus.notify(getVirtualMachineTypesRequest.selector(), Event.wrap(getVirtualMachineTypesRequest));
         try {
             GetVirtualMachineTypesResult res = getVirtualMachineTypesRequest.await();

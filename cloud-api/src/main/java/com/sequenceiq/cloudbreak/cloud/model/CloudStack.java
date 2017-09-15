@@ -27,16 +27,19 @@ public class CloudStack {
 
     private final Map<String, String> tags;
 
+    private final InstanceAuthentication instanceAuthentication;
+
     public CloudStack(List<Group> groups, Network network, Image image, Map<String, String> parameters, Map<String, String> tags, String template,
-            String publicKey, String loginUserName) {
+            InstanceAuthentication instanceAuthentication, String loginUserName, String publicKey) {
         this.groups = ImmutableList.copyOf(groups);
         this.network = network;
         this.image = image;
         this.parameters = ImmutableMap.copyOf(parameters);
         this.tags = ImmutableMap.copyOf(tags);
         this.template = template;
-        this.publicKey = publicKey;
+        this.instanceAuthentication = instanceAuthentication;
         this.loginUserName = loginUserName;
+        this.publicKey = publicKey;
     }
 
     public List<Group> getGroups() {
@@ -61,6 +64,10 @@ public class CloudStack {
 
     public Security getCloudSecurity() {
         return groups.get(0).getSecurity();
+    }
+
+    public InstanceAuthentication getInstanceAuthentication() {
+        return instanceAuthentication;
     }
 
     @Override

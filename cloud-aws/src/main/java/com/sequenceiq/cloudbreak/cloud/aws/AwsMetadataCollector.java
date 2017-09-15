@@ -122,7 +122,7 @@ public class AwsMetadataCollector implements MetadataCollector {
                 // an untracked CloudInstance
                 if (!untrackedInstances.isEmpty()) {
                     cloudInstance = untrackedInstances.remove();
-                    cloudInstance = new CloudInstance(instanceId, cloudInstance.getTemplate());
+                    cloudInstance = new CloudInstance(instanceId, cloudInstance.getTemplate(), cloudInstance.getAuthentication());
                 }
             }
         }

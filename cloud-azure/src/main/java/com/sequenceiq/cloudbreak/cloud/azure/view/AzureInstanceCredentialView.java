@@ -11,18 +11,18 @@ public class AzureInstanceCredentialView {
     }
 
     public String getPublicKey() {
-        return cloudStack.getPublicKey();
+        return cloudStack.getInstanceAuthentication().getPublicKey();
     }
 
     public boolean passwordAuthenticationRequired() {
-        return cloudStack.getPublicKey().startsWith("Basic: ");
+        return cloudStack.getInstanceAuthentication().getPublicKey().startsWith("Basic: ");
     }
 
     public String getPassword() {
-        return cloudStack.getPublicKey().replaceAll("Basic: ", "");
+        return cloudStack.getInstanceAuthentication().getPublicKey().replaceAll("Basic: ", "");
     }
 
     public String getLoginUserName() {
-        return cloudStack.getLoginUserName();
+        return cloudStack.getInstanceAuthentication().getLoginUserName();
     }
 }

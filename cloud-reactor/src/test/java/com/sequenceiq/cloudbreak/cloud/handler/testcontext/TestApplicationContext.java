@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -58,11 +59,15 @@ import reactor.Environment;
 @PropertySource("classpath:application.properties")
 public class TestApplicationContext {
 
+    private final InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
     private final CloudInstance cloudInstance = new CloudInstance("instanceId",
-            new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()));
+            new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()),
+            instanceAuthentication);
 
     private final CloudInstance cloudInstanceBad = new CloudInstance("instanceIdBad",
-            new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()));
+            new InstanceTemplate("flavor", "groupName", 1L, Collections.emptyList(), InstanceStatus.CREATE_REQUESTED, new HashMap<>()),
+            instanceAuthentication);
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;

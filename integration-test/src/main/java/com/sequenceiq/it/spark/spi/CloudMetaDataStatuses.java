@@ -31,7 +31,9 @@ public class CloudMetaDataStatuses extends ITResponse {
             Optional<CloudInstance> cloudInstance = cloudInstances.stream()
                     .filter(instance -> Objects.equals(instance.getTemplate().getPrivateId(), oldTemplate.getPrivateId())).findFirst();
             if (cloudInstance.isPresent()) {
-                CloudInstance newCloudInstance = new CloudInstance(stringCloudVmMetaDataStatusEntry.getKey(), cloudInstance.get().getTemplate(),
+                CloudInstance newCloudInstance = new CloudInstance(stringCloudVmMetaDataStatusEntry.getKey(),
+                        cloudInstance.get().getTemplate(),
+                        cloudInstance.get().getAuthentication(),
                         cloudInstance.get().getParameters());
                 CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(newCloudInstance,
                         oldCloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus());

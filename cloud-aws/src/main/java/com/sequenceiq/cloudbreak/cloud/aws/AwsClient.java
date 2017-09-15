@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationException;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceAuthentication;
 
 @Component
 public class AwsClient {
@@ -32,8 +33,6 @@ public class AwsClient {
     private static final String DEFAULT_REGION_NAME = "us-west-1";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
-
-    private static final String EXISTING_KEYPAIR_PARAM_KEY = "existingKeyPairName";
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
@@ -94,13 +93,12 @@ public class AwsClient {
                 ac.getCloudContext().getName(), ac.getCloudContext().getId());
     }
 
-    public boolean existingKeyPairNameSpecified(AuthenticatedContext auth) {
-        return isNoneEmpty(getExistingKeyPairName(auth));
+    public boolean existingKeyPairNameSpecified(InstanceAuthentication instanceAuthentication) {
+        return isNoneEmpty(getExistingKeyPairName(instanceAuthentication));
     }
 
-    public String getExistingKeyPairName(AuthenticatedContext auth) {
-        CloudCredential cloudCredential = auth.getCloudCredential();
-        return cloudCredential.getParameter(EXISTING_KEYPAIR_PARAM_KEY, String.class);
+    public String getExistingKeyPairName(InstanceAuthentication instanceAuthentication) {
+        return instanceAuthentication.getPublicKeyId();
     }
 
     public void checkAwsEnvironmentVariables(CloudCredential credential) {

@@ -69,6 +69,9 @@ public class StackResponse extends StackBase {
     @ApiModelProperty(StackModelDescription.FLEX_SUBSCRIPTION)
     private FlexSubscriptionResponse flexSubscription;
 
+    @ApiModelProperty(StackModelDescription.AUTHENTICATION)
+    private StackAuthenticationResponse stackAuthentication;
+
     @ApiModelProperty(StackModelDescription.NODE_COUNT)
     private Integer nodeCount;
 
@@ -248,5 +251,13 @@ public class StackResponse extends StackBase {
 
     public void setCloudbreakUsages(List<CloudbreakUsageJson> cloudbreakUsages) {
         this.cloudbreakUsages = cloudbreakUsages;
+    }
+
+    public StackAuthenticationResponse getStackAuthentication() {
+        return stackAuthentication;
+    }
+
+    public void setStackAuthentication(StackAuthenticationResponse stackAuthentication) {
+        this.stackAuthentication = stackAuthentication;
     }
 }

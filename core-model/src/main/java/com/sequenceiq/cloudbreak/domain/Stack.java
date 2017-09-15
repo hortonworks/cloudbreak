@@ -73,11 +73,6 @@ public class Stack implements ProvisionEntity {
     @Column(nullable = false)
     private String region;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String publicKey;
-
-    private String loginUserName;
-
     private String availabilityZone;
 
     private Integer gatewayPort;
@@ -139,6 +134,9 @@ public class Stack implements ProvisionEntity {
 
     @ManyToOne
     private Network network;
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    private StackAuthentication stackAuthentication;
 
     @OneToOne
     private Orchestrator orchestrator;
@@ -597,27 +595,11 @@ public class Stack implements ProvisionEntity {
         this.clusterNameAsSubdomain = clusterNameAsSubdomain;
     }
 
-    public String getPublicKey() {
-        return publicKey;
+    public StackAuthentication getStackAuthentication() {
+        return stackAuthentication;
     }
 
-    public void setPublicKey(String publicKey) {
-        this.publicKey = publicKey;
-    }
-
-    public boolean passwordAuthenticationRequired() {
-        return publicKey != null && publicKey.startsWith("Basic:");
-    }
-
-    public String getLoginPassword() {
-        return publicKey.replaceAll("Basic:", "").trim();
-    }
-
-    public String getLoginUserName() {
-        return loginUserName;
-    }
-
-    public void setLoginUserName(String loginUserName) {
-        this.loginUserName = loginUserName;
+    public void setStackAuthentication(StackAuthentication stackAuthentication) {
+        this.stackAuthentication = stackAuthentication;
     }
 }
