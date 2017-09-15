@@ -1,0 +1,56 @@
+#!/bin/sh
+
+: ${GITHUB_USERNAME:=hortonworks}
+: ${GITHUB_PROJECT:=cloudbreak-deployer}
+: ${CIRCLECI_API:=https://circleci.com/api/v1.1}
+ 
+circle() {
+    declare path=$1
+    shift
+    
+    local url="$CIRCLECI_API/$path"
+    curl -s -G \
+        -H "Accept: application/json" \
+        "$url" "$@"
+}
+
+main() {
+    declare branch=${1:-master}
+
+    local os=$(uname -s | tr "[A-Z]" "[a-z]")
+    local latestartifacts="project/github/$GITHUB_USERNAME/$GITHUB_PROJECT/latest/artifacts?branch=$branch&filter=successful"
+    local artifacts=$(circle $latestartifacts)
+    local message=$(echo "${artifacts}" | grep -o "\"message\":\".*\"" | tr -d '"' | cut -c 9- 2>/dev/null)
+
+    if [ $? -gt 0 ]; then 
+        echo "No artifact found for branch '$branch' at https://circleci.com/gh/$GITHUB_USERNAME/$GITHUB_PROJECT"
+        exit 1
+    elif [[ -n "${message}" ]]; then
+        echo "CircleCI API returned with message: $message"
+        echo "API call: $CIRCLECI_API/$latestartifacts"
+        exit 1
+    fi
+
+    local url=$(echo "${artifacts}" | grep -o "\"url\":\".*$os[^\"]*\"" | tr -d '"' | cut -c 5-)
+
+    if [[ ! "${url}" ]]; then 
+        echo "No artifacts found for os '$os' on branch '$branch' at https://circleci.com/gh/$GITHUB_USERNAME/$GITHUB_PROJECT"
+        exit 1
+    fi
+
+    local dest=/usr/bin
+    hash -r > /dev/null
+    if (command -v cbd > /dev/null); then
+        local existing=$(command -v cbd)
+        dest=${existing%/*}
+    else
+        if echo "$PATH" | grep -q '/usr/local/bin' ; then
+           dest=/usr/local/bin
+        fi
+    fi
+
+    curl -Ls $url | tar -xz -C ${dest}
+    echo "---> cbd installed into ${dest}"
+}
+
+main "$@"
