@@ -19,6 +19,9 @@ upgrade-smartsense-ambari-service:
     - makedirs: True
     - source: salt://smartsense/gateway/hst-gateway.ini
     - mode: 755
+    - template: jinja
+    - context:
+        smartsense_upload: {{ salt['pillar.get']('smartsense_upload') }}
     - watch:
       - pkg: smartsense-hst
 

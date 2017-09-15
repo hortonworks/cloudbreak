@@ -39,3 +39,7 @@ base:
   'roles:knox_gateway':
     - match: grain
     - ldap.init
+
+  'roles:smartsense':
+    - match: grain
+    - smartsense.credentials
