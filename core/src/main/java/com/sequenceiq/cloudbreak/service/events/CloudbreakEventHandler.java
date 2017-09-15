@@ -16,6 +16,7 @@ import reactor.fn.Consumer;
 
 @Component
 public class CloudbreakEventHandler implements Consumer<Event<CloudbreakEventData>> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakEventHandler.class);
 
     @Inject

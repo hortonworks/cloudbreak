@@ -12,12 +12,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.BlueprintEndpoint;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Component
-public class BlueprintController implements BlueprintEndpoint {
+public class BlueprintController extends NotificationController implements BlueprintEndpoint {
 
     @Autowired
     private BlueprintService blueprintService;
@@ -84,26 +85,24 @@ public class BlueprintController implements BlueprintEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        blueprintService.delete(id, user);
+        executeAndNotify(user -> blueprintService.delete(id, user), ResourceEvent.BLUEPRINT_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        blueprintService.delete(name, user);
+        executeAndNotify(user -> blueprintService.delete(name, user), ResourceEvent.BLUEPRINT_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        blueprintService.delete(name, user);
+        executeAndNotify(user -> blueprintService.delete(name, user), ResourceEvent.BLUEPRINT_DELETED);
     }
 
     private BlueprintResponse createBlueprint(IdentityUser user, BlueprintRequest blueprintRequest, boolean publicInAccount) {
         Blueprint blueprint = conversionService.convert(blueprintRequest, Blueprint.class);
         blueprint.setPublicInAccount(publicInAccount);
         blueprint = blueprintService.create(user, blueprint, blueprintRequest.getProperties());
+        notify(user, ResourceEvent.BLUEPRINT_CREATED);
         return conversionService.convert(blueprint, BlueprintResponse.class);
     }
 

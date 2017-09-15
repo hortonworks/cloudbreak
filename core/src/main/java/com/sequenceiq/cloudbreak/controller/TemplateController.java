@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
@@ -20,7 +21,7 @@ import com.sequenceiq.cloudbreak.service.template.DefaultTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Component
-public class TemplateController implements TemplateEndpoint {
+public class TemplateController extends NotificationController implements TemplateEndpoint {
     @Autowired
     private TemplateService templateService;
 
@@ -90,20 +91,17 @@ public class TemplateController implements TemplateEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        templateService.delete(id, user);
+        executeAndNotify(user -> templateService.delete(id, user), ResourceEvent.TEMPLATE_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        templateService.delete(name, user);
+        executeAndNotify(user -> templateService.delete(name, user), ResourceEvent.TEMPLATE_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        templateService.delete(name, user);
+        executeAndNotify(user -> templateService.delete(name, user), ResourceEvent.TEMPLATE_DELETED);
     }
 
     private TemplateResponse createTemplate(IdentityUser user, TemplateRequest templateRequest, boolean publicInAccount) {
@@ -111,6 +109,7 @@ public class TemplateController implements TemplateEndpoint {
         templateValidator.validateTemplateRequest(template);
         template = templateDecorator.decorate(template);
         template = templateService.create(user, template);
+        notify(user, ResourceEvent.TEMPLATE_CREATED);
         return conversionService.convert(template, TemplateResponse.class);
     }
 
