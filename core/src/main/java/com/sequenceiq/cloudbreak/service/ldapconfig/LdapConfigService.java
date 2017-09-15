@@ -86,6 +86,10 @@ public class LdapConfigService {
         delete(get(id));
     }
 
+    public void delete(Long id, IdentityUser user) {
+        delete(get(id).getName(), user);
+    }
+
     public void delete(String name, IdentityUser user) {
         LdapConfig ldapConfig = ldapConfigRepository.findByNameInAccount(name, user.getAccount());
         if (ldapConfig == null) {

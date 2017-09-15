@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.WAIT_FOR_SYNC;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
 @Component
 public class CloudbreakCleanupService implements ApplicationListener<ContextRefreshedEvent> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakCleanupService.class);
 
     @Inject
@@ -96,7 +98,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         triggerSyncs(stacksToSync, clustersToSync);
     }
 
-    private List<Stack> resetStackStatus(List<Long> excludeStackIds) {
+    private List<Stack> resetStackStatus(Collection<Long> excludeStackIds) {
         return stackRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(s -> !excludeStackIds.contains(s.getId()) || WAIT_FOR_SYNC.equals(s.getStatus()))
                 .peek(s -> {
@@ -108,7 +110,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
                 }).collect(Collectors.toList());
     }
 
-    private void cleanInstanceMetaData(Set<InstanceMetaData> metadataSet) {
+    private void cleanInstanceMetaData(Iterable<InstanceMetaData> metadataSet) {
         for (InstanceMetaData metadata : metadataSet) {
             if (InstanceStatus.REQUESTED.equals(metadata.getInstanceStatus()) && metadata.getInstanceId() == null) {
                 LOGGER.info("InstanceMetaData [privateId: '{}'] is deleted at CB start.", metadata.getPrivateId());
@@ -117,17 +119,17 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         }
     }
 
-    private List<Cluster> resetClusterStatus(List<Stack> stacksToSync, List<Long> excludeStackIds) {
+    private List<Cluster> resetClusterStatus(Collection<Stack> stacksToSync, Collection<Long> excludeStackIds) {
         return clusterRepository.findByStatuses(Arrays.asList(UPDATE_REQUESTED, UPDATE_IN_PROGRESS, WAIT_FOR_SYNC, START_IN_PROGRESS, STOP_IN_PROGRESS))
                 .stream().filter(c -> !excludeStackIds.contains(c.getStack().getId()))
                 .peek(c -> {
                     loggingStatusChange("Cluster", c.getId(), c.getStatus(), WAIT_FOR_SYNC);
                     c.setStatus(WAIT_FOR_SYNC);
                     clusterRepository.save(c);
-                }).filter(c -> !stackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
+                }).filter(c -> !isStackToSyncContainsCluster(stacksToSync, c)).collect(Collectors.toList());
     }
 
-    private boolean stackToSyncContainsCluster(List<Stack> stacksToSync, Cluster cluster) {
+    private boolean isStackToSyncContainsCluster(Collection<Stack> stacksToSync, Cluster cluster) {
         Set<Long> stackIds = stacksToSync.stream().map(Stack::getId).collect(Collectors.toSet());
         return stackIds.contains(cluster.getStack().getId());
     }
@@ -135,7 +137,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     /**
      * Exclude all stacks that have active flows and assigned to Cb nodes.
      */
-    private List<Long> excludeStacksByFlowAssignment() {
+    private Collection<Long> excludeStacksByFlowAssignment() {
         List<Long> exclusion = new ArrayList<>();
         List<Object[]> allNonFinalized = flowLogRepository.findAllNonFinalized();
         allNonFinalized.stream().filter(o -> o[2] != null).forEach(o -> exclusion.add((Long) o[1]));
@@ -174,7 +176,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     }
 
     @Transactional
-    private void updateUnassignedFlows(Set<FlowLog> flowLogs, String nodeId) {
+    private void updateUnassignedFlows(Collection<FlowLog> flowLogs, String nodeId) {
         if (flowLogs != null && !flowLogs.isEmpty() && nodeId != null) {
             for (FlowLog flowLog : flowLogs) {
                 flowLog.setCloudbreakNodeId(nodeId);
@@ -186,7 +188,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
     /**
      * It restarts all the disrupted flows that are assigned to this node.
      */
-    private List<Long> restartMyAssignedDisruptedFlows() {
+    private Collection<Long> restartMyAssignedDisruptedFlows() {
         List<Long> stackIds = new ArrayList<>();
         if (cloudbreakNodeConfig.isNodeIdSpecified()) {
             Set<FlowLog> myFlowLogs;
@@ -227,7 +229,7 @@ public class CloudbreakCleanupService implements ApplicationListener<ContextRefr
         LOGGER.info("{} {} status is updated from {} to {} at CB start.", type, id, status, deleteFailed);
     }
 
-    private void triggerSyncs(List<Stack> stacksToSync, List<Cluster> clustersToSync) {
+    private void triggerSyncs(Iterable<Stack> stacksToSync, Iterable<Cluster> clustersToSync) {
         try {
             for (Stack stack : stacksToSync) {
                 LOGGER.info("Triggering full sync on stack [name: {}, id: {}].", stack.getName(), stack.getId());

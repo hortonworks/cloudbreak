@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.cluster.filter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -56,14 +56,8 @@ public class AppMasterFilter implements HostFilter {
         return result;
     }
 
-    private List<HostMetadata> filter(Set<String> hostsWithAM, List<HostMetadata> hosts) {
-        Iterator<HostMetadata> iterator = hosts.iterator();
-        while (iterator.hasNext()) {
-            HostMetadata host = iterator.next();
-            if (hostsWithAM.contains(host.getHostName())) {
-                iterator.remove();
-            }
-        }
+    private List<HostMetadata> filter(Collection<String> hostsWithAM, List<HostMetadata> hosts) {
+        hosts.removeIf(host -> hostsWithAM.contains(host.getHostName()));
         return hosts;
     }
 

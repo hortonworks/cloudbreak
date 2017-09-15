@@ -12,12 +12,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.model.NetworkRequest;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.service.network.DefaultNetworkCreator;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 
 @Component
-public class NetworkController implements NetworkEndpoint {
+public class NetworkController extends NotificationController implements NetworkEndpoint {
 
     @Autowired
     @Qualifier("conversionService")
@@ -82,25 +83,23 @@ public class NetworkController implements NetworkEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        networkService.delete(id, user);
+        executeAndNotify(user -> networkService.delete(id, user), ResourceEvent.NETWORK_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        networkService.delete(name, user);
+        executeAndNotify(user -> networkService.delete(name, user), ResourceEvent.NETWORK_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        networkService.delete(name, user);
+        executeAndNotify(user -> networkService.delete(name, user), ResourceEvent.NETWORK_DELETED);
     }
 
     private NetworkResponse createNetwork(IdentityUser user, NetworkRequest networkRequest, boolean publicInAccount) {
         Network network = convert(networkRequest, publicInAccount);
         network = networkService.create(user, network);
+        notify(user, ResourceEvent.NETWORK_CREATED);
         return conversionService.convert(network, NetworkResponse.class);
     }
 

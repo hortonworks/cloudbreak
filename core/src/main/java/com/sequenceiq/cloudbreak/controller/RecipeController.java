@@ -12,11 +12,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 
 @Component
-public class RecipeController implements RecipeEndpoint {
+public class RecipeController extends NotificationController implements RecipeEndpoint {
 
     @Autowired
     @Qualifier("conversionService")
@@ -76,26 +77,24 @@ public class RecipeController implements RecipeEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        recipeService.delete(id, user);
+        executeAndNotify(user -> recipeService.delete(id, user), ResourceEvent.RECIPE_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        recipeService.delete(name, user);
+        executeAndNotify(user -> recipeService.delete(name, user), ResourceEvent.RECIPE_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        recipeService.delete(name, user);
+        executeAndNotify(user -> recipeService.delete(name, user), ResourceEvent.RECIPE_DELETED);
     }
 
     private RecipeResponse createRecipe(IdentityUser user, RecipeRequest recipeRequest, boolean publicInAccount) {
         Recipe recipe = conversionService.convert(recipeRequest, Recipe.class);
         recipe.setPublicInAccount(publicInAccount);
         recipe = recipeService.create(user, recipe);
+        notify(user, ResourceEvent.RECIPE_CREATED);
         return conversionService.convert(recipe, RecipeResponse.class);
     }
 

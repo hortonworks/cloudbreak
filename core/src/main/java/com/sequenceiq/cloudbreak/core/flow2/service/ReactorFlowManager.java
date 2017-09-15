@@ -59,7 +59,7 @@ import reactor.bus.EventBus;
 @Service
 public class ReactorFlowManager {
 
-    private static final Integer WAIT_FOR_ACCEPT = 5;
+    private static final long WAIT_FOR_ACCEPT = 5L;
 
     @Inject
     private EventBus reactor;

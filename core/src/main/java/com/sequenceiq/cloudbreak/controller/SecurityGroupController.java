@@ -12,12 +12,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.service.securitygroup.DefaultSecurityGroupCreator;
 import com.sequenceiq.cloudbreak.service.securitygroup.SecurityGroupService;
 
 @Component
-public class SecurityGroupController implements SecurityGroupEndpoint {
+public class SecurityGroupController extends NotificationController implements SecurityGroupEndpoint {
+
     @Autowired
     @Qualifier("conversionService")
     private ConversionService conversionService;
@@ -81,25 +83,23 @@ public class SecurityGroupController implements SecurityGroupEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        securityGroupService.delete(id, user);
+        executeAndNotify(user -> securityGroupService.delete(id, user), ResourceEvent.SECURITY_GROUP_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        securityGroupService.delete(name, user);
+        executeAndNotify(user -> securityGroupService.delete(name, user), ResourceEvent.SECURITY_GROUP_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        securityGroupService.delete(name, user);
+        executeAndNotify(user -> securityGroupService.delete(name, user), ResourceEvent.SECURITY_GROUP_DELETED);
     }
 
     private SecurityGroupResponse createSecurityGroup(IdentityUser user, SecurityGroupRequest securityGroupRequest, boolean publicInAccount) {
         SecurityGroup securityGroup = convert(securityGroupRequest, publicInAccount);
         securityGroup = securityGroupService.create(user, securityGroup);
+        notify(user, ResourceEvent.SECURITY_GROUP_CREATED);
         return conversionService.convert(securityGroup, SecurityGroupResponse.class);
     }
 

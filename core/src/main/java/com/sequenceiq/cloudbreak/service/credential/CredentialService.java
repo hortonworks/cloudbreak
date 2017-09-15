@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
-import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -29,8 +28,6 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
-import com.sequenceiq.cloudbreak.service.notification.Notification;
-import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 
 @Service
@@ -47,9 +44,6 @@ public class CredentialService {
 
     @Inject
     private ServiceProviderCredentialAdapter credentialAdapter;
-
-    @Inject
-    private NotificationSender notificationSender;
 
     @Inject
     private AuthorizationService authorizationService;
@@ -119,34 +113,11 @@ public class CredentialService {
         return create(userId, account, credential);
     }
 
-    public void sendErrorNotification(String owner, String account, String cloudPlatform, String errorMessage) {
-        Notification notification = new Notification();
-        notification.setEventType("CREDENTIAL_CREATE_FAILED");
-        notification.setEventTimestamp(new Date());
-        notification.setEventMessage(errorMessage);
-        notification.setOwner(owner);
-        notification.setAccount(account);
-        notification.setCloud(cloudPlatform);
-        notificationSender.send(notification);
-    }
-
-    private void sendNotification(Credential credential) {
-        Notification notification = new Notification();
-        notification.setEventType("CREDENTIAL_CREATED");
-        notification.setEventTimestamp(new Date());
-        notification.setEventMessage("Credential created");
-        notification.setOwner(credential.getOwner());
-        notification.setAccount(credential.getAccount());
-        notification.setCloud(credential.cloudPlatform());
-        notificationSender.send(notification);
-    }
-
     private Credential saveCredential(Credential credential) {
         credential = credentialAdapter.init(credential);
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
-            sendNotification(credential);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.CREDENTIAL, credential.getName(), ex);
         }

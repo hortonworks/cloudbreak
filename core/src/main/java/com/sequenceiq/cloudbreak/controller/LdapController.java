@@ -11,10 +11,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 import com.sequenceiq.cloudbreak.service.ldapconfig.LdapConfigService;
 
-public class LdapController implements LdapConfigEndpoint {
+public class LdapController extends NotificationController implements LdapConfigEndpoint {
 
     @Autowired
     @Qualifier("conversionService")
@@ -74,25 +75,24 @@ public class LdapController implements LdapConfigEndpoint {
 
     @Override
     public void delete(Long id) {
-        ldapConfigService.delete(id);
+        executeAndNotify(user -> ldapConfigService.delete(id, user), ResourceEvent.LDAP_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        ldapConfigService.delete(name, user);
+        executeAndNotify(user -> ldapConfigService.delete(name, user), ResourceEvent.LDAP_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        ldapConfigService.delete(name, user);
+        executeAndNotify(user -> ldapConfigService.delete(name, user), ResourceEvent.LDAP_DELETED);
     }
 
     private LdapConfigResponse createConfig(IdentityUser user, LdapConfigRequest request, boolean publicInAccount) {
         LdapConfig config = conversionService.convert(request, LdapConfig.class);
         config.setPublicInAccount(publicInAccount);
         config = ldapConfigService.create(user, config);
+        notify(user, ResourceEvent.LDAP_CREATED);
         return conversionService.convert(config, LdapConfigResponse.class);
     }
 

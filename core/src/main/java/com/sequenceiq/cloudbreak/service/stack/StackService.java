@@ -154,7 +154,7 @@ public class StackService {
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
 
     @Value("${cb.nginx.port:9443}")
-    private int nginxPort;
+    private Integer nginxPort;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -564,14 +564,13 @@ public class StackService {
 
     private void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        HostGroup hostGroup = stack.getCluster().getHostGroups().stream().filter(input -> {
-            return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
-        }).findFirst().get();
-        if (hostGroup == null) {
+        Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
+                .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
+        if (!hostGroup.isPresent()) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
-        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, adjustment);
+        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(), adjustment);
     }
 
     private void validateStackStatus(Stack stack) {

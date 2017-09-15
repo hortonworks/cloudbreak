@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 
 public class BaseStackCommandsTest {
+
     @InjectMocks
     private BaseStackCommands underTest;
 

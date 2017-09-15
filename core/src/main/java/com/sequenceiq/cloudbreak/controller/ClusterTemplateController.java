@@ -12,11 +12,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.ClusterTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.ClusterTemplate;
 import com.sequenceiq.cloudbreak.service.clustertemplate.ClusterTemplateService;
 
 @Component
-public class ClusterTemplateController implements ClusterTemplateEndpoint {
+public class ClusterTemplateController extends NotificationController implements ClusterTemplateEndpoint {
 
     @Autowired
     private ClusterTemplateService clusterTemplateService;
@@ -76,26 +77,24 @@ public class ClusterTemplateController implements ClusterTemplateEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        clusterTemplateService.delete(id, user);
+        executeAndNotify(user -> clusterTemplateService.delete(id, user), ResourceEvent.CLUSTER_TEMPLATE_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        clusterTemplateService.delete(name, user);
+        executeAndNotify(user -> clusterTemplateService.delete(name, user), ResourceEvent.CLUSTER_TEMPLATE_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        clusterTemplateService.delete(name, user);
+        executeAndNotify(user -> clusterTemplateService.delete(name, user), ResourceEvent.CLUSTER_TEMPLATE_DELETED);
     }
 
     private ClusterTemplateResponse createClusterTemplateRequest(IdentityUser user, ClusterTemplateRequest clusterTemplateRequest, boolean publicInAccount) {
         ClusterTemplate clusterTemplate = conversionService.convert(clusterTemplateRequest, ClusterTemplate.class);
         clusterTemplate.setPublicInAccount(publicInAccount);
         clusterTemplate = clusterTemplateService.create(user, clusterTemplate);
+        notify(user, ResourceEvent.CLUSTER_TEMPLATE_CREATED);
         return conversionService.convert(clusterTemplate, ClusterTemplateResponse.class);
     }
 
