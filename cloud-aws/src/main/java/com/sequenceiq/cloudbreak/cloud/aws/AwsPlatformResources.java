@@ -4,9 +4,9 @@ import static java.util.Collections.singletonList;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -64,15 +64,18 @@ public class AwsPlatformResources implements PlatformResources {
                     describeVpcsRequest.withVpcIds(filter.getVpcId());
                 }
                 for (Vpc vpc : ec2Client.describeVpcs(describeVpcsRequest).getVpcs()) {
-                    Set<String> subnetIds = ec2Client.describeSubnets(createVpcDescribeRequest(vpc))
-                            .getSubnets().stream().map(Subnet::getSubnetId).collect(Collectors.toSet());
+                    Map<String, String> subnetMap = new HashMap<>();
+                    List<Subnet> subnets = ec2Client.describeSubnets(createVpcDescribeRequest(vpc)).getSubnets();
                     Map<String, Object> properties = new HashMap<>();
                     properties.put("cidrBlock", vpc.getCidrBlock());
                     properties.put("default", vpc.getIsDefault());
                     properties.put("dhcpOptionsId", vpc.getDhcpOptionsId());
                     properties.put("instanceTenancy", vpc.getInstanceTenancy());
                     properties.put("state", vpc.getState());
-                    cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), subnetIds, properties));
+                    for (Subnet subnet : subnets) {
+                        subnetMap.put(subnet.getSubnetId(), subnet.getSubnetId());
+                    }
+                    cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), subnetMap, properties));
                 }
                 result.put(actualRegion.value(), cloudNetworks);
             }

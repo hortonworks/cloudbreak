@@ -1,21 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 public class CloudNetwork {
 
     private String name;
 
-    private Set<String> subnetIds = new HashSet<>();
+    private Map<String, String> subnets = new HashMap<>();
 
     private Map<String, Object> properties = new HashMap<>();
 
-    public CloudNetwork(String name, Set<String> subnetIds, Map<String, Object> properties) {
+    public CloudNetwork(String name, Map<String, String> subnets, Map<String, Object> properties) {
         this.name = name;
-        this.subnetIds = subnetIds;
+        this.subnets = subnets;
         this.properties = properties;
     }
 
@@ -27,12 +25,12 @@ public class CloudNetwork {
         this.name = name;
     }
 
-    public Set<String> getSubnetIds() {
-        return subnetIds;
+    public Map<String, String> getSubnets() {
+        return subnets;
     }
 
-    public void setSubnetIds(Set<String> subnetIds) {
-        this.subnetIds = subnetIds;
+    public void setSubnets(Map<String, String> subnets) {
+        this.subnets = subnets;
     }
 
     public Map<String, Object> getProperties() {
