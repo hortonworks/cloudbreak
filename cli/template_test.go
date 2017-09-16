@@ -44,10 +44,10 @@ func TestCreateTemplateImpl(t *testing.T) {
 
 	postTemplate := func(params *templates.PostPublicTemplateParams) (*templates.PostPublicTemplateOK, error) {
 		var id int64
-		if strings.Contains(params.Body.Name, "mtempl") {
+		if strings.Contains(*params.Body.Name, "mtempl") {
 			id = expectedMasterId
 			actualMasterTemplate = params.Body
-		} else if strings.Contains(params.Body.Name, "wtempl") {
+		} else if strings.Contains(*params.Body.Name, "wtempl") {
 			id = expectedWorkerId
 			actualWorkerTemplate = params.Body
 		} else {
@@ -55,7 +55,7 @@ func TestCreateTemplateImpl(t *testing.T) {
 			actualComputeTemplate = params.Body
 		}
 		resp := templates.PostPublicTemplateOK{
-			Payload: &models_cloudbreak.TemplateResponse{ID: &id},
+			Payload: &models_cloudbreak.TemplateResponse{ID: id},
 		}
 		return &resp, nil
 	}
@@ -73,33 +73,33 @@ func validateTemplate(kind string, config InstanceConfig, expId int64, actual *m
 		t.Errorf(kind+" id not match %d == %d", expId, id)
 	}
 	if kind == "master" {
-		if m, _ := regexp.MatchString("mtempl([0-9]{10,20})", actual.Name); m == false {
+		if m, _ := regexp.MatchString("mtempl([0-9]{10,20})", *actual.Name); m == false {
 			t.Errorf("name not match mtempl([0-9]{10,20}) == %s", *actual.Name)
 		}
 	}
 	if kind == "worker" {
-		if m, _ := regexp.MatchString("wtempl([0-9]{10,20})", actual.Name); m == false {
+		if m, _ := regexp.MatchString("wtempl([0-9]{10,20})", *actual.Name); m == false {
 			t.Errorf("name not match wtempl([0-9]{10,20}) == %s", *actual.Name)
 		}
 	}
 	if kind == "compute" {
-		if m, _ := regexp.MatchString("ctempl([0-9]{10,20})", actual.Name); m == false {
+		if m, _ := regexp.MatchString("ctempl([0-9]{10,20})", *actual.Name); m == false {
 			t.Errorf("name not match ctempl([0-9]{10,20}) == %s", *actual.Name)
 		}
 	}
-	if actual.CloudPlatform != "AWS" {
+	if *actual.CloudPlatform != "AWS" {
 		t.Errorf(kind+" cloud platform not match AWS == %s", actual.CloudPlatform)
 	}
-	if actual.InstanceType != config.InstanceType {
+	if *actual.InstanceType != config.InstanceType {
 		t.Errorf(kind+" instance type not match %s == %s", config.InstanceType, actual.CloudPlatform)
 	}
-	if *actual.VolumeType != config.VolumeType {
-		t.Errorf(kind+" volume type not match %s == %s", config.VolumeType, *actual.VolumeType)
+	if actual.VolumeType != config.VolumeType {
+		t.Errorf(kind+" volume type not match %s == %s", config.VolumeType, actual.VolumeType)
 	}
-	if actual.VolumeSize != config.VolumeSize {
+	if actual.VolumeSize != *config.VolumeSize {
 		t.Errorf(kind+" volume size not match %d == %d", config.VolumeSize, actual.VolumeSize)
 	}
-	if actual.VolumeCount != config.VolumeCount {
+	if actual.VolumeCount != *config.VolumeCount {
 		t.Errorf(kind+" volume count not match %d == %d", config.VolumeCount, actual.VolumeCount)
 	}
 }

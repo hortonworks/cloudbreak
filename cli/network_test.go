@@ -25,7 +25,7 @@ func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 	var actual *models_cloudbreak.NetworkRequest
 	postNetwork := func(params *networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error) {
 		actual = params.Body
-		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: &expectedId}}, nil
+		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: expectedId}}, nil
 	}
 
 	createNetworkImpl(skeleton, c, postNetwork, nil)
@@ -34,10 +34,10 @@ func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 	if actualId != expectedId {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
-	if m, _ := regexp.MatchString("net([0-9]{10,20})", actual.Name); m == false {
+	if m, _ := regexp.MatchString("net([0-9]{10,20})", *actual.Name); m == false {
 		t.Errorf("name not match net([0-9]{10,20}) == %s", *actual.Name)
 	}
-	if actual.CloudPlatform != "AWS" {
+	if *actual.CloudPlatform != "AWS" {
 		t.Errorf("cloud platform not match AWS == %s", *actual.CloudPlatform)
 	}
 	expectedParams := make(map[string]interface{})
@@ -55,7 +55,7 @@ func TestCreateNetworkImplDefaultNetwork(t *testing.T) {
 	postNetwork := func(params *networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error) {
 		actual = params.Body
 		id := int64(1)
-		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
+		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: id}}, nil
 	}
 	expectedParams := make(map[string]interface{})
 	expectedParams["vpcId"] = "vpcid"
@@ -98,15 +98,15 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 	postNetwork := func(params *networks.PostPublicNetworkParams) (*networks.PostPublicNetworkOK, error) {
 		actual = params.Body
 		id := int64(1)
-		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: &id}}, nil
+		return &networks.PostPublicNetworkOK{Payload: &models_cloudbreak.NetworkResponse{ID: id}}, nil
 	}
 
 	createNetworkCommandImpl(finder, postNetwork)
 
-	if actual.Name != finder(FlNetworkName.Name) {
+	if *actual.Name != finder(FlNetworkName.Name) {
 		t.Errorf("name not match %s == %s", finder(FlNetworkName.Name), *actual.Name)
 	}
-	if actual.CloudPlatform != "AWS" {
+	if *actual.CloudPlatform != "AWS" {
 		t.Errorf("cloud platform not match AWS == %s", *actual.CloudPlatform)
 	}
 	expectedParams := make(map[string]interface{})
@@ -116,8 +116,8 @@ func TestCreateNetworkCommandImpl(t *testing.T) {
 	if !reflect.DeepEqual(actual.Parameters, expectedParams) {
 		t.Errorf("params not match %s == %s", expectedParams, actual.Parameters)
 	}
-	if *actual.SubnetCIDR != finder(FlSubnetCidr.Name) {
-		t.Errorf("subnet not match %s == %s", finder(FlSubnetCidr.Name), *actual.SubnetCIDR)
+	if actual.SubnetCIDR != finder(FlSubnetCidr.Name) {
+		t.Errorf("subnet not match %s == %s", finder(FlSubnetCidr.Name), actual.SubnetCIDR)
 	}
 }
 
@@ -126,8 +126,8 @@ func TestListPrivateNetworksImpl(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		id := int64(i)
 		netwroks = append(netwroks, &models_cloudbreak.NetworkResponse{
-			ID:   &id,
-			Name: "name" + strconv.Itoa(i),
+			ID:   id,
+			Name: &(&stringWrapper{"name" + strconv.Itoa(i)}).s,
 		})
 	}
 	var rows []Row

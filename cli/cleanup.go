@@ -38,8 +38,8 @@ func (c *Cloudbreak) cleanupBlueprints(wg *sync.WaitGroup) {
 
 func cleanupBlueprintsImpl(getBlueprints func() []*models_cloudbreak.BlueprintResponse, deleteBlueprint func(string) error) {
 	for _, bp := range getBlueprints() {
-		//if (*bp.Name)[0] == 'b' && len(BlueprintMap[*bp.AmbariBlueprint.Blueprint.Name]) > 0 { // que? TODO?
-		if (*bp.Name)[0] == 'b' && len(BlueprintMap[bp.AmbariBlueprint]) > 0 {
+		ambariBlueprint := parseBlueprintJson(bp.AmbariBlueprint)
+		if (*bp.Name)[0] == 'b' && len(BlueprintMap[*ambariBlueprint.Blueprint.Name]) > 0 {
 			if err := deleteBlueprint(*bp.Name); err != nil {
 				log.Warnf("[cleanupBlueprints] failed to delete blueprint: %s", bp.Name)
 				continue

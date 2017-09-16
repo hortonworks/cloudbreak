@@ -14,7 +14,7 @@ func TestListClustersImpl(t *testing.T) {
 	resps := make([]*models_cloudbreak.StackResponse, 0)
 	for i := 0; i <= 3; i++ {
 		id := int64(i)
-		resps = append(resps, &models_cloudbreak.StackResponse{ID: &id})
+		resps = append(resps, &models_cloudbreak.StackResponse{ID: id})
 	}
 	getStacks := func(params *stacks.GetPrivatesStackParams) (*stacks.GetPrivatesStackOK, error) {
 		return &stacks.GetPrivatesStackOK{Payload: resps}, nil
@@ -22,7 +22,7 @@ func TestListClustersImpl(t *testing.T) {
 	mtx := sync.Mutex{}
 	expected := make([]ClusterSkeletonResult, 0)
 	fetchCluster := func(stack *models_cloudbreak.StackResponse, as *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error) {
-		u := strconv.FormatInt(*stack.ID, 10)
+		u := strconv.FormatInt(stack.ID, 10)
 		skeleton := ClusterSkeletonResult{
 			ClusterSkeletonBase: ClusterSkeletonBase{
 				ClusterName: "name" + u,
@@ -81,11 +81,11 @@ func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 			u := strconv.Itoa(expectedCount)
 			expectedCount++
 			metas = append(metas, &models_cloudbreak.InstanceMetaData{
-				InstanceGroup: &(&stringWrapper{"group" + u}).s,
-				InstanceID:    &(&stringWrapper{"id" + u}).s,
-				DiscoveryFQDN: &(&stringWrapper{"fqdn" + u}).s,
-				PublicIP:      &(&stringWrapper{"pubip" + u}).s,
-				PrivateIP:     &(&stringWrapper{"privip" + u}).s,
+				InstanceGroup: "group" + u,
+				InstanceID:    "id" + u,
+				DiscoveryFQDN: "fqdn" + u,
+				PublicIP:      "pubip" + u,
+				PrivateIP:     "privip" + u,
 			})
 		}
 		groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Metadata: metas})
@@ -113,8 +113,8 @@ func TestListClusterNodesImplWithoutMaster(t *testing.T) {
 func TestListClusterNodesImplWithMaster(t *testing.T) {
 	groups := []*models_cloudbreak.InstanceGroupResponse{{
 		Metadata: []*models_cloudbreak.InstanceMetaData{{
-			InstanceGroup: &(&stringWrapper{MASTER}).s,
-			DiscoveryFQDN: &(&stringWrapper{"fqdn"}).s,
+			InstanceGroup: MASTER,
+			DiscoveryFQDN: "fqdn",
 		}},
 	}}
 	getStack := func(params *stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error) {

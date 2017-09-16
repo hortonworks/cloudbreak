@@ -61,8 +61,8 @@ func TestCreateCredential(t *testing.T) {
 	if !reflect.DeepEqual(actualCredential.Parameters, expectedParams) {
 		t.Errorf("params not match %s == %s", expectedParams, actualCredential.Parameters)
 	}
-	if *actualCredential.PublicKey != expectedSshKey {
-		t.Errorf("ssh key not match %s == %s", expectedSshKey, *actualCredential.PublicKey)
+	if actualCredential.PublicKey != expectedSshKey {
+		t.Errorf("ssh key not match %s == %s", expectedSshKey, actualCredential.PublicKey)
 	}
 	if actualExistingKey != finder(FlSSHKeyPair.Name) {
 		t.Errorf("key name name not match %s == %s", finder(FlSSHKeyPair.Name), actualExistingKey)
@@ -111,13 +111,13 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 	var actualCredential *models_cloudbreak.CredentialRequest
 	postAccountCredentail := func(params *credentials.PostPublicCredentialParams) (*credentials.PostPublicCredentialOK, error) {
 		actualCredential = params.Body
-		return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
+		return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: expectedId}}, nil
 	}
 	defaultParams := make(map[string]interface{})
 	defaultParams["roleArn"] = "role"
 	defaultCredential := models_cloudbreak.CredentialResponse{
 		Parameters: defaultParams,
-		PublicKey:  &(&stringWrapper{"pub-key"}).s,
+		PublicKey:  "pub-key",
 	}
 
 	actualId := createCredentialImpl("name", defaultCredential, "ssh-key", true, postAccountCredentail, nil)
@@ -125,14 +125,14 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 	if actualId != expectedId {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
-	if actualCredential.Name != "name" {
+	if *actualCredential.Name != "name" {
 		t.Errorf("name not match name == %s", *actualCredential.Name)
 	}
-	if actualCredential.CloudPlatform != "AWS" {
+	if *actualCredential.CloudPlatform != "AWS" {
 		t.Errorf("cloud platform not match AWS == %s", *actualCredential.CloudPlatform)
 	}
 	if actualCredential.PublicKey != defaultCredential.PublicKey {
-		t.Errorf("public key not match %s == %s", *defaultCredential.PublicKey, *actualCredential.PublicKey)
+		t.Errorf("public key not match %s == %s", defaultCredential.PublicKey, actualCredential.PublicKey)
 	}
 	var expectedParams = make(map[string]interface{})
 	expectedParams["selector"] = "role-based"
@@ -146,7 +146,7 @@ func TestCreateCredentialImplPublic(t *testing.T) {
 func TestCreateCredentialImplPrivate(t *testing.T) {
 	expectedId := int64(1)
 	postUserCredential := func(params *credentials.PostPrivateCredentialParams) (*credentials.PostPrivateCredentialOK, error) {
-		return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: &expectedId}}, nil
+		return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: expectedId}}, nil
 	}
 
 	actualId := createCredentialImpl("name", models_cloudbreak.CredentialResponse{}, "ssh-key", false, nil, postUserCredential)
@@ -161,8 +161,8 @@ func TestListPrivateCredentialsImpl(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		id := int64(i)
 		credentials = append(credentials, &models_cloudbreak.CredentialResponse{
-			ID:   &id,
-			Name: "name" + strconv.Itoa(i),
+			ID:   id,
+			Name: &(&stringWrapper{"name" + strconv.Itoa(i)}).s,
 		})
 	}
 	var rows []Row

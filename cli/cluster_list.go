@@ -116,9 +116,9 @@ func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetPrivateSt
 		metadataArray := instanceGroup.Metadata
 		for _, metadata := range metadataArray {
 			data := *metadata
-			//if data.DiscoveryFQDN == nil {
-			//	continue
-			//}
+			if len(data.DiscoveryFQDN) == 0 {
+				continue
+			}
 			nodeType := data.InstanceGroup
 			if nodeType == MASTER {
 				nodeType = "master - ambari server"

@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"encoding/json"
 	"strconv"
 	"strings"
 	"sync"
@@ -11,6 +12,34 @@ import (
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
+
+type Blueprints struct {
+	Name         *string `json:"blueprint_name"`
+	StackName    string  `json:"stack_name"`
+	StackVersion string  `json:"stack_version"`
+}
+
+type BlueprintConfigurations map[string]map[string]interface{}
+
+type BlueprintSettings map[string][]map[string]interface{}
+
+type Component struct {
+	Name string `json:"name"`
+}
+
+type BlueprintHostGroup struct {
+	Name           string           `json:"name"`
+	Configurations []Configurations `json:"configurations,omitempty"`
+	Components     []Component      `json:"components"`
+	Cardinality    string           `json:"cardinality"`
+}
+
+type AmbariBlueprint struct {
+	Blueprint      Blueprints                `json:"Blueprints"`
+	Configurations []BlueprintConfigurations `json:"configurations,omitempty"`
+	Settings       []BlueprintSettings       `json:"settings,omitempty"`
+	HostGroups     []BlueprintHostGroup      `json:"host_groups"`
+}
 
 var BlueprintHeader []string = []string{"Cluster Type", "HDP Version"}
 
@@ -71,8 +100,8 @@ func listBlueprintsImpl(getPublicBlueprints func() []*models_cloudbreak.Blueprin
 	for _, blueprint := range respBlueprints {
 		// this is a workaround, needs to be hidden, by not storing them as public
 		if !strings.HasPrefix(*blueprint.Name, "b") {
-			//row := &Blueprint{ClusterType: getFancyBlueprintName(blueprint), HDPVersion: blueprint.AmbariBlueprint.Blueprint.StackVersion} // que? TODO?
-			row := &Blueprint{ClusterType: getFancyBlueprintName(blueprint), HDPVersion: blueprint.AmbariBlueprint} // que? TODO?
+			ambariBlueprint := parseBlueprintJson(blueprint.AmbariBlueprint)
+			row := &Blueprint{ClusterType: getFancyBlueprintName(blueprint), HDPVersion: ambariBlueprint.Blueprint.StackVersion}
 			tableRows = append(tableRows, row)
 		}
 	}
@@ -141,11 +170,16 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models_cloudbreak.
 func createBlueprintRequest(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse) *models_cloudbreak.BlueprintRequest {
 	blueprintName := "b" + strconv.FormatInt(time.Now().UnixNano(), 10)
 
+	var reqConfs []map[string]map[string]string
+	for _, c := range skeleton.Configurations {
+		reqConfs = append(reqConfs, c)
+	}
+
 	bpRequest := models_cloudbreak.BlueprintRequest{
 		Name:            &blueprintName,
 		AmbariBlueprint: blueprint.AmbariBlueprint,
-		//Properties:      skeleton.Configurations, // que? TODO?
-		Inputs: blueprint.Inputs,
+		Properties:      reqConfs,
+		Inputs:          blueprint.Inputs,
 	}
 
 	return &bpRequest
@@ -153,8 +187,8 @@ func createBlueprintRequest(skeleton ClusterSkeleton, blueprint *models_cloudbre
 
 func getFancyBlueprintName(blueprint *models_cloudbreak.BlueprintResponse) string {
 	var name string
-	//ambariBpName := *blueprint.AmbariBlueprint.Blueprint.Name  // que? TODO?
-	ambariBpName := blueprint.AmbariBlueprint // que? TODO?
+	ambariBlueprint := parseBlueprintJson(blueprint.AmbariBlueprint)
+	ambariBpName := *ambariBlueprint.Blueprint.Name
 	if len(ambariBpName) > 0 {
 		fancyName := BlueprintMap[ambariBpName]
 		if len(fancyName) > 0 {
@@ -173,4 +207,12 @@ func getRealBlueprintName(name string) string {
 		return realName
 	}
 	return name
+}
+
+func parseBlueprintJson(blueprintJson string) (ambariBlueprint AmbariBlueprint) {
+	err := json.Unmarshal([]byte(blueprintJson), &ambariBlueprint)
+	if err != nil {
+		logErrorAndExit(err)
+	}
+	return
 }

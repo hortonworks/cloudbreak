@@ -63,7 +63,7 @@ func TestCreateClusterImplExistingRds(t *testing.T) {
 func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStack *models_cloudbreak.StackRequest, actualCluster *models_cloudbreak.ClusterRequest) {
 	getBlueprint := func(name string) *models_cloudbreak.BlueprintResponse {
 		return &models_cloudbreak.BlueprintResponse{
-			AmbariBlueprint: models_cloudbreak.AmbariBlueprint{},
+		// AmbariBlueprint: models_cloudbreak.AmbariBlueprint{},
 		}
 	}
 	getNetwork := func(name string) models_cloudbreak.NetworkResponse {
@@ -71,37 +71,37 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 	}
 	id := int64(1)
 	getRdsConfig := func(string) models_cloudbreak.RDSConfigResponse {
-		return models_cloudbreak.RDSConfigResponse{ID: &id}
+		return models_cloudbreak.RDSConfigResponse{ID: id}
 	}
 	stackId := int64(20)
 	postStack := func(params *stacks.PostPrivateStackParams) (*stacks.PostPrivateStackOK, error) {
 		actualStack = params.Body
-		return &stacks.PostPrivateStackOK{Payload: &models_cloudbreak.StackResponse{ID: &stackId}}, nil
+		return &stacks.PostPrivateStackOK{Payload: &models_cloudbreak.StackResponse{ID: stackId}}, nil
 	}
 	clusterId := int64(30)
 	postCluster := func(params *cluster.PostClusterParams) (*cluster.PostClusterOK, error) {
 		actualCluster = params.Body
-		return &cluster.PostClusterOK{Payload: &models_cloudbreak.ClusterResponse{ID: &clusterId}}, nil
+		return &cluster.PostClusterOK{Payload: &models_cloudbreak.ClusterResponse{ID: clusterId}}, nil
 	}
 
 	createFuncs := []func(skeleton ClusterSkeleton) *models_cloudbreak.TemplateRequest{}
 	for i := 0; i < 3; i++ {
 		createFuncs = append(createFuncs, func(s ClusterSkeleton) *models_cloudbreak.TemplateRequest {
-			return &models_cloudbreak.TemplateRequest{Name: "templ", CloudPlatform: "AWS", InstanceType: "m3.xlarge",
-				VolumeCount: &(&int32Wrapper{int32(1)}).i, VolumeSize: &(&int32Wrapper{int32(100)}).i}
+			return &models_cloudbreak.TemplateRequest{Name: &(&stringWrapper{"templ"}).s, CloudPlatform: &(&stringWrapper{"AWS"}).s, InstanceType: &(&stringWrapper{"m3.xlarge"}).s,
+				VolumeCount: int32(1), VolumeSize: int32(100)}
 		})
 	}
 	createSecurityGroupRequest := func(skeleton ClusterSkeleton, group string) *models_cloudbreak.SecurityGroupRequest {
-		return &models_cloudbreak.SecurityGroupRequest{CloudPlatform: "AWS", Name: "secg", SecurityRules: make([]*models_cloudbreak.SecurityRuleRequest, 0)}
+		return &models_cloudbreak.SecurityGroupRequest{CloudPlatform: &(&stringWrapper{"AWS"}).s, Name: &(&stringWrapper{"secg"}).s, SecurityRules: make([]*models_cloudbreak.SecurityRuleRequest, 0)}
 	}
 	createNetworkRequest := func(skeleton ClusterSkeleton, getNetwork func(string) models_cloudbreak.NetworkResponse) *models_cloudbreak.NetworkRequest {
-		return &models_cloudbreak.NetworkRequest{Name: "net", CloudPlatform: "AWS"}
+		return &models_cloudbreak.NetworkRequest{Name: &(&stringWrapper{"net"}).s, CloudPlatform: &(&stringWrapper{"AWS"}).s}
 	}
 	createRecipeRequests := func(recipes []Recipe) []*models_cloudbreak.RecipeRequest {
 		return make([]*models_cloudbreak.RecipeRequest, 0)
 	}
 	createBlueprintRequest := func(skeleton ClusterSkeleton, blueprint *models_cloudbreak.BlueprintResponse) *models_cloudbreak.BlueprintRequest {
-		return &models_cloudbreak.BlueprintRequest{Name: "blueprint"}
+		return &models_cloudbreak.BlueprintRequest{Name: &(&stringWrapper{"blueprint"}).s}
 	}
 	addAutoscalingCluster := func(stackId int64, autoscalingEnabled bool) int64 {
 		return stackId
@@ -115,7 +115,7 @@ func executeStackCreation(skeleton *ClusterSkeleton) (actualId int64, actualStac
 		return stackId
 	}
 	getLdapConfig := func(string) *models_cloudbreak.LdapConfigResponse {
-		return nil
+		return &models_cloudbreak.LdapConfigResponse{ID: 1}
 	}
 	getCluster := func(string) *models_cloudbreak.StackResponse {
 		return nil
@@ -145,7 +145,7 @@ func validateRequests(actual interface{}, expectedName string, t *testing.T) {
 func TestResizeClusterImplStack(t *testing.T) {
 	expectedId := int64(1)
 	getStack := func(string) *models_cloudbreak.StackResponse {
-		return &models_cloudbreak.StackResponse{ID: &expectedId}
+		return &models_cloudbreak.StackResponse{ID: expectedId}
 	}
 	var actualId int64
 	var actualUpdate models_cloudbreak.UpdateStack
@@ -161,10 +161,10 @@ func TestResizeClusterImplStack(t *testing.T) {
 	if actualId != expectedId {
 		t.Errorf("id not match %d == %d", expectedId, actualId)
 	}
-	if actualUpdate.InstanceGroupAdjustment.InstanceGroup != WORKER {
+	if *actualUpdate.InstanceGroupAdjustment.InstanceGroup != WORKER {
 		t.Errorf("type not match %s == %s", WORKER, *actualUpdate.InstanceGroupAdjustment.InstanceGroup)
 	}
-	if actualUpdate.InstanceGroupAdjustment.ScalingAdjustment != expectedAdjustment {
+	if *actualUpdate.InstanceGroupAdjustment.ScalingAdjustment != expectedAdjustment {
 		t.Errorf("type not match %d == %d", expectedAdjustment, actualUpdate.InstanceGroupAdjustment.ScalingAdjustment)
 	}
 	if !*actualUpdate.InstanceGroupAdjustment.WithClusterEvent {
@@ -175,7 +175,7 @@ func TestResizeClusterImplStack(t *testing.T) {
 func TestResizeClusterImplCluster(t *testing.T) {
 	expectedId := int64(1)
 	getStack := func(string) *models_cloudbreak.StackResponse {
-		return &models_cloudbreak.StackResponse{ID: &expectedId}
+		return &models_cloudbreak.StackResponse{ID: expectedId}
 	}
 	var actualId int64
 	var actualUpdate models_cloudbreak.UpdateCluster
@@ -191,10 +191,10 @@ func TestResizeClusterImplCluster(t *testing.T) {
 	if actualId != expectedId {
 		t.Errorf("id does not match %d == %d", expectedId, actualId)
 	}
-	if actualUpdate.HostGroupAdjustment.HostGroup != WORKER {
+	if *actualUpdate.HostGroupAdjustment.HostGroup != WORKER {
 		t.Errorf("type does not match %s == %s", WORKER, *actualUpdate.HostGroupAdjustment.HostGroup)
 	}
-	if actualUpdate.HostGroupAdjustment.ScalingAdjustment != expectedAdjustment {
+	if *actualUpdate.HostGroupAdjustment.ScalingAdjustment != expectedAdjustment {
 		t.Errorf("type does not match %d == %d", expectedAdjustment, actualUpdate.HostGroupAdjustment.ScalingAdjustment)
 	}
 	if !*actualUpdate.HostGroupAdjustment.WithStackUpdate {
@@ -209,8 +209,8 @@ func TestResizeClusterInvalidWorkerCount(t *testing.T) {
 		for i := 0; i < 3; i++ {
 			instances = append(instances, &models_cloudbreak.InstanceMetaData{})
 		}
-		ig := []*models_cloudbreak.InstanceGroupResponse{{Group: WORKER, Metadata: instances}}
-		return &models_cloudbreak.StackResponse{ID: &expectedId, InstanceGroups: ig}
+		ig := []*models_cloudbreak.InstanceGroupResponse{{Group: &WORKER, Metadata: instances}}
+		return &models_cloudbreak.StackResponse{ID: expectedId, InstanceGroups: ig}
 	}
 	putCluster := func(params *cluster.PutClusterParams) error {
 		return nil
@@ -247,8 +247,8 @@ func TestResizeClusterInvalidComputeCount(t *testing.T) {
 		for i := 0; i < 1; i++ {
 			instances = append(instances, &models_cloudbreak.InstanceMetaData{})
 		}
-		ig := []*models_cloudbreak.InstanceGroupResponse{{Group: COMPUTE, Metadata: instances}}
-		return &models_cloudbreak.StackResponse{ID: &expectedId, InstanceGroups: ig}
+		ig := []*models_cloudbreak.InstanceGroupResponse{{Group: &COMPUTE, Metadata: instances}}
+		return &models_cloudbreak.StackResponse{ID: expectedId, InstanceGroups: ig}
 	}
 	putCluster := func(params *cluster.PutClusterParams) error {
 		return nil
@@ -283,19 +283,15 @@ func TestGenerateCreateSharedClusterSkeletonImplNotAvailable(t *testing.T) {
 
 	getBlueprint := func(name string) *models_cloudbreak.BlueprintResponse {
 		return &models_cloudbreak.BlueprintResponse{
-			Name: "blueprint",
-			AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
-				Blueprint: models_cloudbreak.Blueprint{
-					Name: &(&stringWrapper{"blueprint"}).s,
-				},
-			},
+			Name:            &(&stringWrapper{"blueprint"}).s,
+			AmbariBlueprint: "{\"Blueprints\": {\"blueprint_name\"\": \"blueprint\"}}",
 		}
 	}
 	getCluster := func(string) *models_cloudbreak.StackResponse {
 		return &models_cloudbreak.StackResponse{
-			Status:    &(&stringWrapper{"CREATED"}).s,
-			NetworkID: &(&int64Wrapper{int64(1)}).i,
-			Cluster:   &models_cloudbreak.ClusterResponse{Status: &(&stringWrapper{"CREATED"}).s}}
+			Status:    "CREATED",
+			NetworkID: 1,
+			Cluster:   &models_cloudbreak.ClusterResponse{Status: "CREATED"}}
 	}
 
 	fillSharedParameters(skeleton, getBlueprint, getCluster)
@@ -311,12 +307,8 @@ func TestGenerateCreateSharedClusterSkeletonImplMinimalConfig(t *testing.T) {
 
 	getBlueprint := func(name string) *models_cloudbreak.BlueprintResponse {
 		return &models_cloudbreak.BlueprintResponse{
-			Name: "blueprint",
-			AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
-				Blueprint: models_cloudbreak.Blueprint{
-					Name: &(&stringWrapper{"blueprint"}).s,
-				},
-			},
+			Name:            &(&stringWrapper{"blueprint"}).s,
+			AmbariBlueprint: "{\"Blueprints\": {\"blueprint_name\"\": \"blueprint\"}}",
 		}
 	}
 	getCluster := func(string) *models_cloudbreak.StackResponse {
@@ -324,9 +316,9 @@ func TestGenerateCreateSharedClusterSkeletonImplMinimalConfig(t *testing.T) {
 		np["internetGatewayId"] = "igw"
 		networResp := &models_cloudbreak.NetworkResponse{Parameters: np}
 		return &models_cloudbreak.StackResponse{
-			ID:        &(&int64Wrapper{int64(1)}).i,
-			NetworkID: &(&int64Wrapper{int64(1)}).i,
-			Status:    &(&stringWrapper{"AVAILABLE"}).s,
+			ID:        1,
+			NetworkID: 1,
+			Status:    "AVAILABLE",
 			Network:   networResp,
 		}
 	}
@@ -344,13 +336,9 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 
 	getBlueprint := func(name string) *models_cloudbreak.BlueprintResponse {
 		return &models_cloudbreak.BlueprintResponse{
-			Name: "blueprint",
-			AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
-				Blueprint: models_cloudbreak.Blueprint{
-					Name: &(&stringWrapper{"blueprint"}).s,
-				},
-			},
-			Inputs: []*models_cloudbreak.BlueprintParameter{{Name: &(&stringWrapper{"bp-param-name"}).s}},
+			Name:            &(&stringWrapper{"blueprint"}).s,
+			AmbariBlueprint: "{\"Blueprints\": {\"blueprint_name\"\": \"blueprint\"}}",
+			Inputs:          []*models_cloudbreak.BlueprintParameter{{Name: "bp-param-name"}},
 		}
 	}
 	getCluster := func(string) *models_cloudbreak.StackResponse {
@@ -359,10 +347,10 @@ func TestGenerateCreateSharedClusterSkeletonImplFullConfig(t *testing.T) {
 		np["subnetId"] = "subnetId"
 		network := &models_cloudbreak.NetworkResponse{Parameters: np}
 		return &models_cloudbreak.StackResponse{
-			ID:      &(&int64Wrapper{int64(1)}).i,
-			Status:  &(&stringWrapper{"AVAILABLE"}).s,
+			ID:      1,
+			Status:  "AVAILABLE",
 			Network: network,
-			Cluster: &models_cloudbreak.ClusterResponse{RdsConfigs: []*models_cloudbreak.RDSConfigResponse{{Name: "rds-name", Type: &(&stringWrapper{HIVE_RDS}).s}}},
+			Cluster: &models_cloudbreak.ClusterResponse{RdsConfigs: []*models_cloudbreak.RDSConfigResponse{{Name: &(&stringWrapper{"rds-name"}).s, Type: HIVE_RDS}}},
 		}
 	}
 

@@ -14,13 +14,13 @@ ifeq ($(CB_PORT),)
 endif
 
 deps:
-	go get github.com/tools/godep
+	go get -u github.com/golang/dep/cmd/dep
 
 format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 vet:
-	go vet -all github.com/hortonworks/hdc-cli/cli
+	go vet github.com/hortonworks/hdc-cli/cli
 
 test:
 	go test -race github.com/hortonworks/hdc-cli/cli

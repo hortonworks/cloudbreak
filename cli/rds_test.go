@@ -14,11 +14,11 @@ func TestListRDSConfigsImpl(t *testing.T) {
 	for i := 0; i < 3; i++ {
 		n := strconv.Itoa(i)
 		configs = append(configs, &models_cloudbreak.RDSConfigResponse{
-			HdpVersion:    "hdp-version" + n,
-			Name:          "rds-name" + n,
-			ConnectionURL: "jdbc:postgresql://lh:5432/p" + n,
-			DatabaseType:  POSTGRES + n,
-			Type:          &(&stringWrapper{HIVE_RDS}).s,
+			HdpVersion:    &(&stringWrapper{"hdp-version" + n}).s,
+			Name:          &(&stringWrapper{"rds-name" + n}).s,
+			ConnectionURL: &(&stringWrapper{"jdbc:postgresql://lh:5432/p" + n}).s,
+			DatabaseType:  &(&stringWrapper{POSTGRES + n}).s,
+			Type:          HIVE_RDS,
 		})
 	}
 	getConfigs := func(params *rdsconfigs.GetPublicsRdsParams) (*rdsconfigs.GetPublicsRdsOK, error) {
@@ -66,30 +66,30 @@ func TestCreateRDSConfigImpl(t *testing.T) {
 	var actual *models_cloudbreak.RDSConfig
 	postConfig := func(params *rdsconfigs.PostPublicRdsParams) (*rdsconfigs.PostPublicRdsOK, error) {
 		actual = params.Body
-		return &rdsconfigs.PostPublicRdsOK{Payload: &models_cloudbreak.RDSConfigResponse{ID: &expectedId}}, nil
+		return &rdsconfigs.PostPublicRdsOK{Payload: &models_cloudbreak.RDSConfigResponse{ID: expectedId}}, nil
 	}
 
 	createRDSConfigImpl(HIVE_RDS, finder, postConfig)
 
-	if actual.Name != finder(FlRdsName.Name) {
+	if *actual.Name != finder(FlRdsName.Name) {
 		t.Errorf("name not match %s == %s", finder(FlRdsName.Name), *actual.Name)
 	}
-	if actual.ConnectionUserName != finder(FlRdsUsername.Name) {
+	if *actual.ConnectionUserName != finder(FlRdsUsername.Name) {
 		t.Errorf("user name not match %s == %s", finder(FlRdsUsername.Name), *actual.ConnectionUserName)
 	}
-	if actual.ConnectionPassword != finder(FlRdsPassword.Name) {
+	if *actual.ConnectionPassword != finder(FlRdsPassword.Name) {
 		t.Errorf("password not match %s == %s", finder(FlRdsPassword.Name), *actual.ConnectionPassword)
 	}
-	if actual.ConnectionURL != finder(FlRdsUrl.Name) {
+	if *actual.ConnectionURL != finder(FlRdsUrl.Name) {
 		t.Errorf("url not match %s == %s", finder(FlRdsUrl.Name), *actual.ConnectionURL)
 	}
-	if actual.DatabaseType != finder(FlRdsDbType.Name) {
+	if *actual.DatabaseType != finder(FlRdsDbType.Name) {
 		t.Errorf("database type not match %s == %s", finder(FlRdsDbType.Name), *actual.DatabaseType)
 	}
 	if *actual.Validated != false {
 		t.Error("validated not match false")
 	}
-	if actual.HdpVersion != finder(FlHdpVersion.Name) {
+	if *actual.HdpVersion != finder(FlHdpVersion.Name) {
 		t.Errorf("database type not match %s == %s", finder(FlHdpVersion.Name), *actual.HdpVersion)
 	}
 }
@@ -97,7 +97,7 @@ func TestCreateRDSConfigImpl(t *testing.T) {
 func TestExtendRdsUrlJdbc(t *testing.T) {
 	expected := "jdbc:postgresql"
 	actual := extendRdsUrl(expected)
-	if actual != expected {
+	if *actual != expected {
 		t.Errorf("url not match %s == %s", expected, *actual)
 	}
 }
@@ -105,7 +105,7 @@ func TestExtendRdsUrlJdbc(t *testing.T) {
 func TestExtendRdsUrlPostgressql(t *testing.T) {
 	actual := extendRdsUrl("lh:5432/p")
 	expected := "jdbc:postgresql://lh:5432/p"
-	if actual != expected {
+	if *actual != expected {
 		t.Errorf("url not match %s == %s", expected, *actual)
 	}
 }

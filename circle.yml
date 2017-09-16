@@ -1,6 +1,6 @@
 machine:
   environment:
-    GODIST: "go1.7.1.linux-amd64.tar.gz"
+    GODIST: "go1.8.3.linux-amd64.tar.gz"
     
   post:
     - mkdir -p download
@@ -11,3 +11,8 @@ machine:
 dependencies:
   cache_directories:
     - ~/download
+
+test:
+  override:
+    - make vet
+    - make test

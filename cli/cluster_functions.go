@@ -232,25 +232,21 @@ func (c *ClusterSkeletonResult) fill(
 	}
 
 	keys := make([]string, 0, len(securityMap))
-	for k, _ := range securityMap {
+	for k := range securityMap {
 		keys = append(keys, k)
 	}
 	c.RemoteAccess = strings.Join(keys, ",")
 
 	if stack.Cluster != nil {
-		//c.Configurations = stack.Cluster.BlueprintCustomProperties // que? TODO?
+		var configs []Configurations
+		err := json.Unmarshal([]byte(stack.Cluster.BlueprintCustomProperties), &configs)
+		if err != nil {
+			logErrorAndExit(err)
+		}
+		c.Configurations = configs
 	}
 
-	var tags = stack.UserDefinedTags
-	//if len(stack.Tags) > 0 {
-	//	userTags := stack.Tags[USER_TAGS]
-	//	if userTags != nil {
-	//		for k, v := range userTags.(map[string]interface{}) {
-	//			tags[k] = v.(string)
-	//		}
-	//	}
-	//}
-	c.Tags = tags
+	c.Tags = stack.UserDefinedTags
 
 	if autoscaling != nil && (autoscaling.Configuration != nil || len(autoscaling.Policies) > 0) {
 		c.Autoscaling = autoscaling

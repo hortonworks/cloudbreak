@@ -453,25 +453,31 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		enableKnoxGateway := true
 		gatewayType := "CENTRAL"
 
+		customProperties, err := json.Marshal(skeleton.Configurations)
+		if err != nil {
+			logErrorAndExit(err)
+		}
 		clusterReq := models_cloudbreak.ClusterRequest{
-			Name:              &skeleton.ClusterName,
-			Blueprint:         createBlueprintRequest(skeleton, blueprint),
-			ConnectedCluster:  connectedClusterRequest,
-			HostGroups:        hostGroups,
-			UserName:          &skeleton.ClusterAndAmbariUser,
-			Password:          &skeleton.ClusterAndAmbariPassword,
-			RdsConfigJsons:    rdsConfigs,
-			RdsConfigIds:      rdsConfigIds,
-			BlueprintInputs:   inputs,
-			LdapConfigID:      *ldapConfigId,
-			ValidateBlueprint: &(&boolWrapper{false}).b,
-			//BlueprintCustomProperties: skeleton.Configurations, // que? TODO?
+			Name:                      &skeleton.ClusterName,
+			Blueprint:                 createBlueprintRequest(skeleton, blueprint),
+			ConnectedCluster:          connectedClusterRequest,
+			HostGroups:                hostGroups,
+			UserName:                  &skeleton.ClusterAndAmbariUser,
+			Password:                  &skeleton.ClusterAndAmbariPassword,
+			RdsConfigJsons:            rdsConfigs,
+			RdsConfigIds:              rdsConfigIds,
+			BlueprintInputs:           inputs,
+			ValidateBlueprint:         &(&boolWrapper{false}).b,
+			BlueprintCustomProperties: string(customProperties),
 			Gateway: &models_cloudbreak.GatewayJSON{
 				EnableGateway:   &enableKnoxGateway,
 				ExposedServices: exposedServices,
 				GatewayType:     gatewayType,
 			},
 			AmbariDatabaseDetails: ambariDatabase,
+		}
+		if ldapConfigId != nil {
+			clusterReq.LdapConfigID = *ldapConfigId
 		}
 
 		resp, err := postCluster(&cluster.PostClusterParams{ID: stackId, Body: &clusterReq})
@@ -766,6 +772,6 @@ func getBaseSkeleton() *ClusterSkeleton {
 		},
 		HiveMetastore:  &HiveMetastore{},
 		DruidMetastore: &DruidMetastore{},
-		Configurations: []Configurations{}, // que? TODO?
+		Configurations: []Configurations{},
 	}
 }

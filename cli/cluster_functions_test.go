@@ -11,22 +11,18 @@ import (
 func clusterSkeleton(stackParams map[string]string, credParams map[string]interface{}, netParams map[string]interface{}) (ClusterSkeletonResult, *models_cloudbreak.StackResponse, *models_cloudbreak.CredentialResponse, *models_cloudbreak.BlueprintResponse, *models_cloudbreak.NetworkResponse) {
 	skeleton := ClusterSkeletonResult{}
 	sr := models_cloudbreak.StackResponse{
-		Name:         "stack-name",
-		Status:       &(&stringWrapper{"status"}).s,
-		StatusReason: &(&stringWrapper{"status-reason"}).s,
-		HdpVersion:   &(&stringWrapper{"hdp-version"}).s,
+		Name:         &(&stringWrapper{"stack-name"}).s,
+		Status:       "status",
+		StatusReason: "status-reason",
+		HdpVersion:   "hdp-version",
 		Parameters:   stackParams,
 	}
 	cr := models_cloudbreak.CredentialResponse{
 		Parameters: credParams,
 	}
 	br := models_cloudbreak.BlueprintResponse{
-		Name: "blueprint-name",
-		AmbariBlueprint: models_cloudbreak.AmbariBlueprint{
-			Blueprint: models_cloudbreak.Blueprint{
-				Name: &(&stringWrapper{"ambari-blueprint-name"}).s,
-			},
-		},
+		Name:            &(&stringWrapper{"blueprint-name"}).s,
+		AmbariBlueprint: "{\"Blueprints\": {\"blueprint_name\": \"ambari-blueprint-name\"}}",
 	}
 	nj := models_cloudbreak.NetworkResponse{
 		Parameters: netParams,
@@ -46,22 +42,22 @@ func TestFillMinimumSet(t *testing.T) {
 
 	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
-	if skeleton.ClusterName != sr.Name {
+	if skeleton.ClusterName != *sr.Name {
 		t.Errorf("name not match %s == %s", *sr.Name, skeleton.ClusterName)
 	}
 	if skeleton.InstanceRole != "" {
 		t.Errorf("instance role not empty %s", skeleton.RemoteAccess)
 	}
-	if skeleton.Status != *sr.Status {
-		t.Errorf("status not match %s == %s", *sr.Status, skeleton.Status)
+	if skeleton.Status != sr.Status {
+		t.Errorf("status not match %s == %s", sr.Status, skeleton.Status)
 	}
-	if skeleton.StatusReason != *sr.StatusReason {
-		t.Errorf("status reason not match %s == %s", *sr.StatusReason, skeleton.StatusReason)
+	if skeleton.StatusReason != sr.StatusReason {
+		t.Errorf("status reason not match %s == %s", sr.StatusReason, skeleton.StatusReason)
 	}
 	if skeleton.HDPVersion != "hdp" {
 		t.Errorf("HDP version not match hdp == %s", skeleton.HDPVersion)
 	}
-	if skeleton.ClusterType != br.Name {
+	if skeleton.ClusterType != *br.Name {
 		t.Errorf("cluster type not match %s == %s", *br.Name, skeleton.ClusterType)
 	}
 	if skeleton.Network != nil {
@@ -125,8 +121,8 @@ func TestFillWithRDSConfig(t *testing.T) {
 
 	rdsName := "rds-name"
 	rcr := []*models_cloudbreak.RDSConfigResponse{{
-		Name: rdsName,
-		Type: &(&stringWrapper{HIVE_RDS}).s,
+		Name: &rdsName,
+		Type: HIVE_RDS,
 	},
 	}
 
@@ -143,29 +139,29 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
 	groups := make([]*models_cloudbreak.InstanceGroupResponse, 0)
-	groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Group: MASTER, NodeCount: 1})
-	groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Group: WORKER, NodeCount: 2})
+	groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Group: &MASTER, NodeCount: &(&int32Wrapper{1}).i})
+	groups = append(groups, &models_cloudbreak.InstanceGroupResponse{Group: &WORKER, NodeCount: &(&int32Wrapper{2}).i})
 	sr.InstanceGroups = groups
 
 	n := int32(10)
 
 	tm := make(map[string]*models_cloudbreak.TemplateResponse)
 	tm[MASTER] = &models_cloudbreak.TemplateResponse{
-		InstanceType: "master",
-		VolumeType:   &(&stringWrapper{"type"}).s,
-		VolumeSize:   n,
-		VolumeCount:  n,
+		InstanceType: &(&stringWrapper{"master"}).s,
+		VolumeType:   "type",
+		VolumeSize:   &n,
+		VolumeCount:  &n,
 	}
 	tm[WORKER] = &models_cloudbreak.TemplateResponse{
-		InstanceType: "worker",
-		VolumeType:   &(&stringWrapper{"type"}).s,
-		VolumeSize:   n,
-		VolumeCount:  n,
+		InstanceType: &(&stringWrapper{"worker"}).s,
+		VolumeType:   "type",
+		VolumeSize:   &n,
+		VolumeCount:  &n,
 	}
 
 	sm := make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	rules := make([]*models_cloudbreak.SecurityRuleResponse, 0)
-	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "ports"})
+	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: &(&stringWrapper{"ports"}).s})
 	sm["master"] = rules
 
 	skeleton.fill(sr, cr, br, tm, sm, nj, nil, nil, nil, nil)
@@ -173,31 +169,31 @@ func TestFillWithRDSConfigsdrgwsr(t *testing.T) {
 	if skeleton.Master.InstanceCount != 1 {
 		t.Errorf("master instance count not match 1 == %d", skeleton.Master.InstanceCount)
 	}
-	if skeleton.Master.InstanceType != tm[MASTER].InstanceType {
+	if skeleton.Master.InstanceType != *tm[MASTER].InstanceType {
 		t.Errorf("master instance type not match %s == %s", *tm[MASTER].InstanceType, skeleton.Master.InstanceType)
 	}
-	if skeleton.Master.VolumeType != *tm[MASTER].VolumeType {
-		t.Errorf("master volume type not match %s == %s", *tm[MASTER].VolumeType, skeleton.Master.VolumeType)
+	if skeleton.Master.VolumeType != tm[MASTER].VolumeType {
+		t.Errorf("master volume type not match %s == %s", tm[MASTER].VolumeType, skeleton.Master.VolumeType)
 	}
-	if *skeleton.Master.VolumeSize != tm[MASTER].VolumeSize {
+	if *skeleton.Master.VolumeSize != *tm[MASTER].VolumeSize {
 		t.Errorf("master volume size not match %d == %d", tm[MASTER].VolumeSize, skeleton.Master.VolumeSize)
 	}
-	if *skeleton.Master.VolumeCount != tm[MASTER].VolumeCount {
+	if *skeleton.Master.VolumeCount != *tm[MASTER].VolumeCount {
 		t.Errorf("master volume count not match %d == %d", tm[MASTER].VolumeCount, skeleton.Master.VolumeCount)
 	}
 	if skeleton.Worker.InstanceCount != 2 {
 		t.Errorf("worker instance count not match 2 == %d", skeleton.Worker.InstanceCount)
 	}
-	if skeleton.Worker.InstanceType != tm[WORKER].InstanceType {
+	if skeleton.Worker.InstanceType != *tm[WORKER].InstanceType {
 		t.Errorf("worker instance type not match %s == %s", *tm[WORKER].InstanceType, skeleton.Worker.InstanceType)
 	}
-	if skeleton.Worker.VolumeType != *tm[WORKER].VolumeType {
-		t.Errorf("worker volume type not match %s == %s", *tm[WORKER].VolumeType, skeleton.Worker.VolumeType)
+	if skeleton.Worker.VolumeType != tm[WORKER].VolumeType {
+		t.Errorf("worker volume type not match %s == %s", tm[WORKER].VolumeType, skeleton.Worker.VolumeType)
 	}
-	if *skeleton.Worker.VolumeSize != tm[WORKER].VolumeSize {
+	if *skeleton.Worker.VolumeSize != *tm[WORKER].VolumeSize {
 		t.Errorf("worker volume size not match %d == %d", tm[WORKER].VolumeSize, skeleton.Worker.VolumeSize)
 	}
-	if *skeleton.Worker.VolumeCount != tm[WORKER].VolumeCount {
+	if *skeleton.Worker.VolumeCount != *tm[WORKER].VolumeCount {
 		t.Errorf("worker volume count not match %d == %d", tm[WORKER].VolumeCount, skeleton.Worker.VolumeCount)
 	}
 }
@@ -226,7 +222,7 @@ func TestFillWithSecurityMap(t *testing.T) {
 
 	sm := make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	rules := make([]*models_cloudbreak.SecurityRuleResponse, 0)
-	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "22,9443,8443"})
+	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: &(&stringWrapper{"22,9443,8443"}).s})
 	sm["master"] = rules
 	sm["worker"] = rules
 
@@ -250,7 +246,7 @@ func TestFillWithSecurityMapDefaultPorts(t *testing.T) {
 
 	sm := make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	rules := make([]*models_cloudbreak.SecurityRuleResponse, 0)
-	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: "22,9443"})
+	rules = append(rules, &models_cloudbreak.SecurityRuleResponse{Ports: &(&stringWrapper{"22,9443"}).s})
 	sm["master"] = rules
 
 	skeleton.fill(sr, cr, br, nil, sm, nj, nil, nil, nil, nil)
@@ -264,20 +260,20 @@ func TestFillWithCluster(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
 	inputs := make([]*models_cloudbreak.BlueprintInput, 0)
-	inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: &(&stringWrapper{"property"}).s, PropertyValue: &(&stringWrapper{"value"}).s})
+	inputs = append(inputs, &models_cloudbreak.BlueprintInput{Name: "property", PropertyValue: "value"})
 	sr.Cluster = &models_cloudbreak.ClusterResponse{
-		Status:          &(&stringWrapper{"cluster-status"}).s,
-		StatusReason:    &(&stringWrapper{"cluster-reason"}).s,
+		Status:          "cluster-status",
+		StatusReason:    "cluster-reason",
 		BlueprintInputs: inputs,
 	}
 
 	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
-	if skeleton.Status != *sr.Cluster.Status {
-		t.Errorf("status not match %s == %s", *sr.Cluster.Status, skeleton.Status)
+	if skeleton.Status != sr.Cluster.Status {
+		t.Errorf("status not match %s == %s", sr.Cluster.Status, skeleton.Status)
 	}
-	if skeleton.StatusReason != *sr.Cluster.StatusReason {
-		t.Errorf("status reason not match %s == %s", *sr.Cluster.StatusReason, skeleton.StatusReason)
+	if skeleton.StatusReason != sr.Cluster.StatusReason {
+		t.Errorf("status reason not match %s == %s", sr.Cluster.StatusReason, skeleton.StatusReason)
 	}
 
 }
@@ -297,27 +293,27 @@ func TestFillWitMixedHostStatuses(t *testing.T) {
 	host1 := "host1.example.com"
 	host2 := "host2.example.com"
 	metadata := []*models_cloudbreak.InstanceMetaData{
-		{DiscoveryFQDN: &host1,
-			InstanceGroup: &(&stringWrapper{MASTER}).s},
-		{DiscoveryFQDN: &host2,
-			InstanceGroup: &(&stringWrapper{WORKER}).s},
+		{DiscoveryFQDN: host1,
+			InstanceGroup: MASTER},
+		{DiscoveryFQDN: host2,
+			InstanceGroup: WORKER},
 	}
 	ig := []*models_cloudbreak.InstanceGroupResponse{{Metadata: metadata}}
 	hm := []*models_cloudbreak.HostMetadata{
-		{Name: host1,
-			State: &(&stringWrapper{UNHEALTHY}).s},
-		{Name: host2,
-			State: &(&stringWrapper{HEALTHY}).s},
+		{Name: &host1,
+			State: UNHEALTHY},
+		{Name: &host2,
+			State: HEALTHY},
 	}
 	hg := []*models_cloudbreak.HostGroupResponse{
-		{Name: MASTER,
+		{Name: &MASTER,
 			Metadata: hm},
 	}
 	cr := models_cloudbreak.ClusterResponse{
 		HostGroups: hg,
 	}
 	sr := models_cloudbreak.StackResponse{
-		Name:           "stack-name",
+		Name:           &(&stringWrapper{"stack-name"}).s,
 		InstanceGroups: ig,
 		Cluster:        &cr,
 	}
@@ -334,27 +330,27 @@ func TestFillWithHealthyHostStatuses(t *testing.T) {
 	host1 := "host1.example.com"
 	host2 := "host2.example.com"
 	metadata := []*models_cloudbreak.InstanceMetaData{
-		{DiscoveryFQDN: &host1,
-			InstanceGroup: &(&stringWrapper{MASTER}).s},
-		{DiscoveryFQDN: &host2,
-			InstanceGroup: &(&stringWrapper{WORKER}).s},
+		{DiscoveryFQDN: host1,
+			InstanceGroup: MASTER},
+		{DiscoveryFQDN: host2,
+			InstanceGroup: WORKER},
 	}
 	ig := []*models_cloudbreak.InstanceGroupResponse{{Metadata: metadata}}
 	hm := []*models_cloudbreak.HostMetadata{
-		{Name: host1,
-			State: &(&stringWrapper{HEALTHY}).s},
-		{Name: host2,
-			State: &(&stringWrapper{HEALTHY}).s},
+		{Name: &host1,
+			State: HEALTHY},
+		{Name: &host2,
+			State: HEALTHY},
 	}
 	hg := []*models_cloudbreak.HostGroupResponse{
-		{Name: MASTER,
+		{Name: &MASTER,
 			Metadata: hm},
 	}
 	cr := models_cloudbreak.ClusterResponse{
 		HostGroups: hg,
 	}
 	sr := models_cloudbreak.StackResponse{
-		Name:           "stack-name",
+		Name:           &(&stringWrapper{"stack-name"}).s,
 		InstanceGroups: ig,
 		Cluster:        &cr,
 	}
@@ -371,15 +367,15 @@ func TestFillWithUnknownHostStatuses(t *testing.T) {
 	host1 := "host1.example.com"
 	host2 := "host2.example.com"
 	metadata := []*models_cloudbreak.InstanceMetaData{
-		{DiscoveryFQDN: &host1,
-			InstanceGroup: &(&stringWrapper{MASTER}).s},
-		{DiscoveryFQDN: &host2,
-			InstanceGroup: &(&stringWrapper{WORKER}).s},
+		{DiscoveryFQDN: host1,
+			InstanceGroup: MASTER},
+		{DiscoveryFQDN: host2,
+			InstanceGroup: WORKER},
 	}
 	ig := []*models_cloudbreak.InstanceGroupResponse{{Metadata: metadata}}
 	cr := models_cloudbreak.ClusterResponse{}
 	sr := models_cloudbreak.StackResponse{
-		Name:           "stack-name",
+		Name:           &(&stringWrapper{"stack-name"}).s,
 		InstanceGroups: ig,
 		Cluster:        &cr,
 	}
@@ -395,12 +391,12 @@ func TestFillWithClusterAvailable(t *testing.T) {
 	skeleton, sr, cr, br, nj := clusterSkeleton(nil, nil, defaultNetworkParams())
 
 	sr.Cluster = &models_cloudbreak.ClusterResponse{
-		Status: &(&stringWrapper{"AVAILABLE"}).s,
+		Status: "AVAILABLE",
 	}
 
 	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
-	if skeleton.Status != *sr.Status {
-		t.Errorf("status not match %s == %s", *sr.Status, skeleton.Status)
+	if skeleton.Status != sr.Status {
+		t.Errorf("status not match %s == %s", sr.Status, skeleton.Status)
 	}
 }
