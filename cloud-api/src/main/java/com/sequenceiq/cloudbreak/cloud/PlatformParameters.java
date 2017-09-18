@@ -149,7 +149,7 @@ public interface PlatformParameters {
                 String[] keyValue = entry.split(":");
                 regions.put(platform(keyValue[0]), Region.region(keyValue[1]));
             }
-            Region platformRegion = regions.get(platforName());
+            Region platformRegion = regions.get(platform(platforName()));
             if (platformRegion != null && !isEmpty(platformRegion.value())) {
                 return getRegionByName(platformRegion.value());
             }
