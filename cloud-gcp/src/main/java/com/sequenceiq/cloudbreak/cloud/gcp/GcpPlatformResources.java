@@ -55,7 +55,7 @@ public class GcpPlatformResources implements PlatformResources {
                     }
                 }
 
-                CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), subnets, properties);
+                CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), network.getId().toString(), subnets, properties);
                 cloudNetworks.add(cloudNetwork);
             }
 

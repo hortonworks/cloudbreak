@@ -47,7 +47,7 @@ public class AzurePlatformResources implements PlatformResources {
                 properties.put("dnsServerIPs", network.dnsServerIPs());
                 properties.put("resourceGroupName", network.resourceGroupName());
 
-                CloudNetwork cloudNetwork = new CloudNetwork(network.name(), subnets, properties);
+                CloudNetwork cloudNetwork = new CloudNetwork(network.name(), network.id(), subnets, properties);
                 if (result.get(actualRegion) == null) {
                     result.put(actualRegion, new HashSet<>());
                 }
