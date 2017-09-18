@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Entity
 public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup> {
 
@@ -137,6 +139,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         this.attributes = attributes;
     }
 
+    @SuppressFBWarnings("EQ_COMPARETO_USE_OBJECT_EQUALS")
     @Override
     public int compareTo(InstanceGroup o) {
         return groupName.compareTo(o.groupName);

@@ -29,7 +29,7 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
     @BeforeMethod
     public void setContextParams() {
         IntegrationTestContext itContext = getItContext();
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
+        Assert.assertNotNull("Stack id is mandatory.", itContext.getContextParam(CloudbreakITContextConstants.STACK_ID));
     }
 
     @Parameters({"region", "hostGroupToCheck", "scalingAdjustment"})

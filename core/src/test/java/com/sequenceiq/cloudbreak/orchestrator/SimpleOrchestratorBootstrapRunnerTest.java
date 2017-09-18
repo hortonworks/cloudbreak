@@ -43,11 +43,11 @@ public class SimpleOrchestratorBootstrapRunnerTest {
 
     }
 
-    private class MockExitCriteriaModel extends ExitCriteriaModel {
+    private static class MockExitCriteriaModel extends ExitCriteriaModel {
 
     }
 
-    private class MockExitCriteria implements ExitCriteria {
+    private static class MockExitCriteria implements ExitCriteria {
 
         @Override
         public boolean isExitNeeded(ExitCriteriaModel exitCriteriaModel) {

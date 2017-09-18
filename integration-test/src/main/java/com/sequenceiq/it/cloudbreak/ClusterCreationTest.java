@@ -101,7 +101,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         for (HostGroup hostgroup : hostGroups) {
             HostGroupRequest hostGroupBase = new HostGroupRequest();
             hostGroupBase.setName(hostgroup.getName());
-            if (Boolean.TRUE == autoRecoveryMode) {
+            if (Boolean.TRUE.equals(autoRecoveryMode)) {
                 hostGroupBase.setRecoveryMode(RecoveryMode.AUTO);
             }
             ConstraintJson constraintJson = new ConstraintJson();

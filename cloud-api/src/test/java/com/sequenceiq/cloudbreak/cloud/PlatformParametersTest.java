@@ -70,7 +70,7 @@ public class PlatformParametersTest {
         Assert.assertEquals(null, region);
     }
 
-    class TestPlatformParameters implements PlatformParameters {
+    static class TestPlatformParameters implements PlatformParameters {
 
         private String regionDefinition = "test:testRegion-4";
 

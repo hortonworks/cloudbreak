@@ -27,8 +27,8 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
     @BeforeMethod
     public void setContextParameters() {
         IntegrationTestContext itContext = getItContext();
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.STACK_ID), "Stack id is mandatory.");
-        Assert.assertNotNull(itContext.getContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT, AutoscaleClient.class));
+        Assert.assertNotNull("Stack id is mandatory.", itContext.getContextParam(CloudbreakITContextConstants.STACK_ID));
+        Assert.assertNotNull("Autoscale is mandatory.", itContext.getContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT));
     }
 
     @Test

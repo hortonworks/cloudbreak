@@ -42,7 +42,7 @@ public class NetworkConfigurationValidatorTest {
 
         @Override
         public boolean equals(Object obj) {
-            return false;
+            return this == obj;
         }
 
         @Override

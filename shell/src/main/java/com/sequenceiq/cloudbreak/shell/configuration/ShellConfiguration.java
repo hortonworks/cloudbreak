@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient.CloudbreakClientBuilder
 import com.sequenceiq.cloudbreak.client.SSLConnectionException;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 /**
  * Spring bean definitions.
  */
@@ -62,6 +64,7 @@ public class ShellConfiguration {
         return new PropertySourcesPlaceholderConfigurer();
     }
 
+    @SuppressFBWarnings("DM_EXIT")
     @Bean
     public CloudbreakClient cloudbreakClient() {
         try {

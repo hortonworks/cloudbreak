@@ -28,9 +28,11 @@ import com.sequenceiq.cloudbreak.core.flow2.config.FlowConfiguration;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import reactor.bus.Event;
 import reactor.bus.Event.Headers;
 
+@SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class Flow2HandlerTest {
 
     public static final String FLOW_ID = "flowId";

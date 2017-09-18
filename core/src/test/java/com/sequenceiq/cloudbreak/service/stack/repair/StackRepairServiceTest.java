@@ -121,7 +121,7 @@ public class StackRepairServiceTest {
         when(instanceMetaDataRepository.findByInstanceId(stackId, instanceId)).thenReturn(imd1);
     }
 
-    private class StackRepairFlowSubmitterMatcher extends ArgumentMatcher<StackRepairFlowSubmitter> {
+    private static class StackRepairFlowSubmitterMatcher extends ArgumentMatcher<StackRepairFlowSubmitter> {
 
         private final Long expectedStackId;
 

@@ -19,7 +19,7 @@ public class StackUnderOperationService {
     }
 
     public void set(Long stackId) {
-        if (ON_LOCAL.get() == Boolean.TRUE) {
+        if (Boolean.TRUE.equals(ON_LOCAL.get())) {
             STACK_ID_LOCAL.set(stackId);
         } else {
             ON_LOCAL.remove();

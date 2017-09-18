@@ -62,6 +62,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Component
 public class SaltOrchestrator implements HostOrchestrator {
 
@@ -133,6 +135,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void runService(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorException {
@@ -208,6 +211,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void changePrimaryGateway(GatewayConfig formerGateway, GatewayConfig newPrimaryGateway, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {
@@ -270,6 +274,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public void upgradeAmbari(GatewayConfig gatewayConfig, Set<String> target, Set<Node> allNodes, SaltConfig pillarConfig,
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException {

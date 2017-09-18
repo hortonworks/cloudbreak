@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
-import com.sequenceiq.cloudbreak.api.model.AmbariAddressJson;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.Ambari;
@@ -102,8 +101,6 @@ public class ClusterCreationEvaluator implements Runnable {
 
     private AmbariStack createAmbariStack(AutoscaleStackResponse stack) {
         String host = stack.getAmbariServerIp();
-        AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
-        ambariAddressJson.setAmbariAddress(host);
         String gatewayPort = String.valueOf(stack.getGatewayPort());
         SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(stack.getStackId());
         return new AmbariStack(new Ambari(host, gatewayPort, stack.getUserName(), stack.getPassword()), stack.getStackId(), securityConfig);

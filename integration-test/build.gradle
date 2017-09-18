@@ -61,6 +61,7 @@ dependencies {
   compile ("org.uncommons:reportng:1.1.4") {
     exclude group: "velocity"
   }
+  compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
   runtime group: 'com.google.inject',             name: 'guice',                          version: '3.0'
   runtime group: 'org.hibernate',                 name: 'hibernate-validator',            version: hibernateValidatorVersion
 }

@@ -37,6 +37,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(SaltStates.class)
 public class SaltJobIdTrackerTest {
@@ -49,6 +51,7 @@ public class SaltJobIdTrackerTest {
         MockitoAnnotations.initMocks(this);
     }
 
+    @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     @Test
     public void callWithNotStarted() throws Exception {
         String jobId = "1";

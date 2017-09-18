@@ -63,12 +63,12 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenPreferencesShouldNotBeValidated() throws Exception {
+    public void testValidateShouldNotThrowExceptionWhenPreferencesShouldNotBeValidated() throws AccountPreferencesValidationFailed {
         underTest.validate(stack, EMPTY_STRING, EMPTY_STRING);
     }
 
     @Test(expected = AccountPreferencesValidationFailed.class)
-    public void testValidateShouldThrowExceptionWhenTheStackNodeCountIsGreaterThanTheAccountMaximum() throws Exception {
+    public void testValidateShouldThrowExceptionWhenTheStackNodeCountIsGreaterThanTheAccountMaximum() throws AccountPreferencesValidationFailed {
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(4L);
         when(stack.getFullNodeCount()).thenReturn(5);
 
@@ -76,7 +76,7 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheStackNodeCountIsLessThanTheAccountMaximum() throws Exception {
+    public void testValidateShouldNotThrowExceptionWhenTheStackNodeCountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationFailed {
         when(preferences.getMaxNumberOfNodesPerCluster()).thenReturn(4L);
         when(stack.getFullNodeCount()).thenReturn(3);
 
@@ -84,7 +84,8 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test(expected = AccountPreferencesValidationFailed.class)
-    public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountIsGreaterOrEqualThanTheAccountMaximum() throws Exception {
+    public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountIsGreaterOrEqualThanTheAccountMaximum()
+            throws AccountPreferencesValidationFailed {
         when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
         Set stacks = Mockito.mock(Set.class);
         when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
@@ -94,7 +95,7 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountIsLessThanTheAccountMaximum() throws Exception {
+    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountIsLessThanTheAccountMaximum() throws AccountPreferencesValidationFailed {
         when(preferences.getMaxNumberOfClusters()).thenReturn(400L);
         Set stacks = Mockito.mock(Set.class);
         when(stackService.retrieveAccountStacks(anyString())).thenReturn(stacks);
@@ -104,7 +105,8 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test(expected = AccountPreferencesValidationFailed.class)
-    public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsGreaterOrEqualThanTheAccountMaximum() throws Exception {
+    public void testValidateShouldThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsGreaterOrEqualThanTheAccountMaximum()
+            throws AccountPreferencesValidationFailed {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
         Set stacks = Mockito.mock(Set.class);
         when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
@@ -114,7 +116,8 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsLessThanTheAccountMaximum() throws Exception {
+    public void testValidateShouldNotThrowExceptionWhenTheNumberOfClusterInAccountForAUserIsLessThanTheAccountMaximum()
+            throws AccountPreferencesValidationFailed {
         when(preferences.getMaxNumberOfClustersPerUser()).thenReturn(4L);
         Set stacks = Mockito.mock(Set.class);
         when(stackService.retrieveOwnerStacks(anyString())).thenReturn(stacks);
@@ -124,7 +127,7 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test(expected = AccountPreferencesValidationFailed.class)
-    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpired() throws Exception {
+    public void testValidateShouldThrowExceptionWhenTheUserDemoTimeExpired() throws AccountPreferencesValidationFailed {
         Calendar calendar = Calendar.getInstance();
         calendar.roll(Calendar.HOUR_OF_DAY, -1);
         when(preferences.getUserTimeToLive()).thenReturn(40000L);
@@ -136,7 +139,7 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheUserDemoTimeHasNotExpiredYet() throws Exception {
+    public void testValidateShouldNotThrowExceptionWhenTheUserDemoTimeHasNotExpiredYet() throws AccountPreferencesValidationFailed {
         Calendar calendar = Calendar.getInstance();
         calendar.roll(Calendar.MINUTE, -1);
         when(preferences.getUserTimeToLive()).thenReturn(65000L);
@@ -148,7 +151,7 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test(expected = AccountPreferencesValidationFailed.class)
-    public void testValidateShouldThrowExceptionWhenTheStackContainsNotAllowedInstanceTypes() throws Exception {
+    public void testValidateShouldThrowExceptionWhenTheStackContainsNotAllowedInstanceTypes() throws AccountPreferencesValidationFailed {
         String n1St4Type = "n1-standard-4";
         List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, "n1-standard-8", "n1-standard-16");
         when(preferences.getAllowedInstanceTypes()).thenReturn(allowedInstanceTypes);
@@ -164,7 +167,7 @@ public class AccountPreferencesValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenTheStackContainsOnlyAllowedInstanceTypes() throws Exception {
+    public void testValidateShouldNotThrowExceptionWhenTheStackContainsOnlyAllowedInstanceTypes() throws AccountPreferencesValidationFailed {
         String n1St4Type = "n1-standard-4";
         String n1St6Type = "n1-standard-8";
         List<String> allowedInstanceTypes = Arrays.asList(n1St4Type, n1St6Type, "n1-standard-16");

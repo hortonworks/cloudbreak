@@ -52,6 +52,8 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.PollingResult;
 import com.sequenceiq.cloudbreak.service.PollingService;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Component
 public class ClusterBootstrapper {
 
@@ -130,6 +132,7 @@ public class ClusterBootstrapper {
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @SuppressWarnings("unchecked")
     public void bootstrapOnHost(Stack stack) throws CloudbreakException {
         Set<Node> nodes = new HashSet<>();

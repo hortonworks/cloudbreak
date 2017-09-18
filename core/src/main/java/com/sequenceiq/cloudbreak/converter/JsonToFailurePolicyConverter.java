@@ -7,11 +7,12 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 
 @Component
 public class JsonToFailurePolicyConverter extends AbstractConversionServiceAwareConverter<FailurePolicyRequest, FailurePolicy> {
+
     @Override
     public FailurePolicy convert(FailurePolicyRequest json) {
         FailurePolicy stackFailurePolicy = new FailurePolicy();
         stackFailurePolicy.setAdjustmentType(json.getAdjustmentType());
-        stackFailurePolicy.setThreshold(json.getThreshold() == null ? 0 : json.getThreshold());
+        stackFailurePolicy.setThreshold(json.getThreshold() == null ? Long.valueOf(0L) : json.getThreshold());
         return stackFailurePolicy;
     }
 }
