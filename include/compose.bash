@@ -358,6 +358,9 @@ smartsense:
         - CAPTURE_CRON_EXPRESSION
         - UAA_FLEX_USAGE_CLIENT_ID
         - UAA_FLEX_USAGE_CLIENT_SECRET
+        - SMARTSENSE_UPLOAD_HOST
+        - SMARTSENSE_UPLOAD_USERNAME
+        - SMARTSENSE_UPLOAD_PASSWORD
     dns: $PRIVATE_IP
     volumes:
         - .:/var/lib/cloudbreak-deployment
@@ -481,6 +484,9 @@ cloudbreak:
         - CB_COMPONENT_ID
         - CB_COMPONENT_CREATED
         - CB_COMPONENT_CLUSTER_ID
+        - SMARTSENSE_UPLOAD_HOST
+        - SMARTSENSE_UPLOAD_USERNAME
+        - SMARTSENSE_UPLOAD_PASSWORD
     labels:
       - traefik.port=8080
       - traefik.frontend.rule=PathPrefix:/cb/
