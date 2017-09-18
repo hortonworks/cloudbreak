@@ -10,12 +10,15 @@ public class PlatformNetworkResponse implements JsonEntity {
 
     private String name;
 
+    private String id;
+
     private Map<String, String> subnets;
 
     private Map<String, Object> properties = new HashMap<>();
 
-    public PlatformNetworkResponse(String name, Map<String, String> subnets, Map<String, Object> properties) {
+    public PlatformNetworkResponse(String name, String id, Map<String, String> subnets, Map<String, Object> properties) {
         this.name = name;
+        this.id = id;
         this.subnets = subnets;
         this.properties = properties;
     }
@@ -26,6 +29,14 @@ public class PlatformNetworkResponse implements JsonEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Map<String, String> getSubnets() {

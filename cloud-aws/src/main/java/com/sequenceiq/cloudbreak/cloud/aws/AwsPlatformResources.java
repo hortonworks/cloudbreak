@@ -75,7 +75,7 @@ public class AwsPlatformResources implements PlatformResources {
                     for (Subnet subnet : subnets) {
                         subnetMap.put(subnet.getSubnetId(), subnet.getSubnetId());
                     }
-                    cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), subnetMap, properties));
+                    cloudNetworks.add(new CloudNetwork(vpc.getVpcId(), vpc.getVpcId(), subnetMap, properties));
                 }
                 result.put(actualRegion.value(), cloudNetworks);
             }

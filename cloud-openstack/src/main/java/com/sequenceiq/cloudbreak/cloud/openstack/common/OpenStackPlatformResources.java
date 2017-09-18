@@ -45,7 +45,6 @@ public class OpenStackPlatformResources implements PlatformResources {
             properties.put("providerPhyNet", network.getProviderPhyNet());
             properties.put("providerSegID", network.getProviderSegID());
             properties.put("tenantId", network.getTenantId());
-            properties.put("networkId", network.getId());
 
             Map<String, String> subnets = new HashMap<>();
 
@@ -56,7 +55,7 @@ public class OpenStackPlatformResources implements PlatformResources {
                 }
             }
 
-            CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), subnets, properties);
+            CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), network.getId(), subnets, properties);
             cloudNetworks.add(cloudNetwork);
         }
 
