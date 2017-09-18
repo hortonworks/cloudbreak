@@ -13,6 +13,7 @@ import javax.inject.Named;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -103,16 +104,21 @@ public class CachedUserDetailsService {
                     roles.add(IdentityUserRole.fromString(parts[ROLE_PART]));
                 }
             }
-            String userId = userNode.get("id").asText();
-            String email = userNode.get("userName").asText();
-            String givenName = getGivenName(userNode);
-            String familyName = getFamilyName(userNode);
-            String dateOfCreation = userNode.get("meta").get("created").asText();
-            Date created = parseUserCreated(dateOfCreation);
-            return new IdentityUser(userId, email, account, roles, givenName, familyName, created);
+            return createIdentityUser(roles, account, userNode);
         } catch (IOException e) {
             throw new UserDetailsUnavailableException("User details cannot be retrieved from identity server.", e);
         }
+    }
+
+    private IdentityUser createIdentityUser(List<IdentityUserRole> roles, String account, JsonNode userNode) {
+        String userId = userNode.get("id").asText();
+        String email = userNode.get("userName").asText();
+        String givenName = getGivenName(userNode);
+        String familyName = getFamilyName(userNode);
+        String dateOfCreation = userNode.get("meta").get("created").asText();
+        Date created = parseUserCreated(dateOfCreation);
+        account = StringUtils.isEmpty(account) ? userId : account;
+        return new IdentityUser(userId, email, account, roles, givenName, familyName, created);
     }
 
     private String getGivenName(JsonNode userNode) {
