@@ -51,7 +51,9 @@ public class OpenStackPlatformResources implements PlatformResources {
 
             List<? extends Subnet> neutronSubnets = network.getNeutronSubnets();
             for (Subnet neutronSubnet : neutronSubnets) {
-                subnets.put(neutronSubnet.getId(), neutronSubnet.getName());
+                if (neutronSubnet != null) {
+                    subnets.put(neutronSubnet.getId(), neutronSubnet.getName());
+                }
             }
 
             CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), subnets, properties);
