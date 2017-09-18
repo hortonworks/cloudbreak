@@ -18,7 +18,6 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
@@ -61,9 +60,6 @@ public class DefaultCloudbreakEventHostServiceTypeTest {
         stackEvent.setCloud(AWS);
 
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName("master");
-        instanceGroup.setTemplate(template);
         CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN
@@ -85,9 +81,6 @@ public class DefaultCloudbreakEventHostServiceTypeTest {
         stackEvent.setCloud("AZURE");
         stackEvent.setOwner("John");
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName("master");
-        instanceGroup.setTemplate(template);
         CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN
@@ -109,9 +102,6 @@ public class DefaultCloudbreakEventHostServiceTypeTest {
         given(stackRepository.findById(1L)).willReturn(stack);
         CloudbreakEvent stackEvent = new CloudbreakEvent();
         given(eventRepository.save(Mockito.any(CloudbreakEvent.class))).willReturn(stackEvent);
-        InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName("master");
-        instanceGroup.setTemplate(template);
         CloudbreakEventData eventData = new CloudbreakEventData(1L, "STACK_CREATED", "Stack created");
 
         //WHEN

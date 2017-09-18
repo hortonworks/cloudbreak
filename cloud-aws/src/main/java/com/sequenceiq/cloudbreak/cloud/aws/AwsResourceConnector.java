@@ -541,10 +541,12 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
             deleteKeyPair(ac);
-        } else {
+        } else if (resources != null) {
             AmazonEC2Client amazonEC2Client = awsClient.createAccess(credentialView, regionName);
             releaseReservedIp(amazonEC2Client, resources);
             LOGGER.info("No CloudFormation stack saved for stack.");
+        } else {
+            LOGGER.info("No resources to release.");
         }
         return check(ac, resources);
     }
@@ -606,7 +608,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 address = describeResult.getAddresses().get(0);
             } catch (AmazonServiceException e) {
                 if (e.getErrorMessage().equals("The allocation ID '" + elasticIpResource.getName() + "' does not exist")) {
-                    LOGGER.warn("Elastic IP with allocation ID '{}' not found. Ignoring IP release.");
+                    LOGGER.warn("Elastic IP with allocation ID '{}' not found. Ignoring IP release.", elasticIpResource.getName());
                     return;
                 } else {
                     throw e;

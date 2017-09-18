@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SshUserResponse;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 
 import reactor.bus.Event;
 
@@ -32,7 +31,6 @@ public class SshUserHandler implements CloudPlatformEventHandler<SshUserRequest>
         LOGGER.info("Received event: {}", event);
         SshUserRequest request = event.getData();
         CloudContext cloudContext = request.getCloudContext();
-        CloudCredential cloudCredential = request.getCloudCredential();
         request.getResult().onNext(new SshUserResponse(cloudContext, request.getLoginUserName()));
     }
 }

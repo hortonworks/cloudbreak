@@ -65,7 +65,7 @@ public class ManualRecoveryTest extends AbstractCloudbreakIntegrationTest {
         ClusterRepairRequest clusterRepairRequest = new ClusterRepairRequest();
         clusterRepairRequest.setHostGroups(hostgroupList);
         clusterRepairRequest.setRemoveOnly(removeOnly);
-        getCloudbreakClient().clusterEndpoint().repairCluster(Long.valueOf(stackId), clusterRepairRequest).toString();
+        getCloudbreakClient().clusterEndpoint().repairCluster(Long.valueOf(stackId), clusterRepairRequest);
         //THEN
         Map<String, String> desiredStatuses = new HashMap<>();
         desiredStatuses.put("status", "AVAILABLE");

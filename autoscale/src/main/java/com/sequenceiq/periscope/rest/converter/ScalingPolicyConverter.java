@@ -25,7 +25,9 @@ public class ScalingPolicyConverter extends AbstractConverter<ScalingPolicyJson,
         json.setId(source.getId());
         json.setAdjustmentType(source.getAdjustmentType());
         BaseAlert alert = source.getAlert();
-        json.setAlertId(alert == null ? null : alert.getId());
+        if (alert != null) {
+            json.setAlertId(alert.getId());
+        }
         json.setName(source.getName());
         json.setScalingAdjustment(source.getScalingAdjustment());
         json.setHostGroup(source.getHostGroup());

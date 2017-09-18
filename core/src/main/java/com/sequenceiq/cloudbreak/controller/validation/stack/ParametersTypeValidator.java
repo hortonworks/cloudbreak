@@ -9,11 +9,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Component
 public class ParametersTypeValidator implements ParameterValidator {
 
     private static final String SEPARATOR = ", ";
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public <O, E extends StackParamValidation> void validate(Map<String, O> parameters, List<E> paramsList) {
         for (E entry : paramsList) {

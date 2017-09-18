@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'info.solidsoft.pitest'
 
 sourceCompatibility = 1.8
 

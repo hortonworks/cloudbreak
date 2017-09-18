@@ -8,6 +8,8 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.net.util.SubnetUtils;
 import org.apache.commons.net.util.SubnetUtils.SubnetInfo;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class SubnetValidator implements ConstraintValidator<ValidSubnet, String> {
 
     @Override
@@ -48,9 +50,10 @@ public class SubnetValidator implements ConstraintValidator<ValidSubnet, String>
             parts = Arrays.stream(ip.split("\\.")).mapToInt(Integer::parseInt).toArray();
         }
 
+        @SuppressFBWarnings("EQ_COMPARETO_USE_OBJECT_EQUALS")
         @Override
         public int compareTo(Ip o) {
-            if (this == o) {
+            if (equals(o)) {
                 return 0;
             }
             for (int i = 0; i < parts.length; i++) {

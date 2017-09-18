@@ -53,6 +53,8 @@ import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResult;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResultStatus;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class ClusterCommands implements BaseCommands {
 
     private ShellContext shellContext;
@@ -84,6 +86,7 @@ public class ClusterCommands implements BaseCommands {
         }
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @CliCommand(value = "cluster create", help = "Create a new cluster based on a blueprint and optionally a recipe")
     public String createCluster(
             @CliOption(key = "userName", unspecifiedDefaultValue = "admin", help = "Username of the Ambari server") String userName,
@@ -290,7 +293,7 @@ public class ClusterCommands implements BaseCommands {
             if (!Strings.isNullOrEmpty(kerberosMasterKey)) {
                 kerberosRequest.setMasterKey(kerberosMasterKey);
             }
-            kerberosRequest.setTcpAllowed(kerberosTcpAllowed == null ? false : kerberosTcpAllowed);
+            kerberosRequest.setTcpAllowed(kerberosTcpAllowed == null ? Boolean.FALSE : kerberosTcpAllowed);
             if (!Strings.isNullOrEmpty(kerberosRealm)) {
                 kerberosRequest.setRealm(kerberosRealm);
             }

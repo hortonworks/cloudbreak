@@ -9,7 +9,7 @@ jobs:
           key: gradle-cache
       - run:
           name: build
-          command: ./gradlew -Penv=jenkins -b build.gradle clean build --info --stacktrace -x test
+          command: ./gradlew -Penv=jenkins -b build.gradle clean build --info --stacktrace --parallel -x test -x checkstyleMain -x checkstyleTest -x findbugsMain -x findbugsTest
       - save_cache:
           key: gradle-cache
           paths:
@@ -23,11 +23,16 @@ jobs:
   unit-test:
     docker:
       - image: circleci/openjdk:8-jdk
+    environment:
+      _JAVA_OPTIONS: "-Xmx2048m"
     steps:
       - checkout
       - run:
           name: test
-          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace
+          command: ./gradlew -Penv=jenkins -b build.gradle test --info --stacktrace --parallel
+      - run:
+          name: stylecheck
+          command: ./gradlew checkstyleMain checkstyleTest findbugsMain findbugsTest --stacktrace --max-workers 1
       - run:
           name: Save test results
           command: |

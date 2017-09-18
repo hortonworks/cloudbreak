@@ -32,8 +32,10 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import reactor.bus.EventBus;
 
+@SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
 public class AbstractActionTest {
 
     public static final String FLOW_ID = "flowId";
@@ -88,7 +90,7 @@ public class AbstractActionTest {
 
     @Test
     public void testFailedExecute() throws Exception {
-        RuntimeException exception = new UnsupportedOperationException();
+        RuntimeException exception = new UnsupportedOperationException("");
         Mockito.doThrow(exception).when(underTest).doExecute(any(CommonContext.class), any(Payload.class), any(Map.class));
         stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(Flow2Handler.FLOW_ID, FLOW_ID)));
         verify(underTest, times(1)).createFlowContext(eq(FLOW_ID), any(StateContext.class), any(Payload.class));

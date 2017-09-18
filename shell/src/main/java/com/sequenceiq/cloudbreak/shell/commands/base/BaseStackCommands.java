@@ -54,6 +54,8 @@ import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResult;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil.WaitResultStatus;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class BaseStackCommands implements BaseCommands, StackCommands {
 
     public static final long TIMEOUT = 5000L;
@@ -271,6 +273,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 && !shellContext.getActiveHostGroups().isEmpty()) && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public String create(String name, File sshKeyPath, String sshKeyUrl, String sshKeyString, StackRegion region, StackAvailabilityZone availabilityZone,
             boolean publicInAccount, OnFailureAction onFailureAction, AdjustmentType adjustmentType, Long threshold, boolean wait,

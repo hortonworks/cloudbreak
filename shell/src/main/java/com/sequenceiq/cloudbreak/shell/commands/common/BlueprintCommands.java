@@ -268,13 +268,15 @@ public class BlueprintCommands implements BaseCommands {
         Map<String, List<String>> map = new HashMap<>();
         try {
             JsonNode hostGroups = shellContext.objectMapper().readTree(json.getBytes()).get("host_groups");
-            for (JsonNode hostGroup : hostGroups) {
-                List<String> components = new ArrayList<>();
-                JsonNode componentsNodes = hostGroup.get("components");
-                for (JsonNode componentsNode : componentsNodes) {
-                    components.add(componentsNode.get("name").asText());
+            if (hostGroups != null) {
+                for (JsonNode hostGroup : hostGroups) {
+                    List<String> components = new ArrayList<>();
+                    JsonNode componentsNodes = hostGroup.get("components");
+                    for (JsonNode componentsNode : componentsNodes) {
+                        components.add(componentsNode.get("name").asText());
+                    }
+                    map.put(hostGroup.get("name").asText(), components);
                 }
-                map.put(hostGroup.get("name").asText(), components);
             }
         } catch (IOException ignored) {
             map = new HashMap<>();

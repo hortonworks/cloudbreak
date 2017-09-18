@@ -100,7 +100,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
 
     }
 
-    private class UnhealthyInstancesResultMatcher extends ArgumentMatcher<Event<UnhealthyInstancesDetectionResult>> {
+    private static class UnhealthyInstancesResultMatcher extends ArgumentMatcher<Event<UnhealthyInstancesDetectionResult>> {
 
         private final Set<String> expectedUnhealthyIds;
 
