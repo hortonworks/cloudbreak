@@ -8,6 +8,7 @@ import static org.apache.commons.lang3.StringUtils.isNoneEmpty;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -19,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.repackaged.com.google.common.base.Strings;
@@ -100,7 +100,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setAvailabilityZone(source.getAvailabilityZone());
         stack.setOnFailureActionAction(source.getOnFailureAction());
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED.getStatus(), "", DetailedStackStatus.PROVISION_REQUESTED));
-        stack.setInstanceGroups(convertInstanceGroups(source, stack));
+        Set<InstanceGroup> instanceGroups = convertInstanceGroups(source, stack);
+        stack.setInstanceGroups(instanceGroups);
         stack.setFailurePolicy(getConversionService().convert(source.getFailurePolicy(), FailurePolicy.class));
         stack.setParameters(getValidParameters(source));
         stack.setCreated(Calendar.getInstance().getTimeInMillis());
@@ -212,9 +213,13 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
 
     private Set<InstanceGroup> convertInstanceGroups(StackRequest source, Stack stack) {
         List<InstanceGroupRequest> instanceGroupRequests = source.getInstanceGroups();
-        Set<InstanceGroup> convertedSet = (Set<InstanceGroup>) getConversionService().convert(instanceGroupRequests,
-                TypeDescriptor.forObject(instanceGroupRequests),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroup.class)));
+        Set<InstanceGroup> convertedSet = new HashSet<>();
+        for (InstanceGroupRequest instanceGroupRequest : instanceGroupRequests) {
+            InstanceGroup instanceGroup = getConversionService().convert(instanceGroupRequest, InstanceGroup.class);
+            if (instanceGroup != null) {
+                convertedSet.add(getConversionService().convert(instanceGroupRequest, InstanceGroup.class));
+            }
+        }
         boolean gatewaySpecified = false;
         for (InstanceGroup instanceGroup : convertedSet) {
             instanceGroup.setStack(stack);
