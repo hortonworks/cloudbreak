@@ -1,0 +1,44 @@
+{
+  "name": "${stackName}",
+  "blueprintId": ${blueprintId},
+  "enableShipyard": false,
+  "hostGroups": [
+    {
+      "name": "master",
+      "constraint": {
+        "instanceGroupName": "master",
+        "hostCount": 1
+      },
+      "recipeIds": []
+    },
+    {
+      "name": "slave_1",
+      "constraint": {
+        "instanceGroupName": "slave_1",
+        "hostCount": 1
+      },
+      "recipeIds": []
+    }
+  ],
+  "password": "admin",
+  "userName": "admin",
+  "enableSecurity": false,
+  "gateway": {
+    "enableGateway": false,
+    "exposedServices": [
+      "ALL"
+    ]
+  },
+  "kerberos": {
+    "tcpAllowed": false
+  },
+  "ldapRequired": false,
+  "sssdConfigId": null,
+  "validateBlueprint": true,
+  "fileSystem": null,
+  "customContainer": null,
+  "customQueue": "default",
+  "ambariRepoDetailsJson": null,
+  "ambariStackDetails": null,
+  "configStrategy": "ALWAYS_APPLY_DONT_OVERRIDE_CUSTOM_VALUES"
+}

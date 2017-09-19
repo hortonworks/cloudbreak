@@ -14,4 +14,20 @@ object NetworkRequests {
                 jsonPath("""$[?(@.cloudPlatform=="GCP")].id""").saveAs("gcpNetworkId"),
                 jsonPath("""$[?(@.cloudPlatform=="AWS")].id""").saveAs("awsNetworkId"))
 
+    val createMock = http("create mock network")
+        .post("/cb/api/v1/networks/user")
+        .headers(HttpHeaders.commonHeaders)
+        .body(ElFileBody("./simulations/cloudbreak/resources/create-network-mock.json"))
+        .check(status.is(200), jsonPath("$.id").saveAs("mockNetworkId"))
+
+    val deletenetwork = http("delete network")
+      .delete("/cb/api/v1/networks/${networkId}")
+      .headers(HttpHeaders.commonHeaders)
+      .check(status.is(204))
+
+    val deleteMock = http("delete network")
+      .delete("/cb/api/v1/networks/${mockNetworkId}")
+      .headers(HttpHeaders.commonHeaders)
+      .check(status.is(204))
+
 }

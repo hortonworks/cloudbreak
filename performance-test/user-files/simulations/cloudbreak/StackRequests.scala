@@ -22,10 +22,22 @@ object StackRequests {
       .body(ElFileBody("./simulations/cloudbreak/resources/create-stack-azure.json"))
       .check(status.is(200), jsonPath("$.id").saveAs("stackId"))
 
+  val createMockStack = http("create mock stack")
+      .post("/cb/api/v1/stacks/user")
+      .headers(HttpHeaders.commonHeaders)
+      .body(ElFileBody("./simulations/cloudbreak/resources/create-stack-mock.json"))
+      .check(status.is(200), jsonPath("$.id").saveAs("stackId"))
+
   val createCluster = http("create cluster")
       .post("/cb/api/v1/stacks/${stackId}/cluster")
       .headers(HttpHeaders.commonHeaders)
       .body(ElFileBody("./simulations/cloudbreak/resources/create-cluster-azure.json"))
+      .check(status.is(200))
+
+  val createMockCluster = http("create cluster")
+      .post("/cb/api/v1/stacks/${stackId}/cluster")
+      .headers(HttpHeaders.commonHeaders)
+      .body(ElFileBody("./simulations/cloudbreak/resources/create-cluster-mock.json"))
       .check(status.is(200))
 
   val deleteStack = http("delete stack")
