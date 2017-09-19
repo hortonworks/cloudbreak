@@ -15,4 +15,11 @@ object Utils {
     def addVariableToSession(session: Session, key: String, value: Any) : Session = {
         session.set(key, value)
     }
+
+    def stringToMap(stringMap: String) = {
+        stringMap.split("=|;")
+          .grouped(2)
+          .map { case Array(k,v) => k -> v }
+          .toMap
+    }
 }

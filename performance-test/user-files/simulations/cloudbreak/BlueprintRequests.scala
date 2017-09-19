@@ -9,7 +9,7 @@ object BlueprintRequests {
     val createBlueprint = http("create blueprint")
       .post("/cb/api/v1/blueprints/user")
       .headers(HttpHeaders.commonHeaders)
-      .body(ElFileBody("./simulations/cloudbreak/resources/create-blueprint.json"))
+      .body(ElFileBody("./simulations/cloudbreak/resources/create-blueprint-base64.json"))
       .check(status.is(200), jsonPath("$.id").saveAs("blueprintId"))
 
     val deleteBlueprint = http("delete blueprint")
