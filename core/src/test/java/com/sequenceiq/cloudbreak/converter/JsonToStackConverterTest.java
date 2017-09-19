@@ -73,6 +73,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(instanceGroup)
+                .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
@@ -125,6 +127,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(instanceGroup)
+                .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
@@ -150,6 +154,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(instanceGroup)
+                .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());

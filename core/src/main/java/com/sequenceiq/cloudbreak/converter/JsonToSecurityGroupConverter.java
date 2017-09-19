@@ -27,7 +27,7 @@ public class JsonToSecurityGroupConverter extends AbstractConversionServiceAware
     public SecurityGroup convert(SecurityGroupRequest source) {
         SecurityGroup entity = new SecurityGroup();
         if (Strings.isNullOrEmpty(source.getName())) {
-            source.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
+            entity.setName(missingResourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP));
         } else {
             entity.setName(source.getName());
         }
