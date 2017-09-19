@@ -235,10 +235,17 @@ subprojects {
     }
   }
 
-findbugs {
+  findbugs {
     toolVersion = "3.0.1"
     excludeFilter = file("$rootProject.projectDir/config/findbugs/excludeFilter.xml")
-}
+  }
+
+  tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+  }
 
   checkstyle {
     toolVersion = "7.6"
