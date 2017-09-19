@@ -316,7 +316,7 @@ logspout:
 logrotate:
     environment:
         - "CRON_EXPR=0 * * * *"
-        - LOGROTATE_LOGFILES=/var/log/cloudbreak-deployer/*/*.log
+        - "LOGROTATE_LOGFILES=/var/log/cloudbreak-deployer/*.log /var/log/cloudbreak-deployer/*/*.log"
         - LOGROTATE_FILESIZE=10M
     volumes:
         - ./logs:/var/log/cloudbreak-deployer
