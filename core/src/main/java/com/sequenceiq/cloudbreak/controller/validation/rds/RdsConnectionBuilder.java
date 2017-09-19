@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.controller.validation.rds;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -40,8 +40,10 @@ public class RdsConnectionBuilder {
     }
 
     private void createDb(Connection conn, String clusterName, String service) {
-        try (Statement statement = conn.createStatement()) {
-            statement.executeUpdate("CREATE DATABASE " + clusterName + service);
+        String createSQL = "CREATE DATABASE ?";
+        try (PreparedStatement preparedStatement = conn.prepareStatement(createSQL)) {
+            preparedStatement.setString(1, clusterName + service);
+            preparedStatement.executeUpdate(createSQL);
         } catch (PSQLException ex) {
             if ("42P04".equals(ex.getSQLState())) {
                 LOGGER.warn("The expected database already exist");
