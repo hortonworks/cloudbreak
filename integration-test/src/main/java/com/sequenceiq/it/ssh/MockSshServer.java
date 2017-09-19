@@ -43,6 +43,7 @@ public class MockSshServer {
             sshServer.setFileSystemFactory(new MockFileSystemFactory());
             sshServer.setPort(port);
             sshServer.start();
+            LOGGER.debug(sshServer.getHost());
             sshServerMap.put(port, sshServer);
         }
     }
@@ -75,4 +76,5 @@ public class MockSshServer {
             sshServerMap.remove(port);
         }
     }
+
 }
