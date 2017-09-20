@@ -1,9 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 public class InstanceGroupDetails {
-    // Kellenek-e a user adatok a resource-oknal, pl template? Lehet mas user hozta letre az accountban, pl...
-    // Topology information ??
-
     private String groupName;
 
     private String groupType;
