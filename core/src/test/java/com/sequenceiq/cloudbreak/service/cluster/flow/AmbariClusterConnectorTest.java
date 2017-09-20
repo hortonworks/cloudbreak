@@ -61,7 +61,7 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
@@ -107,7 +107,7 @@ public class AmbariClusterConnectorTest {
     private ZeppelinConfigProvider zeppelinConfigProvider;
 
     @Mock
-    private DruidSupersetConfigProvider druidSupersetConfigProvider;
+    private SupersetConfigProvider supersetConfigProvider;
 
     @Mock
     private LlapConfigProvider llapConfigProvider;
