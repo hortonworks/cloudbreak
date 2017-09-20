@@ -6,7 +6,7 @@ import static com.sequenceiq.cloudbreak.api.model.ExposedService.AMBARI;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ATLAS;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.CONSUL;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.CONTAINER_LOGS;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.DRUID_SUPERSET;
+import static com.sequenceiq.cloudbreak.api.model.ExposedService.SUPERSET;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.ELASTIC_SEARCH;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.FALCON;
 import static com.sequenceiq.cloudbreak.api.model.ExposedService.HBASE_MASTER;
@@ -83,7 +83,7 @@ public final class NetworkUtils {
         ports.add(new Port(ELASTIC_SEARCH, "9200", "tcp"));
         ports.add(new Port(SWARM, "3376", "tcp"));
         ports.add(new Port(SHIPYARD, "7070", "tcp"));
-        ports.add(new Port(DRUID_SUPERSET, "9088", "tcp"));
+        ports.add(new Port(SUPERSET, "9088", "tcp"));
     }
 
     private NetworkUtils() {

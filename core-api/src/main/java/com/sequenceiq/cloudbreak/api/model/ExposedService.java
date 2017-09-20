@@ -46,7 +46,7 @@ public enum ExposedService {
     ELASTIC_SEARCH("Elastic Search", "ELASTIC_SEARCH", "", "", ""),
     SWARM("Swarm", "SWARM", "", "", ""),
     SHIPYARD("Shipyard", "SHIPYARD", "", "", ""),
-    DRUID_SUPERSET("Druid Superset", "DRUID_SUPERSET", "", "", "");
+    SUPERSET("Superset", "SUPERSET", "", "", "");
 
     private final String serviceName;
     private final String portName;
