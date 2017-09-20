@@ -12,6 +12,7 @@ import (
 	"fmt"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/cli/cloud"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
@@ -162,7 +163,7 @@ func (c *ClusterSkeletonResult) fill(
 	}
 
 	if network != nil && network.Parameters["vpcId"] != nil && network.Parameters["subnetId"] != nil {
-		net := Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
+		net := cloud.Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
 		c.Network = &net
 	}
 

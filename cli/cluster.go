@@ -5,6 +5,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/cli/cloud"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/cluster"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/stacks"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
@@ -697,7 +698,7 @@ func fillSharedParameters(skeleton *ClusterSkeleton,
 
 	network := stack.Network
 	if network != nil && network.Parameters["internetGatewayId"] == nil {
-		skeleton.Network = &Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
+		skeleton.Network = &cloud.Network{VpcId: network.Parameters["vpcId"].(string), SubnetId: network.Parameters["subnetId"].(string)}
 	}
 
 	if stack.Cluster != nil && len(stack.Cluster.RdsConfigs) > 0 {
@@ -760,7 +761,7 @@ func getBaseSkeleton() *ClusterSkeleton {
 			HiveJDBCAccess:         true,
 			ClusterComponentAccess: false,
 			InstanceRole:           "CREATE",
-			Network:                &Network{},
+			Network:                &cloud.Network{},
 			Tags:                   make(map[string]string, 0),
 			FlexSubscription:       &FlexSubscriptionBase{},
 		},

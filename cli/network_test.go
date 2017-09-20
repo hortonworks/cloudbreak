@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hortonworks/hdc-cli/cli/cloud"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/networks"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
@@ -14,7 +15,7 @@ import (
 func TestCreateNetworkImplCustomNetwork(t *testing.T) {
 	skeleton := ClusterSkeleton{
 		ClusterSkeletonBase: ClusterSkeletonBase{
-			Network: &Network{
+			Network: &cloud.Network{
 				VpcId:    "vpcid",
 				SubnetId: "subnetid",
 			},

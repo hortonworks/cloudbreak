@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/hortonworks/hdc-cli/cli/cloud"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
@@ -110,7 +111,7 @@ func TestFillWithExistingNetwork(t *testing.T) {
 
 	skeleton.fill(sr, cr, br, nil, nil, nj, nil, nil, nil, nil)
 
-	expected := Network{VpcId: "vpcId", SubnetId: "subnetId"}
+	expected := cloud.Network{VpcId: "vpcId", SubnetId: "subnetId"}
 	if *skeleton.Network != expected {
 		t.Errorf("network not match %s == %s", expected, *skeleton.Network)
 	}

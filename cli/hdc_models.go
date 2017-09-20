@@ -1,5 +1,7 @@
 package cli
 
+import "github.com/hortonworks/hdc-cli/cli/cloud"
+
 var (
 	MASTER      = "master"
 	WORKER      = "worker"
@@ -47,7 +49,7 @@ type ClusterSkeletonBase struct {
 	ClusterAndAmbariUser     string                `json:"ClusterAndAmbariUser" yaml:"ClusterAndAmbariUser"`
 	ClusterAndAmbariPassword string                `json:"ClusterAndAmbariPassword" yaml:"ClusterAndAmbariPassword"`
 	InstanceRole             string                `json:"InstanceRole,omitempty" yaml:"InstanceRole"`
-	Network                  *Network              `json:"Network,omitempty" yaml:"Network,omitempty"`
+	Network                  *cloud.Network        `json:"Network,omitempty" yaml:"Network,omitempty"`
 	Ldap                     *string               `json:"Ldap,omitempty" yaml:"Ldap,omitempty"`
 	Tags                     map[string]string     `json:"Tags" yaml:"Tags"`
 	CloudStoragePath         string                `json:"CloudStoragePath,omitempty" yaml:"CloudStoragePath,omitempty"`
@@ -95,11 +97,6 @@ type SpotInstanceConfig struct {
 type Recipe struct {
 	URI   string `json:"URI" yaml:"URI"`
 	Phase string `json:"Phase" yaml:"Phase"`
-}
-
-type Network struct {
-	VpcId    string `json:"VpcId" yaml:"VpcId"`
-	SubnetId string `json:"SubnetId" yaml:"SubnetId"`
 }
 
 type MetaStore struct {

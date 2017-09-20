@@ -20,10 +20,10 @@ format:
 	@gofmt -w ${GOFILES_NOVENDOR}
 
 vet:
-	go vet github.com/hortonworks/hdc-cli/cli
+	go vet ./...
 
 test:
-	go test -race github.com/hortonworks/hdc-cli/cli
+	go test -race ./...
 
 coverage:
 	go test github.com/hortonworks/hdc-cli/cli -cover

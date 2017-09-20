@@ -3,17 +3,22 @@ package cli
 import (
 	"errors"
 
+	"github.com/hortonworks/hdc-cli/cli/cloud"
+	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
+
 	"fmt"
+	"regexp"
+	"strconv"
+
 	swagerrors "github.com/go-swagger/go-swagger/errors"
 	"github.com/go-swagger/go-swagger/httpkit/validate"
 	ss "github.com/hortonworks/hdc-cli/client_cloudbreak/smartsensesubscriptions"
-	"regexp"
-	"strconv"
-	"strings"
 )
 
 func (s *ClusterSkeleton) Validate(cbClient *Cloudbreak) error {
 	var res []error
+	provider := cloud.GetProvider()
+
 	if err := validate.RequiredString("ClusterName", "body", string(s.ClusterName)); err != nil {
 		res = append(res, err)
 	}
@@ -60,7 +65,7 @@ func (s *ClusterSkeleton) Validate(cbClient *Cloudbreak) error {
 		res = append(res, err)
 	}
 	if s.Network != nil {
-		if err := s.Network.Validate(); err != nil {
+		if err := provider.ValidateNetwork(s.Network); err != nil {
 			for _, e := range err {
 				res = append(res, e)
 			}
@@ -119,7 +124,7 @@ func (s *ClusterSkeleton) Validate(cbClient *Cloudbreak) error {
 		res = append(res, err)
 	}
 
-	if err := validateTags(s.Tags); len(err) > 0 {
+	if err := provider.ValidateTags(s.Tags); len(err) > 0 {
 		res = append(res, err...)
 	}
 
@@ -200,25 +205,6 @@ func (a *AutoscalingSkeletonBase) Validate() []error {
 	}
 
 	return res
-}
-
-func (n *Network) Validate() []error {
-	var res []error = nil
-
-	if !n.isEmpty() {
-		if err := validate.RequiredString("VpcId", "network", n.VpcId); err != nil {
-			res = append(res, err)
-		}
-		if err := validate.RequiredString("SubnetId", "network", n.SubnetId); err != nil {
-			res = append(res, err)
-		}
-	}
-
-	return res
-}
-
-func (n *Network) isEmpty() bool {
-	return len(n.VpcId) == 0 && len(n.SubnetId) == 0
 }
 
 func (h *HiveMetastore) Validate() []error {
@@ -341,37 +327,6 @@ func validateSpotRecoveryMode(hostGroup string, recoveryMode string, spotPrice s
 				recoveryMode, hostGroup, spotPrice))
 	}
 	return validateRecoveryMode(hostGroup, recoveryMode)
-}
-
-func validateTags(tags map[string]string) []error {
-	var res []error = make([]error, 0)
-
-	pattern := `^[a-zA-Z0-9+ \-=.@_:/]*$`
-
-	if len(tags) > 10 {
-		res = append(res, errors.New("Maximum number of tags allowed: 10"))
-	}
-
-	for k, v := range tags {
-		if strings.HasPrefix(k, "aws") || strings.HasPrefix(v, "aws") {
-			res = append(res, errors.New("'aws' is a reserved prefix, cannot start the key or value with it"))
-		}
-		if len(k) > 127 {
-			res = append(res, errors.New("Key length cannot be longer than 127 chars, key: "+k))
-		}
-		if len(v) > 255 {
-			res = append(res, errors.New("Value length cannot be longer than 255 chars, value: "+v))
-		}
-		if match, _ := regexp.Match(pattern, []byte(k)); !match {
-			res = append(res, errors.New(fmt.Sprintf("The key (%s) contains invalid characters. "+
-				"Allowed characters are letters, whitespace, and numbers representable in UTF-8, plus the following special characters: + - = . _ : /", k)))
-		}
-		if match, _ := regexp.Match(pattern, []byte(v)); !match {
-			res = append(res, errors.New(fmt.Sprintf("The value (%s) contains invalid characters. "+
-				"Allowed characters are letters, whitespace, and numbers representable in UTF-8, plus the following special characters: + - = . _ : /", v)))
-		}
-	}
-	return res
 }
 
 func validateFlexSubscription(cbClient *Cloudbreak, skeleton *ClusterSkeleton) error {
