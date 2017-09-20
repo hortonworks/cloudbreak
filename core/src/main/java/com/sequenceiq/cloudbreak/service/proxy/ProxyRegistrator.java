@@ -4,9 +4,12 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.OperationException;
 
 @Service
 public class ProxyRegistrator {
@@ -26,10 +29,12 @@ public class ProxyRegistrator {
     @Inject
     private ConsulClient consulClient;
 
+    @Retryable(value = OperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 2000))
     public void register(String clusterName, String contextPath, String gatewayHost) {
         registerKeys(clusterName, String.format("https://%s:8443", gatewayHost), String.format("/%s/", contextPath));
     }
 
+    @Retryable(value = OperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 2000))
     public void remove(String clusterName) {
         removeKeys(clusterName);
     }
