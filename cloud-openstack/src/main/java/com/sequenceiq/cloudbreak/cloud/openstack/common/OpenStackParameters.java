@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -78,6 +79,8 @@ public class OpenStackParameters implements PlatformParameters {
 
     private Region defaultRegion;
 
+    private VmRecommendations vmRecommendations;
+
     @PostConstruct
     public void init() {
         String zone;
@@ -89,6 +92,7 @@ public class OpenStackParameters implements PlatformParameters {
         LOGGER.info("Zone definition for OpenStack: {}", zone);
         regions = readRegions(zone);
         defaultRegion = getDefaultRegion();
+        vmRecommendations = initVmRecommendations();
     }
 
     @Override
@@ -193,11 +197,20 @@ public class OpenStackParameters implements PlatformParameters {
         return result;
     }
 
+    @Override
+    public VmRecommendations recommendedVms() {
+        return vmRecommendations;
+    }
+
     private Collection<VmType> virtualMachines(Boolean extended) {
         return new ArrayList<>();
     }
 
     private VmType defaultVirtualMachine() {
         return vmType("");
+    }
+
+    private VmRecommendations initVmRecommendations() {
+        return null;
     }
 }

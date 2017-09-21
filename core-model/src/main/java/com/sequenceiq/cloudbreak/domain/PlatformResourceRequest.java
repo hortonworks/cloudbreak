@@ -13,6 +13,8 @@ public class PlatformResourceRequest {
 
     private String platformVariant;
 
+    private String availabilityZone;
+
     private Map<String, String> filters = new HashMap<>();
 
     public Credential getCredential() {
@@ -53,5 +55,13 @@ public class PlatformResourceRequest {
 
     public void setFilters(Map<String, String> filters) {
         this.filters = filters;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 }

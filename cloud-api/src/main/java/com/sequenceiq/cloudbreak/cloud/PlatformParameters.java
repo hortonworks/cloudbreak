@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -120,6 +121,13 @@ public interface PlatformParameters {
      * @return the {@link TagSpecification} of a platform
      */
     TagSpecification tagSpecification();
+
+    /**
+     * The recommended virtual machine types for the platform
+     *
+     * @return the {@link VmRecommendations} of a platform
+     */
+    VmRecommendations recommendedVms();
 
     String getDefaultRegionsConfigString();
 

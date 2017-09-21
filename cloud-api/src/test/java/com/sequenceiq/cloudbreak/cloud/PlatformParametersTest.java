@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -173,6 +174,11 @@ public class PlatformParametersTest {
         @Override
         public TagSpecification tagSpecification() {
             return new TagSpecification(1, 256, "keyValidator", 256, "valueValidator");
+        }
+
+        @Override
+        public VmRecommendations recommendedVms() {
+            return null;
         }
 
         @Override

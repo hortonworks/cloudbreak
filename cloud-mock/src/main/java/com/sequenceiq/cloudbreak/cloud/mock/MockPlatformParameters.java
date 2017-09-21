@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
@@ -236,6 +237,11 @@ public class MockPlatformParameters implements PlatformParameters {
     @Override
     public String platforName() {
         return MockConstants.MOCK;
+    }
+
+    @Override
+    public VmRecommendations recommendedVms() {
+        return null;
     }
 
     private enum MockDiskType {

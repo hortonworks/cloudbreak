@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -107,6 +108,8 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private VmType defaultVmType;
 
+    private VmRecommendations vmRecommendations;
+
     @PostConstruct
     public void init() {
         regions = readRegions(resourceDefinition("zone"));
@@ -114,6 +117,7 @@ public class AzurePlatformParameters implements PlatformParameters {
         readVmTypes();
         defaultRegion = getDefaultRegion();
         defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
+        vmRecommendations = initVmRecommendations();
     }
 
     private Map<Region, DisplayName> readRegionDisplayNames(String zone) {
@@ -310,5 +314,21 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public String platforName() {
         return AzureConstants.PLATFORM.value();
+    }
+
+    @Override
+    public VmRecommendations recommendedVms() {
+        return vmRecommendations;
+    }
+
+    private VmRecommendations initVmRecommendations() {
+        VmRecommendations result = null;
+        String vmRecommendation = resourceDefinition("vm-recommendation");
+        try {
+            result = JsonUtil.readValue(vmRecommendation, VmRecommendations.class);
+        } catch (IOException e) {
+            LOGGER.error("Cannot initialize Virtual machine recommendations for Azure", e);
+        }
+        return result;
     }
 }
