@@ -155,6 +155,12 @@ public class VmTypeMeta {
             return this;
         }
 
+        public VmTypeMetaBuilder withCpuAndMemory(int cpu, int memory) {
+            properties.put(CPU, String.valueOf(cpu));
+            properties.put(MEMORY, String.valueOf(memory));
+            return this;
+        }
+
         public VmTypeMetaBuilder withCpuAndMemory(String cpu, String memory) {
             properties.put(CPU, cpu);
             properties.put(MEMORY, memory);

@@ -220,26 +220,26 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     private void convertKnox(Cluster source, ClusterResponse clusterResponse) {
         Gateway gateway = source.getGateway();
-        GatewayJson gatewayJson = new GatewayJson();
+        GatewayJson cloudGatewayJson = new GatewayJson();
 
-        gatewayJson.setEnableGateway(gateway.getEnableGateway());
-        gatewayJson.setTopologyName(gateway.getTopologyName());
+        cloudGatewayJson.setEnableGateway(gateway.getEnableGateway());
+        cloudGatewayJson.setTopologyName(gateway.getTopologyName());
         Json exposedJson = gateway.getExposedServices();
         if (exposedJson != null && StringUtils.isNoneEmpty(exposedJson.getValue())) {
             try {
-                gatewayJson.setExposedServices(exposedJson.get(ExposedServices.class).getServices());
+                cloudGatewayJson.setExposedServices(exposedJson.get(ExposedServices.class).getServices());
             } catch (IOException e) {
                 LOGGER.error("Failed to add exposedServices to response", e);
                 throw new CloudbreakApiException("Failed to add exposedServices to response", e);
             }
         }
-        gatewayJson.setPath(gateway.getPath());
-        gatewayJson.setSignCert(gateway.getSignCert());
-        gatewayJson.setSignPub(gateway.getSignPub());
-        gatewayJson.setSsoProvider(gateway.getSsoProvider());
-        gatewayJson.setSsoType(gateway.getSsoType());
-        gatewayJson.setGatewayType(gateway.getGatewayType());
-        clusterResponse.setGateway(gatewayJson);
+        cloudGatewayJson.setPath(gateway.getPath());
+        cloudGatewayJson.setSignCert(gateway.getSignCert());
+        cloudGatewayJson.setSignPub(gateway.getSignPub());
+        cloudGatewayJson.setSsoProvider(gateway.getSsoProvider());
+        cloudGatewayJson.setSsoType(gateway.getSsoType());
+        cloudGatewayJson.setGatewayType(gateway.getGatewayType());
+        clusterResponse.setGateway(cloudGatewayJson);
 
     }
 

@@ -39,6 +39,22 @@
     {
       "name": "ap-southeast-1",
       "displayName": "Asia Pacific (Singapore)"
+    },
+    {
+      "name": "ap-south-1",
+      "displayName": "Asia Pacific (Mumbai)"
+    },
+    {
+      "name": "eu-west-2",
+      "displayName": "EU (London)"
+    },
+    {
+      "name": "ca-central-1",
+      "displayName": "Canada (Central)"
+    },
+    {
+      "name": "us-east-2",
+      "displayName": "US East (Ohio)"
     }
   ]
 }

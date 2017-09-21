@@ -13,9 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
-import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -43,45 +42,48 @@ public class CloudResourceAdvisor {
     @Inject
     private StackServiceComponentDescriptors stackServiceComponentDescs;
 
-    public Map<String, VmType> createForBlueprint(String blueprint, PlatformResourceRequest resourceRequest, IdentityUser cbUser) {
+    public PlatformRecommendation createForBlueprint(String blueprintName, Long blueprintId, PlatformResourceRequest resourceRequest, IdentityUser cbUser) {
         String cloudPlatform = resourceRequest.getCloudPlatform();
         String region = resourceRequest.getRegion();
         String availabilityZone = resourceRequest.getAvailabilityZone();
         Map<String, VmType> vmTypesByHostGroup = new HashMap<>();
         Map<String, Boolean> hostGroupContainsMasterComp = new HashMap<>();
-        LOGGER.info("Advising resources for blueprint: %s, provider: %s and region: %s.", blueprint, cloudPlatform, region);
+        LOGGER.info("Advising resources for blueprint: {}, provider: {} and region: {}.", blueprintId, blueprintName, cloudPlatform, region);
 
-        String blueprintText = getBlueprint(blueprint, cbUser).getBlueprintText();
+        String blueprintText = getBlueprint(blueprintName, blueprintId, cbUser).getBlueprintText();
         Map<String, Set<String>> componentsByHostGroup = blueprintProcessor.getComponentsByHostGroup(blueprintText);
         componentsByHostGroup
                 .forEach((hGName, components) -> hostGroupContainsMasterComp.put(hGName, isThereMasterComponents(components)));
 
-        PlatformVirtualMachines vmTypes = cloudParameterService.getVmtypes(cloudPlatform, false);
-        VmType defaultVmType = getDefaultVmType(cloudPlatform, availabilityZone, vmTypes);
+        CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
+                resourceRequest.getCredential(),
+                resourceRequest.getRegion(),
+                resourceRequest.getPlatformVariant(),
+                resourceRequest.getFilters());
+        VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
         componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));
 
         VmRecommendations recommendations = cloudParameterService.getRecommendation(cloudPlatform);
         if (recommendations != null) {
-            Collection<VmType> availableVmTypes = vmTypes.getVmTypesPerZones().get(Platform.platform(cloudPlatform))
-                    .get(AvailabilityZone.availabilityZone(availabilityZone));
+            Collection<VmType> availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
 
             Map<String, VmType> masterVmTypes = getVmTypesForComponentType(true, recommendations.getMaster(), hostGroupContainsMasterComp, availableVmTypes);
             vmTypesByHostGroup.putAll(masterVmTypes);
             Map<String, VmType> workerVmTypes = getVmTypesForComponentType(false, recommendations.getWorker(), hostGroupContainsMasterComp, availableVmTypes);
             vmTypesByHostGroup.putAll(workerVmTypes);
         }
-        return vmTypesByHostGroup;
+
+        return new PlatformRecommendation(vmTypesByHostGroup, vmTypes.getCloudVmResponses().get(availabilityZone));
     }
 
-    private Blueprint getBlueprint(String blueprint, IdentityUser cbUser) {
+    private Blueprint getBlueprint(String blueprintName, Long blueprintId, IdentityUser cbUser) {
         Blueprint bp;
         try {
-            Long bpId = Long.valueOf(blueprint);
-            LOGGER.debug("Try to get blueprint by id: %d.", bpId);
-            bp = blueprintService.get(bpId);
+            LOGGER.debug("Try to get blueprint by id: {}.", blueprintId);
+            bp = blueprintService.get(blueprintId);
         } catch (NumberFormatException e) {
-            LOGGER.debug("Try to get blueprint by name: %d.", blueprint);
-            bp = blueprintService.getByName(blueprint, cbUser);
+            LOGGER.debug("Try to get blueprint by name: {}.", blueprintName);
+            bp = blueprintService.getByName(blueprintName, cbUser);
         }
         return bp;
     }
@@ -91,16 +93,10 @@ public class CloudResourceAdvisor {
                 .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster());
     }
 
-    private VmType getDefaultVmType(String cloudPlatform, String availabilityZone, PlatformVirtualMachines vmtypes) {
-        VmType vmType;
-        Map<AvailabilityZone, VmType> vmTypesByAZones = vmtypes.getDefaultVmTypePerZones().get(Platform.platform(cloudPlatform));
-        if (vmTypesByAZones != null) {
-            vmType = vmTypesByAZones.get(AvailabilityZone.availabilityZone(availabilityZone));
-            if (vmType == null || Strings.isNullOrEmpty(vmType.value())) {
-                throw new NotFoundException(String.format("Could not determine VM type for availability zone: '%s'.", availabilityZone));
-            }
-        } else {
-            throw new NotFoundException(String.format("Could not determine VM type for cloud platform: '%s'.", cloudPlatform));
+    private VmType getDefaultVmType(String availabilityZone, CloudVmTypes vmtypes) {
+        VmType vmType = vmtypes.getDefaultCloudVmResponses().get(availabilityZone);
+        if (vmType == null || Strings.isNullOrEmpty(vmType.value())) {
+            throw new NotFoundException(String.format("Could not determine VM type for availability zone: '%s'.", availabilityZone));
         }
         return vmType;
     }

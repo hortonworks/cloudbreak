@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.api.model;
 
-import javax.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
@@ -12,15 +10,25 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RecommendationRequestJson extends PlatformResourceRequestJson {
 
-    @ApiModelProperty(ModelDescriptions.RecommendationRequestModelDescription.BLUEPRINT)
-    @NotNull
-    private String blueprint;
+    @ApiModelProperty(ModelDescriptions.RecommendationRequestModelDescription.BLUEPRINT_NAME)
+    private String blueprintName;
 
-    public String getBlueprint() {
-        return blueprint;
+    @ApiModelProperty(ModelDescriptions.RecommendationRequestModelDescription.BLUEPRINT_ID)
+    private Long blueprintId;
+
+    public String getBlueprintName() {
+        return blueprintName;
     }
 
-    public void setBlueprint(String blueprint) {
-        this.blueprint = blueprint;
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
+    }
+
+    public Long getBlueprintId() {
+        return blueprintId;
+    }
+
+    public void setBlueprintId(Long blueprintId) {
+        this.blueprintId = blueprintId;
     }
 }

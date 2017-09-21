@@ -15,7 +15,9 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformRegionsJson;
@@ -24,9 +26,11 @@ import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
 import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
+import com.sequenceiq.cloudbreak.api.model.RecommendationResponse;
+import com.sequenceiq.cloudbreak.api.model.RegionResponse;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -142,7 +146,7 @@ public interface ConnectorEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "createRecommendation")
-    Map<String, VmTypeJson> createRecommendation(RecommendationRequestJson recommendationRequestJson);
+    RecommendationResponse createRecommendation(RecommendationRequestJson recommendationRequestJson);
 
     @POST
     @Path("custom")
@@ -172,4 +176,31 @@ public interface ConnectorEndpoint {
             nickname = "getPlatformSecurityGroups")
     Map<String, Set<PlatformSecurityGroupResponse>> getSecurityGroups(PlatformResourceRequestJson resourceRequestJson);
 
+    @POST
+    @Path("v2/vmtypes")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_VMTYPES_BY_CREDENTIAL, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getVmTypesByCredentialId")
+    PlatformVmtypesResponse getVmTypesByCredentialId(PlatformResourceRequestJson resourceRequestJson);
+
+    @POST
+    @Path("v2/regions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_REGION_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getRegionsByCredentialId")
+    RegionResponse getRegionsByCredentialId(PlatformResourceRequestJson resourceRequestJson);
+
+    @POST
+    @Path("gateways")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_GATEWAYS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getGatewaysCredentialId")
+    PlatformGatewaysResponse getGatewaysCredentialId(PlatformResourceRequestJson resourceRequestJson);
+
+    @POST
+    @Path("ippools")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_IPPOOLS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getIpPoolsCredentialId")
+    PlatformIpPoolsResponse getIpPoolsCredentialId(PlatformResourceRequestJson resourceRequestJson);
 }

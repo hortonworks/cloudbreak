@@ -151,10 +151,9 @@ public class SecurityConfig {
                     .antMatchers(API_ROOT_CONTEXT + "/rdsconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/smartsensesubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(API_ROOT_CONTEXT + "/flexsubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
-                    .antMatchers(API_ROOT_CONTEXT + "/connectors/**").permitAll()
-
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll();
 
             http.csrf().disable();

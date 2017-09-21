@@ -5,15 +5,18 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.base.Strings;
 import com.microsoft.azure.AzureEnvironment;
 import com.microsoft.azure.PagedList;
 import com.microsoft.azure.credentials.ApplicationTokenCredentials;
@@ -25,6 +28,7 @@ import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.VirtualMachineCustomImage;
 import com.microsoft.azure.management.compute.VirtualMachineInstanceView;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.LoadBalancer;
 import com.microsoft.azure.management.network.NetworkInterface;
 import com.microsoft.azure.management.network.NetworkInterfaces;
@@ -39,6 +43,7 @@ import com.microsoft.azure.management.resources.DeploymentOperations;
 import com.microsoft.azure.management.resources.Deployments;
 import com.microsoft.azure.management.resources.ResourceGroup;
 import com.microsoft.azure.management.resources.ResourceGroups;
+import com.microsoft.azure.management.resources.fluentcore.arm.Region;
 import com.microsoft.azure.management.storage.Encryption;
 import com.microsoft.azure.management.storage.EncryptionService;
 import com.microsoft.azure.management.storage.EncryptionServices;
@@ -454,6 +459,35 @@ public class AzureClient {
 
     public NetworkSecurityGroup getSecurityGroupProperties(String resourceGroup, String securityGroup) {
         return azure.networkSecurityGroups().getByResourceGroup(resourceGroup, securityGroup);
+    }
+
+    public Set<VirtualMachineSize> getVmTypes(String region) {
+        Set<VirtualMachineSize> resultList = new HashSet<>();
+        if (region == null) {
+            for (Region tmpRegion : Region.values()) {
+                PagedList<VirtualMachineSize> virtualMachineSizes = azure.virtualMachines().sizes().listByRegion(Region.findByLabelOrName(tmpRegion.label()));
+                getAllElement(virtualMachineSizes, resultList);
+            }
+        }
+        PagedList<VirtualMachineSize> virtualMachineSizes = azure.virtualMachines().sizes().listByRegion(Region.findByLabelOrName(region));
+        getAllElement(virtualMachineSizes, resultList);
+        return resultList;
+    }
+
+    public Set<Region> getRegion(com.sequenceiq.cloudbreak.cloud.model.Region region) {
+        Set<Region> resultList = new HashSet<>();
+        for (Region tmpRegion : Region.values()) {
+            if (region == null || Strings.isNullOrEmpty(region.value())
+                    || tmpRegion.name().equals(region.value()) || tmpRegion.label().equals(region.value())) {
+                resultList.add(tmpRegion);
+            }
+        }
+        return resultList;
+    }
+
+    private Set<VirtualMachineSize> getAllElement(PagedList<VirtualMachineSize> virtualMachineSizes, Set<VirtualMachineSize> resultList) {
+        resultList.addAll(virtualMachineSizes);
+        return resultList;
     }
 
     public NetworkSecurityGroups getSecurityGroups() {
