@@ -40,10 +40,10 @@ public class StackScalingTest extends AbstractCloudbreakIntegrationTest {
         int expectedNodeCount = ScalingUtil.getNodeCountStack(stackEndpoint, stackId) + scalingAdjustment;
         // WHEN
         UpdateStackJson updateStackJson = new UpdateStackJson();
+        updateStackJson.setWithClusterEvent(false);
         InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
         instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
         instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-        instanceGroupAdjustmentJson.setWithClusterEvent(false);
         updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
         CloudbreakUtil.checkResponse("ScalingStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");

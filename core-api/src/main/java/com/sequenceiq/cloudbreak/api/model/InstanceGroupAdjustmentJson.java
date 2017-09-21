@@ -19,9 +19,6 @@ public class InstanceGroupAdjustmentJson implements JsonEntity {
     @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.SCALING_ADJUSTMENT, required = true)
     private Integer scalingAdjustment;
 
-    @ApiModelProperty(InstanceGroupAdjustmentModelDescription.WITH_CLUSTER_EVENT)
-    private Boolean withClusterEvent = Boolean.FALSE;
-
     public String getInstanceGroup() {
         return instanceGroup;
     }
@@ -36,13 +33,5 @@ public class InstanceGroupAdjustmentJson implements JsonEntity {
 
     public void setScalingAdjustment(Integer scalingAdjustment) {
         this.scalingAdjustment = scalingAdjustment;
-    }
-
-    public void setWithClusterEvent(Boolean withClusterEvent) {
-        this.withClusterEvent = withClusterEvent;
-    }
-
-    public Boolean getWithClusterEvent() {
-        return withClusterEvent;
     }
 }
