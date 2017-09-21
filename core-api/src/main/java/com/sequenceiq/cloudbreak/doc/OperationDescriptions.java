@@ -236,8 +236,9 @@ public class OperationDescriptions {
         public static final String GET_NETWORKS = "retrive network properties";
         public static final String GET_SECURITYGROUPS = "retrive securitygroups properties";
         public static final String GET_SSHKEYS = "retrive sshkeys properties";
-
-
+        public static final String GET_VMTYPES_BY_CREDENTIAL = "retrive vmtype properties by credential";
+        public static final String GET_GATEWAYS = "retrive gateways with properties";
+        public static final String GET_IPPOOLS = "retrive ip pools with properties";
     }
 
     public static class SettingsOpDescription {

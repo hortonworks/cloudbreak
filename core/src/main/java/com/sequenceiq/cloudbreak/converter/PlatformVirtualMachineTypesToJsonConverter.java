@@ -4,8 +4,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.inject.Inject;
-
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.util.Lists;
@@ -22,9 +20,6 @@ import com.sequenceiq.cloudbreak.converter.util.PlatformConverterUtil;
 @Component
 public class PlatformVirtualMachineTypesToJsonConverter extends AbstractConversionServiceAwareConverter<PlatformVirtualMachines,
         PlatformVirtualMachinesJson> {
-
-    @Inject
-    private VmTypeToJsonConverter vmTypeToJsonConverter;
 
     @Override
     public PlatformVirtualMachinesJson convert(PlatformVirtualMachines source) {
@@ -67,7 +62,7 @@ public class PlatformVirtualMachineTypesToJsonConverter extends AbstractConversi
     public Collection<VmTypeJson> convertVmList(Collection<VmType> vmlist) {
         Collection<VmTypeJson> result = Lists.newArrayList();
         for (VmType item : vmlist) {
-            result.add(vmTypeToJsonConverter.convert(item));
+            result.add(getConversionService().convert(item, VmTypeJson.class));
         }
         return result;
     }

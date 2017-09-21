@@ -2,12 +2,17 @@ package com.sequenceiq.cloudbreak.cloud.openstack.auth;
 
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.FACING;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.types.Facing;
 import org.openstack4j.model.common.Identifier;
 import org.openstack4j.model.identity.v2.Access;
+import org.openstack4j.model.identity.v3.Endpoint;
+import org.openstack4j.model.identity.v3.Service;
 import org.openstack4j.model.identity.v3.Token;
 import org.openstack4j.openstack.OSFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -137,6 +142,30 @@ public class OpenStackClient {
         } else {
             authenticatedContext.putParameter(Access.class, access);
         }
+    }
+
+    public Set<String> getRegion(CloudCredential cloudCredential) {
+        Access access = createAccess(cloudCredential);
+        Token token = createToken(cloudCredential);
+
+        Set<String> regions = new HashSet<>();
+
+        if (token == null && access == null) {
+            throw new CloudConnectorException("Unsupported keystone version");
+        } else if (token != null) {
+            for (Service service : token.getCatalog()) {
+                for (Endpoint endpoint : service.getEndpoints()) {
+                    regions.add(endpoint.getRegion());
+                }
+            }
+        } else {
+            for (Access.Service service : access.getServiceCatalog()) {
+                for (org.openstack4j.model.identity.v2.Endpoint endpoint : service.getEndpoints()) {
+                    regions.add(endpoint.getRegion());
+                }
+            }
+        }
+        return regions;
     }
 
 }

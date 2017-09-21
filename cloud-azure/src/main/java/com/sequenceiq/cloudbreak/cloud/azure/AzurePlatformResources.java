@@ -1,31 +1,63 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
+import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
+import com.microsoft.azure.management.compute.VirtualMachineSize;
 import com.microsoft.azure.management.network.Network;
 import com.microsoft.azure.management.network.NetworkSecurityGroup;
 import com.microsoft.azure.management.network.Subnet;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
+import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
+import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroup;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 
 @Service
 public class AzurePlatformResources implements PlatformResources {
+
+    public static final int DEFAULT_MINIMUM_VOLUME_SIZE = 10;
+
+    public static final int DEFAULT_MAXIMUM_VOLUME_SIZE = 1023;
+
+    public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 1;
+
+    @Value("${cb.azure.default.vmtype:Standard_D3_v2}")
+    private String armVmDefault;
+
+    @Value("${cb.arm.zone.parameter.default:North Europe}")
+    private String armZoneParameterDefault;
 
     @Inject
     private AzureClientService azureClientService;
@@ -82,4 +114,89 @@ public class AzurePlatformResources implements PlatformResources {
         }
         return new CloudSecurityGroups(result);
     }
+
+    @Override
+    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+        AzureClient client = azureClientService.getClient(cloudCredential);
+        Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
+        Map<Region, String> displayNames = new HashMap<>();
+        String defaultRegion = armZoneParameterDefault;
+        for (com.microsoft.azure.management.resources.fluentcore.arm.Region azureRegion : client.getRegion(region)) {
+            cloudRegions.put(region(azureRegion.label()), new ArrayList<>());
+            displayNames.put(region(azureRegion.label()), azureRegion.label());
+        }
+        if (region != null && !Strings.isNullOrEmpty(region.value())) {
+            defaultRegion = region.value();
+        }
+        return new CloudRegions(cloudRegions, displayNames, defaultRegion);
+    }
+
+    @Override
+    @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws IOException {
+        AzureClient client = azureClientService.getClient(cloudCredential);
+        Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
+
+        Map<String, Set<VmType>> cloudVmResponses = new HashMap<>();
+        Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
+
+        Set<VmType> types = new HashSet<>();
+        VmType defaultVmType = null;
+
+        for (VirtualMachineSize virtualMachineSize : vmTypes) {
+            VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
+                    .withCpuAndMemory(virtualMachineSize.numberOfCores(), virtualMachineSize.memoryInMB());
+
+            for (VolumeParameterType volumeParameterType : values()) {
+                switch (volumeParameterType) {
+                    case MAGNETIC:
+                        builder.withAutoAttachedConfig(volumeParameterConfig(MAGNETIC, virtualMachineSize));
+                        break;
+                    case SSD:
+                        builder.withAutoAttachedConfig(VolumeParameterConfig.EMPTY);
+                        break;
+                    case EPHEMERAL:
+                        builder.withAutoAttachedConfig(VolumeParameterConfig.EMPTY);
+                        break;
+                    case ST1:
+                        builder.withSt1Config(VolumeParameterConfig.EMPTY);
+                        break;
+                    case AUTO_ATTACHED:
+                        builder.withAutoAttachedConfig(VolumeParameterConfig.EMPTY);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            VmType vmType = VmType.vmTypeWithMeta(virtualMachineSize.name(), builder.create(), true);
+            types.add(vmType);
+            if (virtualMachineSize.name().equals(armVmDefault)) {
+                defaultVmType = vmType;
+            }
+        }
+        cloudVmResponses.put(region.value(), types);
+        defaultCloudVmResponses.put(region.value(), defaultVmType);
+        return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
+    @Override
+    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+        return new CloudGateWays();
+    }
+
+    @Override
+    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+        return new CloudIpPools();
+    }
+
+    private VolumeParameterConfig volumeParameterConfig(VolumeParameterType volumeParameterType, VirtualMachineSize virtualMachineSize) {
+        return new VolumeParameterConfig(
+                volumeParameterType,
+                Integer.valueOf(DEFAULT_MINIMUM_VOLUME_SIZE),
+                Integer.valueOf(DEFAULT_MAXIMUM_VOLUME_SIZE),
+                Integer.valueOf(DEFAULT_MINIMUM_VOLUME_COUNT),
+                virtualMachineSize.maxDataDiskCount());
+    }
+
 }

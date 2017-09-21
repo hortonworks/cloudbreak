@@ -105,25 +105,25 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
     }
 
     private void convertKnox(ClusterRequest source, Cluster cluster) {
-        GatewayJson gatewayJson = source.getGateway();
+        GatewayJson cloudGatewayJson = source.getGateway();
         Gateway gateway = new Gateway();
         gateway.setEnableGateway(Boolean.FALSE);
         gateway.setTopologyName("services");
         gateway.setPath(source.getName());
         gateway.setSsoType(SSOType.NONE);
 
-        if (gatewayJson != null) {
-            if (gatewayJson.getPath() != null) {
-                gateway.setPath(gatewayJson.getPath());
+        if (cloudGatewayJson != null) {
+            if (cloudGatewayJson.getPath() != null) {
+                gateway.setPath(cloudGatewayJson.getPath());
             }
-            if (gatewayJson.getSsoType() != null) {
-                gateway.setSsoType(gatewayJson.getSsoType());
+            if (cloudGatewayJson.getSsoType() != null) {
+                gateway.setSsoType(cloudGatewayJson.getSsoType());
             }
-            gateway.setSignCert(gatewayJson.getSignCert());
-            gateway.setSignPub(gatewayJson.getSignPub());
+            gateway.setSignCert(cloudGatewayJson.getSignCert());
+            gateway.setSignPub(cloudGatewayJson.getSignPub());
         }
 
-        convertExposedServices(gatewayJson, gateway);
+        convertExposedServices(cloudGatewayJson, gateway);
         cluster.setGateway(gateway);
         gateway.setCluster(cluster);
     }

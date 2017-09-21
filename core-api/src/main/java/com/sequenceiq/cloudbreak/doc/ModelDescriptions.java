@@ -70,7 +70,8 @@ public class ModelDescriptions {
     }
 
     public static class RecommendationRequestModelDescription {
-        public static final String BLUEPRINT = "id or name that could indentify an existing blueprint";
+        public static final String BLUEPRINT_NAME = "name that could indentify an existing blueprint";
+        public static final String BLUEPRINT_ID = "id that could indentify an existing blueprint";
     }
 
     public static class StackModelDescription {

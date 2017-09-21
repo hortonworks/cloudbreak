@@ -13,10 +13,13 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworksResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
@@ -28,23 +31,29 @@ import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.PlatformVmtypesResponse;
 import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
+import com.sequenceiq.cloudbreak.api.model.RecommendationResponse;
+import com.sequenceiq.cloudbreak.api.model.RegionResponse;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
-import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
+import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
@@ -186,17 +195,18 @@ public class PlatformParameterController implements ConnectorEndpoint {
     }
 
     @Override
-    public Map<String, VmTypeJson> createRecommendation(RecommendationRequestJson recommendationRequestJson) {
-        Map<String, VmTypeJson> result = new HashMap<>();
+    public RecommendationResponse createRecommendation(RecommendationRequestJson recommendationRequestJson) {
         IdentityUser cbUser = authenticatedUserService.getCbUser();
         PlatformResourceRequest resourceRequest = conversionService.convert(recommendationRequestJson, PlatformResourceRequest.class);
-        String blueprint = recommendationRequestJson.getBlueprint();
-        fieldIsNotEmpty(blueprint, "blueprint");
+        if (recommendationRequestJson.getBlueprintId() == null && Strings.isNullOrEmpty(recommendationRequestJson.getBlueprintName())) {
+            fieldIsNotEmpty(recommendationRequestJson.getBlueprintId(), "blueprintId");
+        }
         fieldIsNotEmpty(resourceRequest.getRegion(), "region");
         fieldIsNotEmpty(resourceRequest.getAvailabilityZone(), "availabilityZone");
-        Map<String, VmType> recommendedVms = cloudResourceAdvisor.createForBlueprint(blueprint, resourceRequest, cbUser);
-        recommendedVms.forEach((hostGroupName, vm) -> result.put(hostGroupName, conversionService.convert(vm, VmTypeJson.class)));
-        return result;
+        PlatformRecommendation recommendedVms =
+                cloudResourceAdvisor.createForBlueprint(recommendationRequestJson.getBlueprintName(), recommendationRequestJson.getBlueprintId(),
+                        resourceRequest, cbUser);
+        return conversionService.convert(recommendedVms, RecommendationResponse.class);
     }
 
     @Override
@@ -215,7 +225,6 @@ public class PlatformParameterController implements ConnectorEndpoint {
         CloudSshKeys cloudSshKeys = cloudParameterService.getCloudSshKeys(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
         return conversionService.convert(cloudSshKeys, PlatformSshKeysResponse.class).getSshKeys();
-
     }
 
     @Override
@@ -225,6 +234,46 @@ public class PlatformParameterController implements ConnectorEndpoint {
         CloudSecurityGroups securityGroups = cloudParameterService.getSecurityGroups(convert.getCredential(), convert.getRegion(),
                 convert.getPlatformVariant(), convert.getFilters());
         return conversionService.convert(securityGroups, PlatformSecurityGroupsResponse.class).getSecurityGroups();
+    }
+
+    @Override
+    public RegionResponse getRegionsByCredentialId(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+
+        CloudRegions cloudRegions = cloudParameterService.getRegionsV2(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudRegions, RegionResponse.class);
+    }
+
+    @Override
+    public PlatformVmtypesResponse getVmTypesByCredentialId(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+        fieldIsNotEmpty(resourceRequestJson.getRegion(), "region");
+        CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudVmTypes, PlatformVmtypesResponse.class);
+    }
+
+    @Override
+    public PlatformGatewaysResponse getGatewaysCredentialId(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+
+        CloudGateWays cloudGateWays = cloudParameterService.getGateways(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudGateWays, PlatformGatewaysResponse.class);
+    }
+
+    @Override
+    public PlatformIpPoolsResponse getIpPoolsCredentialId(PlatformResourceRequestJson resourceRequestJson) {
+        resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
+        PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
+
+        CloudIpPools cloudIpPools = cloudParameterService.getPublicIpPools(convert.getCredential(), convert.getRegion(),
+                convert.getPlatformVariant(), convert.getFilters());
+        return conversionService.convert(cloudIpPools, PlatformIpPoolsResponse.class);
     }
 
     private PlatformResourceRequestJson prepareAccountAndOwner(PlatformResourceRequestJson resourceRequestJson, IdentityUser user) {

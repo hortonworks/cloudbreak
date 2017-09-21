@@ -17,6 +17,10 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
@@ -24,22 +28,30 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequestV2;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResultV2;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSecurityGroupsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendationResponse;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendtaionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
+import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
@@ -55,6 +67,7 @@ import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredenti
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
+import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Service
@@ -300,4 +313,85 @@ public class CloudParameterService {
             throw new OperationException(e);
         }
     }
+
+    public CloudVmTypes getVmTypesV2(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform vmtypes");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformVmTypesRequest getPlatformVmTypesRequest =
+                new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformVmTypesRequest.selector(), Event.wrap(getPlatformVmTypesRequest));
+        try {
+            GetPlatformVmTypesResult res = getPlatformVmTypesRequest.await();
+            LOGGER.info("Platform vmtypes result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform vmtypes", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudVmTypes();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform vmtypes", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public CloudRegions getRegionsV2(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform regions");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformRegionsRequestV2 getPlatformRegionsRequest =
+                new GetPlatformRegionsRequestV2(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformRegionsRequest.selector(), Event.wrap(getPlatformRegionsRequest));
+        try {
+            GetPlatformRegionsResultV2 res = getPlatformRegionsRequest.await();
+            LOGGER.info("Platform regions result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform regions", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudRegions();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform regions", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public CloudGateWays getGateways(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform gateways");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformCloudGatewaysRequest getPlatformCloudGatewaysRequest =
+                new GetPlatformCloudGatewaysRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformCloudGatewaysRequest.selector(), Event.wrap(getPlatformCloudGatewaysRequest));
+        try {
+            GetPlatformCloudGatewaysResult res = getPlatformCloudGatewaysRequest.await();
+            LOGGER.info("Platform gateways result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform gateways", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudGateWays();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform gateways", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public CloudIpPools getPublicIpPools(Credential credential, String region, String variant, Map<String, String> filters) {
+        LOGGER.debug("Get platform publicIpPools");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+        GetPlatformCloudIpPoolsRequest getPlatformCloudIpPoolsRequest =
+                new GetPlatformCloudIpPoolsRequest(cloudCredential, cloudCredential, variant, region, filters);
+        eventBus.notify(getPlatformCloudIpPoolsRequest.selector(), Event.wrap(getPlatformCloudIpPoolsRequest));
+        try {
+            GetPlatformCloudIpPoolsResult res = getPlatformCloudIpPoolsRequest.await();
+            LOGGER.info("Platform publicIpPools result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform publicIpPools", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getCloudIpPools();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform publicIpPools", e);
+            throw new OperationException(e);
+        }
+    }
+
 }
