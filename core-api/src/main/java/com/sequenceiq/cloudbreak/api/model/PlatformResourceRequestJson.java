@@ -35,6 +35,9 @@ public class PlatformResourceRequestJson {
     @ApiModelProperty(hidden = true)
     private String account;
 
+    @ApiModelProperty(PlatformResourceRequestModelDescription.AVAILABILITY_ZONE)
+    private String availabilityZone;
+
     public Long getCredentialId() {
         return credentialId;
     }
@@ -89,5 +92,13 @@ public class PlatformResourceRequestJson {
 
     public void setFilters(Map<String, String> filters) {
         this.filters = filters;
+    }
+
+    public String getAvailabilityZone() {
+        return availabilityZone;
+    }
+
+    public void setAvailabilityZone(String availabilityZone) {
+        this.availabilityZone = availabilityZone;
     }
 }

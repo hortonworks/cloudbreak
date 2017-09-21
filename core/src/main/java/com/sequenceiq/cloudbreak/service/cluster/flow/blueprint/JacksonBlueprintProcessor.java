@@ -2,9 +2,11 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
@@ -127,6 +129,26 @@ public class JacksonBlueprintProcessor implements BlueprintProcessor {
             return result;
         } catch (IOException e) {
             throw new BlueprintProcessingException("Failed to get host groups for component '" + component + "' from blueprint.", e);
+        }
+    }
+
+    @Override
+    public Map<String, Set<String>> getComponentsByHostGroup(String blueprintText) {
+        Map<String, Set<String>> result = new HashMap<>();
+        try {
+            JsonNode blueprintNode = JsonUtil.readTree(blueprintText);
+            JsonNode hostGroups = blueprintNode.path("host_groups");
+            for (JsonNode hostGroupNode : hostGroups) {
+                JsonNode components = hostGroupNode.path("components");
+                Set<String> componentNames = new HashSet<>();
+                for (JsonNode componentNode : components) {
+                    componentNames.add(componentNode.path("name").asText());
+                }
+                result.put(hostGroupNode.path("name").asText(), componentNames);
+            }
+            return result;
+        } catch (IOException e) {
+            throw new BlueprintProcessingException("Failed to get components by host groups from blueprint.", e);
         }
     }
 

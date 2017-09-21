@@ -31,6 +31,8 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformSshKeysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVariantsResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendationResponse;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendtaionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineTypesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
@@ -275,5 +278,23 @@ public class CloudParameterService {
         Map<String, Boolean> specialParameters = new HashMap<>();
         specialParameters.put("enableCustomImage", enableCustomImage);
         return new SpecialParameters(specialParameters);
+    }
+
+    public VmRecommendations getRecommendation(String platform) {
+        LOGGER.debug("Get platform vm recommendation");
+        GetVirtualMachineRecommendtaionRequest getVirtualMachineRecommendtaionRequest = new GetVirtualMachineRecommendtaionRequest(platform);
+        eventBus.notify(getVirtualMachineRecommendtaionRequest.selector(), Event.wrap(getVirtualMachineRecommendtaionRequest));
+        try {
+            GetVirtualMachineRecommendationResponse res = getVirtualMachineRecommendtaionRequest.await();
+            LOGGER.info("Platform vm recommendation result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform vm recommendation", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getRecommendations();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform vm recommendation", e);
+            throw new OperationException(e);
+        }
     }
 }

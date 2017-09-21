@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface BlueprintProcessor {
@@ -21,4 +22,6 @@ public interface BlueprintProcessor {
     String modifyHdpVersion(String originalBlueprint, String hdpVersion);
 
     String addComponentToHostgroups(String component, Collection<String> hostGroupNames, String blueprintText);
+
+    Map<String, Set<String>> getComponentsByHostGroup(String blueprintText);
 }

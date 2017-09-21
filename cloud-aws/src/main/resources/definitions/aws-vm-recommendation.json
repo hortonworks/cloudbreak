@@ -1,0 +1,18 @@
+{
+  "master": {
+    "type": "master",
+    "flavor": "m4.4xlarge",
+    "cardinality": 1,
+    "volumeType": "SSD",
+    "volumeCount": 1,
+    "volumeSizeGB": 32
+  },
+  "worker": {
+    "type": "worker",
+    "flavor": "m4.xlarge",
+    "cardinality": 3,
+    "volumeType": "EPHEMERAL",
+    "volumeCount": 1,
+    "volumeSizeGB": 100
+  }
+}

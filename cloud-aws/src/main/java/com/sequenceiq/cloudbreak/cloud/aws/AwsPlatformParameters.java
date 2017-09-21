@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
@@ -113,6 +114,8 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private VmType defaultVmType;
 
+    private VmRecommendations vmRecommendations;
+
     @PostConstruct
     public void init() {
         regions = readRegions(resourceDefinition("zone"));
@@ -121,6 +124,7 @@ public class AwsPlatformParameters implements PlatformParameters {
         sortListOfVmTypes = refineList();
         defaultRegion = getDefaultRegion();
         defaultVmType = defaultVmTypes.get(regions.get(defaultRegion).get(0));
+        vmRecommendations = initVmRecommendations();
     }
 
     private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
@@ -334,6 +338,11 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public VmRecommendations recommendedVms() {
+        return vmRecommendations;
+    }
+
+    @Override
     public String getDefaultRegionsConfigString() {
         return defaultRegions;
     }
@@ -370,5 +379,16 @@ public class AwsPlatformParameters implements PlatformParameters {
         public String displayName() {
             return displayName;
         }
+    }
+
+    private VmRecommendations initVmRecommendations() {
+        VmRecommendations result = null;
+        String vmRecommendation = resourceDefinition("vm-recommendation");
+        try {
+            result = JsonUtil.readValue(vmRecommendation, VmRecommendations.class);
+        } catch (IOException e) {
+            LOGGER.error("Cannot initialize Virtual machine recommendations for AWS", e);
+        }
+        return result;
     }
 }

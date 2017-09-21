@@ -24,7 +24,9 @@ import com.sequenceiq.cloudbreak.api.model.PlatformSecurityGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -87,14 +89,14 @@ public interface ConnectorEndpoint {
     Collection<String> getOchestratorsByType(@PathParam("type") String type);
 
     @GET
-    @Path("connectors/vmtypes/{type}")
+    @Path("vmtypes/{type}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getVmTypes")
     PlatformVirtualMachinesJson getVmTypes(@PathParam("type") String type, @QueryParam("extended") Boolean extended);
 
     @GET
-    @Path("connectors/regions")
+    @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_REGIONS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getRegions")
@@ -135,7 +137,14 @@ public interface ConnectorEndpoint {
             nickname = "getTagSpecifications")
     TagSpecificationsJson getTagSpecifications();
 
-    @GET
+    @POST
+    @Path("recommendation")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "createRecommendation")
+    Map<String, VmTypeJson> createRecommendation(RecommendationRequestJson recommendationRequestJson);
+
+    @POST
     @Path("custom")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SPECIALS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
@@ -162,6 +171,5 @@ public interface ConnectorEndpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_SECURITYGROUPS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatformSecurityGroups")
     Map<String, Set<PlatformSecurityGroupResponse>> getSecurityGroups(PlatformResourceRequestJson resourceRequestJson);
-
 
 }

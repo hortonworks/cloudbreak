@@ -21,6 +21,8 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.StringTypesCompare;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
@@ -71,6 +74,8 @@ public class GcpPlatformParameters implements PlatformParameters {
     private static final Integer START_LABEL = 97;
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GcpPlatformParameters.class);
 
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
@@ -106,6 +111,8 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
+    private VmRecommendations vmRecommendations;
+
     @PostConstruct
     public void init() {
         regions = readRegionsGcp();
@@ -115,6 +122,7 @@ public class GcpPlatformParameters implements PlatformParameters {
         defaultRegion = getDefaultRegion();
         defaultVmType = nthElement(vmTypes.get(vmTypes.keySet().iterator().next()), DEFAULT_VM_TYPE_POSITION);
         initDefaultVmTypes();
+        vmRecommendations = initVmRecommendations();
     }
 
     private void initDefaultVmTypes() {
@@ -330,6 +338,11 @@ public class GcpPlatformParameters implements PlatformParameters {
         return GcpConstants.GCP_PLATFORM.value();
     }
 
+    @Override
+    public VmRecommendations recommendedVms() {
+        return vmRecommendations;
+    }
+
     private VmType defaultVirtualMachine() {
         return defaultVmType;
     }
@@ -361,5 +374,16 @@ public class GcpPlatformParameters implements PlatformParameters {
         public String getUrl(String projectId, AvailabilityZone zone) {
             return getUrl(projectId, zone, value);
         }
+    }
+
+    private VmRecommendations initVmRecommendations() {
+        VmRecommendations result = null;
+        String vmRecommendation = resourceDefinition("vm-recommendation");
+        try {
+            result = JsonUtil.readValue(vmRecommendation, VmRecommendations.class);
+        } catch (IOException e) {
+            LOGGER.error("Cannot initialize Virtual machine recommendations for GCP", e);
+        }
+        return result;
     }
 }

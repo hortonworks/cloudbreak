@@ -6,10 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
@@ -26,9 +28,11 @@ import com.sequenceiq.cloudbreak.api.model.PlatformSshKeyResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformSshKeysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformVirtualMachinesJson;
+import com.sequenceiq.cloudbreak.api.model.RecommendationRequestJson;
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
 import com.sequenceiq.cloudbreak.api.model.SpecialParametersJson;
 import com.sequenceiq.cloudbreak.api.model.TagSpecificationsJson;
+import com.sequenceiq.cloudbreak.api.model.VmTypeJson;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
@@ -40,22 +44,27 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
+import com.sequenceiq.cloudbreak.service.stack.CloudResourceAdvisor;
 
 @Component
 public class PlatformParameterController implements ConnectorEndpoint {
 
-    @Autowired
+    @Inject
     private CloudParameterService cloudParameterService;
 
-    @Autowired
-    @Qualifier("conversionService")
+    @Inject
+    @Named("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private CloudResourceAdvisor cloudResourceAdvisor;
 
     @Override
     public Map<String, JsonEntity> getPlatforms(Boolean extended) {
@@ -177,6 +186,20 @@ public class PlatformParameterController implements ConnectorEndpoint {
     }
 
     @Override
+    public Map<String, VmTypeJson> createRecommendation(RecommendationRequestJson recommendationRequestJson) {
+        Map<String, VmTypeJson> result = new HashMap<>();
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
+        PlatformResourceRequest resourceRequest = conversionService.convert(recommendationRequestJson, PlatformResourceRequest.class);
+        String blueprint = recommendationRequestJson.getBlueprint();
+        fieldIsNotEmpty(blueprint, "blueprint");
+        fieldIsNotEmpty(resourceRequest.getRegion(), "region");
+        fieldIsNotEmpty(resourceRequest.getAvailabilityZone(), "availabilityZone");
+        Map<String, VmType> recommendedVms = cloudResourceAdvisor.createForBlueprint(blueprint, resourceRequest, cbUser);
+        recommendedVms.forEach((hostGroupName, vm) -> result.put(hostGroupName, conversionService.convert(vm, VmTypeJson.class)));
+        return result;
+    }
+
+    @Override
     public Map<String, Set<PlatformNetworkResponse>> getCloudNetworks(PlatformResourceRequestJson resourceRequestJson) {
         resourceRequestJson = prepareAccountAndOwner(resourceRequestJson, authenticatedUserService.getCbUser());
         PlatformResourceRequest convert = conversionService.convert(resourceRequestJson, PlatformResourceRequest.class);
@@ -210,4 +233,9 @@ public class PlatformParameterController implements ConnectorEndpoint {
         return resourceRequestJson;
     }
 
+    private void fieldIsNotEmpty(Object field, String fieldName) {
+        if (StringUtils.isEmpty(field)) {
+            throw new BadRequestException(String.format("The '%s' request body field is mandatory for recommendation creation.", fieldName));
+        }
+    }
 }

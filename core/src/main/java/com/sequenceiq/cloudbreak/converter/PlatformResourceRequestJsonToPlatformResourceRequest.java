@@ -35,6 +35,10 @@ public class PlatformResourceRequestJsonToPlatformResourceRequest extends
         }
         platformResourceRequest.setFilters(source.getFilters());
         platformResourceRequest.setRegion(source.getRegion());
+        platformResourceRequest.setCloudPlatform(platformResourceRequest.getCredential().cloudPlatform());
+        if (!Strings.isNullOrEmpty(source.getAvailabilityZone())) {
+            platformResourceRequest.setAvailabilityZone(source.getAvailabilityZone());
+        }
         return platformResourceRequest;
     }
 }

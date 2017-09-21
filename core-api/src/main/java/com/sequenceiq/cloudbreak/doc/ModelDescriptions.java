@@ -66,6 +66,11 @@ public class ModelDescriptions {
         public static final String CREDENTIAL_NAME = "credential resource name for the request";
         public static final String REGION = "Related region";
         public static final String FILTER = "filter for resources";
+        public static final String AVAILABILITY_ZONE = "related availability zone";
+    }
+
+    public static class RecommendationRequestModelDescription {
+        public static final String BLUEPRINT = "id or name that could indentify an existing blueprint";
     }
 
     public static class StackModelDescription {
