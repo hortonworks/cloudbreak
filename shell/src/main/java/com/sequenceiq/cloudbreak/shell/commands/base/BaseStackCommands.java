@@ -493,9 +493,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node addition should be at least 1");
             }
             UpdateStackJson updateStackJson = new UpdateStackJson();
+            updateStackJson.setWithClusterEvent(withClusterUpScale);
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
             instanceGroupAdjustmentJson.setScalingAdjustment(adjustment);
-            instanceGroupAdjustmentJson.setWithClusterEvent(withClusterUpScale);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             String stackIdStr = shellContext.getStackId();
@@ -529,9 +529,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 throw shellContext.exceptionTransformer().transformToRuntimeException("The adjustment value in case of node removal should be negative");
             }
             UpdateStackJson updateStackJson = new UpdateStackJson();
+            updateStackJson.setWithClusterEvent(false);
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
             instanceGroupAdjustmentJson.setScalingAdjustment(adjustment);
-            instanceGroupAdjustmentJson.setWithClusterEvent(false);
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup.getName());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             String stackIdStr = shellContext.getStackId();

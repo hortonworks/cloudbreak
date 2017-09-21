@@ -104,20 +104,20 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
 
             UpdateStackJson updateStackJson = new UpdateStackJson();
+            updateStackJson.setWithClusterEvent(false);
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            instanceGroupAdjustmentJson.setWithClusterEvent(false);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             CloudbreakUtil.checkResponse("DownscaleStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         } else {
             mockInstanceUtil.addInstance(instanceMap, scalingAdjustment);
             UpdateStackJson updateStackJson = new UpdateStackJson();
+            updateStackJson.setWithClusterEvent(false);
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-            instanceGroupAdjustmentJson.setWithClusterEvent(false);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");

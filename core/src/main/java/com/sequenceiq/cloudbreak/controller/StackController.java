@@ -166,11 +166,11 @@ public class StackController implements StackEndpoint {
         Stack stack = stackService.getById(id);
         MDCBuilder.buildMdcContext(stack);
         if (updateRequest.getStatus() != null) {
-            stackService.updateStatus(id, updateRequest.getStatus());
+            stackService.updateStatus(id, updateRequest.getStatus(), updateRequest.getWithClusterEvent());
         } else if (!BYOS.equals(stack.cloudPlatform())) {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
             validateAccountPreferences(id, scalingAdjustment);
-            stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment());
+            stackService.updateNodeCount(id, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
         } else if (BYOS.equals(stack.cloudPlatform())) {
             return Response.status(Status.BAD_REQUEST).build();
         }

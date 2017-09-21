@@ -66,9 +66,9 @@ public class UpdateStackRequestValidatorTest {
     @Test
     public void testInValidShouldReturnTrueWhenNodeCountIsLowerThanOneUpdatedAndWithClusterEvent() {
         UpdateStackJson updateStackJson = new UpdateStackJson();
+        updateStackJson.setWithClusterEvent(true);
         InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
         instanceGroupAdjustmentJson.setScalingAdjustment(-1);
-        instanceGroupAdjustmentJson.setWithClusterEvent(true);
         instanceGroupAdjustmentJson.setInstanceGroup("slave_1");
         updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
         updateStackJson.setStatus(null);

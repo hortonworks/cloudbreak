@@ -76,8 +76,8 @@ public class ScalingRequest implements Runnable {
             LOGGER.info("Sending request to add {} instance(s) and install services", scalingAdjustment);
             Long stackId = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateStackJson updateStackJson = new UpdateStackJson();
+            updateStackJson.setWithClusterEvent(true);
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
-            instanceGroupAdjustmentJson.setWithClusterEvent(true);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);

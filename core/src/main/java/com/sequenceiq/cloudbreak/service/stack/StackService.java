@@ -78,6 +78,7 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -104,6 +105,9 @@ public class StackService {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private AmbariClusterService ambariClusterService;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -387,7 +391,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public void updateStatus(Long stackId, StatusRequest status) {
+    public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
         Stack stack = getById(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
@@ -411,10 +415,10 @@ public class StackService {
                 repairFailedNodes(stack);
                 break;
             case STOPPED:
-                stop(stack, cluster);
+                stop(stack, cluster, updateCluster);
                 break;
             case STARTED:
-                start(stack, cluster);
+                start(stack, cluster, updateCluster);
                 break;
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
@@ -448,34 +452,46 @@ public class StackService {
         }
     }
 
-    private void stop(Stack stack, Cluster cluster) {
+    private void stop(Stack stack, Cluster cluster, boolean updateCluster) {
         if (cluster != null && cluster.isStopInProgress()) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
-            String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
-            eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
+            setStackStatusToStopRequested(stack);
         } else {
-            StopRestrictionReason reason = stack.isInfrastructureStoppable();
-            if (stack.isStopped()) {
-                String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
-                LOGGER.info(statusDesc);
-                eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
-            } else if (reason != StopRestrictionReason.NONE) {
-                throw new BadRequestException(
-                        String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
-            } else if (!stack.isAvailable() && !stack.isStopFailed()) {
-                throw new BadRequestException(
-                        String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
-            } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
-                throw new BadRequestException(
-                        String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
-            } else {
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
-                flowManager.triggerStackStop(stack.getId());
-            }
+            triggerStackStopIfNeeded(stack, cluster, updateCluster);
         }
     }
 
-    private void start(Stack stack, Cluster cluster) {
+    private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster) {
+        StopRestrictionReason reason = stack.isInfrastructureStoppable();
+        if (stack.isStopped()) {
+            String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
+            LOGGER.info(statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
+        } else if (reason != StopRestrictionReason.NONE) {
+            throw new BadRequestException(
+                    String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
+        } else if (!stack.isAvailable() && !stack.isStopFailed()) {
+            throw new BadRequestException(
+                    String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
+        } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
+            if (updateCluster) {
+                setStackStatusToStopRequested(stack);
+                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
+            } else {
+                throw new BadRequestException("Cannot update the status of stack '1' to STOPPED, because the cluster is not in STOPPED state.");
+            }
+        } else {
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
+            flowManager.triggerStackStop(stack.getId());
+        }
+    }
+
+    private void setStackStatusToStopRequested(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+        String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
+        eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
+    }
+
+    private void start(Stack stack, Cluster cluster, boolean updateCluster) {
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.info(statusDesc);
@@ -486,20 +502,23 @@ public class StackService {
         } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
+            if (updateCluster) {
+                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STARTED);
+            }
         }
     }
 
-    public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
+    public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent) {
         Stack stack = get(stackId);
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
-        if (instanceGroupAdjustmentJson.getWithClusterEvent()) {
+        if (withClusterEvent) {
             validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
         }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED);
-            flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson);
+            flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson, withClusterEvent);
         } else {
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED);
             flowManager.triggerStackDownscale(stack.getId(), instanceGroupAdjustmentJson);
