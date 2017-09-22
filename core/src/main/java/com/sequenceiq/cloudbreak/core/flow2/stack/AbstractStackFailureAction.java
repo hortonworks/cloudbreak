@@ -30,7 +30,7 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
         Flow flow = getFlow(flowId);
         Stack stack = stackService.getById(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);
-        flow.setFlowFailed();
+        flow.setFlowFailed(payload.getException());
         return new StackFailureContext(flowId, stack);
     }
 

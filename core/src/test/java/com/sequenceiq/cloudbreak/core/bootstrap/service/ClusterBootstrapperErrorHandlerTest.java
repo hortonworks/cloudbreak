@@ -5,6 +5,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anySet;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,7 +15,9 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -44,6 +47,9 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterBootstrapperErrorHandlerTest {
 
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @Mock
     private ResourceRepository resourceRepository;
 
@@ -56,16 +62,11 @@ public class ClusterBootstrapperErrorHandlerTest {
     @Mock
     private HostMetadataRepository hostMetadataRepository;
 
-    //private CloudPlatformResolver platformResolver;
-
     @Mock
     private CloudbreakEventService eventService;
 
     @Mock
     private ContainerOrchestrator orchestrator;
-
-    //@Mock
-    //private ServiceProviderMetadataAdapter metadataSetup;
 
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
@@ -79,7 +80,7 @@ public class ClusterBootstrapperErrorHandlerTest {
     @InjectMocks
     private ClusterBootstrapperErrorHandler underTest;
 
-    @Test(expected = CloudbreakOrchestratorFailedException.class)
+    @Test
     public void clusterBootstrapErrorHandlerWhenNodeCountLessThanOneAfterTheRollbackThenClusterProvisionFailed() throws CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
 
@@ -87,32 +88,29 @@ public class ClusterBootstrapperErrorHandlerTest {
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
         when(instanceGroupRepository.save(any(InstanceGroup.class))).then(returnsFirstArg());
         when(instanceMetaDataRepository.save(any(InstanceMetaData.class))).then(returnsFirstArg());
-        when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer(new Answer<InstanceMetaData>() {
-            @Override
-            public InstanceMetaData answer(InvocationOnMock invocation) {
-                Object[] args = invocation.getArguments();
-                String ip = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-                    if (instanceMetaData.getPrivateIp().equals(ip)) {
-                        return instanceMetaData;
-                    }
+        when(instanceMetaDataRepository.findNotTerminatedByPrivateAddress(anyLong(), anyString())).thenAnswer((Answer<InstanceMetaData>) invocation -> {
+            Object[] args = invocation.getArguments();
+            String ip = (String) args[1];
+            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+                if (instanceMetaData.getPrivateIp().equals(ip)) {
+                    return instanceMetaData;
                 }
-                return null;
             }
+            return null;
         });
-        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer(new Answer<InstanceGroup>() {
-            @Override
-            public InstanceGroup answer(InvocationOnMock invocation) {
-                Object[] args = invocation.getArguments();
-                String name = (String) args[1];
-                for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
-                    if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
-                        return instanceMetaData.getInstanceGroup();
-                    }
+        when(instanceGroupRepository.findOneByGroupNameInStack(anyLong(), anyString())).thenAnswer((Answer<InstanceGroup>) invocation -> {
+            Object[] args = invocation.getArguments();
+            String name = (String) args[1];
+            for (InstanceMetaData instanceMetaData : stack.getRunningInstanceMetaData()) {
+                if (instanceMetaData.getInstanceGroup().getGroupName().equals(name)) {
+                    return instanceMetaData.getInstanceGroup();
                 }
-                return null;
             }
+            return null;
         });
+        when(cloudbreakMessagesService.getMessage(eq("bootstrapper.error.invalide.nodecount"), any())).thenReturn("invalide.nodecount");
+        thrown.expect(CloudbreakOrchestratorFailedException.class);
+        thrown.expectMessage("invalide.nodecount");
 
         underTest.terminateFailedNodes(null, orchestrator, TestUtil.stack(),
                 new GatewayConfig("10.0.0.1",  "198.0.0.1",  "10.0.0.1", 8443, false), prepareNodes(stack));

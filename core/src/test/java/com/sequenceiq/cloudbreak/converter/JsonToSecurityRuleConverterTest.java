@@ -3,13 +3,18 @@ package com.sequenceiq.cloudbreak.converter;
 import java.util.Collections;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.api.model.SecurityRuleRequest;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
 public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<SecurityRuleRequest> {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     private JsonToSecurityRuleConverter underTest;
 
@@ -48,18 +53,24 @@ public class JsonToSecurityRuleConverterTest extends AbstractJsonConverterTest<S
         assertAllFieldsNotNull(result, Collections.singletonList("securityGroup"));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testInvalidPorts() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Ports must be in range of 1-65535");
         underTest.convert(createRequest("0,22,443,70000"));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testInvalidPorts2() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Ports must be in range of 1-65535");
         underTest.convert(createRequest("0-65535"));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testInvalidPorts3() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Ports must be in range of 1-65535");
         underTest.convert(createRequest("0"));
     }
 

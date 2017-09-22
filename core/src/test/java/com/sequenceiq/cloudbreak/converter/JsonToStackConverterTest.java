@@ -12,7 +12,9 @@ import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -37,6 +39,9 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private JsonToStackConverter underTest;
@@ -73,6 +78,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(instanceGroup)
+                .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
@@ -85,16 +92,18 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 stack,
                 Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
                         "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
-                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname"));
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName"));
         Assert.assertEquals("eu-west-1", stack.getRegion());
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testForNoRegionAndNoDefaultRegion() throws CloudbreakException {
+    @Test
+    public void testConvertWithLoginUserName() throws CloudbreakException {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
 
         // GIVEN
+        ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-2");
+        ReflectionTestUtils.setField(underTest, "enableCustomImage", true);
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
@@ -103,6 +112,37 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("You can not modify the default user!");
+        // WHEN
+        Stack stack = underTest.convert(getRequest("stack/stack-with-loginusername.json"));
+        // THEN
+        assertAllFieldsNotNull(
+                stack,
+                Arrays.asList("description", "statusReason", "cluster", "credential", "gatewayPort", "template", "network", "securityConfig", "securityGroup",
+                        "version", "created", "platformVariant", "cloudPlatform", "saltPassword", "stackTemplate", "flexSubscription", "datalakeId",
+                        "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "loginUserName"));
+        Assert.assertEquals("eu-west-1", stack.getRegion());
+    }
+
+    @Test
+    public void testForNoRegionAndNoDefaultRegion() throws CloudbreakException {
+        InstanceGroup instanceGroup = mock(InstanceGroup.class);
+        when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
+
+        // GIVEN
+        given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
+                .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
+        given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(instanceGroup)
+                .willReturn(instanceGroup)
+                .willReturn(new FailurePolicy())
+                .willReturn(new Orchestrator());
+        given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
+        given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("No default region is specified. Region cannot be empty.");
 
         // WHEN
         StackRequest stackRequest = getRequest("stack/stack.json");
@@ -123,6 +163,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(conversionService.convert(any(Object.class), any(TypeDescriptor.class), any(TypeDescriptor.class)))
                 .willReturn(new HashSet<>(Collections.singletonList(instanceGroup)));
         given(conversionService.convert(any(Object.class), any(Class.class)))
+                .willReturn(instanceGroup)
+                .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());

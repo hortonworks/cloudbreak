@@ -5,7 +5,14 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 
 public class SshUserRequest<T> extends CloudPlatformRequest<T> {
 
-    public SshUserRequest(CloudContext cloudContext) {
+    private String loginUserName;
+
+    public SshUserRequest(CloudContext cloudContext, String loginUserName) {
         super(cloudContext, null);
+        this.loginUserName = loginUserName;
+    }
+
+    public String getLoginUserName() {
+        return loginUserName;
     }
 }

@@ -18,7 +18,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,11 +41,15 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultStackHostServiceTypeTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private StackService underTest;
@@ -72,6 +78,9 @@ public class DefaultStackHostServiceTypeTest {
     @Mock
     private CloudbreakEventService eventService;
 
+    @Mock
+    private AmbariClusterService ambariClusterService;
+
     @Before
     public void before() {
         doNothing().when(flowManager).triggerStackStop(anyObject());
@@ -84,7 +93,7 @@ public class DefaultStackHostServiceTypeTest {
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        underTest.updateStatus(1L, StatusRequest.STOPPED, true);
         verify(flowManager, times(1)).triggerStackStop(anyObject());
     }
 
@@ -94,7 +103,7 @@ public class DefaultStackHostServiceTypeTest {
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        underTest.updateStatus(1L, StatusRequest.STOPPED, true);
         verify(eventService, times(1)).fireCloudbreakEvent(eq(1L), eq(STOP_REQUESTED.name()), anyString());
     }
 
@@ -104,7 +113,7 @@ public class DefaultStackHostServiceTypeTest {
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        underTest.updateStatus(1L, StatusRequest.STOPPED, true);
         verify(flowManager, times(1)).triggerStackStop(anyObject());
     }
 
@@ -114,27 +123,31 @@ public class DefaultStackHostServiceTypeTest {
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        underTest.updateStatus(1L, StatusRequest.STOPPED, true);
         verify(flowManager, times(1)).triggerStackStop(anyObject());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void updateStatusTestStopWhenClusterInStoppedAndStackUpdateInProgressThenBadRequestExceptionDropping() {
         Stack stack = stack(UPDATE_IN_PROGRESS, STOPPED);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot update the status of stack '1' to STOPPED, because it isn't in AVAILABLE state.");
+        underTest.updateStatus(1L, StatusRequest.STOPPED, true);
         verify(flowManager, times(1)).triggerStackStop(anyObject());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void updateStatusTestStopWhenClusterAndStackAvailableThenBadRequestExceptionDropping() {
         Stack stack = stack(AVAILABLE, AVAILABLE);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot update the status of stack '1' to STOPPED, because the cluster is not in STOPPED state.");
+        underTest.updateStatus(1L, StatusRequest.STOPPED, false);
     }
 
     @Test
@@ -143,17 +156,19 @@ public class DefaultStackHostServiceTypeTest {
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STARTED);
+        underTest.updateStatus(1L, StatusRequest.STARTED, true);
         verify(flowManager, times(1)).triggerStackStart(anyObject());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void updateStatusTestStartWhenClusterInStoppedAndStackStopFailedThenBadRequestExceptionDropping() {
         Stack stack = stack(UPDATE_IN_PROGRESS, STOPPED);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STARTED);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot update the status of stack '1' to STARTED, because it isn't in STOPPED state.");
+        underTest.updateStatus(1L, StatusRequest.STARTED, true);
     }
 
     @Test
@@ -162,35 +177,41 @@ public class DefaultStackHostServiceTypeTest {
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STARTED);
+        underTest.updateStatus(1L, StatusRequest.STARTED, true);
         verify(flowManager, times(1)).triggerStackStart(anyObject());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void updateStatusTestStartWhenClusterAndStackUpdateInProgressThenBadRequestExceptionDropping() {
         Stack stack = stack(UPDATE_IN_PROGRESS, UPDATE_IN_PROGRESS);
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STARTED);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot update the status of stack '1' to STARTED, because it isn't in STOPPED state.");
+        underTest.updateStatus(1L, StatusRequest.STARTED, true);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void updateStatusTestStopWhenClusterAndStackAvailableAndEphemeralThenBadRequestExceptionDropping() {
         Stack stack = TestUtil.setEphemeral(TestUtil.stack(AVAILABLE, TestUtil.awsCredential()));
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot stop a stack '1'. Reason: Instances with ephemeral volumes cannot be stopped.");
+        underTest.updateStatus(1L, StatusRequest.STOPPED, true);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void updateStatusTestStopWhenClusterAndStackAvailableAndSpotInstancesThenBadRequestExceptionDropping() {
         Stack stack = TestUtil.setSpotInstances(TestUtil.stack(AVAILABLE, TestUtil.awsCredential()));
         given(stackRepository.findOneWithLists(anyLong())).willReturn(stack);
         given(clusterRepository.findOneWithLists(anyLong())).willReturn(stack.getCluster());
         given(stackUpdater.updateStackStatus(anyLong(), any(DetailedStackStatus.class))).willReturn(stack);
-        underTest.updateStatus(1L, StatusRequest.STOPPED);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot stop a stack '1'. Reason: Spot instances cannot be stopped.");
+        underTest.updateStatus(1L, StatusRequest.STOPPED, true);
     }
 
     private Stack stack(Status stackStatus, Status clusterStatus) {

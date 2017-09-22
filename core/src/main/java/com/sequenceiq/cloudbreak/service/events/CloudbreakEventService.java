@@ -6,7 +6,8 @@ import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 
 public interface CloudbreakEventService {
-    void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage);
+
+    void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage);
 
     void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName);
 

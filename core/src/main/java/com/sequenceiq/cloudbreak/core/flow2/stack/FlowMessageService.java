@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 
 @Service
 public class FlowMessageService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FlowMessageService.class);
 
     @Inject

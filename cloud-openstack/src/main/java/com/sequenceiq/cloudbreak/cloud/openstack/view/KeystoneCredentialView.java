@@ -42,10 +42,6 @@ public class KeystoneCredentialView {
         return stackName;
     }
 
-    public String getPublicKey() {
-        return cloudCredential.getPublicKey();
-    }
-
     public String getUserName() {
         return cloudCredential.getParameter("userName", String.class);
     }

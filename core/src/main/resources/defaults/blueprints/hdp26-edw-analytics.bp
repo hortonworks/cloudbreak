@@ -43,7 +43,10 @@
           "hive.exec.compress.output": "true",
           "hive.merge.mapfiles": "true",
           "hive.server2.tez.initialize.default.sessions": "true",
-          "hive.server2.transport.mode": "http"
+          "hive.server2.transport.mode": "http",
+          "hive.exec.orc.split.strategy":"BI",
+          "hive.stats.fetch.bitvector":"true",
+          "hive.metastore.rawstore.impl":"org.apache.hadoop.hive.metastore.cache.CachedStore"
         }
       },
       {
@@ -51,6 +54,13 @@
           "mapreduce.job.reduce.slowstart.completedmaps": "0.7",
           "mapreduce.map.output.compress": "true",
           "mapreduce.output.fileoutputformat.compress": "true"
+        }
+      },
+      {
+        "tez-site": {
+          "tez.runtime.shuffle.parallel.copies":"4",
+          "tez.runtime.enable.final-merge.in.output":"false",
+          "tez.am.am-rm.heartbeat.interval-ms.max":"2000"
         }
       },
       {

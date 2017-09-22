@@ -150,7 +150,7 @@ public class OfflineStateGenerator {
 
     private Flow initializeFlow() throws Exception {
         ((AbstractFlowConfiguration) flowConfiguration).init();
-        Flow flow = flowConfiguration.createFlow("");
+        Flow flow = flowConfiguration.createFlow("", 0L);
         flow.initialize();
         return flow;
     }
@@ -158,9 +158,12 @@ public class OfflineStateGenerator {
     private void saveToFile(String content) throws IOException {
         File destinationDir = new File(OUT_PATH);
         if (!destinationDir.exists()) {
-            destinationDir.mkdirs();
+            boolean success = destinationDir.mkdirs();
+            if (!success) {
+                throw new IOException("Unable to create directories: " + destinationDir.getAbsolutePath());
+            }
         }
-        Files.write(Paths.get(String.format("%s/%s.dot", OUT_PATH, flowConfiguration.getClass().getSimpleName())), content.getBytes());
+        Files.write(Paths.get(String.format("%s/%s.dot", OUT_PATH, flowConfiguration.getClass().getSimpleName())), content.getBytes("UTF-8"));
     }
 
     private static void injectAppContext(FlowConfiguration flowConfiguration) throws IllegalAccessException, NoSuchFieldException {

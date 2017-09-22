@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -183,7 +184,7 @@ public class ContainerConstraint {
             return this;
         }
 
-        public Builder ports(List<Integer> ports) {
+        public Builder ports(Collection<Integer> ports) {
             this.ports.addAll(ports);
             return this;
         }

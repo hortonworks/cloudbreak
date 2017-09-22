@@ -59,7 +59,7 @@ import reactor.bus.EventBus;
 @Service
 public class ReactorFlowManager {
 
-    private static final Integer WAIT_FOR_ACCEPT = 5;
+    private static final long WAIT_FOR_ACCEPT = 5L;
 
     @Inject
     private EventBus reactor;
@@ -86,11 +86,11 @@ public class ReactorFlowManager {
         notify(selector, new StackEvent(selector, stackId));
     }
 
-    public void triggerStackUpscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment) {
+    public void triggerStackUpscale(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustment, boolean withClusterEvent) {
         String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
         StackAndClusterUpscaleTriggerEvent stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
-                instanceGroupAdjustment.getWithClusterEvent() ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
+                withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK);
         notify(selector, stackAndClusterUpscaleTriggerEvent);
     }
 

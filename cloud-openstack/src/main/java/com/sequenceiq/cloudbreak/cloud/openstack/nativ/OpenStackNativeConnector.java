@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.inject.Inject;
 
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
@@ -28,7 +26,6 @@ import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackPlatformResourc
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackSetup;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackTagValidator;
 
-@Service
 public class OpenStackNativeConnector implements CloudConnector {
 
     @Inject

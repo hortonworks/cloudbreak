@@ -2,13 +2,16 @@ package com.sequenceiq.cloudbreak.cloud.init;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.Variant.variant;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
@@ -26,6 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
 public class CloudPlatformConnectorsTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     private final CloudPlatformConnectors c = new CloudPlatformConnectors();
 
@@ -72,12 +78,14 @@ public class CloudPlatformConnectorsTest {
         assertEquals("ONE", conn.variant().value());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void getConnectorDefaultWithNoDefault() {
         List<CloudConnector> connectorList = Lists.newArrayList();
         connectorList.add(getConnector("NODEFAULT", "ONE"));
         connectorList.add(getConnector("NODEFAULT", "TWO"));
         ReflectionTestUtils.setField(c, "cloudConnectors", connectorList);
+        thrown.expect(IllegalStateException.class);
+        thrown.expectMessage(is("No default variant is specified for platform: 'StringType{value='NODEFAULT'}'"));
         c.cloudPlatformConnectors();
     }
 

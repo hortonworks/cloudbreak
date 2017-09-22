@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
+import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -812,14 +813,14 @@ public class AmbariClusterConnector {
             LOGGER.info("Adding generated blueprint to Ambari: {}", JsonUtil.minify(blueprintText));
             ambariClient.addBlueprint(blueprintText, cluster.getTopologyValidation());
         } catch (HttpResponseException hre) {
-            String errorMessage = AmbariClientExceptionUtil.getErrorMessage(hre);
-            throw new CloudbreakServiceException("Ambari Blueprint could not be added: " + errorMessage, hre);
-        } catch (IOException e) {
-            if ("Conflict".equals(e.getMessage())) {
+            if (hre.getStatusCode() == HttpStatus.SC_CONFLICT) {
                 LOGGER.info("Ambari blueprint already exists for stack: {}", stack.getId());
             } else {
-                throw new CloudbreakServiceException(e);
+                String errorMessage = AmbariClientExceptionUtil.getErrorMessage(hre);
+                throw new CloudbreakServiceException("Ambari Blueprint could not be added: " + errorMessage, hre);
             }
+        } catch (IOException e) {
+            throw new CloudbreakServiceException(e);
         }
     }
 

@@ -10,13 +10,14 @@ import static org.mockito.Matchers.anyLong;
 import static org.mockito.Matchers.anyMap;
 import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyVararg;
-
-import javax.ws.rs.NotFoundException;
+import static org.mockito.Matchers.eq;
 
 import org.apache.http.MethodNotSupportedException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -29,10 +30,15 @@ import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseTemplateCommands;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
+import com.sequenceiq.cloudbreak.shell.transformer.ExceptionTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 public class BaseTemplateCommandsTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @InjectMocks
     private BaseTemplateCommands underTest;
 
@@ -51,6 +57,9 @@ public class BaseTemplateCommandsTest {
     @Mock
     private OutputTransformer outputTransformer;
 
+    @Mock
+    private ExceptionTransformer exceptionTransformer;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -61,6 +70,7 @@ public class BaseTemplateCommandsTest {
         given(cloudbreakClient.templateEndpoint()).willReturn(templateEndpoint);
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
         given(shellContext.outputTransformer()).willReturn(outputTransformer);
+        given(shellContext.exceptionTransformer()).willReturn(exceptionTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(any(OutPutType.class), anyObject(), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
@@ -84,9 +94,12 @@ public class BaseTemplateCommandsTest {
         verify(templateEndpoint, times(1)).get(anyLong());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void showTemplateByIdWhichIsNotExist() throws Exception {
-        given(templateEndpoint.get(anyLong())).willThrow(new NotFoundException("not found"));
+        given(templateEndpoint.get(anyLong())).willThrow(new RuntimeException("not found"));
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willReturn(new RuntimeException("not found"));
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("not found");
 
         underTest.show(51L, null, null);
     }
@@ -104,9 +117,14 @@ public class BaseTemplateCommandsTest {
         verify(templateEndpoint, times(1)).getPublic(anyString());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void showTemplateByNameWhichIsNotExistThenThowNotFoundException() throws Exception {
-        given(templateEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
+        RuntimeException expectedException = new RuntimeException("not found");
+        given(templateEndpoint.getPublic(anyString())).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException.getMessage()))).willReturn(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage(expectedException.getMessage());
 
         underTest.show(null, "test1", null);
     }

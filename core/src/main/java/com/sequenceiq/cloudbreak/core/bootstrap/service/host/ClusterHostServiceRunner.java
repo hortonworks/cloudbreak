@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.SmartSenseCredentialConfigService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariAuthenticationProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
@@ -83,6 +84,9 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private AmbariAuthenticationProvider ambariAuthenticationProvider;
+
+    @Inject
+    private SmartSenseCredentialConfigService smartSenseCredentialConfigService;
 
     @Transactional
     public void runAmbariServices(Stack stack, Cluster cluster) throws CloudbreakException {
@@ -134,6 +138,10 @@ public class ClusterHostServiceRunner {
         credentials.put("username", ambariAuthenticationProvider.getAmbariUserName(stack.getCluster()));
         credentials.put("password", ambariAuthenticationProvider.getAmbariPassword(stack.getCluster()));
         servicePillar.put("ambari-credentials", new SaltPillarProperties("/ambari/credentials.sls", singletonMap("ambari", credentials)));
+        if (smartSenseCredentialConfigService.areCredentialsSpecified()) {
+            Map<String, Object> smartSenseCredentials = smartSenseCredentialConfigService.getCredentials();
+            servicePillar.put("smartsense-credentials", new SaltPillarProperties("/smartsense/credentials.sls", smartSenseCredentials));
+        }
 
         return new SaltConfig(servicePillar, createGrainProperties(gatewayConfigs));
     }

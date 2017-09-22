@@ -13,11 +13,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import javax.ws.rs.NotFoundException;
-
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -35,6 +35,9 @@ import com.sequenceiq.cloudbreak.shell.transformer.OutputTransformer;
 import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 
 public class BaseNetworkCommandsTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private BaseNetworkCommands underTest;
@@ -57,8 +60,6 @@ public class BaseNetworkCommandsTest {
     @Mock
     private ExceptionTransformer exceptionTransformer;
 
-    private final RuntimeException expectedException = new RuntimeException("something not found");
-
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -72,8 +73,6 @@ public class BaseNetworkCommandsTest {
         given(outputTransformer.render(any(OutPutType.class), anyObject(), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
-        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
-        given(exceptionTransformer.transformToRuntimeException(anyString())).willThrow(expectedException);
         given(shellContext.exceptionTransformer()).willReturn(exceptionTransformer);
     }
 
@@ -89,14 +88,13 @@ public class BaseNetworkCommandsTest {
     @Test
     public void selectNetworkByIdWhichIsNotExist() {
         given(shellContext.getNetworksByProvider()).willReturn(ImmutableMap.of(50L, "test1"));
+        RuntimeException expectedException = new RuntimeException("Network not found");
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException.getMessage()))).willReturn(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage(expectedException.getMessage());
 
-        RuntimeException ext = null;
-        try {
-            underTest.select(51L, null);
-        } catch (RuntimeException e) {
-            ext = e;
-        }
-        Assert.assertEquals("Wrong error occurred", expectedException, ext);
+        underTest.select(51L, null);
     }
 
     @Test
@@ -108,9 +106,13 @@ public class BaseNetworkCommandsTest {
         Assert.assertEquals("Network is selected with name: test1", select);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void selectNetworkByNameWhichIsNotExistThenThowNotFoundException() {
-        given(networkEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
+        RuntimeException expectedException = new RuntimeException("not found");
+        given(networkEndpoint.getPublic(anyString())).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage(expectedException.getMessage());
 
         underTest.select(null, "test1");
     }
@@ -128,9 +130,13 @@ public class BaseNetworkCommandsTest {
         verify(networkEndpoint, times(1)).get(anyLong());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void showNetworkByIdWhichIsNotExist() throws Exception {
-        when(networkEndpoint.get(anyLong())).thenThrow(new NotFoundException("not found"));
+        RuntimeException expectedException = new RuntimeException("not exists");
+        when(networkEndpoint.get(anyLong())).thenThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage(expectedException.getMessage());
 
         underTest.show(51L, null, null);
     }
@@ -148,9 +154,14 @@ public class BaseNetworkCommandsTest {
         verify(networkEndpoint, times(1)).getPublic(anyString());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void showNetworkByNameWhichIsNotExistThenThowNotFoundException() throws Exception {
-        given(networkEndpoint.getPublic(anyString())).willThrow(new NotFoundException("not found"));
+        RuntimeException expectedException = new RuntimeException("not found");
+        given(networkEndpoint.getPublic(anyString())).willThrow(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException.getMessage()))).willReturn(expectedException);
+        given(exceptionTransformer.transformToRuntimeException(eq(expectedException))).willThrow(expectedException);
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage(expectedException.getMessage());
 
         underTest.show(null, "test1", null);
     }
@@ -161,5 +172,4 @@ public class BaseNetworkCommandsTest {
         networkResponse.setId(50L);
         return networkResponse;
     }
-
 }

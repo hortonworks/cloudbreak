@@ -163,7 +163,7 @@ public class SmartSenseConfigProvider {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    class HSTMetadataInstanceInfoJson {
+    static class HSTMetadataInstanceInfoJson {
         private final String flexSubscriptionId;
 
         private final String guid;
@@ -197,7 +197,7 @@ public class SmartSenseConfigProvider {
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)
-    class HSTMetadataJson {
+    static class HSTMetadataJson {
 
         private static final String SCHEMA_VERSION = "1.0.0";
 

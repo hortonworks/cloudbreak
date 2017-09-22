@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor;
 
+import java.util.Date;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -14,6 +16,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.handler.ReactorEventHandler;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
+import com.sequenceiq.cloudbreak.service.notification.Notification;
+import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 
 import reactor.bus.Event;
 
@@ -25,6 +29,9 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private NotificationSender notificationSender;
 
     @Inject
     private ExtendedCloudCredentialToCredentialConverter extendedCloudCredentialToCredentialConverter;
@@ -43,11 +50,22 @@ public class InteractiveCredentialCreationHandler implements ReactorEventHandler
         try {
             credentialService.createWithRetry(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(), credential);
         } catch (DuplicateKeyValueException e) {
-            credentialService.sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
+            sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
                     extendedCloudCredential.getCloudPlatform(), DuplicatedKeyValueExceptionMapper.errorMessage(e));
         } catch (BadRequestException e) {
-            credentialService.sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
+            sendErrorNotification(extendedCloudCredential.getOwner(), extendedCloudCredential.getAccount(),
                     extendedCloudCredential.getCloudPlatform(), e.getMessage());
         }
+    }
+
+    public void sendErrorNotification(String owner, String account, String cloudPlatform, String errorMessage) {
+        Notification notification = new Notification();
+        notification.setEventType("CREDENTIAL_CREATE_FAILED");
+        notification.setEventTimestamp(new Date());
+        notification.setEventMessage(errorMessage);
+        notification.setOwner(owner);
+        notification.setAccount(account);
+        notification.setCloud(cloudPlatform);
+        notificationSender.send(notification);
     }
 }

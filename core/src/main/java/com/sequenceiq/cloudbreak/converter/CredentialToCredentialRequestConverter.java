@@ -15,7 +15,6 @@ public class CredentialToCredentialRequestConverter extends AbstractConversionSe
         credentialRequest.setCloudPlatform(source.cloudPlatform());
         credentialRequest.setDescription(source.getDescription());
         credentialRequest.setTopologyId(source.getTopology().getId());
-        credentialRequest.setPublicKey(source.getPublicKey());
         credentialRequest.setParameters(source.getAttributes().getMap());
         return credentialRequest;
     }

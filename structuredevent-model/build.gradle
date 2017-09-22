@@ -1,0 +1,13 @@
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+jar {
+    baseName = 'structuredevent-model'
+}
+
+dependencies {
+    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: jacksonVersion
+}

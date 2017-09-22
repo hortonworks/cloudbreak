@@ -21,23 +21,22 @@ public class MockFileSystemFactory implements FileSystemFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockFileSystemFactory.class);
 
     @Override
-    public FileSystem createFileSystem(Session session) throws IOException {
-        return createMockFileSystem();
-    }
-
-    private FileSystem createMockFileSystem() {
+    public FileSystem createFileSystem(Session session) {
         return new MockFileSystem("mockfs") {
             @Override
             public Path getPath(String first, String... more) {
-                String fileName = new File(first).toPath().getFileName().toString();
+                Path path = new File(first).toPath().getFileName();
+                if (path == null) {
+                    throw new IllegalArgumentException("First is not valid");
+                }
                 try {
-                    ClassPathResource classPathResource = new ClassPathResource(fileName);
+                    ClassPathResource classPathResource = new ClassPathResource(path.toString());
                     InputStream inputStream = classPathResource.getInputStream();
-                    File tempFile = new File(fileName);
+                    File tempFile = path.toFile();
                     try (OutputStream outputStream = new FileOutputStream(tempFile)) {
                         IOUtils.copy(inputStream, outputStream);
                     } catch (IOException e) {
-                        LOGGER.error("can't write " + fileName, e);
+                        LOGGER.error("can't write " + path, e);
                     }
                     return tempFile.toPath();
                 } catch (IOException ignored) {

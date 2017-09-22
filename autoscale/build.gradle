@@ -13,6 +13,7 @@ jar {
 }
 
 apply plugin: 'org.springframework.boot'
+apply plugin: 'info.solidsoft.pitest'
 
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']

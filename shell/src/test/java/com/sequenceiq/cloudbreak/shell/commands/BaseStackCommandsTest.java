@@ -12,11 +12,11 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import javax.ws.rs.NotFoundException;
-
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -35,6 +35,10 @@ import com.sequenceiq.cloudbreak.shell.transformer.ResponseTransformer;
 import com.sequenceiq.cloudbreak.shell.util.CloudbreakShellUtil;
 
 public class BaseStackCommandsTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @InjectMocks
     private BaseStackCommands underTest;
 
@@ -72,6 +76,7 @@ public class BaseStackCommandsTest {
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(any(OutPutType.class), anyObject(), anyVararg())).willReturn("id 1 name test1");
         given(outputTransformer.render(anyObject())).willReturn("id 1 name test1");
+        given(shellContext.exceptionTransformer()).willReturn(exceptionTransformer);
     }
 
     @Test
@@ -83,11 +88,12 @@ public class BaseStackCommandsTest {
         Assert.assertEquals("Stack selected, id: 50", select);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void selectStackByIdWhichIsNotExist() {
-        given(stackEndpoint.get(anyLong(), anySet())).willThrow(new NotFoundException("not found"));
-        given(shellContext.exceptionTransformer()).willReturn(exceptionTransformer);
+        given(stackEndpoint.get(anyLong(), anySet())).willThrow(new RuntimeException("not found"));
         given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willReturn(new RuntimeException("not found"));
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("not found");
 
         underTest.select(51L, null);
     }
@@ -101,9 +107,12 @@ public class BaseStackCommandsTest {
         Assert.assertEquals("Stack selected, name: test1", select);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void selectStackByNameWhichIsNotExistThenThowNotFoundException() {
-        given(stackEndpoint.getPublic(anyString(), anySet())).willThrow(new NotFoundException("not found"));
+        given(stackEndpoint.getPublic(anyString(), anySet())).willThrow(new RuntimeException("not found"));
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willReturn(new RuntimeException("not found"));
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("not found");
 
         underTest.select(null, "test1");
     }
@@ -121,9 +130,12 @@ public class BaseStackCommandsTest {
         verify(stackEndpoint, times(1)).get(anyLong(), anySet());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void showStackByIdWhichIsNotExist() {
-        given(stackEndpoint.get(anyLong(), anySet())).willThrow(new NotFoundException("not found"));
+        given(stackEndpoint.get(anyLong(), anySet())).willThrow(new RuntimeException("not found"));
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willReturn(new RuntimeException("not found"));
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("not found");
 
         underTest.show(51L, null, null);
     }
@@ -141,9 +153,12 @@ public class BaseStackCommandsTest {
         verify(stackEndpoint, times(1)).getPublic(anyString(), anySet());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void showStackByNameWhichIsNotExistThenThowNotFoundException() {
-        given(stackEndpoint.getPublic(anyString(), anySet())).willThrow(new NotFoundException("not found"));
+        given(stackEndpoint.getPublic(anyString(), anySet())).willThrow(new RuntimeException("not found"));
+        given(exceptionTransformer.transformToRuntimeException(any(Exception.class))).willReturn(new RuntimeException("not found"));
+        thrown.expect(RuntimeException.class);
+        thrown.expectMessage("not found");
 
         underTest.show(null, "test1", null);
     }

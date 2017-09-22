@@ -92,7 +92,6 @@ public class NetworkService {
         if (network == null) {
             throw new NotFoundException(String.format("Network '%s' not found.", name));
         }
-
         delete(network);
     }
 

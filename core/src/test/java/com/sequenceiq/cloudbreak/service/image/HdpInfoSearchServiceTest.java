@@ -43,14 +43,8 @@ public class HdpInfoSearchServiceTest {
     }
 
     @Test(expected = CloudbreakImageNotFoundException.class)
-    public void testWithNotExsisting1() throws CloudbreakImageNotFoundException {
+    public void testWithNotExsisting() throws CloudbreakImageNotFoundException {
         underTest.searchHDPInfo("aws", "2.4.0.0-661", "2.4.3.0-21", null);
-
-    }
-
-    @Test(expected = CloudbreakImageNotFoundException.class)
-    public void testWithNotExsisting2() throws CloudbreakImageNotFoundException {
-        underTest.searchHDPInfo("aws", "2.4.0.0-660", "2.4.3.0-14", null);
     }
 
     @Test

@@ -125,12 +125,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         subject.setHostGroups(convertHostGroupsFromJson(stack, user, subject, hostGroupsJsons));
         boolean validate = (boolean) data[DecorationData.VALIDATE_BLUEPRINT.ordinal()];
         if (validate) {
-            Blueprint blueprint = null;
-            if (blueprintId != null) {
-                blueprint = blueprintService.get(blueprintId);
-            } else if (requestBlueprint != null) {
-                blueprint = subject.getBlueprint();
-            }
+            Blueprint blueprint = blueprintId != null ? blueprintService.get(blueprintId) : subject.getBlueprint();
             blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stack.getInstanceGroups());
         }
         subject.setTopologyValidation(validate);

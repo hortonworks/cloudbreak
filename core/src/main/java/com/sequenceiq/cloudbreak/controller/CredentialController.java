@@ -15,11 +15,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
-public class CredentialController implements CredentialEndpoint {
+public class CredentialController extends NotificationController implements CredentialEndpoint {
 
     @Resource
     @Qualifier("conversionService")
@@ -79,20 +80,17 @@ public class CredentialController implements CredentialEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        credentialService.delete(id, user);
+        executeAndNotify(user -> credentialService.delete(id, user), ResourceEvent.CREDENTIAL_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        credentialService.delete(name, user);
+        executeAndNotify(user -> credentialService.delete(name, user), ResourceEvent.CREDENTIAL_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        credentialService.delete(name, user);
+        executeAndNotify(user -> credentialService.delete(name, user), ResourceEvent.CREDENTIAL_DELETED);
     }
 
     @Override
@@ -115,7 +113,8 @@ public class CredentialController implements CredentialEndpoint {
     private CredentialResponse createCredential(IdentityUser user, CredentialRequest credentialRequest, boolean publicInAccount) {
         Credential credential = convert(credentialRequest, publicInAccount);
         credential = credentialService.create(user, credential);
-        return conversionService.convert(credential, CredentialResponse.class);
+        notify(user, ResourceEvent.CREDENTIAL_CREATED);
+        return convert(credential);
     }
 
     private Credential convert(CredentialRequest json, boolean publicInAccount) {
@@ -128,7 +127,7 @@ public class CredentialController implements CredentialEndpoint {
         return conversionService.convert(credential, CredentialResponse.class);
     }
 
-    private Set<CredentialResponse> convertCredentials(Set<Credential> credentials) {
+    private Set<CredentialResponse> convertCredentials(Iterable<Credential> credentials) {
         Set<CredentialResponse> jsonSet = new HashSet<>();
         for (Credential credential : credentials) {
             jsonSet.add(convert(credential));

@@ -35,10 +35,6 @@ cb:
   cert:
     dir: /certs/
 
-  tls:
-    private.key.file: client-key.pem
-    cert.file: client.pem
-
   smtp.sender:
     host:
     port: 25

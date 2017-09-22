@@ -14,10 +14,6 @@ public class AzureCredentialView {
         return cloudCredential.getId();
     }
 
-    public String getPublicKey() {
-        return cloudCredential.getPublicKey();
-    }
-
     public String getName() {
         return cloudCredential.getName();
     }
@@ -44,18 +40,6 @@ public class AzureCredentialView {
 
     public String getRoleType() {
         return cloudCredential.getParameter("roleType", String.class);
-    }
-
-    public boolean passwordAuthenticationRequired() {
-        return cloudCredential.getPublicKey().startsWith("Basic: ");
-    }
-
-    public String getPassword() {
-        return cloudCredential.getPublicKey().replaceAll("Basic: ", "");
-    }
-
-    public String getLoginUserName() {
-        return cloudCredential.getLoginUserName();
     }
 
 }

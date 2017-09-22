@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -85,7 +86,7 @@ public class CloudFailureHandler {
         }
     }
 
-    private Set<Long> failureCount(List<CloudResourceStatus> failedResourceRequestResults) {
+    private Set<Long> failureCount(Collection<CloudResourceStatus> failedResourceRequestResults) {
         Set<Long> ids = new HashSet<>(failedResourceRequestResults.size());
         for (CloudResourceStatus failedResourceRequestResult : failedResourceRequestResults) {
             if (ResourceStatus.FAILED.equals(failedResourceRequestResult.getStatus())) {
@@ -95,8 +96,8 @@ public class CloudFailureHandler {
         return ids;
     }
 
-    private double calculatePercentage(Integer failedResourceRequestResults, Integer fullNodeCount) {
-        return ((fullNodeCount + failedResourceRequestResults) / fullNodeCount) * ONE_HUNDRED;
+    private double calculatePercentage(double failedResourceRequestResults, double fullNodeCount) {
+        return (fullNodeCount + failedResourceRequestResults) / fullNodeCount * ONE_HUNDRED;
     }
 
     private void handleExceptions(AuthenticatedContext auth, List<CloudResourceStatus> cloudResourceStatuses, Group group,

@@ -33,5 +33,5 @@ public interface HistoryEndpoint {
     @Path("{historyId}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = HistoryOpDescription.HISTORY_GET, produces = JSON, notes = HistoryNotes.NOTES)
-    HistoryJson getHistory(@PathParam("clusterId") Long clusterId, @PathParam("historyId") Long historyId);
+    HistoryJson getHistoryById(@PathParam("clusterId") Long clusterId, @PathParam("historyId") Long historyId);
 }

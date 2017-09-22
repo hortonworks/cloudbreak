@@ -22,7 +22,8 @@ public class CloudNetworksToPlatformNetworksResponseConverter extends AbstractCo
         for (Entry<String, Set<CloudNetwork>> entry : source.getCloudNetworkResponses().entrySet()) {
             Set<PlatformNetworkResponse> networks = new HashSet<>();
             for (CloudNetwork cloudNetwork : entry.getValue()) {
-                PlatformNetworkResponse actual = new PlatformNetworkResponse(cloudNetwork.getName(), cloudNetwork.getSubnetIds(), cloudNetwork.getProperties());
+                PlatformNetworkResponse actual = new PlatformNetworkResponse(cloudNetwork.getName(), cloudNetwork.getId(), cloudNetwork.getSubnets(),
+                        cloudNetwork.getProperties());
                 networks.add(actual);
             }
             result.put(entry.getKey(), networks);

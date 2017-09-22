@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureCredentialView;
+import com.sequenceiq.cloudbreak.cloud.azure.view.AzureInstanceCredentialView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureSecurityView;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -57,7 +58,8 @@ public class AzureTemplateBuilder {
 
             Network network = cloudStack.getNetwork();
             Map<String, Object> model = new HashMap<>();
-            model.put("credential", armCredentialView);
+            AzureInstanceCredentialView azureInstanceCredentialView = new AzureInstanceCredentialView(cloudStack);
+            model.put("credential", azureInstanceCredentialView);
             String rootDiskStorage = azureStorage.getImageStorageName(armCredentialView, cloudContext,
                     azureStorage.getPersistentStorageName(cloudStack.getParameters()),
                     azureStorage.getArmAttachedStorageOption(cloudStack.getParameters()));
@@ -76,7 +78,7 @@ public class AzureTemplateBuilder {
             model.put("securities", armSecurityView.getPorts());
             model.put("corecustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.CORE)));
             model.put("gatewaycustomData", base64EncodedUserData(cloudStack.getImage().getUserData(InstanceGroupType.GATEWAY)));
-            model.put("disablePasswordAuthentication", !armCredentialView.passwordAuthenticationRequired());
+            model.put("disablePasswordAuthentication", !azureInstanceCredentialView.passwordAuthenticationRequired());
             model.put("existingVPC", azureUtils.isExistingNetwork(network));
             model.put("resourceGroupName", azureUtils.getCustomResourceGroupName(network));
             model.put("existingVNETName", azureUtils.getCustomNetworkId(network));

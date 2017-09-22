@@ -40,7 +40,7 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 @Component
 public class RecipeEngine {
 
-    public static final Set<String> DEFAULT_RECIPES =  Sets.newHashSet("hdfs-home", "smartsense-capture-schedule");
+    public static final Set<String> DEFAULT_RECIPES =  Collections.unmodifiableSet(Sets.newHashSet("hdfs-home", "smartsense-capture-schedule"));
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecipeEngine.class);
 

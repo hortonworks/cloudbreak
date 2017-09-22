@@ -49,7 +49,7 @@ public class VersionComparatorTest {
         Assert.assertEquals(-1, underTest.compare(new VersionString("2.4.0.0"), new VersionString("2.5.0.0-770")));
     }
 
-    private class VersionString implements Versioned {
+    private static class VersionString implements Versioned {
 
         private final String version;
 

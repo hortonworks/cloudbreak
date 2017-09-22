@@ -5,6 +5,7 @@ set +x
 : ${INTEGCB_LOCATION?"integcb location"}
 
 cd $INTEGCB_LOCATION
+
 ./cbd regenerate
 ./cbd start cbdb
 sudo rm -rf .schema

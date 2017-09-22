@@ -27,6 +27,7 @@ import reactor.bus.selector.Selectors;
 
 @Service
 public class DefaultCloudbreakEventService implements CloudbreakEventService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
     private static final String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
@@ -52,8 +53,8 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     }
 
     @Override
-    public void fireCloudbreakEvent(Long stackId, String eventType, String eventMessage) {
-        CloudbreakEventData eventData = new CloudbreakEventData(stackId, eventType, eventMessage);
+    public void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage) {
+        CloudbreakEventData eventData = new CloudbreakEventData(entityId, eventType, eventMessage);
         LOGGER.info("Firing Cloudbreak event: {}", eventData);
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }

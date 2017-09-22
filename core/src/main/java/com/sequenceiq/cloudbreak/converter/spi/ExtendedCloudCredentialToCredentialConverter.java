@@ -15,11 +15,9 @@ public class ExtendedCloudCredentialToCredentialConverter {
         credential.setId(extendedCloudCredential.getId());
         credential.setName(extendedCloudCredential.getName());
         credential.setDescription(extendedCloudCredential.getDescription());
-        credential.setLoginUserName(extendedCloudCredential.getLoginUserName());
         credential.setAccount(extendedCloudCredential.getAccount());
         credential.setOwner(extendedCloudCredential.getOwner());
         credential.setCloudPlatform(extendedCloudCredential.getCloudPlatform());
-        credential.setPublicKey(extendedCloudCredential.getPublicKey());
         try {
             Json json = new Json(extendedCloudCredential.getParameters());
             credential.setAttributes(json);

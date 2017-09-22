@@ -168,7 +168,7 @@ public class StackUpscaleService {
         Stack stack = context.getStack();
         for (InstanceMetaData gwInstance : stack.getGatewayInstanceMetadata()) {
             if (CREATED.equals(gwInstance.getInstanceStatus())) {
-                tlsSetupService.setupTls(stack, gwInstance, stack.getCredential().getLoginUserName(), sshFingerprints.getSshFingerprints());
+                tlsSetupService.setupTls(stack, gwInstance, stack.getLoginUserName(), sshFingerprints.getSshFingerprints());
             }
         }
     }
@@ -178,7 +178,7 @@ public class StackUpscaleService {
         for (InstanceMetaData gateway : stack.getGatewayInstanceMetadata()) {
             if (CREATED.equals(gateway.getInstanceStatus())) {
                 String ipToTls = gatewayConfigService.getGatewayIp(stack, gateway);
-                tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getCredential().getLoginUserName(), sshFingerprints);
+                tlsSetupService.removeTemporarySShKey(stack, ipToTls, gateway.getSshPort(), stack.getLoginUserName(), sshFingerprints);
             }
         }
     }

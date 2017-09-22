@@ -28,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.AutoscaleStackResponse;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
@@ -77,6 +78,8 @@ import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
+import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
+import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -88,6 +91,10 @@ import com.sequenceiq.cloudbreak.util.PasswordUtil;
 @Transactional
 public class StackService {
 
+    private static final String SSH_USER_CENT = "centos";
+
+    private static final String SSH_USER_CB = "cloudbreak";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     @Inject
@@ -98,6 +105,9 @@ public class StackService {
 
     @Inject
     private ImageService imageService;
+
+    @Inject
+    private AmbariClusterService ambariClusterService;
 
     @Inject
     private ClusterRepository clusterRepository;
@@ -144,8 +154,11 @@ public class StackService {
     @Inject
     private Decorator<StackResponse> stackResponseDecorator;
 
+    @Inject
+    private OpenSshPublicKeyValidator rsaPublicKeyValidator;
+
     @Value("${cb.nginx.port:9443}")
-    private int nginxPort;
+    private Integer nginxPort;
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -299,12 +312,21 @@ public class StackService {
         setPlatformVariant(stack);
         MDCBuilder.buildMdcContext(stack);
         try {
+            if (!stack.passwordAuthenticationRequired() && !Strings.isNullOrEmpty(stack.getPublicKey())) {
+                rsaPublicKeyValidator.validate(stack.getPublicKey());
+            }
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
+            }
+            if (stack.getCredential().getAttributes().getMap().get("keystoneVersion") != null) {
+                stack.setLoginUserName(SSH_USER_CENT);
+            } else {
+                stack.setLoginUserName(SSH_USER_CB);
             }
             String template = connector.getTemplate(stack);
             savedStack = stackRepository.save(stack);
             addTemplateForStack(stack, template);
+            addCloudbreakDetailsForStack(stack);
             MDCBuilder.buildMdcContext(savedStack);
             instanceGroupRepository.save(savedStack.getInstanceGroups());
 
@@ -324,7 +346,6 @@ public class StackService {
                 save(savedStack);
                 savedStack = stackRepository.findById(savedStack.getId());
             }
-            addCloudbreakDetailsForStack(savedStack);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
         } catch (CloudbreakSecuritySetupException e) {
@@ -370,7 +391,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public void updateStatus(Long stackId, StatusRequest status) {
+    public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
         Stack stack = getById(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
@@ -394,10 +415,10 @@ public class StackService {
                 repairFailedNodes(stack);
                 break;
             case STOPPED:
-                stop(stack, cluster);
+                stop(stack, cluster, updateCluster);
                 break;
             case STARTED:
-                start(stack, cluster);
+                start(stack, cluster, updateCluster);
                 break;
             default:
                 throw new BadRequestException("Cannot update the status of stack because status request not valid.");
@@ -431,34 +452,46 @@ public class StackService {
         }
     }
 
-    private void stop(Stack stack, Cluster cluster) {
+    private void stop(Stack stack, Cluster cluster, boolean updateCluster) {
         if (cluster != null && cluster.isStopInProgress()) {
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
-            String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
-            eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
+            setStackStatusToStopRequested(stack);
         } else {
-            StopRestrictionReason reason = stack.isInfrastructureStoppable();
-            if (stack.isStopped()) {
-                String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
-                LOGGER.info(statusDesc);
-                eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
-            } else if (reason != StopRestrictionReason.NONE) {
-                throw new BadRequestException(
-                        String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
-            } else if (!stack.isAvailable() && !stack.isStopFailed()) {
-                throw new BadRequestException(
-                        String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
-            } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
-                throw new BadRequestException(
-                        String.format("Cannot update the status of stack '%s' to STOPPED, because the cluster is not in STOPPED state.", stack.getId()));
-            } else {
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
-                flowManager.triggerStackStop(stack.getId());
-            }
+            triggerStackStopIfNeeded(stack, cluster, updateCluster);
         }
     }
 
-    private void start(Stack stack, Cluster cluster) {
+    private void triggerStackStopIfNeeded(Stack stack, Cluster cluster, boolean updateCluster) {
+        StopRestrictionReason reason = stack.isInfrastructureStoppable();
+        if (stack.isStopped()) {
+            String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_IGNORED.code());
+            LOGGER.info(statusDesc);
+            eventService.fireCloudbreakEvent(stack.getId(), STOPPED.name(), statusDesc);
+        } else if (reason != StopRestrictionReason.NONE) {
+            throw new BadRequestException(
+                    String.format("Cannot stop a stack '%s'. Reason: %s", stack.getId(), reason.getReason()));
+        } else if (!stack.isAvailable() && !stack.isStopFailed()) {
+            throw new BadRequestException(
+                    String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getId()));
+        } else if ((cluster != null && !cluster.isStopped()) && !stack.isStopFailed()) {
+            if (updateCluster) {
+                setStackStatusToStopRequested(stack);
+                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STOPPED);
+            } else {
+                throw new BadRequestException("Cannot update the status of stack '1' to STOPPED, because the cluster is not in STOPPED state.");
+            }
+        } else {
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
+            flowManager.triggerStackStop(stack.getId());
+        }
+    }
+
+    private void setStackStatusToStopRequested(Stack stack) {
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+        String message = cloudbreakMessagesService.getMessage(Msg.STACK_STOP_REQUESTED.code());
+        eventService.fireCloudbreakEvent(stack.getId(), STOP_REQUESTED.name(), message);
+    }
+
+    private void start(Stack stack, Cluster cluster, boolean updateCluster) {
         if (stack.isAvailable()) {
             String statusDesc = cloudbreakMessagesService.getMessage(Msg.STACK_START_IGNORED.code());
             LOGGER.info(statusDesc);
@@ -469,20 +502,23 @@ public class StackService {
         } else if (stack.isStopped() || stack.isStartFailed()) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowManager.triggerStackStart(stack.getId());
+            if (updateCluster) {
+                ambariClusterService.updateStatus(stack.getId(), StatusRequest.STARTED);
+            }
         }
     }
 
-    public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson) {
+    public void updateNodeCount(Long stackId, InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, boolean withClusterEvent) {
         Stack stack = get(stackId);
         validateStackStatus(stack);
         validateInstanceGroup(stack, instanceGroupAdjustmentJson.getInstanceGroup());
         validateScalingAdjustment(instanceGroupAdjustmentJson, stack);
-        if (instanceGroupAdjustmentJson.getWithClusterEvent()) {
+        if (withClusterEvent) {
             validateHostGroupAdjustment(instanceGroupAdjustmentJson, stack, instanceGroupAdjustmentJson.getScalingAdjustment());
         }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_REQUESTED);
-            flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson);
+            flowManager.triggerStackUpscale(stack.getId(), instanceGroupAdjustmentJson, withClusterEvent);
         } else {
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED);
             flowManager.triggerStackDownscale(stack.getId(), instanceGroupAdjustmentJson);
@@ -547,14 +583,13 @@ public class StackService {
 
     private void validateHostGroupAdjustment(InstanceGroupAdjustmentJson instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        HostGroup hostGroup = stack.getCluster().getHostGroups().stream().filter(input -> {
-            return input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup());
-        }).findFirst().get();
-        if (hostGroup == null) {
+        Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
+                .filter(input -> input.getConstraint().getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
+        if (!hostGroup.isPresent()) {
             throw new BadRequestException(String.format("Instancegroup '%s' not found or not part of stack '%s'",
                     instanceGroupAdjustmentJson.getInstanceGroup(), stack.getName()));
         }
-        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup, adjustment);
+        blueprintValidator.validateHostGroupScalingRequest(blueprint, hostGroup.get(), adjustment);
     }
 
     private void validateStackStatus(Stack stack) {

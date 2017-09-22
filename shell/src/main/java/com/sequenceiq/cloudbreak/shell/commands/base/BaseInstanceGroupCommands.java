@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCommands {
 
     private ShellContext shellContext;
@@ -55,6 +57,7 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
         return shellContext.isCredentialAvailable() && shellContext.getActiveCloudPlatform().equals(platform);
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
     public String create(InstanceGroup instanceGroup, Integer nodeCount, boolean ambariServer, InstanceGroupTemplateId instanceGroupTemplateId,
             InstanceGroupTemplateName instanceGroupTemplateName, SecurityGroupId instanceGroupSecurityGroupId,

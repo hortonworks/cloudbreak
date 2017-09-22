@@ -161,8 +161,9 @@ buildscript {
     jcenter()
   }
   dependencies {
-    classpath "org.ajoberstar:gradle-git:1.2.0"
-    classpath "com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2"
+    classpath 'org.ajoberstar:gradle-git:1.2.0'
+    classpath 'info.solidsoft.gradle.pitest:gradle-pitest-plugin:1.1.11'
+    classpath 'com.smokejumperit.gradle.license:Gradle-License-Report:0.0.2'
   }
 }
 
@@ -205,6 +206,7 @@ subprojects {
   apply plugin: 'java'
   apply plugin: 'maven'
   apply plugin: 'checkstyle'
+  apply plugin: 'findbugs'
 
   sourceCompatibility = 1.8
   targetCompatibility = 1.8
@@ -233,6 +235,18 @@ subprojects {
     }
   }
 
+  findbugs {
+    toolVersion = "3.0.1"
+    excludeFilter = file("$rootProject.projectDir/config/findbugs/excludeFilter.xml")
+  }
+
+  tasks.withType(FindBugs) {
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+  }
+
   checkstyle {
     toolVersion = "7.6"
   }
@@ -248,6 +262,8 @@ subprojects {
     configFile = rootProject.file('config/checkstyle/checkstyle.xml')
     configProperties = ['config_loc': "$rootDir/config/checkstyle"]
   }
+
+  test.testLogging.showStandardStreams = project.hasProperty('showStandardStreams')
 
   dependencies {
     checkstyle('com.puppycrawl.tools:checkstyle:6.11.1') {

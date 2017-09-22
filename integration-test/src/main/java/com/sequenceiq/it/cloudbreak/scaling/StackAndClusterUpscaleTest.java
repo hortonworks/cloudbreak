@@ -39,10 +39,10 @@ public class StackAndClusterUpscaleTest extends AbstractCloudbreakIntegrationTes
                 + scalingAdjustment;
         // WHEN
         UpdateStackJson updateStackJson = new UpdateStackJson();
+        updateStackJson.setWithClusterEvent(true);
         InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
         instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
         instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
-        instanceGroupAdjustmentJson.setWithClusterEvent(true);
         updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
         CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");

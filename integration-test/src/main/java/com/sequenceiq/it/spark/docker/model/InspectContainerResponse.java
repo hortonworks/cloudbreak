@@ -2,6 +2,8 @@ package com.sequenceiq.it.spark.docker.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 public class InspectContainerResponse {
 
     @SerializedName("Id")
@@ -13,6 +15,7 @@ public class InspectContainerResponse {
     public InspectContainerResponse() {
     }
 
+    @SuppressFBWarnings("URF_UNREAD_FIELD")
     public InspectContainerResponse(String id) {
         this.id = id;
         state = new ContainerState();

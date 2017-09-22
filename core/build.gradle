@@ -19,6 +19,7 @@ plugins {
 }
 
 apply plugin: 'org.springframework.boot'
+apply plugin: 'info.solidsoft.pitest'
 
 bootRun {
   systemProperty 'spring.profiles.active', System.properties['spring.profiles.active']
@@ -82,11 +83,13 @@ dependencies {
     compile group: 'org.mybatis',                   name: 'mybatis-migrations',             version: '3.2.0'
     compile group: 'com.cedarsoftware',             name: 'json-io',                        version: '4.9.12'
     compile group: 'com.github.jknack',             name: 'handlebars',                     version: '4.0.6'
+    compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
 
     compile project(':core-model')
     compile project(':orchestrator-api')
     compile project(':cloud-reactor-api')
     compile project(':cloud-reactor')
+    compile project(':structuredevent-model')
 
     runtime project(':orchestrator-marathon')
     runtime project(':orchestrator-salt')

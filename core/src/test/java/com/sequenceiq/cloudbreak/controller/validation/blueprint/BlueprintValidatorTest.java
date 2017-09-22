@@ -1,12 +1,16 @@
 package com.sequenceiq.cloudbreak.controller.validation.blueprint;
 
+import static org.hamcrest.Matchers.is;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
@@ -27,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintValidatorTest {
+
     private static final String BLUEPRINT_STRING = "blueprint";
 
     private static final String GROUP1 = "group1";
@@ -49,6 +54,9 @@ public class BlueprintValidatorTest {
 
     private static final String UNKNOWN = "unknown";
 
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @Mock
     private StackServiceComponentDescriptors stackServiceComponentDescriptors;
 
@@ -63,19 +71,23 @@ public class BlueprintValidatorTest {
         setupStackServiceComponentDescriptors();
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenJsonTreeCreationIsFailed() throws Exception {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
-        BDDMockito.given(objectMapper.readTree(BDDMockito.anyString())).willThrow(new IOException());
+        IOException expectedException = new IOException("");
+        BDDMockito.given(objectMapper.readTree(BDDMockito.anyString())).willThrow(expectedException);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Blueprint [null] can not be parsed from JSON.");
+        thrown.expectCause(is(expectedException));
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenNoInstanceGroupForAHostGroup() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -83,12 +95,14 @@ public class BlueprintValidatorTest {
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups.stream().limit(instanceGroups.size() - 1).collect(Collectors.toSet()));
         JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("The host groups in the blueprint must match the hostgroups in the request.");
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenNodeCountForAHostGroupIsMoreThanMax() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -97,12 +111,14 @@ public class BlueprintValidatorTest {
         instanceGroups.add(createInstanceGroup("gateway", 1));
         JsonNode blueprintJsonTree = createJsonTreeWithIllegalGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("The node count '2' for hostgroup 'group2' cannot be less than '1' or more than '1' because of 'mastercomp2' component");
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenGroupCountsAreDifferent() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -111,12 +127,14 @@ public class BlueprintValidatorTest {
         instanceGroups.add(createInstanceGroup("gateway", 1));
         JsonNode blueprintJsonTree = createJsonTreeWithTooMuchGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("The host groups in the blueprint must match the hostgroups in the request.");
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenNotEnoughGroupDefinedInBlueprint() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -124,12 +142,14 @@ public class BlueprintValidatorTest {
         Set<HostGroup> hostGroups = createHostGroups(instanceGroups);
         JsonNode blueprintJsonTree = createJsonTreeWithNotEnoughGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("The host groups in the blueprint must match the hostgroups in the request.");
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenComponentIsInMoreGroupsAndNodeCountIsMoreThanMax() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -138,12 +158,14 @@ public class BlueprintValidatorTest {
         instanceGroups.add(createInstanceGroup("gateway", 1));
         JsonNode blueprintJsonTree = createJsonTreeWithComponentInMoreGroups();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Incorrect number of 'mastercomp3' components are in '[group1, group3]' hostgroups: count: 4, min: 1 max: 3");
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testValidateBlueprintForStackShouldThrowBadRequestExceptionWhenComponentIsLessThanMin() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -152,6 +174,8 @@ public class BlueprintValidatorTest {
         instanceGroups.add(createInstanceGroup("gateway", 1));
         JsonNode blueprintJsonTree = createJsonTreeWithComponentIsLess();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Incorrect number of 'slavecomp2' components are in '[group3]' hostgroups: count: 3, min: 5 max: 6");
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
@@ -185,7 +209,7 @@ public class BlueprintValidatorTest {
         // THEN doesn't throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testHostGroupScalingThrowsBadRequestExceptionWhenNodeCountIsMoreThanMax() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -193,12 +217,14 @@ public class BlueprintValidatorTest {
         InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 3);
         HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("The node count '4' for hostgroup 'group3' cannot be less than '1' or more than '3' because of 'mastercomp3' component");
         // WHEN
         underTest.validateHostGroupScalingRequest(blueprint, hostGroup, 1);
         // THEN throw exception
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testHostGroupScalingThrowsBadRequestExceptionWhenNodeCountIsLessThanMin() throws IOException {
         // GIVEN
         Blueprint blueprint = createBlueprint();
@@ -206,6 +232,8 @@ public class BlueprintValidatorTest {
         InstanceGroup instanceGroup = createInstanceGroup(GROUP3, 1);
         HostGroup hostGroup = createHostGroup(instanceGroup.getGroupName(), instanceGroup);
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("The node count '0' for hostgroup 'group3' cannot be less than '1' or more than '3' because of 'mastercomp3' component");
         // WHEN
         underTest.validateHostGroupScalingRequest(blueprint, hostGroup, -1);
         // THEN throw exception

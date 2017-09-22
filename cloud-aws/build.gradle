@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'info.solidsoft.pitest'
 
 repositories {
   maven { url 'http://repo.spring.io/libs-release' }

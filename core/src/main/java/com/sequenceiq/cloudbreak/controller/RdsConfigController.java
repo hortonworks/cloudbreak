@@ -14,13 +14,14 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.rds.RdsConnectionValidator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 
 @Component
-public class RdsConfigController implements RdsConfigEndpoint {
+public class RdsConfigController extends NotificationController implements RdsConfigEndpoint {
 
     @Autowired
     private RdsConfigService rdsConfigService;
@@ -83,20 +84,17 @@ public class RdsConfigController implements RdsConfigEndpoint {
 
     @Override
     public void delete(Long id) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        rdsConfigService.delete(id, user);
+        executeAndNotify(user -> rdsConfigService.delete(id, user), ResourceEvent.RDS_CONFIG_DELETED);
     }
 
     @Override
     public void deletePublic(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        rdsConfigService.delete(name, user);
+        executeAndNotify(user -> rdsConfigService.delete(name, user), ResourceEvent.RDS_CONFIG_DELETED);
     }
 
     @Override
     public void deletePrivate(String name) {
-        IdentityUser user = authenticatedUserService.getCbUser();
-        rdsConfigService.delete(name, user);
+        executeAndNotify(user -> rdsConfigService.delete(name, user), ResourceEvent.RDS_CONFIG_DELETED);
     }
 
     private RDSConfigResponse createRdsConfig(IdentityUser user, RDSConfigRequest rdsConfigJson, boolean publicInAccount) {
@@ -108,6 +106,7 @@ public class RdsConfigController implements RdsConfigEndpoint {
         rdsConfig.setPublicInAccount(publicInAccount);
         try {
             rdsConfig = rdsConfigService.create(user, rdsConfig);
+            notify(user, ResourceEvent.RDS_CONFIG_CREATED);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateKeyValueException(APIResourceType.RDS_CONFIG, rdsConfig.getName(), e);
         }

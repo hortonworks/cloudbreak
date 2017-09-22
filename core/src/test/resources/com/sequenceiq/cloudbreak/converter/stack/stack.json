@@ -6,6 +6,7 @@
   "image": "aws-image",
   "onFailureAction": "ROLLBACK",
   "availabilityZone": "avZone",
+  "publicKey": "ssh-key",
   "failurePolicy": {
     "id": 1,
     "threshold": 10,

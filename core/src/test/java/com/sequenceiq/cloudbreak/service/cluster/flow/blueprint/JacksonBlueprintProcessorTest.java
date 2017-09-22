@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint;
 
+import static org.hamcrest.Matchers.isA;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,8 +11,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -18,6 +23,9 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class JacksonBlueprintProcessorTest {
 
     private static final String HOST_GROUPS_NODE = "host_groups";
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     private final JacksonBlueprintProcessor underTest = new JacksonBlueprintProcessor();
 
@@ -183,10 +191,13 @@ public class JacksonBlueprintProcessorTest {
         Assert.assertFalse(result.contains("NAGIOS_SERVER"));
     }
 
-    @Test(expected = BlueprintProcessingException.class)
+    @Test
     public void testAddConfigEntriesThrowsExceptionIfBlueprintCannotBeParsed() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-invalid.bp");
         List<BlueprintConfigurationEntry> configurationEntries = new ArrayList<>();
+        thrown.expect(BlueprintProcessingException.class);
+        thrown.expectCause(isA(JsonParseException.class));
+        thrown.expectMessage("Failed to add config entries to original blueprint.");
         underTest.addConfigEntries(testBlueprint, configurationEntries, true);
     }
 
@@ -206,9 +217,11 @@ public class JacksonBlueprintProcessorTest {
         Assert.assertEquals(expected, result);
     }
 
-    @Test(expected = BlueprintProcessingException.class)
+    @Test
     public void testGetServicesInHostgroupThrowsExceptionIfBlueprintCannotBeParsed() throws Exception {
         String testBlueprint = FileReaderUtils.readFileFromClasspath("blueprints/test-bp-invalid.bp");
+        thrown.expect(BlueprintProcessingException.class);
+        thrown.expectMessage("Failed to get components for hostgroup 'slave_1' from blueprint.");
         underTest.getComponentsInHostGroup(testBlueprint, "slave_1");
     }
 

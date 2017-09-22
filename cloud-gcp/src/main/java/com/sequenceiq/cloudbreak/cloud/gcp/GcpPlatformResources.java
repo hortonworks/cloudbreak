@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Network;
 import com.google.api.services.compute.model.NetworkList;
+import com.google.api.services.compute.model.Subnetwork;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
@@ -35,25 +37,35 @@ public class GcpPlatformResources implements PlatformResources {
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
         Set<CloudNetwork> cloudNetworks = new HashSet<>();
-        NetworkList networkList = compute.networks().list(projectId).execute();
-        for (Network network : networkList.getItems()) {
-            Map<String, Object> properties = new HashMap<>();
-            properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
-            properties.put("description", Strings.nullToEmpty(network.getDescription()));
-            properties.put("IPv4Range", Strings.nullToEmpty(network.getIPv4Range()));
-            properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
-            CloudNetwork cloudNetwork = new CloudNetwork(network.getName(),
-                    network.getSubnetworks() == null ? new HashSet<>() : new HashSet<>(network.getSubnetworks()),
-                    properties);
-            cloudNetworks.add(cloudNetwork);
-        }
+        if (compute != null) {
+            NetworkList networkList = compute.networks().list(projectId).execute();
+            List<Subnetwork> subnetworkList = compute.subnetworks().list(projectId, region.value()).execute().getItems();
+            for (Network network : networkList.getItems()) {
+                Map<String, Object> properties = new HashMap<>();
+                properties.put("gatewayIPv4", Strings.nullToEmpty(network.getGatewayIPv4()));
+                properties.put("description", Strings.nullToEmpty(network.getDescription()));
+                properties.put("IPv4Range", Strings.nullToEmpty(network.getIPv4Range()));
+                properties.put("creationTimestamp", Strings.nullToEmpty(network.getCreationTimestamp()));
 
-        for (Region actualRegion : gcpPlatformParameters.regions().types()) {
-            if (regionMatch(actualRegion, region)) {
-                result.put(actualRegion.value(), cloudNetworks);
+                Map<String, String> subnets = new HashMap<>();
+                for (Subnetwork subnetwork : subnetworkList) {
+                    if (network.getSubnetworks() != null
+                            && network.getSubnetworks().contains(subnetwork.getSelfLink())) {
+                        subnets.put(subnetwork.getName(), subnetwork.getName());
+                    }
+                }
+
+                CloudNetwork cloudNetwork = new CloudNetwork(network.getName(), network.getId().toString(), subnets, properties);
+                cloudNetworks.add(cloudNetwork);
+            }
+
+            for (Region actualRegion : gcpPlatformParameters.regions().types()) {
+                if (regionMatch(actualRegion, region)) {
+                    result.put(actualRegion.value(), cloudNetworks);
+                }
             }
         }
-        return new CloudNetworks();
+        return new CloudNetworks(result);
     }
 
     @Override

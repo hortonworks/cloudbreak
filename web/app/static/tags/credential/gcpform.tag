@@ -43,15 +43,6 @@
         <input type="file" data-file="gcp.p12" />
     </div>
 </div>
-<div class="form-group" ng-class="{ 'has-error': gcpCredentialForm.gcp_sshPublicKey.$dirty && gcpCredentialForm.gcp_sshPublicKey.$invalid }">
-    <label class="col-sm-3 control-label" for="gcp_sshPublicKey">{{msg.credential_gcp_form_ssh_key_label}}</label>
-    <div class="col-sm-9">
-        <textarea rows="4" ng-attr-placeholder="{{msg.credential_gcp_form_ssh_key_placeholder}}" type="text" class="form-control" ng-model="credentialGcp.publicKey" name="gcp_sshPublicKey" id="gcp_sshPublicKey" required></textarea>
-        <div class="help-block" ng-show="gcpCredentialForm.gcp_sshPublicKey.$dirty && gcpCredentialForm.gcp_sshPublicKey.$invalid">
-            <i class="fa fa-warning"></i> {{msg.credential_ssh_key_invalid}}
-        </div>
-    </div>
-</div>
 <div class="form-group">
     <label class="col-sm-3 control-label" for="topologySelect">{{msg.credential_select_topology}}</label>
     <div class="col-sm-8">

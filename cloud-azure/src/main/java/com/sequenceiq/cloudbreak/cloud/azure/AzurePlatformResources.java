@@ -38,15 +38,16 @@ public class AzurePlatformResources implements PlatformResources {
         for (Network network : client.getNetworks().list()) {
             String actualRegion = network.region().label();
             if (regionMatch(actualRegion, region)) {
-                Set<String> subnets = new HashSet<>();
+                Map<String, String> subnets = new HashMap<>();
                 for (Entry<String, Subnet> subnet : network.subnets().entrySet()) {
-                    subnets.add(subnet.getValue().name());
+                    subnets.put(subnet.getKey(), subnet.getKey());
                 }
                 Map<String, Object> properties = new HashMap<>();
                 properties.put("addressSpaces", network.addressSpaces());
                 properties.put("dnsServerIPs", network.dnsServerIPs());
                 properties.put("resourceGroupName", network.resourceGroupName());
-                CloudNetwork cloudNetwork = new CloudNetwork(network.name(), subnets, properties);
+
+                CloudNetwork cloudNetwork = new CloudNetwork(network.name(), network.id(), subnets, properties);
                 if (result.get(actualRegion) == null) {
                     result.put(actualRegion, new HashSet<>());
                 }

@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -40,6 +42,9 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AwsResourceConnectorTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private AwsResourceConnector underTest;
@@ -67,12 +72,12 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDR() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -111,12 +116,12 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWithNon24Subnets() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -151,12 +156,12 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWithNon24Subnets2() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -191,12 +196,12 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWithNon24Subnets3() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -229,14 +234,14 @@ public class AwsResourceConnectorTest {
         Assert.assertEquals("10.0.64.0/24", cidr);
     }
 
-    @Test(expected = CloudConnectorException.class)
+    @Test
     public void testFindNonOverLappingCIDRWit24Vpc() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -257,17 +262,20 @@ public class AwsResourceConnectorTest {
         when(subnetsResult.getSubnets()).thenReturn(singletonList(subnet1));
         when(subnet1.getCidrBlock()).thenReturn("10.0.0.0/24");
 
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("The selected VPC has to be in a bigger CIDR range than /24");
+
         underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
     }
 
-    @Test(expected = CloudConnectorException.class)
+    @Test
     public void testFindNonOverLappingCIDRWit24VpcEmptySubnet() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -286,17 +294,20 @@ public class AwsResourceConnectorTest {
         when(ec2Client.describeSubnets(any())).thenReturn(subnetsResult);
         when(subnetsResult.getSubnets()).thenReturn(Collections.emptyList());
 
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("The selected VPC has to be in a bigger CIDR range than /24");
+
         underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
     }
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -331,12 +342,12 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc2() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -369,14 +380,14 @@ public class AwsResourceConnectorTest {
         Assert.assertEquals("10.0.4.0/24", cidr);
     }
 
-    @Test(expected = CloudConnectorException.class)
+    @Test
     public void testFindNonOverLappingCIDRWit20VpcFull() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -412,17 +423,20 @@ public class AwsResourceConnectorTest {
         when(subnet7.getCidrBlock()).thenReturn("10.0.12.0/23");
         when(subnet8.getCidrBlock()).thenReturn("10.0.14.0/23");
 
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("Cannot find non-overlapping CIDR range");
+
         underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
     }
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc1Empty() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -465,12 +479,12 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc1Empty2() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -513,12 +527,12 @@ public class AwsResourceConnectorTest {
 
     @Test
     public void testFindNonOverLappingCIDRWit20Vpc1EmptyInTheMiddle() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -559,14 +573,14 @@ public class AwsResourceConnectorTest {
         Assert.assertEquals("10.0.13.0/24", cidr);
     }
 
-    @Test(expected = CloudConnectorException.class)
+    @Test
     public void testFindNonOverLappingCIDRForFullVpc() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);
@@ -595,17 +609,20 @@ public class AwsResourceConnectorTest {
         }
         when(subnetsResult.getSubnets()).thenReturn(subnetList);
 
+        thrown.expect(CloudConnectorException.class);
+        thrown.expectMessage("Cannot find non-overlapping CIDR range");
+
         underTest.findNonOverLappingCIDR(authenticatedContext, cloudStack);
     }
 
     @Test
     public void testFindNonOverLappingCIDRForOneSpot() {
-        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null);
+        Group group1 = new Group("group1", InstanceGroupType.CORE, Collections.emptyList(), null, null, "pubkey", "cloudbreak");
         Map<String, Object> networkParameters = new HashMap<>();
         networkParameters.put("vpcId", "vpc-12345678");
         networkParameters.put("internetGatewayId", "igw-12345678");
         Network network = new Network(new Subnet(null), networkParameters);
-        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null);
+        CloudStack cloudStack = new CloudStack(singletonList(group1), network, null, emptyMap(), emptyMap(), null, "pubkey", "cloudbreak");
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = mock(CloudContext.class);
         Location location = mock(Location.class);

@@ -13,7 +13,9 @@ import javax.validation.ConstraintValidator;
 import javax.validation.Payload;
 import javax.validation.metadata.ConstraintDescriptor;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -25,6 +27,9 @@ import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurat
 @RunWith(MockitoJUnitRunner.class)
 public class NetworkConfigurationValidatorTest {
 
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @InjectMocks
     private NetworkConfigurationValidator underTest;
 
@@ -33,8 +38,10 @@ public class NetworkConfigurationValidatorTest {
         assertTrue(underTest.validateNetworkForStack(TestUtil.network(), TestUtil.generateGcpInstanceGroupsByNodeCount(1, 2, 3)));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void inValidNetworkRequestReturnFalse() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot assign more than 0 addresses in the selected subnet.");
         underTest.validateNetworkForStack(TestUtil.network("10.0.0.1/32"), TestUtil.generateGcpInstanceGroupsByNodeCount(10000, 10000, 10000));
     }
 
@@ -42,7 +49,7 @@ public class NetworkConfigurationValidatorTest {
 
         @Override
         public boolean equals(Object obj) {
-            return false;
+            return this == obj;
         }
 
         @Override

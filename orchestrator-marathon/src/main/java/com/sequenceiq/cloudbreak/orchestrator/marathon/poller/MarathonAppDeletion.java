@@ -35,6 +35,6 @@ public class MarathonAppDeletion implements OrchestratorBootstrap {
                 throw new CloudbreakOrchestratorFailedException(me);
             }
         }
-        return null;
+        return Boolean.FALSE;
     }
 }

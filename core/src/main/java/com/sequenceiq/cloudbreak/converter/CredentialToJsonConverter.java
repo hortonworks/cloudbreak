@@ -40,8 +40,6 @@ public class CredentialToJsonConverter extends AbstractConversionServiceAwareCon
             credentialJson.setParameters(parameters);
         }
         credentialJson.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        credentialJson.setPublicKey(source.getPublicKey());
-        credentialJson.setLoginUserName(source.getLoginUserName());
         if (source.getTopology() != null) {
             credentialJson.setTopologyId(source.getTopology().getId());
         }
