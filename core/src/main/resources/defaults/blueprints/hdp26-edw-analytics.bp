@@ -39,14 +39,18 @@
         }
       },
       {
+        "hive-interactive-site": {
+          "hive.exec.orc.split.strategy":"BI",
+          "hive.stats.fetch.bitvector":"true",
+          "hive.metastore.rawstore.impl":"org.apache.hadoop.hive.metastore.cache.CachedStore"
+       }
+     },
+     {
         "hive-site": {
           "hive.exec.compress.output": "true",
           "hive.merge.mapfiles": "true",
           "hive.server2.tez.initialize.default.sessions": "true",
-          "hive.server2.transport.mode": "http",
-          "hive.exec.orc.split.strategy":"BI",
-          "hive.stats.fetch.bitvector":"true",
-          "hive.metastore.rawstore.impl":"org.apache.hadoop.hive.metastore.cache.CachedStore"
+          "hive.server2.transport.mode": "http"
         }
       },
       {
