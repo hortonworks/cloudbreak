@@ -3,9 +3,15 @@ package com.sequenceiq.cloudbreak.shell.util;
 import java.util.Map;
 
 import org.junit.Assert;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class TagParserTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @Test
     public void testNullTags() {
         Map<String, String> result = TagParser.parseTagsIntoMap(null);
@@ -25,8 +31,10 @@ public class TagParserTest {
         Assert.assertEquals("value", result.get("key"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testWrongTag() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Tags couldn't be parsed. Please use the proper format 'key1=value1,key2=value2'");
         TagParser.parseTagsIntoMap("key");
     }
 

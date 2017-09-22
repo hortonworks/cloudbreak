@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -55,6 +57,9 @@ import groovyx.net.http.HttpResponseException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AmbariClusterHostServiceTypeTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private StackService stackService;
@@ -103,7 +108,7 @@ public class AmbariClusterHostServiceTypeTest {
         given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", "", "/tmp", "/tmp"));
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testStopWhenAwsHasEphemeralVolume() {
         cluster = TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
         cluster.getStack().setCloudPlatform("AWS");
@@ -115,10 +120,13 @@ public class AmbariClusterHostServiceTypeTest {
         when(stackService.get(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
 
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot stop a cluster '1'. Reason: Instances with ephemeral volumes cannot be stopped.");
+
         underTest.updateStatus(1L, StatusRequest.STOPPED);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testStopWhenAwsHasSpotInstances() {
         cluster = TestUtil.cluster(TestUtil.blueprint(), TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential()), 1L);
         cluster.getStack().setCloudPlatform("AWS");
@@ -130,34 +138,51 @@ public class AmbariClusterHostServiceTypeTest {
         when(stackService.get(anyLong())).thenReturn(stack);
         when(stackService.getById(anyLong())).thenReturn(stack);
 
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cannot stop a cluster '1'. Reason: Spot instances cannot be stopped.");
+
         underTest.updateStatus(1L, StatusRequest.STOPPED);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testRetrieveClusterJsonWhenClusterJsonIsNull() throws HttpResponseException {
         // GIVEN
         doReturn(ambariClient).when(ambariClientProvider).getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class));
         given(ambariClient.getClusterAsJson()).willReturn(null);
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Cluster response coming from Ambari server was null. [Ambari Server IP: '123.12.3.4']");
         // WHEN
         underTest.getClusterJson("123.12.3.4", 1L);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testUpdateHostsDoesntAcceptZeroScalingAdjustments() throws Exception {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(0);
+
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(new HostGroup());
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("No scaling adjustments specified. Nothing to do.");
         // WHEN
         underTest.updateHosts(stack.getId(), hga1);
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testUpdateHostsDoesntAcceptScalingAdjustmentsWithDifferentSigns() throws Exception {
         // GIVEN
         HostGroupAdjustmentJson hga1 = new HostGroupAdjustmentJson();
         hga1.setHostGroup("slave_1");
         hga1.setScalingAdjustment(-2);
+
+        when(hostGroupService.getByClusterIdAndName(anyLong(), anyString())).thenReturn(new HostGroup());
+
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("The host group must contain at least 1 host after the decommission: [hostGroup: 'slave_1', current hosts: 0, "
+                + "decommissions requested: 2]");
         // WHEN
         underTest.updateHosts(stack.getId(), hga1);
     }

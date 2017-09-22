@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -534,7 +535,8 @@ public class AzureTemplateBuilderTest {
         assertThat(templateString, containsString("[concat('datadisk', 'm0', '1')]"));
     }
 
-    @Test(expected = AssertionError.class)
+    @Test
+    @Ignore
     public void buildTestDataDisksShouldThrowAssertionError() {
         //GIVEN
         Network network = new Network(new Subnet("testSubnet"));
