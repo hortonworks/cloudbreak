@@ -12,7 +12,9 @@ import java.util.HashSet;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -37,6 +39,9 @@ import com.sequenceiq.cloudbreak.service.account.AccountPreferencesService;
 import com.sequenceiq.cloudbreak.service.stack.StackParameterService;
 
 public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackRequest> {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private JsonToStackConverter underTest;
@@ -91,7 +96,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         Assert.assertEquals("eu-west-1", stack.getRegion());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testConvertWithLoginUserName() throws CloudbreakException {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
@@ -107,6 +112,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("You can not modify the default user!");
         // WHEN
         Stack stack = underTest.convert(getRequest("stack/stack-with-loginusername.json"));
         // THEN
@@ -118,7 +125,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         Assert.assertEquals("eu-west-1", stack.getRegion());
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void testForNoRegionAndNoDefaultRegion() throws CloudbreakException {
         InstanceGroup instanceGroup = mock(InstanceGroup.class);
         when(instanceGroup.getInstanceGroupType()).thenReturn(InstanceGroupType.GATEWAY);
@@ -134,6 +141,8 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
         given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("No default region is specified. Region cannot be empty.");
 
         // WHEN
         StackRequest stackRequest = getRequest("stack/stack.json");

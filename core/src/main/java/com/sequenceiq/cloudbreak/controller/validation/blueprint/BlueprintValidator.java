@@ -39,8 +39,8 @@ public class BlueprintValidator {
                 validateHostGroup(hostGroupNode, hostGroupMap, blueprintServiceComponentMap);
             }
             validateBlueprintServiceComponents(blueprintServiceComponentMap);
-        } catch (IOException ignored) {
-            throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()));
+        } catch (IOException e) {
+            throw new BadRequestException(String.format("Blueprint [%s] can not be parsed from JSON.", blueprint.getId()), e);
         }
     }
 

@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 public class RsaPublicKeyValidatorTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     private OpenSshPublicKeyValidator openSshPublicKeyValidator;
 
@@ -36,8 +41,10 @@ public class RsaPublicKeyValidatorTest {
         );
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void inValidPublicKeyWillFailWhenMissingSshRsa() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("detailed message: Corrupt or unknown public key file format");
         openSshPublicKeyValidator.validate(
                         "AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
                                 + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
@@ -47,26 +54,19 @@ public class RsaPublicKeyValidatorTest {
         );
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void inValidPublicKeyWillFailWhenTooShortBody() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("detailed message: 3");
         openSshPublicKeyValidator.validate(
                         "ssh-rsa AAAA sequence-eu"
         );
     }
 
-    @Test(expected = BadRequestException.class)
-    public void inValidPublicKeyWillFailWhenMissingUserAndSshRsa() {
-        openSshPublicKeyValidator.validate(
-                        "AAAAB3NzaC1yc2EAAAADAQABAAABAQCasJyap4swb4Hk4xOlnF3OmKVwzmv2e053yrtvcUPaxCeboSltOBReuT"
-                                + "QxX+kYCgKCdtEwpIvEDXk16T6nCI4tSptAalFgpUWn+JOysCuLuWnwrk6mSKOzEiPYCrB54444mDY6rbBDSRuE/V"
-                                + "UYQ/yi0imocARlOiFdPRlZGTN0XGE1V8LSo+m0oIzTwBKn58I4v5iB4ZUL/6adGXo7dgdBh/Fmm4uYbgrCZnL1EaK"
-                                + "pMxSG76XWhuzFpHjLkRndz88ha0rB6davag6nZGdno5IepLAWg9oB4jTApHwhN2j1rWLN2y1c+pTxsF6LxBiN5rsY"
-                                + "KR495VFmuOepLYz5I8Dn"
-        );
-    }
-
-    @Test(expected = BadRequestException.class)
+    @Test
     public void inValidPublicKeyWillFailWhenTotallyInvalidString() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("detailed message: Corrupt or unknown public key file format");
         openSshPublicKeyValidator.validate(
                         "ImBAD"
         );
@@ -87,8 +87,10 @@ public class RsaPublicKeyValidatorTest {
         );
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void validSsh2PublicKeyWillFailWhenBeginAndEndSsh2Missing() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("[certificate: 'Comment: \"2048-bit RSA, converted by ricsi@Richards-MacBook-Pro.local \"");
         openSshPublicKeyValidator.validate(
                                 "Comment: \"2048-bit RSA, converted by ricsi@Richards-MacBook-Pro.local \"\n"
                                 + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCB\n"
@@ -100,8 +102,10 @@ public class RsaPublicKeyValidatorTest {
         );
     }
 
-    @Test(expected = BadRequestException.class)
+    @Test
     public void validSsh2PublicKeyWillFailWhenKeyMissing() {
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("[certificate: 'Comment: \"2048-bit RSA, converted by ricsi@Richards-MacBook-Pro.local \"");
         openSshPublicKeyValidator.validate(
                                 "Comment: \"2048-bit RSA, converted by ricsi@Richards-MacBook-Pro.local \"\n"
                                 + "AAAAB3NzaC1yc2EAAAADAQABAAABAQC0Rfl2G2vDs6yc19RxCqReunFgpYj+ucyLobpTCB\n"

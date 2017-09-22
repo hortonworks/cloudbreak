@@ -5,7 +5,9 @@ import static org.junit.Assert.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -17,6 +19,9 @@ import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ContainerOrchestratorResolverTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private ContainerOrchestratorResolver underTest;
@@ -34,7 +39,7 @@ public class ContainerOrchestratorResolverTest {
         assertNotNull(containerOrchestrator);
     }
 
-    @Test(expected = CloudbreakException.class)
+    @Test
     public void getOrchestratorWhenNotExist() throws CloudbreakException {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         TestOneMockContainerOrchestrator testOneMockContainerOrchestrator = new TestOneMockContainerOrchestrator();
@@ -42,6 +47,8 @@ public class ContainerOrchestratorResolverTest {
         TestTwoMockContainerOrchestrator testTwoMockContainerOrchestrator = new TestTwoMockContainerOrchestrator();
         map.put(testTwoMockContainerOrchestrator.name(), testTwoMockContainerOrchestrator);
         ReflectionTestUtils.setField(underTest, "containerOrchestrators", map);
+        thrown.expect(CloudbreakException.class);
+        thrown.expectMessage("ContainerOrchestrator not found: SWARM1");
 
         underTest.get("SWARM1");
     }
