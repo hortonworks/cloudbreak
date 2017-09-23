@@ -1,6 +1,8 @@
-CB_PERFTEST_HOST=192.168.99.100
-CB_NUMBER_OF_USERS=3
-CB_RAMPUP_SECONDS=3
+#!/bin/bash
+
+: ${CB_PERFTEST_HOST:=192.168.64.1}
+: ${CB_NUMBER_OF_USERS:=3}
+: ${CB_RAMPUP_SECONDS:=3}
 
 docker run -it --rm \
 -v `pwd`/conf:/opt/gatling/conf \
