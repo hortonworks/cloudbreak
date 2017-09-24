@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Constraint;
@@ -483,37 +482,6 @@ public class TestUtil {
         cloudbreakUsage.setFlexId("FLEX-1234567");
         cloudbreakUsage.setStackUuid("23423-sdfasdf-23423-2345");
         return cloudbreakUsage;
-    }
-
-    public static List<CloudbreakEvent> generateGcpCloudbreakEvents(int count) {
-        List<CloudbreakEvent> cloudbreakEvents = new ArrayList<>();
-        for (int i = 0; i < count; i++) {
-            cloudbreakEvents.add(gcpCloudbreakEvent((long) i));
-        }
-        return cloudbreakEvents;
-    }
-
-    public static CloudbreakEvent gcpCloudbreakEvent(Long id) {
-        CloudbreakEvent cloudbreakEvent = new CloudbreakEvent();
-        cloudbreakEvent.setId(id);
-        cloudbreakEvent.setInstanceGroup("master");
-        cloudbreakEvent.setAccount("account");
-        cloudbreakEvent.setOwner("owner");
-        cloudbreakEvent.setRegion("us");
-        cloudbreakEvent.setStackName("usagestack");
-        cloudbreakEvent.setStackId(1L);
-        cloudbreakEvent.setEventTimestamp(new Date());
-        cloudbreakEvent.setEventMessage("message");
-        cloudbreakEvent.setEventType("eventType");
-        cloudbreakEvent.setCloud(GCP);
-        cloudbreakEvent.setBlueprintName("blueprintName");
-        cloudbreakEvent.setBlueprintId(1L);
-        cloudbreakEvent.setStackStatus(AVAILABLE);
-        cloudbreakEvent.setNodeCount(1);
-        cloudbreakEvent.setClusterStatus(AVAILABLE);
-        cloudbreakEvent.setClusterId(1L);
-        cloudbreakEvent.setClusterName("test");
-        return cloudbreakEvent;
     }
 
     public static FailurePolicy failurePolicy() {

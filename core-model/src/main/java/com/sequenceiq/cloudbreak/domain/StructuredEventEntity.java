@@ -20,12 +20,29 @@ public class StructuredEventEntity {
     @SequenceGenerator(name = "structuredevent_generator", sequenceName = "structuredevent_id_seq", allocationSize = 1)
     private Long id;
 
+    @Column(nullable = false)
+    private String eventType;
+
+    @Column(nullable = false)
+    private String resourceType;
+
+    @Column(nullable = false)
+    private Long resourceId;
+
+    @Column(nullable = false)
+    private Long timestamp;
+
+    @Column(nullable = false)
+    private String account;
+
+    @Column(nullable = false)
+    private String userId;
+
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json structuredEventJson;
 
-    public StructuredEventEntity(Json structuredEventJson) {
-        this.structuredEventJson = structuredEventJson;
+    public StructuredEventEntity() {
     }
 
     public Long getId() {
@@ -34,6 +51,54 @@ public class StructuredEventEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getEventType() {
+        return eventType;
+    }
+
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public String getResourceType() {
+        return resourceType;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public Long getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public Long getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public String getAccount() {
+        return account;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public Json getStructuredEventJson() {

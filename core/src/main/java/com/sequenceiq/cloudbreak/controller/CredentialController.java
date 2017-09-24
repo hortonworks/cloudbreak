@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
 public class CredentialController extends NotificationController implements CredentialEndpoint {
-
     @Resource
     @Qualifier("conversionService")
     private ConversionService conversionService;

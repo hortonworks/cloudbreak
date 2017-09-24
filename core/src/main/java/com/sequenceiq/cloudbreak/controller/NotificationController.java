@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -31,12 +32,12 @@ public abstract class NotificationController {
     }
 
     protected final void notify(IdentityUser user, ResourceEvent resourceEvent) {
-        Notification notification = new Notification();
-        notification.setEventTimestamp(new Date());
+        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        notification.setEventTimestamp(new Date().getTime());
         notification.setOwner(user.getUserId());
         notification.setAccount(user.getAccount());
         notification.setEventType(resourceEvent.name());
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage()));
-        notificationSender.send(notification);
+        notificationSender.send(new Notification<>(notification));
     }
 }

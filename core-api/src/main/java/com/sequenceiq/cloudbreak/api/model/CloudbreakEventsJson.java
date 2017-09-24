@@ -38,7 +38,7 @@ public class CloudbreakEventsJson implements JsonEntity {
     private String availabilityZone;
 
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
-    private long blueprintId;
+    private Long blueprintId;
 
     @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
     private String blueprintName;
@@ -139,11 +139,11 @@ public class CloudbreakEventsJson implements JsonEntity {
         this.blueprintName = blueprintName;
     }
 
-    public long getBlueprintId() {
+    public Long getBlueprintId() {
         return blueprintId;
     }
 
-    public void setBlueprintId(long blueprintId) {
+    public void setBlueprintId(Long blueprintId) {
         this.blueprintId = blueprintId;
     }
 

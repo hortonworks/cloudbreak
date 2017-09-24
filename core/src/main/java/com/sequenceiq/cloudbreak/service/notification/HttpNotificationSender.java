@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.repository.SubscriptionRepository;
 
 @Service
 public class HttpNotificationSender implements NotificationSender {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpNotificationSender.class);
 
     @Inject
@@ -28,7 +27,7 @@ public class HttpNotificationSender implements NotificationSender {
     private final Client restClient = RestClientUtil.get(new ConfigKey(false, false, false));
 
     @Override
-    public void send(Notification notification) {
+    public <T> void send(Notification<T> notification) {
         List<Subscription> subscriptions = (List<Subscription>) subscriptionRepository.findAll();
         for (Subscription subscription : subscriptions) {
             String endpoint = subscription.getEndpoint();
@@ -37,7 +36,7 @@ public class HttpNotificationSender implements NotificationSender {
                         .target(endpoint)
                         .request()
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
-                        .post(Entity.json(notification), String.class);
+                        .post(Entity.json(notification.getNotification()), String.class);
             } catch (Exception ex) {
                 LOGGER.info("Could not send notification to the specified endpoint: '{}' Cause: {}", endpoint, ex.getMessage());
             }

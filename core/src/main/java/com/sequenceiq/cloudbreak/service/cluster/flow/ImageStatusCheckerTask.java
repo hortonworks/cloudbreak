@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.type.ImageStatus;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -47,10 +48,10 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
         }
     }
 
-    private Notification getImageCopyNotification(ImageStatusResult result, Stack stack) {
-        Notification notification = new Notification();
+    private Notification<CloudbreakEventsJson> getImageCopyNotification(ImageStatusResult result, Stack stack) {
+        CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventType("IMAGE_COPY_STATE");
-        notification.setEventTimestamp(new Date());
+        notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(String.valueOf(result.getStatusProgressValue()));
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
@@ -59,8 +60,7 @@ public class ImageStatusCheckerTask extends StackBasedStatusCheckerTask<ImageChe
         notification.setStackId(stack.getId());
         notification.setStackName(stack.getName());
         notification.setStackStatus(stack.getStatus());
-        return notification;
-
+        return new Notification<>(notification);
     }
 
     @Override
