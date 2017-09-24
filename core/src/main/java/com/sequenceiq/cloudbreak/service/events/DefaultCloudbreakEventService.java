@@ -1,8 +1,6 @@
 package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
@@ -10,33 +8,26 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.jpa.domain.Specifications;
+import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
-import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.repository.CloudbreakEventRepository;
-import com.sequenceiq.cloudbreak.repository.CloudbreakEventSpecifications;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 import reactor.bus.EventBus;
 import reactor.bus.selector.Selectors;
 
 @Service
 public class DefaultCloudbreakEventService implements CloudbreakEventService {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultCloudbreakEventService.class);
 
     private static final String CLOUDBREAK_EVENT = "CLOUDBREAK_EVENT";
 
     @Inject
     private StackRepository stackRepository;
-
-    @Inject
-    private CloudbreakEventRepository eventRepository;
 
     @Inject
     private ErrorHandlerAwareFlowEventFactory eventFactory;
@@ -47,6 +38,15 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     @Inject
     private CloudbreakEventHandler cloudbreakEventHandler;
 
+    @Inject
+    private StructuredFlowEventFactory structuredFlowEventFactory;
+
+    @Inject
+    private StructuredEventService structuredEventService;
+
+    @Inject
+    private ConversionService conversionService;
+
     @PostConstruct
     public void setup() {
         reactor.on(Selectors.$(CLOUDBREAK_EVENT), cloudbreakEventHandler);
@@ -54,98 +54,36 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
 
     @Override
     public void fireCloudbreakEvent(Long entityId, String eventType, String eventMessage) {
-        CloudbreakEventData eventData = new CloudbreakEventData(entityId, eventType, eventMessage);
+        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(entityId, eventType, eventMessage, null);
         LOGGER.info("Firing Cloudbreak event: {}", eventData);
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 
     @Override
     public void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName) {
-        InstanceGroupEventData eventData = new InstanceGroupEventData(stackId, eventType, eventMessage, instanceGroupName);
+        StructuredNotificationEvent eventData = structuredFlowEventFactory.createStructuredNotificationEvent(stackId, eventType, eventMessage,
+                instanceGroupName);
         LOGGER.info("Firing cloudbreak event: {}", eventData);
         reactor.notify(CLOUDBREAK_EVENT, eventFactory.createEvent(eventData));
     }
 
     @Override
-    public CloudbreakEvent createStackEvent(CloudbreakEventData eventData) {
-        LOGGER.debug("Creating stack event from: {}", eventData);
-        String instanceGroupName = getInstanceGroupNameFromEvent(eventData);
-        Stack stack = stackRepository.findById(eventData.getEntityId());
-        CloudbreakEvent stackEvent = createStackEvent(stack, eventData.getEventType(), eventData.getEventMessage(), instanceGroupName);
-        stackEvent = eventRepository.save(stackEvent);
-        LOGGER.info("Created stack event: {}", stackEvent);
-        return stackEvent;
-    }
-
-    private String getInstanceGroupNameFromEvent(CloudbreakEventData eventData) {
-        String instanceGroup = null;
-        if (eventData instanceof InstanceGroupEventData) {
-            instanceGroup = ((InstanceGroupEventData) eventData).getInstanceGroupName();
-        }
-        return instanceGroup;
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public List<CloudbreakEvent> cloudbreakEvents(String owner, Long since) {
-        List<CloudbreakEvent> events;
+    public List<StructuredNotificationEvent> cloudbreakEvents(String owner, Long since) {
+        List<StructuredNotificationEvent> events;
         if (null == since) {
-            events = eventRepository.findAll(CloudbreakEventSpecifications.eventsForUser(owner));
+            events = structuredEventService.getEventsForUserWithType(owner, "NOTIFICATION");
         } else {
-            events = eventRepository.findAll(Specifications
-                    .where(CloudbreakEventSpecifications.eventsForUser(owner))
-                    .and(CloudbreakEventSpecifications.eventsSince(since)));
+            events = structuredEventService.getEventsForUserWithTypeSince(owner, "NOTIFICATION", since);
         }
-        return null != events ? events : Collections.emptyList();
+        return events;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public List<CloudbreakEvent> cloudbreakEventsForStack(IdentityUser owner, Long stackId) {
-        List<CloudbreakEvent> events = new ArrayList<>();
+    public List<StructuredNotificationEvent> cloudbreakEventsForStack(String owner, Long stackId) {
+        List<StructuredNotificationEvent> events = new ArrayList<>();
         if (stackId != null) {
-            events = eventRepository.findCloudbreakEventsForStack(owner.getUserId(), stackId);
+            events = structuredEventService.getEventsForUserWithTypeAndResourceId(owner, "NOTIFICATION", "STACK", stackId);
         }
-        return null != events ? events : Collections.emptyList();
-    }
-
-    private CloudbreakEvent createStackEvent(Stack stack, String eventType, String eventMessage, String instanceGroupName) {
-        CloudbreakEvent stackEvent = new CloudbreakEvent();
-
-        stackEvent.setEventTimestamp(Calendar.getInstance().getTime());
-        stackEvent.setEventMessage(eventMessage);
-        stackEvent.setEventType(eventType);
-        stackEvent.setOwner(stack.getOwner());
-        stackEvent.setAccount(stack.getAccount());
-        stackEvent.setStackId(stack.getId());
-        stackEvent.setStackStatus(stack.getStatus());
-        stackEvent.setStackName(stack.getName());
-        stackEvent.setNodeCount(stack.getRunningInstanceMetaData().size());
-        stackEvent.setRegion(stack.getRegion());
-        stackEvent.setAvailabilityZone(stack.getAvailabilityZone());
-        stackEvent.setCloud(stack.cloudPlatform());
-
-        populateClusterData(stackEvent, stack);
-
-        if (instanceGroupName != null) {
-            stackEvent.setInstanceGroup(instanceGroupName);
-        }
-
-        return stackEvent;
-    }
-
-    private void populateClusterData(CloudbreakEvent stackEvent, Stack stack) {
-        Cluster cluster = stack.getCluster();
-        if (cluster != null) {
-            stackEvent.setClusterStatus(cluster.getStatus());
-            if (cluster.getBlueprint() != null) {
-                stackEvent.setBlueprintId(cluster.getBlueprint().getId());
-                stackEvent.setBlueprintName(cluster.getBlueprint().getBlueprintName());
-            }
-            stackEvent.setClusterId(cluster.getId());
-            stackEvent.setClusterName(cluster.getName());
-        } else {
-            LOGGER.debug("No cluster data available for the stack: {}", stack.getId());
-        }
+        return events;
     }
 }

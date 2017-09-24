@@ -2,8 +2,7 @@ package com.sequenceiq.cloudbreak.service.events;
 
 import java.util.List;
 
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 public interface CloudbreakEventService {
 
@@ -11,9 +10,7 @@ public interface CloudbreakEventService {
 
     void fireCloudbreakInstanceGroupEvent(Long stackId, String eventType, String eventMessage, String instanceGroupName);
 
-    CloudbreakEvent createStackEvent(CloudbreakEventData eventData);
+    List<StructuredNotificationEvent> cloudbreakEvents(String user, Long since);
 
-    List<CloudbreakEvent> cloudbreakEvents(String user, Long since);
-
-    List<CloudbreakEvent> cloudbreakEventsForStack(IdentityUser user, Long stackId);
+    List<StructuredNotificationEvent> cloudbreakEventsForStack(String user, Long stackId);
 }

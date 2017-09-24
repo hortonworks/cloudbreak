@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
@@ -235,10 +236,10 @@ public class StackCreationService {
         notificationSender.send(getImageCopyNotification(result, stack));
     }
 
-    private Notification getImageCopyNotification(CheckImageResult result, Stack stack) {
-        Notification notification = new Notification();
+    private Notification<CloudbreakEventsJson> getImageCopyNotification(CheckImageResult result, Stack stack) {
+        CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventType("IMAGE_COPY_STATE");
-        notification.setEventTimestamp(new Date());
+        notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(String.valueOf(result.getStatusProgressValue()));
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
@@ -247,7 +248,7 @@ public class StackCreationService {
         notification.setStackId(stack.getId());
         notification.setStackName(stack.getName());
         notification.setStackStatus(stack.getStatus());
-        return notification;
+        return new Notification<>(notification);
     }
 
     private void handleFailure(Stack stack, String errorReason) {

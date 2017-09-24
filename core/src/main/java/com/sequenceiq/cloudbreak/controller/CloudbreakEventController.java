@@ -28,7 +28,7 @@ public class CloudbreakEventController implements EventEndpoint {
     @Override
     public List<CloudbreakEventsJson> getByStack(Long stackId) {
         IdentityUser user = authenticatedUserService.getCbUser();
-        return cloudbreakEventsFacade.retrieveEventsByStack(user, stackId);
+        return cloudbreakEventsFacade.retrieveEventsByStack(user.getUserId(), stackId);
     }
 
 }

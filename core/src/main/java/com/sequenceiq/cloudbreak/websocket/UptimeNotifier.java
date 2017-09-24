@@ -9,6 +9,7 @@ import javax.inject.Inject;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -45,8 +46,8 @@ public class UptimeNotifier {
         }
     }
 
-    private Notification createUptimeNotification(Stack stack, Long uptime) {
-        Notification notification = new Notification();
+    private Notification<CloudbreakEventsJson> createUptimeNotification(Stack stack, Long uptime) {
+        CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
         notification.setStackId(stack.getId());
@@ -66,6 +67,6 @@ public class UptimeNotifier {
             notification.setClusterName(stack.getCluster().getName());
             notification.setClusterId(stack.getCluster().getId());
         }
-        return notification;
+        return new Notification<>(notification);
     }
 }

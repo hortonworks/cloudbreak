@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.ambari.client.AmbariClient;
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
@@ -63,10 +64,10 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
         return allFinished;
     }
 
-    private Notification getAmbariProgressNotification(Long progressValue, Stack stack, AmbariOperationType ambariOperationType) {
-        Notification notification = new Notification();
+    private Notification<CloudbreakEventsJson> getAmbariProgressNotification(Long progressValue, Stack stack, AmbariOperationType ambariOperationType) {
+        CloudbreakEventsJson notification = new CloudbreakEventsJson();
         notification.setEventType(ambariOperationType.name());
-        notification.setEventTimestamp(new Date());
+        notification.setEventTimestamp(new Date().getTime());
         notification.setEventMessage(String.valueOf(progressValue));
         notification.setOwner(stack.getOwner());
         notification.setAccount(stack.getAccount());
@@ -79,7 +80,7 @@ public class AmbariOperationsStatusCheckerTask extends ClusterBasedStatusChecker
             notification.setClusterId(stack.getCluster().getId());
             notification.setClusterName(stack.getCluster().getName());
         }
-        return notification;
+        return new Notification<>(notification);
     }
 
     @Override

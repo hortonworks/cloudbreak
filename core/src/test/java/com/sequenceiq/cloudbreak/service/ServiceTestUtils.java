@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.domain.CloudbreakEvent;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
@@ -21,6 +20,9 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.structuredevent.event.NotificationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 
 public final class ServiceTestUtils {
 
@@ -192,13 +194,12 @@ public final class ServiceTestUtils {
         }
     }
 
-    public static CloudbreakEvent createEvent(Long stackId, int nodeCount, String eventStatus, Date eventTimestamp) {
-        CloudbreakEvent event = new CloudbreakEvent();
-        event.setStackId(stackId);
-        event.setEventType(eventStatus);
-        event.setEventTimestamp(eventTimestamp);
-        event.setNodeCount(nodeCount);
-        return event;
+    public static StructuredNotificationEvent createEvent(Long stackId, int nodeCount, String eventStatus, Date eventTimestamp) {
+        OperationDetails operation = new OperationDetails(eventTimestamp.getTime(), "NOTIFICATION", "STACK", stackId, "account", "userid", "cbId", "cbVersion");
+        NotificationDetails notification = new NotificationDetails();
+        notification.setNotificationType(eventStatus);
+        notification.setNodeCount(nodeCount);
+        return new StructuredNotificationEvent(operation, notification);
     }
 
     public static IdentityUser cbUser() {

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.util.Calendar;
-import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -13,7 +12,7 @@ public class OperationDetails {
 
     private String resourceType;
 
-    private Date timestamp;
+    private Long timestamp;
 
     private String account;
 
@@ -28,7 +27,12 @@ public class OperationDetails {
 
     public OperationDetails(String eventType, String resourceType, Long resourceId, String account, String userId, String cloudbreakId,
             String cloudbreakVersion) {
-        this.timestamp = Calendar.getInstance().getTime();
+        this(Calendar.getInstance().getTimeInMillis(), eventType, resourceType, resourceId, account, userId, cloudbreakId, cloudbreakVersion);
+    }
+
+    public OperationDetails(Long timestamp, String eventType, String resourceType, Long resourceId, String account, String userId, String cloudbreakId,
+            String cloudbreakVersion) {
+        this.timestamp = timestamp;
         this.eventType = eventType;
         this.resourceId = resourceId;
         this.resourceType = resourceType;
@@ -50,7 +54,7 @@ public class OperationDetails {
         return resourceId;
     }
 
-    public Date getTimestamp() {
+    public Long getTimestamp() {
         return timestamp;
     }
 
