@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.structuredevent.event;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class OperationDetails {
     private String eventType;
 
@@ -19,6 +22,9 @@ public class OperationDetails {
     private String cloudbreakId;
 
     private String cloudbreakVersion;
+
+    private OperationDetails() {
+    }
 
     public OperationDetails(String eventType, String resourceType, Long resourceId, String account, String userId, String cloudbreakId,
             String cloudbreakVersion) {

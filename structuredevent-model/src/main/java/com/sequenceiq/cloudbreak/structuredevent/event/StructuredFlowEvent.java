@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class StructuredFlowEvent extends StructuredEvent {
     private FlowDetails flow;
 
@@ -8,6 +11,9 @@ public class StructuredFlowEvent extends StructuredEvent {
     private ClusterDetails cluster;
 
     private BlueprintDetails blueprint;
+
+    protected StructuredFlowEvent() {
+    }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack) {
         this(operation, flow, stack, null, null);

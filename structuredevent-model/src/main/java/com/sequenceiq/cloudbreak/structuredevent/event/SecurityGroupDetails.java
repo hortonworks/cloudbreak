@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class SecurityGroupDetails {
     private Long id;
 

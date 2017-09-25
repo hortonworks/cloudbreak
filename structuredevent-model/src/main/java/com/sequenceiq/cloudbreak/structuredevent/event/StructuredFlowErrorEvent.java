@@ -1,7 +1,17 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
+
 public class StructuredFlowErrorEvent extends StructuredFlowEvent {
+    @JsonSerialize(using = Base64Serializer.class)
+    @JsonDeserialize(using = Base64Deserializer.class)
     private String exception;
+
+    private StructuredFlowErrorEvent() {
+    }
 
     public StructuredFlowErrorEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, String exception) {
         this(operation, flow, stack, null, null, exception);
