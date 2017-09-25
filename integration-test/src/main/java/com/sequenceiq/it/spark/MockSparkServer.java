@@ -18,11 +18,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
@@ -30,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
@@ -54,18 +57,21 @@ public class MockSparkServer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockSparkServer.class);
 
-    private static Gson gson = new Gson();
+    private static final Gson GSON = new Gson();
 
-    private static int numberOfInstances = 2;
+    private static final int NUMBER_OF_INSTANCES = 2;
 
-    private static String mockServerAddress = "mockhosts.service.consul";
+    private static final int SSH_PORT = 2020;
 
-    private static int sshPort = 2020;
+    private static final Collection<Integer> CLUSTER_CREATED = new HashSet<>();
 
-    private static Set<Integer> clustersCreated = new HashSet<>();
+    private static final String MOCK_SERVER_ADDRESS;
+
+    static {
+        MOCK_SERVER_ADDRESS = Optional.ofNullable(System.getenv("MOCK_SERVER_ADDRESS")).orElse("mockhosts.service.consul");
+    }
 
     private MockSparkServer() {
-
     }
 
     public static void main(String[] args) {
@@ -88,8 +94,8 @@ public class MockSparkServer {
 
     private static Map<String, CloudVmMetaDataStatus> generateInstances() {
         Map<String, CloudVmMetaDataStatus> instanceMap = new HashMap<>();
-        MockInstanceUtil mockInstanceUtil = new MockInstanceUtil(mockServerAddress, sshPort);
-        mockInstanceUtil.addInstance(instanceMap, numberOfInstances);
+        MockInstanceUtil mockInstanceUtil = new MockInstanceUtil(MOCK_SERVER_ADDRESS, SSH_PORT);
+        mockInstanceUtil.addInstance(instanceMap, NUMBER_OF_INSTANCES);
         return instanceMap;
     }
 
@@ -99,7 +105,7 @@ public class MockSparkServer {
 
         get(AMBARI_API_ROOT + "/clusters", new AmbariClusterResponse(instanceMap));
         get(AMBARI_API_ROOT + "/clusters/:cluster", (req, resp) -> {
-            ITResponse itResp = clustersCreated.contains(Integer.parseInt(req.params(":cluster"))) ? new AmbariClusterResponse(instanceMap)
+            ITResponse itResp = CLUSTER_CREATED.contains(Integer.valueOf(req.params(":cluster"))) ? new AmbariClusterResponse(instanceMap)
                     : new EmptyAmbariClusterResponse();
             return itResp.handle(req, resp);
         });
@@ -107,12 +113,12 @@ public class MockSparkServer {
         post(AMBARI_API_ROOT + "/clusters/:cluster/requests", new AmbariClusterRequestsResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster/requests/:request", new AmbariStatusResponse());
         post(AMBARI_API_ROOT + "/clusters/:cluster", (req, resp) -> {
-            clustersCreated.add(Integer.parseInt(req.params(":cluster")));
+            CLUSTER_CREATED.add(Integer.valueOf(req.params(":cluster")));
             return new EmptyAmbariResponse().handle(req, resp);
-        }, gson::toJson);
+        }, GSON::toJson);
 
-        get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), gson::toJson);
-        get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), gson::toJson);
+        get(AMBARI_API_ROOT + "/services/AMBARI/components/AMBARI_SERVER", new AmbariServicesComponentsResponse(), GSON::toJson);
+        get(AMBARI_API_ROOT + "/hosts", new AmbariHostsResponse(instanceMap), GSON::toJson);
         get(AMBARI_API_ROOT + "/blueprints/:blueprintname", (request, response) -> {
             response.type("text/plain");
             return responseFromJsonFile("blueprint/" + request.params("blueprintname") + ".bp");
@@ -130,8 +136,8 @@ public class MockSparkServer {
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.setStatusCode(HttpStatus.OK.value());
             return genericResponse;
-        }, gson::toJson);
-        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(JsonAutoDetect.Visibility.NONE));
+        }, GSON::toJson);
+        objectMapper.setVisibility(objectMapper.getVisibilityChecker().withGetterVisibility(Visibility.NONE));
         post(SALT_API_ROOT + "/run", new SaltApiRunPostResponse(instanceMap));
         post(SALT_BOOT_ROOT + "/file", (request, response) -> {
             response.status(HttpStatus.CREATED.value());
@@ -141,18 +147,18 @@ public class MockSparkServer {
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.setStatusCode(HttpStatus.OK.value());
             return genericResponse;
-        }, gson::toJson);
+        }, GSON::toJson);
         post(SALT_BOOT_ROOT + "/salt/action/distribute", (request, response) -> {
             GenericResponses genericResponses = new GenericResponses();
             genericResponses.setResponses(new ArrayList<>());
             return genericResponses;
-        }, gson::toJson);
+        }, GSON::toJson);
         post(SALT_BOOT_ROOT + "/hostname/distribute", (request, response) -> {
             GenericResponses genericResponses = new GenericResponses();
-            ArrayList<GenericResponse> responses = new ArrayList<>();
+            List<GenericResponse> responses = new ArrayList<>();
 
-            for (String instanceId : instanceMap.keySet()) {
-                CloudVmMetaDataStatus cloudVmMetaDataStatus = instanceMap.get(instanceId);
+            for (Entry<String, CloudVmMetaDataStatus> stringCloudVmMetaDataStatusEntry : instanceMap.entrySet()) {
+                CloudVmMetaDataStatus cloudVmMetaDataStatus = stringCloudVmMetaDataStatusEntry.getValue();
                 GenericResponse genericResponse = new GenericResponse();
                 genericResponse.setAddress(cloudVmMetaDataStatus.getMetaData().getPrivateIp());
                 genericResponse.setStatus(HostNameUtil.generateHostNameByIp(cloudVmMetaDataStatus.getMetaData().getPrivateIp()));
@@ -161,25 +167,25 @@ public class MockSparkServer {
             }
             genericResponses.setResponses(responses);
             return genericResponses;
-        }, gson::toJson);
+        }, GSON::toJson);
         post(SALT_BOOT_ROOT + "/file/distribute", (request, response) -> {
             GenericResponses genericResponses = new GenericResponses();
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.setStatusCode(HttpStatus.CREATED.value());
             genericResponses.setResponses(Collections.singletonList(genericResponse));
             return genericResponses;
-        }, gson::toJson);
+        }, GSON::toJson);
         post(SALT_BOOT_ROOT + "/salt/server/pillar/distribute", (request, response) -> {
             GenericResponses genericResponses = new GenericResponses();
             GenericResponse genericResponse = new GenericResponse();
             genericResponse.setStatusCode(HttpStatus.OK.value());
             genericResponses.setResponses(Collections.singletonList(genericResponse));
             return genericResponses;
-        }, gson::toJson);
+        }, GSON::toJson);
     }
 
     private static void addSPIEndpoints(Map<String, CloudVmMetaDataStatus> instanceMap) {
-        post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(instanceMap), gson::toJson);
+        post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(instanceMap), GSON::toJson);
     }
 
     private static File createTempFileFromClasspath(String file) {
