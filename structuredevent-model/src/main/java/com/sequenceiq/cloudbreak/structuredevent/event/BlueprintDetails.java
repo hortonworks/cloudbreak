@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class BlueprintDetails {
     private Long id;
 
@@ -11,7 +16,9 @@ public class BlueprintDetails {
 
     private String blueprintName;
 
-    private JsonNode blueprintJson;
+    @JsonSerialize(using = Base64Serializer.class)
+    @JsonDeserialize(using = Base64Deserializer.class)
+    private String blueprintJson;
 
     public Long getId() {
         return id;
@@ -45,11 +52,11 @@ public class BlueprintDetails {
         this.blueprintName = blueprintName;
     }
 
-    public JsonNode getBlueprintJson() {
+    public String getBlueprintJson() {
         return blueprintJson;
     }
 
-    public void setBlueprintJson(JsonNode blueprintJson) {
+    public void setBlueprintJson(String blueprintJson) {
         this.blueprintJson = blueprintJson;
     }
 }

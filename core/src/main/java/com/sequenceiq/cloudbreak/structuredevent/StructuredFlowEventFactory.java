@@ -10,15 +10,15 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowErrorEvent;
-import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.structuredevent.event.BlueprintDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.FlowDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.OperationDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowErrorEvent;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredFlowEvent;
 
 @Component
 @Transactional
@@ -42,7 +42,7 @@ public class StructuredFlowEventFactory {
     public StructuredFlowEvent createStucturedFlowEvent(Long stackId, FlowDetails flowDetails, Boolean detailed, Exception exception) {
         Stack stack = stackService.findLazy(stackId);
         OperationDetails operationDetails = new OperationDetails("FLOW", "STACK", stackId, stack.getAccount(), stack.getOwner(),
-                cloudbreakNodeConfig.getInstanceUUID(), cbVersion);
+                cloudbreakNodeConfig.getId(), cbVersion);
         StackDetails stackDetails = null;
         ClusterDetails clusterDetails = null;
         BlueprintDetails blueprintDetails = null;

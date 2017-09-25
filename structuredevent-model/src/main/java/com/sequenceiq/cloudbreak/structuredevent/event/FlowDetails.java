@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class FlowDetails {
     private String flowChainType;
 
@@ -16,6 +19,9 @@ public class FlowDetails {
     private String flowEvent;
 
     private Long duration;
+
+    private FlowDetails() {
+    }
 
     public FlowDetails(String flowChainType, String flowType, String flowChainId, String flowId, String flowState, String nextFlowState, String flowEvent,
             Long duration) {
