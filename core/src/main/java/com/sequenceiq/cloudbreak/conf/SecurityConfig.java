@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.access.expression.method.MethodSecurityExpressionHandler;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -74,15 +75,17 @@ public class SecurityConfig {
         private ScimAccountGroupReaderFilter scimAccountGroupReaderFilter;
 
         @Bean("PBEStringCleanablePasswordEncryptor")
+        @Scope("prototype")
         public PBEStringCleanablePasswordEncryptor encryptor() {
-            StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+            PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
             encryptor.setPassword(clientSecret);
             return encryptor;
         }
 
         @Bean("LegacyPBEStringCleanablePasswordEncryptor")
+        @Scope("prototype")
         public PBEStringCleanablePasswordEncryptor legacyEncryptor() {
-            StandardPBEStringEncryptor encryptor = new StandardPBEStringEncryptor();
+            PBEStringCleanablePasswordEncryptor encryptor = new StandardPBEStringEncryptor();
             encryptor.setPassword("cbsecret2015");
             return encryptor;
         }

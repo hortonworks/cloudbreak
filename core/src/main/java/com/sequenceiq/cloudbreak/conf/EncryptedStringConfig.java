@@ -3,23 +3,18 @@ package com.sequenceiq.cloudbreak.conf;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.jasypt.encryption.pbe.PBEStringCleanablePasswordEncryptor;
+import org.jasypt.encryption.StringEncryptor;
 import org.jasypt.encryption.pbe.PBEStringEncryptor;
 import org.jasypt.exceptions.EncryptionOperationNotPossibleException;
 import org.jasypt.hibernate4.encryptor.HibernatePBEEncryptorRegistry;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class EncryptedStringConfig {
 
     @Inject
-    @Qualifier("PBEStringCleanablePasswordEncryptor")
-    private PBEStringCleanablePasswordEncryptor encryptor;
-
-    @Inject
-    @Qualifier("LegacyPBEStringCleanablePasswordEncryptor")
-    private PBEStringCleanablePasswordEncryptor legacyEncryptor;
+    private ApplicationContext applicationContext;
 
     @PostConstruct
     public void register() {
@@ -28,14 +23,17 @@ public class EncryptedStringConfig {
 
             @Override
             public String encrypt(String message) {
+                StringEncryptor encryptor = (StringEncryptor) applicationContext.getBean("PBEStringCleanablePasswordEncryptor");
                 return encryptor.encrypt(message);
             }
 
             @Override
             public String decrypt(String encryptedMessage) {
+                StringEncryptor encryptor = (StringEncryptor) applicationContext.getBean("PBEStringCleanablePasswordEncryptor");
                 try {
                     return encryptor.decrypt(encryptedMessage);
                 } catch (EncryptionOperationNotPossibleException e) {
+                    StringEncryptor legacyEncryptor = (StringEncryptor) applicationContext.getBean("LegacyPBEStringCleanablePasswordEncryptor");
                     try {
                         return legacyEncryptor.decrypt(encryptedMessage);
                     } catch (EncryptionOperationNotPossibleException ignored) {
@@ -46,7 +44,6 @@ public class EncryptedStringConfig {
 
             @Override
             public void setPassword(String password) {
-                encryptor.setPassword(password);
             }
         });
     }
