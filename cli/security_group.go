@@ -28,7 +28,7 @@ func createSecurityGroupImpl(skeleton ClusterSkeleton, group string, channel cha
 	secGroup := createSecurityGroupRequest(skeleton, group)
 
 	log.Infof("[CreateSecurityGroup] sending security group create request with name: %s", secGroup.Name)
-	resp, err := postSecGroup(&securitygroups.PostPublicSecurityGroupParams{Body: secGroup})
+	resp, err := postSecGroup(securitygroups.NewPostPublicSecurityGroupParams().WithBody(secGroup))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -80,7 +80,7 @@ func getSecurityDetailsImpl(stack *models_cloudbreak.StackResponse,
 	getIds func(*securitygroups.GetSecurityGroupParams) (*securitygroups.GetSecurityGroupOK, error)) (securityMap map[string][]*models_cloudbreak.SecurityRuleResponse, err error) {
 	securityMap = make(map[string][]*models_cloudbreak.SecurityRuleResponse)
 	for _, v := range stack.InstanceGroups {
-		if respSecurityGroup, err := getIds(&securitygroups.GetSecurityGroupParams{ID: v.SecurityGroupID}); err == nil {
+		if respSecurityGroup, err := getIds(securitygroups.NewGetSecurityGroupParams().WithID(v.SecurityGroupID)); err == nil {
 			securityGroup := respSecurityGroup.Payload
 			for _, sr := range securityGroup.SecurityRules {
 				securityMap[*sr.Subnet] = append(securityMap[*sr.Subnet], sr)
@@ -92,7 +92,7 @@ func getSecurityDetailsImpl(stack *models_cloudbreak.StackResponse,
 
 func (c *Cloudbreak) GetPublicSecurityGroups() []*models_cloudbreak.SecurityGroupResponse {
 	defer timeTrack(time.Now(), "get public security groups")
-	resp, err := c.Cloudbreak.Securitygroups.GetPublicsSecurityGroup(&securitygroups.GetPublicsSecurityGroupParams{})
+	resp, err := c.Cloudbreak.Securitygroups.GetPublicsSecurityGroup(securitygroups.NewGetPublicsSecurityGroupParams())
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -102,5 +102,5 @@ func (c *Cloudbreak) GetPublicSecurityGroups() []*models_cloudbreak.SecurityGrou
 func (c *Cloudbreak) DeleteSecurityGroup(name string) error {
 	defer timeTrack(time.Now(), "delete security group")
 	log.Infof("[DeleteSecurityGroup] delete security group: %s", name)
-	return c.Cloudbreak.Securitygroups.DeletePublicSecurityGroup(&securitygroups.DeletePublicSecurityGroupParams{Name: name})
+	return c.Cloudbreak.Securitygroups.DeletePublicSecurityGroup(securitygroups.NewDeletePublicSecurityGroupParams().WithName(name))
 }

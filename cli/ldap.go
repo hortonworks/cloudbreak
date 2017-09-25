@@ -114,7 +114,7 @@ func ListLdaps(c *cli.Context) error {
 }
 
 func ListLdapsImpl(getLdaps func(*ldap.GetPublicsLdapParams) (*ldap.GetPublicsLdapOK, error), writer func([]string, []Row)) error {
-	resp, err := getLdaps(&ldap.GetPublicsLdapParams{})
+	resp, err := getLdaps(ldap.NewGetPublicsLdapParams())
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -147,7 +147,7 @@ func (c *Cloudbreak) GetLdapByName(name string) *models_cloudbreak.LdapConfigRes
 	defer timeTrack(time.Now(), "get ldap by name")
 	log.Infof("[GetLdapByName] get ldap by name: %s", name)
 
-	resp, err := c.Cloudbreak.Ldap.GetPublicLdap(&ldap.GetPublicLdapParams{Name: name})
+	resp, err := c.Cloudbreak.Ldap.GetPublicLdap(ldap.NewGetPublicLdapParams().WithName(name))
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -170,7 +170,7 @@ func DeleteLdap(c *cli.Context) error {
 }
 
 func deleteLdapImpl(ldapName string, deleteLdap func(*ldap.DeletePublicLdapParams) error) {
-	if err := deleteLdap(&ldap.DeletePublicLdapParams{Name: ldapName}); err != nil {
+	if err := deleteLdap(ldap.NewDeletePublicLdapParams().WithName(ldapName)); err != nil {
 		logErrorAndExit(err)
 	}
 	log.Infof("[deleteLdapImpl] ldap config deleted: %s", ldapName)

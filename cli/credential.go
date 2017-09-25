@@ -91,13 +91,13 @@ func createCredentialImpl(name string, defaultCredential models_cloudbreak.Crede
 	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
 	var id int64
 	if public {
-		resp, err := postAccountCredential(&credentials.PostPublicCredentialParams{Body: credReq})
+		resp, err := postAccountCredential(credentials.NewPostPublicCredentialParams().WithBody(credReq))
 		if err != nil {
 			logErrorAndExit(err)
 		}
 		id = resp.Payload.ID
 	} else {
-		resp, err := postUserCredential(&credentials.PostPrivateCredentialParams{Body: credReq})
+		resp, err := postUserCredential(credentials.NewPostPrivateCredentialParams().WithBody(credReq))
 		if err != nil {
 			logErrorAndExit(err)
 		}
@@ -126,7 +126,7 @@ func createCredentialRequest(name string, defaultCredential models_cloudbreak.Cr
 
 func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models_cloudbreak.CredentialResponse, error) {
 	defer timeTrack(time.Now(), "get credential by id")
-	respCredential, err := c.Cloudbreak.Credentials.GetCredential(&credentials.GetCredentialParams{ID: credentialID})
+	respCredential, err := c.Cloudbreak.Credentials.GetCredential(credentials.NewGetCredentialParams().WithID(credentialID))
 	var credential *models_cloudbreak.CredentialResponse
 	if respCredential != nil {
 		credential = respCredential.Payload
@@ -137,7 +137,7 @@ func (c *Cloudbreak) GetCredentialById(credentialID int64) (*models_cloudbreak.C
 func (c *Cloudbreak) GetCredential(name string) models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get credential by name")
 	log.Infof("[GetCredential] sending get request to find credential with name: %s", name)
-	resp, err := c.Cloudbreak.Credentials.GetPrivateCredential(&credentials.GetPrivateCredentialParams{Name: name})
+	resp, err := c.Cloudbreak.Credentials.GetPrivateCredential(credentials.NewGetPrivateCredentialParams().WithName(name))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -150,7 +150,7 @@ func (c *Cloudbreak) GetCredential(name string) models_cloudbreak.CredentialResp
 
 func (c *Cloudbreak) GetPublicCredentials() []*models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get public credentials")
-	resp, err := c.Cloudbreak.Credentials.GetPublicsCredential(&credentials.GetPublicsCredentialParams{})
+	resp, err := c.Cloudbreak.Credentials.GetPublicsCredential(credentials.NewGetPublicsCredentialParams())
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -160,7 +160,7 @@ func (c *Cloudbreak) GetPublicCredentials() []*models_cloudbreak.CredentialRespo
 func (c *Cloudbreak) DeleteCredential(name string) error {
 	defer timeTrack(time.Now(), "delete credential")
 	log.Infof("[DeleteCredential] delete credential: %s", name)
-	return c.Cloudbreak.Credentials.DeletePublicCredential(&credentials.DeletePublicCredentialParams{Name: name})
+	return c.Cloudbreak.Credentials.DeletePublicCredential(credentials.NewDeletePublicCredentialParams().WithName(name))
 }
 
 func ListPrivateCredentials(c *cli.Context) error {
@@ -188,7 +188,7 @@ func listPrivateCredentialsImpl(getPrivateCredentials func() []*models_cloudbrea
 
 func (c *Cloudbreak) GetPrivateCredentials() []*models_cloudbreak.CredentialResponse {
 	defer timeTrack(time.Now(), "get private credentials")
-	resp, err := c.Cloudbreak.Credentials.GetPrivatesCredential(&credentials.GetPrivatesCredentialParams{})
+	resp, err := c.Cloudbreak.Credentials.GetPrivatesCredential(credentials.NewGetPrivatesCredentialParams())
 	if err != nil {
 		logErrorAndExit(err)
 	}

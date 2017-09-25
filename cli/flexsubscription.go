@@ -54,12 +54,14 @@ func createFlexSubscriptionImpl(
 
 	smartSenseSubscriptionId := ss.ID
 	fa := false
-	resp, err := postPrivateFlexSubscription(&f.PostPrivateFlexSubscriptionParams{Body: &models_cloudbreak.FlexSubscriptionRequest{
-		Name:                     &name,
-		SubscriptionID:           subscriptionId,
-		SmartSenseSubscriptionID: smartSenseSubscriptionId,
-		Default:                  &fa,
-		UsedForController:        &fa}})
+	resp, err := postPrivateFlexSubscription(f.NewPostPrivateFlexSubscriptionParams().
+		WithBody(
+		&models_cloudbreak.FlexSubscriptionRequest{
+			Name:                     &name,
+			SubscriptionID:           subscriptionId,
+			SmartSenseSubscriptionID: smartSenseSubscriptionId,
+			Default:                  &fa,
+			UsedForController:        &fa}))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -87,7 +89,7 @@ func deleteFlexSubscriptionImpl(
 	deletePublicFlexSubscriptionByName func(params *f.DeletePrivateFlexSubscriptionByNameParams) error,
 	name string) {
 
-	err := deletePublicFlexSubscriptionByName(&f.DeletePrivateFlexSubscriptionByNameParams{Name: name})
+	err := deletePublicFlexSubscriptionByName(f.NewDeletePrivateFlexSubscriptionByNameParams().WithName(name))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -108,7 +110,7 @@ func listFlexSubscriptionImpl(
 	getPrivateFlexSubscriptions func(params *f.GetPrivateFlexSubscriptionsParams) (*f.GetPrivateFlexSubscriptionsOK, error),
 	output Output) {
 
-	resp, err := getPrivateFlexSubscriptions(&f.GetPrivateFlexSubscriptionsParams{})
+	resp, err := getPrivateFlexSubscriptions(f.NewGetPrivateFlexSubscriptionsParams())
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -151,7 +153,7 @@ func setFlexSubscriptionAsDefaultImpl(
 	putPublicDefaultFlexSubscriptionByName func(params *f.PutPublicDefaultFlexSubscriptionByNameParams) error,
 	name string) {
 
-	err := putPublicDefaultFlexSubscriptionByName(&f.PutPublicDefaultFlexSubscriptionByNameParams{Name: name})
+	err := putPublicDefaultFlexSubscriptionByName(f.NewPutPublicDefaultFlexSubscriptionByNameParams().WithName(name))
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -176,7 +178,7 @@ func useFlexSubscriptionForControllerImpl(
 	useForControllerPut func(params *f.PutPublicUsedForControllerFlexSubscriptionByNameParams) error,
 	name string) {
 
-	err := useForControllerPut(&f.PutPublicUsedForControllerFlexSubscriptionByNameParams{Name: name})
+	err := useForControllerPut(f.NewPutPublicUsedForControllerFlexSubscriptionByNameParams().WithName(name))
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -185,7 +187,7 @@ func useFlexSubscriptionForControllerImpl(
 func (cb *Cloudbreak) GetFlexSubscriptionByName(name string) *models_cloudbreak.FlexSubscriptionResponse {
 	defer timeTrack(time.Now(), "GetFlexSubscriptionByName")
 
-	resp, err := cb.Cloudbreak.Flexsubscriptions.GetPrivateFlexSubscriptionByName(&f.GetPrivateFlexSubscriptionByNameParams{Name: name})
+	resp, err := cb.Cloudbreak.Flexsubscriptions.GetPrivateFlexSubscriptionByName(f.NewGetPrivateFlexSubscriptionByNameParams().WithName(name))
 
 	if err != nil {
 		logErrorAndExit(err)

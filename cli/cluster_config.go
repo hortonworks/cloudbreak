@@ -11,7 +11,7 @@ func (c *Cloudbreak) GetClusterConfig(id int64, inputs []*models_cloudbreak.Blue
 	defer timeTrack(time.Now(), "get cluster config by id")
 
 	log.Infof("[GetClusterConfig] get cluster config for stack id: %d", id)
-	resp, err := c.Cloudbreak.Cluster.GetConfigsCluster(&cluster.GetConfigsClusterParams{ID: id, Body: &models_cloudbreak.ConfigsRequest{Requests: inputs}})
+	resp, err := c.Cloudbreak.Cluster.GetConfigsCluster(cluster.NewGetConfigsClusterParams().WithID(id).WithBody(&models_cloudbreak.ConfigsRequest{Requests: inputs}))
 
 	if err != nil {
 		logErrorAndExit(err)

@@ -113,7 +113,7 @@ func listBlueprintsImpl(getPublicBlueprints func() []*models_cloudbreak.Blueprin
 
 func (c *Cloudbreak) GetPublicBlueprints() []*models_cloudbreak.BlueprintResponse {
 	defer timeTrack(time.Now(), "get public blueprints")
-	resp, err := c.Cloudbreak.Blueprints.GetPublicsBlueprint(&blueprints.GetPublicsBlueprintParams{})
+	resp, err := c.Cloudbreak.Blueprints.GetPublicsBlueprint(blueprints.NewGetPublicsBlueprintParams())
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -123,14 +123,14 @@ func (c *Cloudbreak) GetPublicBlueprints() []*models_cloudbreak.BlueprintRespons
 func (c *Cloudbreak) DeleteBlueprint(name string) error {
 	defer timeTrack(time.Now(), "delete blueprint")
 	log.Infof("[DeleteBlueprint] delete blueprint: %s", name)
-	return c.Cloudbreak.Blueprints.DeletePublicBlueprint(&blueprints.DeletePublicBlueprintParams{Name: name})
+	return c.Cloudbreak.Blueprints.DeletePublicBlueprint(blueprints.NewDeletePublicBlueprintParams().WithName(name))
 }
 
 func (c *Cloudbreak) GetBlueprintByName(name string) *models_cloudbreak.BlueprintResponse {
 	defer timeTrack(time.Now(), "get blueprint by name")
 	log.Infof("[GetBlueprintByName] get blueprint by name: %s", name)
 
-	resp, err := c.Cloudbreak.Blueprints.GetPublicBlueprint(&blueprints.GetPublicBlueprintParams{Name: getRealBlueprintName(name)})
+	resp, err := c.Cloudbreak.Blueprints.GetPublicBlueprint(blueprints.NewGetPublicBlueprintParams().WithName(getRealBlueprintName(name)))
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -157,7 +157,7 @@ func createBlueprintImpl(skeleton ClusterSkeleton, blueprint *models_cloudbreak.
 
 	bpRequest := createBlueprintRequest(skeleton, blueprint)
 
-	resp, err := postPublicBlueprint(&blueprints.PostPublicBlueprintParams{Body: bpRequest})
+	resp, err := postPublicBlueprint(blueprints.NewPostPublicBlueprintParams().WithBody(bpRequest))
 
 	if err != nil {
 		logErrorAndExit(err)

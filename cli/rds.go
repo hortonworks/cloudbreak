@@ -63,7 +63,7 @@ func ListRDSConfigs(c *cli.Context) error {
 }
 
 func listRDSConfigsImpl(getConfigs func(*rdsconfigs.GetPublicsRdsParams) (*rdsconfigs.GetPublicsRdsOK, error), writer func([]string, []Row)) error {
-	resp, err := getConfigs(&rdsconfigs.GetPublicsRdsParams{})
+	resp, err := getConfigs(rdsconfigs.NewGetPublicsRdsParams())
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -125,7 +125,7 @@ func createRDSConfigImpl(rdsType string, finder func(string) string, postConfig 
 		Type:               rdsType,
 	}
 
-	resp, err := postConfig(&rdsconfigs.PostPublicRdsParams{Body: &rdsConfig})
+	resp, err := postConfig(rdsconfigs.NewPostPublicRdsParams().WithBody(&rdsConfig))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -149,7 +149,7 @@ func DeleteRDSConfig(c *cli.Context) error {
 func deleteRDSConfigImpl(finder func(string) string, deleteRDSConfig func(params *rdsconfigs.DeletePublicRdsParams) error) {
 	rdsName := finder(FlRdsName.Name)
 
-	if err := deleteRDSConfig(&rdsconfigs.DeletePublicRdsParams{Name: rdsName}); err != nil {
+	if err := deleteRDSConfig(rdsconfigs.NewDeletePublicRdsParams().WithName(rdsName)); err != nil {
 		logErrorAndExit(err)
 	}
 	log.Infof("[DeleteRDSConfig] RDS config deleted: %s", rdsName)

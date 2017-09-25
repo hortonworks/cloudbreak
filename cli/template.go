@@ -24,7 +24,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
 	computeTemplateReqBody := createComputeTemplateRequest(skeleton)
 
 	log.Infof("[CreateTemplate] sending master template create request with name: %s", masterTemplateReqBody.Name)
-	resp, err := postTemplate(&templates.PostPublicTemplateParams{Body: masterTemplateReqBody})
+	resp, err := postTemplate(templates.NewPostPublicTemplateParams().WithBody(masterTemplateReqBody))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -34,7 +34,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
 	channel <- resp.Payload.ID
 
 	log.Infof("[CreateTemplate] sending worker template create request with name: %s", workerTemplateReqBody.Name)
-	resp, err = postTemplate(&templates.PostPublicTemplateParams{Body: workerTemplateReqBody})
+	resp, err = postTemplate(templates.NewPostPublicTemplateParams().WithBody(workerTemplateReqBody))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -44,7 +44,7 @@ func createTemplateImpl(skeleton ClusterSkeleton, channel chan int64,
 	channel <- resp.Payload.ID
 
 	log.Infof("[CreateTemplate] sending compute template create request with name: %s", computeTemplateReqBody.Name)
-	resp, err = postTemplate(&templates.PostPublicTemplateParams{Body: computeTemplateReqBody})
+	resp, err = postTemplate(templates.NewPostPublicTemplateParams().WithBody(computeTemplateReqBody))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -126,7 +126,7 @@ func createComputeTemplateRequest(skeleton ClusterSkeleton) *models_cloudbreak.T
 
 func (c *Cloudbreak) GetPublicTemplates() []*models_cloudbreak.TemplateResponse {
 	defer timeTrack(time.Now(), "get public templates")
-	resp, err := c.Cloudbreak.Templates.GetPublicsTemplate(&templates.GetPublicsTemplateParams{})
+	resp, err := c.Cloudbreak.Templates.GetPublicsTemplate(templates.NewGetPublicsTemplateParams())
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -136,5 +136,5 @@ func (c *Cloudbreak) GetPublicTemplates() []*models_cloudbreak.TemplateResponse 
 func (c *Cloudbreak) DeleteTemplate(name string) error {
 	defer timeTrack(time.Now(), "delete template")
 	log.Infof("[DeleteTemplate] delete template: %s", name)
-	return c.Cloudbreak.Templates.DeletePublicTemplate(&templates.DeletePublicTemplateParams{Name: name})
+	return c.Cloudbreak.Templates.DeletePublicTemplate(templates.NewDeletePublicTemplateParams().WithName(name))
 }

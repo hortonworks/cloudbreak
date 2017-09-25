@@ -305,7 +305,7 @@ func (c *Cloudbreak) waitForClusterToFinish(stackId int64, context *cli.Context)
 
 func waitForClusterToFinishImpl(stackId int64, getStack func(params *stacks.GetStackParams) (*stacks.GetStackOK, error)) {
 	for {
-		resp, err := getStack(&stacks.GetStackParams{ID: stackId})
+		resp, err := getStack(stacks.NewGetStackParams().WithID(stackId))
 
 		if err != nil {
 			logErrorAndExit(err)
@@ -340,7 +340,7 @@ func (c *Cloudbreak) waitForClusterToTerminate(clusterName string, context *cli.
 
 func waitForClusterToTerminateImpl(clusterName string, getStack func(*stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error)) {
 	for {
-		resp, err := getStack(&stacks.GetPrivateStackParams{Name: clusterName})
+		resp, err := getStack(stacks.NewGetPrivateStackParams().WithName(clusterName))
 
 		if err != nil {
 			errorMessage := err.Error()

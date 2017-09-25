@@ -24,7 +24,7 @@ var CLUSTER_MANAGER_EXPOSED_SERVICES = []string{"HDFSUI", "YARNUI", "JOBHISTORYU
 func (c *Cloudbreak) GetClusterByName(name string) *models_cloudbreak.StackResponse {
 	defer timeTrack(time.Now(), "get cluster by name")
 
-	stack, err := c.Cloudbreak.Stacks.GetPrivateStack(&stacks.GetPrivateStackParams{Name: name})
+	stack, err := c.Cloudbreak.Stacks.GetPrivateStack(stacks.NewGetPrivateStackParams().WithName(name))
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -123,7 +123,9 @@ func TerminateCluster(c *cli.Context) error {
 	asClient.deleteCluster(clusterName, cbClient.GetClusterByName)
 
 	deleteDependencies := true
-	err := cbClient.Cloudbreak.Stacks.DeletePrivateStack(&stacks.DeletePrivateStackParams{Name: clusterName, DeleteDependencies: &deleteDependencies})
+	err := cbClient.Cloudbreak.Stacks.DeletePrivateStack(stacks.NewDeletePrivateStackParams().
+		WithName(clusterName).
+		WithDeleteDependencies(&deleteDependencies))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -305,7 +307,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 		}
 
 		log.Infof("[CreateStack] sending stack create request with name: %s", skeleton.ClusterName)
-		resp, err := postStack(&stacks.PostPrivateStackParams{Body: &stackReq})
+		resp, err := postStack(stacks.NewPostPrivateStackParams().WithBody(&stackReq))
 
 		if err != nil {
 			logErrorAndExit(err)
@@ -480,7 +482,7 @@ func createClusterImpl(skeleton ClusterSkeleton,
 			clusterReq.LdapConfigID = *ldapConfigId
 		}
 
-		resp, err := postCluster(&cluster.PostClusterParams{ID: stackId, Body: &clusterReq})
+		resp, err := postCluster(cluster.NewPostClusterParams().WithID(stackId).WithBody(&clusterReq))
 
 		if err != nil {
 			logErrorAndExit(err)
@@ -545,7 +547,7 @@ func repairClusterImp(clusterName string, nodeType string, removeOnly bool,
 	stack := getStack(clusterName)
 
 	repairBody := &models_cloudbreak.ClusterRepairRequest{HostGroups: []string{nodeType}, RemoveOnly: &removeOnly}
-	if err := repairCluster(&cluster.RepairClusterParams{Body: repairBody, ID: stack.ID}); err != nil {
+	if err := repairCluster(cluster.NewRepairClusterParams().WithBody(repairBody).WithID(stack.ID)); err != nil {
 		logErrorAndExit(err)
 	}
 }
@@ -593,7 +595,7 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 				WithClusterEvent:  &withClusterScale,
 			},
 		}
-		if err := putStack(&stacks.PutStackParams{ID: stack.ID, Body: update}); err != nil {
+		if err := putStack(stacks.NewPutStackParams().WithID(stack.ID).WithBody(update)); err != nil {
 			logErrorAndExit(err)
 		}
 	} else {
@@ -621,7 +623,7 @@ func resizeClusterImpl(clusterName string, nodeType string, adjustment int32,
 				ValidateNodeCount: &validateNodeCount,
 			},
 		}
-		if err := putCluster(&cluster.PutClusterParams{ID: stack.ID, Body: update}); err != nil {
+		if err := putCluster(cluster.NewPutClusterParams().WithID(stack.ID).WithBody(update)); err != nil {
 			logErrorAndExit(err)
 		}
 	}

@@ -52,7 +52,7 @@ func ListClusters(c *cli.Context) error {
 func listClustersImpl(getStacks func(*stacks.GetPrivatesStackParams) (*stacks.GetPrivatesStackOK, error),
 	fetchCluster func(*models_cloudbreak.StackResponse, *AutoscalingSkeletonResult) (*ClusterSkeletonResult, error), writer func([]string, []Row)) error {
 
-	respStacks, err := getStacks(&stacks.GetPrivatesStackParams{})
+	respStacks, err := getStacks(stacks.NewGetPrivatesStackParams())
 	if err != nil {
 		log.Error(err)
 		return err
@@ -106,7 +106,7 @@ func ListClusterNodes(c *cli.Context) error {
 }
 
 func listClusterNodesImpl(clusterName string, getStack func(*stacks.GetPrivateStackParams) (*stacks.GetPrivateStackOK, error), writer func([]string, []Row)) {
-	respStack, err := getStack(&stacks.GetPrivateStackParams{Name: clusterName})
+	respStack, err := getStack(stacks.NewGetPrivateStackParams().WithName(clusterName))
 	if err != nil {
 		logErrorAndExit(err)
 	}

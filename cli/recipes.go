@@ -56,7 +56,7 @@ func createRecipe(recipe Recipe, postPublicRecipe func(params *recipes.PostPubli
 	recipeRequest := createRecipeRequest(recipe)
 
 	log.Infof("[createRecipe] creating recipe with URI: %s", recipe.URI)
-	resp, err := postPublicRecipe(&recipes.PostPublicRecipeParams{Body: recipeRequest})
+	resp, err := postPublicRecipe(recipes.NewPostPublicRecipeParams().WithBody(recipeRequest))
 
 	if err != nil {
 		logErrorAndExit(err)
@@ -88,7 +88,7 @@ func createRecipeRequest(recipe Recipe) *models_cloudbreak.RecipeRequest {
 
 func (c *Cloudbreak) GetPublicRecipes() []*models_cloudbreak.RecipeResponse {
 	defer timeTrack(time.Now(), "get public recipes")
-	resp, err := c.Cloudbreak.Recipes.GetPublicsRecipe(&recipes.GetPublicsRecipeParams{})
+	resp, err := c.Cloudbreak.Recipes.GetPublicsRecipe(recipes.NewGetPublicsRecipeParams())
 	if err != nil {
 		logErrorAndExit(err)
 	}
@@ -98,5 +98,5 @@ func (c *Cloudbreak) GetPublicRecipes() []*models_cloudbreak.RecipeResponse {
 func (c *Cloudbreak) DeleteRecipe(name string) error {
 	defer timeTrack(time.Now(), "delete recipe")
 	log.Infof("[DeleteRecipe] delete recipe: %s", name)
-	return c.Cloudbreak.Recipes.DeletePublicRecipe(&recipes.DeletePublicRecipeParams{Name: name})
+	return c.Cloudbreak.Recipes.DeletePublicRecipe(recipes.NewDeletePublicRecipeParams().WithName(name))
 }
