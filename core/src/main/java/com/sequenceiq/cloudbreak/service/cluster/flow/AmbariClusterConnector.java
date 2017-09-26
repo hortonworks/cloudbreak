@@ -40,18 +40,15 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
-import com.sequenceiq.cloudbreak.api.model.AdlsFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
-import com.sequenceiq.cloudbreak.api.model.WasbFileSystemConfiguration;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
-import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -85,14 +82,15 @@ import com.sequenceiq.cloudbreak.service.cluster.AmbariClientProvider;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariOperationFailedException;
 import com.sequenceiq.cloudbreak.service.cluster.HadoopConfigurationService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AutoRecoveryConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.AzureFileSystemConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintConfigurationEntry;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.BlueprintProcessor;
-import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.DruidSupersetConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.LlapConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.RDSConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.SmartSenseConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.ZeppelinConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.BlueprintTemplateProcessor;
 import com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.FileSystemConfigurator;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosContainerDnResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDomainResolver;
@@ -214,6 +212,9 @@ public class AmbariClusterConnector {
 
     @Inject
     private AutoRecoveryConfigProvider autoRecoveryConfigProvider;
+
+    @Inject
+    private AzureFileSystemConfigProvider azureFileSystemConfigProvider;
 
     @Inject
     private ImageService imageService;
@@ -533,7 +534,7 @@ public class AmbariClusterConnector {
         FileSystemConfigurator fsConfigurator = fileSystemConfigurators.get(FileSystemType.valueOf(fs.getType()));
         String json = JsonUtil.writeValueAsString(fs.getProperties());
         FileSystemConfiguration fsConfiguration = (FileSystemConfiguration) JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
-        decorateFsConfigurationProperties(fsConfiguration, stack);
+        fsConfiguration = decorateFsConfigurationProperties(fsConfiguration, stack);
         Map<String, String> resourceProperties = fsConfigurator.createResources(fsConfiguration);
         List<BlueprintConfigurationEntry> bpConfigEntries = fsConfigurator.getFsProperties(fsConfiguration, resourceProperties);
         if (fs.isDefaultFs()) {
@@ -542,24 +543,13 @@ public class AmbariClusterConnector {
         return blueprintProcessor.addConfigEntries(blueprintText, bpConfigEntries, true);
     }
 
-    private void decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
+    private FileSystemConfiguration decorateFsConfigurationProperties(FileSystemConfiguration fsConfiguration, Stack stack) {
         fsConfiguration.addProperty(FileSystemConfiguration.STORAGE_CONTAINER, "cloudbreak" + stack.getId());
-        Map<String, String> fileSystemProperties = stack.getCluster().getFileSystem().getProperties();
+
         if (CloudConstants.AZURE.equals(stack.getPlatformVariant())) {
-            String resourceGroupName = stack.getResourceByType(ResourceType.ARM_TEMPLATE).getResourceName();
-            fsConfiguration.addProperty(FileSystemConfiguration.RESOURCE_GROUP_NAME, resourceGroupName);
+            fsConfiguration = azureFileSystemConfigProvider.decorateFileSystemConfiguration(stack, fsConfiguration);
         }
-        if (fsConfiguration instanceof WasbFileSystemConfiguration) {
-            String secureWasb = fileSystemProperties.getOrDefault("secure", "false");
-            fsConfiguration.addProperty("secure", secureWasb);
-        }
-        // we have to lookup secret key from the credential because it is not stored in client side
-        if (fsConfiguration instanceof AdlsFileSystemConfiguration) {
-            String credential = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.CREDENTIAL_SECRET_KEY));
-            String clientId = String.valueOf(stack.getCredential().getAttributes().getMap().get(AdlsFileSystemConfiguration.ACCESS_KEY));
-            ((AdlsFileSystemConfiguration) fsConfiguration).setCredential(credential);
-            ((AdlsFileSystemConfiguration) fsConfiguration).setClientId(clientId);
-        }
+        return fsConfiguration;
     }
 
     private void stopAllServices(Stack stack, AmbariClient ambariClient) throws CloudbreakException {

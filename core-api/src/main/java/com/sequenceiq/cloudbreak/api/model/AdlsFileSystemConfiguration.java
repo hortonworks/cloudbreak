@@ -16,6 +16,12 @@ public class AdlsFileSystemConfiguration extends FileSystemConfiguration {
 
     public static final String ACCESS_KEY = "accessKey";
 
+    public static final String ADLS_TRACKING_CLUSTERTYPE_KEY = "adl.events.tracking.clustertype";
+
+    public static final String ADLS_TRACKING_CLUSTERNAME_KEY = "adl.events.tracking.clustername";
+
+    public static final String ADLS_TRACKING_CLUSTERNAME_VALUE = "CLOUDBREAK";
+
     @NotNull
     @Pattern(regexp = "^[a-z0-9]{3,24}$",
             message = "Must contain only numbers and lowercase letters and must be between 3 and 24 characters long.")
