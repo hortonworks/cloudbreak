@@ -20,5 +20,5 @@ ADD CONSTRAINT structuredevent_pkey PRIMARY KEY (id);
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-DROP TABLE IF EXISTS structuredevent
+DROP TABLE IF EXISTS structuredevent;
 DROP SEQUENCE IF EXISTS structuredevent_id_seq;
