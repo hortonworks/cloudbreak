@@ -13,6 +13,7 @@ CREATE SEQUENCE stackauthentication_id_seq START WITH 1 INCREMENT BY 1 NO MINVAL
 ALTER TABLE stackauthentication ADD CONSTRAINT stackauthentication_pkey PRIMARY KEY (id);
 ALTER TABLE stack ADD COLUMN stackauthentication_id BIGINT;
 ALTER TABLE ONLY stack ADD CONSTRAINT fk_stack_stackauthentication_id FOREIGN KEY (stackauthentication_id) REFERENCES stackauthentication(id);
+UPDATE stack SET loginusername = 'cloudbreak' WHERE loginusername IS NULL;
 INSERT INTO stackauthentication (id, publickey, loginusername, temp_stackid) SELECT nextval('stackauthentication_id_seq') AS "id", publickey, loginusername, id FROM stack;
 UPDATE stack SET stackauthentication_id=o.id FROM stackauthentication o WHERE o.temp_stackid=stack.id;
 ALTER TABLE ONLY stackauthentication DROP COLUMN temp_stackid;
