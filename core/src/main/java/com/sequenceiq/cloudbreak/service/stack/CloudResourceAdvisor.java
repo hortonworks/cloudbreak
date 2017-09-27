@@ -87,7 +87,8 @@ public class CloudResourceAdvisor {
     }
 
     private boolean isThereMasterComponents(Set<String> components) {
-        return components.stream().anyMatch(component -> stackServiceComponentDescs.get(component).isMaster());
+        return components.stream()
+                .anyMatch(component -> stackServiceComponentDescs.get(component) != null && stackServiceComponentDescs.get(component).isMaster());
     }
 
     private VmType getDefaultVmType(String cloudPlatform, String availabilityZone, PlatformVirtualMachines vmtypes) {
