@@ -188,7 +188,7 @@ public class StackToCloudStackConverter {
 
     public CloudInstance buildInstance(InstanceMetaData instanceMetaData, Template template,
             StackAuthentication stackAuthentication, String name, Long privateId, InstanceStatus status) {
-        String id = instanceMetaData == null ? null : instanceMetaData.getId().toString();
+        String id = instanceMetaData == null ? null : instanceMetaData.getInstanceId();
         String hostName = instanceMetaData == null ? null : instanceMetaData.getShortHostname();
         String subnetId = instanceMetaData == null ? null : instanceMetaData.getSubnetId();
 
