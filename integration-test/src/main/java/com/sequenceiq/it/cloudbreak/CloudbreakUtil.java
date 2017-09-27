@@ -141,7 +141,7 @@ public class CloudbreakUtil {
     public static void checkClusterStopped(StackEndpoint stackEndpoint, String port, String stackId, String ambariUser, String ambariPassword) {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
-        Assert.assertEquals(stackResponse.getCluster().getStatus(), "STOPPED", "The cluster is not stopped!");
+        Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.STOPPED, "The cluster is not stopped!");
         Assert.assertEquals(stackResponse.getStatus(), Status.STOPPED, "The stack is not stopped!");
 
         String ambariIp = stackResponse.getCluster().getAmbariServerIp();

@@ -50,7 +50,7 @@ public class ScalingUtil {
             int expectedNodeCount, IntegrationTestContext itContext) {
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
-        Assert.assertEquals(stackResponse.getCluster().getStatus(), "AVAILABLE", "The cluster hasn't been started!");
+        Assert.assertEquals(stackResponse.getCluster().getStatus(), Status.AVAILABLE, "The cluster hasn't been started!");
         Assert.assertEquals(stackResponse.getStatus(), Status.AVAILABLE, "The stack hasn't been started!");
 
         String ambariIp = CloudbreakUtil.getAmbariIp(stackEndpoint, stackId, itContext);
