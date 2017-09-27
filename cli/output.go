@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"os"
+
 	"github.com/olekukonko/tablewriter"
 	"gopkg.in/yaml.v2"
-	"os"
 )
 
 type Output struct {
@@ -56,5 +57,5 @@ func writeTable(header []string, tableRows []Row) {
 	for _, v := range tableRows {
 		table.Append(v.DataAsStringArray())
 	}
-	table.Render() // Send output
+	table.Render()
 }

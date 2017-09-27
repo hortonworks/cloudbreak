@@ -3,9 +3,6 @@ package cli
 import "github.com/hortonworks/hdc-cli/cli/cloud"
 
 var (
-	MASTER      = "master"
-	WORKER      = "worker"
-	COMPUTE     = "compute"
 	POSTGRES    = "POSTGRES"
 	MYSQL       = "MYSQL"
 	MARIADB     = "MARIADB"
