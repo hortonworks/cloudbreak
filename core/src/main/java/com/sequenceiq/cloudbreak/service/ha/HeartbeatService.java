@@ -119,13 +119,13 @@ public class HeartbeatService {
             try {
                 failedNodes = distributeFlows();
             } catch (OptimisticLockingFailureException e) {
-                LOGGER.error("Failed to distribute the flow logs across the active nodes, somebody might have already done it..", e);
+                LOGGER.info("Failed to distribute the flow logs across the active nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
 
             try {
                 cleanupNodes(failedNodes);
             } catch (RuntimeException e) {
-                LOGGER.error("Failed to cleanup the nodes, somebody might have already done it..", e);
+                LOGGER.info("Failed to cleanup the nodes, somebody might have already done it. Message: {}", e.getMessage());
             }
 
             String nodeId = cloudbreakNodeConfig.getId();
