@@ -230,6 +230,62 @@ func main() {
 				}
 			},
 		},
+		{
+			Name:   "list-blueprints",
+			Usage:  "list the available blueprints",
+			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+			Before: ConfigRead,
+			Action: hdc.ListBlueprints,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "create-blueprint",
+			Usage:  "adds a new Ambari blueprint from a file or from a URL",
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Subcommands: []cli.Command{
+				{
+					Name:   "from-url",
+					Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintURL).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: hdc.CreateBlueprintFromUrl,
+					Usage:  "creates a blueprint by downloading it from a URL location",
+					BashComplete: func(c *cli.Context) {
+						for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintURL).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "from-file",
+					Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintFileLocation).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: hdc.CreateBlueprintFromFile,
+					Usage:  "creates a blueprint by reading it from a local file",
+					BashComplete: func(c *cli.Context) {
+						for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintFileLocation).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
+			Name:   "delete-blueprint",
+			Usage:  "deletes a blueprint from Cloudbreak",
+			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+			Before: ConfigRead,
+			Action: hdc.DeleteBlueprint,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
 	}
 
 	// internal commands
