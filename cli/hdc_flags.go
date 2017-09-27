@@ -66,6 +66,20 @@ var (
 			Usage: "user provided file with json content",
 		},
 	}
+	FlDescription = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "description",
+			Usage: "description of resource",
+		},
+	}
+	FlPublic = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "public",
+			Usage: "public in account",
+		},
+	}
 	FlClusterName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{

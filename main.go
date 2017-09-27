@@ -6,6 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	hdc "github.com/hortonworks/hdc-cli/cli"
+	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
 	"github.com/urfave/cli"
 )
 
@@ -101,6 +102,41 @@ func main() {
 			Action: hdc.Configure,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "create-credential",
+			Usage:  "create a new credential",
+			Flags:  []cli.Flag{hdc.FlCredentialName, hdc.FlDescription, hdc.FlPublic, hdc.FlRoleARN, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.CreateCredential, BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlCredentialName, hdc.FlDescription, hdc.FlPublic, hdc.FlRoleARN, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "list-credentials",
+			Usage:  "list the credentials",
+			Before: ConfigRead,
+			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Action: hdc.ListPrivateCredentials,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "delete-credential",
+			Usage:  "delete a credential",
+			Flags:  []cli.Flag{hdc.FlCredentialName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Before: ConfigRead,
+			Action: hdc.DeleteCredential,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range []cli.Flag{hdc.FlCredentialName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
 					printFlagCompletion(f)
 				}
 			},

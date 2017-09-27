@@ -1,9 +1,9 @@
 package cloud
 
-type CloudType int
+type CloudType string
 
 const (
-	AWS = CloudType(iota)
+	AWS = CloudType("AWS")
 )
 
 type Network struct {
@@ -15,6 +15,8 @@ var CurrentCloud CloudType = AWS
 var CloudProviders map[CloudType]CloudProvider = make(map[CloudType]CloudProvider)
 
 type CloudProvider interface {
+	GetName() *string
+	CreateCredentialParameters(func(string) string, func(string) bool) map[string]interface{}
 	ValidateNetwork(*Network) []error
 	ValidateTags(map[string]string) []error
 }

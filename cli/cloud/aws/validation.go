@@ -10,13 +10,6 @@ import (
 	"github.com/hortonworks/hdc-cli/cli/cloud"
 )
 
-func init() {
-	cloud.CloudProviders[cloud.AWS] = new(AwsProvider)
-}
-
-type AwsProvider struct {
-}
-
 func (p *AwsProvider) ValidateNetwork(n *cloud.Network) []error {
 	var res []error = nil
 	if len(n.VpcId) != 0 || len(n.SubnetId) != 0 {
