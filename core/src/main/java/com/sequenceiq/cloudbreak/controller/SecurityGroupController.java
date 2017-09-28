@@ -48,7 +48,6 @@ public class SecurityGroupController extends NotificationController implements S
     @Override
     public Set<SecurityGroupResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         Set<SecurityGroup> securityGroups = securityGroupService.retrievePrivateSecurityGroups(user);
         return convert(securityGroups);
     }
@@ -56,7 +55,6 @@ public class SecurityGroupController extends NotificationController implements S
     @Override
     public Set<SecurityGroupResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        defaultSecurityGroupCreator.createDefaultSecurityGroups(user);
         Set<SecurityGroup> securityGroups = securityGroupService.retrieveAccountSecurityGroups(user);
         return convert(securityGroups);
     }

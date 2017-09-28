@@ -35,7 +35,4 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
 
     @Query("SELECT b FROM Blueprint b WHERE b.owner= :owner and b.name= :name AND b.status <> 'DEFAULT_DELETED'")
     Blueprint findByNameInUser(@Param("name") String name, @Param("owner") String owner);
-
-    @Query("SELECT b FROM Blueprint b WHERE b.account= :account AND (b.status = 'DEFAULT_DELETED' OR b.status = 'DEFAULT') ")
-    Set<Blueprint> findAllDefaultInAccount(@Param("account") String account);
 }

@@ -73,7 +73,6 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
         }
-
         return blueprint;
     }
 
