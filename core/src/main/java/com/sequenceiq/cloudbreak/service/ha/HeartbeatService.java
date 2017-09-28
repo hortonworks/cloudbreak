@@ -25,6 +25,7 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 import com.sequenceiq.cloudbreak.core.flow2.FlowRegister;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChains;
@@ -39,6 +40,7 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.Clock;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFail;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
 @Service
 public class HeartbeatService {
@@ -81,6 +83,9 @@ public class HeartbeatService {
     private ReactorFlowManager reactorFlowManager;
 
     @Inject
+    private MetricService metricService;
+
+    @Inject
     @Qualifier("DefaultRetryService")
     private Retry retryService;
 
@@ -100,6 +105,7 @@ public class HeartbeatService {
                         return true;
                     } catch (RuntimeException e) {
                         LOGGER.error("Failed to update the heartbeat timestamp", e);
+                        metricService.incrementMetricCounter(MetricType.HEARTBEAT_UPDATE_FAILED);
                         throw new ActionWentFail(e.getMessage());
                     }
                 });

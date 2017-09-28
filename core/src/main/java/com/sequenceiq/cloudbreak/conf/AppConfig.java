@@ -20,6 +20,9 @@ import javax.ws.rs.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.actuate.autoconfigure.ExportMetricWriter;
+import org.springframework.boot.actuate.metrics.jmx.JmxMetricWriter;
+import org.springframework.boot.actuate.metrics.writer.MetricWriter;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ResourceLoaderAware;
@@ -31,6 +34,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.jmx.export.MBeanExporter;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -148,14 +152,24 @@ public class AppConfig implements ResourceLoaderAware {
     }
 
     @Bean
+    @ExportMetricWriter
+    /*
+     * Prometheus is not capable to scrape json metrics so we need to expose the actuator metrics to jmx. Every
+     * counter and gauge metrics are exposed too.
+     */
+    public MetricWriter metricWriter(MBeanExporter exporter) {
+        return new JmxMetricWriter(exporter);
+    }
+
+    @Bean
     public FilterRegistrationBean turnOnStackUnderOperationService() {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new GenericFilterBean() {
             @Override
             public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-            stackUnderOperationService.on();
-            chain.doFilter(request, response);
-            stackUnderOperationService.off();
+                stackUnderOperationService.on();
+                chain.doFilter(request, response);
+                stackUnderOperationService.off();
             }
         });
         registration.addUrlPatterns("/*");

@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -234,6 +235,7 @@ public class StackCreationActions {
             protected void doExecute(StackContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.removeTemporarySShKey(context, payload.getSshFingerprints());
                 stackCreationService.stackCreationFinished(context.getStack());
+                metricService.incrementMetricCounter(MetricType.STACK_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -250,6 +252,7 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.handleStackCreationFailure(context.getStack(), payload.getException());
+                metricService.incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStack());
                 sendEvent(context);
             }
 

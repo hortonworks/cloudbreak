@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -136,6 +137,7 @@ public class ClusterCreationActions {
             @Override
             protected void doExecute(ClusterContext context, InstallClusterSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.clusterInstallationFinished(context.getStack(), context.getCluster());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -152,6 +154,7 @@ public class ClusterCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.handleClusterCreationFailure(context.getStack(), payload.getException());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStack());
                 sendEvent(context);
             }
 
