@@ -36,7 +36,7 @@ INSERT INTO structuredevent (eventtype, resourcetype, resourceid, timestamp, acc
                 'userId', owner,
                 'cloudbreakId', '',
                 'cloudbreakVersion', ''),
-            'notification', json_build_object(
+            'notificationDetails', json_build_object(
                 'notificationType', eventtype,
                 'notification', eventmessage,
                 'cloud', cloud,
@@ -59,13 +59,13 @@ DROP SEQUENCE IF EXISTS cloudbreakevent_id_seq;
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-CREATE SEQUENCE cloudbreakevent_id_seq START WITH 1
+CREATE SEQUENCE IF NOT EXISTS cloudbreakevent_id_seq START WITH 1
                                           INCREMENT BY 1
                                           NO MINVALUE
                                           NO MAXVALUE
                                           CACHE 1;
 
-CREATE TABLE cloudbreakevent (
+CREATE TABLE IF NOT EXISTS cloudbreakevent (
     id bigint NOT NULL  DEFAULT nextval('cloudbreakevent_id_seq'),
     account character varying(255) NOT NULL,
     blueprintid bigint NOT NULL,
@@ -87,12 +87,11 @@ CREATE TABLE cloudbreakevent (
     clusterstatus character varying(255)
 );
 
-ALTER TABLE ONLY cloudbreakevent
-    ADD CONSTRAINT cloudbreakevent_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY cloudbreakevent ADD CONSTRAINT cloudbreakevent_pkey PRIMARY KEY (id);
 
-DROP INDEX idx_structuredevent_userid_eventtype;
-DROP INDEX idx_structuredevent_userid_eventtype_resourcetype_resourceid;
-DROP INDEX idx_structuredevent_userid_eventtype_timestamp;
+DROP INDEX IF EXISTS idx_structuredevent_userid_eventtype;
+DROP INDEX IF EXISTS idx_structuredevent_userid_eventtype_resourcetype_resourceid;
+DROP INDEX IF EXISTS idx_structuredevent_userid_eventtype_timestamp;
 
 ALTER TABLE structuredevent DROP COLUMN IF EXISTS eventtype;
 ALTER TABLE structuredevent DROP COLUMN IF EXISTS resourcetype;

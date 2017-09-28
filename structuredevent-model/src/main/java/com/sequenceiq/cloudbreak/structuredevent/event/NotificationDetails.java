@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
-public class NotificationDetails {
+import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class NotificationDetails implements Serializable {
     private String notificationType;
 
     private String notification;

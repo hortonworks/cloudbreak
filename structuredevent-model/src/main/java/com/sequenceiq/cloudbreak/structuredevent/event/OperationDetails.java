@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class OperationDetails {
+public class OperationDetails implements Serializable {
     private String eventType;
 
     private Long resourceId;

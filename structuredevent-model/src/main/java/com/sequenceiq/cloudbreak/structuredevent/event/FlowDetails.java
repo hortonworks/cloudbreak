@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import java.io.Serializable;
+
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class FlowDetails {
+public class FlowDetails implements Serializable {
     private String flowChainType;
 
     private String flowType;

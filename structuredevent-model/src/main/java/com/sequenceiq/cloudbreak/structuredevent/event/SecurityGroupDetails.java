@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
+import java.io.Serializable;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class SecurityGroupDetails {
+public class SecurityGroupDetails implements Serializable {
     private Long id;
 
     private String name;
