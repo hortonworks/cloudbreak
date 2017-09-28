@@ -98,33 +98,58 @@ func main() {
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword, hdc.FlOutput},
+			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword).AddOutputFlag().Build(),
 			Action: hdc.Configure,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword, hdc.FlOutput} {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword).AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
 		},
 		{
-			Name:   "create-credential",
-			Usage:  "create a new credential",
-			Flags:  []cli.Flag{hdc.FlCredentialName, hdc.FlDescription, hdc.FlPublic, hdc.FlRoleARN, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
-			Before: ConfigRead,
-			Action: hdc.CreateCredential, BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlCredentialName, hdc.FlDescription, hdc.FlPublic, hdc.FlRoleARN, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
-					printFlagCompletion(f)
-				}
+			Name:  "create-credential",
+			Usage: "create a new credential",
+			Subcommands: []cli.Command{
+				{
+					Name:  "aws",
+					Usage: "create a new aws credential",
+					Subcommands: []cli.Command{
+						{
+							Name:   "role-based",
+							Usage:  "create a new role based aws credential",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlRoleARN).AddAuthenticationFlags().Build(),
+							Action: hdc.CreateAwsCredential,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlRoleARN).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "key-based",
+							Usage:  "create a new key based aws credential",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlAccessKey, hdc.FlSecretKey).AddAuthenticationFlags().Build(),
+							Action: hdc.CreateAwsCredential,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlAccessKey, hdc.FlSecretKey).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
 			},
 		},
 		{
 			Name:   "list-credentials",
 			Usage:  "list the credentials",
 			Before: ConfigRead,
-			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput},
+			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
 			Action: hdc.ListPrivateCredentials,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword, hdc.FlOutput} {
+				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -132,11 +157,11 @@ func main() {
 		{
 			Name:   "delete-credential",
 			Usage:  "delete a credential",
-			Flags:  []cli.Flag{hdc.FlCredentialName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
 			Action: hdc.DeleteCredential,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range []cli.Flag{hdc.FlCredentialName, hdc.FlServer, hdc.FlUsername, hdc.FlPassword} {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},

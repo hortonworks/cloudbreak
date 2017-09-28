@@ -228,8 +228,8 @@ func ShowHiddenCommands(c *cli.Context) error {
 func PrintHelp(out io.Writer, templ string, data interface{}) {
 	funcMap := template.FuncMap{
 		"join":           strings.Join,
-		"requiredFlags":  RequiredFlags,
-		"optionalFlags":  OptionalFlags,
+		"requiredFlags":  requiredFlags,
+		"optionalFlags":  optionalFlags,
 		"hiddenCommands": HiddenCommands,
 	}
 	w := tabwriter.NewWriter(out, 1, 8, 2, ' ', 0)

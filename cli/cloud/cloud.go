@@ -11,7 +11,7 @@ type Network struct {
 	SubnetId string `json:"SubnetId" yaml:"SubnetId"`
 }
 
-var CurrentCloud CloudType = AWS
+var CurrentCloud CloudType
 var CloudProviders map[CloudType]CloudProvider = make(map[CloudType]CloudProvider)
 
 type CloudProvider interface {

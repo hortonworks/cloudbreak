@@ -22,7 +22,12 @@ func (c *Credential) DataAsStringArray() []string {
 	return []string{strconv.FormatInt(c.ID, 10), c.Name}
 }
 
-func CreateCredential(c *cli.Context) error {
+func CreateAwsCredential(c *cli.Context) error {
+	cloud.CurrentCloud = cloud.AWS
+	return createCredential(c)
+}
+
+func createCredential(c *cli.Context) error {
 	checkRequiredFlags(c)
 	defer timeTrack(time.Now(), "create credential")
 
@@ -40,7 +45,7 @@ func createCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 	provider := cloud.GetProvider()
 	var credentialMap = provider.CreateCredentialParameters(stringFinder, boolFinder)
 
-	name := stringFinder(FlCredentialName.Name)
+	name := stringFinder(FlName.Name)
 	credReq := &models_cloudbreak.CredentialRequest{
 		Name:          &name,
 		Description:   &(&stringWrapper{stringFinder(FlDescription.Name)}).s,
@@ -103,7 +108,7 @@ func DeleteCredential(c *cli.Context) error {
 	defer timeTrack(time.Now(), "delete credential")
 
 	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	name := c.String(FlCredentialName.Name)
+	name := c.String(FlName.Name)
 	log.Infof("[DeleteCredential] delete credential: %s", name)
 	if err := oAuth2Client.Cloudbreak.Credentials.DeletePublicCredential(credentials.NewDeletePublicCredentialParams().WithName(name)); err != nil {
 		logErrorAndExit(err)

@@ -19,6 +19,28 @@ var (
 			EnvVar: "DEBUG",
 		},
 	}
+	FlWait = BoolFlag{
+		RequiredFlag: OPTIONAL,
+		BoolFlag: cli.BoolFlag{
+			Name:  "wait",
+			Usage: "wait for the operation to finish, no argument required",
+		},
+	}
+	FlInputJson = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "cli-input-json",
+			Usage: "user provided file with json content",
+		},
+	}
+	FlOutput = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:   "output",
+			Usage:  "supported formats: json, yaml, table (default: \"json\")",
+			EnvVar: "CB_OUT_FORMAT",
+		},
+	}
 	FlServer = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -59,11 +81,11 @@ var (
 			EnvVar: "CB_PASSWORD",
 		},
 	}
-	FlInputJson = StringFlag{
+	FlName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
-			Name:  "cli-input-json",
-			Usage: "user provided file with json content",
+			Name:  "name",
+			Usage: "name of resource",
 		},
 	}
 	FlDescription = StringFlag{
@@ -80,6 +102,25 @@ var (
 			Usage: "public in account",
 		},
 	}
+	FlRoleARN = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "role-arn",
+		},
+	}
+	FlAccessKey = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "access-key",
+		},
+	}
+	FlSecretKey = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "secret-key",
+		},
+	}
+	// Not used jet as i know
 	FlClusterName = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
@@ -108,26 +149,11 @@ var (
 			Usage: "name of the cluster",
 		},
 	}
-	FlWait = BoolFlag{
-		RequiredFlag: OPTIONAL,
-		BoolFlag: cli.BoolFlag{
-			Name:  "wait",
-			Usage: "wait for the operation to finish, no argument required",
-		},
-	}
 	FlRemoveOnly = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
 			Name:  "remove-only",
 			Usage: "set to true if you want the instances to be removed only, otherwise they will be replaced",
-		},
-	}
-	FlOutput = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:   "output",
-			Usage:  "supported formats: json, yaml, table (default: \"json\")",
-			EnvVar: "CB_OUT_FORMAT",
 		},
 	}
 	FlScalingAdjustment = StringFlag{
@@ -142,18 +168,6 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "node-type",
 			Usage: "type of the nodes. [worker, compute]",
-		},
-	}
-	FlCredentialName = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name: "credential-name",
-		},
-	}
-	FlRoleARN = StringFlag{
-		RequiredFlag: REQUIRED,
-		StringFlag: cli.StringFlag{
-			Name: "role-arn",
 		},
 	}
 	FlSSHKeyURL = StringFlag{
@@ -447,7 +461,7 @@ type BoolFlag struct {
 	RequiredFlag
 }
 
-func RequiredFlags(flags []cli.Flag) []cli.Flag {
+func requiredFlags(flags []cli.Flag) []cli.Flag {
 	required := []cli.Flag{}
 	for _, flag := range flags {
 		if isRequiredVisible(flag) {
@@ -457,7 +471,7 @@ func RequiredFlags(flags []cli.Flag) []cli.Flag {
 	return required
 }
 
-func OptionalFlags(flags []cli.Flag) []cli.Flag {
+func optionalFlags(flags []cli.Flag) []cli.Flag {
 	required := []cli.Flag{}
 	for _, flag := range flags {
 		if flag.GetName() != "generate-bash-completion" {
@@ -508,4 +522,42 @@ func flagValue(flag cli.Flag) reflect.Value {
 		fv = reflect.Indirect(fv)
 	}
 	return fv
+}
+
+type FlagBuilder struct {
+	flags []cli.Flag
+}
+
+func NewFlagBuilder() *FlagBuilder {
+	return &FlagBuilder{flags: make([]cli.Flag, 0)}
+}
+
+func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
+	for _, f := range flags {
+		fb.flags = append(fb.flags, f)
+	}
+	return fb
+}
+
+func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
+	for _, f := range []cli.Flag{FlServer, FlUsername, FlPassword} {
+		fb.flags = append(fb.flags, f)
+	}
+	return fb
+}
+
+func (fb *FlagBuilder) AddResourceDefaultFlags() *FlagBuilder {
+	for _, f := range []cli.Flag{FlName, FlDescription, FlPublic} {
+		fb.flags = append(fb.flags, f)
+	}
+	return fb
+}
+
+func (fb *FlagBuilder) AddOutputFlag() *FlagBuilder {
+	fb.flags = append(fb.flags, FlOutput)
+	return fb
+}
+
+func (fb *FlagBuilder) Build() []cli.Flag {
+	return fb.flags
 }

@@ -2,12 +2,10 @@ package cli
 
 var mockStringFinder = func(in string) (r string) {
 	switch in {
-	case FlCredentialName.Name:
+	case FlName.Name:
 		return "name"
 	case FlDescription.Name:
 		return "descritption"
-	case FlRoleARN.Name:
-		return "role-arn"
 	default:
 		return ""
 	}

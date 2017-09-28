@@ -1,15 +1,19 @@
 package cli
 
 import (
-	"reflect"
 	"strconv"
 	"strings"
 	"testing"
 
+	"github.com/hortonworks/hdc-cli/cli/cloud"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/credentials"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
+
+func init() {
+	cloud.CurrentCloud = cloud.AWS
+}
 
 type mockCredentialCreate struct {
 	request chan (*models_cloudbreak.CredentialRequest)
@@ -56,12 +60,6 @@ func TestCreateCredentialPublic(t *testing.T) {
 	}
 	if *actualCredential.CloudPlatform != "AWS" {
 		t.Errorf("cloud platform not match AWS == %s", *actualCredential.CloudPlatform)
-	}
-	var expectedParams = make(map[string]interface{})
-	expectedParams["selector"] = "role-based"
-	expectedParams["roleArn"] = "role-arn"
-	if !reflect.DeepEqual(actualCredential.Parameters, expectedParams) {
-		t.Errorf("params not match %s == %s", expectedParams, actualCredential.Parameters)
 	}
 }
 
