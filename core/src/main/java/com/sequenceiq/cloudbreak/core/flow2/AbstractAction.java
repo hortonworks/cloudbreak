@@ -21,10 +21,12 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.MessageFactory.HEADERS;
 import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
 
 import reactor.bus.EventBus;
 
 public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload> implements Action<S, E> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractAction.class);
 
     private static final String FLOW_START_TIME = "FLOW_START_TIME";
@@ -34,6 +36,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     private static final String FLOW_STATE_NAME = "FLOW_STATE_NAME";
 
     private static final int MS_PER_SEC = 1000;
+
+    @Inject
+    protected MetricService metricService;
 
     @Inject
     private EventBus eventBus;
@@ -74,9 +79,11 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 Object execTime = variables.get(FLOW_START_EXEC_TIME);
                 long flowElapsed = (System.currentTimeMillis() - (long) flowStartTime) / MS_PER_SEC;
                 long execElapsed = (System.currentTimeMillis() - (long) execTime) / MS_PER_SEC;
+                String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
+                long executionTime = execElapsed > flowElapsed ? execElapsed : flowElapsed;
                 LOGGER.info("Stack: {}, flow state: {}, phase: {}, execution time {} sec", payload.getStackId(),
-                        variables.get(FLOW_STATE_NAME), execElapsed > flowElapsed ? "doExec" : "service",
-                        execElapsed > flowElapsed ? execElapsed : flowElapsed);
+                        flowStateName, execElapsed > flowElapsed ? "doExec" : "service", executionTime);
+                metricService.submit("flowstep." + flowStateName, executionTime);
             }
             variables.put(FLOW_STATE_NAME, context.getStateMachine().getState().getId());
             variables.put(FLOW_START_EXEC_TIME, System.currentTimeMillis());

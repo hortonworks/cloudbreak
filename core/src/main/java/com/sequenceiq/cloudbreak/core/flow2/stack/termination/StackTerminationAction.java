@@ -62,7 +62,7 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
         TerminateStackRequest terminateRequest = createRequest(context);
         Stack stack = context.getStack();
         if (stack == null || stack.getCredential() == null) {
-            LOGGER.info("Could not trigger stack event on null", terminateRequest);
+            LOGGER.info("Could not trigger stack event on null, {}", terminateRequest);
             String statusReason = "Stack or credential not found.";
             TerminateStackResult terminateStackResult = new TerminateStackResult(statusReason, new IllegalArgumentException(statusReason), terminateRequest);
             sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), terminateStackResult);

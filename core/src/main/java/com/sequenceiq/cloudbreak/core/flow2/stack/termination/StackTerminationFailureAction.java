@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -26,6 +27,7 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
         Boolean deleteDependencies = Boolean.valueOf(String.valueOf(variables.get("DELETEDEPENDENCIES")));
         stackTerminationService.handleStackTerminationError(context.getStack(), payload,
                 variables.get("FORCEDTERMINATION") != null, deleteDependencies);
+        metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, context.getStack());
         sendEvent(context);
     }
 

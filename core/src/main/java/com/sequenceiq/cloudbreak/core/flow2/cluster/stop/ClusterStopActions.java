@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
-
 import java.util.Map;
 
 import javax.inject.Inject;
@@ -10,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -49,6 +49,7 @@ public class ClusterStopActions {
             @Override
             protected void doExecute(ClusterContext context, ClusterStopResult payload, Map<Object, Object> variables) throws Exception {
                 clusterStopService.clusterStopFinished(context.getStack());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -65,6 +66,7 @@ public class ClusterStopActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterStopService.handleClusterStopFailure(context.getStack(), payload.getException().getMessage());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStack());
                 sendEvent(context);
             }
 

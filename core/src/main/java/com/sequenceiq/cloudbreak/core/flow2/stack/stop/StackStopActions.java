@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -80,6 +81,7 @@ public class StackStopActions {
             @Override
             protected void doExecute(StackStartStopContext context, StopInstancesResult payload, Map<Object, Object> variables) throws Exception {
                 stackStartStopService.finishStackStop(context);
+                metricService.incrementMetricCounter(MetricType.STACK_STOP_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -96,6 +98,7 @@ public class StackStopActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackStartStopService.handleStackStopError(context.getStack(), payload);
+                metricService.incrementMetricCounter(MetricType.STACK_STOP_FAILED, context.getStack());
                 sendEvent(context);
             }
 

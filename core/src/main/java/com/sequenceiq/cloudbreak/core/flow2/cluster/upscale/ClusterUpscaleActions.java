@@ -17,6 +17,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
@@ -122,6 +123,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) throws Exception {
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context.getFlowId(), FINALIZED_EVENT.event(), payload);
             }
 
@@ -139,6 +141,7 @@ public class ClusterUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStack(), payload.getException());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStack());
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.event(), payload);
             }
         };

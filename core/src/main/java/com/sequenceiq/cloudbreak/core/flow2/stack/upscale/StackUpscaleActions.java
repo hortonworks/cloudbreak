@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.converter.spi.CloudResourceToResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -199,6 +200,7 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) throws Exception {
                 stackUpscaleService.finishExtendHostMetadata(context.getStack());
+                metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
@@ -215,6 +217,7 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackUpscaleService.handleStackUpscaleFailure(context.getStack(), payload);
+                metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStack());
                 sendEvent(context);
             }
 

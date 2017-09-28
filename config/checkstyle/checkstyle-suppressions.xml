@@ -21,6 +21,7 @@
     <suppress checks="CyclomaticComplexity" files="PrometheusEvaluator.java|MetadataSetupService.java"/>
     <suppress checks="ModifierOrderCheck" files="EncryptedJsonToString.java"/>
     <suppress checks="TrailingComment" files="HeartbeatServiceTest.java"/>
+    <suppress checks="VisibilityModifier" files="AbstractAction.java"/>
 
 
     <!-- suppressing checks in application runner classes -->
