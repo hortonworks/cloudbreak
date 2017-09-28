@@ -14,7 +14,6 @@ import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Network;
-import com.sequenceiq.cloudbreak.service.network.DefaultNetworkCreator;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 
 @Component
@@ -26,9 +25,6 @@ public class NetworkController extends NotificationController implements Network
 
     @Autowired
     private NetworkService networkService;
-
-    @Autowired
-    private DefaultNetworkCreator networkCreator;
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
@@ -48,7 +44,6 @@ public class NetworkController extends NotificationController implements Network
     @Override
     public Set<NetworkResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        networkCreator.createDefaultNetworks(user);
         Set<Network> networks = networkService.retrievePrivateNetworks(user);
         return convert(networks);
     }
@@ -56,7 +51,6 @@ public class NetworkController extends NotificationController implements Network
     @Override
     public Set<NetworkResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        networkCreator.createDefaultNetworks(user);
         Set<Network> networks = networkService.retrieveAccountNetworks(user);
         return convert(networks);
     }

@@ -9,10 +9,12 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintParameter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -22,6 +24,10 @@ public class BlueprintUtils {
 
     @Inject
     private JsonHelper jsonHelper;
+
+    public int generateHashCode(Blueprint bp) {
+        return HashCodeBuilder.reflectionHashCode(bp, "id");
+    }
 
     public String readDefaultBlueprintFromFile(String[] split) throws IOException {
         return FileReaderUtils.readFileFromClasspath(String.format("defaults/blueprints/%s.bp", split.length == 2 ? split[1] : split[0]));
