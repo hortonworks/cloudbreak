@@ -14,12 +14,12 @@ CREATE INDEX idx_structuredevent_userid_eventtype_timestamp ON structuredevent (
 
 UPDATE structuredevent SET eventtype = subq.et, resourcetype = subq.rt, resourceid = subq.rid, timestamp = subq.t, account = subq.a, userid = subq.uid
 FROM (select se.id as id,
-             se.structuredeventjson::json->'operation'->'eventType' as et,
-             se.structuredeventjson::json->'operation'->'resourceType' as rt,
+             se.structuredeventjson::json->'operation'->>'eventType' as et,
+             se.structuredeventjson::json->'operation'->>'resourceType' as rt,
              (se.structuredeventjson::json->'operation'->>'resourceId')::bigint as rid,
              (se.structuredeventjson::json->'operation'->>'timestamp')::bigint as t,
-             se.structuredeventjson::json->'operation'->'account' as a,
-             se.structuredeventjson::json->'operation'->'userId' as uid
+             se.structuredeventjson::json->'operation'->>'account' as a,
+             se.structuredeventjson::json->'operation'->>'userId' as uid
         from structuredevent se) as subq
 WHERE structuredevent.id = subq.id;
 
