@@ -1,17 +1,9 @@
 package com.sequenceiq.cloudbreak.service.securitygroup;
 
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.GATEWAY;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.HTTPS;
-import static com.sequenceiq.cloudbreak.api.model.ExposedService.SSH;
-import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT_DELETED;
-
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -25,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
-import com.sequenceiq.cloudbreak.util.NameUtil;
 
 @Service
 public class DefaultSecurityGroupCreator {
@@ -42,28 +33,6 @@ public class DefaultSecurityGroupCreator {
 
     @Value("${cb.nginx.port:9443}")
     private int nginxPort;
-
-    public void createDefaultSecurityGroups(IdentityUser user) {
-        Set<SecurityGroup> defaultSecurityGroups = groupRepository.findAllDefaultInAccount(user.getAccount());
-        List<String> defSecGroupNames = defaultSecurityGroups.stream()
-                .map(g -> g.getStatus() == DEFAULT_DELETED ? NameUtil.cutTimestampPostfix(g.getName()) : g.getName())
-                .collect(Collectors.toList());
-        for (String platform : PLATFORMS_WITH_SEC_GROUP_SUPPORT) {
-            String securityGroupName = "default-" + platform.toLowerCase() + "-only-ssh-and-ssl";
-            if (!defSecGroupNames.contains(securityGroupName)) {
-                createDefaultStrictSecurityGroup(user, platform, securityGroupName);
-            }
-        }
-    }
-
-    private void createDefaultStrictSecurityGroup(IdentityUser user, String platform, String securityGroupName) {
-        List<Port> strictSecurityGroupPorts = new ArrayList<>();
-        strictSecurityGroupPorts.add(new Port(SSH, "22", "tcp"));
-        strictSecurityGroupPorts.add(new Port(HTTPS, "443", "tcp"));
-        strictSecurityGroupPorts.add(new Port(GATEWAY, Integer.toString(nginxPort), "tcp"));
-        String strictSecurityGroupDesc = getPortsOpenDesc(strictSecurityGroupPorts);
-        addSecurityGroup(user, platform, securityGroupName, strictSecurityGroupPorts, strictSecurityGroupDesc);
-    }
 
     private void addSecurityGroup(IdentityUser user, String platform, String name, List<Port> securityGroupPorts, String securityGroupDesc) {
         SecurityGroup onlySshAndSsl = createSecurityGroup(user, platform, name, securityGroupDesc);

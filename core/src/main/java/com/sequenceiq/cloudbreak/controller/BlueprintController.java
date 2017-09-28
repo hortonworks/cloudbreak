@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Component
@@ -49,8 +49,8 @@ public class BlueprintController extends NotificationController implements Bluep
     public Set<BlueprintResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
-        if (blueprints.isEmpty()) {
-            blueprints = blueprintLoaderService.loadBlueprints(user);
+        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
+            blueprints = blueprintLoaderService.loadBlueprintsForTheSpecifiedUser(user, blueprints);
         }
         return toJsonList(blueprints);
     }
@@ -72,8 +72,10 @@ public class BlueprintController extends NotificationController implements Bluep
     @Override
     public Set<BlueprintResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        blueprintLoaderService.loadBlueprints(user);
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
+        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
+            blueprints = blueprintLoaderService.loadBlueprintsForTheSpecifiedUser(user, blueprints);
+        }
         return toJsonList(blueprints);
     }
 

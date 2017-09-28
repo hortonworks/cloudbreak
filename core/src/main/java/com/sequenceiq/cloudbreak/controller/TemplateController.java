@@ -17,16 +17,12 @@ import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.decorator.Decorator;
-import com.sequenceiq.cloudbreak.service.template.DefaultTemplateLoaderService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Component
 public class TemplateController extends NotificationController implements TemplateEndpoint {
     @Autowired
     private TemplateService templateService;
-
-    @Autowired
-    private DefaultTemplateLoaderService defaultTemplateLoaderService;
 
     @Autowired
     private AuthenticatedUserService authenticatedUserService;
@@ -56,7 +52,6 @@ public class TemplateController extends NotificationController implements Templa
     @Override
     public Set<TemplateResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        defaultTemplateLoaderService.createDefaultTemplates(user);
         Set<Template> templates = templateService.retrievePrivateTemplates(user);
         return convert(templates);
     }
@@ -64,7 +59,6 @@ public class TemplateController extends NotificationController implements Templa
     @Override
     public Set<TemplateResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
-        defaultTemplateLoaderService.createDefaultTemplates(user);
         Set<Template> templates = templateService.retrieveAccountTemplates(user);
         return convert(templates);
     }
