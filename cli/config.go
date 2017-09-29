@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/cli/utils"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
@@ -40,7 +41,7 @@ func Configure(c *cli.Context) error {
 
 	err := WriteConfigToFile(GetHomeDirectory(), c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
 	if err != nil {
-		logErrorAndExit(err)
+		utils.LogErrorAndExit(err)
 	}
 	return nil
 }
@@ -48,7 +49,7 @@ func Configure(c *cli.Context) error {
 func GetHomeDirectory() string {
 	homeDir, err := homedir.Dir()
 	if err != nil || len(homeDir) == 0 {
-		logErrorAndExit(errors.New("failed to determine the home directory"))
+		utils.LogErrorAndExit(errors.New("failed to determine the home directory"))
 	}
 	return homeDir
 }

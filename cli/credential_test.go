@@ -7,6 +7,8 @@ import (
 
 	"github.com/hortonworks/hdc-cli/cli/cloud"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
+	"github.com/hortonworks/hdc-cli/cli/types"
+	"github.com/hortonworks/hdc-cli/cli/utils"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/credentials"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
@@ -22,13 +24,13 @@ type mockCredentialCreate struct {
 func (m *mockCredentialCreate) PostPublicCredential(params *credentials.PostPublicCredentialParams) (*credentials.PostPublicCredentialOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Public: &(&boolWrapper{true}).b}}, nil
+	return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Public: &(&types.B{B: true}).B}}, nil
 }
 
 func (m *mockCredentialCreate) PostPrivateCredential(params *credentials.PostPrivateCredentialParams) (*credentials.PostPrivateCredentialOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(2), Public: &(&boolWrapper{false}).b}}, nil
+	return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(2), Public: &(&types.B{B: false}).B}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
@@ -85,7 +87,7 @@ func (m *mockGetPrivatesCredential) GetPrivatesCredential(params *credentials.Ge
 		id := int64(i)
 		resp = append(resp, &models_cloudbreak.CredentialResponse{
 			ID:   id,
-			Name: &(&stringWrapper{"name" + strconv.Itoa(i)}).s,
+			Name: &(&types.S{S: "name" + strconv.Itoa(i)}).S,
 		})
 	}
 
@@ -93,9 +95,9 @@ func (m *mockGetPrivatesCredential) GetPrivatesCredential(params *credentials.Ge
 }
 
 func TestListPrivateCredentialsImpl(t *testing.T) {
-	var rows []Row
+	var rows []utils.Row
 
-	listPrivateCredentialsImpl(new(mockGetPrivatesCredential), func(h []string, r []Row) { rows = r })
+	listPrivateCredentialsImpl(new(mockGetPrivatesCredential), func(h []string, r []utils.Row) { rows = r })
 
 	if len(rows) != 3 {
 		t.Fatalf("row number not match 3 == %d", len(rows))

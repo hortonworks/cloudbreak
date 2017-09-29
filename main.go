@@ -7,6 +7,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	hdc "github.com/hortonworks/hdc-cli/cli"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
+	_ "github.com/hortonworks/hdc-cli/cli/cloud/gcp"
+	"github.com/hortonworks/hdc-cli/cli/utils"
 	"github.com/urfave/cli"
 )
 
@@ -79,7 +81,7 @@ func main() {
 	app.Before = func(c *cli.Context) error {
 		log.SetOutput(os.Stderr)
 		log.SetLevel(log.ErrorLevel)
-		formatter := &hdc.CBFormatter{}
+		formatter := &utils.CBFormatter{}
 		log.SetFormatter(formatter)
 		if c.Bool(hdc.FlDebug.Name) {
 			log.SetLevel(log.DebugLevel)
@@ -138,6 +140,18 @@ func main() {
 								}
 							},
 						},
+					},
+				},
+				{
+					Name:   "gcp",
+					Usage:  "create a new gcp credential",
+					Before: ConfigRead,
+					Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlProjectId, hdc.FlServiceAccountId, hdc.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
+					Action: hdc.CreateGcpCredential,
+					BashComplete: func(c *cli.Context) {
+						for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlProjectId, hdc.FlServiceAccountId, hdc.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
 					},
 				},
 			},

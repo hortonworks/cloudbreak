@@ -1,13 +1,14 @@
-package cli
+package utils
 
 import (
 	"bytes"
 	"fmt"
-	log "github.com/Sirupsen/logrus"
 	"runtime"
 	"sort"
 	"strings"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 const (

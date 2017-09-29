@@ -1,6 +1,9 @@
-package cli
+package utils
 
-import "strings"
+import (
+	"io/ioutil"
+	"strings"
+)
 
 func SafeInt32Convert(value *int32) int32 {
 	if value == nil {
@@ -18,4 +21,12 @@ func SafeStringConvert(value *string) string {
 
 func EscapeStringToJson(input string) string {
 	return strings.Replace(strings.Replace(input, "\\", "\\\\", -1), "\"", "\\\"", -1)
+}
+
+func ReadFile(fileLocation string) []byte {
+	bp, err := ioutil.ReadFile(fileLocation)
+	if err != nil {
+		LogErrorAndExit(err)
+	}
+	return bp
 }

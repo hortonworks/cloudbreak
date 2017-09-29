@@ -1,4 +1,4 @@
-package cli
+package utils
 
 import "testing"
 
@@ -38,5 +38,13 @@ func TestEscapeStringToJson(t *testing.T) {
 	expectedPassword := "§±!@#$%^&*()_+-=[]{};'\\\\:\\\"/.,?><`~"
 	if password != expectedPassword {
 		t.Errorf("expected %s != %s", expectedPassword, password)
+	}
+}
+
+func TestReadFile(t *testing.T) {
+	content := ReadFile("testdata/file")
+
+	if "content\n" != string(content) {
+		t.Errorf("content not match content == %s", string(content))
 	}
 }

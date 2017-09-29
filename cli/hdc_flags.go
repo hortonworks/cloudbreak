@@ -4,6 +4,7 @@ import (
 	"reflect"
 	"strconv"
 
+	"github.com/hortonworks/hdc-cli/cli/utils"
 	"github.com/urfave/cli"
 )
 
@@ -118,6 +119,24 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name: "secret-key",
+		},
+	}
+	FlProjectId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "project-id",
+		},
+	}
+	FlServiceAccountId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "service-account-id",
+		},
+	}
+	FlServiceAccountPrivateKeyFile = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "service-account-private-key-file",
 		},
 	}
 	// Not used jet as i know
@@ -491,7 +510,7 @@ func checkRequiredFlags(c *cli.Context) {
 		}
 	}
 	if len(missingFlags) > 0 {
-		logMissingParameterAndExit(c, missingFlags)
+		utils.LogMissingParameterAndExit(c, missingFlags)
 	}
 }
 

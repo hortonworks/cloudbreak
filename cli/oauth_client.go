@@ -18,6 +18,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
+	"github.com/hortonworks/hdc-cli/cli/utils"
 	asapiclient "github.com/hortonworks/hdc-cli/client_autoscale"
 	apiclient "github.com/hortonworks/hdc-cli/client_cloudbreak"
 )
@@ -53,7 +54,7 @@ func NewCloudbreakOAuth2HTTPClient(address string, username string, password str
 
 	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	if err != nil {
-		logErrorAndExit(err)
+		utils.LogErrorAndExit(err)
 	}
 
 	cbTransport := &transport{client.New(address, "/cb/api/v1", []string{"https"})}
@@ -69,7 +70,7 @@ func NewAutoscalingOAuth2HTTPClient(address string, username string, password st
 
 	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	if err != nil {
-		logErrorAndExit(err)
+		utils.LogErrorAndExit(err)
 	}
 
 	asTransport := &transport{client.New(address, "/as/api/v1", []string{"https"})}
@@ -86,7 +87,7 @@ func NewOAuth2HTTPClients(address string, username string, password string) (*Cl
 
 	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
 	if err != nil {
-		logErrorAndExit(err)
+		utils.LogErrorAndExit(err)
 	}
 
 	cbTransport := &transport{client.New(address, "/cb/api/v1", []string{"https"})}
@@ -101,7 +102,7 @@ func NewOAuth2HTTPClients(address string, username string, password string) (*Cl
 }
 
 func getOAuth2Token(identityUrl string, username string, password string, clientId string) (string, error) {
-	form := url.Values{"credentials": {fmt.Sprintf(`{"username":"%s","password":"%s"}`, username, EscapeStringToJson(password))}}
+	form := url.Values{"credentials": {fmt.Sprintf(`{"username":"%s","password":"%s"}`, username, utils.EscapeStringToJson(password))}}
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s?response_type=token&client_id=%s", identityUrl, clientId), strings.NewReader(form.Encode()))
 	if err != nil {
 		return "", err
@@ -183,9 +184,9 @@ func (r *noContentSafeResponseReader) ReadResponse(response runtime.ClientRespon
 			var errorMessage ErrorMessage
 			err := json.Unmarshal(body, &errorMessage)
 			if err != nil || (len(errorMessage.Message) == 0 && len(errorMessage.ValidationError) == 0) {
-				return nil, &RESTError{string(body), response.Code()}
+				return nil, &utils.RESTError{Response: string(body), Code: response.Code()}
 			}
-			return nil, &RESTError{errorMessage.String(), response.Code()}
+			return nil, &utils.RESTError{Response: errorMessage.String(), Code: response.Code()}
 		}
 	}
 	return resp, nil

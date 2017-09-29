@@ -1,4 +1,4 @@
-package cli
+package utils
 
 import (
 	"fmt"
@@ -22,30 +22,30 @@ func (e *RESTError) Error() string {
 	return fmt.Sprintf("status code: %d, message: %+v ", e.Code, e.Response)
 }
 
-func logMissingParameterMessageAndExit(c *cli.Context, message string) {
-	logMissingParameterAndExit(c, nil, message)
+func LogMissingParameterMessageAndExit(c *cli.Context, message string) {
+	LogMissingParameterAndExit(c, nil, message)
 }
 
-func logMissingParameterAndExit(c *cli.Context, missingFlags []string, message ...string) {
+func LogMissingParameterAndExit(c *cli.Context, missingFlags []string, message ...string) {
 	if len(message) == 0 {
 		if missingFlags != nil && len(missingFlags) > 0 {
-			logErrorMessage(fmt.Sprintf("the following parameters are missing: %v\n", strings.Join(missingFlags, ", ")))
+			LogErrorMessage(fmt.Sprintf("the following parameters are missing: %v\n", strings.Join(missingFlags, ", ")))
 		} else {
-			logErrorMessage("there are missing parameters\n")
+			LogErrorMessage("there are missing parameters\n")
 		}
 	} else {
-		logErrorMessage(message[0])
+		LogErrorMessage(message[0])
 	}
 	cli.ShowSubcommandHelp(c)
 	exit(1)
 }
 
-func logErrorAndExit(err error) {
-	logErrorMessage(err.Error())
+func LogErrorAndExit(err error) {
+	LogErrorMessage(err.Error())
 	exit(1)
 }
 
-func logErrorMessage(message string) {
+func LogErrorMessage(message string) {
 	log.Errorf(message)
 }
 
