@@ -202,7 +202,7 @@ init-profile() {
     if ! [[ "$CB_INSTANCE_NODE_ID" ]]; then
         debug "Instance node UUID not found, let's generate one"
         echo "export CB_INSTANCE_NODE_ID=$(uuidgen | tr '[:upper:]' '[:lower:]')" >> $CBD_PROFILE
-    fi 
+    fi
 
     if ! [[ "$UAA_DEFAULT_SECRET" ]]; then
         info "Your secret is auto-generated in $CBD_PROFILE as UAA_DEFAULT_SECRET"
@@ -251,10 +251,10 @@ provider-and-region-init() {
 
     if ! [ "$CB_INSTANCE_PROVIDER" ] && ! [ "$CB_INSTANCE_REGION" ]; then
         debug "Provider and region of the instance could not be found, estimating them..."
-        
+
         export CB_INSTANCE_PROVIDER="unknown"
         export CB_INSTANCE_REGION="unknown"
-        
+
         if is_linux; then
             # on gcp
             if curl -m 1 -f -s -H "Metadata-Flavor: Google" 169.254.169.254/computeMetadata/v1/ &>/dev/null ; then
@@ -492,14 +492,15 @@ hdc-cli-downloadable() {
 wait-for-cloudbreak() {
     info "Waiting for Cloudbreak UI (timeout: $CB_UI_MAX_WAIT)"
 
+    local curl_cmd="curl -m 1 -L -k -sfo /dev/null ${CB_HOST_ADDRESS}/cb/info"
     local count=0
-    while ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/cb/info &&  [ $((count++)) -lt $CB_UI_MAX_WAIT ] ; do
+    while ! $curl_cmd &&  [ $((count++)) -lt $CB_UI_MAX_WAIT ] ; do
         echo -n . 1>&2
         sleep 1;
     done
     echo 1>&2
 
-    if ! curl -m 1 -sfo /dev/null ${CB_HOST_ADDRESS}/cb/info; then
+    if ! $curl_cmd; then
         error "Could not reach Cloudbreak in time."
         _exit 1
     fi
@@ -573,7 +574,7 @@ main() {
     cmd-export db-list-dumps
     cmd-export db-set-dump
     cmd-export db-restore-volume-from-dump
-    
+
     cmd-export cbd-update update
 
     cmd-export deployer-generate generate
