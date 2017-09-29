@@ -1,34 +1,39 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyObject;
-import static org.mockito.Matchers.anyString;
+import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT;
+import static org.mockito.Matchers.anySet;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.core.convert.ConversionService;
-import org.springframework.test.util.ReflectionTestUtils;
 
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.common.type.ResourceStatus;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
-import com.sequenceiq.cloudbreak.service.ServiceTestUtils;
-import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BlueprintLoaderServiceTest {
+
+    private static final String LUCKY_MAN = "lucky_man";
+
+    private static final String LOTTERY_WINNERS = "lottery_winners";
 
     private static final String JSON = "{\"blueprint\":{\"Blueprints\":{\"blueprint_name\":\"hdp-etl-edw-tp\","
             + "\"stack_name\":\"HDP\",\"stack_version\":\"2.5\"},\"configurations\":[{\"core-site\":{\"fs.trash.interval\":\"4320\"}},{\"hdfs-site\":"
@@ -49,73 +54,124 @@ public class BlueprintLoaderServiceTest {
     private BlueprintLoaderService underTest;
 
     @Mock
-    private ConversionService conversionService;
+    private DefaultBlueprintCache blueprintCache;
 
     @Mock
     private BlueprintRepository blueprintRepository;
 
-    @Mock
-    private BlueprintUtils blueprintUtils;
-
-    @Before
-    public void setUp() throws IOException {
-        when(conversionService.convert(any(BlueprintRequest.class), any(Class.class))).thenAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            BlueprintRequest blueprintRequest = (BlueprintRequest) args[0];
-            return ServiceTestUtils.createBlueprint(blueprintRequest);
-        });
-        when(blueprintRepository.findAllDefaultInAccount(anyString())).thenReturn(new HashSet<>());
-        when(blueprintUtils.convertStringToJsonNode(anyString())).thenReturn(JsonUtil.readTree(JSON));
-        when(blueprintUtils.isBlueprintNamePreConfigured(anyString(), any())).thenCallRealMethod();
+    @Test
+    public void testBlueprintLoaderWhenTheUserWhenUserHaveAllTheDefaultBlueprintThenItShouldReturnWithFalse() {
+        generateCacheData(3);
+        Set<Blueprint> blueprints = generateDatabaseData(3);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+        Assert.assertFalse(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
-    public void threeDefaultBlueprintWithCorrectParameters() {
-        ReflectionTestUtils.setField(underTest, "blueprintArray", Arrays.asList("test1=testloader", "test2=testloader", "test3=testloader"));
-        Set<Blueprint> blueprints = underTest.loadBlueprints(ServiceTestUtils.cbUser());
-        Assert.assertEquals(3, blueprints.size());
+    public void testBlueprintLoaderWhenTheUserIsANewOneInTheNewOrganizationThenItShouldReturnWithTrue() {
+        generateCacheData(2);
+        Set<Blueprint> blueprints = generateDatabaseData(0);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+        Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
-    public void twoDefaultBlueprintWithCorrectParameters() {
-        ReflectionTestUtils.setField(underTest, "blueprintArray", Arrays.asList("test1=testloader", "test2=testloader"));
-        Set<Blueprint> blueprints = underTest.loadBlueprints(ServiceTestUtils.cbUser());
-        Assert.assertEquals(2, blueprints.size());
+    public void testBlueprintLoaderWhenTheUserIsANewOneInTheExistingOrganizationThenItShouldReturnWithTrue() {
+        generateCacheData(2);
+        Set<Blueprint> blueprints = generateDatabaseData(1);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+        Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
-    public void threeDefaultBlueprintButOneIsIncorrect() throws IOException {
-        ReflectionTestUtils.setField(underTest, "blueprintArray", Arrays.asList("test1=testloader", "test2=testloader", "incorrect"));
-        when(blueprintUtils.readDefaultBlueprintFromFile(new String[]{"incorrect"})).thenThrow(new FileNotFoundException("not found"));
-        Set<Blueprint> blueprints = underTest.loadBlueprints(ServiceTestUtils.cbUser());
-        Assert.assertEquals(2, blueprints.size());
+    public void testBlueprintLoaderWhenTheUserHasAllDefaultBlueprintButOneOfItWasChangeThenItShouldReturnWithTrue() {
+        generateCacheData(3, 1);
+        Set<Blueprint> blueprints = generateDatabaseData(3);
+        boolean addingDefaultBlueprintsAreNecessaryForTheUser = underTest.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints);
+        Assert.assertTrue(addingDefaultBlueprintsAreNecessaryForTheUser);
     }
 
     @Test
-    public void threeDefaultBlueprintButEveryParamIsInCorrect() throws IOException {
-        ReflectionTestUtils.setField(underTest, "blueprintArray", Arrays.asList("incorrect0", "incorrect1", "incorrect2"));
-        when(blueprintUtils.readDefaultBlueprintFromFile(anyObject())).thenThrow(new FileNotFoundException("not found"));
-        Set<Blueprint> blueprints = underTest.loadBlueprints(ServiceTestUtils.cbUser());
-        Assert.assertEquals(0, blueprints.size());
+    public void testLoadBlueprintsForTheSpecifiedUserWhenOneNewDefaultExistThenRepositoryShouldUpdateOnlyOneBlueprint() {
+        Map<String, Blueprint> stringBlueprintMap = generateCacheData(3, 1);
+        Set<Blueprint> blueprints = generateDatabaseData(3);
+        ArgumentCaptor<Set> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+
+        Blueprint blueprint = stringBlueprintMap.get("multi-node-hdfs-yarn3");
+        Set<Blueprint> resultList = new HashSet<>();
+        resultList.add(blueprint);
+
+        when(blueprintRepository.save(resultList)).thenReturn(resultList);
+
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
+        verify(blueprintRepository).save(argumentCaptor.capture());
+
+        Assert.assertTrue(argumentCaptor.getAllValues().size() == 1);
+        Assert.assertTrue(resultSet.size() == 1);
     }
 
     @Test
-    public void threeDefaultBlueprintButEveryParamIsJustFileName() {
-        ReflectionTestUtils.setField(underTest, "blueprintArray", Arrays.asList("testloader", "testloader", "testloader"));
-        Set<Blueprint> blueprints = underTest.loadBlueprints(ServiceTestUtils.cbUser());
-        Assert.assertEquals(3, blueprints.size());
+    public void testLoadBlueprintsForTheSpecifiedUserIsNewOneAndNoDefaultBlueprintAddedThenAllDefaultShouldBeAdd() {
+        Map<String, Blueprint> stringBlueprintMap = generateCacheData(3);
+        Set<Blueprint> blueprints = generateDatabaseData(0);
+        ArgumentCaptor<Set> argumentCaptor = ArgumentCaptor.forClass(Set.class);
+        when(blueprintRepository.save(anySet())).thenReturn(stringBlueprintMap.values());
+
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
+        verify(blueprintRepository).save(argumentCaptor.capture());
+
+        Assert.assertTrue(argumentCaptor.getValue().size() == 3);
+        Assert.assertTrue(resultSet.size() == 3);
     }
 
     @Test
-    public void launchDefaultBlueprintEveryParamIsCorrect() {
-        ReflectionTestUtils.setField(underTest, "blueprintArray",
-                Arrays.asList(
-                        "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6=testloader",
-                        "Data Science: Apache Spark 1.6, Zeppelin=testloader",
-                        "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6=testloader",
-                        "EDW-ETL: Apache Spark 2.0-preview, Apache Hive 2.0=testloader",
-                        "EDW-Analytics: Apache Hive 2.0 LLAP, Apache Zeppelin=testloader"));
-        Set<Blueprint> blueprints = underTest.loadBlueprints(ServiceTestUtils.cbUser());
-        Assert.assertEquals(5, blueprints.size());
+    public void testLoadBlueprintsForTheSpecifiedUserWhenEveryDefaultExistThenRepositoryShouldNotUpdateAnything() {
+        generateCacheData(3);
+        Set<Blueprint> blueprints = generateDatabaseData(3);
+
+        Collection<Blueprint> resultSet = underTest.loadBlueprintsForTheSpecifiedUser(identityUser(), blueprints);
+        Assert.assertTrue(resultSet.size() == 0);
+    }
+
+    private Map<String, Blueprint> generateCacheData(int cacheSize) {
+        return generateCacheData(cacheSize, 0);
+    }
+
+    private Map<String, Blueprint> generateCacheData(int cacheSize, int startIndex) {
+        Map<String, Blueprint> cacheData = new HashMap<>();
+        for (int i = startIndex; i < cacheSize + startIndex; i++) {
+            Blueprint blueprint = createBlueprint(DEFAULT, i);
+            cacheData.put(blueprint.getName(), blueprint);
+        }
+        when(blueprintCache.defaultBlueprints()).thenReturn(cacheData);
+        return cacheData;
+    }
+
+    private Set<Blueprint> generateDatabaseData(int cacheSize) {
+        Set<Blueprint> databaseData = new HashSet<>();
+        for (int i = 0; i < cacheSize; i++) {
+            Blueprint blueprint = createBlueprint(DEFAULT, i);
+            databaseData.add(blueprint);
+        }
+        return databaseData;
+    }
+
+    public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setId(Long.valueOf(index));
+        blueprint.setBlueprintName("test-blueprint" + index);
+        blueprint.setBlueprintText(JSON + index);
+        blueprint.setHostGroupCount(3);
+        blueprint.setStatus(resourceStatus);
+        blueprint.setDescription("test blueprint" + index);
+        blueprint.setName("multi-node-hdfs-yarn" + index);
+        blueprint.setOwner(LUCKY_MAN);
+        blueprint.setAccount(LOTTERY_WINNERS);
+        blueprint.setPublicInAccount(true);
+        return blueprint;
+    }
+
+    public static IdentityUser identityUser() {
+        return new IdentityUser(LUCKY_MAN, LUCKY_MAN, LOTTERY_WINNERS, new ArrayList<>(), LUCKY_MAN, LUCKY_MAN, new Date());
     }
 }

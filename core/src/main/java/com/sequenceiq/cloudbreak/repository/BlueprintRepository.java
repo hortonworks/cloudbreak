@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.repository;
 
 import java.util.Set;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -36,6 +37,13 @@ public interface BlueprintRepository extends CrudRepository<Blueprint, Long> {
     @Query("SELECT b FROM Blueprint b WHERE b.owner= :owner and b.name= :name AND b.status <> 'DEFAULT_DELETED'")
     Blueprint findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
+    @Modifying
+    @Query("UPDATE Blueprint bp SET bp.blueprintText = :bpText WHERE bp.id = :id")
+    void updateBlueprintJson(@Param("id") Long id, @Param("bpText") String bpText);
+
     @Query("SELECT b FROM Blueprint b WHERE b.account= :account AND (b.status = 'DEFAULT_DELETED' OR b.status = 'DEFAULT') ")
     Set<Blueprint> findAllDefaultInAccount(@Param("account") String account);
+
+    @Query("SELECT b FROM Blueprint b WHERE (b.status = 'DEFAULT_DELETED' OR b.status = 'DEFAULT') ")
+    Set<Blueprint> findAllDefault();
 }
