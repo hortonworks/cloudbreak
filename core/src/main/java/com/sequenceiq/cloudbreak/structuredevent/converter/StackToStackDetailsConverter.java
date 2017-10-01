@@ -29,7 +29,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 @Component
 public class StackToStackDetailsConverter extends AbstractConversionServiceAwareConverter<Stack, StackDetails> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintToBlueprintDetailsConverter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToStackDetailsConverter.class);
 
     @Inject
     private ConversionService conversionService;

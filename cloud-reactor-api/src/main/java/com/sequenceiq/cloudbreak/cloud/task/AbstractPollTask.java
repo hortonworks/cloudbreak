@@ -2,15 +2,20 @@ package com.sequenceiq.cloudbreak.cloud.task;
 
 import static com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup.CANCELLED;
 
+import java.util.Map;
+
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 public abstract class AbstractPollTask<T> implements PollTask<T> {
 
     private final AuthenticatedContext authenticatedContext;
 
     private final boolean cancellable;
+
+    private Map<String, String> mdcContextMap;
 
     protected AbstractPollTask(AuthenticatedContext authenticatedContext) {
         this(authenticatedContext, true);
@@ -19,7 +24,16 @@ public abstract class AbstractPollTask<T> implements PollTask<T> {
     protected AbstractPollTask(AuthenticatedContext authenticatedContext, boolean cancellable) {
         this.authenticatedContext = authenticatedContext;
         this.cancellable = cancellable;
+        mdcContextMap = MDCBuilder.getMdcContextMap();
     }
+
+    @Override
+    public final T call() throws Exception {
+        MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+        return doCall();
+    }
+
+    protected abstract T doCall() throws Exception;
 
     @Override
     public AuthenticatedContext getAuthenticatedContext() {

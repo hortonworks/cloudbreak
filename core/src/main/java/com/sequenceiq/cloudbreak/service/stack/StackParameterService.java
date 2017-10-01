@@ -19,12 +19,12 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Service
@@ -41,6 +41,9 @@ public class StackParameterService {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     public List<StackParamValidation> getStackParams(IdentityUser user, StackRequest stackRequest) {
         LOGGER.debug("Get stack params");
@@ -62,7 +65,7 @@ public class StackParameterService {
             CloudContext cloudContext = new CloudContext(null, stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
-            eventBus.notify(getStackParamValidationRequest.selector(), Event.wrap(getStackParamValidationRequest));
+            eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));
             try {
                 GetStackParamValidationResult res = getStackParamValidationRequest.await();
                 LOGGER.info("Get stack params result: {}", res);

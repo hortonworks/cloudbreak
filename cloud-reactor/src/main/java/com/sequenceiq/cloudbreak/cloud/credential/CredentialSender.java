@@ -10,8 +10,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveCredentialCreationStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 /**
@@ -25,19 +25,22 @@ public class CredentialSender implements CredentialNotifier {
     @Inject
     private EventBus eventBus;
 
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
+
     @Override
     public void createCredential(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential) {
         InteractiveCredentialCreationRequest credentialCreationRequest =
                 new InteractiveCredentialCreationRequest(cloudContext, extendedCloudCredential);
         LOGGER.info("Triggering event: {}", credentialCreationRequest);
-        eventBus.notify(credentialCreationRequest.selector(), Event.wrap(credentialCreationRequest));
+        eventBus.notify(credentialCreationRequest.selector(), eventFactory.createEvent(credentialCreationRequest));
     }
 
     @Override
     public void sendStatusMessage(CloudContext cloudContext, ExtendedCloudCredential extendedCloudCredential, boolean error, String statusMessage) {
         InteractiveCredentialCreationStatus interactiveCredentialCreationStatus =
                 new InteractiveCredentialCreationStatus(error, statusMessage, cloudContext, extendedCloudCredential);
-        eventBus.notify(interactiveCredentialCreationStatus.selector(), Event.wrap(interactiveCredentialCreationStatus));
+        eventBus.notify(interactiveCredentialCreationStatus.selector(), eventFactory.createEvent(interactiveCredentialCreationStatus));
     }
 
 }

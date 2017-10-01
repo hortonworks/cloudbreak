@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.logger;
 
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.Map;
 
 import org.slf4j.MDC;
@@ -11,13 +12,17 @@ import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 
 public class MDCBuilder {
+    public static final String MDC_CONTEXT_ID = "MDC_CONTEXT_ID";
 
     private MDCBuilder() {
-
     }
 
     public static void buildMdcContext() {
         buildMdcContext(null);
+    }
+
+    public static void addFlowIdToMdcContext(String flowId) {
+        MDC.put(LoggerContextKey.FLOW_ID.toString(), flowId);
     }
 
     public static void buildMdcContext(Object object) {
@@ -81,9 +86,6 @@ public class MDCBuilder {
     }
 
     private static void cleanupMdc() {
-        MDC.remove(LoggerContextKey.OWNER_ID.toString());
-        MDC.remove(LoggerContextKey.RESOURCE_ID.toString());
-        MDC.remove(LoggerContextKey.RESOURCE_NAME.toString());
-        MDC.remove(LoggerContextKey.RESOURCE_TYPE.toString());
+        Arrays.stream(LoggerContextKey.values()).forEach(lck -> MDC.remove(lck.toString()));
     }
 }

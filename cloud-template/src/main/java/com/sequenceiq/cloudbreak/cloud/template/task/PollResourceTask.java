@@ -32,7 +32,7 @@ public class PollResourceTask extends AbstractPollTask<List<CloudResourceStatus>
     }
 
     @Override
-    public List<CloudResourceStatus> call() throws Exception {
+    protected List<CloudResourceStatus> doCall() throws Exception {
         return checker.checkResources(context, getAuthenticatedContext(), cloudResources);
     }
 

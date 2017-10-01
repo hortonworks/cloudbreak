@@ -14,10 +14,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
-import reactor.bus.Event;
-import reactor.bus.Event.Headers;
 import reactor.bus.EventBus;
 
 @Component
@@ -26,6 +25,9 @@ public class FlowChains {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private FlowLogService flowLogService;
@@ -74,7 +76,7 @@ public class FlowChains {
         LOGGER.info("Triggering event: {}", selectable);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FLOW_CHAIN_ID, flowChainId);
-        eventBus.notify(selectable.selector(), new Event<>(new Headers(headers), selectable));
+        eventBus.notify(selectable.selector(), eventFactory.createEvent(headers, selectable));
     }
 
     private void triggerParentFlowChain(String flowChainId) {

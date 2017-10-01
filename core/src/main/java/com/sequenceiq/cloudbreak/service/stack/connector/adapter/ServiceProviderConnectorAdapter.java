@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -45,7 +46,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
@@ -55,6 +55,9 @@ public class ServiceProviderConnectorAdapter {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -87,7 +90,7 @@ public class ServiceProviderConnectorAdapter {
         DownscaleStackRequest downscaleRequest = new DownscaleStackRequest(cloudContext,
                 cloudCredential, cloudStack, resources, instances);
         LOGGER.info("Triggering downscale stack event: {}", downscaleRequest);
-        eventBus.notify(downscaleRequest.selector(), Event.wrap(downscaleRequest));
+        eventBus.notify(downscaleRequest.selector(), eventFactory.createEvent(downscaleRequest));
         try {
             DownscaleStackResult res = downscaleRequest.await();
             LOGGER.info("Downscale stack result: {}", res);
@@ -112,7 +115,7 @@ public class ServiceProviderConnectorAdapter {
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         TerminateStackRequest<TerminateStackResult> terminateRequest = new TerminateStackRequest<>(cloudContext, cloudStack, cloudCredential, resources);
         LOGGER.info("Triggering terminate stack event: {}", terminateRequest);
-        eventBus.notify(terminateRequest.selector(), Event.wrap(terminateRequest));
+        eventBus.notify(terminateRequest.selector(), eventFactory.createEvent(terminateRequest));
         try {
             TerminateStackResult res = terminateRequest.await();
             LOGGER.info("Terminate stack result: {}", res);
@@ -141,7 +144,7 @@ public class ServiceProviderConnectorAdapter {
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
-        eventBus.notify(getPlatformTemplateRequest.selector(), Event.wrap(getPlatformTemplateRequest));
+        eventBus.notify(getPlatformTemplateRequest.selector(), eventFactory.createEvent(getPlatformTemplateRequest));
         try {
             GetPlatformTemplateResult res = getPlatformTemplateRequest.await();
             LOGGER.info("Get template result: {}", res);
@@ -163,7 +166,7 @@ public class ServiceProviderConnectorAdapter {
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
-        eventBus.notify(parameterRequest.selector(), Event.wrap(parameterRequest));
+        eventBus.notify(parameterRequest.selector(), eventFactory.createEvent(parameterRequest));
         try {
             PlatformParameterResult res = parameterRequest.await();
             LOGGER.info("Platform parameter result: {}", res);
@@ -185,7 +188,7 @@ public class ServiceProviderConnectorAdapter {
                 location);
         CloudCredential cloudCredential = credentialConverter.convert(stack.getCredential());
         CheckPlatformVariantRequest checkPlatformVariantRequest = new CheckPlatformVariantRequest(cloudContext, cloudCredential);
-        eventBus.notify(checkPlatformVariantRequest.selector(), Event.wrap(checkPlatformVariantRequest));
+        eventBus.notify(checkPlatformVariantRequest.selector(), eventFactory.createEvent(checkPlatformVariantRequest));
         try {
             CheckPlatformVariantResult res = checkPlatformVariantRequest.await();
             LOGGER.info("Platform variant result: {}", res);

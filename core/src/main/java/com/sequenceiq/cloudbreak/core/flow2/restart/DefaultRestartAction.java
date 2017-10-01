@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.RestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
 
@@ -22,7 +22,7 @@ public class DefaultRestartAction implements RestartAction {
     private EventBus eventBus;
 
     @Inject
-    private ErrorHandlerAwareFlowEventFactory eventFactory;
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Override
     public void restart(String flowId, String flowChainId, String event, Object payload) {

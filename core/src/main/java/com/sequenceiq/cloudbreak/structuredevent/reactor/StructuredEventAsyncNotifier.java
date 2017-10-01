@@ -4,7 +4,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
@@ -16,7 +16,7 @@ public class StructuredEventAsyncNotifier implements StructuredEventClient {
     public static final String EVENT_LOG = "EVENT_LOG";
 
     @Inject
-    private ErrorHandlerAwareFlowEventFactory eventFactory;
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private EventBus eventBus;

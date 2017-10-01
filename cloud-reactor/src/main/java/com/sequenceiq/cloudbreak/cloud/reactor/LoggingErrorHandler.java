@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.service;
+package com.sequenceiq.cloudbreak.cloud.reactor;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,8 +13,8 @@ import reactor.fn.Consumer;
  * The main functionality of the subsystem is to provide meaningful error messages to the calling systems.
  */
 @Component
-public class CloudbreakErrorHandler implements Consumer<Throwable> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakErrorHandler.class);
+public class LoggingErrorHandler implements Consumer<Throwable> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingErrorHandler.class);
 
     @Override
     public void accept(Throwable errorData) {

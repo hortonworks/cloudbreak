@@ -13,9 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
-import com.sequenceiq.cloudbreak.cloud.task.FetchTask;
-import com.sequenceiq.cloudbreak.cloud.task.PollTask;
-import com.sequenceiq.cloudbreak.core.flow2.Flow2Handler;
 
 import reactor.bus.Event;
 
@@ -44,14 +41,6 @@ public class LogContextAspects {
     public void interceptResourcePersistenceHandlerAcceptMethod() {
     }
 
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler.schedule(..))")
-    public void interceptSchedulerScheduleMethod() {
-    }
-
-    @Pointcut("execution(public * com.sequenceiq.cloudbreak.cloud.task.PollTask+.call(..))")
-    public void interceptPollTasksCallMethod() {
-    }
-
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptCloudPlatformEventHandlersAcceptMethod()")
     public void buildLogContextForCloudPlatformEventHandler(JoinPoint joinPoint) {
         Event<CloudPlatformRequest> event = (Event<CloudPlatformRequest>) joinPoint.getArgs()[0];
@@ -66,7 +55,7 @@ public class LogContextAspects {
             + "com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptCloudbreakEventHandlerAcceptMethod()")
     public void buildLogContextForReactorHandler(JoinPoint joinPoint) {
         Event<?> event = (Event<?>) joinPoint.getArgs()[0];
-        Map<String, String> mdcContextMap = event.getHeaders().get(Flow2Handler.MDC_CONTEXT_ID);
+        Map<String, String> mdcContextMap = event.getHeaders().get(MDCBuilder.MDC_CONTEXT_ID);
         if (mdcContextMap != null) {
             MDCBuilder.buildMdcContextFromMap(mdcContextMap);
         }
@@ -81,27 +70,14 @@ public class LogContextAspects {
         LOGGER.debug("A Resource persistence handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
 
-    @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptSchedulerScheduleMethod()")
-    public void buildLogContextForScheduler(JoinPoint joinPoint) {
-        FetchTask task = (FetchTask) joinPoint.getArgs()[0];
-        CloudContext cloudContext = task.getAuthenticatedContext().getCloudContext();
-        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner(), "STACK");
-        LOGGER.info("A SyncPollingScheduler's 'schedule' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
-    }
-
-    @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptPollTasksCallMethod()")
-    public void buildLogContextForPollTask(JoinPoint joinPoint) {
-        PollTask pollTask = (PollTask) joinPoint.getTarget();
-        CloudContext cloudContext = pollTask.getAuthenticatedContext().getCloudContext();
-        MDCBuilder.buildMdcContext(String.valueOf(cloudContext.getId()), cloudContext.getName(), cloudContext.getOwner(), "STACK");
-        LOGGER.debug("A PollTask's 'call' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
-    }
-
     private void buildMdcContext(CloudContext cloudContext, Event<?> event) {
+        Map<String, String> eventMdcContext = event.getHeaders().get(MDCBuilder.MDC_CONTEXT_ID);
         if (cloudContext != null) {
+            String flowId = eventMdcContext != null ? eventMdcContext.get(LoggerContextKey.FLOW_ID.toString()) : null;
+            MDCBuilder.addFlowIdToMdcContext(flowId);
             MDCBuilder.buildMdcContext(stringValue(cloudContext.getId()), stringValue(cloudContext.getName()), stringValue(cloudContext.getOwner()), "STACK");
         } else {
-            MDCBuilder.buildMdcContextFromMap(event.getHeaders().get(Flow2Handler.MDC_CONTEXT_ID));
+            MDCBuilder.buildMdcContextFromMap(eventMdcContext);
         }
     }
 

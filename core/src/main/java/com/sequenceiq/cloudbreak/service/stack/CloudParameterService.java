@@ -50,11 +50,11 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVirtualMachines;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Service
@@ -68,12 +68,15 @@ public class CloudParameterService {
     private EventBus eventBus;
 
     @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
+
+    @Inject
     private CredentialToExtendedCloudCredentialConverter credentialToExtendedCloudCredentialConverter;
 
     public PlatformVariants getPlatformVariants() {
         LOGGER.debug("Get platform variants");
         GetPlatformVariantsRequest getPlatformVariantsRequest = new GetPlatformVariantsRequest();
-        eventBus.notify(getPlatformVariantsRequest.selector(), Event.wrap(getPlatformVariantsRequest));
+        eventBus.notify(getPlatformVariantsRequest.selector(), eventFactory.createEvent(getPlatformVariantsRequest));
         try {
             GetPlatformVariantsResult res = getPlatformVariantsRequest.await();
             LOGGER.info("Platform variants result: {}", res);
@@ -103,7 +106,7 @@ public class CloudParameterService {
     public PlatformDisks getDiskTypes() {
         LOGGER.debug("Get platform disktypes");
         GetDiskTypesRequest getDiskTypesRequest = new GetDiskTypesRequest();
-        eventBus.notify(getDiskTypesRequest.selector(), Event.wrap(getDiskTypesRequest));
+        eventBus.notify(getDiskTypesRequest.selector(), eventFactory.createEvent(getDiskTypesRequest));
         try {
             GetDiskTypesResult res = getDiskTypesRequest.await();
             LOGGER.info("Platform disk types result: {}", res);
@@ -124,7 +127,7 @@ public class CloudParameterService {
         }
         LOGGER.debug("Get platform vm types");
         GetVirtualMachineTypesRequest getVirtualMachineTypesRequest = new GetVirtualMachineTypesRequest(type, extended);
-        eventBus.notify(getVirtualMachineTypesRequest.selector(), Event.wrap(getVirtualMachineTypesRequest));
+        eventBus.notify(getVirtualMachineTypesRequest.selector(), eventFactory.createEvent(getVirtualMachineTypesRequest));
         try {
             GetVirtualMachineTypesResult res = getVirtualMachineTypesRequest.await();
             LOGGER.info("Platform vm types result: {}", res);
@@ -142,7 +145,7 @@ public class CloudParameterService {
     public PlatformRegions getRegions() {
         LOGGER.debug("Get platform regions");
         GetPlatformRegionsRequest getPlatformRegionsRequest = new GetPlatformRegionsRequest();
-        eventBus.notify(getPlatformRegionsRequest.selector(), Event.wrap(getPlatformRegionsRequest));
+        eventBus.notify(getPlatformRegionsRequest.selector(), eventFactory.createEvent(getPlatformRegionsRequest));
         try {
             GetPlatformRegionsResult res = getPlatformRegionsRequest.await();
             LOGGER.info("Platform regions result: {}", res);
@@ -160,7 +163,7 @@ public class CloudParameterService {
     public PlatformOrchestrators getOrchestrators() {
         LOGGER.debug("Get platform orchestrators");
         GetPlatformOrchestratorsRequest getPlatformOrchestratorsRequest = new GetPlatformOrchestratorsRequest();
-        eventBus.notify(getPlatformOrchestratorsRequest.selector(), Event.wrap(getPlatformOrchestratorsRequest));
+        eventBus.notify(getPlatformOrchestratorsRequest.selector(), eventFactory.createEvent(getPlatformOrchestratorsRequest));
         try {
             GetPlatformOrchestratorsResult res = getPlatformOrchestratorsRequest.await();
             LOGGER.info("Platform orchestrators result: {}", res);
@@ -178,7 +181,7 @@ public class CloudParameterService {
     public PlatformImages getImages() {
         LOGGER.debug("Get platform orchestrators");
         GetPlatformImagesRequest getPlatformImagesRequest = new GetPlatformImagesRequest();
-        eventBus.notify(getPlatformImagesRequest.selector(), Event.wrap(getPlatformImagesRequest));
+        eventBus.notify(getPlatformImagesRequest.selector(), eventFactory.createEvent(getPlatformImagesRequest));
         try {
             GetPlatformImagesResult res = getPlatformImagesRequest.await();
             LOGGER.info("Platform images result: {}", res);
@@ -196,7 +199,7 @@ public class CloudParameterService {
     public Map<Platform, PlatformParameters> getPlatformParameters() {
         LOGGER.debug("Get platform parameters for");
         PlatformParametersRequest parametersRequest = new PlatformParametersRequest();
-        eventBus.notify(parametersRequest.selector(), Event.wrap(parametersRequest));
+        eventBus.notify(parametersRequest.selector(), eventFactory.createEvent(parametersRequest));
         try {
             PlatformParametersResult res = parametersRequest.await();
             LOGGER.info("Platform parameter result: {}", res);
@@ -217,7 +220,7 @@ public class CloudParameterService {
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformNetworksRequest getPlatformNetworksRequest =
                 new GetPlatformNetworksRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformNetworksRequest.selector(), Event.wrap(getPlatformNetworksRequest));
+        eventBus.notify(getPlatformNetworksRequest.selector(), eventFactory.createEvent(getPlatformNetworksRequest));
         try {
             GetPlatformNetworksResult res = getPlatformNetworksRequest.await();
             LOGGER.info("Platform networks types result: {}", res);
@@ -237,7 +240,7 @@ public class CloudParameterService {
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformSshKeysRequest getPlatformSshKeysRequest =
                 new GetPlatformSshKeysRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformSshKeysRequest.selector(), Event.wrap(getPlatformSshKeysRequest));
+        eventBus.notify(getPlatformSshKeysRequest.selector(), eventFactory.createEvent(getPlatformSshKeysRequest));
         try {
             GetPlatformSshKeysResult res = getPlatformSshKeysRequest.await();
             LOGGER.info("Platform sshkeys types result: {}", res);
@@ -258,7 +261,7 @@ public class CloudParameterService {
         ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
         GetPlatformSecurityGroupsRequest getPlatformSecurityGroupsRequest =
                 new GetPlatformSecurityGroupsRequest(cloudCredential, cloudCredential, variant, region, filters);
-        eventBus.notify(getPlatformSecurityGroupsRequest.selector(), Event.wrap(getPlatformSecurityGroupsRequest));
+        eventBus.notify(getPlatformSecurityGroupsRequest.selector(), eventFactory.createEvent(getPlatformSecurityGroupsRequest));
         try {
             GetPlatformSecurityGroupsResult res = getPlatformSecurityGroupsRequest.await();
             LOGGER.info("Platform securitygroups types result: {}", res);
@@ -283,7 +286,7 @@ public class CloudParameterService {
     public VmRecommendations getRecommendation(String platform) {
         LOGGER.debug("Get platform vm recommendation");
         GetVirtualMachineRecommendtaionRequest getVirtualMachineRecommendtaionRequest = new GetVirtualMachineRecommendtaionRequest(platform);
-        eventBus.notify(getVirtualMachineRecommendtaionRequest.selector(), Event.wrap(getVirtualMachineRecommendtaionRequest));
+        eventBus.notify(getVirtualMachineRecommendtaionRequest.selector(), eventFactory.createEvent(getVirtualMachineRecommendtaionRequest));
         try {
             GetVirtualMachineRecommendationResponse res = getVirtualMachineRecommendtaionRequest.await();
             LOGGER.info("Platform vm recommendation result: {}", res);

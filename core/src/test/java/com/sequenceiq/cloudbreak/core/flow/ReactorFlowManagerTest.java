@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.HostGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.cloud.Acceptable;
-import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
@@ -39,7 +39,7 @@ public class ReactorFlowManagerTest {
     private EventBus reactor;
 
     @Mock
-    private ErrorHandlerAwareFlowEventFactory eventFactory;
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Mock
     private StackService stackService;

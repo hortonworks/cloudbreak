@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -65,7 +66,7 @@ public class ReactorFlowManager {
     private EventBus reactor;
 
     @Inject
-    private ErrorHandlerAwareFlowEventFactory eventFactory;
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private StackService stackService;
