@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredFlowEventFactory;
@@ -30,7 +30,7 @@ public class DefaultCloudbreakEventService implements CloudbreakEventService {
     private StackRepository stackRepository;
 
     @Inject
-    private ErrorHandlerAwareFlowEventFactory eventFactory;
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private EventBus reactor;

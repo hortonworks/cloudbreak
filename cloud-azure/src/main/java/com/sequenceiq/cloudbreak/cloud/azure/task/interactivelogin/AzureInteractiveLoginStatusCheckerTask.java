@@ -85,7 +85,7 @@ public class AzureInteractiveLoginStatusCheckerTask extends PollBooleanStateTask
     }
 
     @Override
-    public Boolean call() {
+    protected Boolean doCall() {
         Response response = createPollingRequest();
         if (response.getStatusInfo().getFamily() == Family.SUCCESSFUL) {
             String tokenResponseString = response.readEntity(String.class);

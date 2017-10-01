@@ -62,8 +62,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     public static final String FLOW_CANCEL = "FLOWCANCEL";
 
-    public static final String MDC_CONTEXT_ID = "MDC_CONTEXT_ID";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Arrays.asList(

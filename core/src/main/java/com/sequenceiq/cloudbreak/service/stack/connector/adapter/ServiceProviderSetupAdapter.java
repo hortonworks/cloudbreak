@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cloud.event.setup.CheckImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.common.type.ImageStatusResult;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
@@ -33,6 +33,9 @@ public class ServiceProviderSetupAdapter {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -52,7 +55,7 @@ public class ServiceProviderSetupAdapter {
         CheckImageRequest<CheckImageResult> checkImageRequest =
                 new CheckImageRequest<>(cloudContext, cloudCredential, cloudStackConverter.convert(stack), image);
         LOGGER.info("Triggering event: {}", checkImageRequest);
-        eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
+        eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
         try {
             CheckImageResult res = checkImageRequest.await();
             LOGGER.info("Result: {}", res);

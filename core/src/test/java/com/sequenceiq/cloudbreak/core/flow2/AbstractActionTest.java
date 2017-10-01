@@ -30,7 +30,7 @@ import org.springframework.statemachine.config.common.annotation.ObjectPostProce
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.service.ErrorHandlerAwareFlowEventFactory;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import reactor.bus.EventBus;
@@ -53,7 +53,7 @@ public class AbstractActionTest {
     private Flow flow;
 
     @Mock
-    private ErrorHandlerAwareFlowEventFactory reactorEventFactory;
+    private ErrorHandlerAwareReactorEventFactory reactorEventFactory;
 
     private StateMachine<State, Event> stateMachine;
 

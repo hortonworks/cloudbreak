@@ -32,7 +32,7 @@ public class PollComputeStatusTask extends AbstractPollTask<List<CloudVmInstance
     }
 
     @Override
-    public List<CloudVmInstanceStatus> call() throws Exception {
+    protected List<CloudVmInstanceStatus> doCall() throws Exception {
         return builder.checkInstances(context, getAuthenticatedContext(), Collections.singletonList(instance));
     }
 

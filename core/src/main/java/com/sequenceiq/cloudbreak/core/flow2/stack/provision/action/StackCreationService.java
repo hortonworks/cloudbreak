@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
@@ -66,7 +67,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.service.usages.UsageService;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
@@ -85,6 +85,9 @@ public class StackCreationService {
 
     @Inject
     private NotificationSender notificationSender;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private EventBus eventBus;
@@ -159,7 +162,7 @@ public class StackCreationService {
             CheckImageRequest<CheckImageResult> checkImageRequest = new CheckImageRequest<>(context.getCloudContext(), context.getCloudCredential(),
                     cloudStackConverter.convert(stack), image);
             LOGGER.info("Triggering event: {}", checkImageRequest);
-            eventBus.notify(checkImageRequest.selector(), Event.wrap(checkImageRequest));
+            eventBus.notify(checkImageRequest.selector(), eventFactory.createEvent(checkImageRequest));
             CheckImageResult result = checkImageRequest.await();
             sendNotification(result, stack);
             LOGGER.info("Result: {}", result);

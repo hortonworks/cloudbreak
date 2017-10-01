@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -36,7 +37,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
@@ -45,6 +45,9 @@ public class ServiceProviderMetadataAdapter {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private StackToCloudStackConverter cloudStackConverter;
@@ -67,7 +70,7 @@ public class ServiceProviderMetadataAdapter {
         List<CloudResource> cloudResources = cloudResourceConverter.convert(stack.getResources());
         CollectMetadataRequest cmr = new CollectMetadataRequest(cloudContext, cloudCredential, cloudResources, cloudInstances);
         LOGGER.info("Triggering event: {}", cmr);
-        eventBus.notify(CloudPlatformRequest.selector(CollectMetadataRequest.class), Event.wrap(cmr));
+        eventBus.notify(CloudPlatformRequest.selector(CollectMetadataRequest.class), eventFactory.createEvent(cmr));
         try {
             CollectMetadataResult res = cmr.await();
             LOGGER.info("Result: {}", res);
@@ -99,7 +102,7 @@ public class ServiceProviderMetadataAdapter {
             GetInstancesStateRequest<GetInstancesStateResult> stateRequest =
                     new GetInstancesStateRequest<>(cloudContext, cloudCredential, Collections.singletonList(instance));
             LOGGER.info("Triggering event: {}", stateRequest);
-            eventBus.notify(stateRequest.selector(), Event.wrap(stateRequest));
+            eventBus.notify(stateRequest.selector(), eventFactory.createEvent(stateRequest));
             try {
                 GetInstancesStateResult res = stateRequest.await();
                 LOGGER.info("Result: {}", res);

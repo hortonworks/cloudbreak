@@ -11,8 +11,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotification;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourceNotificationType;
 import com.sequenceiq.cloudbreak.cloud.notification.model.ResourcePersisted;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
@@ -22,11 +22,14 @@ public class ResourceNotifier implements PersistenceNotifier {
     @Inject
     private EventBus eventBus;
 
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
+
     @Override
     public ResourcePersisted notifyAllocation(CloudResource cloudResource, CloudContext cloudContext) {
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.CREATE);
         LOGGER.info("Sending resource allocation notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
+        eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
     }
 
@@ -34,7 +37,7 @@ public class ResourceNotifier implements PersistenceNotifier {
     public ResourcePersisted notifyUpdate(CloudResource cloudResource, CloudContext cloudContext) {
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.UPDATE);
         LOGGER.info("Sending resource update notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
+        eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
     }
 
@@ -42,7 +45,7 @@ public class ResourceNotifier implements PersistenceNotifier {
     public ResourcePersisted notifyDeletion(CloudResource cloudResource, CloudContext cloudContext) {
         ResourceNotification notification = new ResourceNotification(cloudResource, cloudContext, ResourceNotificationType.DELETE);
         LOGGER.info("Sending resource deletion notification: {}, context: {}", notification, cloudContext);
-        eventBus.notify("resource-persisted", Event.wrap(notification));
+        eventBus.notify("resource-persisted", eventFactory.createEvent(notification));
         return notification.getResult();
     }
 }

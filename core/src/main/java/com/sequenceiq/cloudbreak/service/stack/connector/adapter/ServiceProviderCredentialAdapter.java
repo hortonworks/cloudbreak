@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
@@ -28,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.Credential;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.stack.connector.OperationException;
 
-import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
@@ -38,6 +38,9 @@ public class ServiceProviderCredentialAdapter {
 
     @Inject
     private EventBus eventBus;
+
+    @Inject
+    private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
     private CredentialToCloudCredentialConverter credentialConverter;
@@ -51,7 +54,7 @@ public class ServiceProviderCredentialAdapter {
 
         CredentialVerificationRequest request = new CredentialVerificationRequest(cloudContext, cloudCredential);
         LOGGER.info("Triggering event: {}", request);
-        eventBus.notify(request.selector(), Event.wrap(request));
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             CredentialVerificationResult res = request.await();
             String message = "Failed to verify the credential: ";
@@ -78,7 +81,7 @@ public class ServiceProviderCredentialAdapter {
         ExtendedCloudCredential cloudCredential = extendedCloudCredentialConverter.convert(credential);
         InteractiveLoginRequest request = new InteractiveLoginRequest(cloudContext, cloudCredential);
         LOGGER.info("Triggering event: {}", request);
-        eventBus.notify(request.selector(), Event.wrap(request));
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             InteractiveLoginResult res = request.await();
             String message = "Interactive login Failed: ";
