@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.controller;
 
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
@@ -19,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 
 @Component
 public class BlueprintController extends NotificationController implements BlueprintEndpoint {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BlueprintController.class);
 
     @Autowired
     private BlueprintService blueprintService;
@@ -49,10 +52,7 @@ public class BlueprintController extends NotificationController implements Bluep
     public Set<BlueprintResponse> getPrivates() {
         IdentityUser user = authenticatedUserService.getCbUser();
         Set<Blueprint> blueprints = blueprintService.retrievePrivateBlueprints(user);
-        if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
-            blueprints = blueprintLoaderService.loadBlueprintsForTheSpecifiedUser(user, blueprints);
-        }
-        return toJsonList(blueprints);
+        return getBlueprintResponses(user, blueprints);
     }
 
     @Override
@@ -73,8 +73,14 @@ public class BlueprintController extends NotificationController implements Bluep
     public Set<BlueprintResponse> getPublics() {
         IdentityUser user = authenticatedUserService.getCbUser();
         Set<Blueprint> blueprints = blueprintService.retrieveAccountBlueprints(user);
+        return getBlueprintResponses(user, blueprints);
+    }
+
+    private Set<BlueprintResponse> getBlueprintResponses(IdentityUser user, Set<Blueprint> blueprints) {
         if (blueprintLoaderService.addingDefaultBlueprintsAreNecessaryForTheUser(blueprints)) {
+            LOGGER.info("Blueprints should modify based on the defaults for the '{}' user.", user.getUserId());
             blueprints = blueprintLoaderService.loadBlueprintsForTheSpecifiedUser(user, blueprints);
+            LOGGER.info("Blueprints modification finished based on the defaults for '{}' user.", user.getUserId());
         }
         return toJsonList(blueprints);
     }
