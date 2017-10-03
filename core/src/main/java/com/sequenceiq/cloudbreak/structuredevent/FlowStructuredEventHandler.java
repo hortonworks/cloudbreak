@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.structuredevent;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.Message;
 import org.springframework.statemachine.StateMachine;
@@ -17,6 +19,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 @Component
 @Scope("prototype")
 public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapter<S, E> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowStructuredEventHandler.class);
+
     @Inject
     private StructuredEventClient structuredEventClient;
 
@@ -95,6 +99,20 @@ public class FlowStructuredEventHandler<S, E> extends StateMachineListenerAdapte
     @Override
     public void transitionEnded(Transition<S, E> transition) {
 
+    }
+
+    @Override
+    public void stateMachineStopped(StateMachine<S, E> stateMachine) {
+        if (!stateMachine.isComplete()) {
+            State<S, E> currentState = stateMachine.getState();
+            Long currentTime = System.currentTimeMillis();
+            String fromId = currentState != null ? currentState.getId().toString() : "unknown";
+            FlowDetails flowDetails = new FlowDetails("", flowType, "", flowId, fromId, "unknown", "FLOW_CANCEL",
+                    lastStateChange == -1L ? -1L : currentTime - lastStateChange);
+            StructuredEvent structuredEvent = structuredFlowEventFactory.createStucturedFlowEvent(stackId, flowDetails, true);
+            structuredEventClient.sendStructuredEvent(structuredEvent);
+            lastStateChange = currentTime;
+        }
     }
 
     @Override
