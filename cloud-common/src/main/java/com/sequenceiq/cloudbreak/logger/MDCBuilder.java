@@ -85,7 +85,7 @@ public class MDCBuilder {
         }
     }
 
-    private static void cleanupMdc() {
+    public static void cleanupMdc() {
         Arrays.stream(LoggerContextKey.values()).forEach(lck -> MDC.remove(lck.toString()));
     }
 }
