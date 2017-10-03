@@ -1,15 +1,20 @@
 package com.sequenceiq.cloudbreak.cloud.reactor.config;
 
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.cloudbreak.cloud.handler.ConsumerNotFoundHandler;
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerThreadPoolExecutor;
 
 import reactor.Environment;
 import reactor.bus.EventBus;
 import reactor.bus.spec.EventBusSpec;
 import reactor.core.dispatch.ThreadPoolExecutorDispatcher;
+import reactor.core.support.NamedDaemonThreadFactory;
 import reactor.fn.timer.Timer;
 
 @Configuration
@@ -39,6 +44,16 @@ public class EventBusConfig {
     }
 
     private ThreadPoolExecutorDispatcher getEventBusDispatcher() {
-        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolSize, eventBusThreadPoolSize, "reactorDispatcher");
+        final ClassLoader context = new ClassLoader(Thread.currentThread()
+                .getContextClassLoader()) {
+        };
+        MDCCleanerThreadPoolExecutor executorService = new MDCCleanerThreadPoolExecutor(eventBusThreadPoolSize,
+                eventBusThreadPoolSize,
+                0L,
+                TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(eventBusThreadPoolSize),
+                new NamedDaemonThreadFactory("reactorDispatcher", context),
+                (r, executor) -> r.run());
+        return new ThreadPoolExecutorDispatcher(eventBusThreadPoolSize, eventBusThreadPoolSize, executorService);
     }
 }

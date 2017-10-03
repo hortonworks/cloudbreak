@@ -14,6 +14,9 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerThreadPoolTaskScheduler;
+
 @Configuration
 @EnableAsync
 @EnableScheduling
@@ -25,6 +28,8 @@ public class AsyncConfig implements AsyncConfigurer, SchedulingConfigurer {
 
     private static final int QUEUE_CAPACITY = 11;
 
+    private static final int TASK_SCHEDULER_POOL_SIZE = 4;
+
     @Override
     public Executor getAsyncExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
@@ -32,6 +37,7 @@ public class AsyncConfig implements AsyncConfigurer, SchedulingConfigurer {
         executor.setMaxPoolSize(MAX_POOL_SIZE);
         executor.setQueueCapacity(QUEUE_CAPACITY);
         executor.setThreadNamePrefix("asyncExecutor-");
+        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -43,12 +49,14 @@ public class AsyncConfig implements AsyncConfigurer, SchedulingConfigurer {
 
     @Bean
     public ThreadPoolTaskScheduler taskScheduler() {
-        return new ThreadPoolTaskScheduler();
+        ThreadPoolTaskScheduler threadPoolTaskScheduler = new MDCCleanerThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(TASK_SCHEDULER_POOL_SIZE);
+        threadPoolTaskScheduler.setThreadNamePrefix("scheduledExecutor-");
+        return threadPoolTaskScheduler;
     }
 
     @Override
     public void configureTasks(ScheduledTaskRegistrar taskRegistrar) {
         taskRegistrar.setTaskScheduler(taskScheduler());
     }
-
 }

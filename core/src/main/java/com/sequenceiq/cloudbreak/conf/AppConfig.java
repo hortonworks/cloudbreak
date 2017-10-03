@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.cloudbreak.client.IdentityClient;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.concurrent.MDCCleanerTaskDecorator;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptor;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteria;
@@ -212,6 +213,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(intermediateCorePoolSize);
         executor.setQueueCapacity(intermediateQueueCapacity);
         executor.setThreadNamePrefix("intermediateBuilderExecutor-");
+        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -222,6 +224,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(corePoolSize);
         executor.setQueueCapacity(queueCapacity);
         executor.setThreadNamePrefix("resourceBuilderExecutor-");
+        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
     }
@@ -232,6 +235,7 @@ public class AppConfig implements ResourceLoaderAware {
         executor.setCorePoolSize(containerCorePoolSize);
         executor.setQueueCapacity(containerteQueueCapacity);
         executor.setThreadNamePrefix("containerBootstrapBuilderExecutor-");
+        executor.setTaskDecorator(new MDCCleanerTaskDecorator());
         executor.initialize();
         return executor;
     }
