@@ -186,6 +186,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             }
             Flow flow = runningFlows.remove(id);
             if (flow != null) {
+                flow.stop();
                 flowLogService.cancel(stackId, id);
             }
         }

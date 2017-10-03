@@ -122,7 +122,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected void sendEvent(String flowId, String selector, Object payload) {
-        LOGGER.info("Triggering event: {}", payload);
+        LOGGER.info("Triggering event: {}, payload: {}", selector, payload);
         Map<String, Object> headers = new HashMap<>();
         headers.put(FLOW_ID, flowId);
         String flowChainId = runningFlows.getFlowChainId(flowId);

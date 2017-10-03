@@ -46,7 +46,6 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
     @Override
     public void initialize(String stateRepresentation, Map<Object, Object> variables) {
         S state  = stateConverter.convert(stateRepresentation);
-        flowMachine.stop();
         List<? extends StateMachineAccess<S, E>> withAllRegions = flowMachine.getStateMachineAccessor().withAllRegions();
         for (StateMachineAccess<S, E> access : withAllRegions) {
             access.resetStateMachine(new DefaultStateMachineContext<>(state, null, null, null));
@@ -55,6 +54,11 @@ public class FlowAdapter<S extends FlowState, E> implements Flow {
             flowMachine.getExtendedState().getVariables().putAll(variables);
         }
         flowMachine.start();
+    }
+
+    @Override
+    public void stop() {
+        flowMachine.stop();
     }
 
     @Override

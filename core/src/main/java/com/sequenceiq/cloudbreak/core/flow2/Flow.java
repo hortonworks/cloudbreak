@@ -9,6 +9,8 @@ public interface Flow {
 
     void initialize(String stateRepresentation, Map<Object, Object> variables);
 
+    void stop();
+
     void sendEvent(String key, Object object);
 
     FlowState getCurrentState();
