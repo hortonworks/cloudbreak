@@ -14,8 +14,10 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -145,6 +147,9 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Inject
     private AwsTagPreparationService awsTagPreparationService;
 
+    @Inject
+    private EncryptedSnapshotPreparator encryptedSnapshotPreparator;
+
     @Value("${cb.publicip:}")
     private String cloudbreakPublicIp;
 
@@ -199,6 +204,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withAuthenticatedContext(ac)
                     .withStack(stack)
                     .withExistingVpc(existingVPC)
+                    .withSnapshotId(getEbsSnapshotIdIfNeeded(ac, stack))
                     .withExistingIGW(awsNetworkView.isExistingIGW())
                     .withExistingSubnetCidr(existingSubnet ? getExistingSubnetCidr(ac, stack) : null)
                     .withExistingSubnetIds(existingSubnet ? awsNetworkView.getSubnetList() : null)
@@ -898,5 +904,21 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         int currentAddress = InetAddresses.coerceToInteger(InetAddresses.forString(address));
         return low <= currentAddress && currentAddress <= high;
     }
+
+    private Map<String, String> getEbsSnapshotIdIfNeeded(AuthenticatedContext ac, CloudStack cloudStack) {
+        Map<String, String> snapshotIdMap = new HashMap<>();
+        for (Group group : cloudStack.getGroups()) {
+            if (encryptedSnapshotPreparator.isEncryptedVolumeRequested(group)) {
+                Optional<String> snapshot = encryptedSnapshotPreparator.createSnapshotIfNeeded(ac, group);
+                if (snapshot.isPresent()) {
+                    snapshotIdMap.put(group.getName(), snapshot.orElse(null));
+                } else {
+                    throw new CloudConnectorException(String.format("Failed to create Ebs encrypted volume on stack: %s", ac.getCloudContext().getId()));
+                }
+            }
+        }
+        return snapshotIdMap;
+    }
+
 
 }

@@ -15,7 +15,6 @@ import org.springframework.util.StringUtils;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.ConnectorEndpoint;
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
@@ -76,7 +75,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
     private CloudResourceAdvisor cloudResourceAdvisor;
 
     @Override
-    public Map<String, JsonEntity> getPlatforms(Boolean extended) {
+    public Map<String, Object> getPlatforms(Boolean extended) {
         PlatformVariants pv = cloudParameterService.getPlatformVariants();
         PlatformDisks diskTypes = cloudParameterService.getDiskTypes();
         PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(null, extended);
@@ -86,7 +85,7 @@ public class PlatformParameterController implements ConnectorEndpoint {
         Map<Platform, PlatformParameters> platformParameters = cloudParameterService.getPlatformParameters();
         SpecialParameters specialParameters = cloudParameterService.getSpecialParameters();
 
-        Map<String, JsonEntity> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
 
         map.put("variants", conversionService.convert(pv, PlatformVariantsJson.class));
         map.put("disks", conversionService.convert(diskTypes, PlatformDisksJson.class));
@@ -142,8 +141,8 @@ public class PlatformParameterController implements ConnectorEndpoint {
     }
 
     @Override
-    public PlatformVirtualMachinesJson getVmTypes(String type, Boolean extended) {
-        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(type.toUpperCase(), extended);
+    public PlatformVirtualMachinesJson getVmTypes(Boolean extended) {
+        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(null, extended);
         return conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class);
     }
 

@@ -65,7 +65,7 @@ public class ParameterGenerator {
         String name = "master";
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
-                new HashMap<>());
+                new HashMap<>(), 0L);
 
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance instance = new CloudInstance("SOME_ID", instanceTemplate, instanceAuthentication);

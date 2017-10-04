@@ -216,12 +216,13 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
             @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
             @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
+            @CliOption(key = "kmsKey", help = "kmsKey of the template") String kmsKey,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
             @CliOption(key = "topologyId", help = "Id of a topology the template belongs to") Long platformId
     ) {
-        return createEc2Template(name, instanceType, volumeCount, volumeSize, volumeType, encrypted, spotPrice, publicInAccount,
+        return createEc2Template(name, instanceType, volumeCount, volumeSize, volumeType, encrypted, spotPrice, kmsKey, publicInAccount,
                 description, platformId);
     }
 
@@ -234,6 +235,7 @@ public class AwsCommands implements CommandMarker {
             @CliOption(key = "volumeType", help = "volumeType of the template") AwsVolumeType volumeType,
             @CliOption(key = "encrypted", help = "use encrypted disks") Boolean encrypted,
             @CliOption(key = "spotPrice", help = "spotPrice of the template") Double spotPrice,
+            @CliOption(key = "kmsKey", help = "kmsKey of the template") String kmsKey,
             @CliOption(key = "publicInAccount", help = "flags if the template is public in the account",
                     unspecifiedDefaultValue = "false", specifiedDefaultValue = "true") boolean publicInAccount,
             @CliOption(key = "description", help = "Description of the template") String description,
@@ -259,6 +261,10 @@ public class AwsCommands implements CommandMarker {
         if (encrypted != null) {
             params.put("encrypted", encrypted);
         }
+        if (kmsKey != null) {
+            params.put("kmsKey", kmsKey);
+        }
+
         return baseTemplateCommands.create(name, instanceType.getName(), volumeCount, volumeSize, volType,
                 publicInAccount, description, params, platformId, PLATFORM);
     }

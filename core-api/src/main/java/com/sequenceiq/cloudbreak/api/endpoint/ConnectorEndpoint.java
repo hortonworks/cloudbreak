@@ -13,7 +13,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
-import com.sequenceiq.cloudbreak.api.model.JsonEntity;
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
@@ -48,7 +47,7 @@ public interface ConnectorEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_PLATFORMS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getPlatforms")
-    Map<String, JsonEntity> getPlatforms(@QueryParam("extended") Boolean extended);
+    Map<String, Object> getPlatforms(@QueryParam("extended") Boolean extended);
 
     @GET
     @Path("variants")
@@ -93,11 +92,11 @@ public interface ConnectorEndpoint {
     Collection<String> getOchestratorsByType(@PathParam("type") String type);
 
     @GET
-    @Path("vmtypes/{type}")
+    @Path("vmtypes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getVmTypes")
-    PlatformVirtualMachinesJson getVmTypes(@PathParam("type") String type, @QueryParam("extended") Boolean extended);
+    PlatformVirtualMachinesJson getVmTypes(@QueryParam("extended") Boolean extended);
 
     @GET
     @Path("regions")

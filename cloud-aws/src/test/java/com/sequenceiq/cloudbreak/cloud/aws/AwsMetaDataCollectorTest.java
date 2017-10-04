@@ -103,7 +103,7 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
                 instanceAuthentication));
 
 
@@ -147,7 +147,7 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
                 instanceAuthentication));
 
 
@@ -195,7 +195,7 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
                 instanceAuthentication));
 
 
@@ -239,10 +239,10 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
                 instanceAuthentication));
         vms.add(new CloudInstance("i-1",
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
                 instanceAuthentication));
 
 
@@ -295,7 +295,7 @@ public class AwsMetaDataCollectorTest {
         List<Volume> volumes = new ArrayList<>();
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         vms.add(new CloudInstance(null,
-                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null),
+                new InstanceTemplate("fla", "cbgateway", 5L, volumes, InstanceStatus.CREATED, null, 0L),
                 instanceAuthentication));
 
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq("region"))).thenReturn(amazonCFClient);

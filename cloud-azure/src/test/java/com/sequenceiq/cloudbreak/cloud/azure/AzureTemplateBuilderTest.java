@@ -125,7 +125,7 @@ public class AzureTemplateBuilderTest {
         name = "master";
         List<Volume> volumes = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1), new Volume("/hadoop/fs2", "HDD", 1));
         InstanceTemplate instanceTemplate = new InstanceTemplate("m1.medium", name, 0L, volumes, InstanceStatus.CREATE_REQUESTED,
-                new HashMap<>());
+                new HashMap<>(), 0L);
         Map<String, Object> params = new HashMap<>();
         params.put(CloudInstance.SUBNET_ID, "existingSubnet");
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
