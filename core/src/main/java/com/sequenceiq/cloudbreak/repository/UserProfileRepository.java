@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 public interface UserProfileRepository extends CrudRepository<UserProfile, Long> {
 
     @Query("SELECT b FROM UserProfile b WHERE b.owner= :owner and b.account= :account")
-    UserProfile findOneByOwnerAndAccount(@Param("owner") String owner, @Param("account") String account);
+    UserProfile findOneByOwnerAndAccount(@Param("account") String account, @Param("owner") String owner);
 
     @Query("SELECT b FROM UserProfile b WHERE b.credential.id = :credentialId")
     Set<UserProfile> findOneByCredentialId(@Param("credentialId") Long credentialId);

@@ -22,13 +22,12 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Credential;
-import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
-import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
+import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
 
 @Service
 @Transactional
@@ -49,7 +48,7 @@ public class CredentialService {
     private AuthorizationService authorizationService;
 
     @Inject
-    private UserProfileRepository userProfileRepository;
+    private UserProfileCredentialHandler userProfileCredentialHandler;
 
     public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
         return credentialRepository.findForUser(user.getUserId());
@@ -118,6 +117,7 @@ public class CredentialService {
         Credential savedCredential;
         try {
             savedCredential = credentialRepository.save(credential);
+            userProfileCredentialHandler.createProfilePreparation(credential);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.CREDENTIAL, credential.getName(), ex);
         }
@@ -170,16 +170,8 @@ public class CredentialService {
         if (!stackRepository.countByCredential(credential).equals(0L)) {
             throw new BadRequestException(String.format("Credential '%d' is in use, cannot be deleted.", credential.getId()));
         }
-        removeCredentialFromUserProfiles(credential);
+        userProfileCredentialHandler.destroyProfilePreparation(credential);
         archiveCredential(credential);
-    }
-
-    private void removeCredentialFromUserProfiles(Credential credential) {
-        Set<UserProfile> userProfiles = userProfileRepository.findOneByCredentialId(credential.getId());
-        for (UserProfile userProfile : userProfiles) {
-            userProfile.setCredential(null);
-            userProfileRepository.save(userProfile);
-        }
     }
 
     public void archiveCredential(Credential credential) {

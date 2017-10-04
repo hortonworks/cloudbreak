@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
-import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.PlatformResourceRequest;
@@ -61,8 +60,9 @@ public class CloudResourceAdvisor {
                 resourceRequest.getPlatformVariant(),
                 resourceRequest.getFilters());
         VmType defaultVmType = getDefaultVmType(availabilityZone, vmTypes);
-        componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));
-
+        if (defaultVmType != null) {
+            componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));
+        }
         VmRecommendations recommendations = cloudParameterService.getRecommendation(cloudPlatform);
         if (recommendations != null) {
             Collection<VmType> availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
@@ -96,7 +96,7 @@ public class CloudResourceAdvisor {
     private VmType getDefaultVmType(String availabilityZone, CloudVmTypes vmtypes) {
         VmType vmType = vmtypes.getDefaultCloudVmResponses().get(availabilityZone);
         if (vmType == null || Strings.isNullOrEmpty(vmType.value())) {
-            throw new NotFoundException(String.format("Could not determine VM type for availability zone: '%s'.", availabilityZone));
+            return null;
         }
         return vmType;
     }

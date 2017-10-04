@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.user;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -34,16 +35,24 @@ public class UserProfileService {
     @Inject
     private CredentialRepository credentialRepository;
 
-    public UserProfile get(IdentityUser user) {
-        UserProfile userProfile = userProfileRepository.findOneByOwnerAndAccount(user.getUserId(), user.getAccount());
+    public UserProfile get(String account, String owner) {
+        UserProfile userProfile = userProfileRepository.findOneByOwnerAndAccount(account, owner);
         if (userProfile == null) {
             userProfile = new UserProfile();
-            userProfile.setAccount(user.getAccount());
-            userProfile.setOwner(user.getUserId());
+            userProfile.setAccount(account);
+            userProfile.setOwner(owner);
             addUiProperties(userProfile);
             userProfile = userProfileRepository.save(userProfile);
         }
         return userProfile;
+    }
+
+    public UserProfile save(UserProfile userProfile) {
+        return userProfileRepository.save(userProfile);
+    }
+
+    public Set<UserProfile> findOneByCredentialId(Long credentialId) {
+        return userProfileRepository.findOneByCredentialId(credentialId);
     }
 
     private void addUiProperties(UserProfile userProfile) {
@@ -55,7 +64,7 @@ public class UserProfileService {
     }
 
     public void put(UserProfileRequest request, IdentityUser user) {
-        UserProfile userProfile = get(user);
+        UserProfile userProfile = get(user.getAccount(), user.getUserId());
         if (request.getCredentialId() != null) {
             Credential credential = credentialRepository.findByIdInAccount(request.getCredentialId(), userProfile.getAccount());
             if (credential == null) {
