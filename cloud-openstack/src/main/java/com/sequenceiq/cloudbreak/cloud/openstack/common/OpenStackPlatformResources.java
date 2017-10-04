@@ -165,39 +165,45 @@ public class OpenStackPlatformResources implements PlatformResources {
         Map<String, VmType> defaultCloudVmResponses = new HashMap<>();
         CloudRegions regions = regions(cloudCredential, region, filters);
         for (Region cloudRegion : regions.getCloudRegions().keySet()) {
-            Set<VmType> types = new HashSet<>();
-
-            for (Flavor flavor : osClient.compute().flavors().list()) {
-                VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
-                        .withCpuAndMemory(flavor.getVcpus(), flavor.getRam());
-                for (VolumeParameterType volumeParameterType : values()) {
-                    switch (volumeParameterType) {
-                        case MAGNETIC:
-                            builder.withMagneticConfig(volumeParameterConfig(MAGNETIC, flavor));
-                            break;
-                        case SSD:
-                            builder.withSsdConfig(null);
-                            break;
-                        case EPHEMERAL:
-                            builder.withEphemeralConfig(null);
-                            break;
-                        case ST1:
-                            builder.withSt1Config(null);
-                            break;
-                        case AUTO_ATTACHED:
-                            builder.withAutoAttachedConfig(null);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                VmType vmType = VmType.vmTypeWithMeta(flavor.getName(), builder.create(), true);
-                types.add(vmType);
+            Set<VmType> types = collectVmTypes(osClient);
+            for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(cloudRegion)) {
+                cloudVmResponses.put(availabilityZone.value(), types);
             }
-            cloudVmResponses.put(cloudRegion.value(), types);
             defaultCloudVmResponses.put(cloudRegion.value(), types.size() > 0 ? (VmType) types.toArray()[0] : null);
         }
         return new CloudVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
+    private Set<VmType> collectVmTypes(OSClient osClient) {
+        Set<VmType> types = new HashSet<>();
+        for (Flavor flavor : osClient.compute().flavors().list()) {
+            VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
+                    .withCpuAndMemory(flavor.getVcpus(), flavor.getRam());
+            for (VolumeParameterType volumeParameterType : values()) {
+                switch (volumeParameterType) {
+                    case MAGNETIC:
+                        builder.withMagneticConfig(volumeParameterConfig(MAGNETIC, flavor));
+                        break;
+                    case SSD:
+                        builder.withSsdConfig(null);
+                        break;
+                    case EPHEMERAL:
+                        builder.withEphemeralConfig(null);
+                        break;
+                    case ST1:
+                        builder.withSt1Config(null);
+                        break;
+                    case AUTO_ATTACHED:
+                        builder.withAutoAttachedConfig(null);
+                        break;
+                    default:
+                        break;
+                }
+            }
+            VmType vmType = VmType.vmTypeWithMeta(flavor.getName(), builder.create(), true);
+            types.add(vmType);
+        }
+        return types;
     }
 
     @Override

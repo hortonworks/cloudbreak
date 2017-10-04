@@ -45,7 +45,7 @@ public class UserDataBuilder {
         return result;
     }
 
-    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSssKey, String cbSshKey, byte[] cbSshKeyDer, String sshUser,
+    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSshKey, String cbSshKey, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters params, String saltBootPassword) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
@@ -55,7 +55,7 @@ public class UserDataBuilder {
         model.put("tmpSshKey", cbSshKey);
         model.put("signaturePublicKey", BaseEncoding.base64().encode(cbSshKeyDer));
         model.put("sshUser", sshUser);
-        model.put("publicSshKey", publicSssKey);
+        model.put("publicSshKey", publicSshKey);
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         return build(model);

@@ -64,8 +64,8 @@ public class ImageService {
             String cbSshKey = stack.getSecurityConfig().getCloudbreakSshPublicKeyDecoded();
             byte[] cbSshKeyDer = PkiUtil.getPublicKeyDer(cbPrivKey);
             String sshUser = stack.getStackAuthentication().getLoginUserName();
-            String publicSssKey = stack.getStackAuthentication().getPublicKey();
-            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSssKey, cbSshKeyDer, cbSshKey, sshUser, params,
+            String publicSshKey = stack.getStackAuthentication().getPublicKey() == null ? "" : stack.getStackAuthentication().getPublicKey();
+            Map<InstanceGroupType, String> userData = userDataBuilder.buildUserData(platform, publicSshKey, cbSshKeyDer, cbSshKey, sshUser, params,
                     stack.getSecurityConfig().getSaltBootPassword());
             HDPInfo hdpInfo = hdpInfoSearchService.searchHDPInfo(platformString, ambariVersion, hdpVersion, imageCatalog);
             if (hdpInfo != null) {
