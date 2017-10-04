@@ -34,6 +34,11 @@ func CreateGcpCredential(c *cli.Context) error {
 	return createCredential(c)
 }
 
+func CreateOpenstackCredential(c *cli.Context) error {
+	cloud.CurrentCloud = cloud.OPENSTACK
+	return createCredential(c)
+}
+
 func createCredential(c *cli.Context) error {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
@@ -50,7 +55,10 @@ type createCredentialClient interface {
 
 func createCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client createCredentialClient) *models_cloudbreak.CredentialResponse {
 	provider := cloud.GetProvider()
-	var credentialMap = provider.CreateCredentialParameters(stringFinder, boolFinder)
+	credentialMap, err := provider.CreateCredentialParameters(stringFinder, boolFinder)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
 
 	name := stringFinder(FlName.Name)
 	credReq := &models_cloudbreak.CredentialRequest{

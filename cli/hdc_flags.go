@@ -139,6 +139,48 @@ var (
 			Name: "service-account-private-key-file",
 		},
 	}
+	FlTenantUser = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "tenant-user",
+		},
+	}
+	FlTenantPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "tenant-password",
+		},
+	}
+	FlTenantName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "tenant-name",
+		},
+	}
+	FlEndpoint = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "endpoint",
+		},
+	}
+	FlKeystoneScope = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name: "keystone-scope",
+		},
+	}
+	FlUserDomain = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "user-domain",
+		},
+	}
+	FlFacing = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name: "facing",
+		},
+	}
 	// Not used jet as i know
 	FlClusterName = StringFlag{
 		RequiredFlag: REQUIRED,

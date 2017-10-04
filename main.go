@@ -8,6 +8,7 @@ import (
 	hdc "github.com/hortonworks/hdc-cli/cli"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/gcp"
+	_ "github.com/hortonworks/hdc-cli/cli/cloud/openstack"
 	"github.com/hortonworks/hdc-cli/cli/utils"
 	"github.com/urfave/cli"
 )
@@ -152,6 +153,36 @@ func main() {
 						for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlProjectId, hdc.FlServiceAccountId, hdc.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
+					},
+				},
+				{
+					Name:  "openstack",
+					Usage: "create a new openstack credential",
+					Subcommands: []cli.Command{
+						{
+							Name:   "keystone-v2",
+							Usage:  "create a new keystone version 2 openstack credential",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlTenantName, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build(),
+							Action: hdc.CreateOpenstackCredential,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlTenantName, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "keystone-v3",
+							Usage:  "create a new keystone version 3 openstack credential",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlUserDomain, hdc.FlKeystoneScope, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build(),
+							Action: hdc.CreateOpenstackCredential,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlUserDomain, hdc.FlKeystoneScope, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
 					},
 				},
 			},

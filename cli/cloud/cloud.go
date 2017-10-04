@@ -3,8 +3,9 @@ package cloud
 type CloudType string
 
 const (
-	AWS = CloudType("AWS")
-	GCP = CloudType("GCP")
+	AWS       = CloudType("AWS")
+	GCP       = CloudType("GCP")
+	OPENSTACK = CloudType("OPENSTACK")
 )
 
 type Network struct {
@@ -17,7 +18,7 @@ var CloudProviders map[CloudType]CloudProvider = make(map[CloudType]CloudProvide
 
 type CloudProvider interface {
 	GetName() *string
-	CreateCredentialParameters(func(string) string, func(string) bool) map[string]interface{}
+	CreateCredentialParameters(func(string) string, func(string) bool) (map[string]interface{}, error)
 	// ValidateNetwork(*Network) []error
 	// ValidateTags(map[string]string) []error
 }

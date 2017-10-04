@@ -18,7 +18,7 @@ func TestCreateRoleBasedCredentialParameters(t *testing.T) {
 		}
 	}
 
-	actualMap := provider.CreateCredentialParameters(stringFinder, nil)
+	actualMap, _ := provider.CreateCredentialParameters(stringFinder, nil)
 
 	if actualMap["selector"] != "role-based" {
 		t.Errorf("selector not match role-based == %s", actualMap["selector"])
@@ -40,7 +40,7 @@ func TestCreateKeyBasedCredentialParameters(t *testing.T) {
 		}
 	}
 
-	actualMap := provider.CreateCredentialParameters(stringFinder, nil)
+	actualMap, _ := provider.CreateCredentialParameters(stringFinder, nil)
 
 	if actualMap["selector"] != "key-based" {
 		t.Errorf("selector not match key-based == %s", actualMap["selector"])

@@ -19,7 +19,7 @@ func TestCreateCredentialParameters(t *testing.T) {
 		}
 	}
 
-	actualMap := provider.CreateCredentialParameters(stringFinder, nil)
+	actualMap, _ := provider.CreateCredentialParameters(stringFinder, nil)
 
 	if actualMap["projectId"] != "project-id" {
 		t.Errorf("projectId not match project-id == %s", actualMap["projectId"])
