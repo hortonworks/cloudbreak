@@ -181,6 +181,30 @@ var (
 			Name: "facing",
 		},
 	}
+	FlSubscriptionId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "subscription-id",
+		},
+	}
+	FlTenantId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "tenant-id",
+		},
+	}
+	FlAppId = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "app-id",
+		},
+	}
+	FlAppPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name: "app-password",
+		},
+	}
 	// Not used jet as i know
 	FlClusterName = StringFlag{
 		RequiredFlag: REQUIRED,

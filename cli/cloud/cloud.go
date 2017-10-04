@@ -4,6 +4,7 @@ type CloudType string
 
 const (
 	AWS       = CloudType("AWS")
+	AZURE     = CloudType("AZURE")
 	GCP       = CloudType("GCP")
 	OPENSTACK = CloudType("OPENSTACK")
 )

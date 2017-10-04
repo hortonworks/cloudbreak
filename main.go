@@ -7,6 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	hdc "github.com/hortonworks/hdc-cli/cli"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
+	_ "github.com/hortonworks/hdc-cli/cli/cloud/azure"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/gcp"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/openstack"
 	"github.com/hortonworks/hdc-cli/cli/utils"
@@ -137,6 +138,24 @@ func main() {
 							Action: hdc.CreateAwsCredential,
 							BashComplete: func(c *cli.Context) {
 								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlAccessKey, hdc.FlSecretKey).AddAuthenticationFlags().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
+					Name:  "azure",
+					Usage: "create a new azure credential",
+					Subcommands: []cli.Command{
+						{
+							Name:   "app-based",
+							Usage:  "create a new app based azure credential",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlSubscriptionId, hdc.FlTenantId, hdc.FlAppId, hdc.FlAppPassword).AddAuthenticationFlags().Build(),
+							Action: hdc.CreateAzureCredential,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlSubscriptionId, hdc.FlTenantId, hdc.FlAppId, hdc.FlAppPassword).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},

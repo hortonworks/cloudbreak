@@ -29,6 +29,11 @@ func CreateAwsCredential(c *cli.Context) error {
 	return createCredential(c)
 }
 
+func CreateAzureCredential(c *cli.Context) error {
+	cloud.CurrentCloud = cloud.AZURE
+	return createCredential(c)
+}
+
 func CreateGcpCredential(c *cli.Context) error {
 	cloud.CurrentCloud = cloud.GCP
 	return createCredential(c)
