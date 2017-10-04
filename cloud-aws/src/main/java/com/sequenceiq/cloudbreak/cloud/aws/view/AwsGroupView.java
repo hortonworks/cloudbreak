@@ -21,6 +21,10 @@ public class AwsGroupView {
 
     private final Boolean ebsEncrypted;
 
+    private final Boolean kmsKeyDefined;
+
+    private final String kmsKey;
+
     private final String volumeType;
 
     private final Double spotPrice;
@@ -31,8 +35,11 @@ public class AwsGroupView {
 
     private final String subnetId;
 
+    private final String snapshotId;
+
     public AwsGroupView(Integer instanceCount, String type, String flavor, String groupName, Integer volumeCount,
-            Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId, String subnetId) {
+            Boolean ebsEncrypted, Integer volumeSize, String volumeType, Double spotPrice, List<SecurityRule> rules, String cloudSecurityId, String subnetId,
+            Boolean kmsKeyDefined, String kmsKey, String snapshotId) {
         this.instanceCount = instanceCount;
         this.type = type;
         this.flavor = flavor;
@@ -45,6 +52,9 @@ public class AwsGroupView {
         this.rules = rules;
         this.cloudSecurityId = cloudSecurityId;
         this.subnetId = subnetId;
+        this.kmsKeyDefined = kmsKeyDefined;
+        this.kmsKey = kmsKey;
+        this.snapshotId = snapshotId;
     }
 
     public Integer getInstanceCount() {
@@ -97,5 +107,17 @@ public class AwsGroupView {
 
     public String getSubnetId() {
         return subnetId;
+    }
+
+    public Boolean getKmsKeyDefined() {
+        return kmsKeyDefined;
+    }
+
+    public String getKmsKey() {
+        return kmsKey;
+    }
+
+    public String getSnapshotId() {
+        return snapshotId;
     }
 }

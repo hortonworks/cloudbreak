@@ -18,9 +18,13 @@ public class InstanceTemplate extends DynamicModel {
 
     private final InstanceStatus status;
 
-    public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status, Map<String, Object> parameters) {
+    private final Long templateId;
+
+    public InstanceTemplate(String flavor, String groupName, Long privateId, List<Volume> volumes, InstanceStatus status, Map<String, Object> parameters,
+            Long templateId) {
         super(parameters);
         this.flavor = flavor;
+        this.templateId = templateId;
         this.groupName = groupName;
         this.privateId = privateId;
         this.volumes = ImmutableList.copyOf(volumes);
@@ -53,6 +57,10 @@ public class InstanceTemplate extends DynamicModel {
 
     public InstanceStatus getStatus() {
         return status;
+    }
+
+    public Long getTemplateId() {
+        return templateId;
     }
 
     @Override

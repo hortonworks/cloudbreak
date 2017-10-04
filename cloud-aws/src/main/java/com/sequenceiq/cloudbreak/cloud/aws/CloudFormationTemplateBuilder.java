@@ -39,6 +39,7 @@ public class CloudFormationTemplateBuilder {
         boolean multigw = context.stack.getGroups().stream().filter(g -> g.getType() == InstanceGroupType.GATEWAY).count() > 1;
         for (Group group : context.stack.getGroups()) {
             AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate());
+            String snapshotId = context.snapshotId.get(group.getName());
             AwsGroupView groupView = new AwsGroupView(
                     group.getInstancesSize(),
                     group.getType().name(),
@@ -51,7 +52,10 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getSpotPrice(),
                     group.getSecurity().getRules(),
                     group.getSecurity().getCloudSecurityId(),
-                    getSubnetIds(context.existingSubnetIds, i, group, multigw));
+                    getSubnetIds(context.existingSubnetIds, i, group, multigw),
+                    awsInstanceView.isKmsEnabled(),
+                    awsInstanceView.getKmsKey(),
+                    snapshotId);
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);
@@ -120,9 +124,9 @@ public class CloudFormationTemplateBuilder {
 
         private boolean existingIGW;
 
-        private List<String> existingSubnetIds;
+        private List<String> existingSubnetIds = new ArrayList<>();
 
-        private List<String> existingSubnetCidr;
+        private List<String> existingSubnetCidr = new ArrayList<>();
 
         private boolean mapPublicIpOnLaunch;
 
@@ -143,6 +147,8 @@ public class CloudFormationTemplateBuilder {
         private String defaultGatewayCidr;
 
         private int knoxPort;
+
+        private Map<String, String> snapshotId = new HashMap<>();
 
         public ModelContext withAuthenticatedContext(AuthenticatedContext ac) {
             this.ac = ac;
@@ -221,6 +227,11 @@ public class CloudFormationTemplateBuilder {
 
         public ModelContext withKnoxPort(int knoxPort) {
             this.knoxPort = knoxPort;
+            return this;
+        }
+
+        public ModelContext withSnapshotId(Map<String, String> snapshotId) {
+            this.snapshotId = snapshotId;
             return this;
         }
 

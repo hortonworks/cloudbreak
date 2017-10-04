@@ -245,8 +245,8 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
             availabilityZones = platformRegions.getAvailabilityZones();
             volumeTypes = cloudbreakClient.connectorEndpoint().getDisktypes().getDiskTypes();
             orchestrators = cloudbreakClient.connectorEndpoint().getOrchestratortypes().getOrchestrators();
-            PlatformVirtualMachinesJson platformVirtualMachines = cloudbreakClient.connectorEndpoint().getVmTypes(null, true);
-            for (Entry<String, Collection<VmTypeJson>> vmCloud : platformVirtualMachines.getVirtualMachines().entrySet()) {
+            PlatformVirtualMachinesJson vmTypes = cloudbreakClient.connectorEndpoint().getVmTypes(true);
+            for (Entry<String, Collection<VmTypeJson>> vmCloud : vmTypes.getVirtualMachines().entrySet()) {
                 List<Map<String, String>> tmp = new ArrayList<>();
                 for (VmTypeJson vmTypeJson : vmCloud.getValue()) {
                     Map<String, String> map = responseTransformer.transformObjectToStringMap(vmTypeJson);
@@ -254,8 +254,8 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
                 }
                 instanceTypes.put(vmCloud.getKey(), tmp);
             }
-            vmTypesPerZones = platformVirtualMachines.getVmTypesPerZones();
-            defaultVmTypePerZones = platformVirtualMachines.getDefaultVmTypePerZones();
+            vmTypesPerZones =  vmTypes.getVmTypesPerZones();
+            defaultVmTypePerZones = vmTypes.getDefaultVmTypePerZones();
         } catch (RuntimeException ignored) {
             System.out.println("Error during retrieving platform variants");
         } finally {

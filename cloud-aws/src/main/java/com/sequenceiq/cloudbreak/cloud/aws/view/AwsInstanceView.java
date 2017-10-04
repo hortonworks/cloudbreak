@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.view;
 
 import java.util.List;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 
@@ -37,6 +38,10 @@ public class AwsInstanceView {
         return instanceTemplate.getPrivateId();
     }
 
+    public Long getTemplateId() {
+        return instanceTemplate.getTemplateId();
+    }
+
     public boolean isEncryptedVolumes() {
         Object ev = instanceTemplate.getParameter("encrypted", Object.class);
         if (ev instanceof Boolean) {
@@ -45,6 +50,18 @@ public class AwsInstanceView {
             return Boolean.parseBoolean((String) ev);
         }
         return false;
+    }
+
+    public boolean isKmsEnabled() {
+        String ev = instanceTemplate.getParameter("kmsKey", String.class);
+        if (Strings.isNullOrEmpty(ev)) {
+            return false;
+        }
+        return true;
+    }
+
+    public String getKmsKey() {
+        return instanceTemplate.getParameter("kmsKey", String.class);
     }
 
     public Double getSpotPrice() {

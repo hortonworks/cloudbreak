@@ -30,7 +30,7 @@ public class MockInstanceUtil {
         serverAddressGenerator.iterateOver((address, number) -> {
             String instanceId = "instance-" + address;
             InstanceTemplate instanceTemplate = new InstanceTemplate("medium", "group", Integer.toUnsignedLong(number),
-                    new ArrayList<>(), InstanceStatus.CREATED, null);
+                    new ArrayList<>(), InstanceStatus.CREATED, null, 0L);
             InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
             CloudInstance cloudInstanceWithId = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication);
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.STARTED);
@@ -44,7 +44,7 @@ public class MockInstanceUtil {
         CloudVmMetaDataStatus vmMetaDataStatus = instanceMap.get(instanceId);
         InstanceTemplate oldTemplate = vmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getTemplate();
         InstanceTemplate newTemplate = new InstanceTemplate("medium", "group", oldTemplate.getPrivateId(),
-                new ArrayList<>(), InstanceStatus.TERMINATED, null);
+                new ArrayList<>(), InstanceStatus.TERMINATED, null, 0L);
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         CloudInstance cloudInstanceWithId = new CloudInstance(instanceId, newTemplate, instanceAuthentication);
         CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstanceWithId, InstanceStatus.TERMINATED);
