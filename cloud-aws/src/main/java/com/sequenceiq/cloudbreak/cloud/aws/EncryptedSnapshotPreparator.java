@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.AvailabilityZone;
 import com.amazonaws.services.ec2.model.CreateSnapshotRequest;
 import com.amazonaws.services.ec2.model.CreateSnapshotResult;
 import com.amazonaws.services.ec2.model.CreateTagsRequest;
@@ -14,8 +15,8 @@ import com.amazonaws.services.ec2.model.CreateVolumeRequest;
 import com.amazonaws.services.ec2.model.CreateVolumeResult;
 import com.amazonaws.services.ec2.model.DescribeAvailabilityZonesRequest;
 import com.amazonaws.services.ec2.model.DescribeSnapshotsRequest;
-import com.amazonaws.services.ec2.model.DescribeSnapshotsResult;
 import com.amazonaws.services.ec2.model.Filter;
+import com.amazonaws.services.ec2.model.Snapshot;
 import com.amazonaws.services.ec2.model.Tag;
 import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.aws.task.AwsPollTaskFactory;
@@ -51,7 +52,7 @@ public class EncryptedSnapshotPreparator {
     private SyncPollingScheduler<Boolean> syncPollingScheduler;
 
     public Optional<String> createSnapshotIfNeeded(AuthenticatedContext ac, Group group) {
-        InstanceTemplate instanceTemplate = group.getInstances().get(0).getTemplate();
+        InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AwsInstanceView awsInstanceView = new AwsInstanceView(instanceTemplate);
         AwsCredentialView awsCredentialView = new AwsCredentialView(ac.getCloudCredential());
@@ -59,11 +60,7 @@ public class EncryptedSnapshotPreparator {
         AmazonEC2Client client = awsClient.createAccess(awsCredentialView, regionName);
 
         Optional<String> snapshotId = checkThatSnapshotIsAvailable(awsInstanceView, client);
-        if (snapshotId.isPresent()) {
-            return snapshotId;
-        } else {
-            return prepareSnapshotForEncryptionBecauseThatDoesNotExist(ac, group, awsInstanceView, client);
-        }
+        return snapshotId.isPresent() ? snapshotId : prepareSnapshotForEncryptionBecauseThatDoesNotExist(ac, group, awsInstanceView, client);
     }
 
     private Optional<String> prepareSnapshotForEncryptionBecauseThatDoesNotExist(AuthenticatedContext ac, Group group,
@@ -79,11 +76,9 @@ public class EncryptedSnapshotPreparator {
     }
 
     private Optional<String> checkThatSnapshotIsAvailable(AwsInstanceView awsInstanceView, AmazonEC2Client client) {
-        DescribeSnapshotsResult describeSnapshotsResult = client.describeSnapshots(prepareDescribeSnapshotsRequest(awsInstanceView));
-        if (describeSnapshotsResult.getSnapshots().isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.ofNullable(describeSnapshotsResult.getSnapshots().get(0).getSnapshotId());
+        Optional<Snapshot> describeSnapshotsResult =
+                client.describeSnapshots(prepareDescribeSnapshotsRequest(awsInstanceView)).getSnapshots().stream().findFirst();
+        return describeSnapshotsResult.isPresent() ? Optional.ofNullable(describeSnapshotsResult.get().getSnapshotId()) : Optional.empty();
     }
 
     private CreateTagsRequest prepareCreateTagsRequest(AwsInstanceView awsInstanceView, CreateSnapshotResult snapshotResult) {
@@ -91,7 +86,9 @@ public class EncryptedSnapshotPreparator {
     }
 
     private ImmutableList<Tag> prepareTagList(AwsInstanceView awsInstanceView) {
-        return ImmutableList.of(new Tag().withKey(CLOUDBREAK_EBS_SNAPSHOT).withValue(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId())));
+        return ImmutableList.of(new Tag()
+                .withKey(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId()))
+                .withValue(String.format(CLOUDBREAK_EBS_SNAPSHOT, awsInstanceView.getTemplateId())));
     }
 
     private void checkSnapshotReadiness(AuthenticatedContext ac, AmazonEC2Client client, CreateSnapshotResult snapshotResult) {
@@ -135,7 +132,9 @@ public class EncryptedSnapshotPreparator {
 
     private String prepareDescribeAvailabilityZonesResult(AuthenticatedContext ac, AmazonEC2Client client) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
-        return client.describeAvailabilityZones(prepareDescribeAvailabilityZoneRequest(regionName)).getAvailabilityZones().get(0).getZoneName();
+        Optional<AvailabilityZone> first =
+                client.describeAvailabilityZones(prepareDescribeAvailabilityZoneRequest(regionName)).getAvailabilityZones().stream().findFirst();
+        return first.isPresent() ? first.get().getZoneName() : null;
     }
 
     private DescribeAvailabilityZonesRequest prepareDescribeAvailabilityZoneRequest(String regionName) {
@@ -151,7 +150,7 @@ public class EncryptedSnapshotPreparator {
     }
 
     public boolean isEncryptedVolumeRequested(Group group) {
-        return group.getInstances().stream().anyMatch(cloudInstance -> new AwsInstanceView(cloudInstance.getTemplate()).isEncryptedVolumes());
+        return new AwsInstanceView(group.getReferenceInstanceConfiguration().getTemplate()).isEncryptedVolumes();
     }
 
 }

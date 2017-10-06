@@ -54,10 +54,7 @@ public class AwsInstanceView {
 
     public boolean isKmsEnabled() {
         String ev = instanceTemplate.getParameter("kmsKey", String.class);
-        if (Strings.isNullOrEmpty(ev)) {
-            return false;
-        }
-        return true;
+        return !Strings.isNullOrEmpty(ev);
     }
 
     public String getKmsKey() {

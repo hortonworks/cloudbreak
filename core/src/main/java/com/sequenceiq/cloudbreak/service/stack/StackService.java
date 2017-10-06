@@ -534,11 +534,13 @@ public class StackService {
         return instanceMetaDataRepository.save(metaData);
     }
 
-    public void validateStack(StackValidation stackValidation) {
+    public void validateStack(StackValidation stackValidation, boolean validateBlueprint) {
         if (stackValidation.getNetwork() != null) {
             networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
         }
-        blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
+        if (validateBlueprint) {
+            blueprintValidator.validateBlueprintForStack(stackValidation.getBlueprint(), stackValidation.getHostGroups(), stackValidation.getInstanceGroups());
+        }
     }
 
     public void validateOrchestrator(Orchestrator orchestrator) {

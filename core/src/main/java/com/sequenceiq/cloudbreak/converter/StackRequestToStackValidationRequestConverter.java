@@ -10,7 +10,9 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Credential;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
@@ -18,6 +20,9 @@ public class StackRequestToStackValidationRequestConverter extends AbstractConve
 
     @Inject
     private CredentialService credentialService;
+
+    @Inject
+    private BlueprintService blueprintService;
 
     @Override
     public StackValidationRequest convert(StackRequest source) {
@@ -38,6 +43,15 @@ public class StackRequestToStackValidationRequestConverter extends AbstractConve
             } else if (source.getCredentialSource().getSourceId() != null) {
                 stackValidationRequest.setCredentialId(source.getCredentialSource().getSourceId());
             }
+        }
+        if (!Strings.isNullOrEmpty(source.getCredentialName())) {
+            Credential credential = credentialService.get(source.getCredentialName(), source.getAccount());
+            stackValidationRequest.setCredentialName(source.getCredentialName());
+            stackValidationRequest.setCredentialId(credential.getId());
+        }
+        if (!Strings.isNullOrEmpty(clusterRequest.getBlueprintName())) {
+            Blueprint blueprint = blueprintService.get(source.getCredentialName(), source.getAccount());
+            stackValidationRequest.setBlueprintId(blueprint.getId());
         }
         stackValidationRequest.setFileSystem(source.getClusterRequest().getFileSystem());
         stackValidationRequest.setHostGroups(source.getClusterRequest().getHostGroups());

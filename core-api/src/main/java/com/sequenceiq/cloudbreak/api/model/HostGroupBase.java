@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.validation.Valid;
@@ -24,7 +25,7 @@ public abstract class HostGroupBase implements JsonEntity {
     private ConstraintJson constraint;
 
     @ApiModelProperty(HostGroupModelDescription.RECIPE_IDS)
-    private Set<Long> recipeIds;
+    private Set<Long> recipeIds = new HashSet<>();
 
     @ApiModelProperty(HostGroupModelDescription.RECOVERY_MODE)
     private RecoveryMode recoveryMode = RecoveryMode.MANUAL;
@@ -60,4 +61,5 @@ public abstract class HostGroupBase implements JsonEntity {
     public void setRecoveryMode(RecoveryMode recoveryMode) {
         this.recoveryMode = recoveryMode;
     }
+
 }

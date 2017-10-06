@@ -99,6 +99,13 @@ public interface ConnectorEndpoint {
     PlatformVirtualMachinesJson getVmTypes(@QueryParam("extended") Boolean extended);
 
     @GET
+    @Path("vmtypes/{type}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_VM_TYPES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "getVmTypes")
+    PlatformVirtualMachinesJson getVmTypes(@PathParam("type") String type, @QueryParam("extended") Boolean extended);
+
+    @GET
     @Path("regions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_REGIONS, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,

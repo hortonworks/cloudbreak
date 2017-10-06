@@ -42,7 +42,8 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         RECIPE_IDS,
         REQUEST_TYPE,
         RECIPES,
-        PUBLIC_IN_ACCOUNT
+        PUBLIC_IN_ACCOUNT,
+        RECIPES_NAMES
     }
 
     @Inject
@@ -80,6 +81,7 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
         Set<Long> recipeIds = (Set<Long>) data[DecorationData.RECIPE_IDS.ordinal()];
         boolean postRequest = (boolean) data[DecorationData.REQUEST_TYPE.ordinal()];
         Set<RecipeRequest> recipes = (Set<RecipeRequest>) data[DecorationData.RECIPES.ordinal()];
+        Set<String> recipeNames = (Set<String>) data[DecorationData.RECIPES_NAMES.ordinal()];
         Boolean publicInAccount = (Boolean) data[DecorationData.PUBLIC_IN_ACCOUNT.ordinal()];
 
         LOGGER.debug("Decorating hostgroup on [{}] request.", postRequest ? "POST" : "PUT");
@@ -93,20 +95,39 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
 
         subject.getRecipes().clear();
         if (recipeIds != null) {
-            for (Long recipeId : recipeIds) {
-                Recipe recipe = recipeService.get(recipeId);
-                subject.getRecipes().add(recipe);
-            }
-        } else if (recipes != null && !recipes.isEmpty()) {
-            for (RecipeRequest recipe : recipes) {
-                Recipe convert = conversionService.convert(recipe, Recipe.class);
-                convert.setPublicInAccount(publicInAccount);
-                convert = recipeService.create(user, convert);
-                subject.getRecipes().add(convert);
-            }
+            prepareRecipesByIds(subject, recipeIds);
+        }
+        if (recipeNames != null && !recipeNames.isEmpty()) {
+            prepareRecipesByRequests(subject, user, recipes, publicInAccount);
+        }
+        if (recipes != null && !recipes.isEmpty()) {
+            prepareRecipesByName(subject, user, recipeNames);
         }
 
         return subject;
+    }
+
+    private void prepareRecipesByName(HostGroup subject, IdentityUser user, Set<String> recipeNames) {
+        for (String recipeName : recipeNames) {
+            Recipe recipe = recipeService.getPublicRecipe(recipeName, user);
+            subject.getRecipes().add(recipe);
+        }
+    }
+
+    private void prepareRecipesByRequests(HostGroup subject, IdentityUser user, Set<RecipeRequest> recipes, Boolean publicInAccount) {
+        for (RecipeRequest recipe : recipes) {
+            Recipe convert = conversionService.convert(recipe, Recipe.class);
+            convert.setPublicInAccount(publicInAccount);
+            convert = recipeService.create(user, convert);
+            subject.getRecipes().add(convert);
+        }
+    }
+
+    private void prepareRecipesByIds(HostGroup subject, Set<Long> recipeIds) {
+        for (Long recipeId : recipeIds) {
+            Recipe recipe = recipeService.get(recipeId);
+            subject.getRecipes().add(recipe);
+        }
     }
 
     private Constraint decorateConstraint(Long stackId, IdentityUser user, Constraint constraint, String instanceGroupName, String constraintTemplateName) {

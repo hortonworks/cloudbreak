@@ -147,6 +147,12 @@ public class PlatformParameterController implements ConnectorEndpoint {
     }
 
     @Override
+    public PlatformVirtualMachinesJson getVmTypes(String type, Boolean extended) {
+        PlatformVirtualMachines vmtypes = cloudParameterService.getVmtypes(type.toUpperCase(), extended);
+        return conversionService.convert(vmtypes, PlatformVirtualMachinesJson.class);
+    }
+
+    @Override
     public PlatformRegionsJson getRegions() {
         PlatformRegions pv = cloudParameterService.getRegions();
         return conversionService.convert(pv, PlatformRegionsJson.class);

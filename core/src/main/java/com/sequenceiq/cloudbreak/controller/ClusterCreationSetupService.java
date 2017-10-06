@@ -103,7 +103,7 @@ public class ClusterCreationSetupService {
                 request.getBlueprintId(), request.getHostGroups(), request.getValidateBlueprint(),
                 request.getRdsConfigIds(), request.getLdapConfigId(),
                 request.getBlueprint(), request.getRdsConfigJsons(),
-                request.getLdapConfig(), request.getConnectedCluster());
+                request.getLdapConfig(), request.getConnectedCluster(), request.getBlueprintName());
         List<ClusterComponent> components = new ArrayList<>();
         components = addAmbariRepoConfig(stack.getId(), components, request, cluster);
         components = addHDPRepoConfig(stack.getId(), components, request, cluster);
