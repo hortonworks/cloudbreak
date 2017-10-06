@@ -1,9 +1,15 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,15 +27,27 @@ public class SshUtil {
     private SshUtil() {
     }
 
-    public static boolean executeCommand(String host, String defaultPrivateKeyFile, String sshCommand, String checkType, String value) throws IOException {
+    public static boolean executeCommand(String host, String defaultPrivateKeyFile, String sshCommand, String sshUser, Map<String, List<String>>  sshCheckMap)
+            throws IOException {
+        if (sshCheckMap.isEmpty()) {
+            return false;
+        }
         try (SSHClient sshClient = new SSHClient()) {
             sshClient.addHostKeyVerifier(new PromiscuousVerifier());
             sshClient.connect(host, 22);
-            sshClient.authPublickey("cloudbreak", defaultPrivateKeyFile);
+            sshClient.authPublickey(sshUser, defaultPrivateKeyFile);
             Pair<Integer, String> cmdOut = execute(sshClient, sshCommand);
             LOGGER.info("Ssh command status code and output: " + cmdOut);
-            return cmdOut.getLeft() == 0 && checkCommandOutput(cmdOut, checkType, value);
+            for (Map.Entry<String, List<String>> entry : sshCheckMap.entrySet()) {
+                for (String listValue: entry.getValue()) {
+                    if (cmdOut.getLeft() != 0 || !checkCommandOutput(cmdOut, entry.getKey(), listValue)) {
+                        LOGGER.error("Ssh command output is not proper: " + entry.getKey() + ' ' + listValue);
+                        return false;
+                    }
+                }
+            }
         }
+        return true;
     }
 
     private static Session startSshSession(SSHClient ssh) throws IOException {
@@ -42,9 +60,10 @@ public class SshUtil {
         LOGGER.info("Waiting to SSH command to be executed...");
         try (Session session = startSshSession(ssh)) {
             try (Command cmd = session.exec(command)) {
-                String stdout = IOUtils.readFully(cmd.getInputStream()).toString();
-                cmd.join(10, TimeUnit.SECONDS);
-                return Pair.of(cmd.getExitStatus(), stdout);
+                try (OutputStream os = IOUtils.readFully(cmd.getInputStream())) {
+                    cmd.join(10, TimeUnit.SECONDS);
+                    return Pair.of(cmd.getExitStatus(), os.toString());
+                }
             }
         }
     }
@@ -62,5 +81,16 @@ public class SshUtil {
                 break;
         }
         return false;
+    }
+
+    public static Map<String, List<String>> getSshCheckMap(String sshChecker) {
+        List<String> sshCheckList = Arrays.asList(sshChecker.split(";"));
+        Map<String, List<String>> sshCheckMap = new HashMap<>();
+        for (String elem : sshCheckList) {
+            String[] tmpList = elem.split(":");
+            Assert.assertTrue(tmpList.length > 1);
+            sshCheckMap.put(tmpList[0], Arrays.asList(tmpList[1].split(",")));
+        }
+        return sshCheckMap;
     }
 }

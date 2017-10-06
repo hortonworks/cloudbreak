@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.filesystem;
 
+import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.SshUtil;
 import com.sequenceiq.it.util.ResourceUtil;
 
+
 public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
 
     @Value("${integrationtest.defaultPrivateKeyFile}")
@@ -37,17 +39,19 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
     }
 
     @Test
-    @Parameters({"filesystemType", "filesystemName", "sshCommand", "folderPrefix", "wasbContainerName"})
-    public void testFileSystem(String filesystemType, String filesystemName, String sshCommand, @Optional("it-terasort") String folderPrefix,
-            @Optional("it-container") String wasbContainerName) throws IOException, GeneralSecurityException {
+    @Parameters({"filesystemType", "filesystemName", "folderPrefix", "wasbContainerName", "sshCommand", "sshUser", "sshChecker"})
+    public void testFileSystem(String filesystemType, String filesystemName, String folderPrefix, @Optional("it-container") String wasbContainerName,
+            String sshCommand, @Optional("cloudbreak") String sshUser, String sshChecker) throws IOException, GeneralSecurityException {
         //GIVEN
+        Assert.assertEquals(new File(defaultPrivateKeyFile).exists(), true, "Private cert file not found: " + defaultPrivateKeyFile);
         fsParams.put("filesystemType", filesystemType);
         fsParams.put("filesystemName", filesystemName);
         fsParams.put("folderPrefix", folderPrefix);
         fsParams.put("wasbContainerName", wasbContainerName);
 
         IntegrationTestContext itContext = getItContext();
-        String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+        String stackId  = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
+
         StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
 
         String masterIp = CloudbreakUtil.getAmbariIp(stackEndpoint, stackId, itContext);
@@ -58,8 +62,9 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
         if ("WASB".equals(filesystemType)) {
             FilesystemUtil.createWasbContainer(cloudProviderParams, filesystemName, wasbContainerName);
         }
+
         //WHEN
-        boolean sshResult = SshUtil.executeCommand(masterIp, defaultPrivateKeyFile, sshCommand, "notContains", "Container killed on request");
+        boolean sshResult = SshUtil.executeCommand(masterIp, defaultPrivateKeyFile, sshCommand, sshUser, SshUtil.getSshCheckMap(sshChecker));
 
         //THEN
         Assert.assertTrue(sshResult, "Ssh command executing was not successful");
