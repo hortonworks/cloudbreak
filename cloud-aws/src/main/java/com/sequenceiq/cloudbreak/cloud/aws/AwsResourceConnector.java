@@ -919,6 +919,4 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
         }
         return snapshotIdMap;
     }
-
-
 }

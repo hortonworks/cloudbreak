@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.task;
 
+import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Scope;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.ec2.AmazonEC2Client;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
+import com.amazonaws.services.ec2.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.task.PollBooleanStateTask;
@@ -36,7 +39,7 @@ public class EbsVolumeStatusCheckerTask extends PollBooleanStateTask {
     protected Boolean doCall() throws Exception {
         LOGGER.info("Checking if AWS EBS volume '{}' is created.", volumeId);
         DescribeVolumesResult describeVolumesResult = amazonEC2Client.describeVolumes(new DescribeVolumesRequest().withVolumeIds(volumeId));
-        return describeVolumesResult.getVolumes() != null && !describeVolumesResult.getVolumes().isEmpty()
-                && "available".equals(describeVolumesResult.getVolumes().get(0).getState());
+        Optional<Volume> volume = describeVolumesResult.getVolumes().stream().findFirst();
+        return volume.isPresent() ? "available".equals(volume.get().getState()) : false;
     }
 }

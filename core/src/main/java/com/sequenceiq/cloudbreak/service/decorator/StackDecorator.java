@@ -77,17 +77,20 @@ public class StackDecorator implements Decorator<Stack> {
         CREDENTIAL_ID,
         NETWORK_ID,
         USER,
-        FLEX_ID
+        FLEX_ID,
+        CREDENTIAL_NAME
     }
 
     @Override
     public Stack decorate(Stack subject, Object... data) {
         prepareDomainIfDefined(subject, data);
         Object credentialId = data[DecorationData.CREDENTIAL_ID.ordinal()];
-        if (credentialId != null || subject.getCredential() != null) {
+        String credentialName = (String) data[DecorationData.CREDENTIAL_NAME.ordinal()];
+        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
+        if (credentialId != null || subject.getCredential() != null || credentialName != null) {
             Object networkId = data[DecorationData.NETWORK_ID.ordinal()];
 
-            prepareCredential(subject, credentialId);
+            prepareCredential(subject, credentialId, credentialName, user);
             subject.setCloudPlatform(subject.getCredential().cloudPlatform());
             if (subject.getInstanceGroups() == null || (networkId == null && subject.getNetwork() == null
                     && !BYOS.equals(subject.getCredential().cloudPlatform()))) {
@@ -105,9 +108,13 @@ public class StackDecorator implements Decorator<Stack> {
         return subject;
     }
 
-    private void prepareCredential(Stack subject, Object credentialId) {
+    private void prepareCredential(Stack subject, Object credentialId, String credentialName, IdentityUser user) {
         if (credentialId != null) {
             Credential credential = credentialService.get((Long) credentialId);
+            subject.setCredential(credential);
+        }
+        if (credentialName != null) {
+            Credential credential = credentialService.getPublicCredential(credentialName, user);
             subject.setCredential(credential);
         }
     }

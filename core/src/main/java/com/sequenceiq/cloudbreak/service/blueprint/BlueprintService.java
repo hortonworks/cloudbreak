@@ -75,6 +75,16 @@ public class BlueprintService {
         return blueprint;
     }
 
+    @PostAuthorize("hasPermission(returnObject,'read')")
+    public Blueprint get(String name, String account) {
+        Blueprint blueprint = blueprintRepository.findOneByName(name, account);
+        if (blueprint == null) {
+            throw new NotFoundException(String.format("Credential '%s' not found in %s account.", name, account));
+        } else {
+            return blueprint;
+        }
+    }
+
     @Transactional(TxType.NEVER)
     public Blueprint create(IdentityUser user, Blueprint blueprint, List<Map<String, Map<String, String>>> properties) {
         LOGGER.debug("Creating blueprint: [User: '{}', Account: '{}']", user.getUsername(), user.getAccount());

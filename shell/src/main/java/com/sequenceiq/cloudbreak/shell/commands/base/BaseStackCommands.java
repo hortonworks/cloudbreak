@@ -23,6 +23,7 @@ import org.springframework.shell.core.annotation.CliOption;
 
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
+import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.api.model.FailurePolicyRequest;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupRequest;
@@ -318,7 +319,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setOnFailureAction(onFailureAction == null ? OnFailureAction.DO_NOTHING : OnFailureAction.valueOf(onFailureAction.name()));
             stackRequest.setNetworkId(shellContext.getActiveNetworkId());
             FailurePolicyRequest failurePolicyRequest = new FailurePolicyRequest();
-            stackRequest.setCredentialId(Long.valueOf(shellContext.getCredentialId()));
+            CredentialResponse credentialById = shellContext.getCredentialById(shellContext.getCredentialId());
+            stackRequest.setCredentialName(credentialById.getName());
             failurePolicyRequest.setAdjustmentType(adjustmentType == null ? AdjustmentType.BEST_EFFORT : AdjustmentType.valueOf(adjustmentType.name()));
             failurePolicyRequest.setThreshold(threshold == null ? 1L : threshold);
             stackRequest.setFailurePolicy(failurePolicyRequest);

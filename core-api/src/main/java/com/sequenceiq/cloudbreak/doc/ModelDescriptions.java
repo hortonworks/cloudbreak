@@ -145,6 +145,7 @@ public class ModelDescriptions {
         public static final String CLUSTER_NAME = "name of the cluster";
         public static final String CLUSTER_ID = "id of the cluster";
         public static final String BLUEPRINT_ID = "blueprint id for the cluster";
+        public static final String BLUEPRINT_NAME = "blueprint name for the cluster";
         public static final String BLUEPRINT = "blueprint for the cluster";
         public static final String VALIDATE_BLUEPRINT = "validate blueprint";
         public static final String HOURS = "duration - how long the cluster is running in hours";
@@ -293,6 +294,7 @@ public class ModelDescriptions {
 
     public static class HostGroupModelDescription {
         public static final String RECIPE_IDS = "referenced recipe ids";
+        public static final String RECIPE_NAMES = "referenced recipe names";
         public static final String RECIPES = "referenced recipes";
         public static final String HOST_GROUP_NAME = "name of the host group";
         public static final String CONSTRAINT = "instance group or resource constraint for a hostgroup";

@@ -61,7 +61,8 @@ public class ClusterDecorator implements Decorator<Cluster> {
         BLUEPRINT,
         RDSCONFIG,
         LDAP_CONFIG,
-        CONNECTED_CLUSTER
+        CONNECTED_CLUSTER,
+        BLUEPRINT_NAME
     }
 
     @Inject
@@ -109,6 +110,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         LdapConfigRequest ldapConfigRequest = (LdapConfigRequest) data[DecorationData.LDAP_CONFIG.ordinal()];
         Set<Long> rdsConfigIds = (Set<Long>) data[DecorationData.RDSCONFIG_ID.ordinal()];
         ConnectedClusterRequest connectedClusterRequest = (ConnectedClusterRequest) data[DecorationData.CONNECTED_CLUSTER.ordinal()];
+        String blueprintName = (String) data[DecorationData.BLUEPRINT_NAME.ordinal()];
 
         Stack stack = stackService.getById(stackId);
 
@@ -119,6 +121,8 @@ public class ClusterDecorator implements Decorator<Cluster> {
             blueprint.setPublicInAccount(stack.isPublicInAccount());
             blueprint = blueprintService.create(user, blueprint, new ArrayList<>());
             subject.setBlueprint(blueprint);
+        } else if (!Strings.isNullOrEmpty(blueprintName)) {
+            subject.setBlueprint(blueprintService.getByName(blueprintName, user));
         } else {
             throw new BadRequestException("Blueprint does not configured for the cluster!");
         }
@@ -226,7 +230,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup.setCluster(cluster);
             hostGroup = hostGroupDecorator.decorate(hostGroup, stack.getId(), user, json.getConstraint(), json.getRecipeIds(),
-                    true, json.getRecipes(), stack.isPublicInAccount());
+                    true, json.getRecipes(), stack.isPublicInAccount(), json.getRecipeNames());
             hostGroups.add(hostGroup);
         }
         return hostGroups;

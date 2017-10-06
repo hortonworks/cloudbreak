@@ -196,7 +196,7 @@ public class StackController implements StackEndpoint {
     @Override
     public Response validate(StackValidationRequest request) {
         StackValidation stackValidation = conversionService.convert(request, StackValidation.class);
-        stackService.validateStack(stackValidation);
+        stackService.validateStack(stackValidation, true);
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
         fileSystemValidator.validateFileSystem(request.getPlatform(), cloudCredential, request.getFileSystem());
         return Response.status(Status.ACCEPTED).build();
@@ -222,7 +222,8 @@ public class StackController implements StackEndpoint {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest, stack, user);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user, stackRequest.getFlexId());
+        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user,
+                stackRequest.getFlexId(), stackRequest.getCredentialName());
         stack.setPublicInAccount(publicInAccount);
         validateAccountPreferences(stack, user);
 
@@ -233,7 +234,7 @@ public class StackController implements StackEndpoint {
         if (stackRequest.getClusterRequest() != null) {
             StackValidationRequest stackValidationRequest = conversionService.convert(stackRequest, StackValidationRequest.class);
             StackValidation stackValidation = conversionService.convert(stackValidationRequest, StackValidation.class);
-            stackService.validateStack(stackValidation);
+            stackService.validateStack(stackValidation, stackRequest.getClusterRequest().getValidateBlueprint());
             CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(stackValidation.getCredential());
             fileSystemValidator.validateFileSystem(stackValidationRequest.getPlatform(), cloudCredential, stackValidationRequest.getFileSystem());
             clusterCreationService.validate(stackRequest.getClusterRequest(), stack, user);

@@ -30,6 +30,9 @@ public class ClusterRequest implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT_ID)
     private Long blueprintId;
 
+    @ApiModelProperty(ClusterModelDescription.BLUEPRINT_NAME)
+    private String blueprintName;
+
     @ApiModelProperty(ClusterModelDescription.BLUEPRINT)
     private BlueprintRequest blueprint;
 
@@ -342,5 +345,13 @@ public class ClusterRequest implements JsonEntity {
 
     public void setExecutorType(ExecutorType executorType) {
         this.executorType = executorType;
+    }
+
+    public String getBlueprintName() {
+        return blueprintName;
+    }
+
+    public void setBlueprintName(String blueprintName) {
+        this.blueprintName = blueprintName;
     }
 }

@@ -46,6 +46,9 @@ public class StackRequest extends StackBase {
     @ApiModelProperty(StackModelDescription.SOURCE_CREDENTIAL)
     private CredentialSourceRequest credentialSource;
 
+    @ApiModelProperty(StackModelDescription.CREDENTIAL_NAME)
+    private String credentialName;
+
     @Valid
     @ApiModelProperty(StackModelDescription.CLUSTER_REQUEST)
     private ClusterRequest clusterRequest;
@@ -158,5 +161,13 @@ public class StackRequest extends StackBase {
 
     public void setStackAuthentication(StackAuthenticationRequest stackAuthentication) {
         this.stackAuthentication = stackAuthentication;
+    }
+
+    public String getCredentialName() {
+        return credentialName;
+    }
+
+    public void setCredentialName(String credentialName) {
+        this.credentialName = credentialName;
     }
 }

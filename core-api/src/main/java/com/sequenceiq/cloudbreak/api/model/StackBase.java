@@ -220,4 +220,5 @@ public abstract class StackBase implements JsonEntity {
     public void setDefaultTags(Map<String, String> defaultTags) {
         this.defaultTags = defaultTags;
     }
+
 }
