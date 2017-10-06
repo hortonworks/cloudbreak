@@ -3,15 +3,16 @@ package cli
 import (
 	"time"
 
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
+	"net/http"
+
 	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/hdc-cli/cli/utils"
 	"github.com/hortonworks/hdc-cli/client_cloudbreak/blueprints"
 	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/urfave/cli"
-	"fmt"
-	"net/http"
-	"encoding/base64"
-	"encoding/json"
-	"github.com/hortonworks/hdc-cli/cli/utils"
 )
 
 var BlueprintHeader []string = []string{"Blueprint Name", "Description", "HDP Version", "Hostgroup Count", "Tags"}
@@ -44,7 +45,7 @@ func ListBlueprints(c *cli.Context) {
 
 func listBlueprintsImpl(client blueprintsClient, writer func([]string, []utils.Row)) {
 	defer utils.TimeTrack(time.Now(), "get public blueprints")
-	log.Infof("[ListBlueprints] sending blueprint list request")
+	log.Infof("[listBlueprintsImpl] sending blueprint list request")
 	resp, err := client.GetPrivatesBlueprint(blueprints.NewGetPrivatesBlueprintParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
@@ -67,12 +68,12 @@ func listBlueprintsImpl(client blueprintsClient, writer func([]string, []utils.R
 }
 
 func decodeAndParseToJson(encodedBlueprint string) map[string]interface{} {
-	log.Debugf("[ListBlueprints] decoding blueprint from base64")
+	log.Debugf("[decodeAndParseToJson] decoding blueprint from base64")
 	b, err := base64.StdEncoding.DecodeString(encodedBlueprint)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Debugf("[ListBlueprints] parse blueprint to JSON")
+	log.Debugf("[decodeAndParseToJson] parse blueprint to JSON")
 	var blueprintJson interface{}
 	json.Unmarshal(b, &blueprintJson)
 	return blueprintJson.(map[string]interface{})
@@ -80,7 +81,7 @@ func decodeAndParseToJson(encodedBlueprint string) map[string]interface{} {
 
 func CreateBlueprintFromUrl(c *cli.Context) {
 	checkRequiredFlags(c)
-	log.Infof("[CreateBlueprint] creating blueprint from a URL")
+	log.Infof("[CreateBlueprintFromUrl] creating blueprint from a URL")
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	urlLocation := c.String(FlBlueprintURL.Name)
 	createBlueprintImpl(
@@ -93,7 +94,7 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 
 func CreateBlueprintFromFile(c *cli.Context) {
 	checkRequiredFlags(c)
-	log.Infof("[CreateBlueprint] creating blueprint from a file")
+	log.Infof("[CreateBlueprintFromFile] creating blueprint from a file")
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	fileLocation := c.String(FlBlueprintFileLocation.Name)
 	createBlueprintImpl(
@@ -114,19 +115,19 @@ func createBlueprintImpl(client blueprintsClient, name string, description strin
 	}
 
 	if public {
-		log.Infof("[CreateBlueprint] sending create public blueprint request")
+		log.Infof("[createBlueprintImpl] sending create public blueprint request")
 		resp, err := client.PostPublicBlueprint(blueprints.NewPostPublicBlueprintParams().WithBody(bpRequest))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
-		log.Infof("[CreateBlueprint] private blueprint created: %s (id: %d)", *resp.Payload.Name, resp.Payload.ID)
+		log.Infof("[createBlueprintImpl] private blueprint created: %s (id: %d)", *resp.Payload.Name, resp.Payload.ID)
 	} else {
-		log.Infof("[CreateBlueprint] sending create private blueprint request")
+		log.Infof("[createBlueprintImpl] sending create private blueprint request")
 		resp, err := client.PostPrivateBlueprint(blueprints.NewPostPrivateBlueprintParams().WithBody(bpRequest))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
-		log.Infof("[CreateBlueprint] private blueprint created: %s (id: %d)", *resp.Payload.Name, resp.Payload.ID)
+		log.Infof("[createBlueprintImpl] private blueprint created: %s (id: %d)", *resp.Payload.Name, resp.Payload.ID)
 	}
 }
 
@@ -138,10 +139,10 @@ func DeleteBlueprint(c *cli.Context) {
 
 func deleteBlueprintsImpl(client blueprintsClient, name string) {
 	defer utils.TimeTrack(time.Now(), "delete blueprint")
-	log.Infof("[DeleteBlueprint] sending delete blueprint request with name: %s", name)
+	log.Infof("[deleteBlueprintsImpl] sending delete blueprint request with name: %s", name)
 	err := client.DeletePrivateBlueprint(blueprints.NewDeletePrivateBlueprintParams().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[DeleteBlueprint] blueprint deleted, name: %s", name)
+	log.Infof("[deleteBlueprintsImpl] blueprint deleted, name: %s", name)
 }

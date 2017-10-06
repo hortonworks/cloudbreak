@@ -67,6 +67,7 @@ func (o *GetImagesByTypeOK) readResponse(response runtime.ClientResponse, consum
 /*GetImagesByTypeOKBody get images by type o k body
 swagger:model GetImagesByTypeOKBody
 */
+
 type GetImagesByTypeOKBody map[string]string
 
 // Validate validates this get images by type o k body

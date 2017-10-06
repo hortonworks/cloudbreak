@@ -51,7 +51,7 @@ type GetVMTypesOK struct {
 }
 
 func (o *GetVMTypesOK) Error() string {
-	return fmt.Sprintf("[GET /connectors/connectors/vmtypes][%d] getVmTypesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /connectors/vmtypes][%d] getVmTypesOK  %+v", 200, o.Payload)
 }
 
 func (o *GetVMTypesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

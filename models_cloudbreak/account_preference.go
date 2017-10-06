@@ -15,6 +15,7 @@ import (
 
 // AccountPreference account preference
 // swagger:model AccountPreference
+
 type AccountPreference struct {
 
 	// allowed instance types in the account (empty list for no restriction)
@@ -48,6 +49,22 @@ type AccountPreference struct {
 	// Minimum: 0
 	UserTimeToLive *int64 `json:"userTimeToLive"`
 }
+
+/* polymorph AccountPreference allowedInstanceTypes false */
+
+/* polymorph AccountPreference clusterTimeToLive false */
+
+/* polymorph AccountPreference defaultTags false */
+
+/* polymorph AccountPreference maxNumberOfClusters false */
+
+/* polymorph AccountPreference maxNumberOfClustersPerUser false */
+
+/* polymorph AccountPreference maxNumberOfNodesPerCluster false */
+
+/* polymorph AccountPreference platforms false */
+
+/* polymorph AccountPreference userTimeToLive false */
 
 // Validate validates this account preference
 func (m *AccountPreference) Validate(formats strfmt.Registry) error {

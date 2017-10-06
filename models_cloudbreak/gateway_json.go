@@ -17,6 +17,7 @@ import (
 
 // GatewayJSON gateway Json
 // swagger:model GatewayJson
+
 type GatewayJSON struct {
 
 	// enable Knox gateway security
@@ -46,6 +47,24 @@ type GatewayJSON struct {
 	// Knox topology name
 	TopologyName string `json:"topologyName,omitempty"`
 }
+
+/* polymorph GatewayJson enableGateway false */
+
+/* polymorph GatewayJson exposedServices false */
+
+/* polymorph GatewayJson gatewayType false */
+
+/* polymorph GatewayJson path false */
+
+/* polymorph GatewayJson signCert false */
+
+/* polymorph GatewayJson signPub false */
+
+/* polymorph GatewayJson ssoProvider false */
+
+/* polymorph GatewayJson ssoType false */
+
+/* polymorph GatewayJson topologyName false */
 
 // Validate validates this gateway Json
 func (m *GatewayJSON) Validate(formats strfmt.Registry) error {

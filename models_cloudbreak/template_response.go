@@ -15,6 +15,7 @@ import (
 
 // TemplateResponse template response
 // swagger:model TemplateResponse
+
 type TemplateResponse struct {
 
 	// type of cloud provider
@@ -57,6 +58,28 @@ type TemplateResponse struct {
 	// type of the volumes
 	VolumeType string `json:"volumeType,omitempty"`
 }
+
+/* polymorph TemplateResponse cloudPlatform false */
+
+/* polymorph TemplateResponse description false */
+
+/* polymorph TemplateResponse id false */
+
+/* polymorph TemplateResponse instanceType false */
+
+/* polymorph TemplateResponse name false */
+
+/* polymorph TemplateResponse parameters false */
+
+/* polymorph TemplateResponse public false */
+
+/* polymorph TemplateResponse topologyId false */
+
+/* polymorph TemplateResponse volumeCount false */
+
+/* polymorph TemplateResponse volumeSize false */
+
+/* polymorph TemplateResponse volumeType false */
 
 // Validate validates this template response
 func (m *TemplateResponse) Validate(formats strfmt.Registry) error {

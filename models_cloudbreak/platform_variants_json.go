@@ -14,6 +14,7 @@ import (
 
 // PlatformVariantsJSON platform variants Json
 // swagger:model PlatformVariantsJson
+
 type PlatformVariantsJSON struct {
 
 	// default variants
@@ -22,6 +23,10 @@ type PlatformVariantsJSON struct {
 	// platform variants
 	PlatformToVariants map[string][]string `json:"platformToVariants,omitempty"`
 }
+
+/* polymorph PlatformVariantsJson defaultVariants false */
+
+/* polymorph PlatformVariantsJson platformToVariants false */
 
 // Validate validates this platform variants Json
 func (m *PlatformVariantsJSON) Validate(formats strfmt.Registry) error {

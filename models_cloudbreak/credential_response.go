@@ -15,6 +15,7 @@ import (
 
 // CredentialResponse credential response
 // swagger:model CredentialResponse
+
 type CredentialResponse struct {
 
 	// type of cloud provider
@@ -29,9 +30,6 @@ type CredentialResponse struct {
 	// id of the resource
 	ID int64 `json:"id,omitempty"`
 
-	// authentication name for machines
-	LoginUserName string `json:"loginUserName,omitempty"`
-
 	// name of the resource
 	// Required: true
 	// Max Length: 100
@@ -45,12 +43,23 @@ type CredentialResponse struct {
 	// resource is visible in account
 	Public *bool `json:"public,omitempty"`
 
-	// public key for accessing instances
-	PublicKey string `json:"publicKey,omitempty"`
-
 	// id of the topology the resource belongs to
 	TopologyID int64 `json:"topologyId,omitempty"`
 }
+
+/* polymorph CredentialResponse cloudPlatform false */
+
+/* polymorph CredentialResponse description false */
+
+/* polymorph CredentialResponse id false */
+
+/* polymorph CredentialResponse name false */
+
+/* polymorph CredentialResponse parameters false */
+
+/* polymorph CredentialResponse public false */
+
+/* polymorph CredentialResponse topologyId false */
 
 // Validate validates this credential response
 func (m *CredentialResponse) Validate(formats strfmt.Registry) error {

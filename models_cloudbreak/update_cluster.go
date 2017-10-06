@@ -18,6 +18,7 @@ import (
 
 // UpdateCluster update cluster
 // swagger:model UpdateCluster
+
 type UpdateCluster struct {
 
 	// details of the Ambari stack
@@ -42,6 +43,20 @@ type UpdateCluster struct {
 	// validate blueprint
 	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
 }
+
+/* polymorph UpdateCluster ambariStackDetails false */
+
+/* polymorph UpdateCluster blueprintId false */
+
+/* polymorph UpdateCluster hostGroupAdjustment false */
+
+/* polymorph UpdateCluster hostgroups false */
+
+/* polymorph UpdateCluster status false */
+
+/* polymorph UpdateCluster userNamePasswordJson false */
+
+/* polymorph UpdateCluster validateBlueprint false */
 
 // Validate validates this update cluster
 func (m *UpdateCluster) Validate(formats strfmt.Registry) error {

@@ -25,22 +25,22 @@ func (c *Credential) DataAsStringArray() []string {
 }
 
 func CreateAwsCredential(c *cli.Context) error {
-	cloud.CurrentCloud = cloud.AWS
+	cloud.SetProviderType(cloud.AWS)
 	return createCredential(c)
 }
 
 func CreateAzureCredential(c *cli.Context) error {
-	cloud.CurrentCloud = cloud.AZURE
+	cloud.SetProviderType(cloud.AZURE)
 	return createCredential(c)
 }
 
 func CreateGcpCredential(c *cli.Context) error {
-	cloud.CurrentCloud = cloud.GCP
+	cloud.SetProviderType(cloud.GCP)
 	return createCredential(c)
 }
 
 func CreateOpenstackCredential(c *cli.Context) error {
-	cloud.CurrentCloud = cloud.OPENSTACK
+	cloud.SetProviderType(cloud.OPENSTACK)
 	return createCredential(c)
 }
 
@@ -73,7 +73,7 @@ func createCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 		Parameters:    credentialMap,
 	}
 
-	log.Infof("[CreateCredential] sending credential create request with name: %s", name)
+	log.Infof("[createCredentialImpl] sending credential create request with name: %s", name)
 	var credential *models_cloudbreak.CredentialResponse
 	public := boolFinder(FlPublic.Name)
 	if public {
@@ -90,7 +90,7 @@ func createCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 		credential = resp.Payload
 	}
 
-	log.Infof("[CreateCredential] credential created, id: %d", credential.ID)
+	log.Infof("[createCredentialImpl] credential created, id: %d", credential.ID)
 	return credential
 }
 

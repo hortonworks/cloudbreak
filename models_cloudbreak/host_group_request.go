@@ -18,6 +18,7 @@ import (
 
 // HostGroupRequest host group request
 // swagger:model HostGroupRequest
+
 type HostGroupRequest struct {
 
 	// instance group or resource constraint for a hostgroup
@@ -32,6 +33,10 @@ type HostGroupRequest struct {
 	// Unique: true
 	RecipeIds []int64 `json:"recipeIds"`
 
+	// referenced recipe names
+	// Unique: true
+	RecipeNames []string `json:"recipeNames"`
+
 	// referenced recipes
 	// Unique: true
 	Recipes []*RecipeRequest `json:"recipes"`
@@ -39,6 +44,18 @@ type HostGroupRequest struct {
 	// recovery mode of the hostgroup's nodes
 	RecoveryMode string `json:"recoveryMode,omitempty"`
 }
+
+/* polymorph HostGroupRequest constraint false */
+
+/* polymorph HostGroupRequest name false */
+
+/* polymorph HostGroupRequest recipeIds false */
+
+/* polymorph HostGroupRequest recipeNames false */
+
+/* polymorph HostGroupRequest recipes false */
+
+/* polymorph HostGroupRequest recoveryMode false */
 
 // Validate validates this host group request
 func (m *HostGroupRequest) Validate(formats strfmt.Registry) error {
@@ -55,6 +72,11 @@ func (m *HostGroupRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRecipeIds(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateRecipeNames(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -110,6 +132,19 @@ func (m *HostGroupRequest) validateRecipeIds(formats strfmt.Registry) error {
 	}
 
 	if err := validate.UniqueItems("recipeIds", "body", m.RecipeIds); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *HostGroupRequest) validateRecipeNames(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.RecipeNames) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("recipeNames", "body", m.RecipeNames); err != nil {
 		return err
 	}
 

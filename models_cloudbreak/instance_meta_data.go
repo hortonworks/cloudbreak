@@ -17,6 +17,7 @@ import (
 
 // InstanceMetaData instance meta data
 // swagger:model InstanceMetaData
+
 type InstanceMetaData struct {
 
 	// ambari server address
@@ -46,6 +47,24 @@ type InstanceMetaData struct {
 	// ssh port
 	SSHPort int32 `json:"sshPort,omitempty"`
 }
+
+/* polymorph InstanceMetaData ambariServer false */
+
+/* polymorph InstanceMetaData discoveryFQDN false */
+
+/* polymorph InstanceMetaData instanceGroup false */
+
+/* polymorph InstanceMetaData instanceId false */
+
+/* polymorph InstanceMetaData instanceStatus false */
+
+/* polymorph InstanceMetaData instanceType false */
+
+/* polymorph InstanceMetaData privateIp false */
+
+/* polymorph InstanceMetaData publicIp false */
+
+/* polymorph InstanceMetaData sshPort false */
 
 // Validate validates this instance meta data
 func (m *InstanceMetaData) Validate(formats strfmt.Registry) error {

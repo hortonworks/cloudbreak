@@ -67,6 +67,7 @@ func (o *GetAllSettingsOK) readResponse(response runtime.ClientResponse, consume
 /*GetAllSettingsOKBody get all settings o k body
 swagger:model GetAllSettingsOKBody
 */
+
 type GetAllSettingsOKBody map[string]map[string]interface{}
 
 // Validate validates this get all settings o k body

@@ -17,6 +17,7 @@ import (
 
 // AutoscaleStackResponse autoscale stack response
 // swagger:model AutoscaleStackResponse
+
 type AutoscaleStackResponse struct {
 
 	// account id of the resource owner that is provided by OAuth provider
@@ -56,6 +57,28 @@ type AutoscaleStackResponse struct {
 	// ambari username
 	UserName string `json:"userName,omitempty"`
 }
+
+/* polymorph AutoscaleStackResponse account false */
+
+/* polymorph AutoscaleStackResponse ambariServerIp false */
+
+/* polymorph AutoscaleStackResponse clusterStatus false */
+
+/* polymorph AutoscaleStackResponse created false */
+
+/* polymorph AutoscaleStackResponse gatewayPort false */
+
+/* polymorph AutoscaleStackResponse name false */
+
+/* polymorph AutoscaleStackResponse owner false */
+
+/* polymorph AutoscaleStackResponse password false */
+
+/* polymorph AutoscaleStackResponse stackId false */
+
+/* polymorph AutoscaleStackResponse status false */
+
+/* polymorph AutoscaleStackResponse userName false */
 
 // Validate validates this autoscale stack response
 func (m *AutoscaleStackResponse) Validate(formats strfmt.Registry) error {

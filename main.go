@@ -112,15 +112,15 @@ func main() {
 		},
 		{
 			Name:  "create-credential",
-			Usage: "create a new credential",
+			Usage: "creates a new credential",
 			Subcommands: []cli.Command{
 				{
 					Name:  "aws",
-					Usage: "create a new aws credential",
+					Usage: "creates a new aws credential",
 					Subcommands: []cli.Command{
 						{
 							Name:   "role-based",
-							Usage:  "create a new role based aws credential",
+							Usage:  "creates a new role based aws credential",
 							Before: ConfigRead,
 							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlRoleARN).AddAuthenticationFlags().Build(),
 							Action: hdc.CreateAwsCredential,
@@ -132,7 +132,7 @@ func main() {
 						},
 						{
 							Name:   "key-based",
-							Usage:  "create a new key based aws credential",
+							Usage:  "creates a new key based aws credential",
 							Before: ConfigRead,
 							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlAccessKey, hdc.FlSecretKey).AddAuthenticationFlags().Build(),
 							Action: hdc.CreateAwsCredential,
@@ -146,11 +146,11 @@ func main() {
 				},
 				{
 					Name:  "azure",
-					Usage: "create a new azure credential",
+					Usage: "creates a new azure credential",
 					Subcommands: []cli.Command{
 						{
 							Name:   "app-based",
-							Usage:  "create a new app based azure credential",
+							Usage:  "creates a new app based azure credential",
 							Before: ConfigRead,
 							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlSubscriptionId, hdc.FlTenantId, hdc.FlAppId, hdc.FlAppPassword).AddAuthenticationFlags().Build(),
 							Action: hdc.CreateAzureCredential,
@@ -164,7 +164,7 @@ func main() {
 				},
 				{
 					Name:   "gcp",
-					Usage:  "create a new gcp credential",
+					Usage:  "creates a new gcp credential",
 					Before: ConfigRead,
 					Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlProjectId, hdc.FlServiceAccountId, hdc.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
 					Action: hdc.CreateGcpCredential,
@@ -176,11 +176,11 @@ func main() {
 				},
 				{
 					Name:  "openstack",
-					Usage: "create a new openstack credential",
+					Usage: "creates a new openstack credential",
 					Subcommands: []cli.Command{
 						{
 							Name:   "keystone-v2",
-							Usage:  "create a new keystone version 2 openstack credential",
+							Usage:  "creates a new keystone version 2 openstack credential",
 							Before: ConfigRead,
 							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlTenantName, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build(),
 							Action: hdc.CreateOpenstackCredential,
@@ -192,7 +192,7 @@ func main() {
 						},
 						{
 							Name:   "keystone-v3",
-							Usage:  "create a new keystone version 3 openstack credential",
+							Usage:  "creates a new keystone version 3 openstack credential",
 							Before: ConfigRead,
 							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlUserDomain, hdc.FlKeystoneScope, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build(),
 							Action: hdc.CreateOpenstackCredential,
@@ -208,7 +208,7 @@ func main() {
 		},
 		{
 			Name:   "list-credentials",
-			Usage:  "list the credentials",
+			Usage:  "lists the credentials",
 			Before: ConfigRead,
 			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
 			Action: hdc.ListPrivateCredentials,
@@ -220,7 +220,7 @@ func main() {
 		},
 		{
 			Name:   "delete-credential",
-			Usage:  "delete a credential",
+			Usage:  "deletes a credential",
 			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
 			Action: hdc.DeleteCredential,
@@ -282,6 +282,205 @@ func main() {
 			Action: hdc.DeleteBlueprint,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:  "generate-cluster-template",
+			Usage: "creates a cluster JSON template",
+			Subcommands: []cli.Command{
+				{
+					Name:  "aws",
+					Usage: "creates an aws cluster JSON template",
+					Subcommands: []cli.Command{
+						{
+							Name:   "new-network",
+							Usage:  "creates an aws cluster JSON template with new network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateAwsStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "existing-network",
+							Usage:  "creates an aws cluster JSON template with existing network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateAwsStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "existing-subnet",
+							Usage:  "creates an aws cluster JSON template with existing subnet",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateAwsStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
+					Name:  "azure",
+					Usage: "creates an azure cluster JSON template",
+					Subcommands: []cli.Command{
+						{
+							Name:   "new-network",
+							Usage:  "creates an azure cluster JSON template with new network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateAzureStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "existing-subnet",
+							Usage:  "creates an azure cluster JSON template with existing subnet",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateAzureStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
+					Name:  "gcp",
+					Usage: "creates an gcp cluster JSON template",
+					Subcommands: []cli.Command{
+						{
+							Name:   "new-network",
+							Usage:  "creates a gcp cluster JSON template with new network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateGcpStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "existing-network",
+							Usage:  "creates a gcp cluster JSON template with existing network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateGcpStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "existing-subnet",
+							Usage:  "creates a gcp cluster JSON template with existing subnet",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateGcpStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "legacy-network",
+							Usage:  "creates a gcp cluster JSON template with legacy network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateGcpStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+				{
+					Name:  "openstack",
+					Usage: "creates an openstack cluster JSON template",
+					Subcommands: []cli.Command{
+						{
+							Name:   "new-network",
+							Usage:  "creates a openstack cluster JSON template with new network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateOpenstackStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "existing-network",
+							Usage:  "creates a openstack cluster JSON template with existing network",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateOpenstackStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+						{
+							Name:   "existing-subnet",
+							Usage:  "creates a openstack cluster JSON template with existing subnet",
+							Before: ConfigRead,
+							Flags:  hdc.NewFlagBuilder().Build(),
+							Action: hdc.GenerateOpenstackStackTemplate,
+							BashComplete: func(c *cli.Context) {
+								for _, f := range hdc.NewFlagBuilder().Build() {
+									printFlagCompletion(f)
+								}
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			Name:      "create-cluster",
+			Usage:     "creates a new cluster",
+			Flags:     hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlInputJson, hdc.FlAmbariPasswordOptional, hdc.FlWait).AddAuthenticationFlags().Build(),
+			Before:    ConfigRead,
+			Action:    hdc.CreateStack,
+			ArgsUsage: hdc.StackTemplateHelp,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlInputJson, hdc.FlAmbariPasswordOptional, hdc.FlWait).AddAuthenticationFlags().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "delete-cluster",
+			Usage:  "deletes a cluster",
+			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName, hdc.FlForce).AddAuthenticationFlags().Build(),
+			Before: ConfigRead,
+			Action: hdc.DeleteStack,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},

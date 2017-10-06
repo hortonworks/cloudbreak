@@ -14,6 +14,7 @@ import (
 
 // BlueprintParameter blueprint parameter
 // swagger:model BlueprintParameter
+
 type BlueprintParameter struct {
 
 	// description
@@ -25,6 +26,12 @@ type BlueprintParameter struct {
 	// reference configuration
 	ReferenceConfiguration string `json:"referenceConfiguration,omitempty"`
 }
+
+/* polymorph BlueprintParameter description false */
+
+/* polymorph BlueprintParameter name false */
+
+/* polymorph BlueprintParameter referenceConfiguration false */
 
 // Validate validates this blueprint parameter
 func (m *BlueprintParameter) Validate(formats strfmt.Registry) error {

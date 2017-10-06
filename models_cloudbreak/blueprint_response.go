@@ -18,6 +18,7 @@ import (
 
 // BlueprintResponse blueprint response
 // swagger:model BlueprintResponse
+
 type BlueprintResponse struct {
 
 	// ambari blueprint JSON, set this or the url field
@@ -51,6 +52,24 @@ type BlueprintResponse struct {
 	// status of the blueprint
 	Status string `json:"status,omitempty"`
 }
+
+/* polymorph BlueprintResponse ambariBlueprint false */
+
+/* polymorph BlueprintResponse blueprintName false */
+
+/* polymorph BlueprintResponse description false */
+
+/* polymorph BlueprintResponse hostGroupCount false */
+
+/* polymorph BlueprintResponse id false */
+
+/* polymorph BlueprintResponse inputs false */
+
+/* polymorph BlueprintResponse name false */
+
+/* polymorph BlueprintResponse public false */
+
+/* polymorph BlueprintResponse status false */
 
 // Validate validates this blueprint response
 func (m *BlueprintResponse) Validate(formats strfmt.Registry) error {

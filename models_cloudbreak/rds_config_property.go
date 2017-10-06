@@ -14,6 +14,7 @@ import (
 
 // RdsConfigProperty rds config property
 // swagger:model RdsConfigProperty
+
 type RdsConfigProperty struct {
 
 	// name
@@ -22,6 +23,10 @@ type RdsConfigProperty struct {
 	// value
 	Value string `json:"value,omitempty"`
 }
+
+/* polymorph RdsConfigProperty name false */
+
+/* polymorph RdsConfigProperty value false */
 
 // Validate validates this rds config property
 func (m *RdsConfigProperty) Validate(formats strfmt.Registry) error {

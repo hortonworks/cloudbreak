@@ -14,11 +14,14 @@ import (
 
 // CloudbreakDetailsJSON cloudbreak details Json
 // swagger:model CloudbreakDetailsJson
+
 type CloudbreakDetailsJSON struct {
 
 	// version of the Cloudbreak that provisioned the stack
 	Version string `json:"version,omitempty"`
 }
+
+/* polymorph CloudbreakDetailsJson version false */
 
 // Validate validates this cloudbreak details Json
 func (m *CloudbreakDetailsJSON) Validate(formats strfmt.Registry) error {

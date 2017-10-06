@@ -14,6 +14,7 @@ import (
 
 // PlatformOrchestratorsJSON platform orchestrators Json
 // swagger:model PlatformOrchestratorsJson
+
 type PlatformOrchestratorsJSON struct {
 
 	// default orchestrators
@@ -22,6 +23,10 @@ type PlatformOrchestratorsJSON struct {
 	// orchestrators
 	Orchestrators map[string][]string `json:"orchestrators,omitempty"`
 }
+
+/* polymorph PlatformOrchestratorsJson defaults false */
+
+/* polymorph PlatformOrchestratorsJson orchestrators false */
 
 // Validate validates this platform orchestrators Json
 func (m *PlatformOrchestratorsJSON) Validate(formats strfmt.Registry) error {

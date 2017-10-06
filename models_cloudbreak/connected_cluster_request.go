@@ -14,6 +14,7 @@ import (
 
 // ConnectedClusterRequest connected cluster request
 // swagger:model ConnectedClusterRequest
+
 type ConnectedClusterRequest struct {
 
 	// source cluster Id
@@ -22,6 +23,10 @@ type ConnectedClusterRequest struct {
 	// source cluster name
 	SourceClusterName string `json:"sourceClusterName,omitempty"`
 }
+
+/* polymorph ConnectedClusterRequest sourceClusterId false */
+
+/* polymorph ConnectedClusterRequest sourceClusterName false */
 
 // Validate validates this connected cluster request
 func (m *ConnectedClusterRequest) Validate(formats strfmt.Registry) error {

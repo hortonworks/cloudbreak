@@ -17,6 +17,7 @@ import (
 
 // ClusterTemplateResponse cluster template response
 // swagger:model ClusterTemplateResponse
+
 type ClusterTemplateResponse struct {
 
 	// id of the resource
@@ -32,6 +33,14 @@ type ClusterTemplateResponse struct {
 	// type of the cluster template
 	Type string `json:"type,omitempty"`
 }
+
+/* polymorph ClusterTemplateResponse id false */
+
+/* polymorph ClusterTemplateResponse name false */
+
+/* polymorph ClusterTemplateResponse template false */
+
+/* polymorph ClusterTemplateResponse type false */
 
 // Validate validates this cluster template response
 func (m *ClusterTemplateResponse) Validate(formats strfmt.Registry) error {

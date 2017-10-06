@@ -15,12 +15,15 @@ import (
 
 // RdsTestResult rds test result
 // swagger:model RdsTestResult
+
 type RdsTestResult struct {
 
 	// result of Ldap connection test
 	// Required: true
 	ConnectionResult *string `json:"connectionResult"`
 }
+
+/* polymorph RdsTestResult connectionResult false */
 
 // Validate validates this rds test result
 func (m *RdsTestResult) Validate(formats strfmt.Registry) error {

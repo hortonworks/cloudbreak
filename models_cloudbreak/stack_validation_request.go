@@ -17,6 +17,7 @@ import (
 
 // StackValidationRequest stack validation request
 // swagger:model StackValidationRequest
+
 type StackValidationRequest struct {
 
 	// blueprint for the cluster
@@ -57,6 +58,28 @@ type StackValidationRequest struct {
 	// Required: true
 	Platform *string `json:"platform"`
 }
+
+/* polymorph StackValidationRequest blueprint false */
+
+/* polymorph StackValidationRequest blueprintId false */
+
+/* polymorph StackValidationRequest credential false */
+
+/* polymorph StackValidationRequest credentialId false */
+
+/* polymorph StackValidationRequest credentialName false */
+
+/* polymorph StackValidationRequest fileSystem false */
+
+/* polymorph StackValidationRequest hostGroups false */
+
+/* polymorph StackValidationRequest instanceGroups false */
+
+/* polymorph StackValidationRequest network false */
+
+/* polymorph StackValidationRequest networkId false */
+
+/* polymorph StackValidationRequest platform false */
 
 // Validate validates this stack validation request
 func (m *StackValidationRequest) Validate(formats strfmt.Registry) error {

@@ -15,6 +15,7 @@ import (
 
 // FlexSubscriptionResponse flex subscription response
 // swagger:model FlexSubscriptionResponse
+
 type FlexSubscriptionResponse struct {
 
 	// account id of the resource owner that is provided by OAuth provider
@@ -56,6 +57,26 @@ type FlexSubscriptionResponse struct {
 	// true if the flex subscription was used for the controller
 	UsedForController *bool `json:"usedForController,omitempty"`
 }
+
+/* polymorph FlexSubscriptionResponse account false */
+
+/* polymorph FlexSubscriptionResponse default false */
+
+/* polymorph FlexSubscriptionResponse id false */
+
+/* polymorph FlexSubscriptionResponse name false */
+
+/* polymorph FlexSubscriptionResponse owner false */
+
+/* polymorph FlexSubscriptionResponse publicInAccount false */
+
+/* polymorph FlexSubscriptionResponse smartSenseSubscription false */
+
+/* polymorph FlexSubscriptionResponse smartSenseSubscriptionId false */
+
+/* polymorph FlexSubscriptionResponse subscriptionId false */
+
+/* polymorph FlexSubscriptionResponse usedForController false */
 
 // Validate validates this flex subscription response
 func (m *FlexSubscriptionResponse) Validate(formats strfmt.Registry) error {

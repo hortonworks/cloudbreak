@@ -17,6 +17,7 @@ import (
 
 // FailurePolicyResponse failure policy response
 // swagger:model FailurePolicyResponse
+
 type FailurePolicyResponse struct {
 
 	// type of  adjustment
@@ -29,6 +30,12 @@ type FailurePolicyResponse struct {
 	// threshold of failure policy
 	Threshold int64 `json:"threshold,omitempty"`
 }
+
+/* polymorph FailurePolicyResponse adjustmentType false */
+
+/* polymorph FailurePolicyResponse id false */
+
+/* polymorph FailurePolicyResponse threshold false */
 
 // Validate validates this failure policy response
 func (m *FailurePolicyResponse) Validate(formats strfmt.Registry) error {

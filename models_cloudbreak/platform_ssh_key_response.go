@@ -14,6 +14,7 @@ import (
 
 // PlatformSSHKeyResponse platform Ssh key response
 // swagger:model PlatformSshKeyResponse
+
 type PlatformSSHKeyResponse struct {
 
 	// name
@@ -22,6 +23,10 @@ type PlatformSSHKeyResponse struct {
 	// properties
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
+
+/* polymorph PlatformSshKeyResponse name false */
+
+/* polymorph PlatformSshKeyResponse properties false */
 
 // Validate validates this platform Ssh key response
 func (m *PlatformSSHKeyResponse) Validate(formats strfmt.Registry) error {

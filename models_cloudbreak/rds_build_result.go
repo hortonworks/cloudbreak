@@ -14,12 +14,15 @@ import (
 
 // RdsBuildResult rds build result
 // swagger:model RdsBuildResult
+
 type RdsBuildResult struct {
 
 	// name of the created dbs
 	// Required: true
 	Results map[string]string `json:"results"`
 }
+
+/* polymorph RdsBuildResult results false */
 
 // Validate validates this rds build result
 func (m *RdsBuildResult) Validate(formats strfmt.Registry) error {

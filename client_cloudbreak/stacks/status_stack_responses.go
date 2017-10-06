@@ -67,6 +67,7 @@ func (o *StatusStackOK) readResponse(response runtime.ClientResponse, consumer r
 /*StatusStackOKBody status stack o k body
 swagger:model StatusStackOKBody
 */
+
 type StatusStackOKBody map[string]interface{}
 
 // Validate validates this status stack o k body

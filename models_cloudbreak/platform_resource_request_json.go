@@ -14,7 +14,11 @@ import (
 
 // PlatformResourceRequestJSON platform resource request Json
 // swagger:model PlatformResourceRequestJson
+
 type PlatformResourceRequestJSON struct {
+
+	// related availability zone
+	AvailabilityZone string `json:"availabilityZone,omitempty"`
 
 	// credential resource id for the request
 	CredentialID int64 `json:"credentialId,omitempty"`
@@ -31,6 +35,18 @@ type PlatformResourceRequestJSON struct {
 	// Related region
 	Region string `json:"region,omitempty"`
 }
+
+/* polymorph PlatformResourceRequestJson availabilityZone false */
+
+/* polymorph PlatformResourceRequestJson credentialId false */
+
+/* polymorph PlatformResourceRequestJson credentialName false */
+
+/* polymorph PlatformResourceRequestJson filters false */
+
+/* polymorph PlatformResourceRequestJson platformVariant false */
+
+/* polymorph PlatformResourceRequestJson region false */
 
 // Validate validates this platform resource request Json
 func (m *PlatformResourceRequestJSON) Validate(formats strfmt.Registry) error {

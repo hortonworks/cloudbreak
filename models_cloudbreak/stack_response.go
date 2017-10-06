@@ -18,6 +18,7 @@ import (
 
 // StackResponse stack response
 // swagger:model StackResponse
+
 type StackResponse struct {
 
 	// account id of the resource owner that is provided by OAuth provider
@@ -134,6 +135,9 @@ type StackResponse struct {
 	// region of the stack
 	Region string `json:"region,omitempty"`
 
+	// stack related authentication
+	StackAuthentication *StackAuthenticationResponse `json:"stackAuthentication,omitempty"`
+
 	// status of the stack
 	Status string `json:"status,omitempty"`
 
@@ -143,6 +147,86 @@ type StackResponse struct {
 	// stack related userdefined tags
 	UserDefinedTags map[string]string `json:"userDefinedTags,omitempty"`
 }
+
+/* polymorph StackResponse account false */
+
+/* polymorph StackResponse ambariVersion false */
+
+/* polymorph StackResponse applicationTags false */
+
+/* polymorph StackResponse availabilityZone false */
+
+/* polymorph StackResponse cloudPlatform false */
+
+/* polymorph StackResponse cloudbreakDetails false */
+
+/* polymorph StackResponse cloudbreakEvents false */
+
+/* polymorph StackResponse cloudbreakUsages false */
+
+/* polymorph StackResponse cluster false */
+
+/* polymorph StackResponse clusterNameAsSubdomain false */
+
+/* polymorph StackResponse created false */
+
+/* polymorph StackResponse credential false */
+
+/* polymorph StackResponse credentialId false */
+
+/* polymorph StackResponse customDomain false */
+
+/* polymorph StackResponse customHostname false */
+
+/* polymorph StackResponse defaultTags false */
+
+/* polymorph StackResponse failurePolicy false */
+
+/* polymorph StackResponse flexSubscription false */
+
+/* polymorph StackResponse gatewayPort false */
+
+/* polymorph StackResponse hardwareInfos false */
+
+/* polymorph StackResponse hdpVersion false */
+
+/* polymorph StackResponse hostgroupNameAsHostname false */
+
+/* polymorph StackResponse id false */
+
+/* polymorph StackResponse image false */
+
+/* polymorph StackResponse instanceGroups false */
+
+/* polymorph StackResponse name false */
+
+/* polymorph StackResponse network false */
+
+/* polymorph StackResponse networkId false */
+
+/* polymorph StackResponse nodeCount false */
+
+/* polymorph StackResponse onFailureAction false */
+
+/* polymorph StackResponse orchestrator false */
+
+/* polymorph StackResponse owner false */
+
+/* polymorph StackResponse parameters false */
+
+/* polymorph StackResponse platformVariant false */
+
+/* polymorph StackResponse public false */
+
+/* polymorph StackResponse region false */
+
+/* polymorph StackResponse stackAuthentication false */
+
+/* polymorph StackResponse status false */
+
+/* polymorph StackResponse statusReason false */
+
+/* polymorph StackResponse userDefinedTags false */
 
 // Validate validates this stack response
 func (m *StackResponse) Validate(formats strfmt.Registry) error {
@@ -214,6 +298,11 @@ func (m *StackResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateOrchestrator(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateStackAuthentication(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -547,6 +636,25 @@ func (m *StackResponse) validateOrchestrator(formats strfmt.Registry) error {
 		if err := m.Orchestrator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("orchestrator")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *StackResponse) validateStackAuthentication(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.StackAuthentication) { // not required
+		return nil
+	}
+
+	if m.StackAuthentication != nil {
+
+		if err := m.StackAuthentication.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("stackAuthentication")
 			}
 			return err
 		}

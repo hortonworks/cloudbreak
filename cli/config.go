@@ -39,7 +39,7 @@ func (c Config) Yaml() string {
 func Configure(c *cli.Context) error {
 	checkRequiredFlags(c)
 
-	err := WriteConfigToFile(GetHomeDirectory(), c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
+	err := writeConfigToFile(GetHomeDirectory(), c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -52,30 +52,6 @@ func GetHomeDirectory() string {
 		utils.LogErrorAndExit(errors.New("failed to determine the home directory"))
 	}
 	return homeDir
-}
-
-func WriteConfigToFile(baseDir string, server string, username string, password string, output string) error {
-	hdcDir := baseDir + "/" + Hdc_dir
-	configFile := hdcDir + "/" + Config_file
-
-	if _, err := os.Stat(hdcDir); os.IsNotExist(err) {
-		log.Infof("[WriteCredentialsToFile] create dir: %s", hdcDir)
-		err = os.MkdirAll(hdcDir, 0700)
-		if err != nil {
-			return err
-		}
-	} else {
-		log.Infof("[WriteConfigToFile] dir already exists: %s", hdcDir)
-	}
-
-	log.Infof("[WriteConfigToFile] writing credentials to file: %s", configFile)
-	confJson := Config{Server: server, Username: username, Password: password, Output: output}.Yaml()
-	err := ioutil.WriteFile(configFile, []byte(confJson), 0600)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func ReadConfig(baseDir string) (*Config, error) {
@@ -98,4 +74,28 @@ func ReadConfig(baseDir string) (*Config, error) {
 	}
 
 	return &config, nil
+}
+
+func writeConfigToFile(baseDir string, server string, username string, password string, output string) error {
+	hdcDir := baseDir + "/" + Hdc_dir
+	configFile := hdcDir + "/" + Config_file
+
+	if _, err := os.Stat(hdcDir); os.IsNotExist(err) {
+		log.Infof("[writeConfigToFile] create dir: %s", hdcDir)
+		err = os.MkdirAll(hdcDir, 0700)
+		if err != nil {
+			return err
+		}
+	} else {
+		log.Infof("[writeConfigToFile] dir already exists: %s", hdcDir)
+	}
+
+	log.Infof("[writeConfigToFile] writing credentials to file: %s", configFile)
+	confJson := Config{Server: server, Username: username, Password: password, Output: output}.Yaml()
+	err := ioutil.WriteFile(configFile, []byte(confJson), 0600)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -14,7 +14,7 @@ import (
 )
 
 func init() {
-	cloud.CurrentCloud = cloud.AWS
+	cloud.SetProviderType(cloud.AWS)
 }
 
 type mockCredentialCreate struct {

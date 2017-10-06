@@ -67,6 +67,7 @@ func (o *PrivateInteractiveLoginCredentialOK) readResponse(response runtime.Clie
 /*PrivateInteractiveLoginCredentialOKBody private interactive login credential o k body
 swagger:model PrivateInteractiveLoginCredentialOKBody
 */
+
 type PrivateInteractiveLoginCredentialOKBody map[string]string
 
 // Validate validates this private interactive login credential o k body

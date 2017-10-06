@@ -16,6 +16,7 @@ import (
 
 // FlexUsageComponentJSON flex usage component Json
 // swagger:model FlexUsageComponentJson
+
 type FlexUsageComponentJSON struct {
 
 	// component Id
@@ -24,6 +25,10 @@ type FlexUsageComponentJSON struct {
 	// instances
 	Instances []*FlexUsageComponentInstanceJSON `json:"instances"`
 }
+
+/* polymorph FlexUsageComponentJson componentId false */
+
+/* polymorph FlexUsageComponentJson instances false */
 
 // Validate validates this flex usage component Json
 func (m *FlexUsageComponentJSON) Validate(formats strfmt.Registry) error {

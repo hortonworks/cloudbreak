@@ -15,6 +15,7 @@ import (
 
 // ClusterRepairRequest cluster repair request
 // swagger:model ClusterRepairRequest
+
 type ClusterRepairRequest struct {
 
 	// List of hostgroups where the failed nodes will be repaired
@@ -24,6 +25,10 @@ type ClusterRepairRequest struct {
 	// If true, the failed nodes will only be removed, otherwise the failed nodes will be removed and new nodes will be started.
 	RemoveOnly *bool `json:"removeOnly,omitempty"`
 }
+
+/* polymorph ClusterRepairRequest hostGroups false */
+
+/* polymorph ClusterRepairRequest removeOnly false */
 
 // Validate validates this cluster repair request
 func (m *ClusterRepairRequest) Validate(formats strfmt.Registry) error {

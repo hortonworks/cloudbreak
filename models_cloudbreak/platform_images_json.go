@@ -14,6 +14,7 @@ import (
 
 // PlatformImagesJSON platform images Json
 // swagger:model PlatformImagesJson
+
 type PlatformImagesJSON struct {
 
 	// default images
@@ -22,6 +23,10 @@ type PlatformImagesJSON struct {
 	// images regex
 	ImagesRegex map[string]string `json:"imagesRegex,omitempty"`
 }
+
+/* polymorph PlatformImagesJson images false */
+
+/* polymorph PlatformImagesJson imagesRegex false */
 
 // Validate validates this platform images Json
 func (m *PlatformImagesJSON) Validate(formats strfmt.Registry) error {

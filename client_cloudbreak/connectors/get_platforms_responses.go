@@ -14,8 +14,6 @@ import (
 	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
-
-	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 )
 
 // GetPlatformsReader is a Reader for the GetPlatforms structure.
@@ -69,7 +67,8 @@ func (o *GetPlatformsOK) readResponse(response runtime.ClientResponse, consumer 
 /*GetPlatformsOKBody get platforms o k body
 swagger:model GetPlatformsOKBody
 */
-type GetPlatformsOKBody map[string]models_cloudbreak.JSONEntity
+
+type GetPlatformsOKBody map[string]interface{}
 
 // Validate validates this get platforms o k body
 func (o GetPlatformsOKBody) Validate(formats strfmt.Registry) error {

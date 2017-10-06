@@ -15,6 +15,7 @@ import (
 
 // SecurityRuleRequest security rule request
 // swagger:model SecurityRuleRequest
+
 type SecurityRuleRequest struct {
 
 	// flag for making the rule modifiable
@@ -34,6 +35,14 @@ type SecurityRuleRequest struct {
 	// Pattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
 	Subnet *string `json:"subnet"`
 }
+
+/* polymorph SecurityRuleRequest modifiable false */
+
+/* polymorph SecurityRuleRequest ports false */
+
+/* polymorph SecurityRuleRequest protocol false */
+
+/* polymorph SecurityRuleRequest subnet false */
 
 // Validate validates this security rule request
 func (m *SecurityRuleRequest) Validate(formats strfmt.Registry) error {

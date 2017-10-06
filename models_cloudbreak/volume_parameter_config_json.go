@@ -14,6 +14,7 @@ import (
 
 // VolumeParameterConfigJSON volume parameter config Json
 // swagger:model VolumeParameterConfigJson
+
 type VolumeParameterConfigJSON struct {
 
 	// maximum number
@@ -31,6 +32,16 @@ type VolumeParameterConfigJSON struct {
 	// volume parameter type
 	VolumeParameterType string `json:"volumeParameterType,omitempty"`
 }
+
+/* polymorph VolumeParameterConfigJson maximumNumber false */
+
+/* polymorph VolumeParameterConfigJson maximumSize false */
+
+/* polymorph VolumeParameterConfigJson minimumNumber false */
+
+/* polymorph VolumeParameterConfigJson minimumSize false */
+
+/* polymorph VolumeParameterConfigJson volumeParameterType false */
 
 // Validate validates this volume parameter config Json
 func (m *VolumeParameterConfigJSON) Validate(formats strfmt.Registry) error {

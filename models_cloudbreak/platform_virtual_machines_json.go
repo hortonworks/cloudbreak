@@ -15,6 +15,7 @@ import (
 
 // PlatformVirtualMachinesJSON platform virtual machines Json
 // swagger:model PlatformVirtualMachinesJson
+
 type PlatformVirtualMachinesJSON struct {
 
 	// default virtual machines
@@ -29,6 +30,14 @@ type PlatformVirtualMachinesJSON struct {
 	// virtual machines per zones
 	VMTypesPerZones map[string]map[string][]VMTypeJSON `json:"vmTypesPerZones,omitempty"`
 }
+
+/* polymorph PlatformVirtualMachinesJson defaultVirtualMachines false */
+
+/* polymorph PlatformVirtualMachinesJson defaultVmTypePerZones false */
+
+/* polymorph PlatformVirtualMachinesJson virtualMachines false */
+
+/* polymorph PlatformVirtualMachinesJson vmTypesPerZones false */
 
 // Validate validates this platform virtual machines Json
 func (m *PlatformVirtualMachinesJSON) Validate(formats strfmt.Registry) error {

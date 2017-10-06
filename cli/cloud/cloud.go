@@ -9,21 +9,31 @@ const (
 	OPENSTACK = CloudType("OPENSTACK")
 )
 
-type Network struct {
-	VpcId    string `json:"VpcId" yaml:"VpcId"`
-	SubnetId string `json:"SubnetId" yaml:"SubnetId"`
+type NetworkMode int
+
+const (
+	NEW_NETWORK_NEW_SUBNET NetworkMode = iota
+	EXISTING_NETWORK_NEW_SUBNET
+	EXISTING_NETWORK_EXISTING_SUBNET
+	LEGACY_NETWORK
+)
+
+var currentCloud CloudType
+
+func SetProviderType(ct CloudType) {
+	currentCloud = ct
 }
 
-var CurrentCloud CloudType
 var CloudProviders map[CloudType]CloudProvider = make(map[CloudType]CloudProvider)
 
 type CloudProvider interface {
 	GetName() *string
 	CreateCredentialParameters(func(string) string, func(string) bool) (map[string]interface{}, error)
+	GetNetworkParamatersTemplate(NetworkMode) map[string]interface{}
 	// ValidateNetwork(*Network) []error
 	// ValidateTags(map[string]string) []error
 }
 
 func GetProvider() CloudProvider {
-	return CloudProviders[CurrentCloud]
+	return CloudProviders[currentCloud]
 }

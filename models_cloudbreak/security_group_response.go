@@ -17,6 +17,7 @@ import (
 
 // SecurityGroupResponse security group response
 // swagger:model SecurityGroupResponse
+
 type SecurityGroupResponse struct {
 
 	// account id of the resource owner that is provided by OAuth provider
@@ -50,6 +51,24 @@ type SecurityGroupResponse struct {
 	// list of security rules that relates to the security group
 	SecurityRules []*SecurityRuleResponse `json:"securityRules"`
 }
+
+/* polymorph SecurityGroupResponse account false */
+
+/* polymorph SecurityGroupResponse cloudPlatform false */
+
+/* polymorph SecurityGroupResponse description false */
+
+/* polymorph SecurityGroupResponse id false */
+
+/* polymorph SecurityGroupResponse name false */
+
+/* polymorph SecurityGroupResponse owner false */
+
+/* polymorph SecurityGroupResponse publicInAccount false */
+
+/* polymorph SecurityGroupResponse securityGroupId false */
+
+/* polymorph SecurityGroupResponse securityRules false */
 
 // Validate validates this security group response
 func (m *SecurityGroupResponse) Validate(formats strfmt.Registry) error {

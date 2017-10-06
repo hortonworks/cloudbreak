@@ -1,10 +1,10 @@
 package utils
 
 import (
-	"io/ioutil"
-	"strings"
-	"net/http"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 )

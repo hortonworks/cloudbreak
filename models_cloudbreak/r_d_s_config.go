@@ -18,6 +18,7 @@ import (
 
 // RDSConfig r d s config
 // swagger:model RDSConfig
+
 type RDSConfig struct {
 
 	// Password to use for the jdbc connection
@@ -55,6 +56,24 @@ type RDSConfig struct {
 	// If true, then the RDS configuration will be validated
 	Validated *bool `json:"validated,omitempty"`
 }
+
+/* polymorph RDSConfig connectionPassword false */
+
+/* polymorph RDSConfig connectionURL false */
+
+/* polymorph RDSConfig connectionUserName false */
+
+/* polymorph RDSConfig databaseType false */
+
+/* polymorph RDSConfig hdpVersion false */
+
+/* polymorph RDSConfig name false */
+
+/* polymorph RDSConfig properties false */
+
+/* polymorph RDSConfig type false */
+
+/* polymorph RDSConfig validated false */
 
 // Validate validates this r d s config
 func (m *RDSConfig) Validate(formats strfmt.Registry) error {

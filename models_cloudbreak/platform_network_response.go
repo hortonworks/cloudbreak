@@ -10,12 +10,15 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/swag"
-	"github.com/go-openapi/validate"
 )
 
 // PlatformNetworkResponse platform network response
 // swagger:model PlatformNetworkResponse
+
 type PlatformNetworkResponse struct {
+
+	// id
+	ID string `json:"id,omitempty"`
 
 	// name
 	Name string `json:"name,omitempty"`
@@ -23,36 +26,25 @@ type PlatformNetworkResponse struct {
 	// properties
 	Properties map[string]interface{} `json:"properties,omitempty"`
 
-	// subnet ids
-	// Unique: true
-	SubnetIds []string `json:"subnetIds"`
+	// subnets
+	Subnets map[string]string `json:"subnets,omitempty"`
 }
+
+/* polymorph PlatformNetworkResponse id false */
+
+/* polymorph PlatformNetworkResponse name false */
+
+/* polymorph PlatformNetworkResponse properties false */
+
+/* polymorph PlatformNetworkResponse subnets false */
 
 // Validate validates this platform network response
 func (m *PlatformNetworkResponse) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := m.validateSubnetIds(formats); err != nil {
-		// prop
-		res = append(res, err)
-	}
-
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
-	return nil
-}
-
-func (m *PlatformNetworkResponse) validateSubnetIds(formats strfmt.Registry) error {
-
-	if swag.IsZero(m.SubnetIds) { // not required
-		return nil
-	}
-
-	if err := validate.UniqueItems("subnetIds", "body", m.SubnetIds); err != nil {
-		return err
-	}
-
 	return nil
 }
 

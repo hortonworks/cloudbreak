@@ -14,6 +14,7 @@ import (
 
 // BlueprintInput blueprint input
 // swagger:model BlueprintInput
+
 type BlueprintInput struct {
 
 	// name
@@ -22,6 +23,10 @@ type BlueprintInput struct {
 	// property value
 	PropertyValue string `json:"propertyValue,omitempty"`
 }
+
+/* polymorph BlueprintInput name false */
+
+/* polymorph BlueprintInput propertyValue false */
 
 // Validate validates this blueprint input
 func (m *BlueprintInput) Validate(formats strfmt.Registry) error {

@@ -18,6 +18,7 @@ import (
 
 // HostGroupResponse host group response
 // swagger:model HostGroupResponse
+
 type HostGroupResponse struct {
 
 	// instance group or resource constraint for a hostgroup
@@ -46,6 +47,20 @@ type HostGroupResponse struct {
 	// recovery mode of the hostgroup's nodes
 	RecoveryMode string `json:"recoveryMode,omitempty"`
 }
+
+/* polymorph HostGroupResponse constraint false */
+
+/* polymorph HostGroupResponse id false */
+
+/* polymorph HostGroupResponse metadata false */
+
+/* polymorph HostGroupResponse name false */
+
+/* polymorph HostGroupResponse recipeIds false */
+
+/* polymorph HostGroupResponse recipes false */
+
+/* polymorph HostGroupResponse recoveryMode false */
 
 // Validate validates this host group response
 func (m *HostGroupResponse) Validate(formats strfmt.Registry) error {

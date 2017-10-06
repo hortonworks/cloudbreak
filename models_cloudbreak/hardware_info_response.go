@@ -14,6 +14,7 @@ import (
 
 // HardwareInfoResponse hardware info response
 // swagger:model HardwareInfoResponse
+
 type HardwareInfoResponse struct {
 
 	// metadata of hosts
@@ -22,6 +23,10 @@ type HardwareInfoResponse struct {
 	// metadata of instances
 	InstanceMetaData *InstanceMetaData `json:"instanceMetaData,omitempty"`
 }
+
+/* polymorph HardwareInfoResponse hostMetadata false */
+
+/* polymorph HardwareInfoResponse instanceMetaData false */
 
 // Validate validates this hardware info response
 func (m *HardwareInfoResponse) Validate(formats strfmt.Registry) error {

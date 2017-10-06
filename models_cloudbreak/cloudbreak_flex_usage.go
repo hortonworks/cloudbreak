@@ -16,6 +16,7 @@ import (
 
 // CloudbreakFlexUsage cloudbreak flex usage
 // swagger:model CloudbreakFlexUsage
+
 type CloudbreakFlexUsage struct {
 
 	// controller
@@ -24,6 +25,10 @@ type CloudbreakFlexUsage struct {
 	// products
 	Products []*FlexUsageProductJSON `json:"products"`
 }
+
+/* polymorph CloudbreakFlexUsage controller false */
+
+/* polymorph CloudbreakFlexUsage products false */
 
 // Validate validates this cloudbreak flex usage
 func (m *CloudbreakFlexUsage) Validate(formats strfmt.Registry) error {

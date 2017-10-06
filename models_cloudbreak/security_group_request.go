@@ -17,6 +17,7 @@ import (
 
 // SecurityGroupRequest security group request
 // swagger:model SecurityGroupRequest
+
 type SecurityGroupRequest struct {
 
 	// type of cloud provider
@@ -39,6 +40,16 @@ type SecurityGroupRequest struct {
 	// list of security rules that relates to the security group
 	SecurityRules []*SecurityRuleRequest `json:"securityRules"`
 }
+
+/* polymorph SecurityGroupRequest cloudPlatform false */
+
+/* polymorph SecurityGroupRequest description false */
+
+/* polymorph SecurityGroupRequest name false */
+
+/* polymorph SecurityGroupRequest securityGroupId false */
+
+/* polymorph SecurityGroupRequest securityRules false */
 
 // Validate validates this security group request
 func (m *SecurityGroupRequest) Validate(formats strfmt.Registry) error {

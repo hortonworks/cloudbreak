@@ -17,6 +17,7 @@ import (
 
 // RecipeResponse recipe response
 // swagger:model RecipeResponse
+
 type RecipeResponse struct {
 
 	// content of recipe
@@ -46,6 +47,20 @@ type RecipeResponse struct {
 	// recipe uri
 	URI string `json:"uri,omitempty"`
 }
+
+/* polymorph RecipeResponse content false */
+
+/* polymorph RecipeResponse description false */
+
+/* polymorph RecipeResponse id false */
+
+/* polymorph RecipeResponse name false */
+
+/* polymorph RecipeResponse public false */
+
+/* polymorph RecipeResponse recipeType false */
+
+/* polymorph RecipeResponse uri false */
 
 // Validate validates this recipe response
 func (m *RecipeResponse) Validate(formats strfmt.Registry) error {

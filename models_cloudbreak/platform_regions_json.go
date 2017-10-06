@@ -14,6 +14,7 @@ import (
 
 // PlatformRegionsJSON platform regions Json
 // swagger:model PlatformRegionsJson
+
 type PlatformRegionsJSON struct {
 
 	// availability zones
@@ -28,6 +29,14 @@ type PlatformRegionsJSON struct {
 	// regions
 	Regions map[string][]string `json:"regions,omitempty"`
 }
+
+/* polymorph PlatformRegionsJson availabilityZones false */
+
+/* polymorph PlatformRegionsJson defaultRegions false */
+
+/* polymorph PlatformRegionsJson displayNames false */
+
+/* polymorph PlatformRegionsJson regions false */
 
 // Validate validates this platform regions Json
 func (m *PlatformRegionsJSON) Validate(formats strfmt.Registry) error {

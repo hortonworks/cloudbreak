@@ -14,6 +14,7 @@ import (
 
 // PlatformDisksJSON platform disks Json
 // swagger:model PlatformDisksJson
+
 type PlatformDisksJSON struct {
 
 	// default disks
@@ -28,6 +29,14 @@ type PlatformDisksJSON struct {
 	// disk displayNames
 	DisplayNames map[string]map[string]string `json:"displayNames,omitempty"`
 }
+
+/* polymorph PlatformDisksJson defaultDisks false */
+
+/* polymorph PlatformDisksJson diskMappings false */
+
+/* polymorph PlatformDisksJson diskTypes false */
+
+/* polymorph PlatformDisksJson displayNames false */
 
 // Validate validates this platform disks Json
 func (m *PlatformDisksJSON) Validate(formats strfmt.Registry) error {

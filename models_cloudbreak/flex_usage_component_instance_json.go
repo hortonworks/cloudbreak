@@ -14,6 +14,7 @@ import (
 
 // FlexUsageComponentInstanceJSON flex usage component instance Json
 // swagger:model FlexUsageComponentInstanceJson
+
 type FlexUsageComponentInstanceJSON struct {
 
 	// creation time
@@ -37,6 +38,20 @@ type FlexUsageComponentInstanceJSON struct {
 	// usage date
 	UsageDate string `json:"usageDate,omitempty"`
 }
+
+/* polymorph FlexUsageComponentInstanceJson creationTime false */
+
+/* polymorph FlexUsageComponentInstanceJson flexSubscriptionId false */
+
+/* polymorph FlexUsageComponentInstanceJson guid false */
+
+/* polymorph FlexUsageComponentInstanceJson peakUsage false */
+
+/* polymorph FlexUsageComponentInstanceJson provider false */
+
+/* polymorph FlexUsageComponentInstanceJson region false */
+
+/* polymorph FlexUsageComponentInstanceJson usageDate false */
 
 // Validate validates this flex usage component instance Json
 func (m *FlexUsageComponentInstanceJSON) Validate(formats strfmt.Registry) error {

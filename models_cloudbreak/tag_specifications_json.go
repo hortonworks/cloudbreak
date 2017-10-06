@@ -14,11 +14,14 @@ import (
 
 // TagSpecificationsJSON tag specifications Json
 // swagger:model TagSpecificationsJson
+
 type TagSpecificationsJSON struct {
 
 	// tag specifications
 	Specifications map[string]map[string]interface{} `json:"specifications,omitempty"`
 }
+
+/* polymorph TagSpecificationsJson specifications false */
 
 // Validate validates this tag specifications Json
 func (m *TagSpecificationsJSON) Validate(formats strfmt.Registry) error {

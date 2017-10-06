@@ -67,6 +67,7 @@ func (o *GetDatabaseConfigSettingsOK) readResponse(response runtime.ClientRespon
 /*GetDatabaseConfigSettingsOKBody get database config settings o k body
 swagger:model GetDatabaseConfigSettingsOKBody
 */
+
 type GetDatabaseConfigSettingsOKBody map[string]interface{}
 
 // Validate validates this get database config settings o k body

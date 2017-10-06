@@ -15,6 +15,7 @@ import (
 
 // AmbariStackDetails ambari stack details
 // swagger:model AmbariStackDetails
+
 type AmbariStackDetails struct {
 
 	// operating system for the stack, like redhat6
@@ -48,6 +49,22 @@ type AmbariStackDetails struct {
 	// Required: true
 	Version *string `json:"version"`
 }
+
+/* polymorph AmbariStackDetails os false */
+
+/* polymorph AmbariStackDetails stack false */
+
+/* polymorph AmbariStackDetails stackBaseURL false */
+
+/* polymorph AmbariStackDetails stackRepoId false */
+
+/* polymorph AmbariStackDetails utilsBaseURL false */
+
+/* polymorph AmbariStackDetails utilsRepoId false */
+
+/* polymorph AmbariStackDetails verify false */
+
+/* polymorph AmbariStackDetails version false */
 
 // Validate validates this ambari stack details
 func (m *AmbariStackDetails) Validate(formats strfmt.Registry) error {

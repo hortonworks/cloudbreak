@@ -15,6 +15,7 @@ import (
 
 // ConstraintTemplateRequest constraint template request
 // swagger:model ConstraintTemplateRequest
+
 type ConstraintTemplateRequest struct {
 
 	// number of CPU cores needed for the Ambari node
@@ -45,6 +46,18 @@ type ConstraintTemplateRequest struct {
 	// Required: true
 	OrchestratorType *string `json:"orchestratorType"`
 }
+
+/* polymorph ConstraintTemplateRequest cpu false */
+
+/* polymorph ConstraintTemplateRequest description false */
+
+/* polymorph ConstraintTemplateRequest disk false */
+
+/* polymorph ConstraintTemplateRequest memory false */
+
+/* polymorph ConstraintTemplateRequest name false */
+
+/* polymorph ConstraintTemplateRequest orchestratorType false */
 
 // Validate validates this constraint template request
 func (m *ConstraintTemplateRequest) Validate(formats strfmt.Registry) error {

@@ -15,6 +15,7 @@ import (
 
 // RDSBuildRequest r d s build request
 // swagger:model RDSBuildRequest
+
 type RDSBuildRequest struct {
 
 	// requested cluster name
@@ -25,6 +26,10 @@ type RDSBuildRequest struct {
 	// Required: true
 	RdsConfigRequest *RDSConfig `json:"rdsConfigRequest"`
 }
+
+/* polymorph RDSBuildRequest clusterName false */
+
+/* polymorph RDSBuildRequest rdsConfigRequest false */
 
 // Validate validates this r d s build request
 func (m *RDSBuildRequest) Validate(formats strfmt.Registry) error {

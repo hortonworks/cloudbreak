@@ -15,6 +15,7 @@ import (
 
 // ConstraintTemplateResponse constraint template response
 // swagger:model ConstraintTemplateResponse
+
 type ConstraintTemplateResponse struct {
 
 	// number of CPU cores needed for the Ambari node
@@ -52,6 +53,22 @@ type ConstraintTemplateResponse struct {
 	// Required: true
 	PublicInAccount bool `json:"publicInAccount"`
 }
+
+/* polymorph ConstraintTemplateResponse cpu false */
+
+/* polymorph ConstraintTemplateResponse description false */
+
+/* polymorph ConstraintTemplateResponse disk false */
+
+/* polymorph ConstraintTemplateResponse id false */
+
+/* polymorph ConstraintTemplateResponse memory false */
+
+/* polymorph ConstraintTemplateResponse name false */
+
+/* polymorph ConstraintTemplateResponse orchestratorType false */
+
+/* polymorph ConstraintTemplateResponse publicInAccount false */
 
 // Validate validates this constraint template response
 func (m *ConstraintTemplateResponse) Validate(formats strfmt.Registry) error {

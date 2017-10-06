@@ -17,6 +17,7 @@ import (
 
 // CloudbreakEvent cloudbreak event
 // swagger:model CloudbreakEvent
+
 type CloudbreakEvent struct {
 
 	// account id of the resource owner that is provided by OAuth provider
@@ -73,6 +74,42 @@ type CloudbreakEvent struct {
 	// status of the stack
 	StackStatus string `json:"stackStatus,omitempty"`
 }
+
+/* polymorph CloudbreakEvent account false */
+
+/* polymorph CloudbreakEvent availabilityZone false */
+
+/* polymorph CloudbreakEvent blueprintId false */
+
+/* polymorph CloudbreakEvent blueprintName false */
+
+/* polymorph CloudbreakEvent cloud false */
+
+/* polymorph CloudbreakEvent clusterId false */
+
+/* polymorph CloudbreakEvent clusterName false */
+
+/* polymorph CloudbreakEvent clusterStatus false */
+
+/* polymorph CloudbreakEvent eventMessage false */
+
+/* polymorph CloudbreakEvent eventTimestamp false */
+
+/* polymorph CloudbreakEvent eventType false */
+
+/* polymorph CloudbreakEvent instanceGroup false */
+
+/* polymorph CloudbreakEvent nodeCount false */
+
+/* polymorph CloudbreakEvent owner false */
+
+/* polymorph CloudbreakEvent region false */
+
+/* polymorph CloudbreakEvent stackId false */
+
+/* polymorph CloudbreakEvent stackName false */
+
+/* polymorph CloudbreakEvent stackStatus false */
 
 // Validate validates this cloudbreak event
 func (m *CloudbreakEvent) Validate(formats strfmt.Registry) error {

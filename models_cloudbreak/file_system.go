@@ -17,6 +17,7 @@ import (
 
 // FileSystem file system
 // swagger:model FileSystem
+
 type FileSystem struct {
 
 	// true if fs.defaultFS should point to this filesystem
@@ -33,6 +34,14 @@ type FileSystem struct {
 	// Required: true
 	Type *string `json:"type"`
 }
+
+/* polymorph FileSystem defaultFs false */
+
+/* polymorph FileSystem name false */
+
+/* polymorph FileSystem properties false */
+
+/* polymorph FileSystem type false */
 
 // Validate validates this file system
 func (m *FileSystem) Validate(formats strfmt.Registry) error {

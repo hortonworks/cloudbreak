@@ -14,11 +14,14 @@ import (
 
 // User user
 // swagger:model User
+
 type User struct {
 
 	// username
 	Username string `json:"username,omitempty"`
 }
+
+/* polymorph User username false */
 
 // Validate validates this user
 func (m *User) Validate(formats strfmt.Registry) error {

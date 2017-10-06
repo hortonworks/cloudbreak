@@ -17,6 +17,7 @@ import (
 
 // LdapConfigResponse ldap config response
 // swagger:model LdapConfigResponse
+
 type LdapConfigResponse struct {
 
 	// bind distinguished name for connection test and group search (e.g. cn=admin,dc=example,dc=org)
@@ -79,6 +80,40 @@ type LdapConfigResponse struct {
 	// Required: true
 	UserSearchBase *string `json:"userSearchBase"`
 }
+
+/* polymorph LdapConfigResponse bindDn false */
+
+/* polymorph LdapConfigResponse description false */
+
+/* polymorph LdapConfigResponse directoryType false */
+
+/* polymorph LdapConfigResponse domain false */
+
+/* polymorph LdapConfigResponse groupMemberAttribute false */
+
+/* polymorph LdapConfigResponse groupNameAttribute false */
+
+/* polymorph LdapConfigResponse groupObjectClass false */
+
+/* polymorph LdapConfigResponse groupSearchBase false */
+
+/* polymorph LdapConfigResponse id false */
+
+/* polymorph LdapConfigResponse name false */
+
+/* polymorph LdapConfigResponse protocol false */
+
+/* polymorph LdapConfigResponse public false */
+
+/* polymorph LdapConfigResponse serverHost false */
+
+/* polymorph LdapConfigResponse serverPort false */
+
+/* polymorph LdapConfigResponse userNameAttribute false */
+
+/* polymorph LdapConfigResponse userObjectClass false */
+
+/* polymorph LdapConfigResponse userSearchBase false */
 
 // Validate validates this ldap config response
 func (m *LdapConfigResponse) Validate(formats strfmt.Registry) error {

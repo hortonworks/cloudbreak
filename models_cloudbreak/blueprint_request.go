@@ -17,6 +17,7 @@ import (
 
 // BlueprintRequest blueprint request
 // swagger:model BlueprintRequest
+
 type BlueprintRequest struct {
 
 	// ambari blueprint JSON, set this or the url field
@@ -43,6 +44,18 @@ type BlueprintRequest struct {
 	// url source of an ambari blueprint, set this or the ambariBlueprint field
 	URL string `json:"url,omitempty"`
 }
+
+/* polymorph BlueprintRequest ambariBlueprint false */
+
+/* polymorph BlueprintRequest description false */
+
+/* polymorph BlueprintRequest inputs false */
+
+/* polymorph BlueprintRequest name false */
+
+/* polymorph BlueprintRequest properties false */
+
+/* polymorph BlueprintRequest url false */
 
 // Validate validates this blueprint request
 func (m *BlueprintRequest) Validate(formats strfmt.Registry) error {

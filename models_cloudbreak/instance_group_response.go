@@ -18,6 +18,7 @@ import (
 
 // InstanceGroupResponse instance group response
 // swagger:model InstanceGroupResponse
+
 type InstanceGroupResponse struct {
 
 	// name of the instance group
@@ -57,6 +58,26 @@ type InstanceGroupResponse struct {
 	// type of the instance group
 	Type string `json:"type,omitempty"`
 }
+
+/* polymorph InstanceGroupResponse group false */
+
+/* polymorph InstanceGroupResponse id false */
+
+/* polymorph InstanceGroupResponse metadata false */
+
+/* polymorph InstanceGroupResponse nodeCount false */
+
+/* polymorph InstanceGroupResponse parameters false */
+
+/* polymorph InstanceGroupResponse securityGroup false */
+
+/* polymorph InstanceGroupResponse securityGroupId false */
+
+/* polymorph InstanceGroupResponse template false */
+
+/* polymorph InstanceGroupResponse templateId false */
+
+/* polymorph InstanceGroupResponse type false */
 
 // Validate validates this instance group response
 func (m *InstanceGroupResponse) Validate(formats strfmt.Registry) error {

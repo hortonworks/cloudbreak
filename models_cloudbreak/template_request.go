@@ -15,6 +15,7 @@ import (
 
 // TemplateRequest template request
 // swagger:model TemplateRequest
+
 type TemplateRequest struct {
 
 	// type of cloud provider
@@ -50,6 +51,24 @@ type TemplateRequest struct {
 	// type of the volumes
 	VolumeType string `json:"volumeType,omitempty"`
 }
+
+/* polymorph TemplateRequest cloudPlatform false */
+
+/* polymorph TemplateRequest description false */
+
+/* polymorph TemplateRequest instanceType false */
+
+/* polymorph TemplateRequest name false */
+
+/* polymorph TemplateRequest parameters false */
+
+/* polymorph TemplateRequest topologyId false */
+
+/* polymorph TemplateRequest volumeCount false */
+
+/* polymorph TemplateRequest volumeSize false */
+
+/* polymorph TemplateRequest volumeType false */
 
 // Validate validates this template request
 func (m *TemplateRequest) Validate(formats strfmt.Registry) error {

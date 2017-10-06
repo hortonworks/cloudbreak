@@ -15,6 +15,7 @@ import (
 
 // KerberosRequest kerberos request
 // swagger:model KerberosRequest
+
 type KerberosRequest struct {
 
 	// kerberos admin user
@@ -50,6 +51,24 @@ type KerberosRequest struct {
 	// url
 	URL string `json:"url,omitempty"`
 }
+
+/* polymorph KerberosRequest admin false */
+
+/* polymorph KerberosRequest containerDn false */
+
+/* polymorph KerberosRequest ldapUrl false */
+
+/* polymorph KerberosRequest masterKey false */
+
+/* polymorph KerberosRequest password false */
+
+/* polymorph KerberosRequest principal false */
+
+/* polymorph KerberosRequest realm false */
+
+/* polymorph KerberosRequest tcpAllowed false */
+
+/* polymorph KerberosRequest url false */
 
 // Validate validates this kerberos request
 func (m *KerberosRequest) Validate(formats strfmt.Registry) error {

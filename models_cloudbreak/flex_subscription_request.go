@@ -15,6 +15,7 @@ import (
 
 // FlexSubscriptionRequest flex subscription request
 // swagger:model FlexSubscriptionRequest
+
 type FlexSubscriptionRequest struct {
 
 	// default
@@ -36,6 +37,16 @@ type FlexSubscriptionRequest struct {
 	// true if the flex subscription was used for the controller
 	UsedForController *bool `json:"usedForController,omitempty"`
 }
+
+/* polymorph FlexSubscriptionRequest default false */
+
+/* polymorph FlexSubscriptionRequest name false */
+
+/* polymorph FlexSubscriptionRequest smartSenseSubscriptionId false */
+
+/* polymorph FlexSubscriptionRequest subscriptionId false */
+
+/* polymorph FlexSubscriptionRequest usedForController false */
 
 // Validate validates this flex subscription request
 func (m *FlexSubscriptionRequest) Validate(formats strfmt.Registry) error {

@@ -14,11 +14,14 @@ import (
 
 // CustomContainerResponse custom container response
 // swagger:model CustomContainerResponse
+
 type CustomContainerResponse struct {
 
 	// definitions
 	Definitions map[string]string `json:"definitions,omitempty"`
 }
+
+/* polymorph CustomContainerResponse definitions false */
 
 // Validate validates this custom container response
 func (m *CustomContainerResponse) Validate(formats strfmt.Registry) error {

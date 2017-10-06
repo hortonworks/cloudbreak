@@ -15,6 +15,7 @@ import (
 
 // SecurityRuleResponse security rule response
 // swagger:model SecurityRuleResponse
+
 type SecurityRuleResponse struct {
 
 	// id of the resource
@@ -37,6 +38,16 @@ type SecurityRuleResponse struct {
 	// Pattern: ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(\/([0-9]|[1-2][0-9]|3[0-2]))$
 	Subnet *string `json:"subnet"`
 }
+
+/* polymorph SecurityRuleResponse id false */
+
+/* polymorph SecurityRuleResponse modifiable false */
+
+/* polymorph SecurityRuleResponse ports false */
+
+/* polymorph SecurityRuleResponse protocol false */
+
+/* polymorph SecurityRuleResponse subnet false */
 
 // Validate validates this security rule response
 func (m *SecurityRuleResponse) Validate(formats strfmt.Registry) error {

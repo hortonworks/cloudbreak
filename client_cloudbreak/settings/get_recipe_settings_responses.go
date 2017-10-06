@@ -67,6 +67,7 @@ func (o *GetRecipeSettingsOK) readResponse(response runtime.ClientResponse, cons
 /*GetRecipeSettingsOKBody get recipe settings o k body
 swagger:model GetRecipeSettingsOKBody
 */
+
 type GetRecipeSettingsOKBody map[string]interface{}
 
 // Validate validates this get recipe settings o k body

@@ -15,6 +15,7 @@ import (
 
 // TopologyResponse topology response
 // swagger:model TopologyResponse
+
 type TopologyResponse struct {
 
 	// type of cloud provider
@@ -39,6 +40,16 @@ type TopologyResponse struct {
 	// topology mapping
 	Nodes map[string]string `json:"nodes,omitempty"`
 }
+
+/* polymorph TopologyResponse cloudPlatform false */
+
+/* polymorph TopologyResponse description false */
+
+/* polymorph TopologyResponse id false */
+
+/* polymorph TopologyResponse name false */
+
+/* polymorph TopologyResponse nodes false */
 
 // Validate validates this topology response
 func (m *TopologyResponse) Validate(formats strfmt.Registry) error {

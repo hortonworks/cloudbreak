@@ -17,6 +17,7 @@ import (
 
 // ConfigsResponse configs response
 // swagger:model ConfigsResponse
+
 type ConfigsResponse struct {
 
 	// response object
@@ -24,6 +25,8 @@ type ConfigsResponse struct {
 	// Unique: true
 	Inputs []*BlueprintInput `json:"inputs"`
 }
+
+/* polymorph ConfigsResponse inputs false */
 
 // Validate validates this configs response
 func (m *ConfigsResponse) Validate(formats strfmt.Registry) error {

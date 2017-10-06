@@ -17,6 +17,7 @@ import (
 
 // InstanceGroups instance groups
 // swagger:model instanceGroups
+
 type InstanceGroups struct {
 
 	// name of the instance group
@@ -47,6 +48,22 @@ type InstanceGroups struct {
 	// type of the instance group
 	Type string `json:"type,omitempty"`
 }
+
+/* polymorph instanceGroups group false */
+
+/* polymorph instanceGroups nodeCount false */
+
+/* polymorph instanceGroups parameters false */
+
+/* polymorph instanceGroups securityGroup false */
+
+/* polymorph instanceGroups securityGroupId false */
+
+/* polymorph instanceGroups template false */
+
+/* polymorph instanceGroups templateId false */
+
+/* polymorph instanceGroups type false */
 
 // Validate validates this instance groups
 func (m *InstanceGroups) Validate(formats strfmt.Registry) error {

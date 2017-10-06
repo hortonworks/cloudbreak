@@ -67,6 +67,7 @@ func (o *IsPlatformSelectionDisabledOK) readResponse(response runtime.ClientResp
 /*IsPlatformSelectionDisabledOKBody is platform selection disabled o k body
 swagger:model IsPlatformSelectionDisabledOKBody
 */
+
 type IsPlatformSelectionDisabledOKBody map[string]bool
 
 // Validate validates this is platform selection disabled o k body

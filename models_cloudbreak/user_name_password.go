@@ -15,6 +15,7 @@ import (
 
 // UserNamePassword user name password
 // swagger:model UserNamePassword
+
 type UserNamePassword struct {
 
 	// old password in ambari
@@ -35,6 +36,12 @@ type UserNamePassword struct {
 	// Min Length: 1
 	UserName *string `json:"userName"`
 }
+
+/* polymorph UserNamePassword oldPassword false */
+
+/* polymorph UserNamePassword password false */
+
+/* polymorph UserNamePassword userName false */
 
 // Validate validates this user name password
 func (m *UserNamePassword) Validate(formats strfmt.Registry) error {

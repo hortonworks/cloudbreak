@@ -15,12 +15,15 @@ import (
 
 // ID Id
 // swagger:model Id
+
 type ID struct {
 
 	// id of the resource
 	// Required: true
 	ID *int64 `json:"id"`
 }
+
+/* polymorph Id id false */
 
 // Validate validates this Id
 func (m *ID) Validate(formats strfmt.Registry) error {

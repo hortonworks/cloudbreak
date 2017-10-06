@@ -17,6 +17,7 @@ import (
 
 // ClusterTemplateRequest cluster template request
 // swagger:model ClusterTemplateRequest
+
 type ClusterTemplateRequest struct {
 
 	// name of the cluster template
@@ -29,6 +30,12 @@ type ClusterTemplateRequest struct {
 	// type of the cluster template
 	Type string `json:"type,omitempty"`
 }
+
+/* polymorph ClusterTemplateRequest name false */
+
+/* polymorph ClusterTemplateRequest template false */
+
+/* polymorph ClusterTemplateRequest type false */
 
 // Validate validates this cluster template request
 func (m *ClusterTemplateRequest) Validate(formats strfmt.Registry) error {

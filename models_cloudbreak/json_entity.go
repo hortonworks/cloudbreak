@@ -7,4 +7,5 @@ package models_cloudbreak
 
 // JSONEntity Json entity
 // swagger:model JsonEntity
+
 type JSONEntity interface{}

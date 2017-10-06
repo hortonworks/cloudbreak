@@ -15,6 +15,7 @@ import (
 
 // InstanceGroupAdjustment instance group adjustment
 // swagger:model InstanceGroupAdjustment
+
 type InstanceGroupAdjustment struct {
 
 	// name of the instance group
@@ -24,10 +25,11 @@ type InstanceGroupAdjustment struct {
 	// scaling adjustment of the instance groups
 	// Required: true
 	ScalingAdjustment *int32 `json:"scalingAdjustment"`
-
-	// on stack update, update cluster too
-	WithClusterEvent *bool `json:"withClusterEvent,omitempty"`
 }
+
+/* polymorph InstanceGroupAdjustment instanceGroup false */
+
+/* polymorph InstanceGroupAdjustment scalingAdjustment false */
 
 // Validate validates this instance group adjustment
 func (m *InstanceGroupAdjustment) Validate(formats strfmt.Registry) error {

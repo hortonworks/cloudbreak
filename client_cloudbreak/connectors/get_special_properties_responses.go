@@ -51,7 +51,7 @@ type GetSpecialPropertiesOK struct {
 }
 
 func (o *GetSpecialPropertiesOK) Error() string {
-	return fmt.Sprintf("[GET /connectors/custom][%d] getSpecialPropertiesOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /connectors/custom][%d] getSpecialPropertiesOK  %+v", 200, o.Payload)
 }
 
 func (o *GetSpecialPropertiesOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
@@ -67,6 +67,7 @@ func (o *GetSpecialPropertiesOK) readResponse(response runtime.ClientResponse, c
 /*GetSpecialPropertiesOKBody get special properties o k body
 swagger:model GetSpecialPropertiesOKBody
 */
+
 type GetSpecialPropertiesOKBody map[string]bool
 
 // Validate validates this get special properties o k body

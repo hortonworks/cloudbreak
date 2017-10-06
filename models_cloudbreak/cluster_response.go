@@ -18,6 +18,7 @@ import (
 
 // ClusterResponse cluster response
 // swagger:model ClusterResponse
+
 type ClusterResponse struct {
 
 	// details of the external Ambari database
@@ -118,6 +119,68 @@ type ClusterResponse struct {
 	UserName string `json:"userName,omitempty"`
 }
 
+/* polymorph ClusterResponse ambariDatabaseDetails false */
+
+/* polymorph ClusterResponse ambariRepoDetailsJson false */
+
+/* polymorph ClusterResponse ambariServerIp false */
+
+/* polymorph ClusterResponse ambariServerUrl false */
+
+/* polymorph ClusterResponse ambariStackDetails false */
+
+/* polymorph ClusterResponse attributes false */
+
+/* polymorph ClusterResponse blueprint false */
+
+/* polymorph ClusterResponse blueprintCustomProperties false */
+
+/* polymorph ClusterResponse blueprintId false */
+
+/* polymorph ClusterResponse blueprintInputs false */
+
+/* polymorph ClusterResponse cluster false */
+
+/* polymorph ClusterResponse configStrategy false */
+
+/* polymorph ClusterResponse customContainers false */
+
+/* polymorph ClusterResponse customQueue false */
+
+/* polymorph ClusterResponse description false */
+
+/* polymorph ClusterResponse executorType false */
+
+/* polymorph ClusterResponse gateway false */
+
+/* polymorph ClusterResponse hostGroups false */
+
+/* polymorph ClusterResponse hoursUp false */
+
+/* polymorph ClusterResponse id false */
+
+/* polymorph ClusterResponse ldapConfig false */
+
+/* polymorph ClusterResponse ldapConfigId false */
+
+/* polymorph ClusterResponse minutesUp false */
+
+/* polymorph ClusterResponse name false */
+
+/* polymorph ClusterResponse rdsConfigIds false */
+
+/* polymorph ClusterResponse rdsConfigs false */
+
+/* polymorph ClusterResponse secure false */
+
+/* polymorph ClusterResponse serviceEndPoints false */
+
+/* polymorph ClusterResponse status false */
+
+/* polymorph ClusterResponse statusReason false */
+
+/* polymorph ClusterResponse userName false */
+
 // Validate validates this cluster response
 func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	var res []error
@@ -183,6 +246,11 @@ func (m *ClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateStatus(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -513,6 +581,81 @@ func (m *ClusterResponse) validateRdsConfigs(formats strfmt.Registry) error {
 			}
 		}
 
+	}
+
+	return nil
+}
+
+var clusterResponseTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		clusterResponseTypeStatusPropEnum = append(clusterResponseTypeStatusPropEnum, v)
+	}
+}
+
+const (
+	// ClusterResponseStatusREQUESTED captures enum value "REQUESTED"
+	ClusterResponseStatusREQUESTED string = "REQUESTED"
+	// ClusterResponseStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
+	ClusterResponseStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+	// ClusterResponseStatusAVAILABLE captures enum value "AVAILABLE"
+	ClusterResponseStatusAVAILABLE string = "AVAILABLE"
+	// ClusterResponseStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
+	ClusterResponseStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+	// ClusterResponseStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
+	ClusterResponseStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+	// ClusterResponseStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
+	ClusterResponseStatusUPDATEFAILED string = "UPDATE_FAILED"
+	// ClusterResponseStatusCREATEFAILED captures enum value "CREATE_FAILED"
+	ClusterResponseStatusCREATEFAILED string = "CREATE_FAILED"
+	// ClusterResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
+	ClusterResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+	// ClusterResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
+	ClusterResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+	// ClusterResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
+	ClusterResponseStatusDELETEFAILED string = "DELETE_FAILED"
+	// ClusterResponseStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
+	ClusterResponseStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+	// ClusterResponseStatusSTOPPED captures enum value "STOPPED"
+	ClusterResponseStatusSTOPPED string = "STOPPED"
+	// ClusterResponseStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
+	ClusterResponseStatusSTOPREQUESTED string = "STOP_REQUESTED"
+	// ClusterResponseStatusSTARTREQUESTED captures enum value "START_REQUESTED"
+	ClusterResponseStatusSTARTREQUESTED string = "START_REQUESTED"
+	// ClusterResponseStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
+	ClusterResponseStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+	// ClusterResponseStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
+	ClusterResponseStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+	// ClusterResponseStatusSTARTFAILED captures enum value "START_FAILED"
+	ClusterResponseStatusSTARTFAILED string = "START_FAILED"
+	// ClusterResponseStatusSTOPFAILED captures enum value "STOP_FAILED"
+	ClusterResponseStatusSTOPFAILED string = "STOP_FAILED"
+	// ClusterResponseStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
+	ClusterResponseStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+)
+
+// prop value enum
+func (m *ClusterResponse) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, clusterResponseTypeStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *ClusterResponse) validateStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Status) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
+		return err
 	}
 
 	return nil

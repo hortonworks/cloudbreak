@@ -17,6 +17,7 @@ import (
 
 // UpdateStack update stack
 // swagger:model UpdateStack
+
 type UpdateStack struct {
 
 	// instance group adjustment
@@ -24,7 +25,16 @@ type UpdateStack struct {
 
 	// status of the scale request
 	Status string `json:"status,omitempty"`
+
+	// on stack update, update cluster too
+	WithClusterEvent *bool `json:"withClusterEvent,omitempty"`
 }
+
+/* polymorph UpdateStack instanceGroupAdjustment false */
+
+/* polymorph UpdateStack status false */
+
+/* polymorph UpdateStack withClusterEvent false */
 
 // Validate validates this update stack
 func (m *UpdateStack) Validate(formats strfmt.Registry) error {

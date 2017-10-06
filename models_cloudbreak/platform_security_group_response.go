@@ -14,6 +14,7 @@ import (
 
 // PlatformSecurityGroupResponse platform security group response
 // swagger:model PlatformSecurityGroupResponse
+
 type PlatformSecurityGroupResponse struct {
 
 	// group Id
@@ -25,6 +26,12 @@ type PlatformSecurityGroupResponse struct {
 	// properties
 	Properties map[string]interface{} `json:"properties,omitempty"`
 }
+
+/* polymorph PlatformSecurityGroupResponse groupId false */
+
+/* polymorph PlatformSecurityGroupResponse groupName false */
+
+/* polymorph PlatformSecurityGroupResponse properties false */
 
 // Validate validates this platform security group response
 func (m *PlatformSecurityGroupResponse) Validate(formats strfmt.Registry) error {

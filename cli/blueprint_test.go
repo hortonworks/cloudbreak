@@ -1,13 +1,13 @@
 package cli
 
 import (
-	"testing"
-	"strconv"
-	"strings"
-	"github.com/hortonworks/hdc-cli/client_cloudbreak/blueprints"
-	"github.com/hortonworks/hdc-cli/models_cloudbreak"
 	"github.com/hortonworks/hdc-cli/cli/types"
 	"github.com/hortonworks/hdc-cli/cli/utils"
+	"github.com/hortonworks/hdc-cli/client_cloudbreak/blueprints"
+	"github.com/hortonworks/hdc-cli/models_cloudbreak"
+	"strconv"
+	"strings"
+	"testing"
 )
 
 type mockBlueprintsClient struct {

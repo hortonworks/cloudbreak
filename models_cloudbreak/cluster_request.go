@@ -18,6 +18,7 @@ import (
 
 // ClusterRequest cluster request
 // swagger:model ClusterRequest
+
 type ClusterRequest struct {
 
 	// details of the external Ambari database
@@ -41,6 +42,9 @@ type ClusterRequest struct {
 	// blueprint inputs in the cluster
 	// Unique: true
 	BlueprintInputs []*BlueprintInput `json:"blueprintInputs"`
+
+	// blueprint name for the cluster
+	BlueprintName string `json:"blueprintName,omitempty"`
 
 	// config recommendation strategy
 	ConfigStrategy string `json:"configStrategy,omitempty"`
@@ -121,6 +125,64 @@ type ClusterRequest struct {
 	// validate blueprint
 	ValidateBlueprint *bool `json:"validateBlueprint,omitempty"`
 }
+
+/* polymorph ClusterRequest ambariDatabaseDetails false */
+
+/* polymorph ClusterRequest ambariRepoDetailsJson false */
+
+/* polymorph ClusterRequest ambariStackDetails false */
+
+/* polymorph ClusterRequest blueprint false */
+
+/* polymorph ClusterRequest blueprintCustomProperties false */
+
+/* polymorph ClusterRequest blueprintId false */
+
+/* polymorph ClusterRequest blueprintInputs false */
+
+/* polymorph ClusterRequest blueprintName false */
+
+/* polymorph ClusterRequest configStrategy false */
+
+/* polymorph ClusterRequest connectedCluster false */
+
+/* polymorph ClusterRequest customContainer false */
+
+/* polymorph ClusterRequest customQueue false */
+
+/* polymorph ClusterRequest description false */
+
+/* polymorph ClusterRequest emailNeeded false */
+
+/* polymorph ClusterRequest emailTo false */
+
+/* polymorph ClusterRequest enableSecurity false */
+
+/* polymorph ClusterRequest executorType false */
+
+/* polymorph ClusterRequest fileSystem false */
+
+/* polymorph ClusterRequest gateway false */
+
+/* polymorph ClusterRequest hostGroups false */
+
+/* polymorph ClusterRequest kerberos false */
+
+/* polymorph ClusterRequest ldapConfig false */
+
+/* polymorph ClusterRequest ldapConfigId false */
+
+/* polymorph ClusterRequest name false */
+
+/* polymorph ClusterRequest password false */
+
+/* polymorph ClusterRequest rdsConfigIds false */
+
+/* polymorph ClusterRequest rdsConfigJsons false */
+
+/* polymorph ClusterRequest userName false */
+
+/* polymorph ClusterRequest validateBlueprint false */
 
 // Validate validates this cluster request
 func (m *ClusterRequest) Validate(formats strfmt.Registry) error {

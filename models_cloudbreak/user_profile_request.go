@@ -14,6 +14,7 @@ import (
 
 // UserProfileRequest user profile request
 // swagger:model UserProfileRequest
+
 type UserProfileRequest struct {
 
 	// credential Id
@@ -25,6 +26,12 @@ type UserProfileRequest struct {
 	// ui properties
 	UIProperties map[string]interface{} `json:"uiProperties,omitempty"`
 }
+
+/* polymorph UserProfileRequest credentialId false */
+
+/* polymorph UserProfileRequest credentialName false */
+
+/* polymorph UserProfileRequest uiProperties false */
 
 // Validate validates this user profile request
 func (m *UserProfileRequest) Validate(formats strfmt.Registry) error {

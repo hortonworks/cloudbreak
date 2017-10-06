@@ -15,6 +15,7 @@ import (
 
 // HostMetadata host metadata
 // swagger:model HostMetadata
+
 type HostMetadata struct {
 
 	// name of the host group
@@ -31,6 +32,14 @@ type HostMetadata struct {
 	// state of the host
 	State string `json:"state,omitempty"`
 }
+
+/* polymorph HostMetadata groupName false */
+
+/* polymorph HostMetadata id false */
+
+/* polymorph HostMetadata name false */
+
+/* polymorph HostMetadata state false */
 
 // Validate validates this host metadata
 func (m *HostMetadata) Validate(formats strfmt.Registry) error {

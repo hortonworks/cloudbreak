@@ -18,6 +18,7 @@ import (
 
 // AutoscaleClusterResponse autoscale cluster response
 // swagger:model AutoscaleClusterResponse
+
 type AutoscaleClusterResponse struct {
 
 	// details of the external Ambari database
@@ -121,6 +122,70 @@ type AutoscaleClusterResponse struct {
 	UserName string `json:"userName,omitempty"`
 }
 
+/* polymorph AutoscaleClusterResponse ambariDatabaseDetails false */
+
+/* polymorph AutoscaleClusterResponse ambariRepoDetailsJson false */
+
+/* polymorph AutoscaleClusterResponse ambariServerIp false */
+
+/* polymorph AutoscaleClusterResponse ambariServerUrl false */
+
+/* polymorph AutoscaleClusterResponse ambariStackDetails false */
+
+/* polymorph AutoscaleClusterResponse attributes false */
+
+/* polymorph AutoscaleClusterResponse blueprint false */
+
+/* polymorph AutoscaleClusterResponse blueprintCustomProperties false */
+
+/* polymorph AutoscaleClusterResponse blueprintId false */
+
+/* polymorph AutoscaleClusterResponse blueprintInputs false */
+
+/* polymorph AutoscaleClusterResponse cluster false */
+
+/* polymorph AutoscaleClusterResponse configStrategy false */
+
+/* polymorph AutoscaleClusterResponse customContainers false */
+
+/* polymorph AutoscaleClusterResponse customQueue false */
+
+/* polymorph AutoscaleClusterResponse description false */
+
+/* polymorph AutoscaleClusterResponse executorType false */
+
+/* polymorph AutoscaleClusterResponse gateway false */
+
+/* polymorph AutoscaleClusterResponse hostGroups false */
+
+/* polymorph AutoscaleClusterResponse hoursUp false */
+
+/* polymorph AutoscaleClusterResponse id false */
+
+/* polymorph AutoscaleClusterResponse ldapConfig false */
+
+/* polymorph AutoscaleClusterResponse ldapConfigId false */
+
+/* polymorph AutoscaleClusterResponse minutesUp false */
+
+/* polymorph AutoscaleClusterResponse name false */
+
+/* polymorph AutoscaleClusterResponse password false */
+
+/* polymorph AutoscaleClusterResponse rdsConfigIds false */
+
+/* polymorph AutoscaleClusterResponse rdsConfigs false */
+
+/* polymorph AutoscaleClusterResponse secure false */
+
+/* polymorph AutoscaleClusterResponse serviceEndPoints false */
+
+/* polymorph AutoscaleClusterResponse status false */
+
+/* polymorph AutoscaleClusterResponse statusReason false */
+
+/* polymorph AutoscaleClusterResponse userName false */
+
 // Validate validates this autoscale cluster response
 func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	var res []error
@@ -186,6 +251,11 @@ func (m *AutoscaleClusterResponse) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateRdsConfigs(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateStatus(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -516,6 +586,81 @@ func (m *AutoscaleClusterResponse) validateRdsConfigs(formats strfmt.Registry) e
 			}
 		}
 
+	}
+
+	return nil
+}
+
+var autoscaleClusterResponseTypeStatusPropEnum []interface{}
+
+func init() {
+	var res []string
+	if err := json.Unmarshal([]byte(`["REQUESTED","CREATE_IN_PROGRESS","AVAILABLE","UPDATE_IN_PROGRESS","UPDATE_REQUESTED","UPDATE_FAILED","CREATE_FAILED","ENABLE_SECURITY_FAILED","DELETE_IN_PROGRESS","DELETE_FAILED","DELETE_COMPLETED","STOPPED","STOP_REQUESTED","START_REQUESTED","STOP_IN_PROGRESS","START_IN_PROGRESS","START_FAILED","STOP_FAILED","WAIT_FOR_SYNC"]`), &res); err != nil {
+		panic(err)
+	}
+	for _, v := range res {
+		autoscaleClusterResponseTypeStatusPropEnum = append(autoscaleClusterResponseTypeStatusPropEnum, v)
+	}
+}
+
+const (
+	// AutoscaleClusterResponseStatusREQUESTED captures enum value "REQUESTED"
+	AutoscaleClusterResponseStatusREQUESTED string = "REQUESTED"
+	// AutoscaleClusterResponseStatusCREATEINPROGRESS captures enum value "CREATE_IN_PROGRESS"
+	AutoscaleClusterResponseStatusCREATEINPROGRESS string = "CREATE_IN_PROGRESS"
+	// AutoscaleClusterResponseStatusAVAILABLE captures enum value "AVAILABLE"
+	AutoscaleClusterResponseStatusAVAILABLE string = "AVAILABLE"
+	// AutoscaleClusterResponseStatusUPDATEINPROGRESS captures enum value "UPDATE_IN_PROGRESS"
+	AutoscaleClusterResponseStatusUPDATEINPROGRESS string = "UPDATE_IN_PROGRESS"
+	// AutoscaleClusterResponseStatusUPDATEREQUESTED captures enum value "UPDATE_REQUESTED"
+	AutoscaleClusterResponseStatusUPDATEREQUESTED string = "UPDATE_REQUESTED"
+	// AutoscaleClusterResponseStatusUPDATEFAILED captures enum value "UPDATE_FAILED"
+	AutoscaleClusterResponseStatusUPDATEFAILED string = "UPDATE_FAILED"
+	// AutoscaleClusterResponseStatusCREATEFAILED captures enum value "CREATE_FAILED"
+	AutoscaleClusterResponseStatusCREATEFAILED string = "CREATE_FAILED"
+	// AutoscaleClusterResponseStatusENABLESECURITYFAILED captures enum value "ENABLE_SECURITY_FAILED"
+	AutoscaleClusterResponseStatusENABLESECURITYFAILED string = "ENABLE_SECURITY_FAILED"
+	// AutoscaleClusterResponseStatusDELETEINPROGRESS captures enum value "DELETE_IN_PROGRESS"
+	AutoscaleClusterResponseStatusDELETEINPROGRESS string = "DELETE_IN_PROGRESS"
+	// AutoscaleClusterResponseStatusDELETEFAILED captures enum value "DELETE_FAILED"
+	AutoscaleClusterResponseStatusDELETEFAILED string = "DELETE_FAILED"
+	// AutoscaleClusterResponseStatusDELETECOMPLETED captures enum value "DELETE_COMPLETED"
+	AutoscaleClusterResponseStatusDELETECOMPLETED string = "DELETE_COMPLETED"
+	// AutoscaleClusterResponseStatusSTOPPED captures enum value "STOPPED"
+	AutoscaleClusterResponseStatusSTOPPED string = "STOPPED"
+	// AutoscaleClusterResponseStatusSTOPREQUESTED captures enum value "STOP_REQUESTED"
+	AutoscaleClusterResponseStatusSTOPREQUESTED string = "STOP_REQUESTED"
+	// AutoscaleClusterResponseStatusSTARTREQUESTED captures enum value "START_REQUESTED"
+	AutoscaleClusterResponseStatusSTARTREQUESTED string = "START_REQUESTED"
+	// AutoscaleClusterResponseStatusSTOPINPROGRESS captures enum value "STOP_IN_PROGRESS"
+	AutoscaleClusterResponseStatusSTOPINPROGRESS string = "STOP_IN_PROGRESS"
+	// AutoscaleClusterResponseStatusSTARTINPROGRESS captures enum value "START_IN_PROGRESS"
+	AutoscaleClusterResponseStatusSTARTINPROGRESS string = "START_IN_PROGRESS"
+	// AutoscaleClusterResponseStatusSTARTFAILED captures enum value "START_FAILED"
+	AutoscaleClusterResponseStatusSTARTFAILED string = "START_FAILED"
+	// AutoscaleClusterResponseStatusSTOPFAILED captures enum value "STOP_FAILED"
+	AutoscaleClusterResponseStatusSTOPFAILED string = "STOP_FAILED"
+	// AutoscaleClusterResponseStatusWAITFORSYNC captures enum value "WAIT_FOR_SYNC"
+	AutoscaleClusterResponseStatusWAITFORSYNC string = "WAIT_FOR_SYNC"
+)
+
+// prop value enum
+func (m *AutoscaleClusterResponse) validateStatusEnum(path, location string, value string) error {
+	if err := validate.Enum(path, location, value, autoscaleClusterResponseTypeStatusPropEnum); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (m *AutoscaleClusterResponse) validateStatus(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Status) { // not required
+		return nil
+	}
+
+	// value enum
+	if err := m.validateStatusEnum("status", "body", m.Status); err != nil {
+		return err
 	}
 
 	return nil

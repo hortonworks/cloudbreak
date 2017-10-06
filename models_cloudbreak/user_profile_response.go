@@ -14,6 +14,7 @@ import (
 
 // UserProfileResponse user profile response
 // swagger:model UserProfileResponse
+
 type UserProfileResponse struct {
 
 	// account
@@ -28,6 +29,14 @@ type UserProfileResponse struct {
 	// ui properties
 	UIProperties map[string]interface{} `json:"uiProperties,omitempty"`
 }
+
+/* polymorph UserProfileResponse account false */
+
+/* polymorph UserProfileResponse credential false */
+
+/* polymorph UserProfileResponse owner false */
+
+/* polymorph UserProfileResponse uiProperties false */
 
 // Validate validates this user profile response
 func (m *UserProfileResponse) Validate(formats strfmt.Registry) error {

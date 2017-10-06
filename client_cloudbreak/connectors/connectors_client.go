@@ -25,6 +25,36 @@ type Client struct {
 }
 
 /*
+CreateRecommendation creates a recommendation that advises cloud resources for the given blueprint
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) CreateRecommendation(params *CreateRecommendationParams) (*CreateRecommendationOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewCreateRecommendationParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "createRecommendation",
+		Method:             "POST",
+		PathPattern:        "/connectors/recommendation",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &CreateRecommendationReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*CreateRecommendationOK), nil
+
+}
+
+/*
 GetDisktypeByType retrives disks by type
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
@@ -85,6 +115,36 @@ func (a *Client) GetDisktypes(params *GetDisktypesParams) (*GetDisktypesOK, erro
 }
 
 /*
+GetGatewaysCredentialID retrives gateways with properties
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetGatewaysCredentialID(params *GetGatewaysCredentialIDParams) (*GetGatewaysCredentialIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetGatewaysCredentialIDParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getGatewaysCredentialId",
+		Method:             "POST",
+		PathPattern:        "/connectors/gateways",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetGatewaysCredentialIDReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetGatewaysCredentialIDOK), nil
+
+}
+
+/*
 GetImages retrives available images
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
@@ -141,6 +201,36 @@ func (a *Client) GetImagesByType(params *GetImagesByTypeParams) (*GetImagesByTyp
 		return nil, err
 	}
 	return result.(*GetImagesByTypeOK), nil
+
+}
+
+/*
+GetIPPoolsCredentialID retrives ip pools with properties
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetIPPoolsCredentialID(params *GetIPPoolsCredentialIDParams) (*GetIPPoolsCredentialIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetIPPoolsCredentialIDParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getIpPoolsCredentialId",
+		Method:             "POST",
+		PathPattern:        "/connectors/ippools",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetIPPoolsCredentialIDReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetIPPoolsCredentialIDOK), nil
 
 }
 
@@ -458,7 +548,7 @@ func (a *Client) GetRegions(params *GetRegionsParams) (*GetRegionsOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getRegions",
 		Method:             "GET",
-		PathPattern:        "/connectors/connectors/regions",
+		PathPattern:        "/connectors/regions",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -475,6 +565,36 @@ func (a *Client) GetRegions(params *GetRegionsParams) (*GetRegionsOK, error) {
 }
 
 /*
+GetRegionsByCredentialID retrives regions by type
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetRegionsByCredentialID(params *GetRegionsByCredentialIDParams) (*GetRegionsByCredentialIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetRegionsByCredentialIDParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getRegionsByCredentialId",
+		Method:             "POST",
+		PathPattern:        "/connectors/v2/regions",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetRegionsByCredentialIDReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetRegionsByCredentialIDOK), nil
+
+}
+
+/*
 GetSpecialProperties retrives special properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
@@ -487,7 +607,7 @@ func (a *Client) GetSpecialProperties(params *GetSpecialPropertiesParams) (*GetS
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getSpecialProperties",
-		Method:             "GET",
+		Method:             "POST",
 		PathPattern:        "/connectors/custom",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
@@ -535,36 +655,6 @@ func (a *Client) GetTagSpecifications(params *GetTagSpecificationsParams) (*GetT
 }
 
 /*
-GetVMTypeByType retrives vm types by type
-
-Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-*/
-func (a *Client) GetVMTypeByType(params *GetVMTypeByTypeParams) (*GetVMTypeByTypeOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetVMTypeByTypeParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getVmTypeByType",
-		Method:             "GET",
-		PathPattern:        "/connectors/vmtypes/{type}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetVMTypeByTypeReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetVMTypeByTypeOK), nil
-
-}
-
-/*
 GetVMTypes retrives available vm types
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
@@ -578,7 +668,7 @@ func (a *Client) GetVMTypes(params *GetVMTypesParams) (*GetVMTypesOK, error) {
 	result, err := a.transport.Submit(&runtime.ClientOperation{
 		ID:                 "getVmTypes",
 		Method:             "GET",
-		PathPattern:        "/connectors/connectors/vmtypes",
+		PathPattern:        "/connectors/vmtypes",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
@@ -591,6 +681,66 @@ func (a *Client) GetVMTypes(params *GetVMTypesParams) (*GetVMTypesOK, error) {
 		return nil, err
 	}
 	return result.(*GetVMTypesOK), nil
+
+}
+
+/*
+GetVMTypesByCredentialID retrives vmtype properties by credential
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetVMTypesByCredentialID(params *GetVMTypesByCredentialIDParams) (*GetVMTypesByCredentialIDOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetVMTypesByCredentialIDParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getVmTypesByCredentialId",
+		Method:             "POST",
+		PathPattern:        "/connectors/v2/vmtypes",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetVMTypesByCredentialIDReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetVMTypesByCredentialIDOK), nil
+
+}
+
+/*
+GetVMTypesByType retrives available vm types
+
+Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
+*/
+func (a *Client) GetVMTypesByType(params *GetVMTypesByTypeParams) (*GetVMTypesByTypeOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetVMTypesByTypeParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getVmTypesByType",
+		Method:             "GET",
+		PathPattern:        "/connectors/vmtypes/{type}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetVMTypesByTypeReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetVMTypesByTypeOK), nil
 
 }
 

@@ -18,6 +18,7 @@ import (
 
 // RDSConfigResponse r d s config response
 // swagger:model RDSConfigResponse
+
 type RDSConfigResponse struct {
 
 	// list of clusters which use config
@@ -60,6 +61,28 @@ type RDSConfigResponse struct {
 	// If true, then the RDS configuration will be validated
 	Validated *bool `json:"validated,omitempty"`
 }
+
+/* polymorph RDSConfigResponse clusterNames false */
+
+/* polymorph RDSConfigResponse connectionURL false */
+
+/* polymorph RDSConfigResponse creationDate false */
+
+/* polymorph RDSConfigResponse databaseType false */
+
+/* polymorph RDSConfigResponse hdpVersion false */
+
+/* polymorph RDSConfigResponse id false */
+
+/* polymorph RDSConfigResponse name false */
+
+/* polymorph RDSConfigResponse properties false */
+
+/* polymorph RDSConfigResponse publicInAccount false */
+
+/* polymorph RDSConfigResponse type false */
+
+/* polymorph RDSConfigResponse validated false */
 
 // Validate validates this r d s config response
 func (m *RDSConfigResponse) Validate(formats strfmt.Registry) error {

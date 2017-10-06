@@ -15,6 +15,7 @@ import (
 
 // TopologyRequest topology request
 // swagger:model TopologyRequest
+
 type TopologyRequest struct {
 
 	// type of cloud provider
@@ -36,6 +37,14 @@ type TopologyRequest struct {
 	// topology mapping
 	Nodes map[string]string `json:"nodes,omitempty"`
 }
+
+/* polymorph TopologyRequest cloudPlatform false */
+
+/* polymorph TopologyRequest description false */
+
+/* polymorph TopologyRequest name false */
+
+/* polymorph TopologyRequest nodes false */
 
 // Validate validates this topology request
 func (m *TopologyRequest) Validate(formats strfmt.Registry) error {

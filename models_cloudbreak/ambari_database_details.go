@@ -17,6 +17,7 @@ import (
 
 // AmbariDatabaseDetails ambari database details
 // swagger:model AmbariDatabaseDetails
+
 type AmbariDatabaseDetails struct {
 
 	// host of the Ambari database
@@ -47,6 +48,18 @@ type AmbariDatabaseDetails struct {
 	// Required: true
 	Vendor *string `json:"vendor"`
 }
+
+/* polymorph AmbariDatabaseDetails host false */
+
+/* polymorph AmbariDatabaseDetails name false */
+
+/* polymorph AmbariDatabaseDetails password false */
+
+/* polymorph AmbariDatabaseDetails port false */
+
+/* polymorph AmbariDatabaseDetails userName false */
+
+/* polymorph AmbariDatabaseDetails vendor false */
 
 // Validate validates this ambari database details
 func (m *AmbariDatabaseDetails) Validate(formats strfmt.Registry) error {

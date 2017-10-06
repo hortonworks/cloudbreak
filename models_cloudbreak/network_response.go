@@ -15,6 +15,7 @@ import (
 
 // NetworkResponse network response
 // swagger:model NetworkResponse
+
 type NetworkResponse struct {
 
 	// type of cloud provider
@@ -47,6 +48,22 @@ type NetworkResponse struct {
 	// id of the topology the resource belongs to
 	TopologyID int64 `json:"topologyId,omitempty"`
 }
+
+/* polymorph NetworkResponse cloudPlatform false */
+
+/* polymorph NetworkResponse description false */
+
+/* polymorph NetworkResponse id false */
+
+/* polymorph NetworkResponse name false */
+
+/* polymorph NetworkResponse parameters false */
+
+/* polymorph NetworkResponse publicInAccount false */
+
+/* polymorph NetworkResponse subnetCIDR false */
+
+/* polymorph NetworkResponse topologyId false */
 
 // Validate validates this network response
 func (m *NetworkResponse) Validate(formats strfmt.Registry) error {

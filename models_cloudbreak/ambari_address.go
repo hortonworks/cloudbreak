@@ -15,12 +15,15 @@ import (
 
 // AmbariAddress ambari address
 // swagger:model AmbariAddress
+
 type AmbariAddress struct {
 
 	// ambari server address
 	// Required: true
 	AmbariAddress *string `json:"ambariAddress"`
 }
+
+/* polymorph AmbariAddress ambariAddress false */
 
 // Validate validates this ambari address
 func (m *AmbariAddress) Validate(formats strfmt.Registry) error {

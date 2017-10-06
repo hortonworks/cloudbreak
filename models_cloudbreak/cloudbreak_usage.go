@@ -14,6 +14,7 @@ import (
 
 // CloudbreakUsage cloudbreak usage
 // swagger:model CloudbreakUsage
+
 type CloudbreakUsage struct {
 
 	// account id of the resource owner that is provided by OAuth provider
@@ -76,6 +77,46 @@ type CloudbreakUsage struct {
 	// ambari username
 	Username string `json:"username,omitempty"`
 }
+
+/* polymorph CloudbreakUsage account false */
+
+/* polymorph CloudbreakUsage availabilityZone false */
+
+/* polymorph CloudbreakUsage blueprintId false */
+
+/* polymorph CloudbreakUsage blueprintName false */
+
+/* polymorph CloudbreakUsage costs false */
+
+/* polymorph CloudbreakUsage day false */
+
+/* polymorph CloudbreakUsage duration false */
+
+/* polymorph CloudbreakUsage flexId false */
+
+/* polymorph CloudbreakUsage instanceGroup false */
+
+/* polymorph CloudbreakUsage instanceHours false */
+
+/* polymorph CloudbreakUsage instanceNum false */
+
+/* polymorph CloudbreakUsage instanceType false */
+
+/* polymorph CloudbreakUsage owner false */
+
+/* polymorph CloudbreakUsage peak false */
+
+/* polymorph CloudbreakUsage provider false */
+
+/* polymorph CloudbreakUsage region false */
+
+/* polymorph CloudbreakUsage stackId false */
+
+/* polymorph CloudbreakUsage stackName false */
+
+/* polymorph CloudbreakUsage stackUuid false */
+
+/* polymorph CloudbreakUsage username false */
 
 // Validate validates this cloudbreak usage
 func (m *CloudbreakUsage) Validate(formats strfmt.Registry) error {

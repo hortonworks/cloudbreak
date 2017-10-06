@@ -17,6 +17,7 @@ import (
 
 // ConfigsRequest configs request
 // swagger:model ConfigsRequest
+
 type ConfigsRequest struct {
 
 	// request object
@@ -24,6 +25,8 @@ type ConfigsRequest struct {
 	// Unique: true
 	Requests []*BlueprintParameter `json:"requests"`
 }
+
+/* polymorph ConfigsRequest requests false */
 
 // Validate validates this configs request
 func (m *ConfigsRequest) Validate(formats strfmt.Registry) error {

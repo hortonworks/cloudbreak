@@ -14,11 +14,14 @@ import (
 
 // ImageJSON image Json
 // swagger:model ImageJson
+
 type ImageJSON struct {
 
 	// name of the image
 	ImageName string `json:"imageName,omitempty"`
 }
+
+/* polymorph ImageJson imageName false */
 
 // Validate validates this image Json
 func (m *ImageJSON) Validate(formats strfmt.Registry) error {

@@ -67,6 +67,7 @@ func (o *GetRegionAvByTypeOK) readResponse(response runtime.ClientResponse, cons
 /*GetRegionAvByTypeOKBody get region av by type o k body
 swagger:model GetRegionAvByTypeOKBody
 */
+
 type GetRegionAvByTypeOKBody map[string][]string
 
 // Validate validates this get region av by type o k body

@@ -18,6 +18,7 @@ import (
 
 // StackRequest stack request
 // swagger:model StackRequest
+
 type StackRequest struct {
 
 	// specific version of ambari
@@ -44,6 +45,9 @@ type StackRequest struct {
 
 	// credential resource id for the stack
 	CredentialID int64 `json:"credentialId,omitempty"`
+
+	// credential resource name for the stack
+	CredentialName string `json:"credentialName,omitempty"`
 
 	// source credential object for cloning
 	CredentialSource *CredentialSourceRequest `json:"credentialSource,omitempty"`
@@ -107,9 +111,72 @@ type StackRequest struct {
 	// region of the stack
 	Region string `json:"region,omitempty"`
 
+	// stack related authentication
+	StackAuthentication *StackAuthentication `json:"stackAuthentication,omitempty"`
+
 	// stack related userdefined tags
 	UserDefinedTags map[string]string `json:"userDefinedTags,omitempty"`
 }
+
+/* polymorph StackRequest ambariVersion false */
+
+/* polymorph StackRequest applicationTags false */
+
+/* polymorph StackRequest availabilityZone false */
+
+/* polymorph StackRequest cloudPlatform false */
+
+/* polymorph StackRequest clusterNameAsSubdomain false */
+
+/* polymorph StackRequest clusterRequest false */
+
+/* polymorph StackRequest credential false */
+
+/* polymorph StackRequest credentialId false */
+
+/* polymorph StackRequest credentialName false */
+
+/* polymorph StackRequest credentialSource false */
+
+/* polymorph StackRequest customDomain false */
+
+/* polymorph StackRequest customHostname false */
+
+/* polymorph StackRequest customImage false */
+
+/* polymorph StackRequest defaultTags false */
+
+/* polymorph StackRequest failurePolicy false */
+
+/* polymorph StackRequest flexId false */
+
+/* polymorph StackRequest hdpVersion false */
+
+/* polymorph StackRequest hostgroupNameAsHostname false */
+
+/* polymorph StackRequest imageCatalog false */
+
+/* polymorph StackRequest instanceGroups false */
+
+/* polymorph StackRequest name false */
+
+/* polymorph StackRequest network false */
+
+/* polymorph StackRequest networkId false */
+
+/* polymorph StackRequest onFailureAction false */
+
+/* polymorph StackRequest orchestrator false */
+
+/* polymorph StackRequest parameters false */
+
+/* polymorph StackRequest platformVariant false */
+
+/* polymorph StackRequest region false */
+
+/* polymorph StackRequest stackAuthentication false */
+
+/* polymorph StackRequest userDefinedTags false */
 
 // Validate validates this stack request
 func (m *StackRequest) Validate(formats strfmt.Registry) error {
@@ -156,6 +223,11 @@ func (m *StackRequest) Validate(formats strfmt.Registry) error {
 	}
 
 	if err := m.validateOrchestrator(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
+
+	if err := m.validateStackAuthentication(formats); err != nil {
 		// prop
 		res = append(res, err)
 	}
@@ -361,6 +433,25 @@ func (m *StackRequest) validateOrchestrator(formats strfmt.Registry) error {
 		if err := m.Orchestrator.Validate(formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("orchestrator")
+			}
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (m *StackRequest) validateStackAuthentication(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.StackAuthentication) { // not required
+		return nil
+	}
+
+	if m.StackAuthentication != nil {
+
+		if err := m.StackAuthentication.Validate(formats); err != nil {
+			if ve, ok := err.(*errors.Validation); ok {
+				return ve.ValidateName("stackAuthentication")
 			}
 			return err
 		}
