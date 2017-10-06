@@ -1,7 +1,7 @@
 name: Azure_simple_smoketest_cred
 parameters:
   cloudProvider: AZURE
-  blueprintName: "EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
+  blueprintName: "26EDW-ETL: Apache Hive 1.2.1, Apache Spark 1.6"
 
 tests:
   - name: init
@@ -20,7 +20,7 @@ tests:
   - name: create gateway template
     parameters:
       azureTemplateName: it-azurerm-credandsmoke-gateway-adls
-      azureVmType: Standard_D4
+      azureVmType: Standard_A7
       azureVolumeCount: 1
       azureVolumeSize: 50
       templateAdditions: "master,1,GATEWAY"
@@ -30,7 +30,7 @@ tests:
   - name: create worker template
     parameters:
       azureTemplateName: it-azurerm-credandsmoke-worker-adls
-      azureVmType: Standard_D4
+      azureVmType: Standard_A7
       azureVolumeCount: 1
       azureVolumeSize: 100
       templateAdditions: "worker,1;"
@@ -40,7 +40,7 @@ tests:
   - name: create compute template
     parameters:
       azureTemplateName: it-azurerm-credandsmoke-compute-adls
-      azureVmType: Standard_D11
+      azureVmType: Standard_A7
       azureVolumeCount: 1
       azureVolumeSize: 200
       templateAdditions: "compute,1"
@@ -67,12 +67,38 @@ tests:
       - com.sequenceiq.it.cloudbreak.StackCreationTest
       - com.sequenceiq.it.cloudbreak.ClusterCreationTest
 
-  - name: test adls filesystem
+  - name: test adls filesystem with terasort
     parameters:
       filesystemType: ADLS
       filesystemName: hwtest
-      sshCommand: raw:sudo -S su - hdfs -c 'hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teragen 100000000 adl://hwtest.azuredatalakestore.net/it-terasort/input;
-                       hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar terasort adl://hwtest.azuredatalakestore.net/it-terasort/input adl://hwtest.azuredatalakestore.net/it-terasort/output;
-                       hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teravalidate adl://hwtest.azuredatalakestore.net/it-terasort/output adl://hwtest.azuredatalakestore.net/it-terasort/validate'
+      sshCommand: raw:sudo -S su - hdfs -c 'hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teragen 10000000 adl://hwtest.azuredatalakestore.net/it-terasort/input;
+                  hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar terasort adl://hwtest.azuredatalakestore.net/it-terasort/input adl://hwtest.azuredatalakestore.net/it-terasort/output;
+                  hadoop jar /usr/hdp/current/hadoop-mapreduce-client/hadoop-mapreduce-examples.jar teravalidate adl://hwtest.azuredatalakestore.net/it-terasort/output adl://hwtest.azuredatalakestore.net/it-terasort/validate'
+      sshChecker: notContains:Container killed on request
+      folderPrefix: it-terasort
+    classes:
+      - com.sequenceiq.it.cloudbreak.filesystem.FilesystemTest
+
+  - name: test adls filesystem with hive and spark
+    parameters:
+      filesystemType: ADLS
+      filesystemName: hwtest
+      sshCommand: raw:sudo -S su - hive -c 'hadoop fs -mkdir adl://hwtest.azuredatalakestore.net/hivetest;
+                  hadoop fs -cp adl://hwtest.azuredatalakestore.net/it-util/Batting.csv adl://hwtest.azuredatalakestore.net/hivetest;
+                  hive -e "DROP TABLE IF EXISTS batting;
+                  CREATE TABLE IF NOT EXISTS batting (col_value STRING) location \"adl://hwtest.azuredatalakestore.net/hivetest/batting\";
+                  SHOW CREATE TABLE batting;
+                  LOAD DATA INPATH \"adl://hwtest.azuredatalakestore.net/hivetest/Batting.csv\" OVERWRITE INTO TABLE batting;
+                  SELECT COUNT(1) FROM batting;
+                  SELECT * FROM batting LIMIT 124;";
+                  export SPARK_CLASSPATH=${SPARK_CLASSPATH}:/usr/lib/hadoop/lib/*;
+                  export SPARK_DIST_CLASSPATH=$(hadoop classpath);
+                  echo -e "val sqlContext = new org.apache.spark.sql.hive.HiveContext(sc);
+                  sqlContext.sql(\"CREATE TABLE IF NOT EXISTS batting (col_value STRING) location \047adl://hwtest.azuredatalakestore.net/hivetest/batting\047\");
+                  sqlContext.sql(\"SELECT COUNT(*) FROM batting\").collect().foreach(println);
+                  sqlContext.sql(\"DROP TABLE IF EXISTS batting\"); exit;" > spark.input;cat spark.input | spark-shell;
+                  rm spark.input'
+      folderPrefix: hivetest
+      sshChecker: contains:124,95196;notContains:killed
     classes:
       - com.sequenceiq.it.cloudbreak.filesystem.FilesystemTest
