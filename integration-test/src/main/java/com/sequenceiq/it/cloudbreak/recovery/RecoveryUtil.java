@@ -11,7 +11,6 @@ import org.openstack4j.api.compute.ServerService;
 import org.openstack4j.openstack.OSFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.Assert;
 
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ec2.AmazonEC2;
@@ -29,21 +28,15 @@ public class RecoveryUtil {
     }
 
     public static String getInstanceId(StackResponse stackResponse, String hostGroup) {
-        String instanceId = null;
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
 
-        outerloop:
         for (InstanceGroupResponse instanceGroup : instanceGroups) {
             if (hostGroup.equals(instanceGroup.getGroup())) {
                 Set<InstanceMetaDataJson> instanceMetaData = instanceGroup.getMetadata();
-                for (InstanceMetaDataJson metaData : instanceMetaData) {
-                    instanceId = metaData.getInstanceId();
-                    break outerloop;
-                }
+                return instanceMetaData.iterator().next().getInstanceId();
             }
         }
-        Assert.assertNotNull(instanceId);
-        return instanceId;
+    return null;
     }
 
     public static void deleteInstance(Map<String, String> cloudProviderParams, String instanceId) {
