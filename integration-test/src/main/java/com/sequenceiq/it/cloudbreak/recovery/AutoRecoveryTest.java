@@ -44,7 +44,10 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
         StackEndpoint stackEndpoint = getCloudbreakClient().stackEndpoint();
         StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
 
-        RecoveryUtil.deleteInstance(cloudProviderParams, RecoveryUtil.getInstanceId(stackResponse, hostGroup));
+        String instanceToDelete = RecoveryUtil.getInstanceId(stackResponse, hostGroup);
+        Assert.assertNotNull(instanceToDelete);
+
+        RecoveryUtil.deleteInstance(cloudProviderParams, instanceToDelete);
 
         Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 - removedInstanceCount;
