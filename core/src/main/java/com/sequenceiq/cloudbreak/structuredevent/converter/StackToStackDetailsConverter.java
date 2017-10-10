@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,9 +23,9 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.json.Json;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.structuredevent.event.InstanceGroupDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 
 @Component
 public class StackToStackDetailsConverter extends AbstractConversionServiceAwareConverter<Stack, StackDetails> {
@@ -50,9 +50,9 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
         stackDetails.setStackStatus(source.getStatus().name());
         stackDetails.setDetailedStackStatus(source.getStackStatus().getDetailedStackStatus().name());
         stackDetails.setStatusReason(source.getStatusReason());
-        stackDetails.setInstanceGroups((Set<InstanceGroupDetails>) conversionService.convert(source.getInstanceGroups(),
+        stackDetails.setInstanceGroups((List<InstanceGroupDetails>) conversionService.convert(source.getInstanceGroups(),
                 TypeDescriptor.forObject(source.getInstanceGroups()),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(InstanceGroupDetails.class))));
+                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(InstanceGroupDetails.class))));
         convertComponents(stackDetails, source);
         convertNetwork(stackDetails, source.getNetwork(), source.cloudPlatform());
         return stackDetails;

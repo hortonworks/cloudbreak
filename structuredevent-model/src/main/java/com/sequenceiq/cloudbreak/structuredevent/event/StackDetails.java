@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -47,7 +47,7 @@ public class StackDetails implements Serializable {
 
     private Boolean exisitngSubnet;
 
-    private Set<InstanceGroupDetails> instanceGroups;
+    private List<InstanceGroupDetails> instanceGroups;
 
     public Long getStackId() {
         return stackId;
@@ -185,11 +185,11 @@ public class StackDetails implements Serializable {
         this.exisitngSubnet = exisitngSubnet;
     }
 
-    public Set<InstanceGroupDetails> getInstanceGroups() {
+    public List<InstanceGroupDetails> getInstanceGroups() {
         return instanceGroups;
     }
 
-    public void setInstanceGroups(Set<InstanceGroupDetails> instanceGroups) {
+    public void setInstanceGroups(List<InstanceGroupDetails> instanceGroups) {
         this.instanceGroups = instanceGroups;
     }
 }

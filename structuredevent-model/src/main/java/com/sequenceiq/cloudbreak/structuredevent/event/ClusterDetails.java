@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -37,7 +37,7 @@ public class ClusterDetails implements Serializable {
 
     private String hdpVersion;
 
-    private Set<String> hostGroups;
+    private List<String> hostGroups;
 
     private Boolean externalDatabase;
 
@@ -143,11 +143,11 @@ public class ClusterDetails implements Serializable {
         this.hdpVersion = hdpVersion;
     }
 
-    public Set<String> getHostGroups() {
+    public List<String> getHostGroups() {
         return hostGroups;
     }
 
-    public void setHostGroups(Set<String> hostGroups) {
+    public void setHostGroups(List<String> hostGroups) {
         this.hostGroups = hostGroups;
     }
 
