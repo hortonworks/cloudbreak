@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.event;
 
 import java.io.Serializable;
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -15,7 +15,7 @@ public class SecurityGroupDetails implements Serializable {
 
     private String securityGroupId;
 
-    private Set<SecurityRuleDetails> securityRules;
+    private List<SecurityRuleDetails> securityRules;
 
     public Long getId() {
         return id;
@@ -49,11 +49,11 @@ public class SecurityGroupDetails implements Serializable {
         this.securityGroupId = securityGroupId;
     }
 
-    public Set<SecurityRuleDetails> getSecurityRules() {
+    public List<SecurityRuleDetails> getSecurityRules() {
         return securityRules;
     }
 
-    public void setSecurityRules(Set<SecurityRuleDetails> securityRules) {
+    public void setSecurityRules(List<SecurityRuleDetails> securityRules) {
         this.securityRules = securityRules;
     }
 }
