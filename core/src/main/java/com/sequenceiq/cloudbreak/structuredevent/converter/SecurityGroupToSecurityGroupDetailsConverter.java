@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import java.util.Set;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -25,9 +25,9 @@ public class SecurityGroupToSecurityGroupDetailsConverter extends AbstractConver
         securityGroupDetails.setName(source.getName());
         securityGroupDetails.setDescription(source.getDescription());
         securityGroupDetails.setSecurityGroupId(source.getSecurityGroupId());
-        securityGroupDetails.setSecurityRules((Set<SecurityRuleDetails>) conversionService.convert(source.getSecurityRules(),
+        securityGroupDetails.setSecurityRules((List<SecurityRuleDetails>) conversionService.convert(source.getSecurityRules(),
                 TypeDescriptor.forObject(source.getSecurityRules()),
-                TypeDescriptor.collection(Set.class, TypeDescriptor.valueOf(SecurityRuleDetails.class))));
+                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(SecurityRuleDetails.class))));
         return securityGroupDetails;
     }
 }
