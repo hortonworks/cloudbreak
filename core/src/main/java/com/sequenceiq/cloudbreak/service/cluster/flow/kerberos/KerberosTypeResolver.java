@@ -14,6 +14,6 @@ public class KerberosTypeResolver {
         } else if (!Strings.isNullOrEmpty(kerberosConfig.getKerberosUrl())) {
             return "mit-kdc";
         }
-        return null;
+        return "mit-kdc";
     }
 }
