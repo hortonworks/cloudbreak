@@ -45,17 +45,6 @@ public class BlueprintToJsonConverterTest extends AbstractEntityConverterTest<Bl
         assertAllFieldsNotNull(result);
     }
 
-    @Test
-    public void testConvertThrowsException() {
-        // GIVEN
-        given(jsonHelper.createJsonFromString(anyString())).willThrow(new RuntimeException("error"));
-        // WHEN
-        BlueprintResponse result = underTest.convert(getSource());
-        // THEN
-        assertEquals("\"error\"", result.getAmbariBlueprint());
-        assertAllFieldsNotNull(result);
-    }
-
     @Override
     public Blueprint createSource() {
         return TestUtil.blueprint();

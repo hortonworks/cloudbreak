@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.node.TextNode;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
@@ -43,12 +42,7 @@ public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConv
         } catch (IOException e) {
             LOGGER.error(String.format("Blueprint's (%s, id:%s) input parameters could not be converted to JSON.", entity.getName(), entity.getId()), e);
         }
-        try {
-            blueprintJson.setAmbariBlueprint(jsonHelper.createJsonFromString(entity.getBlueprintText()));
-        } catch (RuntimeException e) {
-            LOGGER.error("Blueprint cannot be converted to JSON.", e);
-            blueprintJson.setAmbariBlueprint(new TextNode(e.getMessage()));
-        }
+        blueprintJson.setAmbariBlueprint(entity.getBlueprintText());
         return blueprintJson;
     }
 
