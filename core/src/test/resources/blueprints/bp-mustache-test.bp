@@ -41,7 +41,8 @@
             "db_password": "{{{ rangerRds.connectionPassword }}}",
             "db_name": "{{{ rangerRds.databaseName }}}",
             "db_host": "{{{ rangerRds.connectionHost }}}",
-            "DB_FLAVOR": "POSTGRES"
+            "DB_FLAVOR": "POSTGRES",
+            "exported-value": "{{default('/configurations/hadoop-env/hdfs_log_dir_prefix', '/var/log/hadoop')}}"
           }
         }
       },

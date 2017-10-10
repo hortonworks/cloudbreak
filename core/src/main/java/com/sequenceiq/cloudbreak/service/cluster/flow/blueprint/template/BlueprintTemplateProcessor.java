@@ -28,8 +28,10 @@ public class BlueprintTemplateProcessor {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     public String process(String blueprintText, Cluster cluster, Set<RDSConfig> rdsConfigs) throws IOException {
+        long started = System.currentTimeMillis();
         String generateBlueprint = generateBlueprintWithParameters(blueprintText, cluster, rdsConfigs);
-        LOGGER.info("The blueprint for ambari install was successfully generated with mustache, the generated blueprint is: {}", generateBlueprint);
+        long generationTime = System.currentTimeMillis() - started;
+        LOGGER.info("The blueprint was generated successfully under {} ms, the generated blueprint is: {}", generationTime, generateBlueprint);
         return generateBlueprint;
     }
 
@@ -41,7 +43,7 @@ public class BlueprintTemplateProcessor {
                 return options.fn.text();
             }
         });
-        Template template = handlebars.compileInline(blueprintText);
+        Template template = handlebars.compileInline(blueprintText, "{{{", "}}}");
 
         return template.apply(prepareTemplateObject(cluster.getBlueprintInputs().get(Map.class), cluster, rdsConfigs));
     }
@@ -51,15 +53,12 @@ public class BlueprintTemplateProcessor {
             blueprintInputs = new HashMap<>();
         }
 
-        Map<String, Object> result = new BlueprintTemplateModelContextBuilder()
+        return new BlueprintTemplateModelContextBuilder()
                 .withAmbariDatabase(clusterComponentConfigProvider.getAmbariDatabase(cluster.getId()))
                 .withClusterName(cluster.getName())
                 .withLdap(cluster.getLdapConfig())
                 .withRdsConfigs(rdsConfigs)
                 .withCustomProperties(blueprintInputs)
                 .build();
-
-        return result;
     }
-
 }
