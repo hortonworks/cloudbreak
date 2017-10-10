@@ -12,7 +12,7 @@ public class StructuredFlowEvent extends StructuredEvent {
 
     private BlueprintDetails blueprint;
 
-    protected StructuredFlowEvent() {
+    public StructuredFlowEvent() {
     }
 
     public StructuredFlowEvent(OperationDetails operation, FlowDetails flow, StackDetails stack) {
@@ -42,5 +42,21 @@ public class StructuredFlowEvent extends StructuredEvent {
 
     public BlueprintDetails getBlueprint() {
         return blueprint;
+    }
+
+    public void setFlow(FlowDetails flow) {
+        this.flow = flow;
+    }
+
+    public void setStack(StackDetails stack) {
+        this.stack = stack;
+    }
+
+    public void setCluster(ClusterDetails cluster) {
+        this.cluster = cluster;
+    }
+
+    public void setBlueprint(BlueprintDetails blueprint) {
+        this.blueprint = blueprint;
     }
 }

@@ -22,7 +22,7 @@ public class FlowDetails implements Serializable {
 
     private Long duration;
 
-    private FlowDetails() {
+    public FlowDetails() {
     }
 
     public FlowDetails(String flowChainType, String flowType, String flowChainId, String flowId, String flowState, String nextFlowState, String flowEvent,
@@ -67,5 +67,37 @@ public class FlowDetails implements Serializable {
 
     public Long getDuration() {
         return duration;
+    }
+
+    public void setFlowChainType(String flowChainType) {
+        this.flowChainType = flowChainType;
+    }
+
+    public void setFlowType(String flowType) {
+        this.flowType = flowType;
+    }
+
+    public void setFlowChainId(String flowChainId) {
+        this.flowChainId = flowChainId;
+    }
+
+    public void setFlowId(String flowId) {
+        this.flowId = flowId;
+    }
+
+    public void setFlowState(String flowState) {
+        this.flowState = flowState;
+    }
+
+    public void setNextFlowState(String nextFlowState) {
+        this.nextFlowState = nextFlowState;
+    }
+
+    public void setFlowEvent(String flowEvent) {
+        this.flowEvent = flowEvent;
+    }
+
+    public void setDuration(Long duration) {
+        this.duration = duration;
     }
 }
