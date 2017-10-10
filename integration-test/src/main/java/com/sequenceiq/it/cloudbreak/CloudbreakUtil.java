@@ -269,7 +269,7 @@ public class CloudbreakUtil {
         boolean result = false;
         List<String> failedStatuses = Arrays.asList("FAILED", "DELETE_COMPLETED");
         for (Entry<String, String> desiredStatus: currentStatuses.entrySet()) {
-            if (failedStatuses.contains(desiredStatus.getValue())) {
+            if (failedStatuses.stream().anyMatch(fs -> desiredStatus.getValue().contains(fs))) {
                 result = true;
                 break;
             }
