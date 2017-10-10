@@ -1,11 +1,11 @@
 package com.sequenceiq.it.cloudbreak;
 
+import org.apache.commons.codec.binary.Base64;
 import org.testng.Assert;
 import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
 import com.sequenceiq.it.util.ResourceUtil;
@@ -23,7 +23,7 @@ public class BlueprintCreationTest extends AbstractCloudbreakIntegrationTest {
         BlueprintRequest blueprintRequest = new BlueprintRequest();
         blueprintRequest.setName(blueprintName);
         blueprintRequest.setDescription("Blueprint for integration testing");
-        blueprintRequest.setAmbariBlueprint(mapper.readValue(blueprintContent, JsonNode.class));
+        blueprintRequest.setAmbariBlueprint(Base64.encodeBase64String(blueprintContent.getBytes()));
         String id = getCloudbreakClient().blueprintEndpoint().postPrivate(blueprintRequest).getId().toString();
         // THEN
         Assert.assertNotNull(id);

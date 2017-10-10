@@ -5,10 +5,12 @@ import java.util.Set;
 
 import javax.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.BlueprintModelDescription;
+import com.sequenceiq.cloudbreak.json.Base64Deserializer;
+import com.sequenceiq.cloudbreak.json.Base64Serializer;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -17,6 +19,8 @@ import io.swagger.annotations.ApiModelProperty;
 public abstract class BlueprintBase implements JsonEntity {
 
     @ApiModelProperty(BlueprintModelDescription.AMBARI_BLUEPRINT)
+    @JsonSerialize(using = Base64Serializer.class)
+    @JsonDeserialize(using = Base64Deserializer.class)
     private String ambariBlueprint;
 
     @Size(max = 1000)
@@ -26,13 +30,12 @@ public abstract class BlueprintBase implements JsonEntity {
     @ApiModelProperty(BlueprintModelDescription.INPUTS)
     private Set<BlueprintParameterJson> inputs = new HashSet<>();
 
-    @JsonRawValue
     public String getAmbariBlueprint() {
         return ambariBlueprint;
     }
 
-    public void setAmbariBlueprint(JsonNode ambariBlueprint) {
-        this.ambariBlueprint = ambariBlueprint.toString();
+    public void setAmbariBlueprint(String ambariBlueprint) {
+        this.ambariBlueprint = ambariBlueprint;
     }
 
     public String getDescription() {
