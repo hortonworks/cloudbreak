@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.github.jknack.handlebars.Handlebars;
-import com.github.jknack.handlebars.Helper;
-import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -35,14 +33,8 @@ public class BlueprintTemplateProcessor {
 
     private String generateBlueprintWithParameters(String blueprintText, Cluster cluster, Set<RDSConfig> rdsConfigs) throws IOException {
         Handlebars handlebars = new Handlebars();
-        handlebars.registerHelperMissing(new Helper<Object>() {
-            @Override
-            public CharSequence apply(Object context, Options options) {
-                return options.fn.text();
-            }
-        });
+        handlebars.registerHelperMissing((context, options) -> options.fn.text());
         Template template = handlebars.compileInline(blueprintText);
-
         return template.apply(prepareTemplateObject(cluster.getBlueprintInputs().get(Map.class), cluster, rdsConfigs));
     }
 

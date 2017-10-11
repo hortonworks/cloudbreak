@@ -122,7 +122,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
             blueprint = blueprintService.create(user, blueprint, new ArrayList<>());
             subject.setBlueprint(blueprint);
         } else if (!Strings.isNullOrEmpty(blueprintName)) {
-            subject.setBlueprint(blueprintService.getByName(blueprintName, user));
+            subject.setBlueprint(blueprintService.get(blueprintName, user.getAccount()));
         } else {
             throw new BadRequestException("Blueprint does not configured for the cluster!");
         }
@@ -181,7 +181,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
                 }
                 requestedCluster.setBlueprintInputs(new Json(newInputs));
             } catch (IOException | CloudbreakSecuritySetupException e) {
-                LOGGER.error("Could not propagate cluster input parameters: {}", e);
+                LOGGER.error("Could not propagate cluster input parameters", e);
                 throw new BadRequestException("Could not propagate cluster input parameters: " + e.getMessage());
             }
         }
