@@ -24,6 +24,10 @@ public class AdlsFileSystemConfigurator extends AbstractFileSystemConfigurator<A
         String clientId = fsConfig.getClientId();
         String credential = fsConfig.getCredential();
         String tenantId = fsConfig.getTenantId();
+        String adlsTrackingClusterType = fsConfig.getProperty(AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERTYPE_KEY);
+        String adlsTrackingClusterName = fsConfig.getProperty(AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_KEY);
+
+
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "dfs.adls.oauth2.access.token.provider.type", "ClientCredential"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "dfs.adls.oauth2.client.id", clientId));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "dfs.adls.oauth2.credential", credential));
@@ -32,6 +36,10 @@ public class AdlsFileSystemConfigurator extends AbstractFileSystemConfigurator<A
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.AbstractFileSystem.adl.impl", "org.apache.hadoop.fs.adl.Adl"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.adl.impl", "org.apache.hadoop.fs.adl.AdlFileSystem"));
         bpConfigs.add(new BlueprintConfigurationEntry("core-site", "fs.adls.oauth2.resource", "https://management.core.windows.net/"));
+        bpConfigs.add(new BlueprintConfigurationEntry("core-site", AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERNAME_KEY,
+                adlsTrackingClusterName));
+        bpConfigs.add(new BlueprintConfigurationEntry("core-site", AdlsFileSystemConfiguration.ADLS_TRACKING_CLUSTERTYPE_KEY,
+                adlsTrackingClusterType));
 
         return bpConfigs;
     }
