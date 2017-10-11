@@ -43,6 +43,38 @@ public class OperationDetails implements Serializable {
         this.cloudbreakVersion = cloudbreakVersion;
     }
 
+    public void setEventType(String eventType) {
+        this.eventType = eventType;
+    }
+
+    public void setResourceId(Long resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
+
+    public void setTimestamp(Long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setAccount(String account) {
+        this.account = account;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public void setCloudbreakId(String cloudbreakId) {
+        this.cloudbreakId = cloudbreakId;
+    }
+
+    public void setCloudbreakVersion(String cloudbreakVersion) {
+        this.cloudbreakVersion = cloudbreakVersion;
+    }
+
     public String getEventType() {
         return eventType;
     }
