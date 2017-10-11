@@ -35,7 +35,9 @@ public class ClusterDetails implements Serializable {
 
     private String ambariVersion;
 
-    private String hdpVersion;
+    private String clusterType;
+
+    private String clusterVersion;
 
     private List<String> hostGroups;
 
@@ -135,12 +137,20 @@ public class ClusterDetails implements Serializable {
         this.ambariVersion = ambariVersion;
     }
 
-    public String getHdpVersion() {
-        return hdpVersion;
+    public String getClusterType() {
+        return clusterType;
     }
 
-    public void setHdpVersion(String hdpVersion) {
-        this.hdpVersion = hdpVersion;
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
+
+    public String getClusterVersion() {
+        return clusterVersion;
+    }
+
+    public void setClusterVersion(String clusterVersion) {
+        this.clusterVersion = clusterVersion;
     }
 
     public List<String> getHostGroups() {

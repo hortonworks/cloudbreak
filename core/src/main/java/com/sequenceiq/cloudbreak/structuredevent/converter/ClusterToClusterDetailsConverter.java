@@ -85,7 +85,8 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
         }
         HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
         if (hdpRepo != null) {
-            clusterDetails.setHdpVersion(hdpRepo.getHdpVersion());
+            clusterDetails.setClusterType(hdpRepo.getStack().get(HDPRepo.REPO_ID_TAG));
+            clusterDetails.setClusterVersion(hdpRepo.getHdpVersion());
         }
         AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
         if (ambariDatabase != null) {

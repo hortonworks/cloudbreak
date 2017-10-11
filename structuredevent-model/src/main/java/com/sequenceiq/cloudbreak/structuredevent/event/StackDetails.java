@@ -11,9 +11,9 @@ import com.sequenceiq.cloudbreak.structuredevent.json.Base64Serializer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class StackDetails implements Serializable {
-    private Long stackId;
+    private Long id;
 
-    private String stackName;
+    private String name;
 
     private String description;
 
@@ -25,9 +25,9 @@ public class StackDetails implements Serializable {
 
     private String platformVariant;
 
-    private String stackStatus;
+    private String status;
 
-    private String detailedStackStatus;
+    private String detailedStatus;
 
     @JsonSerialize(using = Base64Serializer.class)
     @JsonDeserialize(using = Base64Deserializer.class)
@@ -39,30 +39,32 @@ public class StackDetails implements Serializable {
 
     private String ambariVersion;
 
-    private String hdpVersion;
+    private String clusterType;
+
+    private String clusterVersion;
 
     private Boolean prewarmedImage;
 
     private Boolean existingNetwork;
 
-    private Boolean exisitngSubnet;
+    private Boolean existingSubnet;
 
     private List<InstanceGroupDetails> instanceGroups;
 
-    public Long getStackId() {
-        return stackId;
+    public Long getId() {
+        return id;
     }
 
-    public void setStackId(Long stackId) {
-        this.stackId = stackId;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getStackName() {
-        return stackName;
+    public String getName() {
+        return name;
     }
 
-    public void setStackName(String stackName) {
-        this.stackName = stackName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getRegion() {
@@ -105,20 +107,20 @@ public class StackDetails implements Serializable {
         this.platformVariant = platformVariant;
     }
 
-    public String getStackStatus() {
-        return stackStatus;
+    public String getStatus() {
+        return status;
     }
 
-    public void setStackStatus(String stackStatus) {
-        this.stackStatus = stackStatus;
+    public void setStatus(String status) {
+        this.status = status;
     }
 
-    public String getDetailedStackStatus() {
-        return detailedStackStatus;
+    public String getDetailedStatus() {
+        return detailedStatus;
     }
 
-    public void setDetailedStackStatus(String detailedStackStatus) {
-        this.detailedStackStatus = detailedStackStatus;
+    public void setDetailedStatus(String detailedStatus) {
+        this.detailedStatus = detailedStatus;
     }
 
     public String getStatusReason() {
@@ -153,12 +155,20 @@ public class StackDetails implements Serializable {
         this.ambariVersion = ambariVersion;
     }
 
-    public String getHdpVersion() {
-        return hdpVersion;
+    public String getClusterType() {
+        return clusterType;
     }
 
-    public void setHdpVersion(String hdpVersion) {
-        this.hdpVersion = hdpVersion;
+    public void setClusterType(String clusterType) {
+        this.clusterType = clusterType;
+    }
+
+    public String getClusterVersion() {
+        return clusterVersion;
+    }
+
+    public void setClusterVersion(String clusterVersion) {
+        this.clusterVersion = clusterVersion;
     }
 
     public Boolean getPrewarmedImage() {
@@ -177,12 +187,12 @@ public class StackDetails implements Serializable {
         this.existingNetwork = existingNetwork;
     }
 
-    public Boolean getExisitngSubnet() {
-        return exisitngSubnet;
+    public Boolean getExistingSubnet() {
+        return existingSubnet;
     }
 
-    public void setExisitngSubnet(Boolean exisitngSubnet) {
-        this.exisitngSubnet = exisitngSubnet;
+    public void setExistingSubnet(Boolean existingSubnet) {
+        this.existingSubnet = existingSubnet;
     }
 
     public List<InstanceGroupDetails> getInstanceGroups() {
