@@ -20,8 +20,16 @@ public class StructuredEvent implements Serializable {
         this.operation = operation;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
     public String getType() {
         return type;
+    }
+
+    public void setOperation(OperationDetails operation) {
+        this.operation = operation;
     }
 
     public OperationDetails getOperation() {

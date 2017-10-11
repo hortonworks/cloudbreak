@@ -14,6 +14,10 @@ public class StructuredNotificationEvent extends StructuredEvent {
         this.notificationDetails = notificationDetails;
     }
 
+    public void setNotificationDetails(NotificationDetails notificationDetails) {
+        this.notificationDetails = notificationDetails;
+    }
+
     public NotificationDetails getNotificationDetails() {
         return notificationDetails;
     }
