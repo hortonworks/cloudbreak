@@ -4,7 +4,7 @@ _Please read these instructions before submitting_
 
 _Only use Github issues to report bugs or feature requests_
 
-For example, _Timeouts waiting for SSH/Ambari are generally not bugs within cloudbreak and are better addressed by the HDC channel. Ask on HDC if you are unsure.
+For example, _Timeouts waiting for SSH/Ambari are generally not bugs within cloudbreak and are better addressed by the HCC channel. Ask on HCC if you are unsure.
 
 If you are planning to open a pull-request just open the pull-request instead of making an issue first.
 
