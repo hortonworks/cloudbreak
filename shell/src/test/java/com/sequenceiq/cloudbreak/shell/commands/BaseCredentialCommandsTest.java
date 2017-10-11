@@ -22,7 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.endpoint.CredentialEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.CredentialEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CredentialResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseCredentialCommands;

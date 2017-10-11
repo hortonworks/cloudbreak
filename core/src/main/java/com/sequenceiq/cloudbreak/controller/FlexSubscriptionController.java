@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.cloudbreak.api.endpoint.FlexSubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.FlexSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionRequest;
 import com.sequenceiq.cloudbreak.api.model.FlexSubscriptionResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;

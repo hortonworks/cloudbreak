@@ -13,6 +13,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
+import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -32,19 +33,8 @@ import com.sequenceiq.cloudbreak.service.recipe.RecipeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class HostGroupDecorator implements Decorator<HostGroup> {
+public class HostGroupDecorator {
     private static final Logger LOGGER = LoggerFactory.getLogger(HostGroupDecorator.class);
-
-    private enum DecorationData {
-        STACK_ID,
-        USER,
-        CONSTRAINT,
-        RECIPE_IDS,
-        REQUEST_TYPE,
-        RECIPES,
-        PUBLIC_IN_ACCOUNT,
-        RECIPES_NAMES
-    }
 
     @Inject
     private InstanceGroupRepository instanceGroupRepository;
@@ -70,19 +60,12 @@ public class HostGroupDecorator implements Decorator<HostGroup> {
     @Inject
     private ClusterService clusterService;
 
-    @Override
-    public HostGroup decorate(HostGroup subject, Object... data) {
-        if (null == data || data.length != DecorationData.values().length) {
-            throw new IllegalArgumentException("Invalid decoration data provided. Cluster: " + subject.getName());
-        }
-        Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
-        ConstraintJson constraintJson = (ConstraintJson) data[DecorationData.CONSTRAINT.ordinal()];
-        Set<Long> recipeIds = (Set<Long>) data[DecorationData.RECIPE_IDS.ordinal()];
-        boolean postRequest = (boolean) data[DecorationData.REQUEST_TYPE.ordinal()];
-        Set<RecipeRequest> recipes = (Set<RecipeRequest>) data[DecorationData.RECIPES.ordinal()];
-        Set<String> recipeNames = (Set<String>) data[DecorationData.RECIPES_NAMES.ordinal()];
-        Boolean publicInAccount = (Boolean) data[DecorationData.PUBLIC_IN_ACCOUNT.ordinal()];
+    public HostGroup decorate(HostGroup subject, HostGroupRequest hostGroupRequest, IdentityUser user, Long stackId,
+            boolean postRequest, Boolean publicInAccount) {
+        ConstraintJson constraintJson = hostGroupRequest.getConstraint();
+        Set<Long> recipeIds = hostGroupRequest.getRecipeIds();
+        Set<RecipeRequest> recipes = hostGroupRequest.getRecipes();
+        Set<String> recipeNames = hostGroupRequest.getRecipeNames();
 
         LOGGER.debug("Decorating hostgroup on [{}] request.", postRequest ? "POST" : "PUT");
         Constraint constraint = conversionService.convert(constraintJson, Constraint.class);

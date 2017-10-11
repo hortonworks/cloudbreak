@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.SecurityGroupEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SecurityGroupEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupRequest;
 import com.sequenceiq.cloudbreak.api.model.SecurityGroupResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;

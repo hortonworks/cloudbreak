@@ -77,6 +77,7 @@ public class OperationDescriptions {
         public static final String DELETE_BY_ID = "delete stack by id";
         public static final String GET_STATUS_BY_ID = "retrieve stack status by stack id";
         public static final String PUT_BY_ID = "update stack by id";
+        public static final String PUT_BY_NAME = "update stack by name";
         public static final String GET_METADATA = "retrieve stack metadata";
         public static final String GET_BY_AMBARI_ADDRESS = "retrieve stack by ambari address";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
@@ -93,6 +94,7 @@ public class OperationDescriptions {
         public static final String GET_PUBLIC_BY_NAME = "retrieve cluster by stack name (public)";
         public static final String DELETE_BY_STACK_ID = "delete cluster on a specific stack";
         public static final String PUT_BY_STACK_ID = "update cluster by stack id";
+        public static final String PUT_BY_STACK_NAME = "update cluster by stack name";
         public static final String UPGRADE_AMBARI = "upgrade the Ambari version";
         public static final String GET_CLUSTER_PROPERTIES = "get cluster properties with blueprint outputs";
         public static final String FAILURE_REPORT = "failure report";

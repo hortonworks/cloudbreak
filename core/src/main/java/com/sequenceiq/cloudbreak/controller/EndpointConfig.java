@@ -119,13 +119,16 @@ public class EndpointConfig extends ResourceConfig {
 
     private void registerEndpoints() {
         register(BlueprintController.class);
-        register(PlatformParameterController.class);
-        register(ClusterController.class);
+        register(PlatformParameterV1Controller.class);
+        register(PlatformParameterV2Controller.class);
+        register(ClusterV1Controller.class);
+        register(ClusterV2Controller.class);
         register(CredentialController.class);
         register(NetworkController.class);
         register(RecipeController.class);
         register(SecurityGroupController.class);
-        register(StackController.class);
+        register(StackV1Controller.class);
+        register(StackV2Controller.class);
         register(TemplateController.class);
         register(ConstraintTemplateController.class);
         register(UserController.class);

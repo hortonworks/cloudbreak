@@ -84,7 +84,7 @@ import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.AmbariClusterService;
 import com.sequenceiq.cloudbreak.service.credential.OpenSshPublicKeyValidator;
-import com.sequenceiq.cloudbreak.service.decorator.Decorator;
+import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
@@ -162,7 +162,7 @@ public class StackService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private Decorator<StackResponse> stackResponseDecorator;
+    private StackResponseDecorator stackResponseDecorator;
 
     @Inject
     private OpenSshPublicKeyValidator rsaPublicKeyValidator;
@@ -203,7 +203,7 @@ public class StackService {
     public StackResponse getJsonById(Long id, Set<String> entry) {
         Stack stack = get(id);
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, entry, stack);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entry);
         return stackResponse;
     }
 
@@ -285,7 +285,7 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, entries, stack);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
         return stackResponse;
     }
 
@@ -296,7 +296,7 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
         StackResponse stackResponse = conversionService.convert(stack, StackResponse.class);
-        stackResponse = stackResponseDecorator.decorate(stackResponse, entries, stack);
+        stackResponse = stackResponseDecorator.decorate(stackResponse, stack, entries);
         return stackResponse;
     }
 

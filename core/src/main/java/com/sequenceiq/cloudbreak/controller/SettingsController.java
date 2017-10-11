@@ -6,7 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.SettingsEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SettingsEndpoint;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 
 @Component

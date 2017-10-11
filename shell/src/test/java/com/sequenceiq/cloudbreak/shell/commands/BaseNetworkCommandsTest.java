@@ -24,7 +24,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.api.endpoint.NetworkEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.NetworkEndpoint;
 import com.sequenceiq.cloudbreak.api.model.NetworkResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseNetworkCommands;

@@ -10,7 +10,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -39,7 +39,7 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
         // GIVEN
         itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
-        StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class).stackEndpoint();
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
@@ -47,8 +47,8 @@ public class AutoScalingPrometheusTest extends AbstractCloudbreakIntegrationTest
         autoscaleClient = itContext.getContextParam(CloudbreakITContextConstants.AUTOSCALE_CLIENT, AutoscaleClient.class);
         Long clusterId = AutoscalingUtil.getPeriscopeClusterId(autoscaleClient, stackId);
         long currentTime = RecoveryUtil.getCurentTimeStamp();
-        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackEndpoint, stackId) + scalingAdjustment;
-        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
+        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackV1Endpoint, stackId) + scalingAdjustment;
+        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 + scalingAdjustment;
 
         // WHEN

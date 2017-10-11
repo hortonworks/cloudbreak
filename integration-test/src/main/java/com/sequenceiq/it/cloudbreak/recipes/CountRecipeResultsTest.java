@@ -20,7 +20,7 @@ import org.testng.Assert;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -51,8 +51,8 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
 
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
-        StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
-        List<InstanceGroupResponse> instanceGroups = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>()).getInstanceGroups();
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+        List<InstanceGroupResponse> instanceGroups = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>()).getInstanceGroups();
         String[] files = lookingFor.split(",");
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));
         List<Future> futures = new ArrayList<>(publicIps.size() * files.length);

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 
-import com.sequenceiq.cloudbreak.api.endpoint.LdapConfigEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.LdapConfigEndpoint;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.LdapConfigResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;

@@ -13,7 +13,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.cloudbreak.shell.commands.base.BaseStackCommands;
 import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
@@ -35,7 +35,7 @@ public class ClusterCommandsTest {
     private CloudbreakShellUtil cloudbreakShellUtil;
 
     @Mock
-    private ClusterEndpoint clusterEndpoint;
+    private ClusterV1Endpoint clusterV1Endpoint;
 
     @Mock
     private BaseStackCommands stackCommands;
@@ -47,7 +47,7 @@ public class ClusterCommandsTest {
         underTest = new ClusterCommands(shellContext, cloudbreakShellUtil, stackCommands);
 
         given(shellContext.cloudbreakClient()).willReturn(cloudbreakClient);
-        given(cloudbreakClient.clusterEndpoint()).willReturn(clusterEndpoint);
+        given(cloudbreakClient.clusterEndpoint()).willReturn(clusterV1Endpoint);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ClusterCommandsTest {
         HostGroup hostGroup = new HostGroup("master");
         String addNodeResult = underTest.addNode(hostGroup, +1, false, null);
 
-        verify(clusterEndpoint).put(eq(stackId), anyObject());
+        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackIdStr));
     }
 
@@ -77,7 +77,7 @@ public class ClusterCommandsTest {
         HostGroup hostGroup = new HostGroup("master");
         String addNodeResult = underTest.addNode(hostGroup, +1, false, null);
 
-        verify(clusterEndpoint).put(eq(stackId), anyObject());
+        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackId));
     }
 
@@ -91,7 +91,7 @@ public class ClusterCommandsTest {
         HostGroup hostGroup = new HostGroup("master");
         String addNodeResult = underTest.addNode(hostGroup, +1, false, null);
 
-        verify(clusterEndpoint).put(eq(stackId), anyObject());
+        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackId));
     }
 
@@ -108,7 +108,7 @@ public class ClusterCommandsTest {
         HostGroup hostGroup = new HostGroup("master");
         String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false, null);
 
-        verify(clusterEndpoint).put(eq(stackId), anyObject());
+        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackIdStr));
     }
 
@@ -122,7 +122,7 @@ public class ClusterCommandsTest {
         HostGroup hostGroup = new HostGroup("master");
         String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false, null);
 
-        verify(clusterEndpoint).put(eq(stackId), anyObject());
+        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackId));
     }
 
@@ -136,7 +136,7 @@ public class ClusterCommandsTest {
         HostGroup hostGroup = new HostGroup("master");
         String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false, null);
 
-        verify(clusterEndpoint).put(eq(stackId), anyObject());
+        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackId));
     }
 

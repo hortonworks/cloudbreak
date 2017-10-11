@@ -8,7 +8,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterTemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterTemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.ClusterTemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintParameterJson;
-import com.sequenceiq.cloudbreak.api.model.BlueprintRequest;
+import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConfigsResponse;
 import com.sequenceiq.cloudbreak.api.model.ConnectedClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.HostGroupRequest;
@@ -46,24 +46,9 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class ClusterDecorator implements Decorator<Cluster> {
+public class ClusterDecorator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterDecorator.class);
-
-    private enum DecorationData {
-        STACK_ID,
-        USER,
-        BLUEPRINT_ID,
-        HOSTGROUP_JSONS,
-        VALIDATE_BLUEPRINT,
-        RDSCONFIG_ID,
-        LDAP_CONFIG_ID,
-        BLUEPRINT,
-        RDSCONFIG,
-        LDAP_CONFIG,
-        CONNECTED_CLUSTER,
-        BLUEPRINT_NAME
-    }
 
     @Inject
     private BlueprintService blueprintService;
@@ -95,47 +80,30 @@ public class ClusterDecorator implements Decorator<Cluster> {
     @Inject
     private RdsConnectionValidator rdsConnectionValidator;
 
-    @Override
-    public Cluster decorate(Cluster subject, Object... data) {
-        if (null == data || data.length != DecorationData.values().length) {
-            throw new IllegalArgumentException("Invalid decoration data provided. Cluster: " + subject.getName());
-        }
-        Long stackId = (Long) data[DecorationData.STACK_ID.ordinal()];
-        IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
-        Long blueprintId = (Long) data[DecorationData.BLUEPRINT_ID.ordinal()];
-        Long ldapConfigId = (Long) data[DecorationData.LDAP_CONFIG_ID.ordinal()];
-        Set<HostGroupRequest> hostGroupsJsons = (Set<HostGroupRequest>) data[DecorationData.HOSTGROUP_JSONS.ordinal()];
-        BlueprintRequest requestBlueprint = (BlueprintRequest) data[DecorationData.BLUEPRINT.ordinal()];
-        Set<RDSConfigRequest> requestRdsConfigs = (Set<RDSConfigRequest>) data[DecorationData.RDSCONFIG.ordinal()];
-        LdapConfigRequest ldapConfigRequest = (LdapConfigRequest) data[DecorationData.LDAP_CONFIG.ordinal()];
-        Set<Long> rdsConfigIds = (Set<Long>) data[DecorationData.RDSCONFIG_ID.ordinal()];
-        ConnectedClusterRequest connectedClusterRequest = (ConnectedClusterRequest) data[DecorationData.CONNECTED_CLUSTER.ordinal()];
-        String blueprintName = (String) data[DecorationData.BLUEPRINT_NAME.ordinal()];
-
+    public Cluster decorate(Cluster subject, ClusterRequest request, IdentityUser user, Long stackId) {
         Stack stack = stackService.getByIdWithLists(stackId);
 
-        if (blueprintId != null) {
-            subject.setBlueprint(blueprintService.get(blueprintId));
-        } else if (requestBlueprint != null) {
-            Blueprint blueprint = conversionService.convert(requestBlueprint, Blueprint.class);
+        if (request.getBlueprintId() != null) {
+            subject.setBlueprint(blueprintService.get(request.getBlueprintId()));
+        } else if (request.getBlueprint() != null) {
+            Blueprint blueprint = conversionService.convert(request.getBlueprint(), Blueprint.class);
             blueprint.setPublicInAccount(stack.isPublicInAccount());
             blueprint = blueprintService.create(user, blueprint, new ArrayList<>());
             subject.setBlueprint(blueprint);
-        } else if (!Strings.isNullOrEmpty(blueprintName)) {
-            subject.setBlueprint(blueprintService.get(blueprintName, user.getAccount()));
+        } else if (!Strings.isNullOrEmpty(request.getBlueprintName())) {
+            subject.setBlueprint(blueprintService.get(request.getBlueprintName(), user.getAccount()));
         } else {
             throw new BadRequestException("Blueprint does not configured for the cluster!");
         }
-        subject.setHostGroups(convertHostGroupsFromJson(stack, user, subject, hostGroupsJsons));
-        boolean validate = (boolean) data[DecorationData.VALIDATE_BLUEPRINT.ordinal()];
-        if (validate) {
-            Blueprint blueprint = blueprintId != null ? blueprintService.get(blueprintId) : subject.getBlueprint();
+        subject.setHostGroups(convertHostGroupsFromJson(stack, user, subject, request.getHostGroups()));
+        if (request.getValidateBlueprint()) {
+            Blueprint blueprint = request.getBlueprintId() != null ? blueprintService.get(request.getBlueprintId()) : subject.getBlueprint();
             blueprintValidator.validateBlueprintForStack(blueprint, subject.getHostGroups(), stack.getInstanceGroups());
         }
-        subject.setTopologyValidation(validate);
-        prepareRds(subject, user, rdsConfigIds, requestRdsConfigs, stack);
-        prepareLdap(subject, user, ldapConfigId, ldapConfigRequest, stack);
-        prepareConnectedClusterParameters(subject, user, connectedClusterRequest);
+        subject.setTopologyValidation(request.getValidateBlueprint());
+        prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);
+        prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), stack);
+        prepareConnectedClusterParameters(subject, user, request.getConnectedCluster());
         return subject;
     }
 
@@ -229,8 +197,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         for (HostGroupRequest json : hostGroupsJsons) {
             HostGroup hostGroup = conversionService.convert(json, HostGroup.class);
             hostGroup.setCluster(cluster);
-            hostGroup = hostGroupDecorator.decorate(hostGroup, stack.getId(), user, json.getConstraint(), json.getRecipeIds(),
-                    true, json.getRecipes(), stack.isPublicInAccount(), json.getRecipeNames());
+            hostGroup = hostGroupDecorator.decorate(hostGroup, json, user, stack.getId(), true, stack.isPublicInAccount());
             hostGroups.add(hostGroup);
         }
         return hostGroups;

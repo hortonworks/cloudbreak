@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.api.endpoint.SmartSenseSubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SmartSenseSubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.SmartSenseSubscriptionJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.converter.JsonToSmartSenseSubscriptionConverter;

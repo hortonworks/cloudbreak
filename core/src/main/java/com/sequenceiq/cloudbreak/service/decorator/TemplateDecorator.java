@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 
 @Component
-public class TemplateDecorator implements Decorator<Template> {
+public class TemplateDecorator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TemplateDecorator.class);
 
@@ -33,8 +33,7 @@ public class TemplateDecorator implements Decorator<Template> {
     private final Supplier<Map<Platform, Map<String, VolumeParameterType>>> diskMappings =
             Suppliers.memoize(() -> cloudParameterService.getDiskTypes().getDiskMappings());
 
-    @Override
-    public Template decorate(Template subject, Object... data) {
+    public Template decorate(Template subject) {
         Supplier<VolumeParameterConfig> config = Suppliers.memoize(() -> {
             try {
                 Platform platform = Platform.platform(subject.cloudPlatform());

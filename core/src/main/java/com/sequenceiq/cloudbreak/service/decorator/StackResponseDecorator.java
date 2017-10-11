@@ -12,19 +12,11 @@ import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProv
 import com.sequenceiq.cloudbreak.service.decorator.responseprovider.ResponseProviders;
 
 @Service
-public class StackResponseDecorator implements Decorator<StackResponse> {
+public class StackResponseDecorator {
     @Inject
     private ResponseProviders responseProviders;
 
-    private enum DecorationData {
-        ENTRY,
-        STACK
-    }
-
-    @Override
-    public StackResponse decorate(StackResponse stackResponse, Object... data) {
-        Set<String> entries = (Set<String>) data[DecorationData.ENTRY.ordinal()];
-        Stack stack = (Stack) data[DecorationData.STACK.ordinal()];
+    public StackResponse decorate(StackResponse stackResponse, Stack stack, Set<String> entries) {
         if (entries != null && !entries.isEmpty()) {
             for (String entry : entries) {
                 ResponseProvider responseProvider = responseProviders.get(entry);

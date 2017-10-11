@@ -6,7 +6,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupAdjustmentJson;
 import com.sequenceiq.cloudbreak.api.model.UpdateStackJson;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
@@ -29,13 +29,13 @@ public class StackAndClusterUpscaleTest extends AbstractCloudbreakIntegrationTes
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         int stackIntId = Integer.parseInt(stackId);
-        StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class).stackEndpoint();
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
-        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackEndpoint, stackId) + scalingAdjustment;
-        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
+        int expectedNodeCountStack = ScalingUtil.getNodeCountStack(stackV1Endpoint, stackId) + scalingAdjustment;
+        int expectedNodeCountCluster = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 + scalingAdjustment;
         // WHEN
         UpdateStackJson updateStackJson = new UpdateStackJson();
@@ -48,8 +48,8 @@ public class StackAndClusterUpscaleTest extends AbstractCloudbreakIntegrationTes
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         // THEN
-        ScalingUtil.checkStackScaled(stackEndpoint, stackId, expectedNodeCountStack);
-        ScalingUtil.checkClusterScaled(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
+        ScalingUtil.checkStackScaled(stackV1Endpoint, stackId, expectedNodeCountStack);
+        ScalingUtil.checkClusterScaled(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
         ScalingUtil.putInstanceCountToContext(itContext, stackId);
     }
 }

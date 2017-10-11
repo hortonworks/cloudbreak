@@ -5,7 +5,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -25,7 +24,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
-import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
@@ -84,7 +82,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
-        given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         // WHEN
@@ -114,7 +112,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
-        given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         thrown.expect(BadRequestException.class);
@@ -143,7 +141,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
-        given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
         thrown.expect(BadRequestException.class);
@@ -176,7 +174,7 @@ public class JsonToStackConverterTest extends AbstractJsonConverterTest<StackReq
                 .willReturn(instanceGroup)
                 .willReturn(new FailurePolicy())
                 .willReturn(new Orchestrator());
-        given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
+        //given(stackParameterService.getStackParams(any(IdentityUser.class), any(StackRequest.class))).willReturn(new ArrayList<>());
         given(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).willReturn(OrchestratorType.HOST);
         given(orchestratorTypeResolver.resolveType(any(String.class))).willReturn(OrchestratorType.HOST);
 

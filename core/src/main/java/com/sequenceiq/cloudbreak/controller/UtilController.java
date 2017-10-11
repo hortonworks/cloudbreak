@@ -8,7 +8,7 @@ import javax.validation.Valid;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.UtilEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseTestResult;
 import com.sequenceiq.cloudbreak.api.model.LdapTestResult;
