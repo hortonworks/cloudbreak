@@ -12,10 +12,10 @@ public class StructuredEvent implements Serializable {
 
     private OperationDetails operation;
 
-    protected StructuredEvent() {
+    public StructuredEvent() {
     }
 
-    protected StructuredEvent(String type, OperationDetails operation) {
+    public StructuredEvent(String type, OperationDetails operation) {
         this.type = type;
         this.operation = operation;
     }

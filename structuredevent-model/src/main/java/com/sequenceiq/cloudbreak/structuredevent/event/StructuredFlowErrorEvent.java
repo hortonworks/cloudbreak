@@ -12,7 +12,7 @@ public class StructuredFlowErrorEvent extends StructuredFlowEvent {
     @JsonDeserialize(using = Base64Deserializer.class)
     private String exception;
 
-    private StructuredFlowErrorEvent() {
+    public StructuredFlowErrorEvent() {
     }
 
     public StructuredFlowErrorEvent(OperationDetails operation, FlowDetails flow, StackDetails stack, String exception) {
