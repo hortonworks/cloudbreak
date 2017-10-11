@@ -23,7 +23,7 @@ public class OperationDetails implements Serializable {
 
     private String cloudbreakVersion;
 
-    private OperationDetails() {
+    public OperationDetails() {
     }
 
     public OperationDetails(String eventType, String resourceType, Long resourceId, String account, String userId, String cloudbreakId,

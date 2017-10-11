@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class StructuredNotificationEvent extends StructuredEvent {
     private NotificationDetails notificationDetails;
 
-    private StructuredNotificationEvent() {
+    public StructuredNotificationEvent() {
     }
 
     public StructuredNotificationEvent(OperationDetails operation, NotificationDetails notificationDetails) {
