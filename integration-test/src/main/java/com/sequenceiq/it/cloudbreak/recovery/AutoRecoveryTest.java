@@ -10,7 +10,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -41,15 +41,15 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
 
-        StackEndpoint stackEndpoint = getCloudbreakClient().stackEndpoint();
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
+        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackEndpoint();
+        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         String instanceToDelete = RecoveryUtil.getInstanceId(stackResponse, hostGroup);
         Assert.assertNotNull(instanceToDelete);
 
         RecoveryUtil.deleteInstance(cloudProviderParams, instanceToDelete);
 
-        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
+        Integer expectedNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext)
                 - removedInstanceCount;
 
         WaitResult waitResult = CloudbreakUtil.waitForEvent(getCloudbreakClient(), stackResponse.getName(), "RECOVERY", "autorecovery requested",
@@ -64,7 +64,7 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
         desiredStatuses.put("status", "AVAILABLE");
         desiredStatuses.put("clusterStatus", "AVAILABLE");
         CloudbreakUtil.waitAndCheckStatuses(getCloudbreakClient(), stackId, desiredStatuses);
-        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext);
+        Integer actualNodeCountAmbari = ScalingUtil.getNodeCountAmbari(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, itContext);
         Assert.assertEquals(expectedNodeCountAmbari, actualNodeCountAmbari);
     }
 }

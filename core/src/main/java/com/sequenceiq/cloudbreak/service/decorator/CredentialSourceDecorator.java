@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.service.MissingResourceNameGenerator;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Component
-public class CredentialSourceDecorator implements Decorator<Credential> {
+public class CredentialSourceDecorator {
 
     @Inject
     private CredentialService credentialService;
@@ -27,15 +27,10 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
     @Inject
     private MissingResourceNameGenerator missingResourceNameGenerator;
 
-    @Override
-    public Credential decorate(Credential credential, Object... data) {
-        if (null == data || data.length == 0) {
-            return credential;
-        } else if (credential == null) {
-            CredentialSourceRequest credentialSourceRequest = (CredentialSourceRequest) data[DecorationData.SOURCE_CREDENTIAL.ordinal()];
-            IdentityUser identityUser = (IdentityUser) data[DecorationData.IDENTITY_USER.ordinal()];
+    public Credential decorate(Credential credential, CredentialSourceRequest credentialSourceRequest, IdentityUser user) {
+        if (credential == null) {
             if (!Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())) {
-                credential = credentialService.get(credentialSourceRequest.getSourceName(), identityUser.getAccount());
+                credential = credentialService.get(credentialSourceRequest.getSourceName(), user.getAccount());
             } else {
                 credential = credentialService.get(credentialSourceRequest.getSourceId());
             }
@@ -57,10 +52,5 @@ public class CredentialSourceDecorator implements Decorator<Credential> {
             }
         }
         return credential;
-    }
-
-    private enum DecorationData {
-        SOURCE_CREDENTIAL,
-        IDENTITY_USER
     }
 }

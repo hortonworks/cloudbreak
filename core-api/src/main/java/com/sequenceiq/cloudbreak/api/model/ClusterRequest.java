@@ -291,6 +291,10 @@ public class ClusterRequest implements JsonEntity {
         this.blueprintCustomProperties = blueprintCustomProperties.toString();
     }
 
+    public void setBlueprintCustomPropertiesAsString(String blueprintCustomProperties) {
+        this.blueprintCustomProperties = blueprintCustomProperties;
+    }
+
     public KerberosRequest getKerberos() {
         return kerberos;
     }

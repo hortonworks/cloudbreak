@@ -26,7 +26,7 @@ import org.testng.annotations.Test;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.ImmutableList;
-import com.sequenceiq.cloudbreak.api.endpoint.ClusterEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.ClusterV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.api.model.ConstraintJson;
 import com.sequenceiq.cloudbreak.api.model.GatewayJson;
@@ -118,8 +118,8 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         addSaltMappings(instanceMap);
         addAmbariMappings(instanceMap);
 
-        ClusterEndpoint clusterEndpoint = getCloudbreakClient().clusterEndpoint();
-        Long clusterId = clusterEndpoint.post(Long.valueOf(stackId), clusterRequest).getId();
+        ClusterV1Endpoint clusterV1Endpoint = getCloudbreakClient().clusterEndpoint();
+        Long clusterId = clusterV1Endpoint.post(Long.valueOf(stackId), clusterRequest).getId();
         // THEN
         Assert.assertNotNull(clusterId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");

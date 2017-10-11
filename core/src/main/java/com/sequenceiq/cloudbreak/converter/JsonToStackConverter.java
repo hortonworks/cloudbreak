@@ -219,7 +219,8 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         Map<String, String> userParams = stackRequest.getParameters();
         if (userParams != null) {
             IdentityUser user = authenticatedUserService.getCbUser();
-            for (StackParamValidation stackParamValidation : stackParameterService.getStackParams(user, stackRequest)) {
+            for (StackParamValidation stackParamValidation : stackParameterService.getStackParams(user, stackRequest.getName(),
+                    stackRequest.getCredentialSource(), stackRequest.getCredentialId(), stackRequest.getCredential())) {
                 String paramName = stackParamValidation.getName();
                 String value = userParams.get(paramName);
                 if (value != null) {

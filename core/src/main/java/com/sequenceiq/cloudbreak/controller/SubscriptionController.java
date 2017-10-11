@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.SubscriptionEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.SubscriptionEndpoint;
 import com.sequenceiq.cloudbreak.api.model.IdJson;
 import com.sequenceiq.cloudbreak.api.model.SubscriptionRequest;
 import com.sequenceiq.cloudbreak.domain.Subscription;

@@ -14,7 +14,7 @@ import org.testng.annotations.Optional;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -52,9 +52,9 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
         IntegrationTestContext itContext = getItContext();
         String stackId  = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
-        StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
 
-        String masterIp = CloudbreakUtil.getAmbariIp(stackEndpoint, stackId, itContext);
+        String masterIp = CloudbreakUtil.getAmbariIp(stackV1Endpoint, stackId, itContext);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
 
         sshCommand = ResourceUtil.readStringFromResource(applicationContext, sshCommand.replaceAll("\n", ""));

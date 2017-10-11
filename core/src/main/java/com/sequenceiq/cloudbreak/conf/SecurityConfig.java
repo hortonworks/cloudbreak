@@ -47,23 +47,23 @@ public class SecurityConfig {
     @Configuration
     @EnableResourceServer
     protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter {
-        private static final String[] BLUEPRINT_URL_PATTERNS = {API_ROOT_CONTEXT + "/blueprints/**"};
+        private static final String[] BLUEPRINT_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/blueprints/**"};
 
-        private static final String[] TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/templates/**"};
+        private static final String[] TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/templates/**"};
 
-        private static final String[] CREDENTIAL_URL_PATTERNS = {API_ROOT_CONTEXT + "/credentials/**"};
+        private static final String[] CREDENTIAL_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/credentials/**"};
 
-        private static final String[] RECIPE_URL_PATTERNS = {API_ROOT_CONTEXT + "/recipes/**"};
+        private static final String[] RECIPE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/recipes/**"};
 
-        private static final String[] NETWORK_URL_PATTERNS = {API_ROOT_CONTEXT + "/networks/**"};
+        private static final String[] NETWORK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/networks/**"};
 
-        private static final String[] SECURITYGROUP_URL_PATTERNS = {API_ROOT_CONTEXT + "/securitygroups/**"};
+        private static final String[] SECURITYGROUP_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/securitygroups/**"};
 
-        private static final String[] STACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/stacks/**"};
+        private static final String[] STACK_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/stacks/**", API_ROOT_CONTEXT + "/v2/stacks/**"};
 
-        private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/clustertemplates/**"};
+        private static final String[] STACK_TEMPLATE_URL_PATTERNS = {API_ROOT_CONTEXT + "/v1/clustertemplates/**"};
 
-        private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/accountpreferences/**";
+        private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/v1/accountpreferences/**";
 
         @Value("${cb.client.secret}")
         private String clientSecret;
@@ -121,7 +121,7 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
                     .permitAll()
 
-                    .antMatchers(API_ROOT_CONTEXT + "/users/**").access("#oauth2.hasScope('openid')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/users/**").access("#oauth2.hasScope('openid')")
                     .antMatchers(BLUEPRINT_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.blueprints')")
                     .antMatchers(TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(CREDENTIAL_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.credentials')")
@@ -132,26 +132,29 @@ public class SecurityConfig {
                     .antMatchers(STACK_TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(ACCOUNT_PREFERENCES)
                     .access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers(API_ROOT_CONTEXT + "/stacks/ambari", API_ROOT_CONTEXT + "/stacks/*/certificate", API_ROOT_CONTEXT + "/stacks/all")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/stacks/ambari", API_ROOT_CONTEXT + "/v1/stacks/*/certificate", API_ROOT_CONTEXT + "/v1/stacks/all")
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers(API_ROOT_CONTEXT + "/events/**").access("#oauth2.hasScope('cloudbreak.events')")
-                    .antMatchers(API_ROOT_CONTEXT + "/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
-                    .antMatchers(API_ROOT_CONTEXT + "/usages/user/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
-                    .antMatchers(API_ROOT_CONTEXT + "/usages/flex/**").access("#oauth2.hasScope('cloudbreak.flex')")
-                    .antMatchers(API_ROOT_CONTEXT + "/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
-                    .antMatchers(API_ROOT_CONTEXT + "/subscriptions").access("#oauth2.hasScope('cloudbreak.subscribe')")
-                    .antMatchers(API_ROOT_CONTEXT + "/constraints/**")
+                    .antMatchers(API_ROOT_CONTEXT + "/v2/stacks/ambari", API_ROOT_CONTEXT + "/v2/stacks/*/certificate", API_ROOT_CONTEXT + "/v2/stacks/all")
+                    .access("#oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/events/**").access("#oauth2.hasScope('cloudbreak.events')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/usages/account/**").access("#oauth2.hasScope('cloudbreak.usages.account')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/usages/user/**").access("#oauth2.hasScope('cloudbreak.usages.user')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/usages/flex/**").access("#oauth2.hasScope('cloudbreak.flex')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/usages/**").access("#oauth2.hasScope('cloudbreak.usages.global')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/subscriptions").access("#oauth2.hasScope('cloudbreak.subscribe')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/constraints/**")
                     .access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers(API_ROOT_CONTEXT + "/topologies/**")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/topologies/**")
                     .access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.autoscale')")
-                    .antMatchers(API_ROOT_CONTEXT + "/settings/**")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/settings/**")
                     .access("#oauth2.hasScope('cloudbreak.stacks') or #oauth2.hasScope('cloudbreak.recipes')")
-                    .antMatchers(API_ROOT_CONTEXT + "/ldap/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers(API_ROOT_CONTEXT + "/util/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers(API_ROOT_CONTEXT + "/rdsconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers(API_ROOT_CONTEXT + "/smartsensesubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers(API_ROOT_CONTEXT + "/flexsubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
-                    .antMatchers(API_ROOT_CONTEXT + "/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/ldap/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/util/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/rdsconfigs/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/smartsensesubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/flexsubscriptions/**").access("#oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v1/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
+                    .antMatchers(API_ROOT_CONTEXT + "/v2/connectors/**").access("#oauth2.hasScope('cloudbreak.credentials')")
                     .antMatchers(API_ROOT_CONTEXT + "/swagger.json").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/api-docs/**").permitAll()
                     .antMatchers(API_ROOT_CONTEXT + "/**").denyAll();

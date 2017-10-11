@@ -9,7 +9,7 @@ import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractCloudbreakIntegrationTest;
@@ -143,7 +143,7 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
 
-        StackEndpoint stackEndpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
                 CloudbreakClient.class).stackEndpoint();
 
         if (scalingAdjustment < 0) {
@@ -155,8 +155,8 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
             CloudbreakUtil.waitAndCheckClusterStatus(cloudbreakClient, stackId, "AVAILABLE");
         }
 
-        ScalingUtil.checkStackScaled(stackEndpoint, stackId, expectedNodeCountStack);
-        ScalingUtil.checkClusterScaled(stackEndpoint, ambariPort, stackId, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
+        ScalingUtil.checkStackScaled(stackV1Endpoint, stackId, expectedNodeCountStack);
+        ScalingUtil.checkClusterScaled(stackV1Endpoint, ambariPort, stackId, ambariUser, ambariPassword, expectedNodeCountCluster, itContext);
         ScalingUtil.putInstanceCountToContext(itContext, stackId);
     }
 

@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.UserEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.model.User;
 import com.sequenceiq.cloudbreak.api.model.UserProfileRequest;
 import com.sequenceiq.cloudbreak.api.model.UserProfileResponse;

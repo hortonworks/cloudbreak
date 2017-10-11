@@ -159,6 +159,7 @@ public class ModelDescriptions {
         public static final String CUSTOM_CONTAINERS = "custom containers";
         public static final String CUSTOM_QUEUE = "custom queue for yarn orchestrator";
         public static final String EXECUTOR_TYPE = "executor type of cluster";
+        public static final String BYOS_REQUEST = "byos specific requests for cluster";
         public static final String CONNECTED_CLUSTER = "cluster can connect to a datalake you can define the parameters here";
         public static final String CLUSTER_ATTRIBUTES = "Additional information for ambari cluster";
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
@@ -169,6 +170,7 @@ public class ModelDescriptions {
         public static final String ADJUSTMENT_TYPE = "type of  adjustment";
         public static final String STATUS_REQUEST = "request status";
         public static final String USERNAME_PASSWORD = "user details";
+        public static final String AMBARI_REQUEST = "ambari specific requests";
         public static final String HOSTGROUPS = "collection of hostgroups";
         public static final String AMBARI_STACK_DETAILS = "details of the Ambari stack";
         public static final String AMBARI_REPO_DETAILS = "details of the Ambari package repository";

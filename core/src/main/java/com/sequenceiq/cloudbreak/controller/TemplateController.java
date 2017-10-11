@@ -9,14 +9,14 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.PathVariable;
 
-import com.sequenceiq.cloudbreak.api.endpoint.TemplateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.api.model.TemplateRequest;
 import com.sequenceiq.cloudbreak.api.model.TemplateResponse;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
 import com.sequenceiq.cloudbreak.controller.validation.template.TemplateValidator;
 import com.sequenceiq.cloudbreak.domain.Template;
-import com.sequenceiq.cloudbreak.service.decorator.Decorator;
+import com.sequenceiq.cloudbreak.service.decorator.TemplateDecorator;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 
 @Component
@@ -31,7 +31,7 @@ public class TemplateController extends NotificationController implements Templa
     private TemplateValidator templateValidator;
 
     @Autowired
-    private Decorator<Template> templateDecorator;
+    private TemplateDecorator templateDecorator;
 
     @Autowired
     @Qualifier("conversionService")

@@ -18,7 +18,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.DescribeSpotInstanceRequestsResult;
 import com.amazonaws.services.ec2.model.SpotInstanceRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.StackEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.StackV1Endpoint;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupResponse;
 import com.sequenceiq.cloudbreak.api.model.InstanceMetaDataJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
@@ -41,8 +41,8 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
 
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
-        StackEndpoint stackEndpoint = getCloudbreakClient().stackEndpoint();
-        StackResponse stackResponse = stackEndpoint.get(Long.valueOf(stackId), new HashSet<>());
+        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackEndpoint();
+        StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
 

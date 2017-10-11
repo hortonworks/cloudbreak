@@ -13,7 +13,8 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.api.model.CredentialRequest;
+import com.sequenceiq.cloudbreak.api.model.CredentialSourceRequest;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetStackParamValidationRequest;
@@ -45,24 +46,24 @@ public class StackParameterService {
     @Inject
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
-    public List<StackParamValidation> getStackParams(IdentityUser user, StackRequest stackRequest) {
+    public List<StackParamValidation> getStackParams(IdentityUser user, String name, CredentialSourceRequest credentialSourceRequest,
+            Long credentialId, CredentialRequest credentialRequest) {
         LOGGER.debug("Get stack params");
-        Long credentialId = stackRequest.getCredentialId();
-        if (credentialId != null || stackRequest.getCredential() != null || stackRequest.getCredentialSource() != null) {
+        if (credentialId != null || credentialRequest != null || credentialSourceRequest != null) {
             Credential credential;
             if (credentialId != null) {
                 credential = credentialService.get(credentialId);
-            } else if (stackRequest.getCredential() != null) {
-                credential = conversionService.convert(stackRequest.getCredential(), Credential.class);
+            } else if (credentialRequest != null) {
+                credential = conversionService.convert(credentialRequest, Credential.class);
             } else {
-                if (!Strings.isNullOrEmpty(stackRequest.getCredentialSource().getSourceName())) {
-                    credential = credentialService.get(stackRequest.getCredentialSource().getSourceName(), user.getAccount());
+                if (!Strings.isNullOrEmpty(credentialSourceRequest.getSourceName())) {
+                    credential = credentialService.get(credentialSourceRequest.getSourceName(), user.getAccount());
                 } else {
-                    credential = credentialService.get(stackRequest.getCredentialSource().getSourceId());
+                    credential = credentialService.get(credentialSourceRequest.getSourceId());
                 }
             }
 
-            CloudContext cloudContext = new CloudContext(null, stackRequest.getName(), credential.cloudPlatform(), credential.getOwner());
+            CloudContext cloudContext = new CloudContext(null, name, credential.cloudPlatform(), credential.getOwner());
 
             GetStackParamValidationRequest getStackParamValidationRequest = new GetStackParamValidationRequest(cloudContext);
             eventBus.notify(getStackParamValidationRequest.selector(), eventFactory.createEvent(getStackParamValidationRequest));

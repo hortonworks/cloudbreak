@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.UsageEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakUsageJson;
 import com.sequenceiq.cloudbreak.api.model.flex.CloudbreakFlexUsageJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
