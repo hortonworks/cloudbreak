@@ -40,15 +40,15 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
     @Override
     public StackDetails convert(Stack source) {
         StackDetails stackDetails = new StackDetails();
-        stackDetails.setStackId(source.getId());
-        stackDetails.setStackName(source.getName());
+        stackDetails.setId(source.getId());
+        stackDetails.setName(source.getName());
         stackDetails.setRegion(source.getRegion());
         stackDetails.setAvailabilityZone(source.getAvailabilityZone());
         stackDetails.setDescription(source.getDescription());
         stackDetails.setCloudPlatform(source.cloudPlatform());
         stackDetails.setPlatformVariant(source.getPlatformVariant());
-        stackDetails.setStackStatus(source.getStatus().name());
-        stackDetails.setDetailedStackStatus(source.getStackStatus().getDetailedStackStatus().name());
+        stackDetails.setStatus(source.getStatus().name());
+        stackDetails.setDetailedStatus(source.getStackStatus().getDetailedStackStatus().name());
         stackDetails.setStatusReason(source.getStatusReason());
         stackDetails.setInstanceGroups((List<InstanceGroupDetails>) conversionService.convert(source.getInstanceGroups(),
                 TypeDescriptor.forObject(source.getInstanceGroups()),
@@ -79,14 +79,15 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
         }
         HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stackId);
         if (hdpRepo != null) {
-            stackDetails.setHdpVersion(hdpRepo.getHdpVersion());
+            stackDetails.setClusterType(hdpRepo.getStack().get(HDPRepo.REPO_ID_TAG));
+            stackDetails.setClusterVersion(hdpRepo.getHdpVersion());
         }
     }
 
     private void convertNetwork(StackDetails stackDetails, Network network, String cloudPlatform) {
+        Boolean existingNetwork = Boolean.FALSE;
+        Boolean existingSubnet = Boolean.FALSE;
         if (network != null) {
-            Boolean existingNetwork;
-            Boolean existingSubnet;
             Json attributes = network.getAttributes();
             Map<String, Object> params = attributes == null ? Collections.emptyMap() : attributes.getMap();
             switch (cloudPlatform) {
@@ -109,11 +110,11 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
                     break;
                 default:
                     existingNetwork = Boolean.FALSE;
-                    existingSubnet = Boolean.TRUE;
+                    existingSubnet = Boolean.FALSE;
                     break;
             }
-            stackDetails.setExistingNetwork(existingNetwork);
-            stackDetails.setExisitngSubnet(existingSubnet);
         }
+        stackDetails.setExistingNetwork(existingNetwork);
+        stackDetails.setExistingSubnet(existingSubnet);
     }
 }
