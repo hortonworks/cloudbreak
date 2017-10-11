@@ -50,7 +50,7 @@ public class StackRequestToStackValidationRequestConverter extends AbstractConve
             stackValidationRequest.setCredentialId(credential.getId());
         }
         if (!Strings.isNullOrEmpty(clusterRequest.getBlueprintName())) {
-            Blueprint blueprint = blueprintService.get(source.getCredentialName(), source.getAccount());
+            Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintName(), source.getAccount());
             stackValidationRequest.setBlueprintId(blueprint.getId());
         }
         stackValidationRequest.setFileSystem(source.getClusterRequest().getFileSystem());

@@ -106,7 +106,7 @@ public class ClusterCreationSetupService {
                 request.getLdapConfig(), request.getConnectedCluster(), request.getBlueprintName());
         List<ClusterComponent> components = new ArrayList<>();
         components = addAmbariRepoConfig(stack.getId(), components, request, cluster);
-        components = addHDPRepoConfig(stack.getId(), components, request, cluster);
+        components = addHDPRepoConfig(stack.getId(), components, request, cluster, user);
         components = addAmbariDatabaseConfig(components, request, cluster);
         return clusterService.create(user, stack.getId(), cluster, components);
     }
@@ -131,7 +131,7 @@ public class ClusterCreationSetupService {
         return components;
     }
 
-    private List<ClusterComponent> addHDPRepoConfig(Long stackId, List<ClusterComponent> components, ClusterRequest request, Cluster cluster)
+    private List<ClusterComponent> addHDPRepoConfig(Long stackId, List<ClusterComponent> components, ClusterRequest request, Cluster cluster, IdentityUser user)
             throws JsonProcessingException {
         com.sequenceiq.cloudbreak.domain.Component stackHdpRepoConfig = componentConfigProvider.getComponent(stackId, ComponentType.HDP_REPO_DETAILS,
                 ComponentType.HDP_REPO_DETAILS.name());
@@ -142,7 +142,8 @@ public class ClusterCreationSetupService {
                 ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(hdpRepo), cluster);
                 components.add(component);
             } else {
-                ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(defaultHDPInfo(request).getRepo()), cluster);
+                ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS,
+                        new Json(defaultHDPInfo(request, user).getRepo()), cluster);
                 components.add(hdpRepoComponent);
             }
         } else {
@@ -152,15 +153,17 @@ public class ClusterCreationSetupService {
         return components;
     }
 
-    private HDPInfo defaultHDPInfo(ClusterRequest clusterRequest) {
+    private HDPInfo defaultHDPInfo(ClusterRequest clusterRequest, IdentityUser user) {
         try {
             JsonNode root;
             if (clusterRequest.getBlueprintId() != null) {
                 Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintId());
                 root = JsonUtil.readTree(blueprint.getBlueprintText());
+            } else if (clusterRequest.getBlueprintName() != null) {
+                Blueprint blueprint = blueprintService.get(clusterRequest.getBlueprintName(), user.getAccount());
+                root = JsonUtil.readTree(blueprint.getBlueprintText());
             } else {
                 root = JsonUtil.readTree(clusterRequest.getBlueprint().getAmbariBlueprint());
-
             }
             if (root != null) {
                 String stackVersion = blueprintUtils.getBlueprintHdpVersion(root);

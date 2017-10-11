@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -72,9 +73,9 @@ public class JsonToClusterConverter extends AbstractConversionServiceAwareConver
         if (fileSystem != null) {
             cluster.setFileSystem(getConversionService().convert(fileSystem, FileSystem.class));
         }
+        Map<String, String> inputs = source.getBlueprintInputs() == null ? Collections.emptyMap() : convertBlueprintInputJsons(source.getBlueprintInputs());
         try {
-            Json json = new Json(convertBlueprintInputJsons(source.getBlueprintInputs()));
-            cluster.setBlueprintInputs(source.getBlueprintInputs() == null ? new Json(new HashMap<>()) : json);
+            cluster.setBlueprintInputs(new Json(inputs));
             if (source.getBlueprintCustomProperties() != null) {
                 cluster.setBlueprintCustomProperties(source.getBlueprintCustomProperties());
             } else {
