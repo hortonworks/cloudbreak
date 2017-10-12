@@ -151,19 +151,7 @@ public class AzurePlatformResources implements PlatformResources {
             for (VolumeParameterType volumeParameterType : values()) {
                 switch (volumeParameterType) {
                     case MAGNETIC:
-                        builder.withAutoAttachedConfig(volumeParameterConfig(MAGNETIC, virtualMachineSize));
-                        break;
-                    case SSD:
-                        builder.withAutoAttachedConfig(VolumeParameterConfig.EMPTY);
-                        break;
-                    case EPHEMERAL:
-                        builder.withAutoAttachedConfig(VolumeParameterConfig.EMPTY);
-                        break;
-                    case ST1:
-                        builder.withSt1Config(VolumeParameterConfig.EMPTY);
-                        break;
-                    case AUTO_ATTACHED:
-                        builder.withAutoAttachedConfig(VolumeParameterConfig.EMPTY);
+                        builder.withMagneticConfig(volumeParameterConfig(MAGNETIC, virtualMachineSize));
                         break;
                     default:
                         break;
