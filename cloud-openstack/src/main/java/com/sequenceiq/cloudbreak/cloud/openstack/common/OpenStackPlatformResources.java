@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -137,8 +138,8 @@ public class OpenStackPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        OSClient osClient = openStackClient.createOSClient(cloudCredential);
         Set<String> regionFromOpenStack = openStackClient.getRegion(cloudCredential);
+        OSClient osClient = openStackClient.createOSClient(cloudCredential);
 
         Map<Region, List<com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
@@ -236,10 +237,12 @@ public class OpenStackPlatformResources implements PlatformResources {
         CloudRegions regions = regions(cloudCredential, region, filters);
         for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.getCloudRegions().entrySet()) {
             Set<CloudIpPool> cloudGateWays = new HashSet<>();
-            for (String poolName : osClient.compute().floatingIps().getPoolNames()) {
+            List<? extends Network> networks = osClient.networking().network().list();
+            List<? extends Network> networksWithExternalRouter = networks.stream().filter(Network::isRouterExternal).collect(Collectors.toList());
+            for (Network network : networksWithExternalRouter) {
                 CloudIpPool cloudIpPool = new CloudIpPool();
-                cloudIpPool.setId(poolName);
-                cloudIpPool.setName(poolName);
+                cloudIpPool.setId(network.getId());
+                cloudIpPool.setName(network.getName());
                 cloudGateWays.add(cloudIpPool);
             }
             for (AvailabilityZone availabilityZone : regionListEntry.getValue()) {
