@@ -91,12 +91,20 @@ func DescribeBlueprint(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	resp, err := cbClient.Cloudbreak.Blueprints.GetPublicBlueprint(blueprints.NewGetPublicBlueprintParams().WithName(c.String(FlName.Name)))
+	bp := fetchBlueprint(c.String(FlName.Name), cbClient.Cloudbreak.Blueprints)
+	output.Write(blueprintHeader, convertResponseToBlueprint(bp))
+}
+
+type getPublicBlueprint interface {
+	GetPublicBlueprint(*blueprints.GetPublicBlueprintParams) (*blueprints.GetPublicBlueprintOK, error)
+}
+
+func fetchBlueprint(name string, client getPublicBlueprint) *models_cloudbreak.BlueprintResponse {
+	resp, err := client.GetPublicBlueprint(blueprints.NewGetPublicBlueprintParams().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	bp := resp.Payload
-	output.Write(blueprintHeader, convertResponseToBlueprint(bp))
+	return resp.Payload
 }
 
 func DeleteBlueprint(c *cli.Context) {
@@ -165,7 +173,7 @@ func decodeAndParseToJson(encodedBlueprint string) map[string]interface{} {
 		utils.LogErrorAndExit(err)
 	}
 	log.Debugf("[decodeAndParseToJson] parse blueprint to JSON")
-	var blueprintJson interface{}
+	var blueprintJson map[string]interface{}
 	json.Unmarshal(b, &blueprintJson)
-	return blueprintJson.(map[string]interface{})
+	return blueprintJson
 }

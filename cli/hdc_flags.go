@@ -225,6 +225,20 @@ var (
 			Usage: "URL location of the Ambari blueprint JSON file",
 		},
 	}
+	FlBlueprintName = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "blueprint-name",
+			Usage: "name of the blueprint",
+		},
+	}
+	FlBlueprintFile = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "blueprint-file",
+			Usage: "location of the blueprint file",
+		},
+	}
 	// Not used jet as i know
 	FlClusterName = StringFlag{
 		RequiredFlag: REQUIRED,

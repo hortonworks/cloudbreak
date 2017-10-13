@@ -322,10 +322,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates an aws cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateAwsStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -334,10 +334,10 @@ func main() {
 							Name:   "existing-network",
 							Usage:  "creates an aws cluster JSON template with existing network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateAwsStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -346,10 +346,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates an aws cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateAwsStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -364,10 +364,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates an azure cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateAzureStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -376,10 +376,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates an azure cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateAzureStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -394,10 +394,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates a gcp cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -406,10 +406,10 @@ func main() {
 							Name:   "existing-network",
 							Usage:  "creates a gcp cluster JSON template with existing network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -418,10 +418,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates a gcp cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -430,10 +430,10 @@ func main() {
 							Name:   "legacy-network",
 							Usage:  "creates a gcp cluster JSON template with legacy network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -448,10 +448,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates a openstack cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateOpenstackStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -460,10 +460,10 @@ func main() {
 							Name:   "existing-network",
 							Usage:  "creates a openstack cluster JSON template with existing network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateOpenstackStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -472,10 +472,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates a openstack cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().Build(),
+							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
 							Action: hdc.GenerateOpenstackStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().Build() {
+								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
