@@ -172,9 +172,6 @@ angular.module('uluwatuControllers').controller('templateController', [
 
         $scope.createAzureTemplate = function() {
             $scope.azureTemp.cloudPlatform = "AZURE";
-            if ($scope.azureTemp.parameters.managedDisk) {
-                $scope.azureTemp.volumeType = $rootScope.params.defaultDisks.AZURE;
-            }
             if ($scope.azureTemp.public) {
                 AccountTemplate.save($scope.azureTemp, function(result) {
                     handleAzureTemplateSuccess(result)
@@ -282,6 +279,22 @@ angular.module('uluwatuControllers').controller('templateController', [
             });
         }
 
+        $scope.managedDiskChanged = function () {
+            if ($scope.azureTemp.parameters.managedDisk) {
+                $scope.azureTemp.volumeType = 'Standard_LRS';
+            }
+        }
+
+        $scope.diskFilterByManaged = function(volume) {
+            if ($scope.azureTemplate) {
+                if ($scope.azureTemp.parameters.managedDisk) {
+                    if (volume === 'Standard_GRS') {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
 
         $scope.filterByVolumetype = function(volume) {
             try {

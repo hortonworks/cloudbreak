@@ -33,11 +33,11 @@
         <!-- .col-sm-9 -->
     </div>
 
-    <div class="form-group" ng-show="!azureTemp.parameters.managedDisk">
+    <div class="form-group">
         <label class="col-sm-3 control-label" for="azure_tvolumetype">{{msg.template_form_volume_type_label}}</label>
 
         <div class="col-sm-9">
-            <select class="form-control" id="azure_tvolumetype" name="azure_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AZURE', volumeType) for volumeType in $root.params.diskTypes.AZURE | filter:filterByVolumetype" ng-model="azureTemp.volumeType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE', azureTemp)" required>
+            <select class="form-control" id="azure_tvolumetype" name="azure_tvolumetype" ng-options="volumeType as $root.displayNames.getDisk('AZURE', volumeType) for volumeType in $root.params.diskTypes.AZURE | filter:filterByVolumetype | filter:diskFilterByManaged" ng-model="azureTemp.volumeType" ng-change="changeInstanceType(azureTemp.instanceType, azureTemp.volumeType, 'AZURE', azureTemp)" required>
             </select>
         </div>
         <!-- .col-sm-9 -->
@@ -72,7 +72,7 @@
         <label class="col-sm-3 control-label" for="azuremanaged">{{msg.template_form_managed}}</label>
 
         <div class="col-sm-9">
-            <input type="checkbox" name="azuremanaged" id="azuremanaged" ng-model="azureTemp.parameters.managedDisk">
+            <input type="checkbox" name="azuremanaged" ng-change="managedDiskChanged()" id="azuremanaged" ng-model="azureTemp.parameters.managedDisk">
         </div>
         <!-- .col-sm-9 -->
     </div>
