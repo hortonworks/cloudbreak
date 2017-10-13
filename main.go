@@ -207,11 +207,23 @@ func main() {
 			},
 		},
 		{
+			Name:   "describe-credential",
+			Usage:  "describes a credential",
+			Before: ConfigRead,
+			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: hdc.DescribeCredential,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-credentials",
 			Usage:  "lists the credentials",
 			Before: ConfigRead,
 			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: hdc.ListPrivateCredentials,
+			Action: hdc.ListCredentials,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
@@ -226,18 +238,6 @@ func main() {
 			Action: hdc.DeleteCredential,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build() {
-					printFlagCompletion(f)
-				}
-			},
-		},
-		{
-			Name:   "list-blueprints",
-			Usage:  "list the available blueprints",
-			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-			Before: ConfigRead,
-			Action: hdc.ListBlueprints,
-			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -272,6 +272,30 @@ func main() {
 						}
 					},
 				},
+			},
+		},
+		{
+			Name:   "describe-blueprint",
+			Usage:  "describes a blueprint",
+			Before: ConfigRead,
+			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: hdc.DescribeBlueprint,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "list-blueprints",
+			Usage:  "lists the available blueprints",
+			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+			Before: ConfigRead,
+			Action: hdc.ListBlueprints,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
 			},
 		},
 		{
@@ -474,13 +498,37 @@ func main() {
 			},
 		},
 		{
+			Name:   "describe-cluster",
+			Usage:  "describes a cluster",
+			Before: ConfigRead,
+			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: hdc.DescribeStack,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "list-clusters",
+			Usage:  "lists the running clusters",
+			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+			Before: ConfigRead,
+			Action: hdc.ListStacks,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "delete-cluster",
 			Usage:  "deletes a cluster",
 			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName, hdc.FlForce).AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
 			Action: hdc.DeleteStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build() {
+				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName, hdc.FlForce).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},

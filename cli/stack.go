@@ -14,15 +14,27 @@ import (
 	"github.com/urfave/cli"
 )
 
-func CreateStack(c *cli.Context) error {
+var stackHeader []string = []string{"Name", "Description", "CloudPlatform", "StackStatus", "ClusterStatus"}
+
+type stackOut struct {
+	cloudResourceOut
+	StackStatus   string `json:"StackStatus" yaml:"StackStatus"`
+	ClusterStatus string `json:"ClusterStatus" yaml:"ClusterStatus"`
+}
+
+func (s *stackOut) DataAsStringArray() []string {
+	arr := s.cloudResourceOut.DataAsStringArray()
+	arr = append(arr, s.StackStatus)
+	arr = append(arr, s.ClusterStatus)
+	return arr
+}
+
+func CreateStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "create cluster")
 
 	req := assembleStackRequest(c)
-
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	createStackImpl(oAuth2Client.Cloudbreak.Stacks, req, c.Bool(FlPublic.Name))
-
-	return nil
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	createStackImpl(cbClient.Cloudbreak.Stacks, req, c.Bool(FlPublic.Name))
 }
 
 type createStackClient interface {
@@ -32,21 +44,22 @@ type createStackClient interface {
 
 func createStackImpl(client createStackClient, req *models_cloudbreak.StackRequest, public bool) *models_cloudbreak.StackResponse {
 	var stack *models_cloudbreak.StackResponse
-	log.Infof("[createStackImpl] sending stack create request with name: %s", *req.Name)
 	if public {
+		log.Infof("[createStackImpl] sending create public stack request")
 		resp, err := client.PostPublicStack(stacks.NewPostPublicStackParams().WithBody(req))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		stack = resp.Payload
 	} else {
+		log.Infof("[createStackImpl] sending create private stack request")
 		resp, err := client.PostPrivateStack(stacks.NewPostPrivateStackParams().WithBody(req))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		stack = resp.Payload
 	}
-
+	log.Infof("[createStackImpl] stack created: %s (id: %d)", *stack.Name, stack.ID)
 	return stack
 }
 
@@ -80,15 +93,65 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackRequest {
 	return &req
 }
 
-func DeleteStack(c *cli.Context) error {
-	defer utils.TimeTrack(time.Now(), "delete cluster")
+func convertResponseToStack(s *models_cloudbreak.StackResponse) *stackOut {
+	return &stackOut{
+		cloudResourceOut{*s.Name, s.Cluster.Description, s.CloudPlatform},
+		s.Status,
+		s.Cluster.Status,
+	}
+}
+
+func DescribeStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "describe stack")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := utils.Output{Format: c.String(FlOutput.Name)}
+	resp, err := cbClient.Cloudbreak.Stacks.GetPublicStack(stacks.NewGetPublicStackParams().WithName(c.String(FlName.Name)))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	output.Write(stackHeader, convertResponseToStack(resp.Payload))
+}
+
+func DeleteStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "delete stack")
 
 	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-
 	name := c.String(FlName.Name)
 	stack := cbClient.getStackByName(name)
 	asClient.deleteCluster(name, stack.ID)
+	log.Infof("[DeleteStack] autoscaling cluster deleted, name: %s", name)
 	cbClient.deleteStack(name, c.Bool(FlForce.Name), *stack.Public)
+	log.Infof("[DeleteStack] stack deleted, name: %s", name)
+}
 
-	return nil
+func ListStacks(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "list stacks")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := utils.Output{Format: c.String(FlOutput.Name)}
+	listStacksImpl(cbClient.Cloudbreak.Stacks, output.WriteList)
+}
+
+type getPublicsStackClient interface {
+	GetPublicsStack(*stacks.GetPublicsStackParams) (*stacks.GetPublicsStackOK, error)
+}
+
+func listStacksImpl(client getPublicsStackClient, writer func([]string, []utils.Row)) {
+	log.Infof("[listStacksImpl] sending stack list request")
+	stackResp, err := client.GetPublicsStack(stacks.NewGetPublicsStackParams())
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	var tableRows []utils.Row
+	for _, stack := range stackResp.Payload {
+		tableRows = append(tableRows, convertResponseToStack(stack))
+	}
+
+	writer(stackHeader, tableRows)
 }

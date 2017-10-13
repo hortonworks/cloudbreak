@@ -24,13 +24,13 @@ type mockCredentialCreate struct {
 func (m *mockCredentialCreate) PostPublicCredential(params *credentials.PostPublicCredentialParams) (*credentials.PostPublicCredentialOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Public: &(&types.B{B: true}).B}}, nil
+	return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: true}).B}}, nil
 }
 
 func (m *mockCredentialCreate) PostPrivateCredential(params *credentials.PostPrivateCredentialParams) (*credentials.PostPrivateCredentialOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(2), Public: &(&types.B{B: false}).B}}, nil
+	return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(2), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: false}).B}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
@@ -78,33 +78,33 @@ func TestCreateCredentialPrivate(t *testing.T) {
 	<-mock.request
 }
 
-type mockGetPrivatesCredential struct {
+type mockGetPublicsCredential struct {
 }
 
-func (m *mockGetPrivatesCredential) GetPrivatesCredential(params *credentials.GetPrivatesCredentialParams) (*credentials.GetPrivatesCredentialOK, error) {
+func (m *mockGetPublicsCredential) GetPublicsCredential(params *credentials.GetPublicsCredentialParams) (*credentials.GetPublicsCredentialOK, error) {
 	resp := make([]*models_cloudbreak.CredentialResponse, 0)
 	for i := 0; i < 3; i++ {
-		id := int64(i)
 		resp = append(resp, &models_cloudbreak.CredentialResponse{
-			ID:   id,
-			Name: &(&types.S{S: "name" + strconv.Itoa(i)}).S,
+			Name:          &(&types.S{S: "name" + strconv.Itoa(i)}).S,
+			Description:   &(&types.S{S: "desc" + strconv.Itoa(i)}).S,
+			CloudPlatform: &(&types.S{S: "AWS"}).S,
 		})
 	}
 
-	return &credentials.GetPrivatesCredentialOK{Payload: resp}, nil
+	return &credentials.GetPublicsCredentialOK{Payload: resp}, nil
 }
 
-func TestListPrivateCredentialsImpl(t *testing.T) {
+func TestListCredentialsImpl(t *testing.T) {
 	var rows []utils.Row
 
-	listPrivateCredentialsImpl(new(mockGetPrivatesCredential), func(h []string, r []utils.Row) { rows = r })
+	listCredentialsImpl(new(mockGetPublicsCredential), func(h []string, r []utils.Row) { rows = r })
 
 	if len(rows) != 3 {
 		t.Fatalf("row number not match 3 == %d", len(rows))
 	}
 
 	for i, r := range rows {
-		expected := []string{strconv.Itoa(i), "name" + strconv.Itoa(i)}
+		expected := []string{"name" + strconv.Itoa(i), "desc" + strconv.Itoa(i), "AWS"}
 		if strings.Join(r.DataAsStringArray(), "") != strings.Join(expected, "") {
 			t.Errorf("row data not match %s == %s", expected, r.DataAsStringArray())
 		}

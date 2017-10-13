@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"strconv"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -13,44 +12,32 @@ import (
 	"github.com/urfave/cli"
 )
 
-var credentialHeader []string = []string{"ID", "Name"}
-
-type Credential struct {
-	ID   int64  `json:"Id" yaml:"Id"`
-	Name string `json:"Name" yaml:"Name"`
-}
-
-func (c *Credential) DataAsStringArray() []string {
-	return []string{strconv.FormatInt(c.ID, 10), c.Name}
-}
-
-func CreateAwsCredential(c *cli.Context) error {
+func CreateAwsCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AWS)
-	return createCredential(c)
+	createCredential(c)
 }
 
-func CreateAzureCredential(c *cli.Context) error {
+func CreateAzureCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.AZURE)
-	return createCredential(c)
+	createCredential(c)
 }
 
-func CreateGcpCredential(c *cli.Context) error {
+func CreateGcpCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.GCP)
-	return createCredential(c)
+	createCredential(c)
 }
 
-func CreateOpenstackCredential(c *cli.Context) error {
+func CreateOpenstackCredential(c *cli.Context) {
 	cloud.SetProviderType(cloud.OPENSTACK)
-	return createCredential(c)
+	createCredential(c)
 }
 
-func createCredential(c *cli.Context) error {
+func createCredential(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "create credential")
 
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	createCredentialImpl(c.String, c.Bool, oAuth2Client.Cloudbreak.Credentials)
-	return nil
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	createCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.Credentials)
 }
 
 type createCredentialClient interface {
@@ -73,65 +60,79 @@ func createCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 		Parameters:    credentialMap,
 	}
 
-	log.Infof("[createCredentialImpl] sending credential create request with name: %s", name)
 	var credential *models_cloudbreak.CredentialResponse
 	public := boolFinder(FlPublic.Name)
 	if public {
+		log.Infof("[createCredentialImpl] sending create public credential request")
 		resp, err := client.PostPublicCredential(credentials.NewPostPublicCredentialParams().WithBody(credReq))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		credential = resp.Payload
 	} else {
+		log.Infof("[createCredentialImpl] sending create private credential request")
 		resp, err := client.PostPrivateCredential(credentials.NewPostPrivateCredentialParams().WithBody(credReq))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		credential = resp.Payload
 	}
-
-	log.Infof("[createCredentialImpl] credential created, id: %d", credential.ID)
+	log.Infof("[createCredentialImpl] credential created: %s (id: %d)", *credential.Name, credential.ID)
 	return credential
 }
 
-func ListPrivateCredentials(c *cli.Context) error {
+func DescribeCredential(c *cli.Context) {
 	checkRequiredFlags(c)
-	defer utils.TimeTrack(time.Now(), "list the private credentials")
+	defer utils.TimeTrack(time.Now(), "describe credential")
 
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	listPrivateCredentialsImpl(oAuth2Client.Cloudbreak.Credentials, output.WriteList)
-	return nil
+	resp, err := cbClient.Cloudbreak.Credentials.GetPublicCredential(credentials.NewGetPublicCredentialParams().WithName(c.String(FlName.Name)))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	cred := resp.Payload
+	output.Write(cloudResourceHeader, &cloudResourceOut{*cred.Name, *cred.Description, *cred.CloudPlatform})
 }
 
-type getPrivatesCredentialClient interface {
-	GetPrivatesCredential(*credentials.GetPrivatesCredentialParams) (*credentials.GetPrivatesCredentialOK, error)
+func DeleteCredential(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "delete credential")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	name := c.String(FlName.Name)
+	log.Infof("[DeleteCredential] sending delete credential request with name: %s", name)
+	if err := cbClient.Cloudbreak.Credentials.DeletePublicCredential(credentials.NewDeletePublicCredentialParams().WithName(name)); err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[DeleteCredential] credential deleted, name: %s", name)
 }
 
-func listPrivateCredentialsImpl(client getPrivatesCredentialClient, writer func([]string, []utils.Row)) {
-	credResp, err := client.GetPrivatesCredential(credentials.NewGetPrivatesCredentialParams())
+func ListCredentials(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "list credentials")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	output := utils.Output{Format: c.String(FlOutput.Name)}
+	listCredentialsImpl(cbClient.Cloudbreak.Credentials, output.WriteList)
+}
+
+type getPublicsCredentialClient interface {
+	GetPublicsCredential(*credentials.GetPublicsCredentialParams) (*credentials.GetPublicsCredentialOK, error)
+}
+
+func listCredentialsImpl(client getPublicsCredentialClient, writer func([]string, []utils.Row)) {
+	log.Infof("[listCredentialsImpl] sending credential list request")
+	credResp, err := client.GetPublicsCredential(credentials.NewGetPublicsCredentialParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
 	var tableRows []utils.Row
 	for _, cred := range credResp.Payload {
-		row := &Credential{ID: cred.ID, Name: *cred.Name}
-		tableRows = append(tableRows, row)
+		tableRows = append(tableRows, &cloudResourceOut{*cred.Name, *cred.Description, *cred.CloudPlatform})
 	}
 
-	writer(credentialHeader, tableRows)
-}
-
-func DeleteCredential(c *cli.Context) error {
-	checkRequiredFlags(c)
-	defer utils.TimeTrack(time.Now(), "delete credential")
-
-	oAuth2Client := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	name := c.String(FlName.Name)
-	log.Infof("[DeleteCredential] delete credential: %s", name)
-	if err := oAuth2Client.Cloudbreak.Credentials.DeletePublicCredential(credentials.NewDeletePublicCredentialParams().WithName(name)); err != nil {
-		utils.LogErrorAndExit(err)
-	}
-	return nil
+	writer(cloudResourceHeader, tableRows)
 }
