@@ -26,7 +26,7 @@ public class OpenStackGroupView {
         List<NovaInstanceView> novaInstances = new ArrayList<>();
         for (Group group : groups) {
             for (CloudInstance instance : group.getInstances()) {
-                NovaInstanceView novaInstance = new NovaInstanceView(stackName, instance.getTemplate(), group.getType(), tags);
+                NovaInstanceView novaInstance = new NovaInstanceView(stackName, instance.getTemplate(), group.getType(), tags, group.getLoginUserName());
                 novaInstances.add(novaInstance);
             }
         }

@@ -104,6 +104,7 @@ ${core_user_data}
     properties:
       image: { get_param: image_id }
       name: ${agent.name}
+      admin_user: ${agent.loginUserName}
       flavor: ${agent.flavor}
       <#if availability_zone?has_content>
       availability_zone : ${availability_zone}
