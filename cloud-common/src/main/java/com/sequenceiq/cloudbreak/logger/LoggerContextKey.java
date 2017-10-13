@@ -6,7 +6,8 @@ public enum LoggerContextKey {
     RESOURCE_TYPE("resourceType"),
     RESOURCE_ID("resourceId"),
     RESOURCE_NAME("resourceName"),
-    FLOW_ID("flowId");
+    FLOW_ID("flowId"),
+    TRACKING_ID("trackingId");
 
     private final String value;
 

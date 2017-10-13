@@ -33,6 +33,10 @@ public class LogContextAspects {
     public void interceptFlow2HandlerAcceptMethod() {
     }
 
+    @Pointcut("execution(public * com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainHandler.accept(..))")
+    public void interceptFlowChainHandlerAcceptMethod() {
+    }
+
     @Pointcut("execution(public * com.sequenceiq.cloudbreak.service.events.CloudbreakEventHandler.accept(..))")
     public void interceptCloudbreakEventHandlerAcceptMethod() {
     }
@@ -52,12 +56,15 @@ public class LogContextAspects {
 
     @Before("com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptReactorHandlersAcceptMethod() ||"
             + "com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptFlow2HandlerAcceptMethod() ||"
-            + "com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptCloudbreakEventHandlerAcceptMethod()")
+            + "com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptCloudbreakEventHandlerAcceptMethod() ||"
+            + "com.sequenceiq.cloudbreak.logger.LogContextAspects.interceptFlowChainHandlerAcceptMethod()")
     public void buildLogContextForReactorHandler(JoinPoint joinPoint) {
         Event<?> event = (Event<?>) joinPoint.getArgs()[0];
         Map<String, String> mdcContextMap = event.getHeaders().get(MDCBuilder.MDC_CONTEXT_ID);
         if (mdcContextMap != null) {
             MDCBuilder.buildMdcContextFromMap(mdcContextMap);
+            String trackingId = mdcContextMap.get(LoggerContextKey.TRACKING_ID.toString());
+            MDCBuilder.addTrackingIdToMdcContext(trackingId);
         }
         LOGGER.info("A Reactor event handler's 'accept' method has been intercepted: {}, MDC logger context is built.", joinPoint.toShortString());
     }
@@ -75,6 +82,8 @@ public class LogContextAspects {
         if (cloudContext != null) {
             String flowId = eventMdcContext != null ? eventMdcContext.get(LoggerContextKey.FLOW_ID.toString()) : null;
             MDCBuilder.addFlowIdToMdcContext(flowId);
+            String trackingId = eventMdcContext != null ? eventMdcContext.get(LoggerContextKey.TRACKING_ID.toString()) : null;
+            MDCBuilder.addTrackingIdToMdcContext(trackingId);
             MDCBuilder.buildMdcContext(stringValue(cloudContext.getId()), stringValue(cloudContext.getName()), stringValue(cloudContext.getOwner()), "STACK");
         } else {
             MDCBuilder.buildMdcContextFromMap(eventMdcContext);
