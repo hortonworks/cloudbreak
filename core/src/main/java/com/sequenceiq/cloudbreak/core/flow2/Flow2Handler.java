@@ -8,8 +8,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.annotation.Resource;
 import javax.inject.Inject;
@@ -67,20 +65,20 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private static final Logger LOGGER = LoggerFactory.getLogger(Flow2Handler.class);
 
     private static final List<String> ALLOWED_PARALLEL_FLOWS = Arrays.asList(
-            FORCE_TERMINATION_EVENT.event(), StackTerminationEvent.TERMINATION_EVENT.event()
+        FORCE_TERMINATION_EVENT.event(), StackTerminationEvent.TERMINATION_EVENT.event()
     );
 
     private static final List<Class<? extends FlowConfiguration>> RESTARTABLE_FLOWS = Arrays.asList(
-            StackCreationFlowConfig.class,
-            StackSyncFlowConfig.class, StackTerminationFlowConfig.class, StackStopFlowConfig.class, StackStartFlowConfig.class,
-            StackUpscaleConfig.class, StackDownscaleConfig.class,
-            InstanceTerminationFlowConfig.class,
-            ManualStackRepairTriggerFlowConfig.class,
-            ClusterCreationFlowConfig.class,
-            ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
-            ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
-            ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
-            ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class
+        StackCreationFlowConfig.class,
+        StackSyncFlowConfig.class, StackTerminationFlowConfig.class, StackStopFlowConfig.class, StackStartFlowConfig.class,
+        StackUpscaleConfig.class, StackDownscaleConfig.class,
+        InstanceTerminationFlowConfig.class,
+        ManualStackRepairTriggerFlowConfig.class,
+        ClusterCreationFlowConfig.class,
+        ClusterSyncFlowConfig.class, ClusterTerminationFlowConfig.class, ClusterCredentialChangeFlowConfig.class,
+        ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
+        ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
+        ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class
     );
 
     @Inject
@@ -104,8 +102,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     @Inject
     private FlowLogRepository flowLogRepository;
 
-    private final Lock lock = new ReentrantLock(true);
-
     @Override
     public void accept(Event<? extends Payload> event) {
         String key = (String) event.getKey();
@@ -122,22 +118,16 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 LOGGER.debug("flow trigger arrived: key: {}, payload: {}", key, payload);
                 FlowConfiguration<?> flowConfig = flowConfigurationMap.get(key);
                 if (flowConfig != null && flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getStackId())) {
-                    Flow flow;
-                    lock.lock();
-                    try {
-                        if (!isFlowAcceptable(key, payload)) {
-                            LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
-                            return;
-                        }
-                        flowId = UUID.randomUUID().toString();
-                        flow = flowConfig.createFlow(flowId, payload.getStackId());
-                        flow.initialize();
-                        flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
-                        acceptFlow(payload);
-                        pruneMDCContext(flowId);
-                    } finally {
-                        lock.unlock();
+                    if (!isFlowAcceptable(key, payload)) {
+                        LOGGER.info("Flow operation not allowed, other flow is running. Stack ID {}, event {}", payload.getStackId(), key);
+                        return;
                     }
+                    flowId = UUID.randomUUID().toString();
+                    Flow flow = flowConfig.createFlow(flowId, payload.getStackId());
+                    flow.initialize();
+                    flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
+                    acceptFlow(payload);
+                    pruneMDCContext(flowId);
                     runningFlows.put(flow, flowChainId);
                     flow.sendEvent(key, payload);
                 }
@@ -212,7 +202,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         FlowLog flowLog = flowLogRepository.findFirstByFlowIdOrderByCreatedDesc(flowId);
         if (RESTARTABLE_FLOWS.contains(flowLog.getFlowType())) {
             Optional<FlowConfiguration<?>> flowConfig = flowConfigs.stream()
-                    .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
+                .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
             Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
             Flow flow = flowConfig.get().createFlow(flowId, payload.getStackId());
             runningFlows.put(flow, flowLog.getFlowChainId());
