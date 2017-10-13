@@ -12,10 +12,12 @@ import org.openstack4j.model.compute.Action;
 import org.openstack4j.model.compute.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
@@ -33,8 +35,14 @@ public class OpenStackInstanceConnector implements InstanceConnector {
     @Inject
     private OpenStackClient openStackClient;
 
+    @Value("${cb.openstack.hostkey.verify:}")
+    private boolean verifyHostKey;
+
     @Override
     public String getConsoleOutput(AuthenticatedContext authenticatedContext, CloudInstance vm) {
+        if (!verifyHostKey) {
+            throw new CloudOperationNotSupportedException("Host key verification is disabled on OPENSTACK");
+        }
         OSClient osClient = openStackClient.createOSClient(authenticatedContext);
         return osClient.compute().servers().getConsoleOutput(vm.getInstanceId(), CONSOLE_OUTPUT_LINES);
     }

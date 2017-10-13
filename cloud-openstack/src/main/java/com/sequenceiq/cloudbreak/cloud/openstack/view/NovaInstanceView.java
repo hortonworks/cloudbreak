@@ -23,18 +23,22 @@ public class NovaInstanceView {
 
     private final Map<String, String> tags;
 
-    public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type) {
+    private final String loginUserName;
+
+    public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type, String loginUserName) {
         this.stackName = stackName;
         this.instance = instance;
         this.type = type;
+        this.loginUserName = loginUserName;
         tags = Collections.emptyMap();
     }
 
-    public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type, Map<String, String> tags) {
+    public NovaInstanceView(String stackName, InstanceTemplate instance, InstanceGroupType type, Map<String, String> tags, String loginUserName) {
         this.stackName = stackName;
         this.instance = instance;
         this.type = type;
         this.tags = tags;
+        this.loginUserName = loginUserName;
     }
 
     public String getFlavor() {
@@ -100,4 +104,7 @@ public class NovaInstanceView {
         return metadata;
     }
 
+    public String getLoginUserName() {
+        return loginUserName;
+    }
 }

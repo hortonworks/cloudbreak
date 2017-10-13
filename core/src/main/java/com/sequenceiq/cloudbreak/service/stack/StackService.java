@@ -318,11 +318,7 @@ public class StackService {
             if (stack.getOrchestrator() != null) {
                 orchestratorRepository.save(stack.getOrchestrator());
             }
-            if (stack.getCredential().getAttributes().getMap().get("keystoneVersion") != null) {
-                stack.getStackAuthentication().setLoginUserName(SSH_USER_CENT);
-            } else {
-                stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
-            }
+            stack.getStackAuthentication().setLoginUserName(SSH_USER_CB);
             String template = connector.getTemplate(stack);
             savedStack = stackRepository.save(stack);
             addTemplateForStack(stack, template);

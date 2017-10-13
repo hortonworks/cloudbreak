@@ -11,7 +11,6 @@ export PLATFORM_DISK_PREFIX=${platformDiskPrefix}
 export LAZY_FORMAT_DISK_LIMIT=12
 export IS_GATEWAY=${gateway?c}
 export TMP_SSH_KEY="${tmpSshKey}"
-export PUBLIC_SSH_KEY="${publicSshKey}"
 export SSH_USER=${sshUser}
 export SALT_BOOT_PASSWORD=${saltBootPassword}
 export SALT_BOOT_SIGN_KEY=${signaturePublicKey}

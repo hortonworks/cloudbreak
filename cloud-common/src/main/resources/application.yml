@@ -93,6 +93,7 @@ cb:
   openstack:
     heat.template.path: templates/openstack-heat.ftl
     api.debug: false
+    hostkey.verify: false
 
   max:
     azure.resource.name.length: 120
