@@ -9,12 +9,13 @@ import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.domain.json.EncryptedJsonToString;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 
 @Entity
-@Table(name = "UserProfile")
+@Table(name = "UserProfile", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "owner"}))
 public class UserProfile {
 
     @Id
