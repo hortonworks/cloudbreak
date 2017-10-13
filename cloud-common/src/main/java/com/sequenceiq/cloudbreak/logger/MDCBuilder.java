@@ -25,6 +25,10 @@ public class MDCBuilder {
         MDC.put(LoggerContextKey.FLOW_ID.toString(), flowId);
     }
 
+    public static void addTrackingIdToMdcContext(String trackingId) {
+        MDC.put(LoggerContextKey.TRACKING_ID.toString(), trackingId);
+    }
+
     public static void buildMdcContext(Object object) {
         if (object == null) {
             MDC.put(LoggerContextKey.OWNER_ID.toString(), "cloudbreak");

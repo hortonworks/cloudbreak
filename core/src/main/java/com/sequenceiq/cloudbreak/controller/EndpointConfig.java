@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.TerminationFailedExceptionMap
 import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
-import com.sequenceiq.cloudbreak.filter.MDCCleanupFilter;
+import com.sequenceiq.cloudbreak.filter.MDCContextFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import io.swagger.jaxrs.config.BeanConfig;
@@ -55,7 +55,7 @@ public class EndpointConfig extends ResourceConfig {
     public EndpointConfig() {
         registerEndpoints();
         registerExceptionMappers();
-        register(MDCCleanupFilter.class);
+        register(MDCContextFilter.class);
     }
 
     @PostConstruct

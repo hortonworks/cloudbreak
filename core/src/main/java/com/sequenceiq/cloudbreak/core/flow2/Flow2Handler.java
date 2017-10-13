@@ -46,6 +46,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEv
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
 import com.sequenceiq.cloudbreak.domain.FlowLog;
+import com.sequenceiq.cloudbreak.logger.LoggerContextKey;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.FlowLogRepository;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogService;
 
@@ -132,6 +134,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                         flow.initialize();
                         flowLogService.save(flowId, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                         acceptFlow(payload);
+                        pruneMDCContext(flowId);
                     } finally {
                         lock.unlock();
                     }
@@ -233,5 +236,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     private String getFlowChainId(Event<?> event) {
         return event.getHeaders().get(FLOW_CHAIN_ID);
+    }
+
+    private void pruneMDCContext(String flowId) {
+        String trackingId = MDCBuilder.getMdcContextMap().get(LoggerContextKey.TRACKING_ID.toString());
+        LOGGER.info("Flow has been created with id: '{}' and the related tracking id: '{}'.", flowId, trackingId);
+        MDCBuilder.addTrackingIdToMdcContext("");
     }
 }
