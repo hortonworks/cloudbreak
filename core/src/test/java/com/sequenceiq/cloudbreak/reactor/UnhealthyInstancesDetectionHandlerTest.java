@@ -60,7 +60,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
         Stack stack = mock(Stack.class);
-        when(stackService.getById(stackId)).thenReturn(stack);
+        when(stackService.getByIdWithLists(stackId)).thenReturn(stack);
 
         when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack)).thenReturn(Collections.emptySet());
 

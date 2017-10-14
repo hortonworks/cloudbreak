@@ -102,7 +102,7 @@ public class AmbariClusterHostServiceTypeTest {
         cluster = TestUtil.cluster(TestUtil.blueprint(), stack, 1L);
         stack.setCluster(cluster);
         when(stackService.get(anyLong())).thenReturn(stack);
-        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(stackService.findLazy(anyLong())).thenReturn(stack);
         when(clusterRepository.save(any(Cluster.class))).thenReturn(cluster);
         given(tlsSecurityService.buildTLSClientConfigForPrimaryGateway(anyLong(), anyString())).willReturn(new HttpClientConfig("", "", "/tmp", "/tmp"));
@@ -118,7 +118,7 @@ public class AmbariClusterHostServiceTypeTest {
         stack.setCluster(cluster);
 
         when(stackService.get(anyLong())).thenReturn(stack);
-        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot stop a cluster '1'. Reason: Instances with ephemeral volumes cannot be stopped.");
@@ -136,7 +136,7 @@ public class AmbariClusterHostServiceTypeTest {
         stack.setCluster(cluster);
 
         when(stackService.get(anyLong())).thenReturn(stack);
-        when(stackService.getById(anyLong())).thenReturn(stack);
+        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
 
         thrown.expect(BadRequestException.class);
         thrown.expectMessage("Cannot stop a cluster '1'. Reason: Spot instances cannot be stopped.");

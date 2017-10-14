@@ -233,8 +233,16 @@ public class StackService {
         return stackRepository.findEphemeralClusters(stackId);
     }
 
-    public Stack getById(Long id) {
+    public Stack getByIdWithLists(Long id) {
         Stack retStack = stackRepository.findOneWithLists(id);
+        if (retStack == null) {
+            throw new NotFoundException(String.format("Stack '%s' not found", id));
+        }
+        return retStack;
+    }
+
+    public Stack getById(Long id) {
+        Stack retStack = stackRepository.findOne(id);
         if (retStack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
@@ -392,7 +400,7 @@ public class StackService {
 
     @Transactional(TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
-        Stack stack = getById(stackId);
+        Stack stack = getByIdWithLists(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
             cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());

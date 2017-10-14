@@ -143,7 +143,7 @@ public class StackCreationService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.METADATA_COLLECTION, "Metadata collection");
         updateNodeCount(stack.getId(), context.getCloudStack().getGroups(), results, true);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_TIME, UPDATE_IN_PROGRESS.name(), calculateStackCreationTime(startDate));
-        return stackService.getById(stack.getId());
+        return stackService.getByIdWithLists(stack.getId());
     }
 
     private Date getStartDateIfExist(Map<Object, Object> variables) {
@@ -181,7 +181,7 @@ public class StackCreationService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.TLS_SETUP, "TLS setup");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.FLOW_STACK_METADATA_COLLECTED, UPDATE_IN_PROGRESS.name());
         LOGGER.debug("Metadata setup DONE.");
-        return stackService.getById(stack.getId());
+        return stackService.getByIdWithLists(stack.getId());
     }
 
     public Stack saveTlsInfo(StackContext context, TlsInfo tlsInfo) {
@@ -191,7 +191,7 @@ public class StackCreationService {
             SecurityConfig securityConfig = stack.getSecurityConfig();
             securityConfig.setUsePrivateIpToTls(usePrivateIpToTls);
             stackUpdater.updateStackSecurityConfig(stack, securityConfig);
-            stack = stackService.getById(stack.getId());
+            stack = stackService.getByIdWithLists(stack.getId());
             LOGGER.info("Update Stack and it's SecurityConfig to use private ip when TLS is built.");
         }
         return stack;

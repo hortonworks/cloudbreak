@@ -39,7 +39,7 @@ public class CollectDownscaleCandidatesHandler implements ReactorEventHandler<Co
         CollectDownscaleCandidatesRequest request = event.getData();
         CollectDownscaleCandidatesResult result;
         try {
-            Stack stack = stackService.getById(request.getStackId());
+            Stack stack = stackService.getByIdWithLists(request.getStackId());
             Set<String> hostNames;
             if (request.getHostNames() == null) {
                 hostNames = ambariDecommissioner.collectDownscaleCandidates(stack, request.getHostGroupName(), request.getScalingAdjustment());

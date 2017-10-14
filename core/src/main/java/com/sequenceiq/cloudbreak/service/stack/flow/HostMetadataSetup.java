@@ -45,7 +45,7 @@ public class HostMetadataSetup {
 
     public void setupHostMetadata(Long stackId) throws CloudbreakException {
         LOGGER.info("Setting up host metadata for the cluster.");
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> allInstanceMetaData = stack.getRunningInstanceMetaData();
             updateWithHostData(stack, stack.getRunningInstanceMetaData());
@@ -55,7 +55,7 @@ public class HostMetadataSetup {
 
     public void setupNewHostMetadata(Long stackId, Set<String> newAddresses) throws CloudbreakException {
         LOGGER.info("Extending host metadata.");
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
             Set<InstanceMetaData> newInstanceMetadata = stack.getRunningInstanceMetaData().stream()
                     .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))

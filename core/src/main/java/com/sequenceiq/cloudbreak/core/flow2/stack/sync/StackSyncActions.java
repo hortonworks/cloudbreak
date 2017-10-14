@@ -135,7 +135,7 @@ public class StackSyncActions {
         protected StackSyncContext createFlowContext(String flowId, StateContext<StackSyncState, StackSyncEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Long stackId = payload.getStackId();
-            Stack stack = stackService.getById(stackId);
+            Stack stack = stackService.getByIdWithLists(stackId);
             MDCBuilder.buildMdcContext(stack);
             // we need a find all in stack where we have host metadata associated
             // if there are multiple instances with the same hostname let's use the latest one only
