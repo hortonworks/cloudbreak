@@ -16,12 +16,6 @@ import com.sequenceiq.cloudbreak.domain.Stack;
 @EntityType(entityClass = Stack.class)
 public interface StackRepository extends CrudRepository<Stack, Long> {
 
-    @Override
-    Stack findOne(@Param("id") Long id);
-
-    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
-    Stack findById(@Param("id") Long id);
-
     @Query("SELECT s from Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE s.cluster.ambariIp= :ambariIp AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Stack findByAmbari(@Param("ambariIp") String ambariIp);
