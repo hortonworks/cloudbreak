@@ -11,6 +11,7 @@ import javax.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceCo
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -46,11 +48,13 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.StackWithFingerprintsEvent;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration
 public class StackCreationActions {
@@ -69,6 +73,9 @@ public class StackCreationActions {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
+
+    @Inject
+    private StackService stackService;
 
     @Bean(name = "VALIDATION_STATE")
     public Action provisioningValidationAction() {
@@ -152,7 +159,7 @@ public class StackCreationActions {
             protected Selectable createRequest(StackContext context) {
                 FailurePolicy policy = Optional.ofNullable(context.getStack().getFailurePolicy()).orElse(new FailurePolicy());
                 return new LaunchStackRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
-                        policy.getAdjustmentType(), policy.getThreshold());
+                    policy.getAdjustmentType(), policy.getThreshold());
             }
         };
     }
@@ -164,7 +171,7 @@ public class StackCreationActions {
             protected void doExecute(StackContext context, LaunchStackResult payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = stackCreationService.provisioningFinished(context, payload, variables);
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(),
-                        context.getCloudCredential(), context.getCloudStack());
+                    context.getCloudCredential(), context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -184,7 +191,7 @@ public class StackCreationActions {
             protected void doExecute(StackContext context, CollectMetadataResult payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = stackCreationService.setupMetadata(context, payload);
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
-                        context.getCloudStack());
+                    context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -203,7 +210,7 @@ public class StackCreationActions {
             protected void doExecute(StackContext context, GetTlsInfoResult payload, Map<Object, Object> variables) throws Exception {
                 Stack stack = stackCreationService.saveTlsInfo(context, payload.getTlsInfo());
                 StackContext newContext = new StackContext(context.getFlowId(), stack, context.getCloudContext(), context.getCloudCredential(),
-                        context.getCloudStack());
+                    context.getCloudStack());
                 sendEvent(newContext);
             }
 
@@ -249,6 +256,16 @@ public class StackCreationActions {
     @Bean(name = "STACK_CREATION_FAILED_STATE")
     public Action stackCreationFailureAction() {
         return new AbstractStackFailureAction<StackCreationState, StackCreationEvent>() {
+            @Override
+            protected StackFailureContext createFlowContext(
+                String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, StackFailureEvent payload) {
+                Flow flow = getFlow(flowId);
+                Stack stack = stackService.getByIdWithLists(payload.getStackId());
+                MDCBuilder.buildMdcContext(stack);
+                flow.setFlowFailed(payload.getException());
+                return new StackFailureContext(flowId, stack);
+            }
+
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.handleStackCreationFailure(context.getStack(), payload.getException());
