@@ -21,10 +21,11 @@ import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
+import com.sequenceiq.cloudbreak.domain.Stack;
 
 public interface ClusterService {
 
-    Cluster create(IdentityUser user, Long stackId, Cluster clusterRequest, List<ClusterComponent> component);
+    Cluster create(IdentityUser user, Stack stack, Cluster clusterRequest, List<ClusterComponent> component);
 
     void delete(Long stackId);
 
