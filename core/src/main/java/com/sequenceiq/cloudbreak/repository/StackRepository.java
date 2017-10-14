@@ -60,7 +60,14 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     Stack findByIdInAccount(@Param("id") Long id, @Param("account") String account);
 
     @Query("SELECT s FROM Stack s WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)")
-    Stack findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
+    Stack findByNameInAccountOrOwner(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
+
+    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+        + "WHERE c.name= :name and c.account= :account")
+    Stack findByNameInAccountWithLists(@Param("name") String name, @Param("account") String account);
+
+    @Query("SELECT c FROM Stack c WHERE c.name= :name and c.account= :account")
+    Stack findByNameInAccount(@Param("name") String name, @Param("account") String account);
 
     @Query("SELECT t FROM Stack t LEFT JOIN FETCH t.resources LEFT JOIN FETCH t.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE t.owner= :owner and t.name= :name")
@@ -68,10 +75,6 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @Query("SELECT t FROM Stack t WHERE t.owner= :owner and t.name= :name")
     Stack findByNameInUser(@Param("name") String name, @Param("owner") String owner);
-
-    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE c.name= :name and c.account= :account")
-    Stack findOneByName(@Param("name") String name, @Param("account") String account);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.securityConfig WHERE s.id= :id")
     Stack findByIdWithSecurityConfig(@Param("id") Long id);
