@@ -222,7 +222,7 @@ public class StackService {
     }
 
     public Stack findLazy(Long id) {
-        Stack stack = stackRepository.findByIdLazy(id);
+        Stack stack = stackRepository.findOne(id);
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }

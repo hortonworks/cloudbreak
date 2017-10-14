@@ -28,7 +28,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
                     cloudResource.getName(), cloudResource.getType().name(), stackId);
             return notification;
         }
-        resource.setStack(getStackRepository().findByIdLazy(stackId));
+        resource.setStack(getStackRepository().findOne(stackId));
         resourceRepository.save(resource);
         return notification;
     }
@@ -42,7 +42,7 @@ public class CloudResourcePersisterService extends AbstractCloudPersisterService
         Resource persistedResource = repository.findByStackIdAndNameAndType(stackId, cloudResource.getName(), cloudResource.getType());
         Resource resource = getConversionService().convert(cloudResource, Resource.class);
         updateWithPersistedFields(resource, persistedResource);
-        resource.setStack(getStackRepository().findByIdLazy(stackId));
+        resource.setStack(getStackRepository().findOne(stackId));
         repository.save(resource);
         return notification;
     }
