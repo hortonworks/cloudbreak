@@ -42,7 +42,7 @@ public class TlsSecurityService {
         return securityConfig;
     }
 
-    private void copyClientKeys(SecurityConfig securityConfig) throws CloudbreakSecuritySetupException {
+    private void copyClientKeys(SecurityConfig securityConfig) {
         KeyPair identity = PkiUtil.generateKeypair();
         KeyPair signKey = PkiUtil.generateKeypair();
         X509Certificate cert = PkiUtil.cert(identity, "cloudbreak", signKey);
@@ -72,15 +72,15 @@ public class TlsSecurityService {
 
     public GatewayConfig buildGatewayConfig(Long stackId, InstanceMetaData gatewayInstance, Integer gatewayPort,
             SaltClientConfig saltClientConfig, Boolean knoxGatewayEnabled) throws CloudbreakSecuritySetupException {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         SecurityConfig securityConfig = stack.getSecurityConfig();
         String connectionIp = getGatewayIp(stack, gatewayInstance);
         HttpClientConfig conf = buildTLSClientConfig(stackId, connectionIp, gatewayInstance);
         return new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
-                saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
-                knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-                securityConfig.getSaltSignPrivateKeyDecoded(), securityConfig.getSaltSignPublicKeyDecoded());
+            gatewayPort, conf.getServerCert(), conf.getClientCert(), conf.getClientKey(),
+            saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(), saltClientConfig.getSignatureKeyPem(),
+            knoxGatewayEnabled, InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
+            securityConfig.getSaltSignPrivateKeyDecoded(), securityConfig.getSaltSignPublicKeyDecoded());
     }
 
     public String getGatewayIp(Stack stack, InstanceMetaData gatewayInstance) {
@@ -92,22 +92,23 @@ public class TlsSecurityService {
     }
 
     public HttpClientConfig buildTLSClientConfigForPrimaryGateway(Long stackId, String apiAddress) throws CloudbreakSecuritySetupException {
-        return buildTLSClientConfig(stackId, apiAddress, stackRepository.findOneWithLists(stackId).getPrimaryGatewayInstance());
+        InstanceMetaData primaryGateway = instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stackId);
+        return buildTLSClientConfig(stackId, apiAddress, primaryGateway);
     }
 
     public HttpClientConfig buildTLSClientConfig(Long stackId, String apiAddress, InstanceMetaData gateway) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         if (!BYOS.equals(stack.cloudPlatform())) {
             SecurityConfig securityConfig = stack.getSecurityConfig();
             return new HttpClientConfig(apiAddress,
-                    gateway.getServerCert(), securityConfig.getClientCertDecoded(), securityConfig.getClientKeyDecoded());
+                gateway.getServerCert(), securityConfig.getClientCertDecoded(), securityConfig.getClientKeyDecoded());
         } else {
             return new HttpClientConfig(apiAddress);
         }
     }
 
     public CertificateResponse getCertificates(Long stackId) {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         if (stack == null) {
             throw new NotFoundException("Stack doesn't exist.");
         }
@@ -117,7 +118,7 @@ public class TlsSecurityService {
         }
         SecurityConfig securityConfig = stack.getSecurityConfig();
         return new CertificateResponse(decodeBase64(serverCert),
-                securityConfig.getClientKeyDecoded().getBytes(), securityConfig.getClientCertDecoded().getBytes());
+            securityConfig.getClientKeyDecoded().getBytes(), securityConfig.getClientCertDecoded().getBytes());
     }
 
 }

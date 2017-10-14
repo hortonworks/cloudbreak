@@ -76,9 +76,6 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     @Query("SELECT t FROM Stack t WHERE t.owner= :owner and t.name= :name")
     Stack findByNameInUser(@Param("name") String name, @Param("owner") String owner);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.securityConfig WHERE s.id= :id")
-    Stack findByIdWithSecurityConfig(@Param("id") Long id);
-
     @Query("SELECT s FROM Stack s WHERE s.stackStatus.status <> 'DELETE_COMPLETED'")
     List<Stack> findAllAlive();
 
