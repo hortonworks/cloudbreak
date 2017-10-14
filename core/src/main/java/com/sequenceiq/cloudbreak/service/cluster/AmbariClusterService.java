@@ -180,8 +180,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     @Transactional(TxType.NEVER)
-    public Cluster create(IdentityUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
-        Stack stack = stackService.getByIdWithLists(stackId);
+    public Cluster create(IdentityUser user, Stack stack, Cluster cluster, List<ClusterComponent> components) {
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
@@ -193,9 +192,9 @@ public class AmbariClusterService implements ClusterService {
         if (Status.CREATE_FAILED.equals(stack.getStatus())) {
             throw new BadRequestException("Stack creation failed, cannot create cluster.");
         }
-        if (isMultipleGateway(stack) && isEmbeddedAmbariDB(components)) {
-            throw new BadRequestException("Cluster with multiple gateways and embedded ambari database are not supported!");
-        }
+//        if (isMultipleGateway(stack) && isEmbeddedAmbariDB(components)) {
+//            throw new BadRequestException("Cluster with multiple gateways and embedded ambari database are not supported!");
+//        }
         for (HostGroup hostGroup : cluster.getHostGroups()) {
             constraintRepository.save(hostGroup.getConstraint());
         }
@@ -219,8 +218,8 @@ public class AmbariClusterService implements ClusterService {
         if (stack.isAvailable()) {
             flowManager.triggerClusterInstall(stack.getId());
             InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(cluster.getStatus()));
-            if (InMemoryStateStore.getStack(stackId) == null) {
-                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
+            if (InMemoryStateStore.getStack(stack.getId()) == null) {
+                InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
             }
         }
         return cluster;

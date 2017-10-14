@@ -68,7 +68,7 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
             Image image = componentConfigProvider.getImage(stackId);
             stackDetails.setImageIdentifier(image.getImageName());
         } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.warn("Image not found!", e.getMessage());
+            LOGGER.warn("Image not found! {}", e.getMessage());
         }
         AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(stackId);
         if (ambariRepo != null) {

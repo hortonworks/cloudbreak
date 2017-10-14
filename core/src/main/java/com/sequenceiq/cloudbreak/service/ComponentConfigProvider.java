@@ -32,12 +32,16 @@ public class ComponentConfigProvider {
         return componentRepository.findComponentByStackIdComponentTypeName(stackId, componentType, name);
     }
 
+    public Set<Component> getAllComponentsByStackIdAndType(Long stackId, Set<ComponentType> componentTypes) {
+        return componentRepository.findComponentByStackIdWithType(stackId, componentTypes);
+    }
+
     public Image getImage(Long stackId) throws CloudbreakImageNotFoundException {
         try {
             Component component = getComponent(stackId, ComponentType.IMAGE, ComponentType.IMAGE.name());
             if (component == null) {
                 throw new CloudbreakImageNotFoundException(String.format("Image not found: stackId: %d, componentType: %s, name: %s",
-                        stackId, ComponentType.IMAGE.name(), ComponentType.IMAGE.name()));
+                    stackId, ComponentType.IMAGE.name(), ComponentType.IMAGE.name()));
             }
             LOGGER.debug("Image found! stackId: {}, component: {}", stackId, component);
             return component.getAttributes().get(Image.class);
