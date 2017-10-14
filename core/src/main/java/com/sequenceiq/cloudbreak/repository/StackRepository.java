@@ -42,7 +42,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.id= :id")
     Stack findOneWithLists(@Param("id") Long id);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+    @Query("SELECT s FROM Stack s "
             + "WHERE s.datalakeId= :id AND s.stackStatus.status <> 'DELETE_COMPLETED' AND s.stackStatus.status <> 'DELETE_IN_PROGRESS'"
             + "AND s.stackStatus.status <> 'REQUESTED'")
     Set<Stack> findEphemeralClusters(@Param("id") Long id);
