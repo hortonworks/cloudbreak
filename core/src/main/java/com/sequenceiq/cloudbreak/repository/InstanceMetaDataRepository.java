@@ -46,4 +46,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @Query("SELECT i.serverCert FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceMetadataType = 'GATEWAY_PRIMARY'")
     String getServerCertByStackId(@Param("stackId") Long stackId);
 
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceMetadataType = 'GATEWAY_PRIMARY' AND i.instanceGroup.stack.id= :stackId")
+    InstanceMetaData getPrimaryGatewayInstanceMetadata(@Param("stackId") Long stackId);
+
 }

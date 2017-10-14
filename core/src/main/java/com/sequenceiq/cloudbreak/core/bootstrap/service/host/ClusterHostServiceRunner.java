@@ -174,7 +174,7 @@ public class ClusterHostServiceRunner {
     private void saveSharedRangerService(Stack stack, Map<String, SaltPillarProperties> servicePillar) {
         Long datalakeId = stack.getDatalakeId();
         if (datalakeId != null) {
-            Stack dataLakeStack = stackRepository.findOneWithLists(datalakeId);
+            Stack dataLakeStack = stackRepository.findOne(datalakeId);
             Cluster dataLakeCluster = dataLakeStack.getCluster();
             Set<String> groupNames = blueprintProcessor.getHostGroupsWithComponent(dataLakeCluster.getBlueprint().getBlueprintText(), "RANGER_ADMIN");
             List<HostGroup> groups = dataLakeCluster.getHostGroups().stream().filter(hg -> groupNames.contains(hg.getName())).collect(Collectors.toList());

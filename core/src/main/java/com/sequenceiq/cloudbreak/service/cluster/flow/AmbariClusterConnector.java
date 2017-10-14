@@ -441,7 +441,7 @@ public class AmbariClusterConnector {
     }
 
     public void credentialReplaceAmbariCluster(Long stackId, String newUserName, String newPassword) throws CloudbreakException {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         AmbariClient ambariClient = getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
         ambariClient = createAmbariUser(newUserName, newPassword, stack, ambariClient);
@@ -463,7 +463,7 @@ public class AmbariClusterConnector {
     }
 
     public void credentialUpdateAmbariCluster(Long stackId, String newPassword) throws CloudbreakException {
-        Stack stack = stackRepository.findOneWithLists(stackId);
+        Stack stack = stackRepository.findOne(stackId);
         Cluster cluster = clusterRepository.findOneWithLists(stack.getCluster().getId());
         AmbariClient ambariClient = getAmbariClient(stack, cluster.getUserName(), cluster.getPassword());
         changeAmbariPassword(cluster.getUserName(), cluster.getPassword(), newPassword, stack, ambariClient);

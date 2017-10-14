@@ -187,10 +187,6 @@ public class EmailSenderService {
         return instanceTypesStringBuilder.toString();
     }
 
-    private String getMasterInstanceId(Stack stack) {
-        return stack.getPrimaryGatewayInstance().getInstanceId();
-    }
-
     private void sendEmail(IdentityUser user, String mail, String template, String subject, Map<String, Object> model) {
         try {
             String emailBody = processTemplateIntoString(freemarkerConfiguration.getTemplate(template, "UTF-8"), model);
