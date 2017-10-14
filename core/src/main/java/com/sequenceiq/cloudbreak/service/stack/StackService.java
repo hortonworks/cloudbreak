@@ -176,7 +176,7 @@ public class StackService {
 
     public Set<StackResponse> retrieveAccountStacks(IdentityUser user) {
         if (user.getRoles().contains(IdentityUserRole.ADMIN)) {
-            return convertStacks(stackRepository.findAllInAccount(user.getAccount()));
+            return convertStacks(stackRepository.findAllInAccountWithLists(user.getAccount()));
         } else {
             return convertStacks(stackRepository.findPublicInAccountForUser(user.getUserId(), user.getAccount()));
         }
