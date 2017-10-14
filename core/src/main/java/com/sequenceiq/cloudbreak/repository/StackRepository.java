@@ -59,8 +59,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     @Query("SELECT s FROM Stack s WHERE s.id= :id and s.account= :account")
     Stack findByIdInAccount(@Param("id") Long id, @Param("account") String account);
 
-    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
-            + "WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)")
+    @Query("SELECT s FROM Stack s WHERE s.name= :name and ((s.account= :account and s.publicInAccount=true) or s.owner= :owner)")
     Stack findByNameInAccount(@Param("name") String name, @Param("account") String account, @Param("owner") String owner);
 
     @Query("SELECT t FROM Stack t LEFT JOIN FETCH t.resources LEFT JOIN FETCH t.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
