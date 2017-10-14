@@ -344,7 +344,7 @@ public class StackService {
                 savedStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED);
                 savedStack.setCreated(new Date().getTime());
                 save(savedStack);
-                savedStack = stackRepository.findById(savedStack.getId());
+                savedStack = stackRepository.findOneWithLists(savedStack.getId());
             }
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.STACK, stack.getName(), ex);
