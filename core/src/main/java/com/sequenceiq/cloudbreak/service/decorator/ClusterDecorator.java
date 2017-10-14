@@ -112,7 +112,7 @@ public class ClusterDecorator implements Decorator<Cluster> {
         ConnectedClusterRequest connectedClusterRequest = (ConnectedClusterRequest) data[DecorationData.CONNECTED_CLUSTER.ordinal()];
         String blueprintName = (String) data[DecorationData.BLUEPRINT_NAME.ordinal()];
 
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
 
         if (blueprintId != null) {
             subject.setBlueprint(blueprintService.get(blueprintId));

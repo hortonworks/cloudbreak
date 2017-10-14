@@ -216,6 +216,7 @@ public class AmbariClusterConnectorTest {
                 .thenReturn(ambariClient);
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), any(Cluster.class))).thenReturn(ambariClient);
         when(stackRepository.findOneWithLists(anyLong())).thenReturn(stack);
+        when(stackRepository.findOne(anyLong())).thenReturn(stack);
         when(clusterRepository.findOneWithLists(anyLong())).thenReturn(cluster);
     }
 

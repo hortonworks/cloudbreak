@@ -101,7 +101,7 @@ public class ManualStackRepairTriggerActions {
         protected StackRepairTriggerContext createFlowContext(
                 String flowId, StateContext<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> stateContext, P payload) {
             Long stackId = payload.getStackId();
-            Stack stack = stackService.getById(stackId);
+            Stack stack = stackService.getByIdWithLists(stackId);
             return new StackRepairTriggerContext(flowId, stack);
         }
 

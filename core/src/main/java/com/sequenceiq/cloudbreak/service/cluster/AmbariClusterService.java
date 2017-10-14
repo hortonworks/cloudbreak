@@ -181,7 +181,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     @Transactional(TxType.NEVER)
     public Cluster create(IdentityUser user, Long stackId, Cluster cluster, List<ClusterComponent> components) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         if (stack.getCluster() != null) {
             throw new BadRequestException(String.format("A cluster is already created on this stack! [cluster: '%s']", stack.getCluster()
@@ -349,7 +349,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     @Transactional(TxType.NEVER)
     public void updateStatus(Long stackId, StatusRequest statusRequest) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stackId));
@@ -651,8 +651,8 @@ public class AmbariClusterService implements ClusterService {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
         Blueprint blueprint = blueprintService.get(blueprintId);
-        Stack stack = stackService.getById(stackId);
-        Cluster cluster = getCluster(stackId, stack);
+        Stack stack = stackService.getByIdWithLists(stackId);
+        Cluster cluster = getCluster(stack);
         AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
         if (ambariDatabase != null && !DatabaseVendor.EMBEDDED.value().equals(ambariDatabase.getVendor())) {
             throw new BadRequestException("Ambari doesn't support resetting external DB automatically. To reset Ambari Server schema you must first drop "
@@ -696,10 +696,10 @@ public class AmbariClusterService implements ClusterService {
         return cluster;
     }
 
-    private Cluster getCluster(Long stackId, Stack stack) {
+    private Cluster getCluster(Stack stack) {
         Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
         if (cluster == null) {
-            throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
+            throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stack.getId()));
         }
         return cluster;
     }
@@ -707,7 +707,7 @@ public class AmbariClusterService implements ClusterService {
     @Override
     public void upgrade(Long stackId, AmbariRepo ambariRepoUpgrade) {
         if (ambariRepoUpgrade != null) {
-            Stack stack = stackService.getById(stackId);
+            Stack stack = stackService.getByIdWithLists(stackId);
             Cluster cluster = clusterRepository.findById(stack.getCluster().getId());
             if (cluster == null) {
                 throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stackId));
@@ -990,7 +990,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     private AmbariClient getAmbariClient(Long stackId) throws CloudbreakSecuritySetupException {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
         HttpClientConfig httpClientConfig = tlsSecurityService.buildTLSClientConfigForPrimaryGateway(stackId, stack.getAmbariIp());
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(httpClientConfig, stack.getGatewayPort(), stack.getCluster());
         return ambariClient;

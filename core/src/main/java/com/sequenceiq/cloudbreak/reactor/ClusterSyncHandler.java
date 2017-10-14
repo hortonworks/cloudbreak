@@ -49,7 +49,7 @@ public class ClusterSyncHandler implements ReactorEventHandler<ClusterSyncReques
         ClusterSyncRequest request = event.getData();
         ClusterSyncResult result;
         try {
-            Stack stack = stackService.getById(request.getStackId());
+            Stack stack = stackService.getByIdWithLists(request.getStackId());
             String proxyIp = stackUtil.extractAmbariIp(stack);
             String contextPath = stack.getCluster().getGateway().getPath();
             proxyRegistrator.register(stack.getName(), contextPath, proxyIp);

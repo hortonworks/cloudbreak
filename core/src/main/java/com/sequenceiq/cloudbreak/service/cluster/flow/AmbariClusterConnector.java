@@ -508,9 +508,6 @@ public class AmbariClusterConnector {
             if (!isAllServiceStopped(ambariClient.getHostComponentsStates())) {
                 stopAllServices(stack, ambariClient);
             }
-//            if (!"BYOS".equals(stack.cloudPlatform())) {
-//                stopAmbariAgents(stack, null);
-//            }
         } catch (AmbariConnectionException ignored) {
             LOGGER.debug("Ambari not running on the gateway machine, no need to stop it.");
         }

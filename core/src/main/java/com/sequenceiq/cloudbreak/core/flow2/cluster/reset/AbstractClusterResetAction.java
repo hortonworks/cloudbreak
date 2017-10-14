@@ -13,15 +13,11 @@ import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public abstract class AbstractClusterResetAction<P extends Payload> extends AbstractAction<ClusterResetState, ClusterResetEvent, ClusterContext, P> {
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ClusterService clusterService;
 
     protected AbstractClusterResetAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -30,7 +26,7 @@ public abstract class AbstractClusterResetAction<P extends Payload> extends Abst
     @Override
     protected ClusterContext createFlowContext(String flowId, StateContext<ClusterResetState, ClusterResetEvent> stateContext, P payload) {
         Stack stack = stackService.getById(payload.getStackId());
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+        Cluster cluster = stack.getCluster();
         MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
         return new ClusterContext(flowId, stack, cluster);
     }

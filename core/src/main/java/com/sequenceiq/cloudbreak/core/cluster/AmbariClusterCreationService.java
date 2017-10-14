@@ -24,7 +24,7 @@ public class AmbariClusterCreationService {
     }
 
     public void buildAmbariCluster(Long stackId) {
-        Stack stack = stackService.getById(stackId);
+        Stack stack = stackService.getByIdWithLists(stackId);
         ambariClusterConnector.buildAmbariCluster(stack);
     }
 }
