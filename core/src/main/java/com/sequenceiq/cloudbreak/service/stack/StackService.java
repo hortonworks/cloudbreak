@@ -258,7 +258,7 @@ public class StackService {
     }
 
     public StackResponse getPrivateStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
-        Stack stack = stackRepository.findByNameInUser(name, identityUser.getUserId());
+        Stack stack = stackRepository.findByNameInUserWithLists(name, identityUser.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
