@@ -53,7 +53,7 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
     @Query("SELECT s.id,s.stackStatus.status FROM Stack s WHERE s.id IN (:ids)")
     List<Object[]> findStackStatuses(@Param("ids") Set<Long> ids);
 
-    @Query("SELECT c FROM Stack c LEFT JOIN FETCH c.resources LEFT JOIN FETCH c.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE c.cluster.id= :id")
+    @Query("SELECT c FROM Stack c WHERE c.cluster.id= :id")
     Stack findStackForCluster(@Param("id") Long id);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
