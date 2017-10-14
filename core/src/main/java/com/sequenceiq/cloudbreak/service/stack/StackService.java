@@ -269,7 +269,7 @@ public class StackService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public StackResponse getPublicStackJsonByName(String name, IdentityUser identityUser, Set<String> entries) {
-        Stack stack = stackRepository.findOneByName(name, identityUser.getAccount());
+        Stack stack = stackRepository.findByNameInAccountWithLists(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
@@ -280,7 +280,7 @@ public class StackService {
 
     @PostAuthorize("hasPermission(returnObject,'read')")
     public Stack getPublicStack(String name, IdentityUser identityUser) {
-        Stack stack = stackRepository.findOneByName(name, identityUser.getAccount());
+        Stack stack = stackRepository.findByNameInAccount(name, identityUser.getAccount());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
@@ -288,7 +288,7 @@ public class StackService {
     }
 
     public void delete(String name, IdentityUser user, Boolean deleteDependencies) {
-        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        Stack stack = stackRepository.findByNameInAccountOrOwner(name, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
@@ -296,7 +296,7 @@ public class StackService {
     }
 
     public void forceDelete(String name, IdentityUser user, Boolean deleteDependencies) {
-        Stack stack = stackRepository.findByNameInAccount(name, user.getAccount(), user.getUserId());
+        Stack stack = stackRepository.findByNameInAccountOrOwner(name, user.getAccount(), user.getUserId());
         if (stack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", name));
         }
