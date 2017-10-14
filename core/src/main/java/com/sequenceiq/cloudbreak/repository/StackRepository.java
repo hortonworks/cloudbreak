@@ -22,6 +22,9 @@ public interface StackRepository extends CrudRepository<Stack, Long> {
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE s.owner= :user AND s.stackStatus.status <> 'DELETE_COMPLETED'")
+    Set<Stack> findForUserWithLists(@Param("user") String user);
+
+    @Query("SELECT s FROM Stack s WHERE s.owner= :user AND s.stackStatus.status <> 'DELETE_COMPLETED'")
     Set<Stack> findForUser(@Param("user") String user);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.resources LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
