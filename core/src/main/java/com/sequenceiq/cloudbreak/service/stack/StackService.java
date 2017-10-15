@@ -221,14 +221,6 @@ public class StackService {
         return convertStacksForAutoscale(aliveOnes);
     }
 
-    public Stack findLazy(Long id) {
-        Stack stack = stackRepository.findOne(id);
-        if (stack == null) {
-            throw new NotFoundException(String.format("Stack '%s' not found", id));
-        }
-        return stack;
-    }
-
     public Set<Stack> findClustersConnectedToDatalake(Long stackId) {
         return stackRepository.findEphemeralClusters(stackId);
     }
