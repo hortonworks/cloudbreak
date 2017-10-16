@@ -33,11 +33,11 @@ public class UserDataBuilder {
     @Inject
     private Configuration freemarkerConfiguration;
 
-    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, byte[] cbSshKeyDer, String cbSshKey, String sshUser,
+    Map<InstanceGroupType, String> buildUserData(Platform cloudPlatform, String pubKey, byte[] cbSshKeyDer, String cbSshKey, String sshUser,
             PlatformParameters parameters, String saltBootPassword) {
         Map<InstanceGroupType, String> result = new HashMap<>();
         for (InstanceGroupType type : InstanceGroupType.values()) {
-            String userData = build(type, cloudPlatform, cbSshKey, cbSshKeyDer, sshUser, parameters, saltBootPassword);
+            String userData = build(type, cloudPlatform, pubKey, cbSshKey, cbSshKeyDer, sshUser, parameters, saltBootPassword);
             result.put(type, userData);
             LOGGER.debug("User data for {}, content; {}", type, userData);
         }
@@ -45,7 +45,7 @@ public class UserDataBuilder {
         return result;
     }
 
-    private String build(InstanceGroupType type, Platform cloudPlatform, String cbSshKey, byte[] cbSshKeyDer, String sshUser,
+    private String build(InstanceGroupType type, Platform cloudPlatform, String publicSshKey, String cbSshKey, byte[] cbSshKeyDer, String sshUser,
             PlatformParameters params, String saltBootPassword) {
         Map<String, Object> model = new HashMap<>();
         model.put("cloudPlatform", cloudPlatform.value());
@@ -55,6 +55,7 @@ public class UserDataBuilder {
         model.put("tmpSshKey", cbSshKey);
         model.put("signaturePublicKey", BaseEncoding.base64().encode(cbSshKeyDer));
         model.put("sshUser", sshUser);
+        model.put("publicSshKey", publicSshKey);
         model.put("customUserData", userDataBuilderParams.getCustomData());
         model.put("saltBootPassword", saltBootPassword);
         return build(model);
