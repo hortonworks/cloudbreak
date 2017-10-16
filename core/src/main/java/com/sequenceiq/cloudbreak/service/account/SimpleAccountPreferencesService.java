@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.account;
 
 import java.util.Collections;
-import java.util.concurrent.locks.Lock;
 
 import javax.inject.Inject;
 
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
-import com.google.common.util.concurrent.Striped;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.controller.BadRequestException;
@@ -22,15 +20,11 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     private static final long ZERO = 0L;
 
-    private static final int STRIPES = 10;
-
     @Value("${cb.enabledplatforms:}")
     private String enabledPlatforms;
 
     @Inject
     private AccountPreferencesRepository repository;
-
-    private final Striped<Lock> locks = Striped.lazyWeakLock(STRIPES);
 
     @Override
     public AccountPreferences save(AccountPreferences accountPreferences) {
@@ -56,20 +50,14 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
 
     @Override
     public AccountPreferences getByAccount(String account) {
-        Lock lock = locks.get(account);
-        lock.lock();
-        try {
-            AccountPreferences accountPreferences = repository.findByAccount(account);
-            if (accountPreferences == null) {
-                accountPreferences = createDefaultAccountPreferences(account);
-            }
-            if (!StringUtils.isEmpty(enabledPlatforms)) {
-                accountPreferences.setPlatforms(enabledPlatforms);
-            }
-            return accountPreferences;
-        } finally {
-            lock.unlock();
+        AccountPreferences accountPreferences = repository.findByAccount(account);
+        if (accountPreferences == null) {
+            accountPreferences = createDefaultAccountPreferences(account);
         }
+        if (!StringUtils.isEmpty(enabledPlatforms)) {
+            accountPreferences.setPlatforms(enabledPlatforms);
+        }
+        return accountPreferences;
     }
 
     @Override
@@ -108,6 +96,6 @@ public class SimpleAccountPreferencesService implements AccountPreferencesServic
         defaultPreferences.setAllowedInstanceTypes(Collections.emptyList());
         defaultPreferences.setClusterTimeToLive(ZERO);
         defaultPreferences.setUserTimeToLive(ZERO);
-        return repository.save(defaultPreferences);
+        return defaultPreferences;
     }
 }
