@@ -129,7 +129,7 @@ func listCredentialsImpl(client getPublicsCredentialClient, writer func([]string
 		utils.LogErrorAndExit(err)
 	}
 
-	var tableRows []utils.Row
+	tableRows := []utils.Row{}
 	for _, cred := range credResp.Payload {
 		tableRows = append(tableRows, &cloudResourceOut{*cred.Name, *cred.Description, *cred.CloudPlatform})
 	}

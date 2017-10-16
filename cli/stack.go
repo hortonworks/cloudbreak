@@ -148,7 +148,7 @@ func listStacksImpl(client getPublicsStackClient, writer func([]string, []utils.
 		utils.LogErrorAndExit(err)
 	}
 
-	var tableRows []utils.Row
+	tableRows := []utils.Row{}
 	for _, stack := range stackResp.Payload {
 		tableRows = append(tableRows, convertResponseToStack(stack))
 	}

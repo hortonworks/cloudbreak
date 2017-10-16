@@ -146,7 +146,7 @@ func listBlueprintsImpl(client blueprintsClient, writer func([]string, []utils.R
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	var tableRows []utils.Row
+	tableRows := []utils.Row{}
 	for _, bp := range resp.Payload {
 		tableRows = append(tableRows, convertResponseToBlueprint(bp))
 	}

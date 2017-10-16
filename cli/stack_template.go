@@ -74,7 +74,7 @@ func getNetworkMode(c *cli.Context) cloud.NetworkMode {
 	}
 }
 
-func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, getClient func(string, string, string) getPublicBlueprint) error {
+func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string) string, getBlueprintClient func(string, string, string) getPublicBlueprint) error {
 	provider := cloud.GetProvider()
 
 	template := models_cloudbreak.StackRequest{
@@ -106,7 +106,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 
 	nodes := defaultNodes
 	if bpName := stringFinder(FlBlueprintName.Name); len(bpName) != 0 {
-		bpResp := fetchBlueprint(bpName, getClient(stringFinder(FlServer.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name)))
+		bpResp := fetchBlueprint(bpName, getBlueprintClient(stringFinder(FlServer.Name), stringFinder(FlUsername.Name), stringFinder(FlPassword.Name)))
 		bp, err := base64.StdEncoding.DecodeString(bpResp.AmbariBlueprint)
 		if err != nil {
 			utils.LogErrorAndExit(err)
@@ -154,6 +154,9 @@ func getNodesByBlueprint(bp []byte) []node {
 					utils.LogErrorAndExit(err)
 				}
 			}
+		}
+		if hg["name"] == nil {
+			utils.LogErrorMessageAndExit("host group name not found in blueprint")
 		}
 		node := node{hg["name"].(string), models_cloudbreak.InstanceGroupResponseTypeCORE, int32(count)}
 		nodes = append(nodes, &node)
