@@ -5,7 +5,7 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
-	hdc "github.com/hortonworks/hdc-cli/cli"
+	cb "github.com/hortonworks/hdc-cli/cli"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/azure"
 	_ "github.com/hortonworks/hdc-cli/cli/cloud/gcp"
@@ -24,41 +24,41 @@ func ConfigRead(c *cli.Context) error {
 		}
 	}
 
-	server := c.String(hdc.FlServer.Name)
-	username := c.String(hdc.FlUsername.Name)
-	password := c.String(hdc.FlPassword.Name)
-	output := c.String(hdc.FlOutput.Name)
+	server := c.String(cb.FlServer.Name)
+	username := c.String(cb.FlUsername.Name)
+	password := c.String(cb.FlPassword.Name)
+	output := c.String(cb.FlOutput.Name)
 
-	config, err := hdc.ReadConfig(hdc.GetHomeDirectory())
+	config, err := cb.ReadConfig(cb.GetHomeDirectory())
 	if err == nil {
 		if len(output) == 0 {
-			c.Set(hdc.FlOutput.Name, config.Output)
+			c.Set(cb.FlOutput.Name, config.Output)
 		}
 	}
 
 	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
 		if err != nil {
-			log.Error(fmt.Sprintf("configuration is not set, see: hdc configure --help or provide the following flags: %v",
-				[]string{"--" + hdc.FlServer.Name, "--" + hdc.FlUsername.Name, "--" + hdc.FlPassword.Name}))
+			log.Error(fmt.Sprintf("configuration is not set, see: cb configure --help or provide the following flags: %v",
+				[]string{"--" + cb.FlServer.Name, "--" + cb.FlUsername.Name, "--" + cb.FlPassword.Name}))
 			os.Exit(1)
 		}
 
 		PrintConfig(*config)
 
 		if len(server) == 0 {
-			c.Set(hdc.FlServer.Name, config.Server)
+			c.Set(cb.FlServer.Name, config.Server)
 		}
 		if len(username) == 0 {
-			c.Set(hdc.FlUsername.Name, config.Username)
+			c.Set(cb.FlUsername.Name, config.Username)
 		}
 		if len(password) == 0 {
-			c.Set(hdc.FlPassword.Name, config.Password)
+			c.Set(cb.FlPassword.Name, config.Password)
 		}
 	}
 	return nil
 }
 
-func PrintConfig(cfg hdc.Config) {
+func PrintConfig(cfg cb.Config) {
 	cfg.Password = "*"
 	log.Infof("[ConfigRead] Config read from file, setting as global variable:\n%s", cfg.Yaml())
 }
@@ -70,14 +70,14 @@ func printFlagCompletion(f cli.Flag) {
 func main() {
 
 	app := cli.NewApp()
-	app.Name = "hdc"
+	app.Name = "cb"
 	app.HelpName = "Hortonworks Data Cloud command line tool"
-	app.Version = hdc.Version + "-" + hdc.BuildTime
+	app.Version = cb.Version + "-" + cb.BuildTime
 	app.Author = "Hortonworks"
 	app.EnableBashCompletion = true
 
 	app.Flags = []cli.Flag{
-		hdc.FlDebug,
+		cb.FlDebug,
 	}
 
 	app.Before = func(c *cli.Context) error {
@@ -85,27 +85,27 @@ func main() {
 		log.SetLevel(log.ErrorLevel)
 		formatter := &utils.CBFormatter{}
 		log.SetFormatter(formatter)
-		if c.Bool(hdc.FlDebug.Name) {
+		if c.Bool(cb.FlDebug.Name) {
 			log.SetLevel(log.DebugLevel)
 		}
 		return nil
 	}
 
-	cli.AppHelpTemplate = hdc.AppHelpTemplate
-	cli.HelpPrinter = hdc.PrintHelp
-	cli.CommandHelpTemplate = hdc.CommandHelpTemplate
-	cli.SubcommandHelpTemplate = hdc.SubCommandHelpTemplate
+	cli.AppHelpTemplate = cb.AppHelpTemplate
+	cli.HelpPrinter = cb.PrintHelp
+	cli.CommandHelpTemplate = cb.CommandHelpTemplate
+	cli.SubcommandHelpTemplate = cb.SubCommandHelpTemplate
 
 	app.Commands = []cli.Command{
 		{
 			Name: "configure",
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
-				"to %s/%s/%s", hdc.GetHomeDirectory(), hdc.Hdc_dir, hdc.Config_file),
+				"to %s/%s/%s", cb.GetHomeDirectory(), cb.Config_dir, cb.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword).AddOutputFlag().Build(),
-			Action: hdc.Configure,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword).AddOutputFlag().Build(),
+			Action: cb.Configure,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlServerRequired, hdc.FlUsernameRequired, hdc.FlPassword).AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword).AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -122,10 +122,10 @@ func main() {
 							Name:   "role-based",
 							Usage:  "creates a new role based aws credential",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlRoleARN).AddAuthenticationFlags().Build(),
-							Action: hdc.CreateAwsCredential,
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build(),
+							Action: cb.CreateAwsCredential,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlRoleARN).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlRoleARN).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -134,10 +134,10 @@ func main() {
 							Name:   "key-based",
 							Usage:  "creates a new key based aws credential",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlAccessKey, hdc.FlSecretKey).AddAuthenticationFlags().Build(),
-							Action: hdc.CreateAwsCredential,
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build(),
+							Action: cb.CreateAwsCredential,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlAccessKey, hdc.FlSecretKey).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlAccessKey, cb.FlSecretKey).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -152,10 +152,10 @@ func main() {
 							Name:   "app-based",
 							Usage:  "creates a new app based azure credential",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlSubscriptionId, hdc.FlTenantId, hdc.FlAppId, hdc.FlAppPassword).AddAuthenticationFlags().Build(),
-							Action: hdc.CreateAzureCredential,
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build(),
+							Action: cb.CreateAzureCredential,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlSubscriptionId, hdc.FlTenantId, hdc.FlAppId, hdc.FlAppPassword).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlSubscriptionId, cb.FlTenantId, cb.FlAppId, cb.FlAppPassword).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -166,10 +166,10 @@ func main() {
 					Name:   "gcp",
 					Usage:  "creates a new gcp credential",
 					Before: ConfigRead,
-					Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlProjectId, hdc.FlServiceAccountId, hdc.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
-					Action: hdc.CreateGcpCredential,
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build(),
+					Action: cb.CreateGcpCredential,
 					BashComplete: func(c *cli.Context) {
-						for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlProjectId, hdc.FlServiceAccountId, hdc.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlProjectId, cb.FlServiceAccountId, cb.FlServiceAccountPrivateKeyFile).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
@@ -182,10 +182,10 @@ func main() {
 							Name:   "keystone-v2",
 							Usage:  "creates a new keystone version 2 openstack credential",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlTenantName, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build(),
-							Action: hdc.CreateOpenstackCredential,
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build(),
+							Action: cb.CreateOpenstackCredential,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlTenantName, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlTenantName, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -194,10 +194,10 @@ func main() {
 							Name:   "keystone-v3",
 							Usage:  "creates a new keystone version 3 openstack credential",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlUserDomain, hdc.FlKeystoneScope, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build(),
-							Action: hdc.CreateOpenstackCredential,
+							Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlUserDomain, cb.FlKeystoneScope, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build(),
+							Action: cb.CreateOpenstackCredential,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlTenantUser, hdc.FlTenantPassword, hdc.FlUserDomain, hdc.FlKeystoneScope, hdc.FlEndpoint, hdc.FlFacing).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlTenantUser, cb.FlTenantPassword, cb.FlUserDomain, cb.FlKeystoneScope, cb.FlEndpoint, cb.FlFacing).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -210,10 +210,10 @@ func main() {
 			Name:   "describe-credential",
 			Usage:  "describes a credential",
 			Before: ConfigRead,
-			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: hdc.DescribeCredential,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.DescribeCredential,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -222,10 +222,10 @@ func main() {
 			Name:   "list-credentials",
 			Usage:  "lists the credentials",
 			Before: ConfigRead,
-			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: hdc.ListCredentials,
+			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.ListCredentials,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -233,11 +233,11 @@ func main() {
 		{
 			Name:   "delete-credential",
 			Usage:  "deletes a credential",
-			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
-			Action: hdc.DeleteCredential,
+			Action: cb.DeleteCredential,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -245,29 +245,29 @@ func main() {
 		{
 			Name:   "create-blueprint",
 			Usage:  "adds a new Ambari blueprint from a file or from a URL",
-			Flags:  []cli.Flag{hdc.FlServer, hdc.FlUsername, hdc.FlPassword},
+			Flags:  []cli.Flag{cb.FlServer, cb.FlUsername, cb.FlPassword},
 			Before: ConfigRead,
 			Subcommands: []cli.Command{
 				{
 					Name:   "from-url",
-					Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintURL).AddAuthenticationFlags().Build(),
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintURL).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: hdc.CreateBlueprintFromUrl,
+					Action: cb.CreateBlueprintFromUrl,
 					Usage:  "creates a blueprint by downloading it from a URL location",
 					BashComplete: func(c *cli.Context) {
-						for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintURL).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintURL).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
 				},
 				{
 					Name:   "from-file",
-					Flags:  hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintFileLocation).AddAuthenticationFlags().Build(),
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintFileLocation).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
-					Action: hdc.CreateBlueprintFromFile,
+					Action: cb.CreateBlueprintFromFile,
 					Usage:  "creates a blueprint by reading it from a local file",
 					BashComplete: func(c *cli.Context) {
-						for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlBlueprintFileLocation).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintFileLocation).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
@@ -278,10 +278,10 @@ func main() {
 			Name:   "describe-blueprint",
 			Usage:  "describes a blueprint",
 			Before: ConfigRead,
-			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: hdc.DescribeBlueprint,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.DescribeBlueprint,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -289,11 +289,11 @@ func main() {
 		{
 			Name:   "list-blueprints",
 			Usage:  "lists the available blueprints",
-			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
 			Before: ConfigRead,
-			Action: hdc.ListBlueprints,
+			Action: cb.ListBlueprints,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -301,11 +301,11 @@ func main() {
 		{
 			Name:   "delete-blueprint",
 			Usage:  "deletes a blueprint from Cloudbreak",
-			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
-			Action: hdc.DeleteBlueprint,
+			Action: cb.DeleteBlueprint,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -322,10 +322,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates an aws cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateAwsStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateAwsStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -334,10 +334,10 @@ func main() {
 							Name:   "existing-network",
 							Usage:  "creates an aws cluster JSON template with existing network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateAwsStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateAwsStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -346,10 +346,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates an aws cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateAwsStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateAwsStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -364,10 +364,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates an azure cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateAzureStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateAzureStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -376,10 +376,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates an azure cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateAzureStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateAzureStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -394,10 +394,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates a gcp cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateGcpStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -406,10 +406,10 @@ func main() {
 							Name:   "existing-network",
 							Usage:  "creates a gcp cluster JSON template with existing network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateGcpStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -418,10 +418,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates a gcp cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateGcpStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -430,10 +430,10 @@ func main() {
 							Name:   "legacy-network",
 							Usage:  "creates a gcp cluster JSON template with legacy network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateGcpStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateGcpStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -448,10 +448,10 @@ func main() {
 							Name:   "new-network",
 							Usage:  "creates a openstack cluster JSON template with new network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateOpenstackStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateOpenstackStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -460,10 +460,10 @@ func main() {
 							Name:   "existing-network",
 							Usage:  "creates a openstack cluster JSON template with existing network",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateOpenstackStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateOpenstackStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -472,10 +472,10 @@ func main() {
 							Name:   "existing-subnet",
 							Usage:  "creates a openstack cluster JSON template with existing subnet",
 							Before: ConfigRead,
-							Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build(),
-							Action: hdc.GenerateOpenstackStackTemplate,
+							Flags:  cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build(),
+							Action: cb.GenerateOpenstackStackTemplate,
 							BashComplete: func(c *cli.Context) {
-								for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlBlueprintName, hdc.FlBlueprintFile).AddAuthenticationFlags().Build() {
+								for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlBlueprintName, cb.FlBlueprintFile).AddAuthenticationFlags().Build() {
 									printFlagCompletion(f)
 								}
 							},
@@ -487,12 +487,12 @@ func main() {
 		{
 			Name:      "create-cluster",
 			Usage:     "creates a new cluster",
-			Flags:     hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlInputJson, hdc.FlAmbariPasswordOptional, hdc.FlWait).AddAuthenticationFlags().Build(),
+			Flags:     cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWait).AddAuthenticationFlags().Build(),
 			Before:    ConfigRead,
-			Action:    hdc.CreateStack,
-			ArgsUsage: hdc.StackTemplateHelp,
+			Action:    cb.CreateStack,
+			ArgsUsage: cb.StackTemplateHelp,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(hdc.FlInputJson, hdc.FlAmbariPasswordOptional, hdc.FlWait).AddAuthenticationFlags().Build() {
+				for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWait).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -501,10 +501,10 @@ func main() {
 			Name:   "describe-cluster",
 			Usage:  "describes a cluster",
 			Before: ConfigRead,
-			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
-			Action: hdc.DescribeStack,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.DescribeStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -512,11 +512,11 @@ func main() {
 		{
 			Name:   "list-clusters",
 			Usage:  "lists the running clusters",
-			Flags:  hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
 			Before: ConfigRead,
-			Action: hdc.ListStacks,
+			Action: cb.ListStacks,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -524,11 +524,11 @@ func main() {
 		{
 			Name:   "delete-cluster",
 			Usage:  "deletes a cluster",
-			Flags:  hdc.NewFlagBuilder().AddFlags(hdc.FlName, hdc.FlForce).AddAuthenticationFlags().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForce).AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
-			Action: hdc.DeleteStack,
+			Action: cb.DeleteStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range hdc.NewFlagBuilder().AddFlags(hdc.FlName, hdc.FlForce).AddAuthenticationFlags().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForce).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -541,7 +541,7 @@ func main() {
 			Name:   "internal",
 			Usage:  "shows the internal commands",
 			Hidden: true,
-			Action: hdc.ShowHiddenCommands,
+			Action: cb.ShowHiddenCommands,
 		},
 	}...)
 

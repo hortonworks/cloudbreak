@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	Hdc_dir     = ".hdc"
+	Config_dir  = ".cb"
 	Config_file = "config"
 )
 
@@ -55,8 +55,8 @@ func GetHomeDirectory() string {
 }
 
 func ReadConfig(baseDir string) (*Config, error) {
-	hdcDir := baseDir + "/" + Hdc_dir
-	configFile := hdcDir + "/" + Config_file
+	configDir := baseDir + "/" + Config_dir
+	configFile := configDir + "/" + Config_file
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
 		return nil, err
@@ -77,17 +77,17 @@ func ReadConfig(baseDir string) (*Config, error) {
 }
 
 func writeConfigToFile(baseDir string, server string, username string, password string, output string) error {
-	hdcDir := baseDir + "/" + Hdc_dir
-	configFile := hdcDir + "/" + Config_file
+	configDir := baseDir + "/" + Config_dir
+	configFile := configDir + "/" + Config_file
 
-	if _, err := os.Stat(hdcDir); os.IsNotExist(err) {
-		log.Infof("[writeConfigToFile] create dir: %s", hdcDir)
-		err = os.MkdirAll(hdcDir, 0700)
+	if _, err := os.Stat(configDir); os.IsNotExist(err) {
+		log.Infof("[writeConfigToFile] create dir: %s", configDir)
+		err = os.MkdirAll(configDir, 0700)
 		if err != nil {
 			return err
 		}
 	} else {
-		log.Infof("[writeConfigToFile] dir already exists: %s", hdcDir)
+		log.Infof("[writeConfigToFile] dir already exists: %s", configDir)
 	}
 
 	log.Infof("[writeConfigToFile] writing credentials to file: %s", configFile)

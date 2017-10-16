@@ -1,4 +1,4 @@
-BINARY=hdc
+BINARY=cb
 
 VERSION ?= snapshot
 BUILD_TIME=$(shell date +%FT%T)
@@ -82,9 +82,9 @@ release: build
 	mkdir release
 	git tag v${VERSION}
 	git push https://${GITHUB_ACCESS_TOKEN}@github.com/hortonworks/hdc-cli.git v${VERSION}
-	tar -zcvf release/hdc-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin hdc
-	tar -zcvf release/hdc-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux hdc
-	tar -zcvf release/hdc-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows hdc.exe
+	tar -zcvf release/hdc-cli_${VERSION}_Darwin_x86_64.tgz -C build/Darwin "${BINARY}"
+	tar -zcvf release/hdc-cli_${VERSION}_Linux_x86_64.tgz -C build/Linux "${BINARY}"
+	tar -zcvf release/hdc-cli_${VERSION}_Windows_x86_64.tgz -C build/Windows "${BINARY}.exe"
 
 release-docker:
 	docker run --rm -v "${PWD}":/go/src/github.com/hortonworks/hdc-cli -w /go/src/github.com/hortonworks/hdc-cli -e VERSION=${VERSION} -e GITHUB_ACCESS_TOKEN=${GITHUB_TOKEN} golang:1.9 bash -c "make deps && make release"
@@ -93,7 +93,7 @@ upload_s3:
 	ls -1 release | xargs -I@ aws s3 cp release/@ s3://hdc-cli/@ --acl public-read
 
 linux-test: build-linux
-	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name hdc alpine sh
+	docker run --rm -it -v ${PWD}/build/Linux/:/usr/sbin/ --name "${BINARY}" alpine sh
 
 .DEFAULT_GOAL := build
 

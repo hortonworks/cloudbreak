@@ -10,7 +10,7 @@ import (
 func TestWriteConfigToFileDirExists(t *testing.T) {
 	tempDirName, _ := ioutil.TempDir("", "configwritetest")
 	defer os.RemoveAll(tempDirName)
-	os.MkdirAll(tempDirName+string(filepath.Separator)+Hdc_dir, 0700)
+	os.MkdirAll(tempDirName+string(filepath.Separator)+Config_dir, 0700)
 
 	writeConfigToFile(tempDirName, "server", "user", "password", "output")
 
@@ -27,7 +27,7 @@ func TestWriteConfigToFileDirNotExists(t *testing.T) {
 }
 
 func validateConfigContent(tempDirName string, t *testing.T) {
-	content, _ := ioutil.ReadFile(tempDirName + string(filepath.Separator) + Hdc_dir + string(filepath.Separator) + Config_file)
+	content, _ := ioutil.ReadFile(tempDirName + string(filepath.Separator) + Config_dir + string(filepath.Separator) + Config_file)
 
 	expected := "username: user\npassword: password\nserver: server\noutput: output\n"
 	if string(content) != expected {
@@ -39,9 +39,9 @@ func TestReadConfig(t *testing.T) {
 	tempDirName, _ := ioutil.TempDir("", "configreadtest")
 	defer os.RemoveAll(tempDirName)
 
-	os.MkdirAll(tempDirName+string(filepath.Separator)+Hdc_dir, 0700)
+	os.MkdirAll(tempDirName+string(filepath.Separator)+Config_dir, 0700)
 	password := "§±!@#$%^&*()_+-=[]{};'\\:\"/.,?><`~"
-	ioutil.WriteFile(tempDirName+string(filepath.Separator)+Hdc_dir+string(filepath.Separator)+Config_file, []byte("username: user\npassword: "+password+"\nserver: server\noutput: output\n"), 0700)
+	ioutil.WriteFile(tempDirName+string(filepath.Separator)+Config_dir+string(filepath.Separator)+Config_file, []byte("username: user\npassword: "+password+"\nserver: server\noutput: output\n"), 0700)
 
 	config, err := ReadConfig(tempDirName)
 
