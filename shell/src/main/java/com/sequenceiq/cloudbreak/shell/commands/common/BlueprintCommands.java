@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.springframework.shell.core.annotation.CliAvailabilityIndicator;
 import org.springframework.shell.core.annotation.CliCommand;
@@ -52,7 +51,7 @@ public class BlueprintCommands implements BaseCommands {
                 BlueprintRequest blueprintRequest = new BlueprintRequest();
                 blueprintRequest.setName(name);
                 blueprintRequest.setDescription(description);
-                blueprintRequest.setAmbariBlueprint(Base64.encodeBase64String(json.getBytes()));
+                blueprintRequest.setAmbariBlueprint(json);
                 String id;
                 if (publicInAccount) {
                     id = shellContext.cloudbreakClient().blueprintEndpoint().postPublic(blueprintRequest).getId().toString();
