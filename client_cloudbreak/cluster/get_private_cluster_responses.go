@@ -51,7 +51,7 @@ type GetPrivateClusterOK struct {
 }
 
 func (o *GetPrivateClusterOK) Error() string {
-	return fmt.Sprintf("[GET /stacks/user/{name}/cluster][%d] getPrivateClusterOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /v1/stacks/user/{name}/cluster][%d] getPrivateClusterOK  %+v", 200, o.Payload)
 }
 
 func (o *GetPrivateClusterOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

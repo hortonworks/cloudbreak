@@ -51,7 +51,7 @@ type PostClusterOK struct {
 }
 
 func (o *PostClusterOK) Error() string {
-	return fmt.Sprintf("[POST /stacks/{id}/cluster][%d] postClusterOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[POST /v1/stacks/{id}/cluster][%d] postClusterOK  %+v", 200, o.Payload)
 }
 
 func (o *PostClusterOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

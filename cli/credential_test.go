@@ -9,7 +9,7 @@ import (
 	_ "github.com/hortonworks/cb-cli/cli/cloud/aws"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/credentials"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1credentials"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
@@ -21,16 +21,16 @@ type mockCredentialCreate struct {
 	request chan (*models_cloudbreak.CredentialRequest)
 }
 
-func (m *mockCredentialCreate) PostPublicCredential(params *credentials.PostPublicCredentialParams) (*credentials.PostPublicCredentialOK, error) {
+func (m *mockCredentialCreate) PostPublicCredential(params *v1credentials.PostPublicCredentialParams) (*v1credentials.PostPublicCredentialOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: true}).B}}, nil
+	return &v1credentials.PostPublicCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(1), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: true}).B}}, nil
 }
 
-func (m *mockCredentialCreate) PostPrivateCredential(params *credentials.PostPrivateCredentialParams) (*credentials.PostPrivateCredentialOK, error) {
+func (m *mockCredentialCreate) PostPrivateCredential(params *v1credentials.PostPrivateCredentialParams) (*v1credentials.PostPrivateCredentialOK, error) {
 	m.request <- params.Body
 	defer close(m.request)
-	return &credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(2), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: false}).B}}, nil
+	return &v1credentials.PostPrivateCredentialOK{Payload: &models_cloudbreak.CredentialResponse{ID: int64(2), Name: &(&types.S{S: ""}).S, Public: &(&types.B{B: false}).B}}, nil
 }
 
 func TestCreateCredentialPublic(t *testing.T) {
@@ -81,7 +81,7 @@ func TestCreateCredentialPrivate(t *testing.T) {
 type mockGetPublicsCredential struct {
 }
 
-func (m *mockGetPublicsCredential) GetPublicsCredential(params *credentials.GetPublicsCredentialParams) (*credentials.GetPublicsCredentialOK, error) {
+func (m *mockGetPublicsCredential) GetPublicsCredential(params *v1credentials.GetPublicsCredentialParams) (*v1credentials.GetPublicsCredentialOK, error) {
 	resp := make([]*models_cloudbreak.CredentialResponse, 0)
 	for i := 0; i < 3; i++ {
 		resp = append(resp, &models_cloudbreak.CredentialResponse{
@@ -91,7 +91,7 @@ func (m *mockGetPublicsCredential) GetPublicsCredential(params *credentials.GetP
 		})
 	}
 
-	return &credentials.GetPublicsCredentialOK{Payload: resp}, nil
+	return &v1credentials.GetPublicsCredentialOK{Payload: resp}, nil
 }
 
 func TestListCredentialsImpl(t *testing.T) {

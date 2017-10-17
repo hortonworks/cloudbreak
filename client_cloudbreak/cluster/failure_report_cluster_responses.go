@@ -53,7 +53,7 @@ func (o *FailureReportClusterDefault) Code() int {
 }
 
 func (o *FailureReportClusterDefault) Error() string {
-	return fmt.Sprintf("[POST /stacks/{id}/cluster/failurereport][%d] failureReportCluster default ", o._statusCode)
+	return fmt.Sprintf("[POST /v1/stacks/{id}/cluster/failurereport][%d] failureReportCluster default ", o._statusCode)
 }
 
 func (o *FailureReportClusterDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

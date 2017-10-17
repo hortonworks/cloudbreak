@@ -13,54 +13,20 @@ import (
 
 var StackTemplateHelp = `
 {
-	"availabilityZone": "____",
-	"cloudPlatform": "OPENSTACK",
+	"availabilityZone": "____",							// Availability zone of the cluster on AZURE it is the same as the region
 	"clusterRequest": {
-		"blueprintInputs": null,
-		"blueprintName": "____",
-		"gateway": {
-			"enableGateway": false,
-			"exposedServices": null,
-			"gatewayType": "INDIVIDUAL"
-		},
-		"hostGroups": [
-			{
-				"constraint": {
-					"hostCount": 1,
-					"instanceGroupName": "master"
-				},
-				"name": "master",
-				"recipeIds": null,
-				"recipeNames": null,
-				"recipes": null,
-				"recoveryMode": "AUTO"
-			},
-			{
-				"constraint": {
-					"hostCount": 1,
-					"instanceGroupName": "slave"
-				},
-				"name": "slave",
-				"recipeIds": null,
-				"recipeNames": null,
-				"recipes": null,
-				"recoveryMode": "AUTO"
-			}
-		],
-		"name": "____",
-		"password": "",
-		"rdsConfigIds": null,
-		"rdsConfigJsons": null,
-		"userName": "____"
+		"ambariRequest": {
+			"blueprintName": "____",					// Name of the selected blueprint
+			"password": "",								// Password of the Ambari user
+			"userName": "____"							// Name of the Ambari user
+		}
 	},
-	"credentialName": "____",
+	"credentialName": "____",							// Name of the selected credential
 	"instanceGroups": [
 		{
-			"group": "master",
-			"nodeCount": 1,
+			"group": "master",							// Name of the instance group
+			"nodeCount": 1,								// Number of nodes in the group
 			"securityGroup": {
-				"cloudPlatform": "OPENSTACK",
-				"name": null,
 				"securityRules": [
 					{
 						"ports": "22",
@@ -80,74 +46,24 @@ var StackTemplateHelp = `
 				]
 			},
 			"template": {
-				"cloudPlatform": "OPENSTACK",
-				"instanceType": "____",
-				"name": null,
+				"instanceType": "____",					// Name of the selected template
 				"parameters": {
 					"encrypted": false,
 					"sshLocation": "0.0.0.0/0"
 				},
-				"volumeCount": 1,
-				"volumeSize": 10
+				"volumeCount": 1,						// Number of volumes
+				"volumeSize": 10						// Size of Volumes in Gb
 			},
-			"type": "GATEWAY"
-		},
-		{
-			"group": "slave",
-			"nodeCount": 1,
-			"securityGroup": {
-				"cloudPlatform": "OPENSTACK",
-				"name": null,
-				"securityRules": [
-					{
-						"ports": "22",
-						"protocol": "tcp",
-						"subnet": "0.0.0.0/0"
-					},
-					{
-						"ports": "443",
-						"protocol": "tcp",
-						"subnet": "0.0.0.0/0"
-					},
-					{
-						"ports": "9443",
-						"protocol": "tcp",
-						"subnet": "0.0.0.0/0"
-					}
-				]
-			},
-			"template": {
-				"cloudPlatform": "OPENSTACK",
-				"instanceType": "____",
-				"name": null,
-				"parameters": {
-					"encrypted": false,
-					"sshLocation": "0.0.0.0/0"
-				},
-				"volumeCount": 1,
-				"volumeSize": 10
-			},
-			"type": "CORE"
+			"type": "GATEWAY"							// Type of the group [GATEWAY, CORE]
 		}
 	],
-	"name": "____",
-	"network": {
-		"cloudPlatform": "OPENSTACK",
-		"name": null,
-		"parameters": {
-			"publicNetId": ""
-		},
-		"subnetCIDR": "10.0.0.0/16"
-	},
+	"name": "____",										// Name of the cluster
 	"orchestrator": {
-		"type": "SALT"
+		"type": "SALT"									// Type of the orhestrator [SALT, CONTAINER]
 	},
-	"parameters": {
-		"instanceProfileStrategy": "CREATE"
-	},
-	"region": "____",
+	"region": "____",									// Region of the cluster
 	"stackAuthentication": {
-		"publicKey": "____"
+		"publicKey": "____"								// Public key
 	}
 }`
 

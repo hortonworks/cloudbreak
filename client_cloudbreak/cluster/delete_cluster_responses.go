@@ -53,7 +53,7 @@ func (o *DeleteClusterDefault) Code() int {
 }
 
 func (o *DeleteClusterDefault) Error() string {
-	return fmt.Sprintf("[DELETE /stacks/{id}/cluster][%d] deleteCluster default ", o._statusCode)
+	return fmt.Sprintf("[DELETE /v1/stacks/{id}/cluster][%d] deleteCluster default ", o._statusCode)
 }
 
 func (o *DeleteClusterDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

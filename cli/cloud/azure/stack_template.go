@@ -10,3 +10,7 @@ func (p *AzureProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map
 		return nil
 	}
 }
+
+func (p *AzureProvider) GetParamatersTemplate() map[string]string {
+	return nil
+}

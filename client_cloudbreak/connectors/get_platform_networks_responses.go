@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
-	"github.com/go-openapi/swag"
 	"github.com/go-openapi/validate"
 
 	strfmt "github.com/go-openapi/strfmt"
@@ -74,10 +73,6 @@ func (o GetPlatformNetworksOKBody) Validate(formats strfmt.Registry) error {
 		}
 
 		for i := 0; i < len(o[k]); i++ {
-
-			if swag.IsZero(o[k][i]) {
-				continue
-			}
 
 		}
 

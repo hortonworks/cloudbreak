@@ -9,7 +9,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/stacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1stacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v2stacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -43,26 +44,26 @@ func CreateStack(c *cli.Context) {
 
 	req := assembleStackRequest(c)
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	createStackImpl(cbClient.Cloudbreak.Stacks, req, c.Bool(FlPublic.Name))
+	createStackImpl(cbClient.Cloudbreak.V2stacks, req, c.Bool(FlPublic.Name))
 }
 
 type createStackClient interface {
-	PostPublicStack(*stacks.PostPublicStackParams) (*stacks.PostPublicStackOK, error)
-	PostPrivateStack(*stacks.PostPrivateStackParams) (*stacks.PostPrivateStackOK, error)
+	PostPublicStackV2(*v2stacks.PostPublicStackV2Params) (*v2stacks.PostPublicStackV2OK, error)
+	PostPrivateStackV2(*v2stacks.PostPrivateStackV2Params) (*v2stacks.PostPrivateStackV2OK, error)
 }
 
-func createStackImpl(client createStackClient, req *models_cloudbreak.StackRequest, public bool) *models_cloudbreak.StackResponse {
+func createStackImpl(client createStackClient, req *models_cloudbreak.StackV2Request, public bool) *models_cloudbreak.StackResponse {
 	var stack *models_cloudbreak.StackResponse
 	if public {
 		log.Infof("[createStackImpl] sending create public stack request")
-		resp, err := client.PostPublicStack(stacks.NewPostPublicStackParams().WithBody(req))
+		resp, err := client.PostPublicStackV2(v2stacks.NewPostPublicStackV2Params().WithBody(req))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		stack = resp.Payload
 	} else {
 		log.Infof("[createStackImpl] sending create private stack request")
-		resp, err := client.PostPrivateStack(stacks.NewPostPrivateStackParams().WithBody(req))
+		resp, err := client.PostPrivateStackV2(v2stacks.NewPostPrivateStackV2Params().WithBody(req))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
@@ -72,7 +73,7 @@ func createStackImpl(client createStackClient, req *models_cloudbreak.StackReque
 	return stack
 }
 
-func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackRequest {
+func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 	path := c.String(FlInputJson.Name)
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		utils.LogErrorAndExit(err)
@@ -81,7 +82,7 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackRequest {
 	log.Infof("[assembleStackTemplate] read cluster create json from file: %s", path)
 	content := utils.ReadFile(path)
 
-	var req models_cloudbreak.StackRequest
+	var req models_cloudbreak.StackV2Request
 	err := json.Unmarshal(content, &req)
 	if err != nil {
 		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
@@ -90,13 +91,14 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackRequest {
 
 	name := c.String(FlName.Name)
 	req.Name = &name
-	if req.ClusterRequest != nil {
-		req.ClusterRequest.Name = &name
-	}
 
 	ambariPassword := c.String(FlAmbariPasswordOptional.Name)
 	if len(ambariPassword) != 0 {
-		req.ClusterRequest.Password = &ambariPassword
+		if req.ClusterRequest != nil && req.ClusterRequest.AmbariRequest != nil {
+			req.ClusterRequest.AmbariRequest.Password = &ambariPassword
+		} else {
+			utils.LogErrorMessageAndExit("Missing clusterRequest.ambariRequest node in JSON")
+		}
 	}
 
 	return &req
@@ -116,7 +118,7 @@ func DescribeStack(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	resp, err := cbClient.Cloudbreak.Stacks.GetPublicStack(stacks.NewGetPublicStackParams().WithName(c.String(FlName.Name)))
+	resp, err := cbClient.Cloudbreak.V1stacks.GetPublicStack(v1stacks.NewGetPublicStackParams().WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -141,16 +143,16 @@ func ListStacks(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	listStacksImpl(cbClient.Cloudbreak.Stacks, output.WriteList)
+	listStacksImpl(cbClient.Cloudbreak.V1stacks, output.WriteList)
 }
 
 type getPublicsStackClient interface {
-	GetPublicsStack(*stacks.GetPublicsStackParams) (*stacks.GetPublicsStackOK, error)
+	GetPublicsStack(*v1stacks.GetPublicsStackParams) (*v1stacks.GetPublicsStackOK, error)
 }
 
 func listStacksImpl(client getPublicsStackClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listStacksImpl] sending stack list request")
-	stacksResp, err := client.GetPublicsStack(stacks.NewGetPublicsStackParams())
+	stacksResp, err := client.GetPublicsStack(v1stacks.NewGetPublicsStackParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

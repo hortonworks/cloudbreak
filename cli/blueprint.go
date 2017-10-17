@@ -10,7 +10,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/blueprints"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1blueprints"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -36,7 +36,7 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	urlLocation := c.String(FlURL.Name)
 	createBlueprintImpl(
-		cbClient.Cloudbreak.Blueprints,
+		cbClient.Cloudbreak.V1blueprints,
 		c.String(FlName.Name),
 		c.String(FlDescription.Name),
 		c.Bool(FlPublic.Name),
@@ -50,7 +50,7 @@ func CreateBlueprintFromFile(c *cli.Context) {
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	fileLocation := c.String(FlFile.Name)
 	createBlueprintImpl(
-		cbClient.Cloudbreak.Blueprints,
+		cbClient.Cloudbreak.V1blueprints,
 		c.String(FlName.Name),
 		c.String(FlDescription.Name),
 		c.Bool(FlPublic.Name),
@@ -68,14 +68,14 @@ func createBlueprintImpl(client blueprintClient, name string, description string
 	var blueprint *models_cloudbreak.BlueprintResponse
 	if public {
 		log.Infof("[createBlueprintImpl] sending create public blueprint request")
-		resp, err := client.PostPublicBlueprint(blueprints.NewPostPublicBlueprintParams().WithBody(bpRequest))
+		resp, err := client.PostPublicBlueprint(v1blueprints.NewPostPublicBlueprintParams().WithBody(bpRequest))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		blueprint = resp.Payload
 	} else {
 		log.Infof("[createBlueprintImpl] sending create private blueprint request")
-		resp, err := client.PostPrivateBlueprint(blueprints.NewPostPrivateBlueprintParams().WithBody(bpRequest))
+		resp, err := client.PostPrivateBlueprint(v1blueprints.NewPostPrivateBlueprintParams().WithBody(bpRequest))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
@@ -91,16 +91,16 @@ func DescribeBlueprint(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	bp := fetchBlueprint(c.String(FlName.Name), cbClient.Cloudbreak.Blueprints)
+	bp := fetchBlueprint(c.String(FlName.Name), cbClient.Cloudbreak.V1blueprints)
 	output.Write(blueprintHeader, convertResponseToBlueprint(bp))
 }
 
 type getPublicBlueprint interface {
-	GetPublicBlueprint(*blueprints.GetPublicBlueprintParams) (*blueprints.GetPublicBlueprintOK, error)
+	GetPublicBlueprint(*v1blueprints.GetPublicBlueprintParams) (*v1blueprints.GetPublicBlueprintOK, error)
 }
 
 func fetchBlueprint(name string, client getPublicBlueprint) *models_cloudbreak.BlueprintResponse {
-	resp, err := client.GetPublicBlueprint(blueprints.NewGetPublicBlueprintParams().WithName(name))
+	resp, err := client.GetPublicBlueprint(v1blueprints.NewGetPublicBlueprintParams().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -112,12 +112,12 @@ func DeleteBlueprint(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "delete blueprint")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	deleteBlueprintsImpl(cbClient.Cloudbreak.Blueprints, c.String(FlName.Name))
+	deleteBlueprintsImpl(cbClient.Cloudbreak.V1blueprints, c.String(FlName.Name))
 }
 
 func deleteBlueprintsImpl(client blueprintClient, name string) {
 	log.Infof("[deleteBlueprintsImpl] sending delete blueprint request with name: %s", name)
-	err := client.DeletePrivateBlueprint(blueprints.NewDeletePrivateBlueprintParams().WithName(name))
+	err := client.DeletePrivateBlueprint(v1blueprints.NewDeletePrivateBlueprintParams().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -130,19 +130,19 @@ func ListBlueprints(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	listBlueprintsImpl(cbClient.Cloudbreak.Blueprints, output.WriteList)
+	listBlueprintsImpl(cbClient.Cloudbreak.V1blueprints, output.WriteList)
 }
 
 type blueprintClient interface {
-	PostPrivateBlueprint(params *blueprints.PostPrivateBlueprintParams) (*blueprints.PostPrivateBlueprintOK, error)
-	PostPublicBlueprint(params *blueprints.PostPublicBlueprintParams) (*blueprints.PostPublicBlueprintOK, error)
-	GetPrivatesBlueprint(params *blueprints.GetPrivatesBlueprintParams) (*blueprints.GetPrivatesBlueprintOK, error)
-	DeletePrivateBlueprint(params *blueprints.DeletePrivateBlueprintParams) error
+	PostPrivateBlueprint(params *v1blueprints.PostPrivateBlueprintParams) (*v1blueprints.PostPrivateBlueprintOK, error)
+	PostPublicBlueprint(params *v1blueprints.PostPublicBlueprintParams) (*v1blueprints.PostPublicBlueprintOK, error)
+	GetPrivatesBlueprint(params *v1blueprints.GetPrivatesBlueprintParams) (*v1blueprints.GetPrivatesBlueprintOK, error)
+	DeletePrivateBlueprint(params *v1blueprints.DeletePrivateBlueprintParams) error
 }
 
 func listBlueprintsImpl(client blueprintClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listBlueprintsImpl] sending blueprint list request")
-	resp, err := client.GetPrivatesBlueprint(blueprints.NewGetPrivatesBlueprintParams())
+	resp, err := client.GetPrivatesBlueprint(v1blueprints.NewGetPrivatesBlueprintParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

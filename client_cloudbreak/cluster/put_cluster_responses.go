@@ -53,7 +53,7 @@ func (o *PutClusterDefault) Code() int {
 }
 
 func (o *PutClusterDefault) Error() string {
-	return fmt.Sprintf("[PUT /stacks/{id}/cluster][%d] putCluster default ", o._statusCode)
+	return fmt.Sprintf("[PUT /v1/stacks/{id}/cluster][%d] putCluster default ", o._statusCode)
 }
 
 func (o *PutClusterDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

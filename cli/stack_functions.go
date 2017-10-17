@@ -7,7 +7,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/stacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1stacks"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -17,17 +17,17 @@ func (c *Cloudbreak) waitForClusterToFinish(stackID int64, context *cli.Context)
 		defer utils.TimeTrack(time.Now(), "cluster installation/update")
 
 		log.Infof("[WaitForClusterToFinish] wait for cluster to finish")
-		waitForClusterToFinishImpl(stackID, c.Cloudbreak.Stacks)
+		waitForClusterToFinishImpl(stackID, c.Cloudbreak.V1stacks)
 	}
 }
 
 type getStackClient interface {
-	GetStack(*stacks.GetStackParams) (*stacks.GetStackOK, error)
+	GetStack(*v1stacks.GetStackParams) (*v1stacks.GetStackOK, error)
 }
 
 func waitForClusterToFinishImpl(stackID int64, client getStackClient) {
 	for {
-		resp, err := client.GetStack(&stacks.GetStackParams{ID: stackID})
+		resp, err := client.GetStack(&v1stacks.GetStackParams{ID: stackID})
 
 		if err != nil {
 			utils.LogErrorAndExit(err)
@@ -55,7 +55,7 @@ func (c *Cloudbreak) getStackByName(name string) *models_cloudbreak.StackRespons
 	defer utils.TimeTrack(time.Now(), "get stack by name")
 
 	log.Infof("[getStackByName] delete autoscaling cluster, name: %s", name)
-	stack, err := c.Cloudbreak.Stacks.GetPublicStack(stacks.NewGetPublicStackParams().WithName(name))
+	stack, err := c.Cloudbreak.V1stacks.GetPublicStack(v1stacks.NewGetPublicStackParams().WithName(name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -68,9 +68,9 @@ func (c *Cloudbreak) deleteStack(name string, forced bool, public bool) {
 	log.Infof("[deleteStack] deleting stack, name: %s", name)
 	var err error
 	if public {
-		err = c.Cloudbreak.Stacks.DeletePublicStack(stacks.NewDeletePublicStackParams().WithName(name).WithForced(&forced))
+		err = c.Cloudbreak.V1stacks.DeletePublicStack(v1stacks.NewDeletePublicStackParams().WithName(name).WithForced(&forced))
 	} else {
-		err = c.Cloudbreak.Stacks.DeletePrivateStack(stacks.NewDeletePrivateStackParams().WithName(name).WithForced(&forced))
+		err = c.Cloudbreak.V1stacks.DeletePrivateStack(v1stacks.NewDeletePrivateStackParams().WithName(name).WithForced(&forced))
 	}
 	if err != nil {
 		utils.LogErrorAndExit(err)

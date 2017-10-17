@@ -51,7 +51,7 @@ type GetClusterOK struct {
 }
 
 func (o *GetClusterOK) Error() string {
-	return fmt.Sprintf("[GET /stacks/{id}/cluster][%d] getClusterOK  %+v", 200, o.Payload)
+	return fmt.Sprintf("[GET /v1/stacks/{id}/cluster][%d] getClusterOK  %+v", 200, o.Payload)
 }
 
 func (o *GetClusterOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {

@@ -7,7 +7,7 @@ import (
 	"github.com/hortonworks/cb-cli/cli/cloud"
 	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/credentials"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1credentials"
 	"github.com/hortonworks/cb-cli/models_cloudbreak"
 	"github.com/urfave/cli"
 )
@@ -37,12 +37,12 @@ func createCredential(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "create credential")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	createCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.Credentials)
+	createCredentialImpl(c.String, c.Bool, cbClient.Cloudbreak.V1credentials)
 }
 
 type createCredentialClient interface {
-	PostPublicCredential(*credentials.PostPublicCredentialParams) (*credentials.PostPublicCredentialOK, error)
-	PostPrivateCredential(*credentials.PostPrivateCredentialParams) (*credentials.PostPrivateCredentialOK, error)
+	PostPublicCredential(*v1credentials.PostPublicCredentialParams) (*v1credentials.PostPublicCredentialOK, error)
+	PostPrivateCredential(*v1credentials.PostPrivateCredentialParams) (*v1credentials.PostPrivateCredentialOK, error)
 }
 
 func createCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client createCredentialClient) *models_cloudbreak.CredentialResponse {
@@ -64,14 +64,14 @@ func createCredentialImpl(stringFinder func(string) string, boolFinder func(stri
 	public := boolFinder(FlPublic.Name)
 	if public {
 		log.Infof("[createCredentialImpl] sending create public credential request")
-		resp, err := client.PostPublicCredential(credentials.NewPostPublicCredentialParams().WithBody(credReq))
+		resp, err := client.PostPublicCredential(v1credentials.NewPostPublicCredentialParams().WithBody(credReq))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
 		credential = resp.Payload
 	} else {
 		log.Infof("[createCredentialImpl] sending create private credential request")
-		resp, err := client.PostPrivateCredential(credentials.NewPostPrivateCredentialParams().WithBody(credReq))
+		resp, err := client.PostPrivateCredential(v1credentials.NewPostPrivateCredentialParams().WithBody(credReq))
 		if err != nil {
 			utils.LogErrorAndExit(err)
 		}
@@ -87,7 +87,7 @@ func DescribeCredential(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	resp, err := cbClient.Cloudbreak.Credentials.GetPublicCredential(credentials.NewGetPublicCredentialParams().WithName(c.String(FlName.Name)))
+	resp, err := cbClient.Cloudbreak.V1credentials.GetPublicCredential(v1credentials.NewGetPublicCredentialParams().WithName(c.String(FlName.Name)))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
@@ -103,7 +103,7 @@ func DeleteCredential(c *cli.Context) {
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	log.Infof("[DeleteCredential] sending delete credential request with name: %s", name)
-	if err := cbClient.Cloudbreak.Credentials.DeletePublicCredential(credentials.NewDeletePublicCredentialParams().WithName(name)); err != nil {
+	if err := cbClient.Cloudbreak.V1credentials.DeletePublicCredential(v1credentials.NewDeletePublicCredentialParams().WithName(name)); err != nil {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[DeleteCredential] credential deleted, name: %s", name)
@@ -115,16 +115,16 @@ func ListCredentials(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	output := utils.Output{Format: c.String(FlOutput.Name)}
-	listCredentialsImpl(cbClient.Cloudbreak.Credentials, output.WriteList)
+	listCredentialsImpl(cbClient.Cloudbreak.V1credentials, output.WriteList)
 }
 
 type getPublicsCredentialClient interface {
-	GetPublicsCredential(*credentials.GetPublicsCredentialParams) (*credentials.GetPublicsCredentialOK, error)
+	GetPublicsCredential(*v1credentials.GetPublicsCredentialParams) (*v1credentials.GetPublicsCredentialOK, error)
 }
 
 func listCredentialsImpl(client getPublicsCredentialClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listCredentialsImpl] sending credential list request")
-	credResp, err := client.GetPublicsCredential(credentials.NewGetPublicsCredentialParams())
+	credResp, err := client.GetPublicsCredential(v1credentials.NewGetPublicsCredentialParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

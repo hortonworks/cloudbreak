@@ -11,29 +11,31 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/cb-cli/client_cloudbreak/accountpreferences"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/blueprints"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/cluster"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/clustertemplates"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/connectors"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/constraints"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/credentials"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/events"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/flexsubscriptions"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/ldap"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/networks"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/rdsconfigs"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/recipes"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/securitygroups"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/settings"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/smartsensesubscriptions"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/stacks"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/subscriptions"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/templates"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/topologies"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/usages"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/users"
-	"github.com/hortonworks/cb-cli/client_cloudbreak/util"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1accountpreferences"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1blueprints"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1clustertemplates"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1connectors"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1constraints"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1credentials"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1events"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1flexsubscriptions"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1ldap"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1networks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1rdsconfigs"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1recipes"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1securitygroups"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1settings"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1smartsensesubscriptions"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1stacks"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1subscriptions"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1templates"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1topologies"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1usages"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1users"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v1util"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v2connectors"
+	"github.com/hortonworks/cb-cli/client_cloudbreak/v2stacks"
 )
 
 // Default cloudbreak HTTP client.
@@ -45,7 +47,7 @@ const (
 	DefaultHost string = "localhost"
 	// DefaultBasePath is the default BasePath
 	// found in Meta (info) section of spec file
-	DefaultBasePath string = "/api/v1"
+	DefaultBasePath string = "/api"
 )
 
 // DefaultSchemes are the default schemes found in Meta (info) section of spec file
@@ -77,51 +79,55 @@ func New(transport runtime.ClientTransport, formats strfmt.Registry) *Cloudbreak
 	cli := new(Cloudbreak)
 	cli.Transport = transport
 
-	cli.Accountpreferences = accountpreferences.New(transport, formats)
-
-	cli.Blueprints = blueprints.New(transport, formats)
-
 	cli.Cluster = cluster.New(transport, formats)
 
-	cli.Clustertemplates = clustertemplates.New(transport, formats)
+	cli.V1accountpreferences = v1accountpreferences.New(transport, formats)
 
-	cli.Connectors = connectors.New(transport, formats)
+	cli.V1blueprints = v1blueprints.New(transport, formats)
 
-	cli.Constraints = constraints.New(transport, formats)
+	cli.V1clustertemplates = v1clustertemplates.New(transport, formats)
 
-	cli.Credentials = credentials.New(transport, formats)
+	cli.V1connectors = v1connectors.New(transport, formats)
 
-	cli.Events = events.New(transport, formats)
+	cli.V1constraints = v1constraints.New(transport, formats)
 
-	cli.Flexsubscriptions = flexsubscriptions.New(transport, formats)
+	cli.V1credentials = v1credentials.New(transport, formats)
 
-	cli.Ldap = ldap.New(transport, formats)
+	cli.V1events = v1events.New(transport, formats)
 
-	cli.Networks = networks.New(transport, formats)
+	cli.V1flexsubscriptions = v1flexsubscriptions.New(transport, formats)
 
-	cli.Rdsconfigs = rdsconfigs.New(transport, formats)
+	cli.V1ldap = v1ldap.New(transport, formats)
 
-	cli.Recipes = recipes.New(transport, formats)
+	cli.V1networks = v1networks.New(transport, formats)
 
-	cli.Securitygroups = securitygroups.New(transport, formats)
+	cli.V1rdsconfigs = v1rdsconfigs.New(transport, formats)
 
-	cli.Settings = settings.New(transport, formats)
+	cli.V1recipes = v1recipes.New(transport, formats)
 
-	cli.Smartsensesubscriptions = smartsensesubscriptions.New(transport, formats)
+	cli.V1securitygroups = v1securitygroups.New(transport, formats)
 
-	cli.Stacks = stacks.New(transport, formats)
+	cli.V1settings = v1settings.New(transport, formats)
 
-	cli.Subscriptions = subscriptions.New(transport, formats)
+	cli.V1smartsensesubscriptions = v1smartsensesubscriptions.New(transport, formats)
 
-	cli.Templates = templates.New(transport, formats)
+	cli.V1stacks = v1stacks.New(transport, formats)
 
-	cli.Topologies = topologies.New(transport, formats)
+	cli.V1subscriptions = v1subscriptions.New(transport, formats)
 
-	cli.Usages = usages.New(transport, formats)
+	cli.V1templates = v1templates.New(transport, formats)
 
-	cli.Users = users.New(transport, formats)
+	cli.V1topologies = v1topologies.New(transport, formats)
 
-	cli.Util = util.New(transport, formats)
+	cli.V1usages = v1usages.New(transport, formats)
+
+	cli.V1users = v1users.New(transport, formats)
+
+	cli.V1util = v1util.New(transport, formats)
+
+	cli.V2connectors = v2connectors.New(transport, formats)
+
+	cli.V2stacks = v2stacks.New(transport, formats)
 
 	return cli
 }
@@ -167,51 +173,55 @@ func (cfg *TransportConfig) WithSchemes(schemes []string) *TransportConfig {
 
 // Cloudbreak is a client for cloudbreak
 type Cloudbreak struct {
-	Accountpreferences *accountpreferences.Client
-
-	Blueprints *blueprints.Client
-
 	Cluster *cluster.Client
 
-	Clustertemplates *clustertemplates.Client
+	V1accountpreferences *v1accountpreferences.Client
 
-	Connectors *connectors.Client
+	V1blueprints *v1blueprints.Client
 
-	Constraints *constraints.Client
+	V1clustertemplates *v1clustertemplates.Client
 
-	Credentials *credentials.Client
+	V1connectors *v1connectors.Client
 
-	Events *events.Client
+	V1constraints *v1constraints.Client
 
-	Flexsubscriptions *flexsubscriptions.Client
+	V1credentials *v1credentials.Client
 
-	Ldap *ldap.Client
+	V1events *v1events.Client
 
-	Networks *networks.Client
+	V1flexsubscriptions *v1flexsubscriptions.Client
 
-	Rdsconfigs *rdsconfigs.Client
+	V1ldap *v1ldap.Client
 
-	Recipes *recipes.Client
+	V1networks *v1networks.Client
 
-	Securitygroups *securitygroups.Client
+	V1rdsconfigs *v1rdsconfigs.Client
 
-	Settings *settings.Client
+	V1recipes *v1recipes.Client
 
-	Smartsensesubscriptions *smartsensesubscriptions.Client
+	V1securitygroups *v1securitygroups.Client
 
-	Stacks *stacks.Client
+	V1settings *v1settings.Client
 
-	Subscriptions *subscriptions.Client
+	V1smartsensesubscriptions *v1smartsensesubscriptions.Client
 
-	Templates *templates.Client
+	V1stacks *v1stacks.Client
 
-	Topologies *topologies.Client
+	V1subscriptions *v1subscriptions.Client
 
-	Usages *usages.Client
+	V1templates *v1templates.Client
 
-	Users *users.Client
+	V1topologies *v1topologies.Client
 
-	Util *util.Client
+	V1usages *v1usages.Client
+
+	V1users *v1users.Client
+
+	V1util *v1util.Client
+
+	V2connectors *v2connectors.Client
+
+	V2stacks *v2stacks.Client
 
 	Transport runtime.ClientTransport
 }
@@ -220,50 +230,54 @@ type Cloudbreak struct {
 func (c *Cloudbreak) SetTransport(transport runtime.ClientTransport) {
 	c.Transport = transport
 
-	c.Accountpreferences.SetTransport(transport)
-
-	c.Blueprints.SetTransport(transport)
-
 	c.Cluster.SetTransport(transport)
 
-	c.Clustertemplates.SetTransport(transport)
+	c.V1accountpreferences.SetTransport(transport)
 
-	c.Connectors.SetTransport(transport)
+	c.V1blueprints.SetTransport(transport)
 
-	c.Constraints.SetTransport(transport)
+	c.V1clustertemplates.SetTransport(transport)
 
-	c.Credentials.SetTransport(transport)
+	c.V1connectors.SetTransport(transport)
 
-	c.Events.SetTransport(transport)
+	c.V1constraints.SetTransport(transport)
 
-	c.Flexsubscriptions.SetTransport(transport)
+	c.V1credentials.SetTransport(transport)
 
-	c.Ldap.SetTransport(transport)
+	c.V1events.SetTransport(transport)
 
-	c.Networks.SetTransport(transport)
+	c.V1flexsubscriptions.SetTransport(transport)
 
-	c.Rdsconfigs.SetTransport(transport)
+	c.V1ldap.SetTransport(transport)
 
-	c.Recipes.SetTransport(transport)
+	c.V1networks.SetTransport(transport)
 
-	c.Securitygroups.SetTransport(transport)
+	c.V1rdsconfigs.SetTransport(transport)
 
-	c.Settings.SetTransport(transport)
+	c.V1recipes.SetTransport(transport)
 
-	c.Smartsensesubscriptions.SetTransport(transport)
+	c.V1securitygroups.SetTransport(transport)
 
-	c.Stacks.SetTransport(transport)
+	c.V1settings.SetTransport(transport)
 
-	c.Subscriptions.SetTransport(transport)
+	c.V1smartsensesubscriptions.SetTransport(transport)
 
-	c.Templates.SetTransport(transport)
+	c.V1stacks.SetTransport(transport)
 
-	c.Topologies.SetTransport(transport)
+	c.V1subscriptions.SetTransport(transport)
 
-	c.Usages.SetTransport(transport)
+	c.V1templates.SetTransport(transport)
 
-	c.Users.SetTransport(transport)
+	c.V1topologies.SetTransport(transport)
 
-	c.Util.SetTransport(transport)
+	c.V1usages.SetTransport(transport)
+
+	c.V1users.SetTransport(transport)
+
+	c.V1util.SetTransport(transport)
+
+	c.V2connectors.SetTransport(transport)
+
+	c.V2stacks.SetTransport(transport)
 
 }

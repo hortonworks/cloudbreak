@@ -51,21 +51,21 @@ build-windows:
 	GOOS=windows CGO_ENABLED=0 go build -a ${LDFLAGS} -o build/Windows/${BINARY}.exe main.go
 
 generate-swagger:
-	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
+	swagger generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client_cloudbreak -m models_cloudbreak
 	make fix-swagger
 
 generate-swagger-docker:
 	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.12.0 \
-	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/v1/swagger.json -c client_cloudbreak -m models_cloudbreak
+	generate client -f http://$(CB_IP):$(CB_PORT)/cb/api/swagger.json -c client_cloudbreak -m models_cloudbreak
 	make fix-swagger
 
 fix-swagger:
 	$(info fixed on master https://github.com/go-swagger/go-swagger/issues/1197#issuecomment-335610396)
 	go run swagger_fix/main.go --src models_cloudbreak/platform_gateways_response.go --operation remove-statement --exp validateGateways:range-0,for-0,if-1
 	go run swagger_fix/main.go --src models_cloudbreak/platform_ip_pools_response.go --operation remove-statement --exp validateIppools:range-0,for-0,if-1
-	go run swagger_fix/main.go --src client_cloudbreak/connectors/get_platform_networks_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
-	go run swagger_fix/main.go --src client_cloudbreak/connectors/get_platform_s_sh_keys_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
-	go run swagger_fix/main.go --src client_cloudbreak/connectors/get_platform_security_groups_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
+	go run swagger_fix/main.go --src client_cloudbreak/v1connectors/get_platform_networks_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
+	go run swagger_fix/main.go --src client_cloudbreak/v1connectors/get_platform_s_sh_keys_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
+	go run swagger_fix/main.go --src client_cloudbreak/v1connectors/get_platform_security_groups_responses.go --operation remove-statement --exp Validate:range-0,for-0,if-1
 	goimports -l -w models_cloudbreak
 	goimports -l -w client_cloudbreak
 	@gofmt -w ${GOFILES_NOVENDOR}

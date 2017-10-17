@@ -53,7 +53,7 @@ func (o *UpgradeClusterDefault) Code() int {
 }
 
 func (o *UpgradeClusterDefault) Error() string {
-	return fmt.Sprintf("[POST /stacks/{id}/cluster/upgrade][%d] upgradeCluster default ", o._statusCode)
+	return fmt.Sprintf("[POST /v1/stacks/{id}/cluster/upgrade][%d] upgradeCluster default ", o._statusCode)
 }
 
 func (o *UpgradeClusterDefault) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
