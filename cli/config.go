@@ -7,6 +7,7 @@ import (
 
 	"errors"
 
+	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/hdc-cli/cli/utils"
 	"github.com/mitchellh/go-homedir"
@@ -26,24 +27,30 @@ type Config struct {
 	Output   string `json:"output,omitempty" yaml:"output,omitempty"`
 }
 
-func (c Config) Json() string {
-	j, _ := json.MarshalIndent(c, "", "  ")
-	return string(j)
-}
+type ConfigList map[string]Config
 
 func (c Config) Yaml() string {
 	j, _ := yaml.Marshal(c)
 	return string(j)
 }
 
-func Configure(c *cli.Context) error {
+func (c ConfigList) Json() string {
+	j, _ := json.MarshalIndent(c, "", "  ")
+	return string(j)
+}
+
+func (c ConfigList) Yaml() string {
+	j, _ := yaml.Marshal(c)
+	return string(j)
+}
+
+func Configure(c *cli.Context) {
 	checkRequiredFlags(c)
 
-	err := writeConfigToFile(GetHomeDirectory(), c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name))
+	err := writeConfigToFile(GetHomeDirectory(), c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name), c.String(FlOutput.Name), c.String(FlProfile.Name))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	return nil
 }
 
 func GetHomeDirectory() string {
@@ -54,7 +61,7 @@ func GetHomeDirectory() string {
 	return homeDir
 }
 
-func ReadConfig(baseDir string) (*Config, error) {
+func ReadConfig(baseDir string, profile string) (*Config, error) {
 	configDir := baseDir + "/" + Config_dir
 	configFile := configDir + "/" + Config_file
 
@@ -67,18 +74,27 @@ func ReadConfig(baseDir string) (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-	var config Config
-	err = yaml.Unmarshal(content, &config)
+
+	var configList ConfigList
+	err = yaml.Unmarshal(content, &configList)
 	if err != nil {
 		return nil, err
 	}
 
-	return &config, nil
+	if config, valid := configList[profile]; valid {
+		log.Infof("[ReadConfig] selected profile: %s", profile)
+		return &config, nil
+	} else {
+		return nil, errors.New(fmt.Sprintf("Invalid profile selected: %s", profile))
+	}
 }
 
-func writeConfigToFile(baseDir string, server string, username string, password string, output string) error {
+func writeConfigToFile(baseDir string, server string, username string, password string, output string, profile string) error {
 	configDir := baseDir + "/" + Config_dir
 	configFile := configDir + "/" + Config_file
+	if len(profile) == 0 {
+		profile = "default"
+	}
 
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
 		log.Infof("[writeConfigToFile] create dir: %s", configDir)
@@ -91,9 +107,17 @@ func writeConfigToFile(baseDir string, server string, username string, password 
 	}
 
 	log.Infof("[writeConfigToFile] writing credentials to file: %s", configFile)
-	confJson := Config{Server: server, Username: username, Password: password, Output: output}.Yaml()
-	err := ioutil.WriteFile(configFile, []byte(confJson), 0600)
+
+	configs := ConfigList{
+		profile: Config{Server: server, Username: username, Password: password, Output: output},
+	}
+
+	f, err := os.OpenFile(configFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
+		return err
+	}
+	defer f.Close()
+	if _, err := f.Write([]byte(configs.Yaml())); err != nil {
 		return err
 	}
 

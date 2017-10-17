@@ -28,12 +28,18 @@ func ConfigRead(c *cli.Context) error {
 	username := c.String(cb.FlUsername.Name)
 	password := c.String(cb.FlPassword.Name)
 	output := c.String(cb.FlOutput.Name)
+	profile := c.String(cb.FlProfile.Name)
+	if len(profile) == 0 {
+		profile = "default"
+	}
 
-	config, err := cb.ReadConfig(cb.GetHomeDirectory())
-	if err == nil {
-		if len(output) == 0 {
-			c.Set(cb.FlOutput.Name, config.Output)
-		}
+	config, err := cb.ReadConfig(cb.GetHomeDirectory(), profile)
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+
+	if len(output) == 0 {
+		c.Set(cb.FlOutput.Name, config.Output)
 	}
 
 	if len(server) == 0 || len(username) == 0 || len(password) == 0 {
@@ -102,10 +108,10 @@ func main() {
 			Description: fmt.Sprintf("it will save the provided server address and credential "+
 				"to %s/%s/%s", cb.GetHomeDirectory(), cb.Config_dir, cb.Config_file),
 			Usage:  "configure the server address and credentials used to communicate with this server",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword).AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfile).AddOutputFlag().Build(),
 			Action: cb.Configure,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword).AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlServerRequired, cb.FlUsernameRequired, cb.FlPassword, cb.FlProfile).AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},

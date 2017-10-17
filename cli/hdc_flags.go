@@ -41,6 +41,14 @@ var (
 			EnvVar: "CB_OUT_FORMAT",
 		},
 	}
+	FlProfile = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:   "profile",
+			Usage:  "selects a config profile to use",
+			EnvVar: "CB_PROFILE",
+		},
+	}
 	FlForce = BoolFlag{
 		RequiredFlag: OPTIONAL,
 		BoolFlag: cli.BoolFlag{
@@ -356,7 +364,7 @@ func (fb *FlagBuilder) AddFlags(flags ...cli.Flag) *FlagBuilder {
 }
 
 func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
-	for _, f := range []cli.Flag{FlServer, FlUsername, FlPassword} {
+	for _, f := range []cli.Flag{FlServer, FlUsername, FlPassword, FlProfile} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

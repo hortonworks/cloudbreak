@@ -12,7 +12,7 @@ func TestWriteConfigToFileDirExists(t *testing.T) {
 	defer os.RemoveAll(tempDirName)
 	os.MkdirAll(tempDirName+string(filepath.Separator)+Config_dir, 0700)
 
-	writeConfigToFile(tempDirName, "server", "user", "password", "output")
+	writeConfigToFile(tempDirName, "server", "user", "password", "output", "default")
 
 	validateConfigContent(tempDirName, t)
 }
@@ -21,7 +21,7 @@ func TestWriteConfigToFileDirNotExists(t *testing.T) {
 	tempDirName, _ := ioutil.TempDir("", "configwritetest")
 	defer os.RemoveAll(tempDirName)
 
-	writeConfigToFile(tempDirName, "server", "user", "password", "output")
+	writeConfigToFile(tempDirName, "server", "user", "password", "output", "default")
 
 	validateConfigContent(tempDirName, t)
 }
@@ -29,7 +29,7 @@ func TestWriteConfigToFileDirNotExists(t *testing.T) {
 func validateConfigContent(tempDirName string, t *testing.T) {
 	content, _ := ioutil.ReadFile(tempDirName + string(filepath.Separator) + Config_dir + string(filepath.Separator) + Config_file)
 
-	expected := "username: user\npassword: password\nserver: server\noutput: output\n"
+	expected := "default:\n  username: user\n  password: password\n  server: server\n  output: output\n"
 	if string(content) != expected {
 		t.Errorf("content not match %s == %s", expected, string(content))
 	}
@@ -41,9 +41,9 @@ func TestReadConfig(t *testing.T) {
 
 	os.MkdirAll(tempDirName+string(filepath.Separator)+Config_dir, 0700)
 	password := "§±!@#$%^&*()_+-=[]{};'\\:\"/.,?><`~"
-	ioutil.WriteFile(tempDirName+string(filepath.Separator)+Config_dir+string(filepath.Separator)+Config_file, []byte("username: user\npassword: "+password+"\nserver: server\noutput: output\n"), 0700)
+	ioutil.WriteFile(tempDirName+string(filepath.Separator)+Config_dir+string(filepath.Separator)+Config_file, []byte("default:\n  username: user\n  password: "+password+"\n  server: server\n  output: output\n"), 0700)
 
-	config, err := ReadConfig(tempDirName)
+	config, err := ReadConfig(tempDirName, "default")
 
 	if err != nil {
 		t.Errorf("unable to read file: %s", err.Error())
