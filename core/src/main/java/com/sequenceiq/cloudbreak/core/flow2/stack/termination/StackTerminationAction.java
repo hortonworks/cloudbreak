@@ -14,9 +14,11 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.service.messages.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyRegistrator;
@@ -40,6 +42,9 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
 
     @Inject
     private ProxyRegistrator proxyRegistrator;
+
+    @Inject
+    private ClusterService clusterService;
 
     public StackTerminationAction() {
         super(TerminationEvent.class);
@@ -67,12 +72,21 @@ public class StackTerminationAction extends AbstractStackTerminationAction<Termi
             TerminateStackResult terminateStackResult = new TerminateStackResult(statusReason, new IllegalArgumentException(statusReason), terminateRequest);
             sendEvent(context.getFlowId(), StackTerminationEvent.TERMINATION_FAILED_EVENT.event(), terminateStackResult);
         } else {
+            putClusterToDeleteInProgressState(stack);
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_IN_PROGRESS, "Terminating the cluster and its infrastructure.");
             cloudbreakEventService.fireCloudbreakEvent(context.getStack().getId(), DELETE_IN_PROGRESS.name(),
                     messagesService.getMessage(Msg.STACK_DELETE_IN_PROGRESS.code()));
             LOGGER.debug("Assembling terminate stack event for stack: {}", stack);
             LOGGER.info("Triggering terminate stack event: {}", terminateRequest);
             sendEvent(context.getFlowId(), terminateRequest.selector(), terminateRequest);
+        }
+    }
+
+    private void putClusterToDeleteInProgressState(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            cluster.setStatus(DELETE_IN_PROGRESS);
+            clusterService.updateCluster(cluster);
         }
     }
 }
