@@ -125,7 +125,7 @@ public class StackDecorator implements Decorator<Stack> {
     private void prepareInstanceGroups(Stack subject, Object... data) {
         IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
         for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
-            if (instanceGroup.getTemplate() != null) {
+            if (instanceGroup.getTemplate() != null && instanceGroup.getTemplate().getId() == null) {
                 Template template = instanceGroup.getTemplate();
                 template.setPublicInAccount(subject.isPublicInAccount());
                 template.setCloudPlatform(subject.cloudPlatform());
@@ -134,7 +134,7 @@ public class StackDecorator implements Decorator<Stack> {
                 template = templateService.create(user, template);
                 instanceGroup.setTemplate(template);
             }
-            if (instanceGroup.getSecurityGroup() != null) {
+            if (instanceGroup.getSecurityGroup() != null && instanceGroup.getSecurityGroup().getId() == null) {
                 SecurityGroup securityGroup = instanceGroup.getSecurityGroup();
                 securityGroup.setPublicInAccount(subject.isPublicInAccount());
                 securityGroup.setCloudPlatform(subject.cloudPlatform());

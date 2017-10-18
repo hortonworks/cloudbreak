@@ -233,8 +233,8 @@ public class StackController implements StackEndpoint {
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest, stack, user);
-        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user, stackRequest.getFlexId());
         stack.setPublicInAccount(publicInAccount);
+        stack = stackDecorator.decorate(stack, stackRequest.getCredentialId(), stackRequest.getNetworkId(), user, stackRequest.getFlexId());
         validateAccountPreferences(stack, user);
         if (stack.getOrchestrator() != null && stack.getOrchestrator().getApiEndpoint() != null) {
             stackService.validateOrchestrator(stack.getOrchestrator());
