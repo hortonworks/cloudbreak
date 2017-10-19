@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.controller.mapper.TypeMismatchExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.UnsupportedOperationFailedExceptionMapper;
 import com.sequenceiq.cloudbreak.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.cloudbreak.filter.MDCContextFilter;
+import com.sequenceiq.cloudbreak.structuredevent.rest.StructuredEventFilter;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 import io.swagger.jaxrs.config.BeanConfig;
@@ -46,13 +47,22 @@ import io.swagger.jaxrs.config.SwaggerContextService;
 @ApplicationPath(CoreApi.API_ROOT_CONTEXT)
 @Component
 public class EndpointConfig extends ResourceConfig {
-
     private static final String VERSION_UNAVAILABLE = "unspecified";
 
     @Value("${info.app.version:}")
     private String cbVersion;
 
+    @Value("${cb.structuredevent.rest.enabled:false}")
+    private Boolean auditEnabled;
+
     public EndpointConfig() {
+    }
+
+    @PostConstruct
+    private void init() {
+        if (auditEnabled) {
+            register(StructuredEventFilter.class);
+        }
         registerEndpoints();
         registerExceptionMappers();
         register(MDCContextFilter.class);
@@ -136,6 +146,5 @@ public class EndpointConfig extends ResourceConfig {
         register(io.swagger.jaxrs.listing.ApiListingResource.class);
         register(io.swagger.jaxrs.listing.SwaggerSerializers.class);
         register(io.swagger.jaxrs.listing.AcceptHeaderApiListingResource.class);
-
     }
 }
