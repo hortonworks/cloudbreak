@@ -6,7 +6,7 @@ Use these steps to set up your local development environment, IDEA, command line
 
 ### Local Development Environment Setup
 
-Before setting up your development environment on OSX, you must install Docker and Boot2docker.
+Before setting up your development environment on OSX, you must install Docker and Docker Machine.
 
 The simplest way to prepare your working environment is to start Cloudbreak on your local machine using the Cloudbreak Deployer. The latest version of the Cloudbreak Deployer is available in [this github repository](https://github.com/hortonworks/cloudbreak-deployer).
 
