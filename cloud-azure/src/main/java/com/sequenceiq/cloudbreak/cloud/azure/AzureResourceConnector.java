@@ -248,6 +248,15 @@ public class AzureResourceConnector implements ResourceConnector<Map<String, Map
             List<CloudResourceStatus> check = new ArrayList<>(1);
             check.add(new CloudResourceStatus(resources.get(0), ResourceStatus.IN_PROGRESS));
             return check;
+        } catch (CloudException e) {
+            LOGGER.error("Upscale error, cloud exception happened: ", e);
+            if (e.body() != null && e.body().details() != null) {
+                String details = e.body().details().stream().map(CloudError::message).collect(Collectors.joining(", "));
+                throw new CloudConnectorException(String.format("Stack upscale failed, status code %s, error message: %s, details: %s",
+                        e.body().code(), e.body().message(), details));
+            } else {
+                throw new CloudConnectorException(String.format("Stack upscale failed: '%s', please go to Azure Portal for detailed message", e));
+            }
         } catch (Exception e) {
             throw new CloudConnectorException(String.format("Could not upscale: %s  ", stackName), e);
         }
