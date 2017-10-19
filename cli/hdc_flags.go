@@ -219,14 +219,14 @@ var (
 			Name: "app-password",
 		},
 	}
-	FlBlueprintFileLocation = StringFlag{
+	FlFile = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "file",
 			Usage: "location of the Ambari blueprint JSON file",
 		},
 	}
-	FlBlueprintURL = StringFlag{
+	FlURL = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "url",
@@ -247,19 +247,11 @@ var (
 			Usage: "location of the blueprint file",
 		},
 	}
-	// Not used jet as i know
-	FlClusterName = StringFlag{
+	FlExecutionType = StringFlag{
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
-			Name:  "cluster-name",
-			Usage: "name of a cluster",
-		},
-	}
-	FlClusterNameOptional = StringFlag{
-		RequiredFlag: OPTIONAL,
-		StringFlag: cli.StringFlag{
-			Name:  "cluster-name",
-			Usage: "name of a cluster",
+			Name:  "execution-type",
+			Usage: "type of execution [pre, post]",
 		},
 	}
 	FlAmbariPasswordOptional = StringFlag{

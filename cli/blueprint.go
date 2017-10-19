@@ -34,7 +34,7 @@ func CreateBlueprintFromUrl(c *cli.Context) {
 
 	log.Infof("[CreateBlueprintFromUrl] creating blueprint from a URL")
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	urlLocation := c.String(FlBlueprintURL.Name)
+	urlLocation := c.String(FlURL.Name)
 	createBlueprintImpl(
 		cbClient.Cloudbreak.Blueprints,
 		c.String(FlName.Name),
@@ -48,7 +48,7 @@ func CreateBlueprintFromFile(c *cli.Context) {
 
 	log.Infof("[CreateBlueprintFromFile] creating blueprint from a file")
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	fileLocation := c.String(FlBlueprintFileLocation.Name)
+	fileLocation := c.String(FlFile.Name)
 	createBlueprintImpl(
 		cbClient.Cloudbreak.Blueprints,
 		c.String(FlName.Name),
@@ -57,7 +57,7 @@ func CreateBlueprintFromFile(c *cli.Context) {
 		utils.ReadFile(fileLocation))
 }
 
-func createBlueprintImpl(client blueprintsClient, name string, description string, public bool, ambariBlueprint []byte) *models_cloudbreak.BlueprintResponse {
+func createBlueprintImpl(client blueprintClient, name string, description string, public bool, ambariBlueprint []byte) *models_cloudbreak.BlueprintResponse {
 	defer utils.TimeTrack(time.Now(), "create blueprint")
 	bpRequest := &models_cloudbreak.BlueprintRequest{
 		Name:            &name,
@@ -115,7 +115,7 @@ func DeleteBlueprint(c *cli.Context) {
 	deleteBlueprintsImpl(cbClient.Cloudbreak.Blueprints, c.String(FlName.Name))
 }
 
-func deleteBlueprintsImpl(client blueprintsClient, name string) {
+func deleteBlueprintsImpl(client blueprintClient, name string) {
 	log.Infof("[deleteBlueprintsImpl] sending delete blueprint request with name: %s", name)
 	err := client.DeletePrivateBlueprint(blueprints.NewDeletePrivateBlueprintParams().WithName(name))
 	if err != nil {
@@ -133,14 +133,14 @@ func ListBlueprints(c *cli.Context) {
 	listBlueprintsImpl(cbClient.Cloudbreak.Blueprints, output.WriteList)
 }
 
-type blueprintsClient interface {
+type blueprintClient interface {
 	PostPrivateBlueprint(params *blueprints.PostPrivateBlueprintParams) (*blueprints.PostPrivateBlueprintOK, error)
 	PostPublicBlueprint(params *blueprints.PostPublicBlueprintParams) (*blueprints.PostPublicBlueprintOK, error)
 	GetPrivatesBlueprint(params *blueprints.GetPrivatesBlueprintParams) (*blueprints.GetPrivatesBlueprintOK, error)
 	DeletePrivateBlueprint(params *blueprints.DeletePrivateBlueprintParams) error
 }
 
-func listBlueprintsImpl(client blueprintsClient, writer func([]string, []utils.Row)) {
+func listBlueprintsImpl(client blueprintClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listBlueprintsImpl] sending blueprint list request")
 	resp, err := client.GetPrivatesBlueprint(blueprints.NewGetPrivatesBlueprintParams())
 	if err != nil {

@@ -143,13 +143,13 @@ type getPublicsStackClient interface {
 
 func listStacksImpl(client getPublicsStackClient, writer func([]string, []utils.Row)) {
 	log.Infof("[listStacksImpl] sending stack list request")
-	stackResp, err := client.GetPublicsStack(stacks.NewGetPublicsStackParams())
+	stacksResp, err := client.GetPublicsStack(stacks.NewGetPublicsStackParams())
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
 
 	tableRows := []utils.Row{}
-	for _, stack := range stackResp.Payload {
+	for _, stack := range stacksResp.Payload {
 		tableRows = append(tableRows, convertResponseToStack(stack))
 	}
 

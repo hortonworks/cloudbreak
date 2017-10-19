@@ -249,31 +249,29 @@ func main() {
 			},
 		},
 		{
-			Name:   "create-blueprint",
-			Usage:  "adds a new Ambari blueprint from a file or from a URL",
-			Flags:  []cli.Flag{cb.FlServer, cb.FlUsername, cb.FlPassword},
-			Before: ConfigRead,
+			Name:  "create-blueprint",
+			Usage: "adds a new Ambari blueprint from a file or from a URL",
 			Subcommands: []cli.Command{
 				{
 					Name:   "from-url",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintURL).AddAuthenticationFlags().Build(),
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.CreateBlueprintFromUrl,
 					Usage:  "creates a blueprint by downloading it from a URL location",
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintURL).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlURL).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
 				},
 				{
 					Name:   "from-file",
-					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintFileLocation).AddAuthenticationFlags().Build(),
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build(),
 					Before: ConfigRead,
 					Action: cb.CreateBlueprintFromFile,
 					Usage:  "creates a blueprint by reading it from a local file",
 					BashComplete: func(c *cli.Context) {
-						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlBlueprintFileLocation).AddAuthenticationFlags().Build() {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlFile).AddAuthenticationFlags().Build() {
 							printFlagCompletion(f)
 						}
 					},
@@ -306,7 +304,7 @@ func main() {
 		},
 		{
 			Name:   "delete-blueprint",
-			Usage:  "deletes a blueprint from Cloudbreak",
+			Usage:  "deletes a blueprint",
 			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
 			Action: cb.DeleteBlueprint,
@@ -535,6 +533,72 @@ func main() {
 			Action: cb.DeleteStack,
 			BashComplete: func(c *cli.Context) {
 				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForce).AddAuthenticationFlags().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:  "create-recipe",
+			Usage: "adds a new recipe from a file or from a URL",
+			Subcommands: []cli.Command{
+				{
+					Name:   "from-url",
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.CreateRecipeFromUrl,
+					Usage:  "creates a recipe by downloading it from a URL location",
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlURL).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+				{
+					Name:   "from-file",
+					Flags:  cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlFile).AddAuthenticationFlags().Build(),
+					Before: ConfigRead,
+					Action: cb.CreateRecipeFromFile,
+					Usage:  "creates a recipe by reading it from a local file",
+					BashComplete: func(c *cli.Context) {
+						for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlExecutionType, cb.FlFile).AddAuthenticationFlags().Build() {
+							printFlagCompletion(f)
+						}
+					},
+				},
+			},
+		},
+		{
+			Name:   "describe-recipe",
+			Usage:  "describes a recipe",
+			Before: ConfigRead,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.DescribeRecipe,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "list-recipes",
+			Usage:  "lists the available recipes",
+			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
+			Before: ConfigRead,
+			Action: cb.ListRecipes,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "delete-recipe",
+			Usage:  "deletes a recipe",
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+			Before: ConfigRead,
+			Action: cb.DeleteRecipe,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},
