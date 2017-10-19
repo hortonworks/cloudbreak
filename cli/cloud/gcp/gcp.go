@@ -1,6 +1,6 @@
 package gcp
 
-import "github.com/hortonworks/hdc-cli/cli/cloud"
+import "github.com/hortonworks/cb-cli/cli/cloud"
 
 var name string
 

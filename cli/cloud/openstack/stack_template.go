@@ -1,6 +1,6 @@
 package openstack
 
-import "github.com/hortonworks/hdc-cli/cli/cloud"
+import "github.com/hortonworks/cb-cli/cli/cloud"
 
 func (p *OpenstackProvider) GetNetworkParamatersTemplate(mode cloud.NetworkMode) map[string]interface{} {
 	switch mode {

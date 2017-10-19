@@ -13,7 +13,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/hdc-cli/models_cloudbreak"
+	"github.com/hortonworks/cb-cli/models_cloudbreak"
 )
 
 // GetPublicFlexSubscriptionByNameReader is a Reader for the GetPublicFlexSubscriptionByName structure.

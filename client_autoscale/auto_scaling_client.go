@@ -11,11 +11,11 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/hdc-cli/client_autoscale/alerts"
-	"github.com/hortonworks/hdc-cli/client_autoscale/clusters"
-	"github.com/hortonworks/hdc-cli/client_autoscale/configurations"
-	"github.com/hortonworks/hdc-cli/client_autoscale/history"
-	"github.com/hortonworks/hdc-cli/client_autoscale/policies"
+	"github.com/hortonworks/cb-cli/client_autoscale/alerts"
+	"github.com/hortonworks/cb-cli/client_autoscale/clusters"
+	"github.com/hortonworks/cb-cli/client_autoscale/configurations"
+	"github.com/hortonworks/cb-cli/client_autoscale/history"
+	"github.com/hortonworks/cb-cli/client_autoscale/policies"
 )
 
 // Default auto scaling HTTP client.

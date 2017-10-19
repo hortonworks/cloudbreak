@@ -3,7 +3,7 @@ package aws
 import (
 	"testing"
 
-	"github.com/hortonworks/hdc-cli/cli/cloud"
+	"github.com/hortonworks/cb-cli/cli/cloud"
 )
 
 var provider cloud.CloudProvider = new(AwsProvider)

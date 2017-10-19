@@ -3,7 +3,7 @@ package gcp
 import (
 	"encoding/base64"
 
-	"github.com/hortonworks/hdc-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/cli/utils"
 )
 
 func (p *GcpProvider) CreateCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/cli/utils"
-	"github.com/hortonworks/hdc-cli/client_autoscale/clusters"
-	"github.com/hortonworks/hdc-cli/models_autoscale"
+	"github.com/hortonworks/cb-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/client_autoscale/clusters"
+	"github.com/hortonworks/cb-cli/models_autoscale"
 )
 
 func (as *Autoscaling) deleteCluster(name string, stackID int64) {

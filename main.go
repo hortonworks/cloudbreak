@@ -5,12 +5,12 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
-	cb "github.com/hortonworks/hdc-cli/cli"
-	_ "github.com/hortonworks/hdc-cli/cli/cloud/aws"
-	_ "github.com/hortonworks/hdc-cli/cli/cloud/azure"
-	_ "github.com/hortonworks/hdc-cli/cli/cloud/gcp"
-	_ "github.com/hortonworks/hdc-cli/cli/cloud/openstack"
-	"github.com/hortonworks/hdc-cli/cli/utils"
+	cb "github.com/hortonworks/cb-cli/cli"
+	_ "github.com/hortonworks/cb-cli/cli/cloud/aws"
+	_ "github.com/hortonworks/cb-cli/cli/cloud/azure"
+	_ "github.com/hortonworks/cb-cli/cli/cloud/gcp"
+	_ "github.com/hortonworks/cb-cli/cli/cloud/openstack"
+	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/urfave/cli"
 )
 

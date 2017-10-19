@@ -1,4 +1,4 @@
-# Hortonworks Data Cloud - Command Line Interface
+# Cloudbreak - Command Line Interface
 
 ## Install
 

@@ -5,7 +5,7 @@ package aws
 // 	"strings"
 // 	"testing"
 //
-// 	"github.com/hortonworks/hdc-cli/cli/cloud"
+// 	"github.com/hortonworks/cb-cli/cli/cloud"
 // )
 //
 // var cloudProvider cloud.CloudProvider = new(AwsProvider)

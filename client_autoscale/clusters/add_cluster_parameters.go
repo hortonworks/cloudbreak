@@ -17,7 +17,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/hdc-cli/models_autoscale"
+	"github.com/hortonworks/cb-cli/models_autoscale"
 )
 
 // NewAddClusterParams creates a new AddClusterParams object

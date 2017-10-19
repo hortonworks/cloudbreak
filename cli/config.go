@@ -9,7 +9,7 @@ import (
 
 	"fmt"
 	log "github.com/Sirupsen/logrus"
-	"github.com/hortonworks/hdc-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"

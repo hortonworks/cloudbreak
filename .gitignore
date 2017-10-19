@@ -27,7 +27,7 @@ _testmain.go
 *.test
 *.prof
 
-hdc-cli
+cb-cli
 build/
 debug
 .vscode/

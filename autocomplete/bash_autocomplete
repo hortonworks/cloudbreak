@@ -1,5 +1,5 @@
 #! /bin/bash
-: ${PROG:=hdc}
+: ${PROG:=cb}
 
 _cli_bash_autocomplete() {
      local cur opts base

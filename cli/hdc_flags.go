@@ -3,7 +3,7 @@ package cli
 import (
 	"reflect"
 
-	"github.com/hortonworks/hdc-cli/cli/utils"
+	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/urfave/cli"
 )
 

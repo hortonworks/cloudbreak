@@ -13,7 +13,7 @@ import (
 
 	strfmt "github.com/go-openapi/strfmt"
 
-	"github.com/hortonworks/hdc-cli/models_autoscale"
+	"github.com/hortonworks/cb-cli/models_autoscale"
 )
 
 // SetScalingConfigurationReader is a Reader for the SetScalingConfiguration structure.

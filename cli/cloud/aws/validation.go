@@ -7,7 +7,7 @@ package aws
 // 	"strings"
 //
 // 	"github.com/go-openapi/validate"
-// 	"github.com/hortonworks/hdc-cli/cli/cloud"
+// 	"github.com/hortonworks/cb-cli/cli/cloud"
 // )
 //
 // func (p *AwsProvider) ValidateNetwork(n *cloud.Network) []error {

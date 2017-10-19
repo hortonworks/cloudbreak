@@ -18,9 +18,9 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
-	"github.com/hortonworks/hdc-cli/cli/utils"
-	asapiclient "github.com/hortonworks/hdc-cli/client_autoscale"
-	apiclient "github.com/hortonworks/hdc-cli/client_cloudbreak"
+	"github.com/hortonworks/cb-cli/cli/utils"
+	asapiclient "github.com/hortonworks/cb-cli/client_autoscale"
+	apiclient "github.com/hortonworks/cb-cli/client_cloudbreak"
 )
 
 var PREFIX_TRIM []string = []string{"http://", "https://"}
