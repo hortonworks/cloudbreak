@@ -92,7 +92,7 @@ public class StackCreatorService {
         }
 
         stack = stackService.create(user, stack, stackRequest.getAmbariVersion(), stackRequest.getHdpVersion(),
-                stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getCustomImage()));
+                stackRequest.getImageCatalog(), Optional.ofNullable(stackRequest.getImageId()));
 
         if (stackRequest.getClusterRequest() != null) {
             Cluster cluster = clusterCreationService.prepare(stackRequest.getClusterRequest(), stack, user);

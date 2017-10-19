@@ -53,7 +53,7 @@ import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.HostMetadataState;
@@ -364,9 +364,9 @@ public class AmbariClusterConnector {
         // quick fix: this should be configured by StackAdvisor, but that's not working as of now
         blueprintText = llapConfigProvider.addToBlueprint(stack, blueprintText);
         if (!orchestratorTypeResolver.resolveType(stack.getOrchestrator()).containerOrchestrator()) {
-            HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
-            if (hdpRepo != null && hdpRepo.getHdpVersion() != null) {
-                blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, hdpRepo.getHdpVersion());
+            StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
+            if (stackRepoDetails != null && stackRepoDetails.getHdpVersion() != null) {
+                blueprintText = blueprintProcessor.modifyHdpVersion(blueprintText, stackRepoDetails.getHdpVersion());
             }
         }
         if (rdsConfigs != null && !rdsConfigs.isEmpty()) {
@@ -717,19 +717,19 @@ public class AmbariClusterConnector {
     }
 
     private void setBaseRepoURL(Stack stack, StackService ambariClient) throws CloudbreakException {
-        HDPRepo hdpRepo = null;
+        StackRepoDetails stackRepoDetails = null;
         Orchestrator orchestrator = stack.getOrchestrator();
         if (!orchestratorTypeResolver.resolveType(orchestrator).containerOrchestrator() || "YARN".equals(orchestrator.getType())) {
-            hdpRepo = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
+            stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
         }
-        if (hdpRepo != null) {
+        if (stackRepoDetails != null) {
             try {
-                LOGGER.info("Use specific Ambari repository: {}", hdpRepo);
-                Map<String, String> stackRepo = hdpRepo.getStack();
-                Map<String, String> utilRepo = hdpRepo.getUtil();
-                String stackRepoId = stackRepo.remove(HDPRepo.REPO_ID_TAG);
-                String utilRepoId = utilRepo.remove(HDPRepo.REPO_ID_TAG);
-                stackRepo.remove(HDPRepo.MPACK_TAG);
+                LOGGER.info("Use specific Ambari repository: {}", stackRepoDetails);
+                Map<String, String> stackRepo = stackRepoDetails.getStack();
+                Map<String, String> utilRepo = stackRepoDetails.getUtil();
+                String stackRepoId = stackRepo.remove(StackRepoDetails.REPO_ID_TAG);
+                String utilRepoId = utilRepo.remove(StackRepoDetails.REPO_ID_TAG);
+                stackRepo.remove(StackRepoDetails.MPACK_TAG);
                 String[] typeVersion = stackRepoId.split("-");
                 String stackType = typeVersion[0];
                 String version = "";
@@ -737,14 +737,14 @@ public class AmbariClusterConnector {
                     version = typeVersion[1];
                 }
                 for (Entry<String, String> entry : stackRepo.entrySet()) {
-                    addRepository(ambariClient, stackType, version, entry.getKey(), stackRepoId, entry.getValue(), hdpRepo.isVerify());
+                    addRepository(ambariClient, stackType, version, entry.getKey(), stackRepoId, entry.getValue(), stackRepoDetails.isVerify());
                 }
                 for (Entry<String, String> entry : utilRepo.entrySet()) {
-                    addRepository(ambariClient, stackType, version, entry.getKey(), utilRepoId, entry.getValue(), hdpRepo.isVerify());
+                    addRepository(ambariClient, stackType, version, entry.getKey(), utilRepoId, entry.getValue(), stackRepoDetails.isVerify());
                 }
             } catch (HttpResponseException e) {
                 String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
-                String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", hdpRepo.toString(), exceptionErrorMsg);
+                String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", stackRepoDetails.toString(), exceptionErrorMsg);
                 throw new BadRequestException(msg, e);
             }
         } else {
@@ -760,8 +760,8 @@ public class AmbariClusterConnector {
     private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {
         try {
             Cluster cluster = stack.getCluster();
-            HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
-            String repoId = hdpRepo.getStack().get("repoid");
+            StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
+            String repoId = stackRepoDetails.getStack().get("repoid");
             if (!repoId.startsWith("HDF") && !repoId.startsWith("hdf")) {
                 Map<String, Map<String, Map<String, String>>> hostGroupConfig = hadoopConfigurationService.getHostGroupConfiguration(cluster);
                 blueprintText = ambariClient.extendBlueprintHostGroupConfiguration(blueprintText, hostGroupConfig);

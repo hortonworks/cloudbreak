@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.model;
+package com.sequenceiq.cloudbreak.cloud.model.component;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,17 +9,17 @@ import org.springframework.stereotype.Component;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@ConfigurationProperties("cb.hdp")
+@ConfigurationProperties("cb.hdf")
 @Component
-public class DefaultHDPEntries {
+public class DefaultHDFEntries {
 
-    private Map<String, DefaultHDPInfo> entries = new HashMap<>();
+    private Map<String, DefaultHDFInfo> entries = new HashMap<>();
 
-    public Map<String, DefaultHDPInfo> getEntries() {
+    public Map<String, DefaultHDFInfo> getEntries() {
         return entries;
     }
 
-    public void setEntries(Map<String, DefaultHDPInfo> entries) {
+    public void setEntries(Map<String, DefaultHDFInfo> entries) {
         this.entries = entries;
     }
 }

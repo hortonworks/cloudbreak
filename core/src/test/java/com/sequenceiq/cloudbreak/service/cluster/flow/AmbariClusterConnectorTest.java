@@ -35,7 +35,7 @@ import com.sequenceiq.ambari.client.InvalidHostGroupHostAssociation;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.model.ConfigStrategy;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
@@ -233,11 +233,11 @@ public class AmbariClusterConnectorTest {
         when(ambariOperationService.waitForOperations(any(Stack.class), any(AmbariClient.class), anyMap(), any(AmbariOperationType.class)))
                 .thenReturn(PollingResult.TIMEOUT);
         when(orchestratorTypeResolver.resolveType(any(Orchestrator.class))).thenReturn(OrchestratorType.HOST);
-        when(clusterComponentConfigProvider.getHDPRepo(any())).thenAnswer((Answer<HDPRepo>) invocation -> {
-            HDPRepo hdpRepo = new HDPRepo();
-            hdpRepo.setStack(new HashMap<>(Collections.singletonMap(HDPRepo.REPO_ID_TAG, "stackRepoId")));
-            hdpRepo.setUtil(new HashMap<>(Collections.singletonMap(HDPRepo.REPO_ID_TAG, "utilRepoId")));
-            return hdpRepo;
+        when(clusterComponentConfigProvider.getHDPRepo(any())).thenAnswer((Answer<StackRepoDetails>) invocation -> {
+            StackRepoDetails stackRepoDetails = new StackRepoDetails();
+            stackRepoDetails.setStack(new HashMap<>(Collections.singletonMap(StackRepoDetails.REPO_ID_TAG, "stackRepoId")));
+            stackRepoDetails.setUtil(new HashMap<>(Collections.singletonMap(StackRepoDetails.REPO_ID_TAG, "utilRepoId")));
+            return stackRepoDetails;
         });
         when(cloudbreakMessagesService.getMessage(eq("ambari.cluster.install.failed"))).thenReturn("ambari.cluster.install.failed");
         thrown.expect(AmbariOperationFailedException.class);

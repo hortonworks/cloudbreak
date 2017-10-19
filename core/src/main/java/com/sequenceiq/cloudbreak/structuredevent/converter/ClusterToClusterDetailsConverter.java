@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.DatabaseVendor;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -83,10 +83,10 @@ public class ClusterToClusterDetailsConverter extends AbstractConversionServiceA
         if (ambariRepo != null) {
             clusterDetails.setAmbariVersion(ambariRepo.getVersion());
         }
-        HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
-        if (hdpRepo != null) {
-            clusterDetails.setClusterType(hdpRepo.getStack().get(HDPRepo.REPO_ID_TAG));
-            clusterDetails.setClusterVersion(hdpRepo.getHdpVersion());
+        StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(cluster.getId());
+        if (stackRepoDetails != null) {
+            clusterDetails.setClusterType(stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG));
+            clusterDetails.setClusterVersion(stackRepoDetails.getHdpVersion());
         }
         AmbariDatabase ambariDatabase = clusterComponentConfigProvider.getAmbariDatabase(cluster.getId());
         if (ambariDatabase != null) {

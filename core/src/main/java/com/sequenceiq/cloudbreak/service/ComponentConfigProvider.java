@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTemplate;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -86,13 +86,13 @@ public class ComponentConfigProvider {
         }
     }
 
-    public HDPRepo getHDPRepo(Long stackId) {
+    public StackRepoDetails getHDPRepo(Long stackId) {
         try {
             Component component = getComponent(stackId, ComponentType.HDP_REPO_DETAILS, ComponentType.HDP_REPO_DETAILS.name());
             if (component == null) {
                 return null;
             }
-            return component.getAttributes().get(HDPRepo.class);
+            return component.getAttributes().get(StackRepoDetails.class);
         } catch (IOException e) {
             throw new CloudbreakServiceException("Failed to read hdp repo details for stack.", e);
         }

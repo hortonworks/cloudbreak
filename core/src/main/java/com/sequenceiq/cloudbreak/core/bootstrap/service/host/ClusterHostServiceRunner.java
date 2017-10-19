@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.ExposedService;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -232,7 +232,7 @@ public class ClusterHostServiceRunner {
     }
 
     private void saveHDPPillar(Long clusterId, Map<String, SaltPillarProperties> servicePillar) {
-        HDPRepo hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
+        StackRepoDetails hdprepo = clusterComponentConfigProvider.getHDPRepo(clusterId);
         servicePillar.put("hdp", new SaltPillarProperties("/hdp/repo.sls", singletonMap("hdp", hdprepo)));
     }
 

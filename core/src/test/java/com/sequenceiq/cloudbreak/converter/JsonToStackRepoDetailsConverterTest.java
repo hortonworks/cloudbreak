@@ -6,9 +6,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 
-public class JsonToHDPRepoConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
+public class JsonToStackRepoDetailsConverterTest extends AbstractJsonConverterTest<AmbariStackDetailsJson> {
     private JsonToHDPRepoConverter underTest;
 
     @Before
@@ -20,7 +20,7 @@ public class JsonToHDPRepoConverterTest extends AbstractJsonConverterTest<Ambari
     public void testConvert() {
         // GIVEN
         // WHEN
-        HDPRepo result = underTest.convert(getRequest("stack/ambari-stack-details.json"));
+        StackRepoDetails result = underTest.convert(getRequest("stack/ambari-stack-details.json"));
         // THEN
         assertAllFieldsNotNull(result, Collections.singletonList("knox"));
     }

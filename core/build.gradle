@@ -155,6 +155,7 @@ class BuildInfoTask extends DefaultTask {
   def writeBuildInfo() {
     destination.mkdirs()
     File applicationDestination = new File(applicationPropertiesPath + "/resources/main")
+    String activeProfile = determineActiveProfile()
     applicationDestination.mkdirs()
     new File(destination, "build.info").withWriter { out ->
       [
@@ -165,8 +166,21 @@ class BuildInfoTask extends DefaultTask {
     new File(applicationDestination, "application.properties").withWriter { out ->
       [
               "info.app.name=" + basename,
-              "info.app.version=" + buildVersion
+              "info.app.version=" + buildVersion,
+              "spring.profiles.active=" + activeProfile
       ].each { out.println it }
     }
+  }
+
+  private String determineActiveProfile() {
+      String activeProfile = "dev"
+      if (buildVersion.contains("dev") || buildVersion.equals("unspecified")) {
+          activeProfile = "dev"
+      } else if (buildVersion.contains("rc")) {
+          activeProfile = "rc"
+      } else {
+          activeProfile = "prod"
+      }
+      return activeProfile
   }
 }

@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.api.model.StackAuthenticationResponse;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
@@ -189,9 +189,9 @@ public class StackToJsonConverter extends AbstractConversionServiceAwareConverte
     private StackResponse convertComponentConfig(StackResponse stackJson, Stack source) {
         try {
             if (source.getCluster() != null) {
-                HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(source.getCluster().getId());
-                if (hdpRepo != null) {
-                    stackJson.setHdpVersion(hdpRepo.getHdpVersion());
+                StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(source.getCluster().getId());
+                if (stackRepoDetails != null) {
+                    stackJson.setHdpVersion(stackRepoDetails.getHdpVersion());
                 }
 
                 AmbariRepo ambariRepo = clusterComponentConfigProvider.getAmbariRepo(source.getCluster().getId());

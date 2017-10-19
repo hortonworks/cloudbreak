@@ -1,15 +1,16 @@
-package com.sequenceiq.cloudbreak.cloud.model;
+package com.sequenceiq.cloudbreak.cloud.model.component;
 
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HDPInfo implements Versioned {
+public class StackInfo implements Versioned {
 
     private String version;
 
-    private HDPRepo repo;
+    private StackRepoDetails repo;
 
     private Map<String, Map<String, String>> images;
 
@@ -22,14 +23,14 @@ public class HDPInfo implements Versioned {
         this.version = version;
     }
 
-    public HDPRepo getRepo() {
+    public StackRepoDetails getRepo() {
         if (repo != null) {
             repo.setHdpVersion(version);
         }
         return repo;
     }
 
-    public void setRepo(HDPRepo repo) {
+    public void setRepo(StackRepoDetails repo) {
         this.repo = repo;
     }
 
@@ -43,7 +44,7 @@ public class HDPInfo implements Versioned {
 
     @Override
     public String toString() {
-        return "HDPInfo{"
+        return "StackInfo{"
                 + "version='" + version + '\''
                 + ", repo=" + repo
                 + ", images=" + images

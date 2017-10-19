@@ -331,7 +331,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setAmbariVersion(ambariVersion);
             stackRequest.setHdpVersion(hdpVersion);
             stackRequest.setImageCatalog(imageCatalog);
-            stackRequest.setCustomImage(customImage);
+            stackRequest.setImageId(customImage);
             stackRequest.setCustomDomain(customDomain);
             stackRequest.setCustomHostname(customHostname);
             stackRequest.setClusterNameAsSubdomain(clusterNameAsSubdomain);
