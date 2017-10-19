@@ -6,7 +6,7 @@ import (
 	"github.com/hortonworks/cb-cli/cli/utils"
 )
 
-func (p *GcpProvider) CreateCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
+func (p *GcpProvider) GetCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["projectId"] = stringFinder("project-id")
 	credentialMap["serviceAccountId"] = stringFinder("service-account-id")

@@ -28,10 +28,8 @@ var CloudProviders map[CloudType]CloudProvider = make(map[CloudType]CloudProvide
 
 type CloudProvider interface {
 	GetName() *string
-	CreateCredentialParameters(func(string) string, func(string) bool) (map[string]interface{}, error)
+	GetCredentialParameters(func(string) string, func(string) bool) (map[string]interface{}, error)
 	GetNetworkParamatersTemplate(NetworkMode) map[string]interface{}
-	// ValidateNetwork(*Network) []error
-	// ValidateTags(map[string]string) []error
 }
 
 func GetProvider() CloudProvider {

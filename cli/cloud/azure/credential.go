@@ -1,6 +1,6 @@
 package azure
 
-func (p *AzureProvider) CreateCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
+func (p *AzureProvider) GetCredentialParameters(stringFinder func(string) string, boolFinder func(string) bool) (map[string]interface{}, error) {
 	var credentialMap = make(map[string]interface{})
 	credentialMap["subscriptionId"] = stringFinder("subscription-id")
 	credentialMap["tenantId"] = stringFinder("tenant-id")

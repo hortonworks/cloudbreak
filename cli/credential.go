@@ -47,7 +47,7 @@ type createCredentialClient interface {
 
 func createCredentialImpl(stringFinder func(string) string, boolFinder func(string) bool, client createCredentialClient) *models_cloudbreak.CredentialResponse {
 	provider := cloud.GetProvider()
-	credentialMap, err := provider.CreateCredentialParameters(stringFinder, boolFinder)
+	credentialMap, err := provider.GetCredentialParameters(stringFinder, boolFinder)
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
