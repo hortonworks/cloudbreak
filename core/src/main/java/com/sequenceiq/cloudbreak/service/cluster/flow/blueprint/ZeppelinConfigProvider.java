@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Gateway;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -64,8 +64,8 @@ public class ZeppelinConfigProvider {
             model.put("knoxGateway", gateway.getEnableGateway());
             String shiroIniContent = processTemplateIntoString(freemarkerConfiguration.getTemplate("hdp/zeppelin/shiro_ini_content.ftl", "UTF-8"), model);
 
-            HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(cluster.getId());
-            if (hdpRepo != null && hdpRepo.getHdpVersion() != null && !hdpRepo.getHdpVersion().startsWith(HDP_2_5_VERSION)) {
+            StackRepoDetails stackRepoDetails = componentConfigProvider.getHDPRepo(cluster.getId());
+            if (stackRepoDetails != null && stackRepoDetails.getHdpVersion() != null && !stackRepoDetails.getHdpVersion().startsWith(HDP_2_5_VERSION)) {
                 configs.add(new BlueprintConfigurationEntry(ZEPPELIN_MASTER_CONFIG_FILES_2_6, "shiro_ini_content", shiroIniContent));
             } else {
                 configs.add(new BlueprintConfigurationEntry(ZEPPELIN_MASTER_CONFIG_FILES_2_5, "shiro_ini_content", shiroIniContent));

@@ -9,10 +9,11 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,12 +25,12 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
-import com.sequenceiq.cloudbreak.cloud.model.DefaultHDFEntries;
-import com.sequenceiq.cloudbreak.cloud.model.DefaultHDFInfo;
-import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPEntries;
-import com.sequenceiq.cloudbreak.cloud.model.DefaultHDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.HDPInfo;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
+import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackInfo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.controller.validation.filesystem.FileSystemValidator;
@@ -54,35 +55,35 @@ public class ClusterCreationSetupService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationSetupService.class);
 
-    @Autowired
+    @Inject
     private FileSystemValidator fileSystemValidator;
 
-    @Autowired
+    @Inject
     private CredentialToCloudCredentialConverter credentialToCloudCredentialConverter;
 
-    @Autowired
-    @Qualifier("conversionService")
+    @Inject
+    @Named("conversionService")
     private ConversionService conversionService;
 
-    @Autowired
+    @Inject
     private ClusterDecorator clusterDecorator;
 
-    @Autowired
+    @Inject
     private ClusterService clusterService;
 
-    @Autowired
+    @Inject
     private ComponentConfigProvider componentConfigProvider;
 
-    @Autowired
+    @Inject
     private BlueprintUtils blueprintUtils;
 
-    @Autowired
+    @Inject
     private DefaultHDPEntries defaultHDPEntries;
 
-    @Autowired
+    @Inject
     private DefaultHDFEntries defaultHDFEntries;
 
-    @Autowired
+    @Inject
     private BlueprintService blueprintService;
 
     public void validate(ClusterRequest request, Stack stack, IdentityUser user) {
@@ -136,8 +137,8 @@ public class ClusterCreationSetupService {
             List<ClusterComponent> components, ClusterRequest request, Cluster cluster, IdentityUser user) throws JsonProcessingException {
         if (!stackHdpRepoConfig.isPresent()) {
             if (request.getAmbariStackDetails() != null) {
-                HDPRepo hdpRepo = conversionService.convert(request.getAmbariStackDetails(), HDPRepo.class);
-                ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(hdpRepo), cluster);
+                StackRepoDetails stackRepoDetails = conversionService.convert(request.getAmbariStackDetails(), StackRepoDetails.class);
+                ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(stackRepoDetails), cluster);
                 components.add(component);
             } else {
                 ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS,
@@ -151,7 +152,7 @@ public class ClusterCreationSetupService {
         return components;
     }
 
-    private HDPInfo defaultHDPInfo(ClusterRequest request, IdentityUser user) {
+    private StackInfo defaultHDPInfo(ClusterRequest request, IdentityUser user) {
         try {
             JsonNode root;
             if (request.getBlueprintId() != null) {

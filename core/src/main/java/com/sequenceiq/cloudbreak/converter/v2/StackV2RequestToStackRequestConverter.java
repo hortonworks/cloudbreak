@@ -60,7 +60,7 @@ public class StackV2RequestToStackRequestConverter extends AbstractConversionSer
 
         stackRequest.setImageCatalog(source.getImageCatalog());
         stackRequest.setImageCatalog(source.getImageCatalog());
-        stackRequest.setCustomImage(source.getCustomImage());
+        stackRequest.setImageId(source.getImageId());
         stackRequest.setFlexId(source.getFlexId());
         stackRequest.setCredentialName(source.getCredentialName());
         stackRequest.setOwner(source.getOwner());

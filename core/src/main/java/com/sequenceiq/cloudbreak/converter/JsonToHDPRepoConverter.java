@@ -6,18 +6,18 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 
 @Component
-public class JsonToHDPRepoConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, HDPRepo> {
+public class JsonToHDPRepoConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
 
     private static final String REDHAT_6 = "redhat6";
 
     private static final String REDHAT_7 = "redhat7";
 
     @Override
-    public HDPRepo convert(AmbariStackDetailsJson source) {
-        HDPRepo repo = new HDPRepo();
+    public StackRepoDetails convert(AmbariStackDetailsJson source) {
+        StackRepoDetails repo = new StackRepoDetails();
         Map<String, String> stack = new HashMap<>();
         Map<String, String> util = new HashMap<>();
 

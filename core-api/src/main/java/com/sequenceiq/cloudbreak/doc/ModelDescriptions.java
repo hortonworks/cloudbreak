@@ -115,7 +115,7 @@ public class ModelDescriptions {
         public static final String SUBNET_ID = "cluster subnet id";
         public static final String FILE_SYSTEM = "external file system configuration";
         public static final String INSTANCE_GROUPS = "collection of instance groupst";
-        public static final String CUSTOM_IMAGE = "custom image for the cluster";
+        public static final String IMAGE_ID = "virtual machine image id from ImageCatalog, machines of the cluster will be started from this image";
         public static final String INSTANCE_GROUP_ADJUSTMENT = "instance group adjustment";
         public static final String APPLICATION_TAGS = "stack related application tags";
         public static final String DEFAULT_TAGS = "stack related default tags";

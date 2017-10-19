@@ -1,49 +1,29 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.WebTarget;
+import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
-import com.sequenceiq.cloudbreak.cloud.model.CloudbreakImageCatalog;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 
 @Service
 public class ImageCatalogProvider {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogProvider.class);
-
     @Value("${cb.image.catalog.url}")
     private String defaultCatalogUrl;
 
-    public CloudbreakImageCatalog getImageCatalog(String customImageCatalog) {
-        if (defaultCatalogUrl == null && customImageCatalog == null) {
-            LOGGER.warn("No image catalog was defined!");
-            return null;
-        }
-        String catalogUrl = defaultCatalogUrl;
-        if (customImageCatalog != null) {
-            catalogUrl = customImageCatalog;
-        }
-        LOGGER.info("Used Image Catalog: {}", catalogUrl);
-        try {
-            if (catalogUrl.startsWith("http")) {
-                Client client = RestClientUtil.get();
-                WebTarget target = client.target(catalogUrl);
-                return target.request().get().readEntity(CloudbreakImageCatalog.class);
-            } else {
-                LOGGER.warn("Image catalog URL is not valid: {}", catalogUrl);
-            }
-        } catch (RuntimeException e) {
-            LOGGER.warn("Failed to get image catalog", e);
-        }
-        return null;
+    @Inject
+    private CachedImageCatalogProvider cachedImageCatalogProvider;
+
+    public CloudbreakImageCatalogV2 getImageCatalogV2() throws CloudbreakImageCatalogException {
+        return getImageCatalogV2(false);
     }
 
-    public String getDefaultCatalogUrl() {
-        return defaultCatalogUrl;
+    public CloudbreakImageCatalogV2 getImageCatalogV2(boolean forceRefresh) throws CloudbreakImageCatalogException {
+        if (forceRefresh) {
+            cachedImageCatalogProvider.evictImageCatalogCache(defaultCatalogUrl);
+        }
+        return cachedImageCatalogProvider.getImageCatalogV2(defaultCatalogUrl);
     }
 }

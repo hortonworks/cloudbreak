@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.AbstractConversionServiceAwareConverter;
@@ -77,10 +77,10 @@ public class StackToStackDetailsConverter extends AbstractConversionServiceAware
         } else {
             stackDetails.setPrewarmedImage(Boolean.FALSE);
         }
-        HDPRepo hdpRepo = componentConfigProvider.getHDPRepo(stackId);
-        if (hdpRepo != null) {
-            stackDetails.setClusterType(hdpRepo.getStack().get(HDPRepo.REPO_ID_TAG));
-            stackDetails.setClusterVersion(hdpRepo.getHdpVersion());
+        StackRepoDetails stackRepoDetails = componentConfigProvider.getHDPRepo(stackId);
+        if (stackRepoDetails != null) {
+            stackDetails.setClusterType(stackRepoDetails.getStack().get(StackRepoDetails.REPO_ID_TAG));
+            stackDetails.setClusterVersion(stackRepoDetails.getHdpVersion());
         }
     }
 

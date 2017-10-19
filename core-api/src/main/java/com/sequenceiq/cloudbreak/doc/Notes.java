@@ -62,6 +62,7 @@ public class Notes {
     public static final String CLUSTER_REPAIR_NOTES = "Removing the failed nodes and starting new nodes to substitute them.";
     public static final String SMARTSENSE_SUBSCRIPTION_NOTES = "SmartSense subscriptions could be configured.";
     public static final String FLEX_SUBSCRIPTION_NOTES = "Flex subscriptions could be configured.";
+    public static final String IMAGE_CATALOG_NOTES = "Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.";
 
     private Notes() {
     }

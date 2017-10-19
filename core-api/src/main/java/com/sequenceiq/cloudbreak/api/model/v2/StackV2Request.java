@@ -93,8 +93,8 @@ public class StackV2Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.IMAGE_CATALOG)
     private String imageCatalog;
 
-    @ApiModelProperty(StackModelDescription.CUSTOM_IMAGE)
-    private String customImage;
+    @ApiModelProperty(StackModelDescription.IMAGE_ID)
+    private String imageId;
 
     @ApiModelProperty(StackModelDescription.FLEX_ID)
     private Long flexId;
@@ -144,12 +144,12 @@ public class StackV2Request implements JsonEntity {
         this.instanceGroups = instanceGroups;
     }
 
-    public String getCustomImage() {
-        return customImage;
+    public String getImageId() {
+        return imageId;
     }
 
-    public void setCustomImage(String customImage) {
-        this.customImage = customImage;
+    public void setImageId(String imageId) {
+        this.imageId = imageId;
     }
 
     public Long getFlexId() {

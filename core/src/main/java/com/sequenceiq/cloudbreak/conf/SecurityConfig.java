@@ -65,6 +65,8 @@ public class SecurityConfig {
 
         private static final String ACCOUNT_PREFERENCES = API_ROOT_CONTEXT + "/v1/accountpreferences/**";
 
+        private static final String IMAGE_CATALOG_PATTERN = API_ROOT_CONTEXT + "/v1/imagecatalogs/**";
+
         @Value("${cb.client.secret}")
         private String clientSecret;
 
@@ -118,6 +120,8 @@ public class SecurityConfig {
                     .antMatchers(HttpMethod.GET, STACK_URL_PATTERNS)
                     .access("#oauth2.hasScope('cloudbreak.stacks.read') or #oauth2.hasScope('cloudbreak.stacks')"
                             + " or #oauth2.hasScope('cloudbreak.autoscale')")
+                    .antMatchers(HttpMethod.GET, IMAGE_CATALOG_PATTERN)
+                    .access("#oauth2.hasScope('cloudbreak.templates.read') or #oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(HttpMethod.GET, ACCOUNT_PREFERENCES)
                     .permitAll()
 
@@ -132,6 +136,7 @@ public class SecurityConfig {
                     .antMatchers(STACK_TEMPLATE_URL_PATTERNS).access("#oauth2.hasScope('cloudbreak.stacks')")
                     .antMatchers(ACCOUNT_PREFERENCES)
                     .access("#oauth2.hasScope('cloudbreak.templates') and #oauth2.hasScope('cloudbreak.stacks')")
+                    .antMatchers(IMAGE_CATALOG_PATTERN).access("#oauth2.hasScope('cloudbreak.templates')")
                     .antMatchers(API_ROOT_CONTEXT + "/v1/stacks/ambari", API_ROOT_CONTEXT + "/v1/stacks/*/certificate", API_ROOT_CONTEXT + "/v1/stacks/all")
                     .access("#oauth2.hasScope('cloudbreak.autoscale')")
                     .antMatchers(API_ROOT_CONTEXT + "/v2/stacks/ambari", API_ROOT_CONTEXT + "/v2/stacks/*/certificate", API_ROOT_CONTEXT + "/v2/stacks/all")

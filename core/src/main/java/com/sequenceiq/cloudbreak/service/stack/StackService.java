@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
@@ -326,7 +327,7 @@ public class StackService {
     }
 
     @Transactional(TxType.NEVER)
-    public Stack create(IdentityUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> customImage) {
+    public Stack create(IdentityUser user, Stack stack, String ambariVersion, String hdpVersion, String imageCatalog, Optional<String> imageId) {
         Stack savedStack;
         stack.setOwner(user.getUserId());
         stack.setAccount(user.getAccount());
@@ -356,7 +357,7 @@ public class StackService {
                 securityConfig.setStack(stack);
                 securityConfigRepository.save(securityConfig);
                 savedStack.setSecurityConfig(securityConfig);
-                imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog, customImage);
+                imageService.create(savedStack, connector.getPlatformParameters(stack), ambariVersion, hdpVersion, imageCatalog, imageId);
                 flowManager.triggerProvisioning(savedStack.getId());
             } else {
                 savedStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED);
@@ -371,6 +372,9 @@ public class StackService {
             throw new CloudbreakApiException("Storing security credentials failed", e);
         } catch (CloudbreakImageNotFoundException e) {
             LOGGER.error("Cloudbreak Image not found", e);
+            throw new CloudbreakApiException(e.getMessage(), e);
+        } catch (CloudbreakImageCatalogException e) {
+            LOGGER.error("Cloudbreak Image Catalog error", e);
             throw new CloudbreakApiException(e.getMessage(), e);
         }
         return savedStack;

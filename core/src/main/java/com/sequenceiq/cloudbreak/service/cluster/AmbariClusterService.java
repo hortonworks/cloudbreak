@@ -50,7 +50,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.PkiUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
-import com.sequenceiq.cloudbreak.cloud.model.HDPRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -642,7 +642,7 @@ public class AmbariClusterService implements ClusterService {
     }
 
     @Override
-    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, HDPRepo hdpRepo) {
+    public Cluster recreate(Long stackId, Long blueprintId, Set<HostGroup> hostGroups, boolean validateBlueprint, StackRepoDetails stackRepoDetails) {
         if (blueprintId == null || hostGroups == null) {
             throw new BadRequestException("Blueprint id and hostGroup assignments can not be null.");
         }
@@ -669,7 +669,7 @@ public class AmbariClusterService implements ClusterService {
         }
 
         hostGroups = hostGroupService.saveOrUpdateWithMetadata(hostGroups, cluster);
-        cluster = prepareCluster(hostGroups, hdpRepo, blueprint, stack, cluster);
+        cluster = prepareCluster(hostGroups, stackRepoDetails, blueprint, stack, cluster);
 
         try {
             triggerClusterInstall(stack, cluster);
@@ -680,11 +680,11 @@ public class AmbariClusterService implements ClusterService {
 
     }
 
-    private Cluster prepareCluster(Set<HostGroup> hostGroups, HDPRepo hdpRepo, Blueprint blueprint, Stack stack, Cluster cluster) {
+    private Cluster prepareCluster(Set<HostGroup> hostGroups, StackRepoDetails stackRepoDetails, Blueprint blueprint, Stack stack, Cluster cluster) {
         cluster.setBlueprint(blueprint);
         cluster.getHostGroups().clear();
         cluster.getHostGroups().addAll(hostGroups);
-        createHDPRepoComponent(hdpRepo, stack);
+        createHDPRepoComponent(stackRepoDetails, stack);
         LOGGER.info("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
         cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
@@ -760,27 +760,28 @@ public class AmbariClusterService implements ClusterService {
 
     }
 
-    private void createHDPRepoComponent(HDPRepo hdpRepoUpdate, Stack stack) {
-        if (hdpRepoUpdate != null) {
-            HDPRepo hdpRepo = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
-            if (hdpRepo == null) {
+    private void createHDPRepoComponent(StackRepoDetails stackRepoDetailsUpdate, Stack stack) {
+        if (stackRepoDetailsUpdate != null) {
+            StackRepoDetails stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
+            if (stackRepoDetails == null) {
                 try {
-                    clusterComponentConfigProvider.store(new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(hdpRepoUpdate), stack.getCluster()));
+                    ClusterComponent clusterComp = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(stackRepoDetailsUpdate), stack.getCluster());
+                    clusterComponentConfigProvider.store(clusterComp);
                 } catch (JsonProcessingException ignored) {
-                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", hdpRepoUpdate));
+                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
                 }
             } else {
                 ClusterComponent component = clusterComponentConfigProvider.getComponent(stack.getCluster().getId(), ComponentType.HDP_REPO_DETAILS);
-                hdpRepo.setHdpVersion(hdpRepoUpdate.getHdpVersion());
-                hdpRepo.setVerify(hdpRepoUpdate.isVerify());
-                hdpRepo.setStack(hdpRepoUpdate.getStack());
-                hdpRepo.setUtil(hdpRepoUpdate.getUtil());
-                hdpRepo.setKnox(hdpRepoUpdate.getKnox());
+                stackRepoDetails.setHdpVersion(stackRepoDetailsUpdate.getHdpVersion());
+                stackRepoDetails.setVerify(stackRepoDetailsUpdate.isVerify());
+                stackRepoDetails.setStack(stackRepoDetailsUpdate.getStack());
+                stackRepoDetails.setUtil(stackRepoDetailsUpdate.getUtil());
+                stackRepoDetails.setKnox(stackRepoDetailsUpdate.getKnox());
                 try {
-                    component.setAttributes(new Json(hdpRepo));
+                    component.setAttributes(new Json(stackRepoDetails));
                     clusterComponentConfigProvider.store(component);
                 } catch (JsonProcessingException ignored) {
-                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", hdpRepoUpdate));
+                    throw new BadRequestException(String.format("HDP Repo parameters cannot be converted. %s", stackRepoDetailsUpdate));
                 }
             }
         }

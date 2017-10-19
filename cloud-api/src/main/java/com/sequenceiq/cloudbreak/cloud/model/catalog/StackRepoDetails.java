@@ -1,25 +1,25 @@
-package com.sequenceiq.cloudbreak.cloud.model;
+package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class HDPRepo {
+public class StackRepoDetails {
 
     public static final String REPO_ID_TAG = "repoid";
 
     public static final String MPACK_TAG = "mpack";
 
+    @JsonProperty("stack")
     private Map<String, String> stack;
 
+    @JsonProperty("util")
     private Map<String, String> util;
 
+    @JsonProperty("knox")
     private Map<String, String> knox;
-
-    private boolean verify = true;
-
-    private String hdpVersion;
 
     public Map<String, String> getStack() {
         return stack;
@@ -45,24 +45,8 @@ public class HDPRepo {
         this.knox = knox;
     }
 
-    public boolean isVerify() {
-        return verify;
-    }
-
-    public void setVerify(boolean verify) {
-        this.verify = verify;
-    }
-
-    public String getHdpVersion() {
-        return hdpVersion;
-    }
-
-    public void setHdpVersion(String hdpVersion) {
-        this.hdpVersion = hdpVersion;
-    }
-
     @Override
     public String toString() {
-        return "HDPRepo{stack='" + stack.get(REPO_ID_TAG) + "'; utils='" + util.get(REPO_ID_TAG) + "'}";
+        return "StackRepoDetails{stack='" + stack.get(REPO_ID_TAG) + "'; utils='" + util.get(REPO_ID_TAG) + "'}";
     }
 }

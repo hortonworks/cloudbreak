@@ -281,4 +281,8 @@ public class OperationDescriptions {
         public static final String SET_DEFAULT_IN_ACCOUNT = "sets the account default flag on the Flex subscription";
         public static final String SET_USED_FOR_CONTROLLER_IN_ACCOUNT = "sets the account 'used for controller' flag on the Flex subscription";
     }
+
+    public static class ImageCatalogOpDescription {
+        public static final String GET_IMAGES_BY_PROVIDER = "determines available images for the Cloudbreak version by the given provider";
+    }
 }

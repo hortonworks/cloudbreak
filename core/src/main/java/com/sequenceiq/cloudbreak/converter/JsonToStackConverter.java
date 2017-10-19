@@ -123,7 +123,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         stack.setHostgroupNameAsHostname(source.isHostgroupNameAsHostname());
 
         stack.setUuid(UUID.randomUUID().toString());
-        validateCustomImage(source);
         return stack;
     }
 
@@ -140,12 +139,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
         }
         if (source.getStackAuthentication() != null && source.getStackAuthentication().getLoginUserName() != null) {
             throw new BadRequestException("You can not modify the default user!");
-        }
-    }
-
-    private void validateCustomImage(StackRequest source) {
-        if ((source.getCustomImage() != null && !source.getCustomImage().isEmpty()) && !enableCustomImage) {
-            throw new BadRequestException("Custom image feature was not enabled. Please enable it with -Dcb.enable.custom.image=true.");
         }
     }
 
