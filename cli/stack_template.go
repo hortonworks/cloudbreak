@@ -192,7 +192,6 @@ func convertNodeToInstanceGroup(node node) *models_cloudbreak.InstanceGroups {
 			InstanceType:  &(&types.S{S: "____"}).S,
 			VolumeCount:   1,
 			VolumeSize:    10,
-			Parameters:    map[string]interface{}{"sshLocation": "0.0.0.0/0", "encrypted": false},
 		},
 		Group:     &node.name,
 		NodeCount: &node.count,
