@@ -70,13 +70,8 @@ func ReadConfig(baseDir string, profile string) (*Config, error) {
 	}
 	log.Infof("[ReadConfig] found config file: %s", configFile)
 
-	content, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		return nil, err
-	}
-
 	var configList ConfigList
-	err = yaml.Unmarshal(content, &configList)
+	err := readConfigToList(configFile, &configList)
 	if err != nil {
 		return nil, err
 	}
@@ -108,18 +103,32 @@ func writeConfigToFile(baseDir string, server string, username string, password 
 
 	log.Infof("[writeConfigToFile] writing credentials to file: %s", configFile)
 
-	configs := ConfigList{
-		profile: Config{Server: server, Username: username, Password: password, Output: output},
+	var configList ConfigList = make(ConfigList)
+	if _, err := os.Stat(configFile); !os.IsNotExist(err) {
+		err = readConfigToList(configFile, &configList)
+		if err != nil {
+			return err
+		}
 	}
 
-	f, err := os.OpenFile(configFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	configList[profile] = Config{Server: server, Username: username, Password: password, Output: output}
+
+	err := ioutil.WriteFile(configFile, []byte(configList.Yaml()), 0600)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	if _, err := f.Write([]byte(configs.Yaml())); err != nil {
+
+	return nil
+}
+
+func readConfigToList(configPath string, configList *ConfigList) error {
+	content, err := ioutil.ReadFile(configPath)
+	if err != nil {
 		return err
 	}
-
+	err = yaml.Unmarshal(content, configList)
+	if err != nil {
+		return err
+	}
 	return nil
 }
