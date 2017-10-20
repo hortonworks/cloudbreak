@@ -91,12 +91,6 @@
   revision = "8a82927c942c94794a5cd8b8b50ce2f48a955c0c"
 
 [[projects]]
-  name = "github.com/go-swagger/go-swagger"
-  packages = ["errors","httpkit/validate","strfmt","swag"]
-  revision = "ff42df2bf231f6a12383b36332f8364254ea86d6"
-  version = "0.5.0"
-
-[[projects]]
   branch = "master"
   name = "github.com/mailru/easyjson"
   packages = ["buffer","jlexer","jwriter"]
@@ -142,6 +136,12 @@
   revision = "bd91bbf73e9a4a801adbfb97133c992678533126"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/tools"
+  packages = ["go/ast/astutil"]
+  revision = "9bd2f442688b66c5289262d70f537c2ecf81d7de"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/mgo.v2"
   packages = ["bson","internal/json"]
@@ -155,6 +155,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a8296242e85dac150c1fc3fd5e9577ce978d54842c96ce69f453c7af68d8b966"
+  inputs-digest = "a41427caa57106e1b0dfff4a0acc6b067ab4ee6a122f48aaacb03e20f00e6adb"
   solver-name = "gps-cdcl"
   solver-version = 1
