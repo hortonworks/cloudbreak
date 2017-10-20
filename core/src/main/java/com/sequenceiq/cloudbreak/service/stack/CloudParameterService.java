@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsReq
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesResult;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformOrchestratorsRequest;
@@ -53,6 +56,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
@@ -388,6 +393,27 @@ public class CloudParameterService {
                 throw new OperationException(res.getErrorDetails());
             }
             return res.getCloudIpPools();
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while getting the platform publicIpPools", e);
+            throw new OperationException(e);
+        }
+    }
+
+    public Map<String, InstanceGroupParameterResponse> getInstanceGroupParameters(Credential credential, Set<InstanceGroupParameterRequest> instanceGroups) {
+        LOGGER.debug("Get platform getInstanceGroupParameters");
+        ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
+
+        GetPlatformInstanceGroupParameterRequest getPlatformInstanceGroupParameterRequest =
+                new GetPlatformInstanceGroupParameterRequest(cloudCredential, cloudCredential, instanceGroups, null);
+        eventBus.notify(getPlatformInstanceGroupParameterRequest.selector(), Event.wrap(getPlatformInstanceGroupParameterRequest));
+        try {
+            GetPlatformInstanceGroupParameterResult res = getPlatformInstanceGroupParameterRequest.await();
+            LOGGER.info("Platform instanceGroupParameterResult result: {}", res);
+            if (res.getStatus().equals(EventStatus.FAILED)) {
+                LOGGER.error("Failed to get platform instanceGroupParameterResult", res.getErrorDetails());
+                throw new OperationException(res.getErrorDetails());
+            }
+            return res.getInstanceGroupParameterResponses();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform publicIpPools", e);
             throw new OperationException(e);

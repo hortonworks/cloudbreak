@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +42,8 @@ import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -70,6 +73,10 @@ import com.sequenceiq.cloudbreak.util.JsonUtil;
 public class AzurePlatformParameters implements PlatformParameters {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzurePlatformParameters.class);
+
+    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 3;
+
+    private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
 
     private static final int START_LABEL = 98;
 
@@ -254,7 +261,8 @@ public class AzurePlatformParameters implements PlatformParameters {
         additionalStackParameterValidations.add(new StackParamValidation(PlatformParametersConsts.TTL, false, String.class, Optional.of("^[0-9]*$")));
         additionalStackParameterValidations.add(new StackParamValidation("diskPerStorage", false, String.class, Optional.empty()));
         additionalStackParameterValidations.add(new StackParamValidation("encryptStorage", false, Boolean.class, Optional.empty()));
-        additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class, Optional.of("^[a-z0-9]{0,24}$")));
+        additionalStackParameterValidations.add(new StackParamValidation("persistentStorage", false, String.class,
+                Optional.of("^[a-z0-9]{0,24}$")));
         additionalStackParameterValidations.add(new StackParamValidation("attachedStorageOption", false, ArmAttachedStorageOption.class,
                 Optional.empty()));
         return additionalStackParameterValidations;
@@ -314,6 +322,33 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Override
     public String platforName() {
         return AzureConstants.PLATFORM.value();
+    }
+
+    @Override
+    public Map<String, InstanceGroupParameterResponse> collectInstanceGroupParameters(Set<InstanceGroupParameterRequest> instanceGroupParameterRequests) {
+        Map<String, InstanceGroupParameterResponse> result = new HashMap<>();
+        for (InstanceGroupParameterRequest groupParameterRequest : instanceGroupParameterRequests) {
+            InstanceGroupParameterResponse instanceGroupParameterResponse = new InstanceGroupParameterResponse();
+            if (groupParameterRequest.getParameters().keySet().contains("availabilitySet")) {
+                instanceGroupParameterResponse.setGroupName(groupParameterRequest.getGroupName());
+                instanceGroupParameterResponse.setParameters(groupParameterRequest.getParameters());
+
+            } else if (groupParameterRequest.getNodeCount() > 1) {
+                Map<String, Object> parameters = groupParameterRequest.getParameters();
+
+                Map<String, Object> availabilitySet = new HashMap<>();
+                availabilitySet.put("name", String.format("%s-%s-as", groupParameterRequest.getGroupName(), groupParameterRequest.getStackName()));
+                availabilitySet.put("faultDomainCount", DEFAULT_FAULT_DOMAIN_COUNTER);
+                availabilitySet.put("updateDomainCount", DEFAULT_UPDATE_DOMAIN_COUNTER);
+
+                parameters.put("availabilitySet", availabilitySet);
+
+                instanceGroupParameterResponse.setGroupName(groupParameterRequest.getGroupName());
+                instanceGroupParameterResponse.setParameters(parameters);
+            }
+            result.put(instanceGroupParameterResponse.getGroupName(), instanceGroupParameterResponse);
+        }
+        return result;
     }
 
     @Override

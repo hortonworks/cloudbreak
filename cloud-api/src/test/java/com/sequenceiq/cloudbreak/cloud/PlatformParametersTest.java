@@ -199,5 +199,6 @@ public class PlatformParametersTest {
         public String platforName() {
             return "test";
         }
+
     }
 }
