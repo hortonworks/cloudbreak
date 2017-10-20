@@ -70,13 +70,6 @@ fix-swagger:
 	goimports -l -w client_cloudbreak
 	@gofmt -w ${GOFILES_NOVENDOR}
 
-generate-swagger-autoscale:
-	swagger generate client -f http://$(CB_IP):8085/as/api/v1/swagger.json -c client_autoscale -m models_autoscale
-
-generate-swagger-autoscale-docker:
-	@docker run --rm -it -v "${GOPATH}":"${GOPATH}" -w "${PWD}" -e GOPATH --net=host quay.io/goswagger/swagger:0.11.0 \
-	generate client -f http://$(CB_IP):8085/as/api/v1/swagger.json -c client_autoscale -m models_autoscale
-
 release: build
 	rm -rf release
 	mkdir release

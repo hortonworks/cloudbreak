@@ -19,7 +19,6 @@ import (
 	"github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 	"github.com/hortonworks/cb-cli/cli/utils"
-	asapiclient "github.com/hortonworks/cb-cli/client_autoscale"
 	apiclient "github.com/hortonworks/cb-cli/client_cloudbreak"
 )
 
@@ -27,10 +26,6 @@ var PREFIX_TRIM []string = []string{"http://", "https://"}
 
 type Cloudbreak struct {
 	Cloudbreak *apiclient.Cloudbreak
-}
-
-type Autoscaling struct {
-	AutoScaling *asapiclient.AutoScaling
 }
 
 // This is nearly identical with http.DefaultTransport
@@ -61,44 +56,6 @@ func NewCloudbreakOAuth2HTTPClient(address string, username string, password str
 	cbTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
 	cbTransport.Runtime.Transport = LoggedTransportConfig
 	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}
-}
-
-func NewAutoscalingOAuth2HTTPClient(address string, username string, password string) *Autoscaling {
-	for _, v := range PREFIX_TRIM {
-		address = strings.TrimPrefix(address, v)
-	}
-
-	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-
-	asTransport := &transport{client.New(address, "/as/api/v1", []string{"https"})}
-	asTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
-	asTransport.Runtime.Transport = LoggedTransportConfig
-
-	return &Autoscaling{AutoScaling: asapiclient.New(asTransport, strfmt.Default)}
-}
-
-func NewOAuth2HTTPClients(address string, username string, password string) (*Cloudbreak, *Autoscaling) {
-	for _, v := range PREFIX_TRIM {
-		address = strings.TrimPrefix(address, v)
-	}
-
-	token, err := getOAuth2Token("https://"+address+"/identity/oauth/authorize", username, password, "cloudbreak_shell")
-	if err != nil {
-		utils.LogErrorAndExit(err)
-	}
-
-	cbTransport := &transport{client.New(address, "/cb/api/v1", []string{"https"})}
-	cbTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
-	cbTransport.Runtime.Transport = LoggedTransportConfig
-
-	asTransport := &transport{client.New(address, "/as/api/v1", []string{"https"})}
-	asTransport.Runtime.DefaultAuthentication = client.BearerToken(token)
-	asTransport.Runtime.Transport = LoggedTransportConfig
-
-	return &Cloudbreak{Cloudbreak: apiclient.New(cbTransport, strfmt.Default)}, &Autoscaling{AutoScaling: asapiclient.New(asTransport, strfmt.Default)}
 }
 
 func getOAuth2Token(identityUrl string, username string, password string, clientId string) (string, error) {
