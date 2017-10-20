@@ -29,6 +29,15 @@ func (s *stackOut) DataAsStringArray() []string {
 	return arr
 }
 
+type stackDetailsOut struct {
+	*models_cloudbreak.StackResponse
+	resp *models_cloudbreak.StackResponse
+}
+
+func (s *stackDetailsOut) DataAsStringArray() []string {
+	return convertResponseToStack(s.resp).DataAsStringArray()
+}
+
 func CreateStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "create cluster")
 
@@ -112,7 +121,7 @@ func DescribeStack(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 
-	output.Write(stackHeader, convertResponseToStack(resp.Payload))
+	output.Write(stackHeader, &stackDetailsOut{resp.Payload, resp.Payload})
 }
 
 func DeleteStack(c *cli.Context) {
