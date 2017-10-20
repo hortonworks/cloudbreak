@@ -152,7 +152,7 @@ var StackTemplateHelp = `
 }`
 
 var AppHelpTemplate = `NAME:
-   Hortonworks Data Cloud command line tool
+   Cloudbreak command line tool
 USAGE:
    {{if .UsageText}}{{.UsageText}}{{else}}{{.Name}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
    {{if .Version}}{{if not .HideVersion}}
@@ -175,7 +175,7 @@ COPYRIGHT:
 `
 
 var CommandHelpTemplate = `NAME:
-   Hortonworks Data Cloud command line tool
+   Cloudbreak command line tool
 
 USAGE:
    {{.HelpName}}{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{if .Category}}
@@ -195,7 +195,7 @@ OPTIONS:
 `
 
 var SubCommandHelpTemplate = `NAME:
-   Hortonworks Data Cloud command line tool
+   Cloudbreak command line tool
 
 USAGE:
    {{.HelpName}} command{{if .VisibleFlags}} [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}
@@ -213,7 +213,7 @@ OPTIONS:
 `
 
 var HiddenAppHelpTemplate = `NAME:
-   Hortonworks Data Cloud command line tool
+   Cloudbreak command line tool
 
 USAGE:
    {{if .UsageText}}{{.UsageText}}{{else}}{{.HelpName}} {{if .VisibleFlags}}[global options]{{end}}{{if .Commands}} command [command options]{{end}} {{if .ArgsUsage}}{{.ArgsUsage}}{{else}}[arguments...]{{end}}{{end}}
