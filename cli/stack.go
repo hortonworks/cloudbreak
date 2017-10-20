@@ -119,11 +119,9 @@ func DeleteStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "delete stack")
 
-	cbClient, asClient := NewOAuth2HTTPClients(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlName.Name)
 	stack := cbClient.getStackByName(name)
-	asClient.deleteCluster(name, stack.ID)
-	log.Infof("[DeleteStack] autoscaling cluster deleted, name: %s", name)
 	cbClient.deleteStack(name, c.Bool(FlForce.Name), *stack.Public)
 	log.Infof("[DeleteStack] stack deleted, name: %s", name)
 }
