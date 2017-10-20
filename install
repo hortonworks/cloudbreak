@@ -1,4 +1,4 @@
-CBD_VERSION=1.2.2
+CBD_VERSION=1.16.4
 CBD_DIR=cloudbreak-deployer
 : ${GIT_ORG:=hortonworks}
 : ${GIT_PROJECT:=cloudbreak-deployer}
