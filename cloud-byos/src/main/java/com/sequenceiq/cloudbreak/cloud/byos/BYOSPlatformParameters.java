@@ -147,4 +147,5 @@ public class BYOSPlatformParameters implements PlatformParameters {
     public String platforName() {
         return BYOSConstants.BYOS_PLATFORM.value();
     }
+
 }

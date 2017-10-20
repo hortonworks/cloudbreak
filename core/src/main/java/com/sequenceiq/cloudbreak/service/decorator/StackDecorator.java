@@ -2,6 +2,10 @@ package com.sequenceiq.cloudbreak.service.decorator;
 
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.BYOS;
 
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -10,8 +14,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Orchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
@@ -26,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
@@ -97,10 +105,8 @@ public class StackDecorator implements Decorator<Stack> {
                 throw new BadRequestException("Instance groups and network must be specified!");
             }
             prepareNetwork(subject, networkId);
-            prepareOrchestratorIfNotExist(subject, subject.getCredential());
-            if (subject.getFailurePolicy() != null) {
-                validatFailurePolicy(subject, subject.getFailurePolicy());
-            }
+            prepareOrchestratorIfNotExist(subject);
+            validatFailurePolicy(subject);
             prepareInstanceGroups(subject, data);
             prepareFlexSubscription(subject, data);
             validate(subject);
@@ -131,7 +137,11 @@ public class StackDecorator implements Decorator<Stack> {
 
     private void prepareInstanceGroups(Stack subject, Object... data) {
         IdentityUser user = (IdentityUser) data[DecorationData.USER.ordinal()];
+        Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponse = cloudParameterService
+                .getInstanceGroupParameters(subject.getCredential(), getInstanceGroupParameterRequests(subject));
         for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
+            updateInstanceGroupParameters(instanceGroupParameterResponse, instanceGroup);
+
             if (instanceGroup.getTemplate() != null) {
                 Template template = instanceGroup.getTemplate();
                 template.setPublicInAccount(subject.isPublicInAccount());
@@ -147,6 +157,28 @@ public class StackDecorator implements Decorator<Stack> {
                 securityGroup.setCloudPlatform(subject.cloudPlatform());
                 securityGroup = securityGroupService.create(user, securityGroup);
                 instanceGroup.setSecurityGroup(securityGroup);
+            }
+        }
+    }
+
+    private Set<InstanceGroupParameterRequest> getInstanceGroupParameterRequests(Stack subject) {
+        Set<InstanceGroupParameterRequest> instanceGroupParameterRequests = new HashSet<>();
+        for (InstanceGroup instanceGroup : subject.getInstanceGroups()) {
+            InstanceGroupParameterRequest convert = conversionService.convert(instanceGroup, InstanceGroupParameterRequest.class);
+            convert.setStackName(subject.getName());
+            instanceGroupParameterRequests.add(convert);
+        }
+        return instanceGroupParameterRequests;
+    }
+
+    private void updateInstanceGroupParameters(Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponses, InstanceGroup instanceGroup) {
+        InstanceGroupParameterResponse instanceGroupParameterResponse = instanceGroupParameterResponses.get(instanceGroup.getGroupName());
+        if (instanceGroupParameterResponse != null) {
+            try {
+                Json jsonProperties = new Json(instanceGroupParameterResponse.getParameters());
+                instanceGroup.setAttributes(jsonProperties);
+            } catch (JsonProcessingException e) {
+                LOGGER.error("Could not update '{}' instancegroup parameters with defaults.", instanceGroupParameterResponse.getGroupName());
             }
         }
     }
@@ -170,10 +202,10 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-    private void prepareOrchestratorIfNotExist(Stack subject, Credential credential) {
+    private void prepareOrchestratorIfNotExist(Stack subject) {
         if (subject.getOrchestrator() == null) {
             PlatformOrchestrators orchestrators = cloudParameterService.getOrchestrators();
-            Orchestrator orchestrator = orchestrators.getDefaults().get(Platform.platform(credential.cloudPlatform()));
+            Orchestrator orchestrator = orchestrators.getDefaults().get(Platform.platform(subject.getCredential().cloudPlatform()));
             com.sequenceiq.cloudbreak.domain.Orchestrator orchestratorObject = new com.sequenceiq.cloudbreak.domain.Orchestrator();
             orchestratorObject.setType(orchestrator.value());
             subject.setOrchestrator(orchestratorObject);
@@ -192,14 +224,16 @@ public class StackDecorator implements Decorator<Stack> {
         }
     }
 
-    private void validatFailurePolicy(Stack stack, FailurePolicy failurePolicy) {
-        if (failurePolicy.getThreshold() == 0L && !AdjustmentType.BEST_EFFORT.equals(failurePolicy.getAdjustmentType())) {
-            throw new BadRequestException("The threshold can not be 0");
-        }
-        if (AdjustmentType.EXACT.equals(failurePolicy.getAdjustmentType())) {
-            validateExactCount(stack, failurePolicy);
-        } else if (AdjustmentType.PERCENTAGE.equals(failurePolicy.getAdjustmentType())) {
-            validatePercentageCount(failurePolicy);
+    private void validatFailurePolicy(Stack stack) {
+        if (stack.getFailurePolicy() != null) {
+            if (stack.getFailurePolicy().getThreshold() == 0L && !AdjustmentType.BEST_EFFORT.equals(stack.getFailurePolicy().getAdjustmentType())) {
+                throw new BadRequestException("The threshold can not be 0");
+            }
+            if (AdjustmentType.EXACT.equals(stack.getFailurePolicy().getAdjustmentType())) {
+                validateExactCount(stack, stack.getFailurePolicy());
+            } else if (AdjustmentType.PERCENTAGE.equals(stack.getFailurePolicy().getAdjustmentType())) {
+                validatePercentageCount(stack.getFailurePolicy());
+            }
         }
     }
 
