@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.Constraint;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -51,7 +51,7 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
         }
         flowEventChain.add(cste);
         if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
-            Stack stack = stackService.getById(event.getStackId());
+            StackMinimal stack = stackService.getByIdMinimal(event.getStackId());
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), event.getHostGroupName());
             Constraint hostGroupConstraint = hostGroup.getConstraint();
             String instanceGroupName = Optional.ofNullable(hostGroupConstraint.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);

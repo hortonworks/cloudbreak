@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerE
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClustersUpgradeTriggerEvent;
@@ -53,7 +53,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
-        Stack stack = stackService.getById(event.getStackId());
+        StackMinimal stack = stackService.getByIdMinimal(event.getStackId());
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
         Map<String, List<String>> failedNodesMap = event.getFailedNodesMap();
         for (Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {

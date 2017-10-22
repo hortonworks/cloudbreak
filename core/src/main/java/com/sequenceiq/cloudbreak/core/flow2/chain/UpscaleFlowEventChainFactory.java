@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -38,8 +38,8 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackAndClusterUpscaleTriggerEvent event) {
-        Stack stack = stackService.getById(event.getStackId());
-        Cluster cluster = stack.getCluster();
+        StackMinimal stack = stackService.getByIdMinimal(event.getStackId());
+        ClusterMinimal cluster = stack.getCluster();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getStackId(), false, event.accepted()));
         flowEventChain.add(new StackScaleTriggerEvent(ADD_INSTANCES_EVENT.event(), event.getStackId(), event.getInstanceGroup(),

@@ -69,6 +69,7 @@ public class ReactorFlowManagerTest {
         };
         when(stackService.get(anyLong())).thenReturn(TestUtil.stack());
         when(stackService.getById(anyLong())).thenReturn(TestUtil.stack());
+        when(stackService.getByIdMinimal(anyLong())).thenReturn(TestUtil.stackMinimal());
         when(eventFactory.createEventWithErrHandler(anyObject())).thenReturn(new Event<>(acceptable));
     }
 

@@ -33,8 +33,8 @@ public class ClusterResetService {
     @Inject
     private EmailSenderService emailSenderService;
 
-    public void resetCluster(Stack stack, Cluster cluster) {
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
+    public void resetCluster(long stackId) {
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
     }
 
     public void handleResetClusterFailure(Stack stack, Exception exception) {

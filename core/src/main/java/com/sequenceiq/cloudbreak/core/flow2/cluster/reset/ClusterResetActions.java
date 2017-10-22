@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -48,14 +48,14 @@ public class ClusterResetActions {
     public Action syncCluster() {
         return new AbstractClusterResetAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterResetService.resetCluster(context.getStack(), context.getCluster());
+            protected void doExecute(ClusterMinimalContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                clusterResetService.resetCluster(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new ClusterResetRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new ClusterResetRequest(context.getStackId());
             }
         };
     }
@@ -64,13 +64,13 @@ public class ClusterResetActions {
     public Action finishResetCluster() {
         return new AbstractClusterResetAction<ClusterResetResult>(ClusterResetResult.class) {
             @Override
-            protected void doExecute(ClusterContext context, ClusterResetResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, ClusterResetResult payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StartAmbariRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StartAmbariRequest(context.getStackId());
             }
         };
     }
@@ -79,13 +79,13 @@ public class ClusterResetActions {
     public Action finishStartAmbari() {
         return new AbstractClusterResetAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterResetEvent.FINALIZED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StackEvent(ClusterResetEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
     }
