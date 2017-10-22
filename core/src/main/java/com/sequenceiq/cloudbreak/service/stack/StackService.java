@@ -246,7 +246,7 @@ public class StackService {
         return retStack;
     }
 
-    public StackMinimal getMinimalById(Long id) {
+    public StackMinimal getByIdMinimal(Long id) {
         StackMinimal retStack = stackMinimalRepository.findOne(id);
         if (retStack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));

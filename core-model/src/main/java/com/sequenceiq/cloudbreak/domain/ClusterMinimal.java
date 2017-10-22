@@ -1,10 +1,17 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.REQUESTED;
+import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
+
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -25,6 +32,9 @@ public class ClusterMinimal implements ProvisionEntity {
     private Boolean emailNeeded;
 
     private String emailTo;
+
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     public Stack getStack() {
         return stack;
@@ -80,5 +90,21 @@ public class ClusterMinimal implements ProvisionEntity {
 
     public void setEmailNeeded(Boolean emailNeeded) {
         this.emailNeeded = emailNeeded;
+    }
+
+    public boolean isRequested() {
+        return REQUESTED.equals(status);
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public boolean isStartRequested() {
+        return START_REQUESTED.equals(status);
     }
 }

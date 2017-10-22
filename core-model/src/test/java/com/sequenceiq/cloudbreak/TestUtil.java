@@ -57,7 +57,9 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
+import com.sequenceiq.cloudbreak.domain.StackStatusMinimal;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
@@ -124,6 +126,16 @@ public class TestUtil {
                 (instanceGroup.getTemplate()).setVolumeType("ephemeral");
             }
         }
+        return stack;
+    }
+
+    public static StackMinimal stackMinimal(Status stackStatus, Credential credential) {
+        StackMinimal stack = new StackMinimal();
+        stack.setStackStatus(new StackStatusMinimal());
+        stack.setName("simplestack");
+        stack.setOwner("userid");
+        stack.setId(1L);
+        stack.setCloudPlatform(credential.cloudPlatform());
         return stack;
     }
 
@@ -308,6 +320,10 @@ public class TestUtil {
 
     public static Stack stack() {
         return stack(AVAILABLE, gcpCredential());
+    }
+
+    public static StackMinimal stackMinimal() {
+        return stackMinimal(AVAILABLE, gcpCredential());
     }
 
     public static Cluster  cluster() {

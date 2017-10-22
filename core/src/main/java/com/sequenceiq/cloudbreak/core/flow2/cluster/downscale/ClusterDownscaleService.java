@@ -20,10 +20,11 @@ import com.sequenceiq.cloudbreak.api.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Cluster;
+import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -72,8 +73,8 @@ public class ClusterDownscaleService {
     }
 
     public void updateMetadata(Long stackId, Set<String> hostNames, String hostGroupName) {
-        Stack stack = stackService.getById(stackId);
-        Cluster cluster = stack.getCluster();
+        StackMinimal stack = stackService.getByIdMinimal(stackId);
+        ClusterMinimal cluster = stack.getCluster();
         hostNames.forEach(hn -> {
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
             List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()

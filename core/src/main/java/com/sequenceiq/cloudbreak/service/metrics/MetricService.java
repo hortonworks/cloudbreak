@@ -39,7 +39,7 @@ public class MetricService {
      */
     public void incrementMetricCounter(MetricType metric, StackMinimal stack) {
         if (stack != null && stack.getPlatformVariant() != null) {
-            incrementMetricCounter(getMetricNameWithPlatform(metric, stack.getCloudPlatform()));
+            incrementMetricCounter(getMetricNameWithPlatform(metric, stack.cloudPlatform()));
         } else {
             incrementMetricCounter(metric.getMetricName());
         }

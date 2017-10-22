@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -19,7 +19,7 @@ public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition
 
     @Override
     public boolean isFlowTriggerable(Long stackId) {
-        Stack stack = stackService.getById(stackId);
+        StackMinimal stack = stackService.getByIdMinimal(stackId);
         boolean result = stack.isAvailable() && stack.getCluster() != null && stack.getCluster().isRequested();
         if (!result) {
             LOGGER.warn("Cluster creation cannot be triggered, because cluster is not in requested status or stack is not available.");

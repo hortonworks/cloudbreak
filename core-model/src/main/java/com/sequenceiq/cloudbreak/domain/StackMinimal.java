@@ -1,11 +1,15 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
+
+import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
@@ -29,6 +33,9 @@ public class StackMinimal implements ProvisionEntity {
 
     @OneToOne
     private OrchestratorMinimal orchestrator;
+
+    @OneToOne
+    private StackStatusMinimal stackStatus;
 
     public Long getId() {
         return id;
@@ -78,11 +85,27 @@ public class StackMinimal implements ProvisionEntity {
         this.platformVariant = platformVariant;
     }
 
-    public String getCloudPlatform() {
+    public String cloudPlatform() {
         return cloudPlatform;
     }
 
     public void setCloudPlatform(String cloudPlatform) {
         this.cloudPlatform = cloudPlatform;
+    }
+
+    public boolean isAvailable() {
+        return AVAILABLE.equals(getStatus());
+    }
+
+    public StackStatusMinimal getStackStatus() {
+        return stackStatus;
+    }
+
+    public void setStackStatus(StackStatusMinimal stackStatus) {
+        this.stackStatus = stackStatus;
+    }
+
+    public Status getStatus() {
+        return stackStatus != null ? stackStatus.getStatus() : null;
     }
 }

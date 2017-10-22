@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
-import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -20,8 +20,8 @@ public class ClusterStartFlowTriggerCondition implements FlowTriggerCondition {
 
     @Override
     public boolean isFlowTriggerable(Long stackId) {
-        Stack stack = stackService.getById(stackId);
-        Cluster cluster = stack.getCluster();
+        StackMinimal stack = stackService.getByIdMinimal(stackId);
+        ClusterMinimal cluster = stack.getCluster();
         boolean result = cluster != null && cluster.isStartRequested();
         if (!result) {
             LOGGER.warn("Cluster start cannot be triggered, because cluster {}", cluster == null ? "is null" : "not in startRequested status");
