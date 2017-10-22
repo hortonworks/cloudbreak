@@ -10,7 +10,6 @@ import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
-import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
 import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -27,8 +26,7 @@ public abstract class AbstractClusterAction<P extends Payload> extends AbstractA
 
     @Override
     protected ClusterMinimalContext createFlowContext(String flowId, StateContext<FlowState, FlowEvent> clusterContext, P payload) {
-        StackMinimal stack = stackService.getMinimalById(payload.getStackId());
-        ClusterMinimal cluster = stack.getCluster();
+        StackMinimal stack = stackService.getByIdMinimal(payload.getStackId());
         MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
         return new ClusterMinimalContext(flowId, stack);
     }

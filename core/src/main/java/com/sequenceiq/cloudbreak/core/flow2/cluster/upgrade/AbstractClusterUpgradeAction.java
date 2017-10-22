@@ -26,7 +26,7 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
 
     @Override
     protected ClusterMinimalContext createFlowContext(String flowId, StateContext<ClusterUpgradeState, ClusterUpgradeEvent> stateContext, P payload) {
-        StackMinimal stack = stackService.getMinimalById(payload.getStackId());
+        StackMinimal stack = stackService.getByIdMinimal(payload.getStackId());
         MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
         return new ClusterMinimalContext(flowId, stack);
     }
