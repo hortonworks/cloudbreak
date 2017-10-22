@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
@@ -37,6 +38,24 @@ public class StackUtil {
             }
         }
         return agents;
+    }
+
+    public String extractAmbariIp(StackMinimal stack) {
+        String ambariIp = null;
+        try {
+            OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(stack.getOrchestrator().getType());
+            if (orchestratorType != null && orchestratorType.containerOrchestrator()) {
+                ambariIp = stack.getCluster().getAmbariIp();
+            } else {
+                InstanceMetaData gatewayInstance = instanceMetaDataRepository.getPrimaryGatewayInstanceMetadata(stack.getId());
+                if (stack.getCluster() != null && stack.getCluster().getAmbariIp() != null && gatewayInstance != null) {
+                    ambariIp = gatewayInstance.getPublicIpWrapper();
+                }
+            }
+        } catch (CloudbreakException ex) {
+            LOGGER.error("Could not resolve orchestrator type: ", ex);
+        }
+        return ambariIp;
     }
 
     public String extractAmbariIp(Stack stack) {

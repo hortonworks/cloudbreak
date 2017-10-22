@@ -11,7 +11,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -72,14 +72,14 @@ public class ClusterCreationActions {
     public Action startingAmbariServicesAction() {
         return new AbstractClusterAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbariServices(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StartAmbariServicesRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StartAmbariServicesRequest(context.getStackId());
             }
         };
     }
@@ -88,13 +88,13 @@ public class ClusterCreationActions {
     public Action registerProxyAction() {
         return new AbstractClusterAction<StartAmbariServicesSuccess>(StartAmbariServicesSuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, StartAmbariServicesSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, StartAmbariServicesSuccess payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new RegisterProxyRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new RegisterProxyRequest(context.getStackId());
             }
         };
     }
@@ -103,14 +103,14 @@ public class ClusterCreationActions {
     public Action startingAmbariAction() {
         return new AbstractClusterAction<RegisterProxySuccess>(RegisterProxySuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, RegisterProxySuccess payload, Map<Object, Object> variables) throws Exception {
-                clusterCreationService.startingAmbari(context.getStack());
+            protected void doExecute(ClusterMinimalContext context, RegisterProxySuccess payload, Map<Object, Object> variables) throws Exception {
+                clusterCreationService.startingAmbari(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StartAmbariRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StartAmbariRequest(context.getStackId());
             }
         };
     }
@@ -119,14 +119,14 @@ public class ClusterCreationActions {
     public Action installingClusterAction() {
         return new AbstractClusterAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.installingCluster(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new InstallClusterRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new InstallClusterRequest(context.getStackId());
             }
         };
     }
@@ -135,15 +135,15 @@ public class ClusterCreationActions {
     public Action clusterCreationFinishedAction() {
         return new AbstractClusterAction<InstallClusterSuccess>(InstallClusterSuccess.class) {
             @Override
-            protected void doExecute(ClusterContext context, InstallClusterSuccess payload, Map<Object, Object> variables) throws Exception {
-                clusterCreationService.clusterInstallationFinished(context.getStack(), context.getCluster());
+            protected void doExecute(ClusterMinimalContext context, InstallClusterSuccess payload, Map<Object, Object> variables) throws Exception {
+                clusterCreationService.clusterInstallationFinished(context.getStack());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FINISHED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FINISHED_EVENT.event(), context.getStackId());
             }
         };
     }
