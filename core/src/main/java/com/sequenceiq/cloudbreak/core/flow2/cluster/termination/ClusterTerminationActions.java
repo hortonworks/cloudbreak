@@ -10,7 +10,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -27,14 +27,14 @@ public class ClusterTerminationActions {
     public Action terminatingCluster() {
         return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterTerminationFlowService.terminateCluster(context);
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new ClusterTerminationRequest(context.getStack().getId(), context.getCluster() != null ? context.getCluster().getId() : null);
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new ClusterTerminationRequest(context.getStackId(), context.getCluster() != null ? context.getCluster().getId() : null);
 
             }
         };
@@ -44,7 +44,7 @@ public class ClusterTerminationActions {
     public Action clusterTerminationFinished() {
         return new AbstractClusterAction<ClusterTerminationResult>(ClusterTerminationResult.class) {
             @Override
-            protected void doExecute(ClusterContext context, ClusterTerminationResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, ClusterTerminationResult payload, Map<Object, Object> variables) throws Exception {
                 if (payload.isOperationAllowed()) {
                     clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
                 } else {
@@ -54,8 +54,8 @@ public class ClusterTerminationActions {
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterTerminationEvent.FINALIZED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StackEvent(ClusterTerminationEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
     }

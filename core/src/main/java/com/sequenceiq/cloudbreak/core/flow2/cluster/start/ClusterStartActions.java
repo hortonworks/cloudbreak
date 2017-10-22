@@ -13,7 +13,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -38,14 +38,14 @@ public class ClusterStartActions {
     public Action startingCluster() {
         return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterStartService.startingCluster(context.getStack(), context.getCluster());
+            protected void doExecute(ClusterMinimalContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                clusterStartService.startingCluster(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new ClusterStartRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new ClusterStartRequest(context.getStackId());
             }
         };
     }
@@ -54,8 +54,8 @@ public class ClusterStartActions {
     public Action clusterStartPolling() {
         return new AbstractClusterAction<ClusterStartResult>(ClusterStartResult.class) {
             @Override
-            protected void doExecute(ClusterContext context, ClusterStartResult payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context.getFlowId(), new ClusterStartPollingRequest(context.getStack().getId(), payload.getRequestId()));
+            protected void doExecute(ClusterMinimalContext context, ClusterStartResult payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context.getFlowId(), new ClusterStartPollingRequest(context.getStackId(), payload.getRequestId()));
             }
         };
     }
@@ -64,15 +64,15 @@ public class ClusterStartActions {
     public Action clusterStartFinished() {
         return new AbstractClusterAction<ClusterStartPollingResult>(ClusterStartPollingResult.class) {
             @Override
-            protected void doExecute(ClusterContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) throws Exception {
                 clusterStartService.clusterStartFinished(context.getStack());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterStartEvent.FINALIZED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StackEvent(ClusterStartEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
     }

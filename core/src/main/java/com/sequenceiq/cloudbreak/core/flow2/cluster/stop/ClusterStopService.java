@@ -32,14 +32,14 @@ public class ClusterStopService {
     @Inject
     private StackUtil stackUtil;
 
-    public void stoppingCluster(Stack stack) {
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOP_IN_PROGRESS);
+    public void stoppingCluster(long stackId) {
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
+        clusterService.updateClusterStatusByStackId(stackId, Status.STOP_IN_PROGRESS);
     }
 
-    public void clusterStopFinished(Stack stack) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOPPED);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOPPED, Status.STOPPED.name());
+    public void clusterStopFinished(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, Status.STOPPED);
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_STOPPED, Status.STOPPED.name());
     }
 
     public void handleClusterStopFailure(Stack stack, String errorReason) {

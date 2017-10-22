@@ -11,6 +11,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -45,7 +46,7 @@ public class ClusterUpgradeActions {
         return new AbstractClusterUpgradeAction<StackEvent>(StackEvent.class) {
             @Override
             protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpgradeService.upgradeCluster(context.getStack(), context.getCluster());
+                clusterUpgradeService.upgradeCluster(context.getStack().getId());
                 sendEvent(context);
             }
 
@@ -60,14 +61,14 @@ public class ClusterUpgradeActions {
     public Action clusterUpgradeFinished() {
         return new AbstractClusterAction<ClusterUpgradeResult>(ClusterUpgradeResult.class) {
             @Override
-            protected void doExecute(ClusterContext context, ClusterUpgradeResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterMinimalContext context, ClusterUpgradeResult payload, Map<Object, Object> variables) throws Exception {
                 clusterUpgradeService.clusterUpgradeFinished(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new StackEvent(ClusterUpgradeEvent.FINALIZED_EVENT.event(), context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new StackEvent(ClusterUpgradeEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
     }

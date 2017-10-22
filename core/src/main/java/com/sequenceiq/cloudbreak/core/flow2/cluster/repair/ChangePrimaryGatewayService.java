@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -58,15 +59,15 @@ public class ChangePrimaryGatewayService {
     @Inject
     private FlowMessageService flowMessageService;
 
-    public void changePrimaryGatewayStarted(Stack stack) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_GATEWAY_CHANGE, UPDATE_IN_PROGRESS.name());
+    public void changePrimaryGatewayStarted(long stackId) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_GATEWAY_CHANGE, UPDATE_IN_PROGRESS.name());
     }
 
     @Transactional
-    public void primaryGatewayChanged(Stack stack, String newPrimaryGatewayFQDN) throws CloudbreakException {
-        Set<InstanceMetaData> imds = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
+    public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException {
+        Set<InstanceMetaData> imds = instanceMetaDataRepository.findNotTerminatedForStack(stackId);
         Optional<InstanceMetaData> formerPrimaryGateway =
                 imds.stream().filter(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY).findFirst();
         Optional<InstanceMetaData> newPrimaryGateway =
@@ -78,7 +79,7 @@ public class ChangePrimaryGatewayService {
             InstanceMetaData npg = newPrimaryGateway.get();
             npg.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
             instanceMetaDataRepository.save(npg);
-            Stack updatedStack = stackService.getByIdWithLists(stack.getId());
+            Stack updatedStack = stackService.getByIdWithLists(stackId);
             String gatewayIp = gatewayConfigService.getPrimaryGatewayIp(updatedStack);
 
             Cluster cluster = updatedStack.getCluster();
@@ -89,7 +90,7 @@ public class ChangePrimaryGatewayService {
         }
     }
 
-    public void ambariServerStarted(Stack stack) {
+    public void ambariServerStarted(StackMinimal stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway succesfully changed.");
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, AVAILABLE.name(),

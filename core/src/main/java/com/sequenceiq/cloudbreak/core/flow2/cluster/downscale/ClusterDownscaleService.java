@@ -57,16 +57,16 @@ public class ClusterDownscaleService {
     @Inject
     private HostGroupService hostGroupService;
 
-    public void clusterDownscaleStarted(Stack stack, String hostGroupName, Integer scalingAdjustment, Set<String> hostNames) {
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_IN_PROGRESS);
+    public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<String> hostNames) {
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_DOWN, Status.UPDATE_IN_PROGRESS.name());
+        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
         if (scalingAdjustment != null) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", scalingAdjustment, hostGroupName);
-            flowMessageService.fireInstanceGroupEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
                     hostGroupName, scalingAdjustment, hostGroupName);
         } else if (!CollectionUtils.isEmpty(hostNames)) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", hostNames, hostGroupName);
-            flowMessageService.fireInstanceGroupEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Msg.AMBARI_CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, Status.UPDATE_IN_PROGRESS.name(),
                     hostGroupName, hostNames, hostGroupName);
         }
     }
