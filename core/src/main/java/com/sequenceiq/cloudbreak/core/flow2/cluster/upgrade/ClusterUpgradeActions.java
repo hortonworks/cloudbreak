@@ -10,7 +10,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -45,14 +44,14 @@ public class ClusterUpgradeActions {
     public Action upgradeCluster() {
         return new AbstractClusterUpgradeAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpgradeService.upgradeCluster(context.getStack().getId());
+            protected void doExecute(ClusterMinimalContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                clusterUpgradeService.upgradeCluster(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterContext context) {
-                return new ClusterUpgradeRequest(context.getStack().getId());
+            protected Selectable createRequest(ClusterMinimalContext context) {
+                return new ClusterUpgradeRequest(context.getStackId());
             }
         };
     }
