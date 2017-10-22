@@ -77,13 +77,13 @@ public class ClusterUpgradeActions {
         return new AbstractStackFailureAction<ClusterUpgradeState, ClusterUpgradeEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpgradeService.handleUpgradeClusterFailure(context.getStack(), payload.getException().getMessage());
+                clusterUpgradeService.handleUpgradeClusterFailure(context.getStackMinimal().getId(), payload.getException().getMessage());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterUpgradeEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ClusterUpgradeEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
             }
         };
     }

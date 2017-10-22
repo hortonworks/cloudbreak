@@ -96,7 +96,7 @@ public class ClusterCredentialChangeActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
             }
         };
     }

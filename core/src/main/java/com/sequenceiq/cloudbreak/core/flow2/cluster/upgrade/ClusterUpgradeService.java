@@ -8,7 +8,6 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -38,14 +37,15 @@ public class ClusterUpgradeService {
     }
 
     public void clusterUpgradeFinished(StackMinimal stack) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_REQUESTED);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Ambari is successfully upgraded.");
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_UPGRADE_FINISHED, Status.AVAILABLE.name(), stackUtil.extractAmbariIp(stack));
+        Long stackId = stack.getId();
+        clusterService.updateClusterStatusByStackId(stackId, Status.START_REQUESTED);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ambari is successfully upgraded.");
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_UPGRADE_FINISHED, Status.AVAILABLE.name(), stackUtil.extractAmbariIp(stack));
     }
 
-    public void handleUpgradeClusterFailure(Stack stack, String errorReason) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.UPDATE_FAILED, errorReason);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_UPGRADE_FAILED, Status.UPDATE_FAILED.name(), errorReason);
+    public void handleUpgradeClusterFailure(long stackId, String errorReason) {
+        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_FAILED, errorReason);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_UPGRADE_FAILED, Status.UPDATE_FAILED.name(), errorReason);
     }
 }

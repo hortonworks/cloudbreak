@@ -86,10 +86,10 @@ public class InstanceTerminationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE_FINISHED, AVAILABLE.name());
     }
 
-    public void handleInstanceTerminationError(Stack stack, StackFailureEvent payload) {
+    public void handleInstanceTerminationError(long stackId, StackFailureEvent payload) {
         Exception ex = payload.getException();
         LOGGER.error("Error during instance terminating flow:", ex);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Instance termination failed. " + ex.getMessage());
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_REMOVING_INSTANCE_FAILED, AVAILABLE.name(), ex.getMessage());
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instance termination failed. " + ex.getMessage());
+        flowMessageService.fireEventAndLog(stackId, Msg.STACK_REMOVING_INSTANCE_FAILED, AVAILABLE.name(), ex.getMessage());
     }
 }

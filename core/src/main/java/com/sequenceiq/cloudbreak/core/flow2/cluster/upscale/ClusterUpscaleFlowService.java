@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -86,12 +85,12 @@ public class ClusterUpscaleFlowService {
         }
     }
 
-    public void clusterUpscaleFailed(Stack stack, Exception errorDetails) {
+    public void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.error("Error during Cluster upscale flow: " + errorDetails.getMessage(), errorDetails);
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED, errorDetails.getMessage());
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED,
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PROVISIONED,
                 String.format("New node(s) could not be added to the cluster: %s", errorDetails));
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
     }
 
     private int updateMetadata(StackMinimal stack, String hostGroupName) {

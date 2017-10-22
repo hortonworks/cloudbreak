@@ -12,7 +12,7 @@ import com.sequenceiq.cloudbreak.core.flow2.Flow;
 import com.sequenceiq.cloudbreak.core.flow2.FlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.FlowState;
 import com.sequenceiq.cloudbreak.core.flow2.PayloadConverter;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -28,7 +28,7 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
     @Override
     protected StackFailureContext createFlowContext(String flowId, StateContext<S, E> stateContext, StackFailureEvent payload) {
         Flow flow = getFlow(flowId);
-        Stack stack = stackService.getById(payload.getStackId());
+        StackMinimal stack = stackService.getByIdMinimal(payload.getStackId());
         MDCBuilder.buildMdcContext(stack);
         flow.setFlowFailed(payload.getException());
         return new StackFailureContext(flowId, stack);

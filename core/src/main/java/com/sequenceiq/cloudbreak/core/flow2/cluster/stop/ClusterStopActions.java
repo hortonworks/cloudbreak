@@ -63,14 +63,14 @@ public class ClusterStopActions {
         return new AbstractStackFailureAction<ClusterStopState, ClusterStopEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterStopService.handleClusterStopFailure(context.getStack(), payload.getException().getMessage());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStack());
+                clusterStopService.handleClusterStopFailure(context.getStackMinimal(), payload.getException().getMessage());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackMinimal());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStopEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ClusterStopEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
             }
         };
     }

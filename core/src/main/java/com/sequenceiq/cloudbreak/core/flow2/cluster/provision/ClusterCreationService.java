@@ -101,7 +101,7 @@ public class ClusterCreationService {
         }
     }
 
-    public void handleClusterCreationFailure(Stack stack, Exception exception) {
+    public void handleClusterCreationFailure(StackMinimal stack, Exception exception) {
         if (stack.getCluster() != null) {
             Cluster cluster = clusterService.getById(stack.getCluster().getId());
             String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
