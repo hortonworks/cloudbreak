@@ -269,13 +269,13 @@ public class StackCreationActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
                 stackCreationService.handleStackCreationFailure(context.getStack(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStack());
+                metricService.incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackMinimal());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStackMinimal().getId());
             }
         };
     }

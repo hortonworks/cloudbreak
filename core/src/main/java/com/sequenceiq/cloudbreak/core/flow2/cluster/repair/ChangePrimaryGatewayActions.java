@@ -92,13 +92,13 @@ public class ChangePrimaryGatewayActions {
         return new AbstractStackFailureAction<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                changePrimaryGatewayService.changePrimaryGatewayFailed(context.getStack(), payload.getException());
+                changePrimaryGatewayService.changePrimaryGatewayFailed(context.getStackMinimal().getId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED.event(), context.getStack().getId());
+                return new StackEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED.event(), context.getStackMinimal().getId());
             }
         };
     }

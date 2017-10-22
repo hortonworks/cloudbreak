@@ -82,14 +82,14 @@ public class ClusterStartActions {
         return new AbstractStackFailureAction<ClusterStartState, ClusterStartEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterStartService.handleClusterStartFailure(context.getStack(), payload.getException().getMessage());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStack());
+                clusterStartService.handleClusterStartFailure(context.getStackMinimal(), payload.getException().getMessage());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackMinimal());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
             }
         };
     }

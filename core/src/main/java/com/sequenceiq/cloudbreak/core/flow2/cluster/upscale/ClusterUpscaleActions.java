@@ -136,8 +136,8 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStack(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStack());
+                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackMinimal().getId(), payload.getException());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackMinimal());
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.event(), payload);
             }
         };

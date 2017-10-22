@@ -97,14 +97,14 @@ public class StackStopActions {
         return new AbstractStackFailureAction<StackStopState, StackStopEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                stackStartStopService.handleStackStopError(context.getStack(), payload);
-                metricService.incrementMetricCounter(MetricType.STACK_STOP_FAILED, context.getStack());
+                stackStartStopService.handleStackStopError(context.getStackMinimal(), payload);
+                metricService.incrementMetricCounter(MetricType.STACK_STOP_FAILED, context.getStackMinimal());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
             }
         };
     }

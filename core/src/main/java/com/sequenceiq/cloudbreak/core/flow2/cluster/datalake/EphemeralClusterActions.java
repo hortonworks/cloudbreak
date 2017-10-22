@@ -58,13 +58,13 @@ public class EphemeralClusterActions {
         return new AbstractStackFailureAction<EphemeralClusterState, EphemeralClusterEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                ephemeralClusterService.updateClusterFailed(context.getStack(), payload.getException());
+                ephemeralClusterService.updateClusterFailed(context.getStackMinimal().getId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(EphemeralClusterEvent.EPHEMERAL_CLUSTER_FAILURE_HANDLED.event(), context.getStack().getId());
+                return new StackEvent(EphemeralClusterEvent.EPHEMERAL_CLUSTER_FAILURE_HANDLED.event(), context.getStackMinimal().getId());
             }
         };
     }

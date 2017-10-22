@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
 import com.sequenceiq.cloudbreak.domain.StackMinimal;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -60,8 +60,8 @@ public class ClusterStartService {
         }
     }
 
-    public void handleClusterStartFailure(Stack stack, String errorReason) {
-        Cluster cluster = stack.getCluster();
+    public void handleClusterStartFailure(StackMinimal stack, String errorReason) {
+        ClusterMinimal cluster = stack.getCluster();
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);

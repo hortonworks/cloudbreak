@@ -97,9 +97,9 @@ public class ChangePrimaryGatewayService {
                 stackUtil.extractAmbariIp(stack));
     }
 
-    public void changePrimaryGatewayFailed(Stack stack, Exception exception) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + exception.getMessage());
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_GATEWAY_CHANGE_FAILED, UPDATE_FAILED.name(), exception.getMessage());
+    public void changePrimaryGatewayFailed(long stackId, Exception exception) {
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + exception.getMessage());
+        flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_GATEWAY_CHANGE_FAILED, UPDATE_FAILED.name(), exception.getMessage());
     }
 }

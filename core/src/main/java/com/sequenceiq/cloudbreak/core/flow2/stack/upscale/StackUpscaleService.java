@@ -197,12 +197,12 @@ public class StackUpscaleService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_UPSCALE_FINISHED, AVAILABLE.name());
     }
 
-    public void handleStackUpscaleFailure(Stack stack, StackFailureEvent payload) {
+    public void handleStackUpscaleFailure(long stackId, StackFailureEvent payload) {
         LOGGER.error("Exception during the upscale of stack", payload.getException());
         try {
             String errorReason = payload.getException().getMessage();
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), errorReason);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
+            flowMessageService.fireEventAndLog(stackId, Msg.STACK_INFRASTRUCTURE_UPDATE_FAILED, AVAILABLE.name(), errorReason);
         } catch (RuntimeException e) {
             LOGGER.error("Exception during the handling of stack scaling failure: {}", e.getMessage());
         }
