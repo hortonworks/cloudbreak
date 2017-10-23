@@ -74,7 +74,7 @@ public class ClusterTerminationFlowService {
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
         if (cluster.getEmailNeeded()) {
-            sendDeleteFailedMail(cluster);
+            sendDeleteFailedMail(cluster, stackId);
         }
     }
 
@@ -99,8 +99,8 @@ public class ClusterTerminationFlowService {
         flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
     }
 
-    private void sendDeleteFailedMail(ClusterView cluster) {
+    private void sendDeleteFailedMail(ClusterView cluster, long stackId) {
         emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
-        flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
+        flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
     }
 }

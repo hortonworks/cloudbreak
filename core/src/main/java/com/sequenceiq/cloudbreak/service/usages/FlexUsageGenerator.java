@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.common.service.user.UserFilterField;
 import com.sequenceiq.cloudbreak.domain.CloudbreakUsage;
 import com.sequenceiq.cloudbreak.domain.FlexSubscription;
 import com.sequenceiq.cloudbreak.domain.SmartSenseSubscription;
-import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.repository.FlexSubscriptionRepository;
 import com.sequenceiq.cloudbreak.service.flex.FlexSubscriptionService;
 import com.sequenceiq.cloudbreak.service.ha.CloudbreakNodeConfig;
@@ -189,7 +189,7 @@ public class FlexUsageGenerator {
                 usageJson.setRegion(usage.getRegion());
                 usageJson.setPeakUsage(usage.getPeak());
                 usageJson.setUsageDate(formatInstant(usage.getDay().toInstant(), FLEX_USAGE_DAY_FORMAT_PATTERN));
-                Stack stack = stackService.getById(usage.getStackId());
+                StackView stack = stackService.getByIdView(usage.getStackId());
                 usageJson.setCreationTime(formatInstant(Instant.ofEpochMilli(stack.getCreated()), FLEX_TIME_ZONE_FORMAT_PATTERN));
                 usageJson.setTerminationTime(getTerminationTime(stack));
                 flexUsageJsonsByStackId.put(stackId, usageJson);
@@ -209,7 +209,7 @@ public class FlexUsageGenerator {
         return usageDayZoneDate.format(DateTimeFormatter.ofPattern(pattern));
     }
 
-    private String getTerminationTime(Stack stack) {
+    private String getTerminationTime(StackView stack) {
         String terminationTime = "";
         if (stack.isDeleteCompleted()) {
             try {

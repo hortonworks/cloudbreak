@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.model.Status.START_REQUESTED;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -20,8 +21,8 @@ public class ClusterView implements ProvisionEntity {
     @Id
     private Long id;
 
-    @OneToOne
-    private Stack stack;
+    @OneToOne(fetch = FetchType.LAZY)
+    private StackView stack;
 
     private String name;
 
@@ -36,10 +37,6 @@ public class ClusterView implements ProvisionEntity {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    public Stack getStack() {
-        return stack;
-    }
-
     public Long getId() {
         return id;
     }
@@ -48,7 +45,11 @@ public class ClusterView implements ProvisionEntity {
         this.id = id;
     }
 
-    public void setStack(Stack stack) {
+    public StackView getStack() {
+        return stack;
+    }
+
+    public void setStack(StackView stack) {
         this.stack = stack;
     }
 
@@ -60,28 +61,20 @@ public class ClusterView implements ProvisionEntity {
         this.name = name;
     }
 
-    public String getAmbariIp() {
-        return ambariIp;
-    }
-
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
-    }
-
-    public String getEmailTo() {
-        return emailTo;
-    }
-
-    public void setEmailTo(String emailTo) {
-        this.emailTo = emailTo;
-    }
-
     public String getOwner() {
         return owner;
     }
 
     public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public String getAmbariIp() {
+        return ambariIp;
+    }
+
+    public void setAmbariIp(String ambariIp) {
+        this.ambariIp = ambariIp;
     }
 
     public Boolean getEmailNeeded() {
@@ -92,8 +85,12 @@ public class ClusterView implements ProvisionEntity {
         this.emailNeeded = emailNeeded;
     }
 
-    public boolean isRequested() {
-        return REQUESTED.equals(status);
+    public String getEmailTo() {
+        return emailTo;
+    }
+
+    public void setEmailTo(String emailTo) {
+        this.emailTo = emailTo;
     }
 
     public Status getStatus() {
@@ -102,6 +99,10 @@ public class ClusterView implements ProvisionEntity {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public boolean isRequested() {
+        return REQUESTED.equals(status);
     }
 
     public boolean isStartRequested() {

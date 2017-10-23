@@ -60,9 +60,10 @@ public class UnhealthyInstancesDetectionHandlerTest {
         when(event.getData()).thenReturn(unhealthyInstancesDetectionRequest);
 
         Stack stack = mock(Stack.class);
-        when(stackService.getByIdWithLists(stackId)).thenReturn(stack);
+        when(stack.getId()).thenReturn(stackId);
+        when(stackService.getById(stackId)).thenReturn(stack);
 
-        when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack)).thenReturn(Collections.emptySet());
+        when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stackId)).thenReturn(Collections.emptySet());
 
         unhealthyInstancesDetectionHandler.accept(event);
         verifyZeroInteractions(unhealthyInstancesFinalizer);
@@ -87,7 +88,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
         unhealthyInstances.add(imd1);
         unhealthyInstances.add(imd2);
         unhealthyInstances.add(imd3);
-        when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack)).thenReturn(unhealthyInstances);
+        when(candidateUnhealthyInstanceSelector.selectCandidateUnhealthyInstances(stack.getId())).thenReturn(unhealthyInstances);
 
         Set<String> unhealthyInstanceIds = new HashSet<>();
         unhealthyInstanceIds.add("i-0f1e0605506aaaaaa");

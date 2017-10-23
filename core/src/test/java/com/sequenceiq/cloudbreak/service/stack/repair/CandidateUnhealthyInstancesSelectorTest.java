@@ -62,7 +62,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
         InstanceMetaData imd1 = setupInstanceMetaData(stack.getId(), "ip-10-0-0-2.ec2.internal", slaveGroup);
         InstanceMetaData imd2 = setupInstanceMetaData(stack.getId(), "ip-10-0-0-4.ec2.internal", slaveGroup);
 
-        Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack);
+        Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack.getId());
 
         assertEquals(2, candidateUnhealthyInstances.size());
         assertTrue(candidateUnhealthyInstances.contains(imd1));
@@ -77,7 +77,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
         when(clusterService.getHostStatuses(stack.getId())).thenReturn(hostStatuses);
 
-        Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack);
+        Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack.getId());
 
         assertTrue(candidateUnhealthyInstances.isEmpty());
     }
@@ -99,7 +99,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
         InstanceMetaData imd2 = setupInstanceMetaData(stack.getId(), "ip-10-0-0-4.ec2.internal", slaveGroup);
         setupInstanceMetaData(stack.getId(), "ip-10-0-0-3.ec2.internal", gatewayGroup);
 
-        Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack);
+        Set<InstanceMetaData> candidateUnhealthyInstances = undertest.selectCandidateUnhealthyInstances(stack.getId());
 
         assertEquals(2, candidateUnhealthyInstances.size());
         assertTrue(candidateUnhealthyInstances.contains(imd1));
