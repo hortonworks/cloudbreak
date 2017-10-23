@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 
@@ -40,7 +40,7 @@ public class StackUtil {
         return agents;
     }
 
-    public String extractAmbariIp(StackMinimal stack) {
+    public String extractAmbariIp(StackView stack) {
         return extractAmbariIp(stack.getId(), stack.getOrchestrator().getType(), stack.getCluster() != null ? stack.getCluster().getAmbariIp() : null);
     }
 

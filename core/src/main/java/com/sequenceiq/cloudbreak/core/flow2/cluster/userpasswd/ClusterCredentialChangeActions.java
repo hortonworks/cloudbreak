@@ -14,7 +14,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
@@ -39,7 +39,7 @@ public class ClusterCredentialChangeActions {
     public Action changingClusterCredential() {
         return new AbstractClusterAction<ClusterCredentialChangeTriggerEvent>(ClusterCredentialChangeTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext ctx, ClusterCredentialChangeTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext ctx, ClusterCredentialChangeTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterCredentialChangeService.credentialChange(ctx.getStackId());
                 ClusterCredentialChangeRequest request;
                 switch (payload.getType()) {
@@ -61,7 +61,7 @@ public class ClusterCredentialChangeActions {
     public Action clusterCredentialChangeFinished() {
         return new AbstractClusterAction<ClusterCredentialChangeResult>(ClusterCredentialChangeResult.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterCredentialChangeResult payload, Map<Object, Object> variables) throws Exception {
                 switch (payload.getRequest().getType()) {
                     case REPLACE:
                         clusterCredentialChangeService.finishCredentialReplace(context.getStackId(), context.getClusterId(),
@@ -78,7 +78,7 @@ public class ClusterCredentialChangeActions {
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(ClusterCredentialChangeEvent.FINALIZED_EVENT.event(), context.getStack().getId());
             }
         };
@@ -96,7 +96,7 @@ public class ClusterCredentialChangeActions {
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+                return new StackEvent(ClusterCredentialChangeEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

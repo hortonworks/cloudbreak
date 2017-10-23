@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -36,7 +36,7 @@ public class ClusterUpgradeService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_UPGRADE, Status.UPDATE_IN_PROGRESS.name());
     }
 
-    public void clusterUpgradeFinished(StackMinimal stack) {
+    public void clusterUpgradeFinished(StackView stack) {
         Long stackId = stack.getId();
         clusterService.updateClusterStatusByStackId(stackId, Status.START_REQUESTED);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Ambari is successfully upgraded.");

@@ -10,7 +10,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleTriggerEvent;
@@ -32,7 +32,7 @@ public class ClusterDownscaleActions {
     public Action collectCandidatesAction() {
         return new AbstractClusterAction<ClusterDownscaleTriggerEvent>(ClusterDownscaleTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupName(), payload.getAdjustment(),
                         payload.getHostNames());
                 CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
@@ -46,7 +46,7 @@ public class ClusterDownscaleActions {
     public Action decommissionAction() {
         return new AbstractClusterAction<CollectDownscaleCandidatesResult>(CollectDownscaleCandidatesResult.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, CollectDownscaleCandidatesResult payload, Map<Object, Object> variables) throws Exception {
                 DecommissionRequest request = new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getHostNames());
                 sendEvent(context.getFlowId(), request.selector(), request);
             }
@@ -57,13 +57,13 @@ public class ClusterDownscaleActions {
     public Action updateInstanceMetadataAction() {
         return new AbstractClusterAction<DecommissionResult>(DecommissionResult.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, DecommissionResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) throws Exception {
                 clusterDownscaleService.updateMetadata(context.getStackId(), payload.getHostNames(), payload.getRequest().getHostGroupName());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(ClusterDownscaleEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
@@ -74,13 +74,13 @@ public class ClusterDownscaleActions {
         return new AbstractStackFailureAction<ClusterStartState, ClusterStartEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterDownscaleService.handleClusterDownscaleFailure(context.getStackMinimal().getId(), payload.getException());
+                clusterDownscaleService.handleClusterDownscaleFailure(context.getStackView().getId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterDownscaleEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+                return new StackEvent(ClusterDownscaleEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

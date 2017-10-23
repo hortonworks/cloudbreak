@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.repository.HostMetadataRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -65,7 +65,7 @@ public class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void clusterUpscaleFinished(StackMinimal stack, String hostgroupName) {
+    public void clusterUpscaleFinished(StackView stack, String hostgroupName) {
         int numOfFailedHosts = updateMetadata(stack, hostgroupName);
         boolean success = numOfFailedHosts == 0;
         if (success) {
@@ -93,7 +93,7 @@ public class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
     }
 
-    private int updateMetadata(StackMinimal stack, String hostGroupName) {
+    private int updateMetadata(StackView stack, String hostGroupName) {
         LOGGER.info("Start update metadata");
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());

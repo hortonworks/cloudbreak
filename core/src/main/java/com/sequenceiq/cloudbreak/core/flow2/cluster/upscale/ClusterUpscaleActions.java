@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
@@ -136,8 +136,8 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackMinimal().getId(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackMinimal());
+                clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(), payload.getException());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView());
                 sendEvent(context.getFlowId(), FAIL_HANDLED_EVENT.event(), payload);
             }
         };
@@ -164,7 +164,7 @@ public class ClusterUpscaleActions {
         @Override
         protected ClusterUpscaleContext createFlowContext(String flowId, StateContext<ClusterUpscaleState, ClusterUpscaleEvent> stateContext, P payload) {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
-            StackMinimal stack = stackService.getByIdMinimal(payload.getStackId());
+            StackView stack = stackService.getByIdView(payload.getStackId());
             MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
             return new ClusterUpscaleContext(flowId, stack, getHostgroupName(variables), getAdjustment(variables));
         }

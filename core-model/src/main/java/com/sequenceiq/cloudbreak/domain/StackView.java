@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
 @Table(name = "Stack", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class StackMinimal implements ProvisionEntity {
+public class StackView implements ProvisionEntity {
 
     @Id
     private Long id;
@@ -23,7 +23,7 @@ public class StackMinimal implements ProvisionEntity {
     private String owner;
 
     @OneToOne(mappedBy = "stack")
-    private ClusterMinimal cluster;
+    private ClusterView cluster;
 
     @Column(columnDefinition = "TEXT")
     private String cloudPlatform;
@@ -32,10 +32,10 @@ public class StackMinimal implements ProvisionEntity {
     private String platformVariant;
 
     @OneToOne
-    private OrchestratorMinimal orchestrator;
+    private OrchestratorView orchestrator;
 
     @OneToOne
-    private StackStatusMinimal stackStatus;
+    private StackStatusView stackStatus;
 
     public Long getId() {
         return id;
@@ -61,19 +61,19 @@ public class StackMinimal implements ProvisionEntity {
         this.owner = owner;
     }
 
-    public ClusterMinimal getCluster() {
+    public ClusterView getCluster() {
         return cluster;
     }
 
-    public void setCluster(ClusterMinimal cluster) {
+    public void setCluster(ClusterView cluster) {
         this.cluster = cluster;
     }
 
-    public OrchestratorMinimal getOrchestrator() {
+    public OrchestratorView getOrchestrator() {
         return orchestrator;
     }
 
-    public void setOrchestrator(OrchestratorMinimal orchestrator) {
+    public void setOrchestrator(OrchestratorView orchestrator) {
         this.orchestrator = orchestrator;
     }
 
@@ -97,11 +97,11 @@ public class StackMinimal implements ProvisionEntity {
         return AVAILABLE.equals(getStatus());
     }
 
-    public StackStatusMinimal getStackStatus() {
+    public StackStatusView getStackStatus() {
         return stackStatus;
     }
 
-    public void setStackStatus(StackStatusMinimal stackStatus) {
+    public void setStackStatus(StackStatusView stackStatus) {
         this.stackStatus = stackStatus;
     }
 

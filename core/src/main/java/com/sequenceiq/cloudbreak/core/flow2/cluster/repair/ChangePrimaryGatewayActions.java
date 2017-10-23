@@ -10,7 +10,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -32,7 +32,7 @@ public class ChangePrimaryGatewayActions {
     public Action repairGatewayAction() {
         return new AbstractClusterAction<ChangePrimaryGatewayTriggerEvent>(ChangePrimaryGatewayTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ChangePrimaryGatewayTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ChangePrimaryGatewayTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 changePrimaryGatewayService.changePrimaryGatewayStarted(context.getStackId());
                 ChangePrimaryGatewayRequest request = new ChangePrimaryGatewayRequest(context.getStackId());
                 sendEvent(context.getFlowId(), request.selector(), request);
@@ -44,13 +44,13 @@ public class ChangePrimaryGatewayActions {
     public Action waitingForAmbariServer() {
         return new AbstractClusterAction<ChangePrimaryGatewaySuccess>(ChangePrimaryGatewaySuccess.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ChangePrimaryGatewaySuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ChangePrimaryGatewaySuccess payload, Map<Object, Object> variables) throws Exception {
                 changePrimaryGatewayService.primaryGatewayChanged(context.getStackId(), payload.getNewPrimaryGatewayFQDN());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new WaitForAmbariServerRequest(context.getStackId());
             }
         };
@@ -60,12 +60,12 @@ public class ChangePrimaryGatewayActions {
     public Action registerProxyAction() {
         return new AbstractClusterAction<WaitForAmbariServerSuccess>(WaitForAmbariServerSuccess.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, WaitForAmbariServerSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, WaitForAmbariServerSuccess payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new RegisterProxyRequest(context.getStackId());
             }
         };
@@ -75,13 +75,13 @@ public class ChangePrimaryGatewayActions {
     public Action changeGatewayFinishedAction() {
         return new AbstractClusterAction<RegisterProxySuccess>(RegisterProxySuccess.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, RegisterProxySuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, RegisterProxySuccess payload, Map<Object, Object> variables) throws Exception {
                 changePrimaryGatewayService.ambariServerStarted(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FLOW_FINISHED.event(), context.getStackId());
             }
         };
@@ -92,13 +92,13 @@ public class ChangePrimaryGatewayActions {
         return new AbstractStackFailureAction<ChangePrimaryGatewayState, ChangePrimaryGatewayEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                changePrimaryGatewayService.changePrimaryGatewayFailed(context.getStackMinimal().getId(), payload.getException());
+                changePrimaryGatewayService.changePrimaryGatewayFailed(context.getStackView().getId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED.event(), context.getStackMinimal().getId());
+                return new StackEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_FAILURE_HANDLED.event(), context.getStackView().getId());
             }
         };
     }

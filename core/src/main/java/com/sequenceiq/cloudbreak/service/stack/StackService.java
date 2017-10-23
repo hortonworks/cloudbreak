@@ -60,7 +60,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
@@ -73,7 +73,7 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.StackMinimalRepository;
+import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
@@ -103,7 +103,7 @@ public class StackService {
     private StackRepository stackRepository;
 
     @Inject
-    private StackMinimalRepository stackMinimalRepository;
+    private StackViewRepository stackViewRepository;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -246,8 +246,8 @@ public class StackService {
         return retStack;
     }
 
-    public StackMinimal getByIdMinimal(Long id) {
-        StackMinimal retStack = stackMinimalRepository.findOne(id);
+    public StackView getByIdView(Long id) {
+        StackView retStack = stackViewRepository.findOne(id);
         if (retStack == null) {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }

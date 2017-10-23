@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.controller.validation.stack.StackValidator;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
@@ -164,7 +164,7 @@ public class StackController implements StackEndpoint {
 
     @Override
     public Response put(Long id, UpdateStackJson updateRequest) {
-        StackMinimal stack = stackService.getByIdMinimal(id);
+        StackView stack = stackService.getByIdView(id);
         MDCBuilder.buildMdcContext(stack);
         if (updateRequest.getStatus() != null) {
             stackService.updateStatus(id, updateRequest.getStatus(), updateRequest.getWithClusterEvent());

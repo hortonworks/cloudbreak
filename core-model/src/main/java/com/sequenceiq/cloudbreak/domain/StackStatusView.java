@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
 @Table(name = "stackstatus")
-public class StackStatusMinimal implements ProvisionEntity {
+public class StackStatusView implements ProvisionEntity {
     @Id
     private Long id;
 

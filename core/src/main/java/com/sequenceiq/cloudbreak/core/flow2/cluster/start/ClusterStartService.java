@@ -13,8 +13,8 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.ClusterView;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.EmailSenderService;
@@ -39,14 +39,14 @@ public class ClusterStartService {
     @Inject
     private StackUtil stackUtil;
 
-    public void startingCluster(StackMinimal stack) {
+    public void startingCluster(StackView stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the Ambari cluster. Ambari ip: %s",
                 stackUtil.extractAmbariIp(stack)));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stackUtil.extractAmbariIp(stack));
     }
 
-    public void clusterStartFinished(StackMinimal stack) {
+    public void clusterStartFinished(StackView stack) {
         Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
         String ambariIp = stackUtil.extractAmbariIp(stack);
         cluster.setUpSince(new Date().getTime());
@@ -60,8 +60,8 @@ public class ClusterStartService {
         }
     }
 
-    public void handleClusterStartFailure(StackMinimal stack, String errorReason) {
-        ClusterMinimal cluster = stack.getCluster();
+    public void handleClusterStartFailure(StackView stack, String errorReason) {
+        ClusterView cluster = stack.getCluster();
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_FAILED);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
