@@ -19,12 +19,12 @@ public class InstanceTerminationFailureAction extends AbstractStackFailureAction
 
     @Override
     protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-        instanceTerminationService.handleInstanceTerminationError(context.getStackMinimal().getId(), payload);
+        instanceTerminationService.handleInstanceTerminationError(context.getStackView().getId(), payload);
         sendEvent(context);
     }
 
     @Override
     protected Selectable createRequest(StackFailureContext context) {
-        return new StackEvent(InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+        return new StackEvent(InstanceTerminationEvent.TERMINATION_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
     }
 }

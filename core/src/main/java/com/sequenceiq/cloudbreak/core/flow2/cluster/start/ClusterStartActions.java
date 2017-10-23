@@ -13,7 +13,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -38,13 +38,13 @@ public class ClusterStartActions {
     public Action startingCluster() {
         return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterStartService.startingCluster(context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new ClusterStartRequest(context.getStackId());
             }
         };
@@ -54,7 +54,7 @@ public class ClusterStartActions {
     public Action clusterStartPolling() {
         return new AbstractClusterAction<ClusterStartResult>(ClusterStartResult.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ClusterStartResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterStartResult payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context.getFlowId(), new ClusterStartPollingRequest(context.getStackId(), payload.getRequestId()));
             }
         };
@@ -64,14 +64,14 @@ public class ClusterStartActions {
     public Action clusterStartFinished() {
         return new AbstractClusterAction<ClusterStartPollingResult>(ClusterStartPollingResult.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterStartPollingResult payload, Map<Object, Object> variables) throws Exception {
                 clusterStartService.clusterStartFinished(context.getStack());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(ClusterStartEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
@@ -82,14 +82,14 @@ public class ClusterStartActions {
         return new AbstractStackFailureAction<ClusterStartState, ClusterStartEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterStartService.handleClusterStartFailure(context.getStackMinimal(), payload.getException().getMessage());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackMinimal());
+                clusterStartService.handleClusterStartFailure(context.getStackView(), payload.getException().getMessage());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_START_FAILED, context.getStackView());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+                return new StackEvent(ClusterStartEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

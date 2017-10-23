@@ -2,28 +2,28 @@ package com.sequenceiq.cloudbreak.core.flow2.stack;
 
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 
 public class StackFailureContext extends CommonContext {
 
-    private final StackMinimal stackMinimal;
+    private final StackView stackView;
 
     private final Stack stack;
 
     public StackFailureContext(String flowId, Stack stack) {
         super(flowId);
         this.stack = stack;
-        stackMinimal = null;
+        stackView = null;
     }
 
-    public StackFailureContext(String flowId, StackMinimal stackMinimal) {
+    public StackFailureContext(String flowId, StackView stackView) {
         super(flowId);
         stack = null;
-        this.stackMinimal = stackMinimal;
+        this.stackView = stackView;
     }
 
-    public StackMinimal getStackMinimal() {
-        return stackMinimal;
+    public StackView getStackView() {
+        return stackView;
     }
 
     public Stack getStack() {

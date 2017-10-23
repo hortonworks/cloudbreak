@@ -8,13 +8,13 @@ import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.event.Payload;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-public abstract class AbstractClusterResetAction<P extends Payload> extends AbstractAction<ClusterResetState, ClusterResetEvent, ClusterMinimalContext, P> {
+public abstract class AbstractClusterResetAction<P extends Payload> extends AbstractAction<ClusterResetState, ClusterResetEvent, ClusterViewContext, P> {
     @Inject
     private StackService stackService;
 
@@ -23,14 +23,14 @@ public abstract class AbstractClusterResetAction<P extends Payload> extends Abst
     }
 
     @Override
-    protected ClusterMinimalContext createFlowContext(String flowId, StateContext<ClusterResetState, ClusterResetEvent> stateContext, P payload) {
-        StackMinimal stack = stackService.getByIdMinimal(payload.getStackId());
+    protected ClusterViewContext createFlowContext(String flowId, StateContext<ClusterResetState, ClusterResetEvent> stateContext, P payload) {
+        StackView stack = stackService.getByIdView(payload.getStackId());
         MDCBuilder.buildMdcContext(stack.getId().toString(), stack.getName(), stack.getOwner(), "CLUSTER");
-        return new ClusterMinimalContext(flowId, stack);
+        return new ClusterViewContext(flowId, stack);
     }
 
     @Override
-    protected Object getFailurePayload(P payload, Optional<ClusterMinimalContext> flowContext, Exception ex) {
+    protected Object getFailurePayload(P payload, Optional<ClusterViewContext> flowContext, Exception ex) {
         return new StackFailureEvent(payload.getStackId(), ex);
     }
 }

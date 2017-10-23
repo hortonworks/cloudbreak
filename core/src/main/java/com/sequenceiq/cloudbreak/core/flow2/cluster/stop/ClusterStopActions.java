@@ -11,7 +11,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -29,13 +29,13 @@ public class ClusterStopActions {
     public Action stoppingCluster() {
         return new AbstractClusterAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterStopService.stoppingCluster(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new ClusterStopRequest(context.getStackId());
             }
         };
@@ -45,14 +45,14 @@ public class ClusterStopActions {
     public Action clusterStopFinished() {
         return new AbstractClusterAction<ClusterStopResult>(ClusterStopResult.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ClusterStopResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterStopResult payload, Map<Object, Object> variables) throws Exception {
                 clusterStopService.clusterStopFinished(context.getStackId());
                 metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(ClusterStopEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
@@ -63,14 +63,14 @@ public class ClusterStopActions {
         return new AbstractStackFailureAction<ClusterStopState, ClusterStopEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterStopService.handleClusterStopFailure(context.getStackMinimal(), payload.getException().getMessage());
-                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackMinimal());
+                clusterStopService.handleClusterStopFailure(context.getStackView(), payload.getException().getMessage());
+                metricService.incrementMetricCounter(MetricType.CLUSTER_STOP_FAILED, context.getStackView());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterStopEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+                return new StackEvent(ClusterStopEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

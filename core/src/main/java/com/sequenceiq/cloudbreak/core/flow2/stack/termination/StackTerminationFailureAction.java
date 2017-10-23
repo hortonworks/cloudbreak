@@ -45,12 +45,12 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
         Boolean deleteDependencies = Boolean.valueOf(String.valueOf(variables.get("DELETEDEPENDENCIES")));
         stackTerminationService.handleStackTerminationError(context.getStack(), payload,
             variables.get("FORCEDTERMINATION") != null, deleteDependencies);
-        metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, context.getStackMinimal());
+        metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_FAILED, context.getStackView());
         sendEvent(context);
     }
 
     @Override
     protected Selectable createRequest(StackFailureContext context) {
-        return new StackEvent(StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+        return new StackEvent(StackTerminationEvent.STACK_TERMINATION_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
     }
 }

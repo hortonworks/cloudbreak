@@ -13,12 +13,12 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.ClusterView;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -45,15 +45,15 @@ public class ClusterTerminationFlowService {
     @Inject
     private FlowMessageService flowMessageService;
 
-    public void terminateCluster(ClusterMinimalContext context) {
+    public void terminateCluster(ClusterViewContext context) {
         clusterService.updateClusterStatusByStackId(context.getStackId(), Status.DELETE_IN_PROGRESS);
         LOGGER.info("Cluster delete started.");
     }
 
-    public void finishClusterTerminationAllowed(ClusterMinimalContext context, ClusterTerminationResult payload) {
+    public void finishClusterTerminationAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
         LOGGER.info("Terminate cluster result: {}", payload);
-        StackMinimal stack = context.getStack();
-        ClusterMinimal cluster = context.getCluster();
+        StackView stack = context.getStack();
+        ClusterView cluster = context.getCluster();
         if (cluster != null) {
             terminationService.finalizeClusterTermination(cluster.getId());
             clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
@@ -66,10 +66,10 @@ public class ClusterTerminationFlowService {
         }
     }
 
-    public void finishClusterTerminationNotAllowed(ClusterMinimalContext context, ClusterTerminationResult payload) {
-        StackMinimal stack = context.getStack();
+    public void finishClusterTerminationNotAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
+        StackView stack = context.getStack();
         Long stackId = stack.getId();
-        ClusterMinimal cluster = context.getCluster();
+        ClusterView cluster = context.getCluster();
         flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), "Operation not allowed");
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
@@ -99,7 +99,7 @@ public class ClusterTerminationFlowService {
         flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
     }
 
-    private void sendDeleteFailedMail(ClusterMinimal cluster) {
+    private void sendDeleteFailedMail(ClusterView cluster) {
         emailSenderService.sendTerminationFailureEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
         flowMessageService.fireEventAndLog(cluster.getStack().getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_FAILED.name());
     }

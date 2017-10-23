@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 
 @Service
 public class MetricService {
@@ -37,7 +37,7 @@ public class MetricService {
      * @param metric Metric name
      * @param stack  Stack, used to determine the cloud platform
      */
-    public void incrementMetricCounter(MetricType metric, StackMinimal stack) {
+    public void incrementMetricCounter(MetricType metric, StackView stack) {
         if (stack != null && stack.getPlatformVariant() != null) {
             incrementMetricCounter(getMetricNameWithPlatform(metric, stack.cloudPlatform()));
         } else {

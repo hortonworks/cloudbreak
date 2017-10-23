@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
@@ -48,13 +48,13 @@ public class ClusterResetActions {
     public Action syncCluster() {
         return new AbstractClusterResetAction<StackEvent>(StackEvent.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
                 clusterResetService.resetCluster(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new ClusterResetRequest(context.getStackId());
             }
         };
@@ -64,12 +64,12 @@ public class ClusterResetActions {
     public Action finishResetCluster() {
         return new AbstractClusterResetAction<ClusterResetResult>(ClusterResetResult.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, ClusterResetResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, ClusterResetResult payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StartAmbariRequest(context.getStackId());
             }
         };
@@ -79,12 +79,12 @@ public class ClusterResetActions {
     public Action finishStartAmbari() {
         return new AbstractClusterResetAction<StartAmbariSuccess>(StartAmbariSuccess.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, StartAmbariSuccess payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(ClusterResetEvent.FINALIZED_EVENT.event(), context.getStackId());
             }
         };
@@ -95,13 +95,13 @@ public class ClusterResetActions {
         return new AbstractStackFailureAction<ClusterResetState, ClusterResetEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterResetService.handleResetClusterFailure(context.getStackMinimal(), payload.getException());
+                clusterResetService.handleResetClusterFailure(context.getStackView(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(ClusterResetEvent.FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+                return new StackEvent(ClusterResetEvent.FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

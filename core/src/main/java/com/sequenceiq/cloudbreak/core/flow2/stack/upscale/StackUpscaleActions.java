@@ -216,14 +216,14 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                stackUpscaleService.handleStackUpscaleFailure(context.getStackMinimal().getId(), payload);
-                metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackMinimal());
+                stackUpscaleService.handleStackUpscaleFailure(context.getStackView().getId(), payload);
+                metricService.incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackMinimal().getId());
+                return new StackEvent(StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

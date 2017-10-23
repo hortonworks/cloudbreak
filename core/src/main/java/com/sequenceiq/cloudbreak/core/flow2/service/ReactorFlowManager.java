@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceT
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.cloud.reactor.ErrorHandlerAwareReactorEventFactory;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.EphemeralClusterUpdateTriggerEvent;
@@ -115,7 +115,7 @@ public class ReactorFlowManager {
     }
 
     public void triggerTermination(Long stackId, Boolean deleteDependencies) {
-        StackMinimal stack = stackService.getByIdMinimal(stackId);
+        StackView stack = stackService.getByIdView(stackId);
 
         if (BYOS.equals(stack.cloudPlatform())) {
             String selector = FlowChainTriggers.BYOS_CLUSTER_TERMINATION_TRIGGER_EVENT;

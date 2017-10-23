@@ -22,7 +22,6 @@ public class DisableOnGCPRestartAction extends FillInMemoryStateStoreRestartActi
 
     @Override
     public void restart(String flowId, String flowChainId, String event, Object payload) {
-        // TODO can be minimal stack
         Payload stackPayload = (Payload) payload;
         Stack stack = stackService.getById(stackPayload.getStackId());
         if (stack.getPlatformVariant().equals(GCP)) {

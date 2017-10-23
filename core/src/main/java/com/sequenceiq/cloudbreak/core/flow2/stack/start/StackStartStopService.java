@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.common.type.BillingStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -72,7 +72,7 @@ public class StackStartStopService {
         usageService.startUsagesForStack(stack);
     }
 
-    public void handleStackStartError(StackMinimal stack, StackFailureEvent payload) {
+    public void handleStackStartError(StackView stack, StackFailureEvent payload) {
         handleError(stack, payload.getException(), DetailedStackStatus.START_FAILED, Msg.STACK_INFRASTRUCTURE_START_FAILED,
                 "Stack start failed: ");
     }
@@ -100,7 +100,7 @@ public class StackStartStopService {
         }
     }
 
-    public void handleStackStopError(StackMinimal stack, StackFailureEvent payload) {
+    public void handleStackStopError(StackView stack, StackFailureEvent payload) {
         handleError(stack, payload.getException(), DetailedStackStatus.STOP_FAILED, Msg.STACK_INFRASTRUCTURE_STOP_FAILED, "Stack stop failed: ");
     }
 
@@ -113,7 +113,7 @@ public class StackStartStopService {
         }
     }
 
-    private void handleError(StackMinimal stack, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
+    private void handleError(StackView stack, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
         LOGGER.error(logMessage, exception);
         Status stackStatus = detailedStackStatus.getStatus();
         stackUpdater.updateStackStatus(stack.getId(), detailedStackStatus, logMessage + exception.getMessage());

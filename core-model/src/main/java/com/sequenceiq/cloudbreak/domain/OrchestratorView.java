@@ -7,7 +7,7 @@ import javax.persistence.Table;
 
 @Entity
 @Table(name = "Orchestrator")
-public class OrchestratorMinimal implements ProvisionEntity {
+public class OrchestratorView implements ProvisionEntity {
     @Id
     private Long id;
 

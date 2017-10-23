@@ -1,23 +1,23 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
-import com.sequenceiq.cloudbreak.domain.ClusterMinimal;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.ClusterView;
+import com.sequenceiq.cloudbreak.domain.StackView;
 
-public class ClusterMinimalContext extends CommonContext {
+public class ClusterViewContext extends CommonContext {
 
-    private final StackMinimal stack;
+    private final StackView stack;
 
-    public ClusterMinimalContext(String flowId, StackMinimal stack) {
+    public ClusterViewContext(String flowId, StackView stack) {
         super(flowId);
         this.stack = stack;
     }
 
-    public StackMinimal getStack() {
+    public StackView getStack() {
         return stack;
     }
 
-    public ClusterMinimal getCluster() {
+    public ClusterView getCluster() {
         return stack.getCluster();
     }
 

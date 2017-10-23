@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.api.model.Status;
 
 @Entity
 @Table(name = "Cluster", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
-public class ClusterMinimal implements ProvisionEntity {
+public class ClusterView implements ProvisionEntity {
 
     @Id
     private Long id;

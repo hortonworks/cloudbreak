@@ -17,9 +17,9 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Cluster;
-import com.sequenceiq.cloudbreak.domain.OrchestratorMinimal;
+import com.sequenceiq.cloudbreak.domain.OrchestratorView;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackMinimal;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterTerminationService;
@@ -62,8 +62,8 @@ public class ClusterCreationService {
         flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_METADATA_SETUP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void startingAmbariServices(StackMinimal stack) throws CloudbreakException {
-        OrchestratorMinimal orchestrator = stack.getOrchestrator();
+    public void startingAmbariServices(StackView stack) throws CloudbreakException {
+        OrchestratorView orchestrator = stack.getOrchestrator();
         OrchestratorType orchestratorType = orchestratorTypeResolver.resolveType(orchestrator.getType());
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_AMBARI_SERVICES, "Running cluster services.");
         if (orchestratorType.containerOrchestrator()) {
@@ -81,14 +81,14 @@ public class ClusterCreationService {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
     }
 
-    public void installingCluster(StackMinimal stack) {
+    public void installingCluster(StackView stack) {
         String ambariIp = stackUtil.extractAmbariIp(stack);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION,
                 String.format("Building the Ambari cluster. Ambari ip:%s", ambariIp));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_BUILDING, UPDATE_IN_PROGRESS.name(), ambariIp);
     }
 
-    public void clusterInstallationFinished(StackMinimal stack) {
+    public void clusterInstallationFinished(StackView stack) {
         String ambariIp = stackUtil.extractAmbariIp(stack);
         clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
@@ -101,7 +101,7 @@ public class ClusterCreationService {
         }
     }
 
-    public void handleClusterCreationFailure(StackMinimal stack, Exception exception) {
+    public void handleClusterCreationFailure(StackView stack, Exception exception) {
         if (stack.getCluster() != null) {
             Cluster cluster = clusterService.getById(stack.getCluster().getId());
             String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null

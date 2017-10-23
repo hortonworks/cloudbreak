@@ -10,7 +10,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.AbstractClusterAction;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterMinimalContext;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -29,7 +29,7 @@ public class EphemeralClusterActions {
     public Action updateNameserverAction() {
         return new AbstractClusterAction<EphemeralClusterUpdateTriggerEvent>(EphemeralClusterUpdateTriggerEvent.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, EphemeralClusterUpdateTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateTriggerEvent payload, Map<Object, Object> variables) throws Exception {
                 ephemeralClusterService.updateClusterStarted(context.getStackId());
                 EphemeralClusterUpdateRequest request = new EphemeralClusterUpdateRequest(context.getStackId());
                 sendEvent(context.getFlowId(), request.selector(), request);
@@ -41,13 +41,13 @@ public class EphemeralClusterActions {
     public Action ephemeralUpdateFinishedAction() {
         return new AbstractClusterAction<EphemeralClusterUpdateSuccess>(EphemeralClusterUpdateSuccess.class) {
             @Override
-            protected void doExecute(ClusterMinimalContext context, EphemeralClusterUpdateSuccess payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterViewContext context, EphemeralClusterUpdateSuccess payload, Map<Object, Object> variables) throws Exception {
                 ephemeralClusterService.updateClusterFinished(context.getStackId());
                 sendEvent(context);
             }
 
             @Override
-            protected Selectable createRequest(ClusterMinimalContext context) {
+            protected Selectable createRequest(ClusterViewContext context) {
                 return new StackEvent(EphemeralClusterEvent.EPHEMERAL_CLUSTER_FLOW_FINISHED.event(), context.getStackId());
             }
         };
@@ -58,13 +58,13 @@ public class EphemeralClusterActions {
         return new AbstractStackFailureAction<EphemeralClusterState, EphemeralClusterEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                ephemeralClusterService.updateClusterFailed(context.getStackMinimal().getId(), payload.getException());
+                ephemeralClusterService.updateClusterFailed(context.getStackView().getId(), payload.getException());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(EphemeralClusterEvent.EPHEMERAL_CLUSTER_FAILURE_HANDLED.event(), context.getStackMinimal().getId());
+                return new StackEvent(EphemeralClusterEvent.EPHEMERAL_CLUSTER_FAILURE_HANDLED.event(), context.getStackView().getId());
             }
         };
     }
