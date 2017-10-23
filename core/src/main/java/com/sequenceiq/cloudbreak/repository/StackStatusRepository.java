@@ -6,4 +6,6 @@ import com.sequenceiq.cloudbreak.domain.StackStatus;
 
 @EntityType(entityClass = StackStatus.class)
 public interface StackStatusRepository extends CrudRepository<StackStatus, Long> {
+
+    StackStatus findFirstByStackIdOrderByCreatedDesc(long stackId);
 }

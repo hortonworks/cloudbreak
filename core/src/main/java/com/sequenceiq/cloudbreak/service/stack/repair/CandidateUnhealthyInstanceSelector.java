@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.core.CloudbreakSecuritySetupException;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
@@ -28,13 +27,12 @@ public class CandidateUnhealthyInstanceSelector {
     @Inject
     private InstanceMetaDataRepository instanceMetaDataRepository;
 
-    public Set<InstanceMetaData> selectCandidateUnhealthyInstances(Stack stack)
-            throws CloudbreakSecuritySetupException {
-        Map<String, String> hostStatuses = clusterService.getHostStatuses(stack.getId());
+    public Set<InstanceMetaData> selectCandidateUnhealthyInstances(long stackId) throws CloudbreakSecuritySetupException {
+        Map<String, String> hostStatuses = clusterService.getHostStatuses(stackId);
         LOGGER.info("HostStatuses: {}", hostStatuses);
         Set<InstanceMetaData> candidateUnhealthyInstances = new HashSet<>();
         hostStatuses.keySet().stream().filter(hostName -> hostName != null && "UNKNOWN".equals(hostStatuses.get(hostName))).forEach(hostName -> {
-            InstanceMetaData instanceMetaData = instanceMetaDataRepository.findHostInStack(stack.getId(), hostName);
+            InstanceMetaData instanceMetaData = instanceMetaDataRepository.findHostInStack(stackId, hostName);
             if (isAWorker(instanceMetaData)) {
                 candidateUnhealthyInstances.add(instanceMetaData);
             }

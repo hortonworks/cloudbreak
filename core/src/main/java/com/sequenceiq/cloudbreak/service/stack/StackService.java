@@ -60,8 +60,9 @@ import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.StackView;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.StackValidation;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -73,9 +74,10 @@ import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.InstanceMetaDataRepository;
 import com.sequenceiq.cloudbreak.repository.OrchestratorRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityConfigRepository;
-import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
+import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
+import com.sequenceiq.cloudbreak.repository.StackViewRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
@@ -104,6 +106,9 @@ public class StackService {
 
     @Inject
     private StackViewRepository stackViewRepository;
+
+    @Inject
+    private StackStatusRepository stackStatusRepository;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -252,6 +257,10 @@ public class StackService {
             throw new NotFoundException(String.format("Stack '%s' not found", id));
         }
         return retStack;
+    }
+
+    public StackStatus getCurrentStatusByStackId(long stackId) {
+        return stackStatusRepository.findFirstByStackIdOrderByCreatedDesc(stackId);
     }
 
     public StackResponse get(String ambariAddress) {

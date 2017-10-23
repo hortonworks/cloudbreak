@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackStatus;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.repository.ClusterRepository;
@@ -249,7 +250,7 @@ public class AmbariClusterService implements ClusterService {
 
     @Override
     public Cluster retrieveClusterByStackId(Long stackId) {
-        return stackService.getById(stackId).getCluster();
+        return clusterRepository.findOneByStackId(stackId);
     }
 
     @Override
@@ -544,21 +545,21 @@ public class AmbariClusterService implements ClusterService {
     @Transactional(TxType.NEVER)
     public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
-        Stack stack = stackService.getById(stackId);
-        Cluster cluster = stack.getCluster();
+        StackStatus stackStatus = stackService.getCurrentStatusByStackId(stackId);
+        Cluster cluster = retrieveClusterByStackId(stackId);
         if (cluster != null) {
             cluster.setStatus(status);
             cluster.setStatusReason(statusReason);
             cluster = clusterRepository.save(cluster);
             if (status.isRemovableStatus()) {
                 InMemoryStateStore.deleteCluster(cluster.getId());
-                if (stack.getStatus().isRemovableStatus()) {
-                    InMemoryStateStore.deleteStack(cluster.getStack().getId());
+                if (stackStatus.getStatus().isRemovableStatus()) {
+                    InMemoryStateStore.deleteStack(stackId);
                 }
             } else {
                 InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(status));
                 if (InMemoryStateStore.getStack(stackId) == null) {
-                    InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stack.getStatus()));
+                    InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stackStatus.getStatus()));
                 }
             }
         }

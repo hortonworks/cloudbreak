@@ -104,6 +104,15 @@ public class StackStartStopService {
         handleError(stack, payload.getException(), DetailedStackStatus.STOP_FAILED, Msg.STACK_INFRASTRUCTURE_STOP_FAILED, "Stack stop failed: ");
     }
 
+    public boolean isStopPossible(StackView stack) {
+        if (stack != null && stack.isStopRequested()) {
+            return true;
+        } else {
+            LOGGER.info("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
+            return false;
+        }
+    }
+
     public boolean isStopPossible(Stack stack) {
         if (stack != null && stack.isStopRequested()) {
             return true;

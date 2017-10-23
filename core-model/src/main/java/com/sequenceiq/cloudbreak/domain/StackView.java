@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.domain;
 
 import static com.sequenceiq.cloudbreak.api.model.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.model.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.model.Status.STOP_REQUESTED;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,6 +39,10 @@ public class StackView implements ProvisionEntity {
 
     @OneToOne
     private StackStatusView stackStatus;
+
+    private Integer gatewayPort;
+
+    private Long created;
 
     public Long getId() {
         return id;
@@ -107,5 +114,33 @@ public class StackView implements ProvisionEntity {
 
     public Status getStatus() {
         return stackStatus != null ? stackStatus.getStatus() : null;
+    }
+
+    public boolean isDeleteCompleted() {
+        return DELETE_COMPLETED.equals(getStatus());
+    }
+
+    public boolean isDeleteInProgress() {
+        return DELETE_IN_PROGRESS.equals(getStatus());
+    }
+
+    public boolean isStopRequested() {
+        return STOP_REQUESTED.equals(getStatus());
+    }
+
+    public Integer getGatewayPort() {
+        return gatewayPort;
+    }
+
+    public void setGatewayPort(Integer gatewayPort) {
+        this.gatewayPort = gatewayPort;
+    }
+
+    public Long getCreated() {
+        return created;
+    }
+
+    public void setCreated(Long created) {
+        this.created = created;
     }
 }
