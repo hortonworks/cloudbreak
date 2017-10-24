@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hortonworks/cb-cli/cli/types"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1stacks"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v2stacks"
@@ -124,6 +126,31 @@ func DescribeStack(c *cli.Context) {
 	}
 
 	output.Write(stackHeader, &stackDetailsOut{resp.Payload, resp.Payload})
+}
+
+func ScaleStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	desiredCount, err := strconv.Atoi(c.String(FlDesiredNodeCount.Name))
+	if err != nil {
+		utils.LogErrorMessageAndExit("Unable to parse as number: " + c.String(FlDesiredNodeCount.Name))
+	}
+	defer utils.TimeTrack(time.Now(), "scale stack")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	name := c.String(FlGroupName.Name)
+	req := &models_cloudbreak.UpdateStackV2{
+		InstanceGroupAdjustment: &models_cloudbreak.InstanceGroupAdjustmentV2{
+			DesiredCount:  &(&types.I32{I: int32(desiredCount)}).I,
+			InstanceGroup: &name,
+		},
+		WithClusterEvent: &(&types.B{B: true}).B,
+	}
+	log.Infof("[ScaleStack] scaling stack, name: %s", name)
+	err = cbClient.Cloudbreak.V2stacks.PutStackV2(v2stacks.NewPutStackV2Params().WithName(c.String(FlName.Name)).WithBody(req))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[ScaleStack] stack scaled, name: %s", name)
 }
 
 func DeleteStack(c *cli.Context) {

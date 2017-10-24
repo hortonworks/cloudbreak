@@ -147,7 +147,7 @@ func getNodesByBlueprint(bp []byte) []node {
 				var err error
 				count, err = strconv.Atoi(cardinality)
 				if err != nil {
-					utils.LogErrorAndExit(err)
+					utils.LogErrorMessageAndExit("Unable to parse as number: " + cardinality)
 				}
 			}
 		}

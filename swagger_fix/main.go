@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hortonworks/cb-cli/cli/utils"
 	"golang.org/x/tools/go/ast/astutil"
 )
 
@@ -86,7 +87,8 @@ func getNodes(target ast.Node, stmts []string, collect []*ast.Node) []*ast.Node 
 		what := exp[0]
 		where, err := strconv.Atoi(exp[1])
 		if err != nil {
-			panic(err.Error())
+			utils.LogErrorMessageAndExit("Unable to parse as number: " + exp[1])
+			panic(4)
 		}
 		node := findNode(&getBlockStmt(&target).List, what, where)
 		collect = getNodes(node, stmts[1:], append(collect, &node))

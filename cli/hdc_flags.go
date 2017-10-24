@@ -261,6 +261,20 @@ var (
 			Usage: "password of the cluster and ambari",
 		},
 	}
+	FlGroupName = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "group-name",
+			Usage: "name of the group to scale",
+		},
+	}
+	FlDesiredNodeCount = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "desired-node-count",
+			Usage: "desired number of nodes",
+		},
+	}
 )
 
 type RequiredFlag struct {

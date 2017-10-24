@@ -514,6 +514,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "scale-cluster",
+			Usage:  "scales a cluster",
+			Before: ConfigRead,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.ScaleStack,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-clusters",
 			Usage:  "lists the running clusters",
 			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),
