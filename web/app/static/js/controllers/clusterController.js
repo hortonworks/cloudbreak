@@ -1617,6 +1617,13 @@ angular.module('uluwatuControllers').controller('clusterController', ['$scope', 
             if (instanceGroup.nodeCount == 1) {
                 if (instanceGroup.parameters.availabilitySet == null || instanceGroup.parameters.availabilitySet.name === "") {
                     result = true;
+                } else {
+                    var asName = instanceGroup.parameters.availabilitySet.name;
+                        angular.forEach($scope.cluster.instanceGroups, function (ig) {
+                            if (ig.group != instanceGroup.group && ig.parameters.availabilitySet != null && ig.parameters.availabilitySet.name === asName) {
+                                result = true;
+                            }
+                        });
                 }
             } else {
                 result = true;

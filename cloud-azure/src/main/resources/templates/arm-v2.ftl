@@ -92,8 +92,9 @@
       "sshKeyPath" : "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]"
   	},
     "resources": [
+            <#assign uniqueAsNames=[]>
             <#list igs as group>
-                <#if group.availabilitySetName?? && group.availabilitySetName?has_content>
+                <#if group.availabilitySetName?? && group.availabilitySetName?has_content && (!uniqueAsNames?seq_contains(group.availabilitySetName))>
             {
                 "type": "Microsoft.Compute/availabilitySets",
                 "name": "[variables('${group.compressedName}AsName')]",
@@ -109,6 +110,7 @@
                     "platformUpdateDomainCount": "[variables('${group.compressedName}AsUpdateDomainCount')]"
                 }
             },
+                <#assign uniqueAsNames = uniqueAsNames+[group.availabilitySetName]>
                 </#if>
             </#list>
             <#if !existingVPC>

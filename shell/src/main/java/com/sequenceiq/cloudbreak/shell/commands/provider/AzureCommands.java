@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.shell.completion.StackAvailabilityZone;
 import com.sequenceiq.cloudbreak.shell.completion.StackRegion;
 import com.sequenceiq.cloudbreak.shell.model.AvailabilitySetEntry;
 import com.sequenceiq.cloudbreak.shell.model.AvailabilitySetFaultDomainNumber;
-import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
 import com.sequenceiq.cloudbreak.shell.util.TagParser;
 
@@ -352,24 +351,6 @@ public class AzureCommands implements CommandMarker {
         Map<String, Object> parameters = new HashMap<>();
 
         if (availabilitySetName != null) {
-            String asName = availabilitySetName.getName();
-            for (String otherIgName : shellContext.getInstanceGroups().keySet()) {
-                InstanceGroupEntry otherIgEntry = shellContext.getInstanceGroups().get(otherIgName);
-                if (instanceGroup.getName().equals(otherIgName)) {
-                    continue;
-                }
-                if (otherIgEntry.getAttributes() != null && otherIgEntry.getAttributes().get("availabilitySet") != null) {
-                    Object otherIgAs = otherIgEntry.getAttributes().get("availabilitySet");
-                    if (otherIgAs != null && otherIgAs instanceof HashMap) {
-                        String otherIgAsName =  (String) ((HashMap) otherIgAs).get("name");
-                        if (asName.equals(otherIgAsName)) {
-                            throw shellContext.exceptionTransformer()
-                                    .transformToRuntimeException("Cannot use the same availability set for two different instance groups!");
-                        }
-                    }
-                }
-            }
-
             AvailabilitySetEntry as = shellContext.getAzureAvailabilitySets().get(availabilitySetName.getName());
             if (as == null) {
                 throw shellContext.exceptionTransformer()
