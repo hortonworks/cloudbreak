@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.repository.InstanceGroupRepository;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.CloudbreakServiceException;
@@ -220,7 +221,7 @@ public class StackCreationService {
         usageService.openUsagesForStack(stack);
     }
 
-    public void handleStackCreationFailure(Stack stack, Exception errorDetails) {
+    public void handleStackCreationFailure(StackView stack, Exception errorDetails) {
         LOGGER.error("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
@@ -254,7 +255,8 @@ public class StackCreationService {
         return new Notification<>(notification);
     }
 
-    private void handleFailure(Stack stack, String errorReason) {
+    private void handleFailure(StackView stackView, String errorReason) {
+        Stack stack = stackService.getByIdWithLists(stackView.getId());
         try {
             if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                 LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
@@ -262,7 +264,7 @@ public class StackCreationService {
                 stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ROLLING_BACK);
                 connector.rollback(stack, stack.getResources());
                 flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_INFRASTRUCTURE_CREATE_FAILED, BILLING_STOPPED.name(), errorReason);
-                usageService.closeUsagesForStack(stack);
+                usageService.closeUsagesForStack(stack.getId());
             }
         } catch (Exception ex) {
             LOGGER.error("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);

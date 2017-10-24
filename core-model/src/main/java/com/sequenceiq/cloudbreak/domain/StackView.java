@@ -143,4 +143,8 @@ public class StackView implements ProvisionEntity {
     public void setCreated(Long created) {
         this.created = created;
     }
+
+    public boolean isStackInDeletionPhase() {
+        return DELETE_COMPLETED.equals(getStatus()) || DELETE_IN_PROGRESS.equals(getStatus());
+    }
 }

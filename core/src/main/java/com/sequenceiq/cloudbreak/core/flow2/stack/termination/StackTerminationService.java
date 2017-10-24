@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.common.type.MetricType;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -71,14 +72,14 @@ public class StackTerminationService {
                     stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
             flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, DELETE_COMPLETED.name());
         }
-        usageService.closeUsagesForStack(stack);
+        usageService.closeUsagesForStack(stack.getId());
         if (deleteDependencies) {
             dependecyDeletionService.deleteDependencies(stack);
         }
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
-    public void handleStackTerminationError(Stack stack, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
+    public void handleStackTerminationError(StackView stack, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
         String stackUpdateMessage;
         Msg eventMessage;
         DetailedStackStatus status;
