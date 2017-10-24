@@ -4,17 +4,26 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.inject.Inject;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.type.MetricType;
+import com.sequenceiq.cloudbreak.service.metrics.MetricService;
+
 @Component
 public class FlowRegister {
+
+    @Inject
+    private MetricService metricService;
 
     private final Map<String, Pair<Flow, String>> runningFlows = new ConcurrentHashMap<>();
 
     public void put(Flow flow, String chainFlowId) {
         runningFlows.put(flow.getFlowId(), new ImmutablePair<>(flow, chainFlowId));
+        metricService.submit(MetricType.ACTIVE_FLOWS.getMetricName(), runningFlows.size());
     }
 
     public Flow get(String flowId) {
@@ -29,6 +38,7 @@ public class FlowRegister {
 
     public Flow remove(String flowId) {
         Pair<Flow, String> pair = runningFlows.remove(flowId);
+        metricService.submit(MetricType.ACTIVE_FLOWS.getMetricName(), runningFlows.size());
         return pair == null ? null : pair.getLeft();
     }
 

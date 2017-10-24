@@ -21,6 +21,8 @@ public enum MetricType {
     CLUSTER_START_SUCCESSFUL("cluster.start.successful"),
     CLUSTER_START_FAILED("cluster.start.failed"),
 
+    FLOW_STEP("flowstep"),
+    ACTIVE_FLOWS("activeflow"),
     HEARTBEAT_UPDATE_FAILED("heartbeat.update.failed");
 
     private final String metricName;
