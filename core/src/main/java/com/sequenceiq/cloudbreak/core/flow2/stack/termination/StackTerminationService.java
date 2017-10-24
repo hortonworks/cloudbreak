@@ -79,7 +79,7 @@ public class StackTerminationService {
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
-    public void handleStackTerminationError(StackView stack, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
+    public void handleStackTerminationError(StackView stackView, StackFailureEvent payload, boolean forced, Boolean deleteDependencies) {
         String stackUpdateMessage;
         Msg eventMessage;
         DetailedStackStatus status;
@@ -88,29 +88,29 @@ public class StackTerminationService {
             stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
             status = DetailedStackStatus.DELETE_FAILED;
             eventMessage = Msg.STACK_INFRASTRUCTURE_DELETE_FAILED;
-            stackUpdater.updateStackStatus(stack.getId(), status, stackUpdateMessage);
+            stackUpdater.updateStackStatus(stackView.getId(), status, stackUpdateMessage);
             LOGGER.error("Error during stack termination flow: ", errorDetails);
         } else {
-            terminationService.finalizeTermination(stack.getId(), true);
-            clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
+            terminationService.finalizeTermination(stackView.getId(), true);
+            clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);
             stackUpdateMessage = "Stack was force terminated.";
             status = DetailedStackStatus.DELETE_COMPLETED;
             eventMessage = Msg.STACK_FORCED_DELETE_COMPLETED;
             if (deleteDependencies) {
-                dependecyDeletionService.deleteDependencies(stack);
+                dependecyDeletionService.deleteDependencies(stackView);
             }
         }
-        flowMessageService.fireEventAndLog(stack.getId(), eventMessage, status.name(), stackUpdateMessage);
-        if (stack.getCluster() != null && stack.getCluster().getEmailNeeded()) {
-            String ambariIp = stackUtil.extractAmbariIp(stack);
+        flowMessageService.fireEventAndLog(stackView.getId(), eventMessage, status.name(), stackUpdateMessage);
+        if (stackView.getClusterView() != null && stackView.getClusterView().getEmailNeeded()) {
+            String ambariIp = stackUtil.extractAmbariIp(stackView);
             if (forced) {
-                emailSenderService.sendTerminationSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        ambariIp, stack.getCluster().getName());
+                emailSenderService.sendTerminationSuccessEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
+                        ambariIp, stackView.getClusterView().getName());
             } else {
-                emailSenderService.sendTerminationFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        ambariIp, stack.getCluster().getName());
+                emailSenderService.sendTerminationFailureEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
+                        ambariIp, stackView.getClusterView().getName());
             }
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, status.name());
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.STACK_NOTIFICATION_EMAIL, status.name());
         }
     }
 }

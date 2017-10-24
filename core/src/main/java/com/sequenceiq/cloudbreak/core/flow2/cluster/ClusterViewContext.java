@@ -17,8 +17,8 @@ public class ClusterViewContext extends CommonContext {
         return stack;
     }
 
-    public ClusterView getCluster() {
-        return stack.getCluster();
+    public ClusterView getClusterView() {
+        return stack.getClusterView();
     }
 
     public long getStackId() {
@@ -26,6 +26,6 @@ public class ClusterViewContext extends CommonContext {
     }
 
     public long getClusterId() {
-        return getCluster().getId();
+        return getClusterView().getId();
     }
 }

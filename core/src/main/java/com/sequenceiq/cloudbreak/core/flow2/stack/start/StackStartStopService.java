@@ -122,17 +122,17 @@ public class StackStartStopService {
         }
     }
 
-    private void handleError(StackView stack, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
+    private void handleError(StackView stackView, Exception exception, DetailedStackStatus detailedStackStatus, Msg msg, String logMessage) {
         LOGGER.error(logMessage, exception);
         Status stackStatus = detailedStackStatus.getStatus();
-        stackUpdater.updateStackStatus(stack.getId(), detailedStackStatus, logMessage + exception.getMessage());
-        flowMessageService.fireEventAndLog(stack.getId(), msg, stackStatus.name(), exception.getMessage());
-        if (stack.getCluster() != null) {
-            clusterService.updateClusterStatusByStackId(stack.getId(), STOPPED);
-            if (stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
-                flowMessageService.fireEventAndLog(stack.getId(), Msg.STACK_NOTIFICATION_EMAIL, stackStatus.name());
+        stackUpdater.updateStackStatus(stackView.getId(), detailedStackStatus, logMessage + exception.getMessage());
+        flowMessageService.fireEventAndLog(stackView.getId(), msg, stackStatus.name(), exception.getMessage());
+        if (stackView.getClusterView() != null) {
+            clusterService.updateClusterStatusByStackId(stackView.getId(), STOPPED);
+            if (stackView.getClusterView().getEmailNeeded()) {
+                emailSenderService.sendStopFailureEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
+                        stackUtil.extractAmbariIp(stackView), stackView.getClusterView().getName());
+                flowMessageService.fireEventAndLog(stackView.getId(), Msg.STACK_NOTIFICATION_EMAIL, stackStatus.name());
             }
         }
     }

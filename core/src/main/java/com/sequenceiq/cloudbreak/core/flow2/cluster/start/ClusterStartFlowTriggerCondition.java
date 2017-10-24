@@ -20,11 +20,11 @@ public class ClusterStartFlowTriggerCondition implements FlowTriggerCondition {
 
     @Override
     public boolean isFlowTriggerable(Long stackId) {
-        StackView stack = stackService.getByIdView(stackId);
-        ClusterView cluster = stack.getCluster();
-        boolean result = cluster != null && cluster.isStartRequested();
+        StackView stackView = stackService.getByIdView(stackId);
+        ClusterView clusterView = stackView.getClusterView();
+        boolean result = clusterView != null && clusterView.isStartRequested();
         if (!result) {
-            LOGGER.warn("Cluster start cannot be triggered, because cluster {}", cluster == null ? "is null" : "not in startRequested status");
+            LOGGER.warn("Cluster start cannot be triggered, because cluster {}", clusterView == null ? "is null" : "not in startRequested status");
         }
         return result;
     }

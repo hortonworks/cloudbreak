@@ -52,29 +52,30 @@ public class ClusterTerminationFlowService {
 
     public void finishClusterTerminationAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
         LOGGER.info("Terminate cluster result: {}", payload);
-        StackView stack = context.getStack();
-        ClusterView cluster = context.getCluster();
-        if (cluster != null) {
-            terminationService.finalizeClusterTermination(cluster.getId());
-            clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
-            InMemoryStateStore.deleteCluster(cluster.getId());
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
-            if (cluster.getEmailNeeded()) {
-                emailSenderService.sendTerminationSuccessEmail(cluster.getOwner(), cluster.getEmailTo(), cluster.getAmbariIp(), cluster.getName());
-                flowMessageService.fireEventAndLog(stack.getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_COMPLETED.name());
+        StackView stackView = context.getStack();
+        ClusterView clusterView = context.getClusterView();
+        if (clusterView != null) {
+            terminationService.finalizeClusterTermination(clusterView.getId());
+            clusterService.updateClusterStatusByStackId(stackView.getId(), DELETE_COMPLETED);
+            InMemoryStateStore.deleteCluster(clusterView.getId());
+            stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
+            if (clusterView.getEmailNeeded()) {
+                emailSenderService.sendTerminationSuccessEmail(clusterView.getOwner(), clusterView.getEmailTo(),
+                    clusterView.getAmbariIp(), clusterView.getName());
+                flowMessageService.fireEventAndLog(stackView.getId(), Msg.CLUSTER_EMAIL_SENT, DELETE_COMPLETED.name());
             }
         }
     }
 
     public void finishClusterTerminationNotAllowed(ClusterViewContext context, ClusterTerminationResult payload) {
-        StackView stack = context.getStack();
-        Long stackId = stack.getId();
-        ClusterView cluster = context.getCluster();
+        StackView stackView = context.getStack();
+        Long stackId = stackView.getId();
+        ClusterView clusterView = context.getClusterView();
         flowMessageService.fireEventAndLog(stackId, Msg.CLUSTER_DELETE_FAILED, DELETE_FAILED.name(), "Operation not allowed");
         clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
-        if (cluster.getEmailNeeded()) {
-            sendDeleteFailedMail(cluster, stackId);
+        if (clusterView.getEmailNeeded()) {
+            sendDeleteFailedMail(clusterView, stackId);
         }
     }
 

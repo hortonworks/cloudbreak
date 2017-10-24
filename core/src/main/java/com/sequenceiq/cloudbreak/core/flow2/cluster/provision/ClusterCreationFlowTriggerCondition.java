@@ -19,8 +19,8 @@ public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition
 
     @Override
     public boolean isFlowTriggerable(Long stackId) {
-        StackView stack = stackService.getByIdView(stackId);
-        boolean result = stack.isAvailable() && stack.getCluster() != null && stack.getCluster().isRequested();
+        StackView stackView = stackService.getByIdView(stackId);
+        boolean result = stackView.isAvailable() && stackView.getClusterView() != null && stackView.getClusterView().isRequested();
         if (!result) {
             LOGGER.warn("Cluster creation cannot be triggered, because cluster is not in requested status or stack is not available.");
         }

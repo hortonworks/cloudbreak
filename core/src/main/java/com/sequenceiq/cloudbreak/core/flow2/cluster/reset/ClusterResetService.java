@@ -37,16 +37,16 @@ public class ClusterResetService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_RESET, Status.UPDATE_IN_PROGRESS.name());
     }
 
-    public void handleResetClusterFailure(StackView stack, Exception exception) {
-        Cluster cluster = clusterService.retrieveClusterByStackId(stack.getId());
+    public void handleResetClusterFailure(StackView stackView, Exception exception) {
+        Cluster cluster = clusterService.retrieveClusterByStackId(stackView.getId());
         String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
                 ? exception.getCause().getMessage() : exception.getMessage();
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.CREATE_FAILED, errorMessage);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, Status.CREATE_FAILED.name(), errorMessage);
+        clusterService.updateClusterStatusByStackId(stackView.getId(), Status.CREATE_FAILED, errorMessage);
+        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_CREATE_FAILED, Status.CREATE_FAILED.name(), errorMessage);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stack.getCluster().getEmailTo(), cluster.getName());
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.AVAILABLE.name());
+            emailSenderService.sendProvisioningFailureEmail(cluster.getOwner(), stackView.getClusterView().getEmailTo(), cluster.getName());
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.AVAILABLE.name());
         }
     }
 }

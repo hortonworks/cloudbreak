@@ -53,13 +53,13 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(ClusterRepairTriggerEvent event) {
-        StackView stack = stackService.getByIdView(event.getStackId());
+        StackView stackView = stackService.getByIdView(event.getStackId());
         Queue<Selectable> flowChainTriggers = new ConcurrentLinkedDeque<>();
         Map<String, List<String>> failedNodesMap = event.getFailedNodesMap();
         for (Entry<String, List<String>> failedNodes : failedNodesMap.entrySet()) {
             String hostGroupName = failedNodes.getKey();
             List<String> hostNames = failedNodes.getValue();
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
             InstanceGroup instanceGroup = hostGroup.getConstraint().getInstanceGroup();
             if (InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType())) {
                 List<InstanceMetaData> primary = instanceMetadataRepository.findAllByInstanceGroup(instanceGroup).stream().filter(

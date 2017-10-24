@@ -72,22 +72,22 @@ public class ClusterDownscaleService {
     }
 
     public void updateMetadata(Long stackId, Set<String> hostNames, String hostGroupName) {
-        StackView stack = stackService.getByIdView(stackId);
-        ClusterView cluster = stack.getCluster();
+        StackView stackView = stackService.getByIdView(stackId);
+        ClusterView clusterView = stackView.getClusterView();
         hostNames.forEach(hn -> {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), hostGroupName);
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterView.getId(), hostGroupName);
             List<HostMetadata> hostMetaToRemove = hostGroup.getHostMetadata().stream()
                     .filter(md -> hostNames.contains(md.getHostName())).collect(Collectors.toList());
             hostGroup.getHostMetadata().removeAll(hostMetaToRemove);
             hostGroupService.save(hostGroup);
         });
-        if (!BYOS.equals(stack.cloudPlatform())) {
+        if (!BYOS.equals(stackView.cloudPlatform())) {
             LOGGER.info("Start updating metadata");
             for (String hostName : hostNames) {
-                stackService.updateMetaDataStatus(stack.getId(), hostName, InstanceStatus.DECOMMISSIONED);
+                stackService.updateMetaDataStatus(stackView.getId(), hostName, InstanceStatus.DECOMMISSIONED);
             }
         }
-        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
+        clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALED_DOWN, AVAILABLE.name());
     }
 

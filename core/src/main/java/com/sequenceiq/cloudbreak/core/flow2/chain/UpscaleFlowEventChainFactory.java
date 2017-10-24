@@ -38,15 +38,15 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
 
     @Override
     public Queue<Selectable> createFlowTriggerEventQueue(StackAndClusterUpscaleTriggerEvent event) {
-        StackView stack = stackService.getByIdView(event.getStackId());
-        ClusterView cluster = stack.getCluster();
+        StackView stackView = stackService.getByIdView(event.getStackId());
+        ClusterView clusterView = stackView.getClusterView();
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getStackId(), false, event.accepted()));
         flowEventChain.add(new StackScaleTriggerEvent(ADD_INSTANCES_EVENT.event(), event.getStackId(), event.getInstanceGroup(),
                 event.getAdjustment(), event.getHostNames()));
-        if (ScalingType.isClusterUpScale(event.getScalingType()) && cluster != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(cluster.getId(), event.getInstanceGroup());
-            flowEventChain.add(new ClusterScaleTriggerEvent(CLUSTER_UPSCALE_TRIGGER_EVENT.event(), stack.getId(), hostGroup.getName(),
+        if (ScalingType.isClusterUpScale(event.getScalingType()) && clusterView != null) {
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndInstanceGroupName(clusterView.getId(), event.getInstanceGroup());
+            flowEventChain.add(new ClusterScaleTriggerEvent(CLUSTER_UPSCALE_TRIGGER_EVENT.event(), stackView.getId(), hostGroup.getName(),
                     event.getAdjustment()));
         }
         return flowEventChain;
