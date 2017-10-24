@@ -61,8 +61,8 @@ public class UsageService {
         usageRepository.save(usages);
     }
 
-    public void closeUsagesForStack(Stack stack) {
-        List<CloudbreakUsage> usages = usageRepository.findOpensForStack(stack.getId());
+    public void closeUsagesForStack(Long stackId) {
+        List<CloudbreakUsage> usages = usageRepository.findOpensForStack(stackId);
         for (CloudbreakUsage usage : usages) {
             closeUsage(usage);
             usageRepository.save(usage);

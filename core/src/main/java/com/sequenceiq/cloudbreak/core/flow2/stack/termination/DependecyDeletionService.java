@@ -17,18 +17,23 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Recipe;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.HostGroupRepository;
 import com.sequenceiq.cloudbreak.repository.NetworkRepository;
 import com.sequenceiq.cloudbreak.repository.RecipeRepository;
 import com.sequenceiq.cloudbreak.repository.SecurityGroupRepository;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.repository.TemplateRepository;
 import com.sequenceiq.cloudbreak.service.credential.CredentialService;
 
 @Service
 public class DependecyDeletionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DependecyDeletionService.class);
+
+    @Inject
+    private StackRepository stackRepository;
 
     @Inject
     private NetworkRepository networkRepository;
@@ -50,6 +55,11 @@ public class DependecyDeletionService {
 
     @Inject
     private HostGroupRepository hostGroupRepository;
+
+    public void deleteDependencies(StackView stackView) {
+        Stack stack = stackRepository.findOneWithLists(stackView.getId());
+        deleteDependencies(stack);
+    }
 
     public void deleteDependencies(Stack stack) {
         deleteNetwork(stack.getNetwork());
