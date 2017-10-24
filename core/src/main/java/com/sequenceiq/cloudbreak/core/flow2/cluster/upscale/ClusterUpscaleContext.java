@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
-import com.sequenceiq.cloudbreak.domain.StackView;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 
 public class ClusterUpscaleContext extends ClusterViewContext {
     private final String hostGroupName;
