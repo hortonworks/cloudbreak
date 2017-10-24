@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.domain;
+package com.sequenceiq.cloudbreak.domain.view;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.model.Status;
+import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
 @Entity
 @Table(name = "stackstatus")

@@ -7,8 +7,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.core.flow2.FlowTriggerCondition;
-import com.sequenceiq.cloudbreak.domain.ClusterView;
-import com.sequenceiq.cloudbreak.domain.StackView;
+import com.sequenceiq.cloudbreak.domain.view.ClusterView;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster;
 
 import com.sequenceiq.cloudbreak.core.flow2.CommonContext;
-import com.sequenceiq.cloudbreak.domain.ClusterView;
-import com.sequenceiq.cloudbreak.domain.StackView;
+import com.sequenceiq.cloudbreak.domain.view.ClusterView;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 
 public class ClusterViewContext extends CommonContext {
 
