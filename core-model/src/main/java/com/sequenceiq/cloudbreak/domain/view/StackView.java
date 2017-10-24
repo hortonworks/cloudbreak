@@ -15,8 +15,12 @@ import javax.persistence.UniqueConstraint;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+
 @Entity
 @Table(name = "Stack", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))
+// It's only here, because of findbugs does not know the fields will be set by JPA with Reflection
+@SuppressFBWarnings("UWF_UNWRITTEN_FIELD")
 public class StackView implements ProvisionEntity {
 
     @Id
@@ -45,60 +49,43 @@ public class StackView implements ProvisionEntity {
 
     private Long created;
 
-    public Long getId() {
-        return id;
+    public StackView() {
     }
 
-    public void setId(Long id) {
+    public StackView(Long id, String name, String owner, String cloudPlatform, StackStatusView stackStatus) {
         this.id = id;
+        this.name = name;
+        this.owner = owner;
+        this.cloudPlatform = cloudPlatform;
+        this.stackStatus = stackStatus;
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getOwner() {
         return owner;
     }
 
-    public void setOwner(String owner) {
-        this.owner = owner;
-    }
-
-    public ClusterView getCluster() {
+    public ClusterView getClusterView() {
         return cluster;
-    }
-
-    public void setCluster(ClusterView cluster) {
-        this.cluster = cluster;
     }
 
     public OrchestratorView getOrchestrator() {
         return orchestrator;
     }
 
-    public void setOrchestrator(OrchestratorView orchestrator) {
-        this.orchestrator = orchestrator;
-    }
-
     public String getPlatformVariant() {
         return platformVariant;
     }
 
-    public void setPlatformVariant(String platformVariant) {
-        this.platformVariant = platformVariant;
-    }
-
     public String cloudPlatform() {
         return cloudPlatform;
-    }
-
-    public void setCloudPlatform(String cloudPlatform) {
-        this.cloudPlatform = cloudPlatform;
     }
 
     public boolean isAvailable() {
@@ -107,10 +94,6 @@ public class StackView implements ProvisionEntity {
 
     public StackStatusView getStackStatus() {
         return stackStatus;
-    }
-
-    public void setStackStatus(StackStatusView stackStatus) {
-        this.stackStatus = stackStatus;
     }
 
     public Status getStatus() {
@@ -133,16 +116,8 @@ public class StackView implements ProvisionEntity {
         return gatewayPort;
     }
 
-    public void setGatewayPort(Integer gatewayPort) {
-        this.gatewayPort = gatewayPort;
-    }
-
     public Long getCreated() {
         return created;
-    }
-
-    public void setCreated(Long created) {
-        this.created = created;
     }
 
     public boolean isStackInDeletionPhase() {

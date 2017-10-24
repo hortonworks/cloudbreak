@@ -65,22 +65,22 @@ public class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_UP, UPDATE_IN_PROGRESS.name());
     }
 
-    public void clusterUpscaleFinished(StackView stack, String hostgroupName) {
-        int numOfFailedHosts = updateMetadata(stack, hostgroupName);
+    public void clusterUpscaleFinished(StackView stackView, String hostgroupName) {
+        int numOfFailedHosts = updateMetadata(stackView, hostgroupName);
         boolean success = numOfFailedHosts == 0;
         if (success) {
             LOGGER.info("Cluster upscaled successfully");
-            clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
-            if (stack.getCluster().getEmailNeeded()) {
-                emailSenderService.sendUpscaleSuccessEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                        stackUtil.extractAmbariIp(stack), stack.getCluster().getName());
-                flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
+            clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALED_UP, AVAILABLE.name());
+            if (stackView.getClusterView().getEmailNeeded()) {
+                emailSenderService.sendUpscaleSuccessEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
+                        stackUtil.extractAmbariIp(stackView), stackView.getClusterView().getName());
+                flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, AVAILABLE.name());
             }
         } else {
             LOGGER.info("Cluster upscale failed. {} hosts failed to upscale", numOfFailedHosts);
-            clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_FAILED);
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to",
+            clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED);
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to",
                     String.format("Ambari upscale operation failed on %d node(s).", numOfFailedHosts));
         }
     }
@@ -93,15 +93,15 @@ public class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_SCALING_FAILED, UPDATE_FAILED.name(), "added to", errorDetails);
     }
 
-    private int updateMetadata(StackView stack, String hostGroupName) {
+    private int updateMetadata(StackView stackView, String hostGroupName) {
         LOGGER.info("Start update metadata");
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName);
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
         Set<HostMetadata> hostMetadata = hostGroupService.findEmptyHostMetadataInHostGroup(hostGroup.getId());
         updateFailedHostMetaData(hostMetadata);
         int failedHosts = 0;
         for (HostMetadata hostMeta : hostMetadata) {
-            if (!BYOS.equals(stack.cloudPlatform()) && hostGroup.getConstraint().getInstanceGroup() != null) {
-                stackService.updateMetaDataStatus(stack.getId(), hostMeta.getHostName(), InstanceStatus.REGISTERED);
+            if (!BYOS.equals(stackView.cloudPlatform()) && hostGroup.getConstraint().getInstanceGroup() != null) {
+                stackService.updateMetaDataStatus(stackView.getId(), hostMeta.getHostName(), InstanceStatus.REGISTERED);
             }
             hostGroupService.updateHostMetaDataStatus(hostMeta.getId(), HostMetadataState.HEALTHY);
             if (hostMeta.getHostMetadataState() == HostMetadataState.UNHEALTHY) {

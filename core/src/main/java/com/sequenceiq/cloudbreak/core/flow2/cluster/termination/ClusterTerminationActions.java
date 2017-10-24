@@ -34,7 +34,7 @@ public class ClusterTerminationActions {
 
             @Override
             protected Selectable createRequest(ClusterViewContext context) {
-                return new ClusterTerminationRequest(context.getStackId(), context.getCluster() != null ? context.getCluster().getId() : null);
+                return new ClusterTerminationRequest(context.getStackId(), context.getClusterView() != null ? context.getClusterView().getId() : null);
 
             }
         };

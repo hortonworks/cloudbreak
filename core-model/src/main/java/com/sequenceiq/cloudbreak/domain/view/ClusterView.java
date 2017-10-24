@@ -42,64 +42,32 @@ public class ClusterView implements ProvisionEntity {
         return id;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public StackView getStack() {
+    public StackView getStackView() {
         return stack;
-    }
-
-    public void setStack(StackView stack) {
-        this.stack = stack;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public String getOwner() {
         return owner;
-    }
-
-    public void setOwner(String owner) {
-        this.owner = owner;
     }
 
     public String getAmbariIp() {
         return ambariIp;
     }
 
-    public void setAmbariIp(String ambariIp) {
-        this.ambariIp = ambariIp;
-    }
-
     public Boolean getEmailNeeded() {
         return emailNeeded;
-    }
-
-    public void setEmailNeeded(Boolean emailNeeded) {
-        this.emailNeeded = emailNeeded;
     }
 
     public String getEmailTo() {
         return emailTo;
     }
 
-    public void setEmailTo(String emailTo) {
-        this.emailTo = emailTo;
-    }
-
     public Status getStatus() {
         return status;
-    }
-
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public boolean isRequested() {

@@ -57,12 +57,12 @@ import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 import com.sequenceiq.cloudbreak.domain.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.domain.StackStatus;
-import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 import com.sequenceiq.cloudbreak.domain.json.JsonToString;
+import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
+import com.sequenceiq.cloudbreak.domain.view.StackView;
 
 public class TestUtil {
 
@@ -91,12 +91,12 @@ public class TestUtil {
 
     public static IdentityUser cbAdminUser() {
         return new IdentityUser("userid", "testuser", "testaccount",
-                Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
+            Arrays.asList(IdentityUserRole.ADMIN, IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static IdentityUser cbUser() {
         return new IdentityUser("userid", "testuser", "testaccount",
-                Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
+            Collections.singletonList(IdentityUserRole.USER), "givenname", "familyname", new Date());
     }
 
     public static Credential awsCredential() {
@@ -130,13 +130,7 @@ public class TestUtil {
     }
 
     public static StackView stackView(Status stackStatus, Credential credential) {
-        StackView stack = new StackView();
-        stack.setStackStatus(new StackStatusView());
-        stack.setName("simplestack");
-        stack.setOwner("userid");
-        stack.setId(1L);
-        stack.setCloudPlatform(credential.cloudPlatform());
-        return stack;
+        return new StackView(1L, "simplestack", "userid", credential.cloudPlatform(), new StackStatusView());
     }
 
     public static Stack stack(Status stackStatus, Credential credential) {
@@ -242,14 +236,14 @@ public class TestUtil {
     public static Network network(String subnet) {
         Network network = new Network();
         network.setSubnetCIDR(subnet);
-//        network.setAddressPrefixCIDR(DUMMY_ADDRESS_PREFIX_CIDR);
+        //        network.setAddressPrefixCIDR(DUMMY_ADDRESS_PREFIX_CIDR);
         network.setId(1L);
         network.setName(DUMMY_NAME);
         return network;
     }
 
     public static InstanceMetaData instanceMetaData(Long serverNumber, Long instanceGroupId, InstanceStatus instanceStatus, boolean ambariServer,
-            InstanceGroup instanceGroup) {
+        InstanceGroup instanceGroup) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
         instanceMetaData.setAmbariServer(ambariServer);
@@ -270,7 +264,7 @@ public class TestUtil {
         Set<InstanceMetaData> instanceMetaDatas = new HashSet<>();
         for (int i = 1; i <= count; i++) {
             instanceMetaDatas.add(instanceMetaData(Integer.toUnsignedLong(i), instanceGroupId, InstanceStatus.REGISTERED,
-                    instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
+                instanceGroup.getInstanceGroupType().equals(InstanceGroupType.GATEWAY), instanceGroup));
         }
         return instanceMetaDatas;
     }
@@ -326,7 +320,7 @@ public class TestUtil {
         return stackView(AVAILABLE, gcpCredential());
     }
 
-    public static Cluster  cluster() {
+    public static Cluster cluster() {
         return cluster(blueprint(), stack(AVAILABLE, gcpCredential()), 0L);
     }
 
@@ -552,7 +546,7 @@ public class TestUtil {
         if (stack.cloudPlatform().equals(AWS)) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
                 (instanceGroup.getTemplate()).setAttributes(new JsonToString().convertToEntityAttribute(
-                        "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
+                    "{\"sshLocation\":\"0.0.0.0/0\",\"encrypted\":false,\"spotPrice\":0.04}"));
             }
         }
         return stack;

@@ -40,8 +40,9 @@ public class StackUtil {
         return agents;
     }
 
-    public String extractAmbariIp(StackView stack) {
-        return extractAmbariIp(stack.getId(), stack.getOrchestrator().getType(), stack.getCluster() != null ? stack.getCluster().getAmbariIp() : null);
+    public String extractAmbariIp(StackView stackView) {
+        return extractAmbariIp(stackView.getId(), stackView.getOrchestrator().getType(),
+            stackView.getClusterView() != null ? stackView.getClusterView().getAmbariIp() : null);
     }
 
     public String extractAmbariIp(Stack stack) {

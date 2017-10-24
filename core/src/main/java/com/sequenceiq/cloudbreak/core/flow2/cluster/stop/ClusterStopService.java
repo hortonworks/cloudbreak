@@ -42,15 +42,15 @@ public class ClusterStopService {
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_STOPPED, Status.STOPPED.name());
     }
 
-    public void handleClusterStopFailure(StackView stack, String errorReason) {
-        ClusterView cluster = stack.getCluster();
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.STOP_FAILED);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
-        flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.AVAILABLE.name(), errorReason);
+    public void handleClusterStopFailure(StackView stackView, String errorReason) {
+        ClusterView cluster = stackView.getClusterView();
+        clusterService.updateClusterStatusByStackId(stackView.getId(), Status.STOP_FAILED);
+        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "The Ambari cluster could not be stopped: " + errorReason);
+        flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_STOP_FAILED, Status.AVAILABLE.name(), errorReason);
         if (cluster.getEmailNeeded()) {
-            emailSenderService.sendStopFailureEmail(stack.getCluster().getOwner(), stack.getCluster().getEmailTo(),
-                    stackUtil.extractAmbariIp(stack), cluster.getName());
-            flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.STOP_FAILED.name());
+            emailSenderService.sendStopFailureEmail(stackView.getClusterView().getOwner(), stackView.getClusterView().getEmailTo(),
+                    stackUtil.extractAmbariIp(stackView), cluster.getName());
+            flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.STOP_FAILED.name());
         }
     }
 }
