@@ -76,9 +76,11 @@ public class OpenStackPlatformResources implements PlatformResources {
             Map<String, String> subnets = new HashMap<>();
 
             List<? extends Subnet> neutronSubnets = network.getNeutronSubnets();
-            for (Subnet neutronSubnet : neutronSubnets) {
-                if (neutronSubnet != null) {
-                    subnets.put(neutronSubnet.getId(), neutronSubnet.getName());
+            if (neutronSubnets != null) {
+                for (Subnet neutronSubnet : neutronSubnets) {
+                    if (neutronSubnet != null) {
+                        subnets.put(neutronSubnet.getId(), neutronSubnet.getName());
+                    }
                 }
             }
 
