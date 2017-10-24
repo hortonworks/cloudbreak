@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
+import com.sequenceiq.cloudbreak.domain.StackView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -260,22 +261,22 @@ public class StackCreationActions {
             protected StackFailureContext createFlowContext(
                 String flowId, StateContext<StackCreationState, StackCreationEvent> stateContext, StackFailureEvent payload) {
                 Flow flow = getFlow(flowId);
-                Stack stack = stackService.getByIdWithLists(payload.getStackId());
-                MDCBuilder.buildMdcContext(stack);
+                StackView stackView = stackService.getByIdView(payload.getStackId());
+                MDCBuilder.buildMdcContext(stackView);
                 flow.setFlowFailed(payload.getException());
-                return new StackFailureContext(flowId, stack);
+                return new StackFailureContext(flowId, stackView);
             }
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                stackCreationService.handleStackCreationFailure(context.getStack(), payload.getException());
-                metricService.incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStack());
+                stackCreationService.handleStackCreationFailure(context.getStackView(), payload.getException());
+                metricService.incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackView());
                 sendEvent(context);
             }
 
             @Override
             protected Selectable createRequest(StackFailureContext context) {
-                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(StackCreationEvent.STACKCREATION_FAILURE_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }
