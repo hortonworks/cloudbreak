@@ -43,9 +43,9 @@ import com.sequenceiq.cloudbreak.service.stack.CloudParameterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
-public class StackCommonController implements StackEndpoint {
+public class StackCommonService implements StackEndpoint {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackCommonService.class);
 
     @Autowired
     private StackService stackService;
