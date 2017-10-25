@@ -25,7 +25,9 @@ import com.sequenceiq.cloudbreak.api.model.CertificateResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformVariantsJson;
 import com.sequenceiq.cloudbreak.api.model.StackResponse;
 import com.sequenceiq.cloudbreak.api.model.StackValidationRequest;
-import com.sequenceiq.cloudbreak.api.model.UpdateStackRequestV2;
+import com.sequenceiq.cloudbreak.api.model.ReinstallRequestV2;
+import com.sequenceiq.cloudbreak.api.model.StackScaleRequestV2;
+import com.sequenceiq.cloudbreak.api.model.UserNamePasswordJson;
 import com.sequenceiq.cloudbreak.api.model.v2.StackV2Request;
 import com.sequenceiq.cloudbreak.doc.ContentType;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
@@ -122,11 +124,53 @@ public interface StackV2Endpoint extends StackEndpoint {
             @QueryParam("deleteDependencies") @DefaultValue("false") Boolean deleteDependencies);
 
     @PUT
-    @Path("{name}")
+    @Path("scaling/{name}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = OperationDescriptions.StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
-            nickname = "putStackV2")
-    Response put(@PathParam("name") String name, @Valid UpdateStackRequestV2 updateRequest);
+            nickname = "putscalingStackV2")
+    Response putScaling(@PathParam("name") String name, @Valid StackScaleRequestV2 updateRequest) throws Exception;
+
+    @PUT
+    @Path("start/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "putstartStackV2")
+    Response putStart(@PathParam("name") String name);
+
+    @PUT
+    @Path("stop/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "putstopStackV2")
+    Response putStop(@PathParam("name") String name);
+
+    @PUT
+    @Path("sync/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "putsyncStackV2")
+    Response putSync(@PathParam("name") String name);
+
+    @PUT
+    @Path("repair/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "putrepairStackV2")
+    Response putRepair(@PathParam("name") String name);
+
+    @PUT
+    @Path("reinstall/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "putreinstallStackV2")
+    Response putReinstall(@PathParam("name") String name, @Valid ReinstallRequestV2 reinstallRequestV2) throws Exception;
+
+    @PUT
+    @Path("ambari_password/{name}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.PUT_BY_NAME, produces = ContentType.JSON, notes = Notes.STACK_NOTES,
+            nickname = "putpasswordStackV2")
+    Response putPassword(@PathParam("name") String name, @Valid UserNamePasswordJson userNamePasswordJson) throws Exception;
 
     @GET
     @Path("{id}/status")
