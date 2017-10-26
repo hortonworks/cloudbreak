@@ -178,6 +178,20 @@ func StopStack(c *cli.Context) {
 	log.Infof("[StopStack] stack stopted, name: %s", name)
 }
 
+func SyncStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "sync stack")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	name := c.String(FlName.Name)
+	log.Infof("[SyncStack] syncing stack, name: %s", name)
+	err := cbClient.Cloudbreak.V2stacks.PutsyncStackV2(v2stacks.NewPutsyncStackV2Params().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[SyncStack] stack synced, name: %s", name)
+}
+
 func DeleteStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "delete stack")
