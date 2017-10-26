@@ -526,6 +526,30 @@ func main() {
 			},
 		},
 		{
+			Name:   "start-cluster",
+			Usage:  "starts a cluster",
+			Before: ConfigRead,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.StartStack,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "stop-cluster",
+			Usage:  "stops a cluster",
+			Before: ConfigRead,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.StopStack,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-clusters",
 			Usage:  "lists the running clusters",
 			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),

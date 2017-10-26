@@ -137,17 +137,45 @@ func ScaleStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "scale stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	name := c.String(FlGroupName.Name)
+	groupName := c.String(FlGroupName.Name)
 	req := &models_cloudbreak.StackScaleRequestV2{
 		DesiredCount: &(&types.I32{I: int32(desiredCount)}).I,
-		Group:        &name,
+		Group:        &groupName,
 	}
-	log.Infof("[ScaleStack] scaling stack, name: %s", name)
+	log.Infof("[ScaleStack] scaling stack, name: %s", groupName)
 	err = cbClient.Cloudbreak.V2stacks.PutscalingStackV2(v2stacks.NewPutscalingStackV2Params().WithName(c.String(FlName.Name)).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[ScaleStack] stack scaled, name: %s", name)
+	log.Infof("[ScaleStack] stack scaled, name: %s", groupName)
+}
+
+func StartStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "start stack")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	name := c.String(FlName.Name)
+	log.Infof("[StartStack] starting stack, name: %s", name)
+	err := cbClient.Cloudbreak.V2stacks.PutstartStackV2(v2stacks.NewPutstartStackV2Params().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[StartStack] stack started, name: %s", name)
+}
+
+func StopStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "stop stack")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	name := c.String(FlName.Name)
+	log.Infof("[StopStack] stopping stack, name: %s", name)
+	err := cbClient.Cloudbreak.V2stacks.PutstopStackV2(v2stacks.NewPutstopStackV2Params().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[StopStack] stack stopted, name: %s", name)
 }
 
 func DeleteStack(c *cli.Context) {
