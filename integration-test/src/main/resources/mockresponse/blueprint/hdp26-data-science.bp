@@ -1,8 +1,8 @@
 {
     "Blueprints": {
-      "blueprint_name": "hdp25-data-science",
+      "blueprint_name": "hdp26-data-science",
       "stack_name": "HDP",
-      "stack_version": "2.5"
+      "stack_version": "2.6"
     },
     "settings": [
       {
@@ -186,4 +186,4 @@
         "cardinality": "1+"
       }
     ]
-}
+  }
