@@ -562,6 +562,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "repair-cluster",
+			Usage:  "repaires a cluster",
+			Before: ConfigRead,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.RepairStack,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-clusters",
 			Usage:  "lists the running clusters",
 			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),

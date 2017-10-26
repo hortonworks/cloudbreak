@@ -192,6 +192,20 @@ func SyncStack(c *cli.Context) {
 	log.Infof("[SyncStack] stack synced, name: %s", name)
 }
 
+func RepairStack(c *cli.Context) {
+	checkRequiredFlags(c)
+	defer utils.TimeTrack(time.Now(), "repair stack")
+
+	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
+	name := c.String(FlName.Name)
+	log.Infof("[RepairStack] repairing stack, name: %s", name)
+	err := cbClient.Cloudbreak.V2stacks.PutrepairStackV2(v2stacks.NewPutrepairStackV2Params().WithName(name))
+	if err != nil {
+		utils.LogErrorAndExit(err)
+	}
+	log.Infof("[RepairStack] stack repaired, name: %s", name)
+}
+
 func DeleteStack(c *cli.Context) {
 	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "delete stack")
