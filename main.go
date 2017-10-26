@@ -574,6 +574,18 @@ func main() {
 			},
 		},
 		{
+			Name:   "change-ambari-password",
+			Usage:  "changes Ambari password",
+			Before: ConfigRead,
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlOldPassword, cb.FlNewPassword, cb.FlAmbariUser).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Action: cb.ChangeAmbariPassword,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlOldPassword, cb.FlNewPassword, cb.FlAmbariUser).AddAuthenticationFlags().AddOutputFlag().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
 			Name:   "list-clusters",
 			Usage:  "lists the running clusters",
 			Flags:  cb.NewFlagBuilder().AddAuthenticationFlags().AddOutputFlag().Build(),

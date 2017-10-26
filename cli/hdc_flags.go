@@ -275,6 +275,27 @@ var (
 			Usage: "desired number of nodes",
 		},
 	}
+	FlOldPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "old-password",
+			Usage: "old password of ambari",
+		},
+	}
+	FlNewPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "new-password",
+			Usage: "new password of ambari",
+		},
+	}
+	FlAmbariUser = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ambari-user",
+			Usage: "user of ambari",
+		},
+	}
 )
 
 type RequiredFlag struct {
