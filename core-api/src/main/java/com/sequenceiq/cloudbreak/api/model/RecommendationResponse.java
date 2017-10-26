@@ -16,9 +16,12 @@ public class RecommendationResponse implements JsonEntity {
 
     private Set<VmTypeJson> virtualMachines = new HashSet<>();
 
-    public RecommendationResponse(Map<String, VmTypeJson> recommendations, Set<VmTypeJson> virtualMachines) {
+    private Set<DiskResponse> diskResponses = new HashSet<>();
+
+    public RecommendationResponse(Map<String, VmTypeJson> recommendations, Set<VmTypeJson> virtualMachines, Set<DiskResponse> diskResponses) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
+        this.diskResponses = diskResponses;
     }
 
     public Map<String, VmTypeJson> getRecommendations() {
@@ -35,5 +38,13 @@ public class RecommendationResponse implements JsonEntity {
 
     public void setVirtualMachines(Set<VmTypeJson> virtualMachines) {
         this.virtualMachines = virtualMachines;
+    }
+
+    public Set<DiskResponse> getDiskResponses() {
+        return diskResponses;
+    }
+
+    public void setDiskResponses(Set<DiskResponse> diskResponses) {
+        this.diskResponses = diskResponses;
     }
 }
