@@ -138,15 +138,12 @@ func ScaleStack(c *cli.Context) {
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
 	name := c.String(FlGroupName.Name)
-	req := &models_cloudbreak.UpdateStackV2{
-		InstanceGroupAdjustment: &models_cloudbreak.InstanceGroupAdjustmentV2{
-			DesiredCount:  &(&types.I32{I: int32(desiredCount)}).I,
-			InstanceGroup: &name,
-		},
-		WithClusterEvent: &(&types.B{B: true}).B,
+	req := &models_cloudbreak.StackScaleRequestV2{
+		DesiredCount: &(&types.I32{I: int32(desiredCount)}).I,
+		Group:        &name,
 	}
 	log.Infof("[ScaleStack] scaling stack, name: %s", name)
-	err = cbClient.Cloudbreak.V2stacks.PutStackV2(v2stacks.NewPutStackV2Params().WithName(c.String(FlName.Name)).WithBody(req))
+	err = cbClient.Cloudbreak.V2stacks.PutscalingStackV2(v2stacks.NewPutscalingStackV2Params().WithName(c.String(FlName.Name)).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}

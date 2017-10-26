@@ -445,25 +445,205 @@ func (a *Client) PostPublicStackV2(params *PostPublicStackV2Params) (*PostPublic
 }
 
 /*
-PutStackV2 updates stack by name
+PutpasswordStackV2 updates stack by name
 
 Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
 */
-func (a *Client) PutStackV2(params *PutStackV2Params) error {
+func (a *Client) PutpasswordStackV2(params *PutpasswordStackV2Params) error {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPutStackV2Params()
+		params = NewPutpasswordStackV2Params()
 	}
 
 	_, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "putStackV2",
+		ID:                 "putpasswordStackV2",
 		Method:             "PUT",
-		PathPattern:        "/v2/stacks/{name}",
+		PathPattern:        "/v2/stacks/ambari_password/{name}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http", "https"},
 		Params:             params,
-		Reader:             &PutStackV2Reader{formats: a.formats},
+		Reader:             &PutpasswordStackV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+PutreinstallStackV2 updates stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PutreinstallStackV2(params *PutreinstallStackV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutreinstallStackV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putreinstallStackV2",
+		Method:             "PUT",
+		PathPattern:        "/v2/stacks/reinstall/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutreinstallStackV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+PutrepairStackV2 updates stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PutrepairStackV2(params *PutrepairStackV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutrepairStackV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putrepairStackV2",
+		Method:             "PUT",
+		PathPattern:        "/v2/stacks/repair/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutrepairStackV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+PutscalingStackV2 updates stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PutscalingStackV2(params *PutscalingStackV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutscalingStackV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putscalingStackV2",
+		Method:             "PUT",
+		PathPattern:        "/v2/stacks/scaling/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutscalingStackV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+PutstartStackV2 updates stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PutstartStackV2(params *PutstartStackV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutstartStackV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putstartStackV2",
+		Method:             "PUT",
+		PathPattern:        "/v2/stacks/start/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutstartStackV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+PutstopStackV2 updates stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PutstopStackV2(params *PutstopStackV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutstopStackV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putstopStackV2",
+		Method:             "PUT",
+		PathPattern:        "/v2/stacks/stop/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutstopStackV2Reader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
+/*
+PutsyncStackV2 updates stack by name
+
+Stacks are template instances - a running cloud infrastructure created based on a template. Stacks are always launched on behalf of a cloud user account. Stacks support a wide range of resources, allowing you to build a highly available, reliable, and scalable infrastructure for your application needs.
+*/
+func (a *Client) PutsyncStackV2(params *PutsyncStackV2Params) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewPutsyncStackV2Params()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "putsyncStackV2",
+		Method:             "PUT",
+		PathPattern:        "/v2/stacks/sync/{name}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &PutsyncStackV2Reader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})

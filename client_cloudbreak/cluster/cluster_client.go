@@ -295,36 +295,6 @@ func (a *Client) PutCluster(params *PutClusterParams) error {
 }
 
 /*
-PutClusterV2 updates cluster by stack name
-
-Clusters are materialised Hadoop services on a given infrastructure. They are built based on a Blueprint (running the components and services specified) and on a configured infrastructure Stack. Once a cluster is created and launched, it can be used the usual way as any Hadoop cluster. We suggest to start with the Cluster's Ambari UI for an overview of your cluster.
-*/
-func (a *Client) PutClusterV2(params *PutClusterV2Params) error {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewPutClusterV2Params()
-	}
-
-	_, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "putClusterV2",
-		Method:             "PUT",
-		PathPattern:        "/v2/stacks/{name}/cluster",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &PutClusterV2Reader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return err
-	}
-	return nil
-
-}
-
-/*
 RepairCluster repairs the cluster
 
 Removing the failed nodes and starting new nodes to substitute them.
