@@ -1,25 +1,38 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import javax.inject.Inject;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
+
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.EventEndpoint;
 import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.facade.CloudbreakEventsFacade;
+import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
+import com.sequenceiq.cloudbreak.util.JsonUtil;
 
 @Component
 public class CloudbreakEventController implements EventEndpoint {
 
-    @Autowired
+    @Inject
     private CloudbreakEventsFacade cloudbreakEventsFacade;
 
-    @Autowired
+    @Inject
     private AuthenticatedUserService authenticatedUserService;
 
-    @Override
+    @Inject
+    private StructuredEventService structuredEventService;
+
     public List<CloudbreakEventsJson> get(Long since) {
         IdentityUser user = authenticatedUserService.getCbUser();
         return cloudbreakEventsFacade.retrieveEvents(user.getUserId(), since);
@@ -31,4 +44,29 @@ public class CloudbreakEventController implements EventEndpoint {
         return cloudbreakEventsFacade.retrieveEventsByStack(user.getUserId(), stackId);
     }
 
+    @Override
+    public List<StructuredEvent> getStructuredEvents(Long stackId) {
+        return getStructuredEventsForStack(stackId);
+    }
+
+    @Override
+    public Response getStructuredEventsZip(Long stackId) {
+        List<StructuredEvent> events = getStructuredEventsForStack(stackId);
+        StreamingOutput streamingOutput = output -> {
+            ZipOutputStream zipOutputStream = new ZipOutputStream(output);
+            zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
+            zipOutputStream.write(JsonUtil.writeValueAsString(events).getBytes());
+            zipOutputStream.closeEntry();
+            zipOutputStream.close();
+        };
+        return Response.ok(streamingOutput).header("content-disposition", "attachment; filename = struct-events.zip").build();
+    }
+
+    private List<StructuredEvent> getStructuredEventsForStack(Long stackId) {
+        IdentityUser identityUser = authenticatedUserService.getCbUser();
+        Map<String, Long> resourceIds = Maps.newHashMap();
+        resourceIds.put("STACK", stackId);
+        resourceIds.put("stacks", stackId);
+        return structuredEventService.getEventsForUser(identityUser.getUserId(), Arrays.asList("REST", "FLOW", "NOTIFICATION"), resourceIds);
+    }
 }

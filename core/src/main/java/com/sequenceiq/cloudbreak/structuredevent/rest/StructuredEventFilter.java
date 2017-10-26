@@ -24,6 +24,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.ext.WriterInterceptor;
 import javax.ws.rs.ext.WriterInterceptorContext;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.glassfish.jersey.message.MessageUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -108,7 +109,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
-        if ((Boolean) requestContext.getProperty(LOGGING_ENABLED_PROPERTY)) {
+        if (BooleanUtils.isTrue((Boolean) requestContext.getProperty(LOGGING_ENABLED_PROPERTY))) {
             RestResponseDetails restResponse = createResponseDetails(responseContext);
             if (responseContext.hasEntity()) {
                 final OutputStream stream = new LoggingStream(responseContext.getEntityStream());
@@ -127,7 +128,7 @@ public class StructuredEventFilter implements WriterInterceptor, ContainerReques
     @Override
     public void aroundWriteTo(WriterInterceptorContext context) throws IOException, WebApplicationException {
         context.proceed();
-        if ((Boolean) context.getProperty(LOGGING_ENABLED_PROPERTY)) {
+        if (BooleanUtils.isTrue((Boolean) context.getProperty(LOGGING_ENABLED_PROPERTY))) {
             Long requestTime = (Long) context.getProperty(REQUEST_TIME);
             RestRequestDetails restRequest = (RestRequestDetails) context.getProperty(REQUEST_DETAILS);
             RestResponseDetails restResponse = (RestResponseDetails) context.getProperty(RESPONSE_DETAILS);

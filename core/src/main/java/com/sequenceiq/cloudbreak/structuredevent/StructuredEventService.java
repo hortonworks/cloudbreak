@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent;
 
 import java.util.List;
+import java.util.Map;
 
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
 
@@ -12,4 +13,6 @@ public interface StructuredEventService {
     <T extends StructuredEvent> List<T> getEventsForUserWithTypeSince(String userId, String eventType, Long since);
 
     <T extends StructuredEvent> List<T> getEventsForUserWithTypeAndResourceId(String userId, String eventType, String resourceType, Long resourceId);
+
+    List<StructuredEvent> getEventsForUser(String userId, List<String> eventTypes, Map<String, Long> resoureceIds);
 }

@@ -35,6 +35,7 @@ dependencies {
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
 
   compile project(':cloud-common')
+  compile project(':structuredevent-model')
 }
 
 task testJar(type: Jar, dependsOn: testClasses) {

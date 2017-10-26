@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.db;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -9,6 +10,7 @@ import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.domain.StructuredEventEntity;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredEventService;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEvent;
@@ -50,5 +52,23 @@ public class StructuredEventDBService implements StructuredEventService {
         return events != null ? (List<T>) conversionService.convert(events,
                 TypeDescriptor.forObject(events),
                 TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
+    }
+
+    @Override
+    public List<StructuredEvent> getEventsForUser(String userId, List<String> eventTypes, Map<String, Long> resourceIds) {
+        List<StructuredEventEntity> events = Lists.newArrayList();
+        for (String eventType : eventTypes) {
+            for (Map.Entry<String, Long> resId : resourceIds.entrySet()) {
+                events.addAll(structuredEventRepository.findByUserIdAndEventTypeAndResourceTypeAndResourceId(
+                        userId, eventType, resId.getKey(), resId.getValue()));
+            }
+        }
+        List<StructuredEvent> structEvents = events != null ? (List) conversionService.convert(events,
+                TypeDescriptor.forObject(events),
+                TypeDescriptor.collection(List.class, TypeDescriptor.valueOf(StructuredEvent.class))) : Collections.emptyList();
+        Collections.sort(structEvents, (StructuredEvent o1, StructuredEvent o2) -> {
+                return (int) (o1.getOperation().getTimestamp() - o2.getOperation().getTimestamp());
+            });
+        return structEvents;
     }
 }
