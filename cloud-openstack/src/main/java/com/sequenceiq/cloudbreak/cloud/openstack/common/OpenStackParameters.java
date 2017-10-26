@@ -3,10 +3,12 @@ package com.sequenceiq.cloudbreak.cloud.openstack.common;
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
 import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
+import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -102,11 +104,17 @@ public class OpenStackParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), new HashMap<>());
+        return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), getDisplayName());
     }
 
     private Collection<DiskType> getDiskTypes() {
-        return new ArrayList<>();
+        return Arrays.asList(diskType("HDD"));
+    }
+
+    private Map<DiskType, DisplayName> getDisplayName() {
+        Map<DiskType, DisplayName> displayNameMap = new HashMap<>();
+        displayNameMap.put(diskType("HDD"), displayName("HDD"));
+        return displayNameMap;
     }
 
     private DiskType defaultDiskType() {

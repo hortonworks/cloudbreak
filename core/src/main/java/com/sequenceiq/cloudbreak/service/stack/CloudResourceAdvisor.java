@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +16,9 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
@@ -73,7 +78,14 @@ public class CloudResourceAdvisor {
             vmTypesByHostGroup.putAll(workerVmTypes);
         }
 
-        return new PlatformRecommendation(vmTypesByHostGroup, vmTypes.getCloudVmResponses().get(availabilityZone));
+        PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
+        Platform platform = platform(cloudPlatform);
+        DiskTypes diskTypes = new DiskTypes(
+                platformDisks.getDiskTypes().get(platform),
+                platformDisks.getDefaultDisks().get(platform),
+                platformDisks.getDiskMappings().get(platform),
+                platformDisks.getDiskDisplayNames().get(platform));
+        return new PlatformRecommendation(vmTypesByHostGroup, vmTypes.getCloudVmResponses().get(availabilityZone), diskTypes);
     }
 
     private Blueprint getBlueprint(String blueprintName, Long blueprintId, IdentityUser cbUser) {

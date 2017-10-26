@@ -11,9 +11,12 @@ public class PlatformRecommendation {
 
     private Set<VmType> virtualMachines = new HashSet<>();
 
-    public PlatformRecommendation(Map<String, VmType> recommendations, Set<VmType> virtualMachines) {
+    private DiskTypes diskTypes;
+
+    public PlatformRecommendation(Map<String, VmType> recommendations, Set<VmType> virtualMachines, DiskTypes diskTypes) {
         this.recommendations = recommendations;
         this.virtualMachines = virtualMachines;
+        this.diskTypes = diskTypes;
     }
 
     public Map<String, VmType> getRecommendations() {
@@ -30,5 +33,13 @@ public class PlatformRecommendation {
 
     public void setVirtualMachines(Set<VmType> virtualMachines) {
         this.virtualMachines = virtualMachines;
+    }
+
+    public DiskTypes getDiskTypes() {
+        return diskTypes;
+    }
+
+    public void setDiskTypes(DiskTypes diskTypes) {
+        this.diskTypes = diskTypes;
     }
 }
