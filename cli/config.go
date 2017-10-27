@@ -8,6 +8,7 @@ import (
 	"errors"
 
 	"fmt"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/mitchellh/go-homedir"
@@ -56,7 +57,7 @@ func Configure(c *cli.Context) {
 func GetHomeDirectory() string {
 	homeDir, err := homedir.Dir()
 	if err != nil || len(homeDir) == 0 {
-		utils.LogErrorAndExit(errors.New("failed to determine the home directory"))
+		utils.LogErrorMessageAndExit("failed to determine the home directory")
 	}
 	return homeDir
 }

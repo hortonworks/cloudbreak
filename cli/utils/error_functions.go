@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"runtime"
 	"strings"
@@ -10,8 +9,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
 )
-
-var exit func(code int) = os.Exit
 
 type RESTError struct {
 	Response interface{}
@@ -37,12 +34,12 @@ func LogMissingParameterAndExit(c *cli.Context, missingFlags []string, message .
 		LogErrorMessage(message[0])
 	}
 	cli.ShowSubcommandHelp(c)
-	exit(1)
+	panic("missing")
 }
 
 func LogErrorAndExit(err error) {
 	LogErrorMessage(err.Error())
-	exit(1)
+	panic(err.Error())
 }
 
 func LogErrorMessage(message string) {
@@ -51,7 +48,7 @@ func LogErrorMessage(message string) {
 
 func LogErrorMessageAndExit(message string) {
 	log.Errorf(message)
-	exit(1)
+	panic(message)
 }
 
 func getFunctionName(caller interface{}) string {

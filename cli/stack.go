@@ -2,7 +2,6 @@ package cli
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -46,33 +45,11 @@ func CreateStack(c *cli.Context) {
 
 	req := assembleStackRequest(c)
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	createStackImpl(cbClient.Cloudbreak.V2stacks, req, c.Bool(FlPublic.Name))
-}
+	cbClient.createStack(req, c.Bool(FlPublic.Name))
 
-type createStackClient interface {
-	PostPublicStackV2(*v2stacks.PostPublicStackV2Params) (*v2stacks.PostPublicStackV2OK, error)
-	PostPrivateStackV2(*v2stacks.PostPrivateStackV2Params) (*v2stacks.PostPrivateStackV2OK, error)
-}
-
-func createStackImpl(client createStackClient, req *models_cloudbreak.StackV2Request, public bool) *models_cloudbreak.StackResponse {
-	var stack *models_cloudbreak.StackResponse
-	if public {
-		log.Infof("[createStackImpl] sending create public stack request")
-		resp, err := client.PostPublicStackV2(v2stacks.NewPostPublicStackV2Params().WithBody(req))
-		if err != nil {
-			utils.LogErrorAndExit(err)
-		}
-		stack = resp.Payload
-	} else {
-		log.Infof("[createStackImpl] sending create private stack request")
-		resp, err := client.PostPrivateStackV2(v2stacks.NewPostPrivateStackV2Params().WithBody(req))
-		if err != nil {
-			utils.LogErrorAndExit(err)
-		}
-		stack = resp.Payload
+	if c.Bool(FlWait.Name) {
+		cbClient.waitForOperationToFinish(*req.Name, AVAILABLE, AVAILABLE)
 	}
-	log.Infof("[createStackImpl] stack created: %s (id: %d)", *stack.Name, stack.ID)
-	return stack
 }
 
 func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
@@ -88,7 +65,7 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 	err := json.Unmarshal(content, &req)
 	if err != nil {
 		msg := fmt.Sprintf(`Invalid json format: %s. Please make sure that the json is valid (check for commas and double quotes).`, err.Error())
-		utils.LogErrorAndExit(errors.New(msg))
+		utils.LogErrorMessageAndExit(msg)
 	}
 
 	name := c.String(FlName.Name)
@@ -137,17 +114,21 @@ func ScaleStack(c *cli.Context) {
 	defer utils.TimeTrack(time.Now(), "scale stack")
 
 	cbClient := NewCloudbreakOAuth2HTTPClient(c.String(FlServer.Name), c.String(FlUsername.Name), c.String(FlPassword.Name))
-	groupName := c.String(FlGroupName.Name)
 	req := &models_cloudbreak.StackScaleRequestV2{
 		DesiredCount: &(&types.I32{I: int32(desiredCount)}).I,
-		Group:        &groupName,
+		Group:        &(&types.S{S: c.String(FlGroupName.Name)}).S,
 	}
-	log.Infof("[ScaleStack] scaling stack, name: %s", groupName)
-	err = cbClient.Cloudbreak.V2stacks.PutscalingStackV2(v2stacks.NewPutscalingStackV2Params().WithName(c.String(FlName.Name)).WithBody(req))
+	name := c.String(FlName.Name)
+	log.Infof("[ScaleStack] scaling stack, name: %s", name)
+	err = cbClient.Cloudbreak.V2stacks.PutscalingStackV2(v2stacks.NewPutscalingStackV2Params().WithName(name).WithBody(req))
 	if err != nil {
 		utils.LogErrorAndExit(err)
 	}
-	log.Infof("[ScaleStack] stack scaled, name: %s", groupName)
+	log.Infof("[ScaleStack] stack scaled, name: %s", name)
+
+	if c.Bool(FlWait.Name) {
+		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
+	}
 }
 
 func StartStack(c *cli.Context) {
@@ -162,6 +143,10 @@ func StartStack(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[StartStack] stack started, name: %s", name)
+
+	if c.Bool(FlWait.Name) {
+		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
+	}
 }
 
 func StopStack(c *cli.Context) {
@@ -176,6 +161,10 @@ func StopStack(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[StopStack] stack stopted, name: %s", name)
+
+	if c.Bool(FlWait.Name) {
+		cbClient.waitForOperationToFinish(name, STOPPED, STOPPED)
+	}
 }
 
 func SyncStack(c *cli.Context) {
@@ -204,6 +193,10 @@ func RepairStack(c *cli.Context) {
 		utils.LogErrorAndExit(err)
 	}
 	log.Infof("[RepairStack] stack repaired, name: %s", name)
+
+	if c.Bool(FlWait.Name) {
+		cbClient.waitForOperationToFinish(name, AVAILABLE, AVAILABLE)
+	}
 }
 
 func DeleteStack(c *cli.Context) {
@@ -215,6 +208,10 @@ func DeleteStack(c *cli.Context) {
 	stack := cbClient.getStackByName(name)
 	cbClient.deleteStack(name, c.Bool(FlForce.Name), *stack.Public)
 	log.Infof("[DeleteStack] stack deleted, name: %s", name)
+
+	if c.Bool(FlWait.Name) {
+		cbClient.waitForOperationToFinish(name, DELETE_COMPLETED, SKIP)
+	}
 }
 
 func ListStacks(c *cli.Context) {

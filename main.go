@@ -74,6 +74,11 @@ func printFlagCompletion(f cli.Flag) {
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			os.Exit(1)
+		}
+	}()
 
 	app := cli.NewApp()
 	app.Name = "cb"
@@ -517,10 +522,10 @@ func main() {
 			Name:   "scale-cluster",
 			Usage:  "scales a cluster",
 			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build(),
 			Action: cb.ScaleStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount).AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlGroupName, cb.FlDesiredNodeCount, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -529,10 +534,10 @@ func main() {
 			Name:   "start-cluster",
 			Usage:  "starts a cluster",
 			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build(),
 			Action: cb.StartStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -541,10 +546,10 @@ func main() {
 			Name:   "stop-cluster",
 			Usage:  "stops a cluster",
 			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build(),
 			Action: cb.StopStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -565,10 +570,10 @@ func main() {
 			Name:   "repair-cluster",
 			Usage:  "repaires a cluster",
 			Before: ConfigRead,
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build(),
 			Action: cb.RepairStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().AddOutputFlag().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlWait).AddAuthenticationFlags().AddOutputFlag().Build() {
 					printFlagCompletion(f)
 				}
 			},
@@ -600,11 +605,11 @@ func main() {
 		{
 			Name:   "delete-cluster",
 			Usage:  "deletes a cluster",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForce).AddAuthenticationFlags().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForce, cb.FlWait).AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
 			Action: cb.DeleteStack,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForce).AddAuthenticationFlags().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName, cb.FlForce, cb.FlWait).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},
