@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -69,9 +70,12 @@ public class CloudResourceAdvisor {
             componentsByHostGroup.keySet().forEach(comp -> vmTypesByHostGroup.put(comp, defaultVmType));
         }
         VmRecommendations recommendations = cloudParameterService.getRecommendation(cloudPlatform);
-        if (recommendations != null) {
-            Collection<VmType> availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
 
+        Set<VmType> availableVmTypes = vmTypes.getCloudVmResponses().get(availabilityZone);
+        if (availableVmTypes == null) {
+            availableVmTypes = Collections.emptySet();
+        }
+        if (recommendations != null) {
             Map<String, VmType> masterVmTypes = getVmTypesForComponentType(true, recommendations.getMaster(), hostGroupContainsMasterComp, availableVmTypes);
             vmTypesByHostGroup.putAll(masterVmTypes);
             Map<String, VmType> workerVmTypes = getVmTypesForComponentType(false, recommendations.getWorker(), hostGroupContainsMasterComp, availableVmTypes);
@@ -85,7 +89,8 @@ public class CloudResourceAdvisor {
                 platformDisks.getDefaultDisks().get(platform),
                 platformDisks.getDiskMappings().get(platform),
                 platformDisks.getDiskDisplayNames().get(platform));
-        return new PlatformRecommendation(vmTypesByHostGroup, vmTypes.getCloudVmResponses().get(availabilityZone), diskTypes);
+
+        return new PlatformRecommendation(vmTypesByHostGroup, availableVmTypes, diskTypes);
     }
 
     private Blueprint getBlueprint(String blueprintName, Long blueprintId, IdentityUser cbUser) {
