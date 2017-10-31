@@ -74,7 +74,7 @@ public class StructuredFlowEventFactory {
         notificationDetails.setRegion(stack.getRegion());
         notificationDetails.setAvailabiltyZone(stack.getAvailabilityZone());
         notificationDetails.setStackId(stackId);
-        notificationDetails.setStackName(stack.getName());
+        notificationDetails.setStackName(stack.getDisplayName());
         notificationDetails.setStackStatus(stack.getStatus().name());
         notificationDetails.setNodeCount(stack.getRunningInstanceMetaData().size());
         notificationDetails.setInstanceGroup(instanceGroupName);

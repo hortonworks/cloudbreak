@@ -87,6 +87,8 @@ public class Stack implements ProvisionEntity {
 
     private boolean clusterNameAsSubdomain;
 
+    private String displayName;
+
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
@@ -208,6 +210,14 @@ public class Stack implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
     }
 
     public Cluster getCluster() {
