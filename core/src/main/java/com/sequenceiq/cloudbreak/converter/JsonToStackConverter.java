@@ -88,6 +88,7 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();
         stack.setName(source.getName());
+        stack.setDisplayName(source.getName());
         stack.setRegion(getRegion(source));
         setPlatform(source);
         stack.setCloudPlatform(source.getCloudPlatform());
