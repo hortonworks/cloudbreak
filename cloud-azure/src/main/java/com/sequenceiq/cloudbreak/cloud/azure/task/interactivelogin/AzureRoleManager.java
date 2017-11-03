@@ -108,13 +108,21 @@ public class AzureRoleManager {
         Response response = request.put(Entity.entity(jsonObject.toString(), MediaType.APPLICATION_JSON));
 
         if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-            String errorMsg = response.readEntity(String.class);
-            LOGGER.error("Assign role request error - status code: " + response.getStatus()
-                    + " - error message: " + errorMsg);
-            throw new InteractiveLoginException("Assign role request error - status code: " + response.getStatus()
-                    + " - error message: " + errorMsg);
+            String errorResponse = response.readEntity(String.class);
+            LOGGER.error("Assign role request error - status code: {} - error message: {}", response.getStatus(), errorResponse);
+            if (response.getStatusInfo().getStatusCode() == Status.FORBIDDEN.getStatusCode()) {
+                throw new InteractiveLoginException("You don't have enough permissions to assign roles, please contact with your administrator");
+            } else {
+                try {
+                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                    throw new InteractiveLoginException("Failed to assing role: " + errorMessage);
+                } catch (IOException e) {
+                    throw new InteractiveLoginException("Failed to assing role (status " + response.getStatus() + "): " + errorResponse);
+                }
+            }
         } else {
-            LOGGER.info("Role assigned successfully");
+            LOGGER.info("Role assigned successfully. subscriptionId '{}', roleDefinitionId {}, principalObjectId {}",
+                    subscriptionId, roleDefinitionId, principalObjectId);
         }
     }
 
@@ -150,18 +158,17 @@ public class AzureRoleManager {
             AzureRoleDefinitionListResponse azureRoleDefinitionListResponse = response.readEntity(AzureRoleDefinitionListResponse.class);
             LOGGER.info("Role definitions retrieved:" + azureRoleDefinitionListResponse.getValue());
             return azureRoleDefinitionListResponse.getValue();
-
         } else {
+            String errorResponse = response.readEntity(String.class);
+            LOGGER.error("Get role definition request with filter: {}, failed: {}", filter, errorResponse);
             if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
                 throw new InteractiveLoginException("You have no permission to access Active Directory roles, please contact with your administrator");
             } else {
-                String errorResponse = response.readEntity(String.class);
-                LOGGER.error("Get role definition request with filter: " + filter + " failed:" + errorResponse);
                 try {
                     String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
                     throw new InteractiveLoginException("Get role definition request with filter: " + filter + " failed: " + errorMessage);
                 } catch (IOException e) {
-                    throw new IllegalStateException(e);
+                    throw new InteractiveLoginException("Get role definition request with filter: " + filter + " failed:" + errorResponse);
                 }
             }
         }
@@ -189,11 +196,20 @@ public class AzureRoleManager {
         Response response = request.put(Entity.entity(customRole, MediaType.APPLICATION_JSON));
 
         if (response.getStatusInfo().getFamily() != Family.SUCCESSFUL) {
-            String errorMsg = response.readEntity(String.class);
-            LOGGER.error("Create role request error - status code: " + response.getStatus()
-                    + " - error message: " + errorMsg);
-            throw new InteractiveLoginException("Create role request error - status code: " + response.getStatus()
-                    + " - error message: " + errorMsg);
+            String errorResponse = response.readEntity(String.class);
+            LOGGER.error("Create role request error - status code: {} - error message: ", response.getStatus(), errorResponse);
+            if (Status.FORBIDDEN.getStatusCode() == response.getStatus()) {
+                throw new InteractiveLoginException("You don't have enough permissions to create role, please contact with your administrator");
+            } else {
+                try {
+                    String errorMessage = new ObjectMapper().readTree(errorResponse).get("error").get("message").asText();
+                    throw new InteractiveLoginException("Create role request error - status code: "
+                            + response.getStatus() + " - error message: " + errorMessage);
+                } catch (IOException e) {
+                    throw new InteractiveLoginException("Create role request error - status code: "
+                            + response.getStatus() + " - error message: " + errorResponse);
+                }
+            }
         }
         LOGGER.info("Role " + roleName +  " created successfully");
         return roleDefinitionId;
