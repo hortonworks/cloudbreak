@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.credential;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -16,6 +17,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.model.CloudbreakEventsJson;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
 import com.sequenceiq.cloudbreak.common.model.user.IdentityUserRole;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
@@ -26,6 +28,8 @@ import com.sequenceiq.cloudbreak.repository.CredentialRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.AuthorizationService;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
+import com.sequenceiq.cloudbreak.service.notification.Notification;
+import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderCredentialAdapter;
 import com.sequenceiq.cloudbreak.service.user.UserProfileCredentialHandler;
 
@@ -49,6 +53,9 @@ public class CredentialService {
 
     @Inject
     private UserProfileCredentialHandler userProfileCredentialHandler;
+
+    @Inject
+    private NotificationSender notificationSender;
 
     public Set<Credential> retrievePrivateCredentials(IdentityUser user) {
         return credentialRepository.findForUser(user.getUserId());
@@ -107,7 +114,7 @@ public class CredentialService {
     }
 
     @Transactional(TxType.NEVER)
-    @Retryable(value = BadRequestException.class, maxAttempts = 10, backoff = @Backoff(delay = 2000))
+    @Retryable(value = BadRequestException.class, maxAttempts = 30, backoff = @Backoff(delay = 2000))
     public Credential createWithRetry(String userId, String account, Credential credential) {
         return create(userId, account, credential);
     }
@@ -118,10 +125,22 @@ public class CredentialService {
         try {
             savedCredential = credentialRepository.save(credential);
             userProfileCredentialHandler.createProfilePreparation(credential);
+            sendCredentialCreatedNotification(credential);
         } catch (DataIntegrityViolationException ex) {
             throw new DuplicateKeyValueException(APIResourceType.CREDENTIAL, credential.getName(), ex);
         }
         return savedCredential;
+    }
+
+    private void sendCredentialCreatedNotification(Credential credential) {
+        CloudbreakEventsJson notification = new CloudbreakEventsJson();
+        notification.setEventType("CREDENTIAL_CREATED");
+        notification.setEventTimestamp(new Date().getTime());
+        notification.setEventMessage("Credential created");
+        notification.setOwner(credential.getOwner());
+        notification.setAccount(credential.getAccount());
+        notification.setCloud(credential.cloudPlatform());
+        notificationSender.send(new Notification<>(notification));
     }
 
     public Credential getPublicCredential(String name, IdentityUser user) {
