@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonClientException;
+import com.amazonaws.services.ec2.AmazonEC2Client;
+import com.amazonaws.services.ec2.model.DescribeRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -59,8 +61,9 @@ public class AwsCredentialConnector implements CredentialConnector {
         if (isEmpty(accessKey) || isEmpty(secretKey)) {
             String message = "Please provide both the 'access' and 'secret key'";
             return new CloudCredentialStatus(credential, CredentialStatus.FAILED, new Exception(message), message);
+        } else {
+            return verifyAccessKeySecretKeyIsAssumable(credential);
         }
-        return new CloudCredentialStatus(credential, CredentialStatus.VERIFIED);
     }
 
     @Override
@@ -93,6 +96,25 @@ public class AwsCredentialConnector implements CredentialConnector {
         } catch (RuntimeException e) {
             String errorMessage = String.format("Could not assume role '%s': check if the role exists and if it's created with the correct external ID",
                     awsCredential.getRoleArn());
+            LOGGER.error(errorMessage, e);
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
+        }
+        return new CloudCredentialStatus(cloudCredential, CredentialStatus.CREATED);
+    }
+
+    private CloudCredentialStatus verifyAccessKeySecretKeyIsAssumable(CloudCredential cloudCredential) {
+        AwsCredentialView awsCredential = new AwsCredentialView(cloudCredential);
+        try {
+            AmazonEC2Client access = awsClient.createAccess(cloudCredential);
+            DescribeRegionsRequest describeRegionsRequest = new DescribeRegionsRequest();
+            access.describeRegions(describeRegionsRequest);
+        } catch (AmazonClientException ae) {
+            String errorMessage = "Unable to verify AWS credentials: please make sure the access key and secret key is correct";
+            LOGGER.error(errorMessage, ae);
+            return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, ae, errorMessage);
+        } catch (RuntimeException e) {
+            String errorMessage = String.format("Could not verify keys '%s': check if the keys exists and if it's created with the correct external ID",
+                    awsCredential.getAccessKey());
             LOGGER.error(errorMessage, e);
             return new CloudCredentialStatus(cloudCredential, CredentialStatus.FAILED, e, errorMessage);
         }
