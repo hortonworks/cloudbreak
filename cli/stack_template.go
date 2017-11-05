@@ -183,6 +183,7 @@ func convertNodeToInstanceGroup(node node) *models_cloudbreak.InstanceGroupsV2 {
 	ig := &models_cloudbreak.InstanceGroupsV2{
 		Template: &models_cloudbreak.TemplateV2Request{
 			InstanceType: &(&types.S{S: "____"}).S,
+			VolumeType:   "____",
 			VolumeCount:  1,
 			VolumeSize:   10,
 		},
