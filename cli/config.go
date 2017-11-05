@@ -67,7 +67,7 @@ func ReadConfig(baseDir string, profile string) (*Config, error) {
 	configFile := configDir + "/" + Config_file
 
 	if _, err := os.Stat(configFile); os.IsNotExist(err) {
-		return nil, err
+		return nil, fmt.Errorf("%s, first create a config by executing `cb configure command`", err.Error())
 	}
 	log.Infof("[ReadConfig] found config file: %s", configFile)
 
