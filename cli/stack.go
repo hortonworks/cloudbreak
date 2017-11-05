@@ -41,6 +41,7 @@ func (s *stackDetailsOut) DataAsStringArray() []string {
 }
 
 func CreateStack(c *cli.Context) {
+	checkRequiredFlags(c)
 	defer utils.TimeTrack(time.Now(), "create cluster")
 
 	req := assembleStackRequest(c)
