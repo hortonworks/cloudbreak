@@ -180,7 +180,7 @@ func convertNodeToHostGroup(node node) *models_cloudbreak.HostGroupRequest {
 }
 
 func convertNodeToInstanceGroup(node node) *models_cloudbreak.InstanceGroupsV2 {
-	return &models_cloudbreak.InstanceGroupsV2{
+	ig := &models_cloudbreak.InstanceGroupsV2{
 		Template: &models_cloudbreak.TemplateV2Request{
 			InstanceType: &(&types.S{S: "____"}).S,
 			VolumeCount:  1,
@@ -190,17 +190,16 @@ func convertNodeToInstanceGroup(node node) *models_cloudbreak.InstanceGroupsV2 {
 		NodeCount: &node.count,
 		Type:      node.groupType,
 		SecurityGroup: &models_cloudbreak.SecurityGroupV2Request{
-			SecurityRules: getDefaultSecurityRules(),
+			SecurityRules: []*models_cloudbreak.SecurityRuleRequest{
+				getDefaultSecurityRule("22"),
+			},
 		},
 	}
-}
-
-func getDefaultSecurityRules() []*models_cloudbreak.SecurityRuleRequest {
-	return []*models_cloudbreak.SecurityRuleRequest{
-		getDefaultSecurityRule("22"),
-		getDefaultSecurityRule("443"),
-		getDefaultSecurityRule("9443"),
+	if node.groupType == models_cloudbreak.InstanceGroupResponseTypeGATEWAY {
+		ig.SecurityGroup.SecurityRules = append(ig.SecurityGroup.SecurityRules, getDefaultSecurityRule("443"))
+		ig.SecurityGroup.SecurityRules = append(ig.SecurityGroup.SecurityRules, getDefaultSecurityRule("9443"))
 	}
+	return ig
 }
 
 func getDefaultSecurityRule(port string) *models_cloudbreak.SecurityRuleRequest {
