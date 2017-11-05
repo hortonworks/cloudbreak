@@ -310,11 +310,11 @@ func main() {
 		{
 			Name:   "delete-blueprint",
 			Usage:  "deletes a blueprint",
-			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build(),
 			Before: ConfigRead,
 			Action: cb.DeleteBlueprint,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},
