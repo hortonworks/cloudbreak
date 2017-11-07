@@ -100,6 +100,7 @@ dependencies {
     runtime project(':cloud-byos')
     runtime project(':cloud-mock')
     runtime project(':cloud-azure')
+    runtime project(':cloud-yarn')
 
 
     runtime     group: 'activation',                name: 'activation',                     version: '1.0.2'
