@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+repositories {
+    maven { url 'http://repo.spring.io/libs-release' }
+    mavenCentral()
+}
+
+jar {
+    baseName = 'cloud-yarn'
+}
+
+dependencies {
+
+    compile project(':cloud-common')
+    compile project(':cloud-reactor')
+    compile project(':cloud-template')
+    compile project(':orchestrator-yarn')
+
+    compile group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
+
+    testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
+    testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
+}
