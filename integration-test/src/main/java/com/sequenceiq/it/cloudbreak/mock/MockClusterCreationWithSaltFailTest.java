@@ -108,7 +108,7 @@ public class MockClusterCreationWithSaltFailTest extends AbstractMockIntegration
         String failMessage = "Source file salt://ambari/scripts/ambari-server-initttt.sh not found | "
                 + "Service ambari-server is already enabled, and is dead | "
                 + "Package haveged is already installed.";
-        CloudbreakUtil.checkClusterFailed(getCloudbreakClient().stackEndpoint(), stackIdStr, failMessage);
+        CloudbreakUtil.checkClusterFailed(getCloudbreakClient().stackV1Endpoint(), stackIdStr, failMessage);
     }
 
     private void addAmbariMappings(Map<String, CloudVmMetaDataStatus> instanceMap) {

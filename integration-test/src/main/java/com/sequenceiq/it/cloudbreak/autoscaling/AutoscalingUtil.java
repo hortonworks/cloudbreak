@@ -144,7 +144,7 @@ public class AutoscalingUtil extends AbstractCloudbreakIntegrationTest {
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
 
         StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
-                CloudbreakClient.class).stackEndpoint();
+                CloudbreakClient.class).stackV1Endpoint();
 
         if (scalingAdjustment < 0) {
             CloudbreakUtil.waitAndCheckClusterStatus(cloudbreakClient, stackId, "AVAILABLE");

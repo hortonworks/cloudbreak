@@ -37,11 +37,11 @@ public class ClusterSecurityService {
     private boolean hasAccess(String userId, String account, String ambariAddress, Long stackId) {
         StackResponse stack;
         if (stackId != null) {
-            stack = cloudbreakClient.stackEndpoint().get(stackId, new HashSet<>());
+            stack = cloudbreakClient.stackV1Endpoint().get(stackId, new HashSet<>());
         } else {
             AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
             ambariAddressJson.setAmbariAddress(ambariAddress);
-            stack = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson);
+            stack = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson);
         }
         return stack.getOwner().equals(userId) || (stack.isPublicInAccount() && stack.getAccount().equals(account));
     }
@@ -53,7 +53,7 @@ public class ClusterSecurityService {
             String pass = ambari.getPass();
             AmbariAddressJson ambariAddressJson = new AmbariAddressJson();
             ambariAddressJson.setAmbariAddress(host);
-            StackResponse stack = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson);
+            StackResponse stack = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson);
             Long id = stack.getId();
             SecurityConfig securityConfig = tlsSecurityService.prepareSecurityConfig(id);
             if (user == null || pass == null) {

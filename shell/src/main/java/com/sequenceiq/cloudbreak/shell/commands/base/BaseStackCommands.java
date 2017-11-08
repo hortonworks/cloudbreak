@@ -85,7 +85,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @Override
     public String list() {
         try {
-            Set<StackResponse> publics = shellContext.cloudbreakClient().stackEndpoint().getPublics();
+            Set<StackResponse> publics = shellContext.cloudbreakClient().stackV1Endpoint().getPublics();
             return shellContext.outputTransformer().render(shellContext.responseTransformer().transformToMap(publics, "id", "name"), "ID", "INFO");
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -169,7 +169,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String delete(Long id, String name, boolean wait, Long timeout) {
         try {
             if (id != null) {
-                shellContext.cloudbreakClient().stackEndpoint().delete(id, false, false);
+                shellContext.cloudbreakClient().stackV1Endpoint().delete(id, false, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
                 shellContext.removeStack();
                 if (wait) {
@@ -183,8 +183,8 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                     return "Stack termination started with id: " + id;
                 }
             } else if (name != null) {
-                StackResponse response = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
-                shellContext.cloudbreakClient().stackEndpoint().deletePublic(name, false, false);
+                StackResponse response = shellContext.cloudbreakClient().stackV1Endpoint().getPublic(name, new HashSet<>());
+                shellContext.cloudbreakClient().stackV1Endpoint().deletePublic(name, false, false);
                 shellContext.setHint(Hints.CREATE_CLUSTER);
 
                 if (wait) {
@@ -216,7 +216,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     public String select(Long id, String name) {
         try {
             if (id != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
+                StackResponse stack = shellContext.cloudbreakClient().stackV1Endpoint().get(id, new HashSet<>());
                 if (stack != null) {
                     shellContext.addStack(id.toString(), stack.getName());
                     shellContext.setCredential(stack.getCredentialId().toString());
@@ -232,7 +232,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 }
 
             } else if (name != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
+                StackResponse stack = shellContext.cloudbreakClient().stackV1Endpoint().getPublic(name, new HashSet<>());
                 if (stack != null) {
                     Long stackId = stack.getId();
                     shellContext.addStack(stackId.toString(), name);
@@ -354,9 +354,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             stackRequest.setInstanceGroups(instanceGroupRequestList);
             Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().stackEndpoint().postPublic(stackRequest).getId();
+                id = shellContext.cloudbreakClient().stackV1Endpoint().postPublic(stackRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId();
+                id = shellContext.cloudbreakClient().stackV1Endpoint().postPrivate(stackRequest).getId();
             }
             StackResponse stackResponse = new StackResponse();
             stackResponse.setName(stackRequest.getName());
@@ -380,9 +380,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         try {
             Long id;
             if (publicInAccount) {
-                id = shellContext.cloudbreakClient().stackEndpoint().postPublic(stackRequest).getId();
+                id = shellContext.cloudbreakClient().stackV1Endpoint().postPublic(stackRequest).getId();
             } else {
-                id = shellContext.cloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId();
+                id = shellContext.cloudbreakClient().stackV1Endpoint().postPrivate(stackRequest).getId();
             }
             StackResponse stackResponse = new StackResponse();
             stackResponse.setName(stackRequest.getName());
@@ -411,19 +411,19 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setStatus(StatusRequest.STOPPED);
         cloudbreakShellUtil.checkResponse("stopStack",
-                shellContext.cloudbreakClient().stackEndpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
+                shellContext.cloudbreakClient().stackV1Endpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
         return "Stack is stopping";
     }
 
     public String stop(Long id, String name) {
         try {
             if (id != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
+                StackResponse stack = shellContext.cloudbreakClient().stackV1Endpoint().get(id, new HashSet<>());
                 if (stack != null) {
                     return stop(stack);
                 }
             } else if (name != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
+                StackResponse stack = shellContext.cloudbreakClient().stackV1Endpoint().getPublic(name, new HashSet<>());
                 if (stack != null) {
                     return stop(stack);
                 }
@@ -450,19 +450,19 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setStatus(StatusRequest.STARTED);
         cloudbreakShellUtil.checkResponse("startStack",
-                shellContext.cloudbreakClient().stackEndpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
+                shellContext.cloudbreakClient().stackV1Endpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
         return "Stack is starting";
     }
 
     public String start(Long id, String name) {
         try {
             if (id != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
+                StackResponse stack = shellContext.cloudbreakClient().stackV1Endpoint().get(id, new HashSet<>());
                 if (stack != null) {
                     return start(stack);
                 }
             } else if (name != null) {
-                StackResponse stack = shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
+                StackResponse stack = shellContext.cloudbreakClient().stackV1Endpoint().getPublic(name, new HashSet<>());
                 if (stack != null) {
                     return start(stack);
                 }
@@ -504,7 +504,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             String stackIdStr = shellContext.getStackId();
             Long stackId = Long.valueOf(stackIdStr);
-            cloudbreakShellUtil.checkResponse("upscaleStack", shellContext.cloudbreakClient().stackEndpoint().put(stackId, updateStackJson));
+            cloudbreakShellUtil.checkResponse("upscaleStack", shellContext.cloudbreakClient().stackV1Endpoint().put(stackId, updateStackJson));
             if (!wait) {
                 return "Stack upscale started with id: " + stackIdStr;
             }
@@ -540,7 +540,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
             String stackIdStr = shellContext.getStackId();
             Long stackId = Long.valueOf(stackIdStr);
-            cloudbreakShellUtil.checkResponse("downscaleStack", shellContext.cloudbreakClient().stackEndpoint().put(stackId, updateStackJson));
+            cloudbreakShellUtil.checkResponse("downscaleStack", shellContext.cloudbreakClient().stackV1Endpoint().put(stackId, updateStackJson));
             if (!wait) {
                 return "Stack downscale started with id: " + stackIdStr;
             }
@@ -587,7 +587,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setStatus(StatusRequest.SYNC);
             cloudbreakShellUtil.checkResponse("syncStack",
-                    shellContext.cloudbreakClient().stackEndpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
+                    shellContext.cloudbreakClient().stackV1Endpoint().put(Long.valueOf(shellContext.getStackId()), updateStackJson));
             return "Stack is syncing";
         } catch (Exception ex) {
             throw shellContext.exceptionTransformer().transformToRuntimeException(ex);
@@ -601,9 +601,9 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     private StackResponse getStackResponse(String name, Long id) {
         if (name != null) {
-            return shellContext.cloudbreakClient().stackEndpoint().getPublic(name, new HashSet<>());
+            return shellContext.cloudbreakClient().stackV1Endpoint().getPublic(name, new HashSet<>());
         } else if (id != null) {
-            return shellContext.cloudbreakClient().stackEndpoint().get(id, new HashSet<>());
+            return shellContext.cloudbreakClient().stackV1Endpoint().get(id, new HashSet<>());
         }
         return null;
     }

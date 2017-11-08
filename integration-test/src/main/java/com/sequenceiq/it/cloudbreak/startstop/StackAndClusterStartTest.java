@@ -43,7 +43,7 @@ public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest 
         // WHEN
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setStatus(StatusRequest.valueOf(STARTED));
-        CloudbreakUtil.checkResponse("StartStack", getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson));
+        CloudbreakUtil.checkResponse("StartStack", getCloudbreakClient().stackV1Endpoint().put(Long.valueOf(stackIntId), updateStackJson));
 
         if (Boolean.TRUE.equals(waitOn)) {
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
@@ -54,6 +54,6 @@ public class StackAndClusterStartTest extends AbstractCloudbreakIntegrationTest 
         CloudbreakUtil.checkResponse("StartCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
         CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         // THEN
-        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackId, ambariUser, ambariPassword, true);
+        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackV1Endpoint(), ambariPort, stackId, ambariUser, ambariPassword, true);
     }
 }

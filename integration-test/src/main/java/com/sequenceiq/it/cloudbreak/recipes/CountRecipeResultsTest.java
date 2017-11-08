@@ -51,7 +51,7 @@ public class CountRecipeResultsTest extends AbstractCloudbreakIntegrationTest {
 
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint();
         List<InstanceGroupResponse> instanceGroups = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>()).getInstanceGroups();
         String[] files = lookingFor.split(",");
         List<String> publicIps = getPublicIps(instanceGroups, Arrays.asList(searchRecipesOnHosts.split(",")));

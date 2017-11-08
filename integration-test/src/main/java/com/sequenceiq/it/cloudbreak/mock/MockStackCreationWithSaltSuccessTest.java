@@ -117,7 +117,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         initSpark();
 
         // WHEN
-        String stackId = getCloudbreakClient().stackEndpoint().postPrivate(stackRequest).getId().toString();
+        String stackId = getCloudbreakClient().stackV1Endpoint().postPrivate(stackRequest).getId().toString();
         // THEN
         Assert.assertNotNull(stackId);
         itContext.putCleanUpParam(CloudbreakITContextConstants.STACK_ID, stackId);

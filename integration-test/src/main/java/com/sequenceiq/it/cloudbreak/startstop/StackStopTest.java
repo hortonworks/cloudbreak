@@ -36,10 +36,10 @@ public class StackStopTest extends AbstractCloudbreakIntegrationTest {
         // WHEN
         UpdateStackJson updateStackJson = new UpdateStackJson();
         updateStackJson.setStatus(StatusRequest.valueOf(STOPPED));
-        CloudbreakUtil.checkResponse("StopStack", getCloudbreakClient().stackEndpoint().put(Long.valueOf(stackIntId), updateStackJson));
+        CloudbreakUtil.checkResponse("StopStack", getCloudbreakClient().stackV1Endpoint().put(Long.valueOf(stackIntId), updateStackJson));
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, STOPPED);
         // THEN
-        CloudbreakUtil.checkClusterStopped(getCloudbreakClient().stackEndpoint(), ambariPort, stackId, ambariUser, ambariPassword);
+        CloudbreakUtil.checkClusterStopped(getCloudbreakClient().stackV1Endpoint(), ambariPort, stackId, ambariUser, ambariPassword);
     }
 }
 

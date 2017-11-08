@@ -40,6 +40,6 @@ public class ClusterStartTest extends AbstractCloudbreakIntegrationTest {
         CloudbreakUtil.checkResponse("StartCluster", getCloudbreakClient().clusterEndpoint().put(Long.valueOf(stackIntId), updateClusterJson));
         CloudbreakUtil.waitAndCheckClusterStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         // THEN
-        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackId, ambariUser, ambariPassword, true);
+        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackV1Endpoint(), ambariPort, stackId, ambariUser, ambariPassword, true);
     }
 }

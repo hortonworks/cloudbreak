@@ -36,7 +36,7 @@ public class ClusterAndStackDownscaleTest extends AbstractCloudbreakIntegrationT
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         int stackIntId = Integer.parseInt(stackId);
         StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT,
-                CloudbreakClient.class).stackEndpoint();
+                CloudbreakClient.class).stackV1Endpoint();
         String ambariUser = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID);
         String ambariPassword = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID);
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);

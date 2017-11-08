@@ -178,7 +178,7 @@ public class CloudbreakUtil {
             LOGGER.info("Waiting for status(es) {}, stack id: {}, current status(es) {} ...", desiredStatuses, stackId, currentStatuses);
 
             sleep();
-            StackV1Endpoint stackV1Endpoint = cloudbreakClient.stackEndpoint();
+            StackV1Endpoint stackV1Endpoint = cloudbreakClient.stackV1Endpoint();
             try {
                 Map<String, Object> statusResult = stackV1Endpoint.status(Long.valueOf(stackId));
                 for (String statusPath : desiredStatuses.keySet()) {

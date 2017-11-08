@@ -109,7 +109,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("DownscaleStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
+            CloudbreakUtil.checkResponse("DownscaleStack", getCloudbreakClient().stackV1Endpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
         } else {
             mockInstanceUtil.addInstance(instanceMap, scalingAdjustment);
@@ -119,7 +119,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
             instanceGroupAdjustmentJson.setInstanceGroup(instanceGroup);
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackEndpoint().put((long) stackIntId, updateStackJson));
+            CloudbreakUtil.checkResponse("UpscaleStack", getCloudbreakClient().stackV1Endpoint().put((long) stackIntId, updateStackJson));
             CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackId, "AVAILABLE");
 
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
@@ -134,7 +134,7 @@ public class MockClusterScalingTest extends AbstractMockIntegrationTest {
         itContext.putContextParam(CloudbreakITContextConstants.MOCK_INSTANCE_MAP, instanceMap);
         // THEN
         CloudbreakUtil.checkClusterAvailability(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(),
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint(),
                 "8080", stackId, itContext.getContextParam(CloudbreakITContextConstants.AMBARI_USER_ID),
                 itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PASSWORD_ID), false);
 

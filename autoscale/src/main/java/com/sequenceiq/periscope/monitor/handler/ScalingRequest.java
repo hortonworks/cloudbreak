@@ -74,14 +74,14 @@ public class ScalingRequest implements Runnable {
         History history = null;
         try {
             LOGGER.info("Sending request to add {} instance(s) and install services", scalingAdjustment);
-            Long stackId = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson).getId();
+            Long stackId = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateStackJson updateStackJson = new UpdateStackJson();
             updateStackJson.setWithClusterEvent(true);
             InstanceGroupAdjustmentJson instanceGroupAdjustmentJson = new InstanceGroupAdjustmentJson();
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-            cloudbreakClient.stackEndpoint().put(stackId, updateStackJson);
+            cloudbreakClient.stackV1Endpoint().put(stackId, updateStackJson);
             history = historyService.createEntry(ScalingStatus.SUCCESS, "Upscale successfully triggered", totalNodes, policy);
         } catch (RuntimeException e) {
             history = historyService.createEntry(ScalingStatus.FAILED, "Couldn't trigger upscaling due to: " + e.getMessage(), totalNodes, policy);
@@ -101,7 +101,7 @@ public class ScalingRequest implements Runnable {
         History history = null;
         try {
             LOGGER.info("Sending request to remove {} node(s) from host group '{}'", scalingAdjustment, hostGroup);
-            Long stackId = cloudbreakClient.stackEndpoint().getStackForAmbari(ambariAddressJson).getId();
+            Long stackId = cloudbreakClient.stackV1Endpoint().getStackForAmbari(ambariAddressJson).getId();
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             HostGroupAdjustmentJson hostGroupAdjustmentJson = new HostGroupAdjustmentJson();
             hostGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);

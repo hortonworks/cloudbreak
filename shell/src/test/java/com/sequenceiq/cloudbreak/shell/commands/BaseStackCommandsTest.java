@@ -70,7 +70,7 @@ public class BaseStackCommandsTest {
         underTest = new BaseStackCommands(shellContext, cloudbreakShellUtil);
 
         given(shellContext.cloudbreakClient()).willReturn(cloudbreakClient);
-        given(cloudbreakClient.stackEndpoint()).willReturn(stackV1Endpoint);
+        given(cloudbreakClient.stackV1Endpoint()).willReturn(stackV1Endpoint);
         given(shellContext.responseTransformer()).willReturn(responseTransformer);
         given(shellContext.outputTransformer()).willReturn(outputTransformer);
         given(outputTransformer.render(any(OutPutType.class), anyVararg())).willReturn("id 1 name test1");
