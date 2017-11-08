@@ -122,7 +122,7 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
                 itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).credentialEndpoint(), cloudProvider,
                 credentialName);
         putStackToContextIfExist(
-                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint(), stackName);
+                itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint(), stackName);
         if (StringUtils.hasLength(instanceGroups)) {
             List<String[]> instanceGroupStrings = templateAdditionHelper.parseCommaSeparatedRows(instanceGroups);
             itContext.putContextParam(CloudbreakITContextConstants.TEMPLATE_ID,

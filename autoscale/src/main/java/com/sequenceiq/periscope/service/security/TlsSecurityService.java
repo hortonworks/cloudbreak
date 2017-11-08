@@ -22,7 +22,7 @@ public class TlsSecurityService {
     private SecurityConfigRepository securityConfigRepository;
 
     public SecurityConfig prepareSecurityConfig(Long stackId) {
-        CertificateResponse response = cloudbreakClient.stackEndpoint().getCertificate(stackId);
+        CertificateResponse response = cloudbreakClient.stackV1Endpoint().getCertificate(stackId);
         byte[] serverCert = Base64.encode(response.getServerCert());
         byte[] clientKey = Base64.encode(response.getClientKey());
         byte[] clientCert = Base64.encode(response.getClientCert());

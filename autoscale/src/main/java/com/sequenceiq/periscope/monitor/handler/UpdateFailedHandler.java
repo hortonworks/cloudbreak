@@ -56,7 +56,7 @@ public class UpdateFailedHandler implements ApplicationListener<UpdateFailedEven
         } else if (RETRY_THRESHOLD - 1 == failed) {
             try {
                 CloudbreakClient cloudbreakClient = cloudbreakClientConfiguration.cloudbreakClient();
-                StackResponse stackResponse = cloudbreakClient.stackEndpoint().get(cluster.getStackId(), new HashSet<>());
+                StackResponse stackResponse = cloudbreakClient.stackV1Endpoint().get(cluster.getStackId(), new HashSet<>());
                 String stackStatus = stackResponse.getStatus().name();
                 String clusterStatus = stackResponse.getCluster().getStatus().name();
                 if (stackStatus.startsWith(DELETE_STATUSES_PREFIX)) {

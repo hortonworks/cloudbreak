@@ -35,7 +35,7 @@ public class TagsTest extends AbstractCloudbreakIntegrationTest {
         IntegrationTestContext itContext = getItContext();
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint();
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         Map<String, String> userDefinedTagsStack = TagsUtil.checkTagsStack(stackResponse);

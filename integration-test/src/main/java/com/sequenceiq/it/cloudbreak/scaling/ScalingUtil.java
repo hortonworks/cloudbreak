@@ -91,7 +91,7 @@ public class ScalingUtil {
 
     public static void putInstanceCountToContext(IntegrationTestContext itContext, String stackId) {
         List<Map<String, Integer>> tmpInstanceCount = new ArrayList<>();
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint();
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         if (itContext.getContextParam(CloudbreakITContextConstants.INSTANCE_COUNT, List.class) != null) {

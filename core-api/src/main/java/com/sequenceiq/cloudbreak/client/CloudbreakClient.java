@@ -40,6 +40,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.TopologyEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UsageEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UserEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v1.UtilEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v2.ConnectorV2Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v2.StackV2Endpoint;
 
 import net.jodah.expiringmap.ExpirationPolicy;
 import net.jodah.expiringmap.ExpiringMap;
@@ -84,7 +86,9 @@ public class CloudbreakClient {
 
     private EndpointWrapper<SecurityGroupEndpoint> securityGroupEndpoint;
 
-    private EndpointWrapper<StackV1Endpoint> stackEndpoint;
+    private EndpointWrapper<StackV1Endpoint> stackV1Endpoint;
+
+    private EndpointWrapper<StackV2Endpoint> stackV2Endpoint;
 
     private EndpointWrapper<SubscriptionEndpoint> subscriptionEndpoint;
 
@@ -100,7 +104,9 @@ public class CloudbreakClient {
 
     private EndpointWrapper<ClusterV1Endpoint> clusterEndpoint;
 
-    private EndpointWrapper<ConnectorV1Endpoint> connectorEndpoint;
+    private EndpointWrapper<ConnectorV1Endpoint> connectorV1Endpoint;
+
+    private EndpointWrapper<ConnectorV2Endpoint> connectorV2Endpoint;
 
     private EndpointWrapper<ConstraintTemplateEndpoint> constraintTemplateEndpoint;
 
@@ -170,7 +176,8 @@ public class CloudbreakClient {
         usageEndpoint = newResource(usageEndpoint, UsageEndpoint.class, headers);
         eventEndpoint = newResource(eventEndpoint, EventEndpoint.class, headers);
         securityGroupEndpoint = newResource(securityGroupEndpoint, SecurityGroupEndpoint.class, headers);
-        stackEndpoint = newResource(stackEndpoint, StackV1Endpoint.class, headers);
+        stackV1Endpoint = newResource(stackV1Endpoint, StackV1Endpoint.class, headers);
+        stackV2Endpoint = newResource(stackV2Endpoint, StackV2Endpoint.class, headers);
         subscriptionEndpoint = newResource(subscriptionEndpoint, SubscriptionEndpoint.class, headers);
         networkEndpoint = newResource(networkEndpoint, NetworkEndpoint.class, headers);
         recipeEndpoint = newResource(recipeEndpoint, RecipeEndpoint.class, headers);
@@ -178,7 +185,8 @@ public class CloudbreakClient {
         accountPreferencesEndpoint = newResource(accountPreferencesEndpoint, AccountPreferencesEndpoint.class, headers);
         blueprintEndpoint = newResource(blueprintEndpoint, BlueprintEndpoint.class, headers);
         clusterEndpoint = newResource(clusterEndpoint, ClusterV1Endpoint.class, headers);
-        connectorEndpoint = newResource(connectorEndpoint, ConnectorV1Endpoint.class, headers);
+        connectorV1Endpoint = newResource(connectorV1Endpoint, ConnectorV1Endpoint.class, headers);
+        connectorV2Endpoint = newResource(connectorV2Endpoint, ConnectorV2Endpoint.class, headers);
         userEndpoint = newResource(userEndpoint, UserEndpoint.class, headers);
         constraintTemplateEndpoint = newResource(constraintTemplateEndpoint, ConstraintTemplateEndpoint.class, headers);
         utilEndpoint = newResource(utilEndpoint, UtilEndpoint.class, headers);
@@ -232,9 +240,14 @@ public class CloudbreakClient {
         return securityGroupEndpoint.getEndpointProxy();
     }
 
-    public StackV1Endpoint stackEndpoint() {
+    public StackV1Endpoint stackV1Endpoint() {
         refresh();
-        return stackEndpoint.getEndpointProxy();
+        return stackV1Endpoint.getEndpointProxy();
+    }
+
+    public StackV2Endpoint stackV2Endpoint() {
+        refresh();
+        return stackV2Endpoint.getEndpointProxy();
     }
 
     public SubscriptionEndpoint subscriptionEndpoint() {
@@ -272,9 +285,14 @@ public class CloudbreakClient {
         return clusterEndpoint.getEndpointProxy();
     }
 
-    public ConnectorV1Endpoint connectorEndpoint() {
+    public ConnectorV1Endpoint connectorV1Endpoint() {
         refresh();
-        return connectorEndpoint.getEndpointProxy();
+        return connectorV1Endpoint.getEndpointProxy();
+    }
+
+    public ConnectorV2Endpoint connectorV2Endpoint() {
+        refresh();
+        return connectorV2Endpoint.getEndpointProxy();
     }
 
     public LdapConfigEndpoint ldapConfigEndpoint() {

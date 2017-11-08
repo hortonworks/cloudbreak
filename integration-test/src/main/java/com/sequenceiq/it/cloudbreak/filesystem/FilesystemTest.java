@@ -52,7 +52,7 @@ public class FilesystemTest extends AbstractCloudbreakIntegrationTest {
         IntegrationTestContext itContext = getItContext();
         String stackId  = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
-        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackEndpoint();
+        StackV1Endpoint stackV1Endpoint = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, CloudbreakClient.class).stackV1Endpoint();
 
         String masterIp = CloudbreakUtil.getAmbariIp(stackV1Endpoint, stackId, itContext);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);

@@ -41,7 +41,7 @@ public class AutoRecoveryTest extends AbstractCloudbreakIntegrationTest {
         String ambariPort = itContext.getContextParam(CloudbreakITContextConstants.AMBARI_PORT_ID);
         Map<String, String> cloudProviderParams = itContext.getContextParam(CloudbreakITContextConstants.CLOUDPROVIDER_PARAMETERS, Map.class);
 
-        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackEndpoint();
+        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         String instanceToDelete = RecoveryUtil.getInstanceId(stackResponse, hostGroup);

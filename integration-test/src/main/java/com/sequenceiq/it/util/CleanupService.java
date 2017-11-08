@@ -42,7 +42,7 @@ public class CleanupService {
             return;
         }
         cleanedUp = true;
-        Set<StackResponse> stacks = cloudbreakClient.stackEndpoint().getPrivates();
+        Set<StackResponse> stacks = cloudbreakClient.stackV1Endpoint().getPrivates();
         for (StackResponse stack : stacks) {
             if (stack.getName().startsWith("it-")) {
                 deleteStackAndWait(cloudbreakClient, String.valueOf(stack.getId()));
@@ -165,7 +165,7 @@ public class CleanupService {
     public boolean deleteStack(CloudbreakClient cloudbreakClient, String stackId) {
         boolean result = false;
         if (stackId != null) {
-            cloudbreakClient.stackEndpoint().delete(Long.valueOf(stackId), false, false);
+            cloudbreakClient.stackV1Endpoint().delete(Long.valueOf(stackId), false, false);
             result = true;
         }
         return result;

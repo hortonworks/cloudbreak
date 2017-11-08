@@ -82,7 +82,7 @@ public class ClusterCreationTest extends AbstractCloudbreakIntegrationTest {
         // THEN
         Assert.assertNotNull(clusterId);
         CloudbreakUtil.waitAndCheckStackStatus(getCloudbreakClient(), stackIdStr, "AVAILABLE");
-        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackEndpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
+        CloudbreakUtil.checkClusterAvailability(getCloudbreakClient().stackV1Endpoint(), ambariPort, stackIdStr, ambariUser, ambariPassword, checkAmbari);
 
         if (Boolean.TRUE.equals(withRDSConfig)) {
             checkRDSConfigWithCluster(itContext, clusterName);

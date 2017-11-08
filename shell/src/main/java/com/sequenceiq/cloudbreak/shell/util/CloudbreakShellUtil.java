@@ -66,7 +66,7 @@ public class CloudbreakShellUtil {
             Date start = new Date();
             LOGGER.info("Waiting for status {}, stack id: {}, current status {} ...", desiredStatus, stackId, status);
             sleep();
-            Map<String, Object> statusResult = cloudbreakClient.stackEndpoint().status(stackId);
+            Map<String, Object> statusResult = cloudbreakClient.stackV1Endpoint().status(stackId);
             if (statusResult == null || statusResult.isEmpty()) {
                 return new WaitResult(WaitResultStatus.FAILED, "Status result is empty.");
             }

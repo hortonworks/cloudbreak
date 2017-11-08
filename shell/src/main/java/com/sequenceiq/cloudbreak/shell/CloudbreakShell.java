@@ -212,7 +212,7 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
     }
 
     private void initStackAccessibility() {
-        if (!cloudbreakClient.stackEndpoint().getPublics().isEmpty()) {
+        if (!cloudbreakClient.stackV1Endpoint().getPublics().isEmpty()) {
             context.setStackAccessible();
         }
     }
@@ -239,13 +239,13 @@ public class CloudbreakShell implements CommandLineRunner, ShellStatusListener {
         Map<String, Map<String, Collection<VmTypeJson>>> vmTypesPerZones = new HashMap<>();
         Map<String, Map<String, String>> defaultVmTypePerZones = new HashMap<>();
         try {
-            platformToVariants = cloudbreakClient.connectorEndpoint().getPlatformVariants().getPlatformToVariants();
-            PlatformRegionsJson platformRegions = cloudbreakClient.connectorEndpoint().getRegions();
+            platformToVariants = cloudbreakClient.connectorV1Endpoint().getPlatformVariants().getPlatformToVariants();
+            PlatformRegionsJson platformRegions = cloudbreakClient.connectorV1Endpoint().getRegions();
             regions = platformRegions.getRegions();
             availabilityZones = platformRegions.getAvailabilityZones();
-            volumeTypes = cloudbreakClient.connectorEndpoint().getDisktypes().getDiskTypes();
-            orchestrators = cloudbreakClient.connectorEndpoint().getOrchestratortypes().getOrchestrators();
-            PlatformVirtualMachinesJson vmTypes = cloudbreakClient.connectorEndpoint().getVmTypes(true);
+            volumeTypes = cloudbreakClient.connectorV1Endpoint().getDisktypes().getDiskTypes();
+            orchestrators = cloudbreakClient.connectorV1Endpoint().getOrchestratortypes().getOrchestrators();
+            PlatformVirtualMachinesJson vmTypes = cloudbreakClient.connectorV1Endpoint().getVmTypes(true);
             for (Entry<String, Collection<VmTypeJson>> vmCloud : vmTypes.getVirtualMachines().entrySet()) {
                 List<Map<String, String>> tmp = new ArrayList<>();
                 for (VmTypeJson vmTypeJson : vmCloud.getValue()) {

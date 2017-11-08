@@ -41,7 +41,7 @@ public class AwsCheckSpotInstance extends AbstractCloudbreakIntegrationTest {
 
         String stackId = itContext.getContextParam(CloudbreakITContextConstants.STACK_ID);
 
-        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackEndpoint();
+        StackV1Endpoint stackV1Endpoint = getCloudbreakClient().stackV1Endpoint();
         StackResponse stackResponse = stackV1Endpoint.get(Long.valueOf(stackId), new HashSet<>());
 
         List<InstanceGroupResponse> instanceGroups = stackResponse.getInstanceGroups();
