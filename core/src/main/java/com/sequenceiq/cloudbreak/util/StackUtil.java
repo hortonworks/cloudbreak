@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.time.Duration;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.Stack;
@@ -42,7 +46,7 @@ public class StackUtil {
 
     public String extractAmbariIp(StackView stackView) {
         return extractAmbariIp(stackView.getId(), stackView.getOrchestrator().getType(),
-            stackView.getClusterView() != null ? stackView.getClusterView().getAmbariIp() : null);
+                stackView.getClusterView() != null ? stackView.getClusterView().getAmbariIp() : null);
     }
 
     public String extractAmbariIp(Stack stack) {
@@ -65,5 +69,17 @@ public class StackUtil {
             LOGGER.error("Could not resolve orchestrator type: ", ex);
         }
         return result;
+    }
+
+    public long getUptimeForCluster(Cluster cluster, boolean addUpsinceToUptime) {
+        Duration uptime = Duration.ZERO;
+        if (StringUtils.isNotBlank(cluster.getUptime())) {
+            uptime = Duration.parse(cluster.getUptime());
+        }
+        if (cluster.getUpSince() != null && addUpsinceToUptime) {
+            long now = new Date().getTime();
+            uptime = uptime.plusMillis(now - cluster.getUpSince());
+        }
+        return uptime.toMillis();
     }
 }
