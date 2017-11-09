@@ -21,6 +21,8 @@ public abstract class ITResponse implements Route {
 
     public static final String SALT_BOOT_ROOT = "/saltboot";
 
+    public static final String IMAGE_CATALOG = "/imagecatalog";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ITResponse.class);
 
     private static final String MOCKRESPONSE = "/mockresponse/";
