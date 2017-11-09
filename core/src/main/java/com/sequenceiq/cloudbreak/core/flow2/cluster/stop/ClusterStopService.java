@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stop;
 
+import java.time.Duration;
+
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
@@ -8,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.model.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.model.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.FlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.Msg;
+import com.sequenceiq.cloudbreak.domain.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.repository.StackUpdater;
@@ -33,8 +36,15 @@ public class ClusterStopService {
     private StackUtil stackUtil;
 
     public void stoppingCluster(long stackId) {
+        updateClusterUptime(stackId);
         flowMessageService.fireEventAndLog(stackId, Msg.AMBARI_CLUSTER_STOPPING, Status.UPDATE_IN_PROGRESS.name());
         clusterService.updateClusterStatusByStackId(stackId, Status.STOP_IN_PROGRESS);
+    }
+
+    private void updateClusterUptime(long stackId) {
+        Cluster cluster = clusterService.retrieveClusterByStackId(stackId);
+        cluster.setUptime(Duration.ofMillis(stackUtil.getUptimeForCluster(cluster, true)).toString());
+        clusterService.updateCluster(cluster);
     }
 
     public void clusterStopFinished(long stackId) {

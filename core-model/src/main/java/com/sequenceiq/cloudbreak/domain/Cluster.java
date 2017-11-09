@@ -157,6 +157,8 @@ public class Cluster implements ProvisionEntity {
     @Column(columnDefinition = "TEXT")
     private Json customContainerDefinition;
 
+    private String uptime;
+
     public Stack getStack() {
         return stack;
     }
@@ -496,4 +498,13 @@ public class Cluster implements ProvisionEntity {
     public void setExecutorType(ExecutorType executorType) {
         this.executorType = executorType;
     }
+
+    public String getUptime() {
+        return uptime;
+    }
+
+    public void setUptime(String uptime) {
+        this.uptime = uptime;
+    }
+
 }

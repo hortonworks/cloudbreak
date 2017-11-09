@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.websocket;
 
-import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 
@@ -17,6 +16,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class UptimeNotifier {
@@ -31,15 +31,17 @@ public class UptimeNotifier {
     @Inject
     private NotificationSender notificationSender;
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Scheduled(fixedDelay = 60000)
     public void sendUptime() {
         EnumSet<Status> statuses = EnumSet.complementOf(EnumSet.of(Status.DELETE_COMPLETED));
         List<Cluster> clusters = clusterRepository.findByStatuses(statuses);
-        long now = new Date().getTime();
         for (Cluster cluster : clusters) {
             Stack stack = stackRepository.findStackForCluster(cluster.getId());
             if (stack != null && !stack.isDeleteCompleted()) {
-                Long uptime = cluster.getUpSince() == null || !cluster.isAvailable() ? 0L : now - cluster.getUpSince();
+                Long uptime = stackUtil.getUptimeForCluster(cluster, cluster.isAvailable());
                 Notification notification = createUptimeNotification(stack, uptime);
                 notificationSender.send(notification);
             }

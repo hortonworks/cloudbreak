@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -121,17 +120,13 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         if (source.getBlueprint() != null) {
             clusterResponse.setBlueprintId(source.getBlueprint().getId());
         }
-        if (source.getUpSince() != null && source.isAvailable()) {
-            long now = new Date().getTime();
-            long uptime = now - source.getUpSince();
-            int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
-            int hours = (int) (uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
-            clusterResponse.setHoursUp(hours);
-            clusterResponse.setMinutesUp(minutes);
-        } else {
-            clusterResponse.setHoursUp(0);
-            clusterResponse.setMinutesUp(0);
-        }
+
+        long uptime = stackUtil.getUptimeForCluster(source, source.isAvailable());
+        int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
+        int hours = (int) (uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
+        clusterResponse.setHoursUp(hours);
+        clusterResponse.setMinutesUp(minutes);
+
         Set<RDSConfig> rdsConfigs = source.getRdsConfigs();
         convertRdsIds(clusterResponse, rdsConfigs);
         if (source.getLdapConfig() != null) {

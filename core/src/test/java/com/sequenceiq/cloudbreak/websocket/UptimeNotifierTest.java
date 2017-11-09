@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.websocket;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +29,7 @@ import com.sequenceiq.cloudbreak.repository.ClusterRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.notification.Notification;
 import com.sequenceiq.cloudbreak.service.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class UptimeNotifierTest {
@@ -42,6 +45,14 @@ public class UptimeNotifierTest {
 
     @Mock
     private NotificationSender notificationSender;
+
+    @Mock
+    private StackUtil stackUtil;
+
+    @Before
+    public void init() {
+        when(stackUtil.getUptimeForCluster(any(Cluster.class), anyBoolean())).thenReturn(1L);
+    }
 
     @Test
     public void notificationSendingWhenEverythingWorkFine() {

@@ -42,7 +42,7 @@ public class ClusterStartService {
     public void startingCluster(StackView stack) {
         clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the Ambari cluster. Ambari ip: %s",
-            stackUtil.extractAmbariIp(stack)));
+                stackUtil.extractAmbariIp(stack)));
         flowMessageService.fireEventAndLog(stack.getId(), Msg.AMBARI_CLUSTER_STARTING, Status.UPDATE_IN_PROGRESS.name(), stackUtil.extractAmbariIp(stack));
     }
 
@@ -67,7 +67,7 @@ public class ClusterStartService {
         flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_START_FAILED, Status.START_FAILED.name(), errorReason);
         if (clusterView.getEmailNeeded()) {
             emailSenderService.sendStartFailureEmail(stackView.getClusterView().getOwner(), clusterView.getEmailTo(),
-                stackUtil.extractAmbariIp(stackView), clusterView.getName());
+                    stackUtil.extractAmbariIp(stackView), clusterView.getName());
             flowMessageService.fireEventAndLog(stackView.getId(), Msg.AMBARI_CLUSTER_NOTIFICATION_EMAIL, Status.START_FAILED.name());
         }
     }
