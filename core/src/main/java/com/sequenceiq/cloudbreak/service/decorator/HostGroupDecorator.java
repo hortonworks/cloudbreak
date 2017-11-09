@@ -81,10 +81,10 @@ public class HostGroupDecorator {
             prepareRecipesByIds(subject, recipeIds);
         }
         if (recipeNames != null && !recipeNames.isEmpty()) {
-            prepareRecipesByRequests(subject, user, recipes, publicInAccount);
+            prepareRecipesByName(subject, user, recipeNames);
         }
         if (recipes != null && !recipes.isEmpty()) {
-            prepareRecipesByName(subject, user, recipeNames);
+            prepareRecipesByRequests(subject, user, recipes, publicInAccount);
         }
 
         return subject;
