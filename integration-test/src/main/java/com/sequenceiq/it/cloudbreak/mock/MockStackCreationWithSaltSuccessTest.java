@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.mock;
 
+import static com.sequenceiq.it.spark.ITResponse.IMAGE_CATALOG;
 import static com.sequenceiq.it.spark.ITResponse.MOCK_ROOT;
+import static spark.Spark.get;
 import static spark.Spark.port;
 import static spark.Spark.post;
 
@@ -8,6 +10,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.WebTarget;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.StringUtils;
@@ -25,12 +30,14 @@ import com.sequenceiq.cloudbreak.api.model.OnFailureAction;
 import com.sequenceiq.cloudbreak.api.model.OrchestratorRequest;
 import com.sequenceiq.cloudbreak.api.model.StackAuthenticationRequest;
 import com.sequenceiq.cloudbreak.api.model.StackRequest;
+import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.it.IntegrationTestContext;
 import com.sequenceiq.it.cloudbreak.AbstractMockIntegrationTest;
 import com.sequenceiq.it.cloudbreak.CloudbreakITContextConstants;
 import com.sequenceiq.it.cloudbreak.CloudbreakUtil;
 import com.sequenceiq.it.cloudbreak.InstanceGroup;
+import com.sequenceiq.it.cloudbreak.mock.json.CBVersion;
 import com.sequenceiq.it.spark.spi.CloudMetaDataStatuses;
 import com.sequenceiq.it.util.ResourceUtil;
 
@@ -114,6 +121,7 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         stackRequest.setParameters(map);
         port(mockPort);
         addSPIEndpoints(instanceMap);
+        mockImageCatalogResponse(itContext);
         initSpark();
 
         // WHEN
@@ -130,4 +138,13 @@ public class MockStackCreationWithSaltSuccessTest extends AbstractMockIntegratio
         post(MOCK_ROOT + "/cloud_metadata_statuses", new CloudMetaDataStatuses(instanceMap), gson()::toJson);
     }
 
+    private void mockImageCatalogResponse(IntegrationTestContext itContext) {
+        get(IMAGE_CATALOG, (request, response) -> {
+            String cbServerRoot = itContext.getContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER_ROOT);
+            Client client = RestClientUtil.get();
+            WebTarget target = client.target(cbServerRoot + "/info");
+            CBVersion cbVersion = target.request().get().readEntity(CBVersion.class);
+            return responseFromJsonFile("imagecatalog/catalog.json").replace("CB_VERSION", cbVersion.getApp().getVersion());
+        });
+    }
 }

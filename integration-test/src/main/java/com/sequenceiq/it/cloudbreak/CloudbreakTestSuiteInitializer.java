@@ -99,14 +99,16 @@ public class CloudbreakTestSuiteInitializer extends AbstractTestNGSpringContextT
             @Optional("") String instanceGroups, @Optional("") String hostGroups, @Optional("") String blueprintName,
             @Optional("") String stackName, @Optional("") String networkName, @Optional("") String securityGroupName) {
         cloudbreakServer = StringUtils.hasLength(cloudbreakServer) ? cloudbreakServer : defaultCloudbreakServer;
+        String cbServerRoot = cloudbreakServer + cbRootContextPath;
         itContext.putContextParam(CloudbreakITContextConstants.SKIP_REMAINING_SUITETEST_AFTER_ONE_FAILED, skipRemainingSuiteTestsAfterOneFailed);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER, cloudbreakServer);
+        itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_SERVER_ROOT, cbServerRoot);
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDPROVIDER, cloudProvider);
         String identity = itContext.getContextParam(IntegrationTestContext.IDENTITY_URL);
         String user = itContext.getContextParam(IntegrationTestContext.AUTH_USER);
         String password = itContext.getContextParam(IntegrationTestContext.AUTH_PASSWORD);
 
-        CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cloudbreakServer + cbRootContextPath, identity, "cloudbreak_shell")
+        CloudbreakClient cloudbreakClient = new CloudbreakClientBuilder(cbServerRoot, identity, "cloudbreak_shell")
                 .withCertificateValidation(false).withDebug(true).withCredential(user, password).build();
         itContext.putContextParam(CloudbreakITContextConstants.CLOUDBREAK_CLIENT, cloudbreakClient);
         if (cleanUpBeforeStart) {
