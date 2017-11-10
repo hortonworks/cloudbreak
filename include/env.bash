@@ -80,7 +80,6 @@ CB_DB_ENV_USER - User for the Cloudbreak database authentication
 CB_DB_ROOT_PATH - Deprecated - Location of the database volume on Cloudbreak host
 CB_DEFAULT_SUBSCRIPTION_ADDRESS - Address of the default subscription for Cloudbreak notifications
 CB_ENABLEDPLATFORMS - Disables Cloudbreak resource called Platform
-CB_ENABLE_CUSTOM_IMAGE - Flag to enable custom cloud images
 CBD_FORCE_START - Disables docker-compose.yml and uaa.yml validation
 CB_GCP_HOSTKEY_VERIFY - Enables host fingerprint verification on GCP
 CB_HBM2DDL_STRATEGY - Configures hibernate.hbm2ddl.auto in Cloudbreak

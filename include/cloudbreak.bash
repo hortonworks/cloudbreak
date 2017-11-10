@@ -236,7 +236,6 @@ cloudbreak-conf-defaults() {
     env-import DEFAULT_INBOUND_ACCESS_IP ""
     env-import CB_AWS_DEFAULT_INBOUND_SECURITY_GROUP ""
     env-import CB_AWS_VPC ""
-    env-import CB_ENABLE_CUSTOM_IMAGE "false"
     env-import CB_MAX_SALT_NEW_SERVICE_RETRY 90
     env-import CB_MAX_SALT_RECIPE_EXECUTION_RETRY 90
     env-import CB_LOG_LEVEL "INFO"
