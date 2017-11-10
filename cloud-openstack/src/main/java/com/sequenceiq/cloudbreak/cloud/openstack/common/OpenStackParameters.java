@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
-import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -32,11 +31,9 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
-import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Regions;
@@ -152,21 +149,6 @@ public class OpenStackParameters implements PlatformParameters {
     @Override
     public PlatformOrchestrator orchestratorParams() {
         return new PlatformOrchestrator(Collections.singletonList(orchestrator(OrchestratorConstants.SALT)), orchestrator(OrchestratorConstants.SALT));
-    }
-
-    @Override
-    public PlatformImage images() {
-        List<CustomImage> customImages = new ArrayList<>();
-        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
-            String property = environment.getProperty("openstack." + "default");
-            customImages.add(customImage(regionListEntry.getKey().value(), property));
-        }
-        return new PlatformImage(customImages, imageRegex());
-    }
-
-    @Override
-    public String imageRegex() {
-        return "";
     }
 
     @Override

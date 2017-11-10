@@ -22,8 +22,6 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRe
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsResult;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformImagesResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
@@ -60,7 +58,6 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDisks;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformImages;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrators;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRegions;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
@@ -192,24 +189,6 @@ public class CloudParameterService {
             return res.getPlatformOrchestrators();
         } catch (InterruptedException e) {
             LOGGER.error("Error while getting the platform orchestrators", e);
-            throw new OperationException(e);
-        }
-    }
-
-    public PlatformImages getImages() {
-        LOGGER.debug("Get platform orchestrators");
-        GetPlatformImagesRequest getPlatformImagesRequest = new GetPlatformImagesRequest();
-        eventBus.notify(getPlatformImagesRequest.selector(), eventFactory.createEvent(getPlatformImagesRequest));
-        try {
-            GetPlatformImagesResult res = getPlatformImagesRequest.await();
-            LOGGER.info("Platform images result: {}", res);
-            if (res.getStatus().equals(EventStatus.FAILED)) {
-                LOGGER.error("Failed to get platform images", res.getErrorDetails());
-                throw new OperationException(res.getErrorDetails());
-            }
-            return res.getPlatformImages();
-        } catch (InterruptedException e) {
-            LOGGER.error("Error while getting the platform images", e);
             throw new OperationException(e);
         }
     }
