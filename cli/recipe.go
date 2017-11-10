@@ -6,6 +6,7 @@ import (
 
 	"net/http"
 
+	"encoding/base64"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hortonworks/cb-cli/cli/utils"
 	"github.com/hortonworks/cb-cli/client_cloudbreak/v1recipes"
@@ -37,7 +38,7 @@ func CreateRecipeFromUrl(c *cli.Context) {
 		c.String(FlDescription.Name),
 		c.Bool(FlPublic.Name),
 		getExecutionType(c.String(FlExecutionType.Name)),
-		utils.ReadContentFromURL(urlLocation, new(http.Client)))
+		base64.StdEncoding.EncodeToString(utils.ReadContentFromURL(urlLocation, new(http.Client))))
 }
 
 func CreateRecipeFromFile(c *cli.Context) {
@@ -52,7 +53,7 @@ func CreateRecipeFromFile(c *cli.Context) {
 		c.String(FlDescription.Name),
 		c.Bool(FlPublic.Name),
 		getExecutionType(c.String(FlExecutionType.Name)),
-		utils.ReadFile(fileLocation))
+		base64.StdEncoding.EncodeToString(utils.ReadFile(fileLocation)))
 }
 
 func getExecutionType(executionType string) string {
@@ -72,12 +73,12 @@ type recipeClient interface {
 	PostPublicRecipe(params *v1recipes.PostPublicRecipeParams) (*v1recipes.PostPublicRecipeOK, error)
 }
 
-func createRecipeImpl(client recipeClient, name string, description string, public bool, executionType string, recipeContent []byte) *models_cloudbreak.RecipeResponse {
+func createRecipeImpl(client recipeClient, name string, description string, public bool, executionType string, recipeContent string) *models_cloudbreak.RecipeResponse {
 	defer utils.TimeTrack(time.Now(), "create recipe")
 	recipeRequest := &models_cloudbreak.RecipeRequest{
 		Name:        name,
 		Description: &description,
-		Content:     string(recipeContent),
+		Content:     recipeContent,
 		RecipeType:  &executionType,
 	}
 	var recipe *models_cloudbreak.RecipeResponse
