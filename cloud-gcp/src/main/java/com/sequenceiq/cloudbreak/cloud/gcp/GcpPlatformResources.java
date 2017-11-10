@@ -144,6 +144,10 @@ public class GcpPlatformResources implements PlatformResources {
             sb.append(StringUtils.capitalize(s.replaceAll("[0-9]", "")));
             sb.append(" ");
         }
+        split = word.split("(?<=\\D)(?=\\d)");
+        if (split.length == 2) {
+            sb.append(split[1]);
+        }
         return sb.toString().trim();
     }
 
