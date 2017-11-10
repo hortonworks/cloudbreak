@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +30,8 @@ import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 @Service
 public class UsageService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsageService.class);
 
     @Inject
     private UsageTimeService usageTimeService;
@@ -107,8 +112,12 @@ public class UsageService {
 
     @Scheduled(cron = "0 01 0 * * *")
     public void fixUsages() {
-        reopenOldUsages();
-        openNewIfNotFound();
+        try {
+            reopenOldUsages();
+            openNewIfNotFound();
+        } catch (DataIntegrityViolationException e) {
+            LOGGER.warn("Constraint violation during usage generation (maybe another node is generating..): {}", e.getMessage());
+        }
     }
 
     private void reopenOldUsages() {

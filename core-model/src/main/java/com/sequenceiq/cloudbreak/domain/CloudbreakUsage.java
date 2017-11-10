@@ -10,10 +10,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.sequenceiq.cloudbreak.api.model.UsageStatus;
 
 @Entity
+@Table(name = "CloudbreakUsage", uniqueConstraints = @UniqueConstraint(columnNames = {"stackId", "instanceGroup", "day"}))
 public class CloudbreakUsage implements ProvisionEntity {
 
     @Id
