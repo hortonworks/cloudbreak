@@ -2,9 +2,6 @@ server:
   contextPath: "/cb"
 
 spring:
-  cloud:
-    consul:
-      host: consul.service.consul
   freemarker:
     template-loader-path: file:/etc/cloudbreak,classpath:/
     prefer-file-system-access: false

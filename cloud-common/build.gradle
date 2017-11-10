@@ -37,9 +37,6 @@ dependencies {
     compile group: 'org.postgresql',                name: 'postgresql',                     version: '9.4.1212'
     compile group: 'com.sequenceiq',                name: 'consul-api',                     version: '1.10'
     compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-    runtime ('org.springframework.cloud:spring-cloud-starter-consul-config:1.0.0.M6-v3'){
-      exclude group: 'com.ecwid.consul';
-    }
     testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
     testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
 }
