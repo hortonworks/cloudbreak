@@ -91,7 +91,7 @@ cloudbreak-conf-consul() {
 cloudbreak-conf-images() {
     declare desc="Defines image catalog urls"
 
-    env-import CB_IMAGE_CATALOG_URL "https://s3-eu-west-1.amazonaws.com/cloudbreak-info/cb-image-catalog.json"
+    env-import CB_IMAGE_CATALOG_URL ""
 }
 
 cloudbreak-conf-smtp() {
