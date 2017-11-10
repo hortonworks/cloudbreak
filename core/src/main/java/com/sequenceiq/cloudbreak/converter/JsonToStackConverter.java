@@ -81,9 +81,6 @@ public class JsonToStackConverter extends AbstractConversionServiceAwareConverte
     @Value("${cb.platform.default.regions:}")
     private String defaultRegions;
 
-    @Value("${cb.enable.custom.image:false}")
-    private Boolean enableCustomImage;
-
     @Override
     public Stack convert(StackRequest source) {
         Stack stack = new Stack();

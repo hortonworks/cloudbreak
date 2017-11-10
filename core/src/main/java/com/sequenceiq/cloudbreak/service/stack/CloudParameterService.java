@@ -10,7 +10,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.model.SpecialParameters;
@@ -75,9 +74,6 @@ import reactor.bus.EventBus;
 @Service
 public class CloudParameterService {
     private static final Logger LOGGER = LoggerFactory.getLogger(CloudParameterService.class);
-
-    @Value("${cb.enable.custom.image:false}")
-    private Boolean enableCustomImage;
 
     @Inject
     private EventBus eventBus;
@@ -276,7 +272,6 @@ public class CloudParameterService {
     public SpecialParameters getSpecialParameters() {
         LOGGER.debug("Get special platform parameters");
         Map<String, Boolean> specialParameters = new HashMap<>();
-        specialParameters.put("enableCustomImage", enableCustomImage);
         return new SpecialParameters(specialParameters);
     }
 
