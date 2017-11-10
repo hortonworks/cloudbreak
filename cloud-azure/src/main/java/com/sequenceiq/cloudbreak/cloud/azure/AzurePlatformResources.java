@@ -53,6 +53,8 @@ public class AzurePlatformResources implements PlatformResources {
 
     public static final int DEFAULT_MINIMUM_VOLUME_COUNT = 1;
 
+    private static final float NO_MB_PER_GB = 1024f;
+
     @Value("${cb.azure.default.vmtype:Standard_D3_v2}")
     private String armVmDefault;
 
@@ -145,8 +147,9 @@ public class AzurePlatformResources implements PlatformResources {
         VmType defaultVmType = null;
 
         for (VirtualMachineSize virtualMachineSize : vmTypes) {
+            float memoryInGB = virtualMachineSize.memoryInMB() / NO_MB_PER_GB;
             VmTypeMeta.VmTypeMetaBuilder builder = VmTypeMeta.VmTypeMetaBuilder.builder()
-                    .withCpuAndMemory(virtualMachineSize.numberOfCores(), virtualMachineSize.memoryInMB());
+                    .withCpuAndMemory(virtualMachineSize.numberOfCores(), memoryInGB);
 
             for (VolumeParameterType volumeParameterType : values()) {
                 switch (volumeParameterType) {
