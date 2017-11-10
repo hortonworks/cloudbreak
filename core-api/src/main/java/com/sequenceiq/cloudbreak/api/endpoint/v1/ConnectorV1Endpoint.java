@@ -15,7 +15,6 @@ import javax.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.api.model.PlatformDisksJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformGatewaysResponse;
-import com.sequenceiq.cloudbreak.api.model.PlatformImagesJson;
 import com.sequenceiq.cloudbreak.api.model.PlatformIpPoolsResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformNetworkResponse;
 import com.sequenceiq.cloudbreak.api.model.PlatformOrchestratorsJson;
@@ -123,20 +122,6 @@ public interface ConnectorV1Endpoint {
     @ApiOperation(value = ConnectorOpDescription.GET_REGION_AV_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
             nickname = "getRegionAvByType")
     Map<String, Collection<String>> getRegionAvByType(@PathParam("type") String type);
-
-    @GET
-    @Path("images/{type}")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_IMAGE_R_BY_TYPE, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getImagesByType")
-    Map<String, String> getImagesByType(@PathParam("type") String type);
-
-    @GET
-    @Path("images")
-    @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = ConnectorOpDescription.GET_IMAGES, produces = ContentType.JSON, notes = Notes.CONNECTOR_NOTES,
-            nickname = "getImages")
-    PlatformImagesJson getImages();
 
     @GET
     @Path("tagspecifications")

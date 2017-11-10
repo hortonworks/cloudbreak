@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
-import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
@@ -37,11 +36,9 @@ import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionView;
 import com.sequenceiq.cloudbreak.cloud.gcp.model.ZoneDefinitionWrapper;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
-import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionDisplayNameSpecification;
@@ -301,21 +298,6 @@ public class GcpPlatformParameters implements PlatformParameters {
             result.put(zone, new VmTypes(zoneTypes.getValue(), defaultVmTypes.get(zone)));
         }
         return result;
-    }
-
-    @Override
-    public PlatformImage images() {
-        List<CustomImage> customImages = new ArrayList<>();
-        for (Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
-            String property = environment.getProperty("gcp." + "default");
-            customImages.add(customImage(regionListEntry.getKey().value(), property));
-        }
-        return new PlatformImage(customImages, imageRegex());
-    }
-
-    @Override
-    public String imageRegex() {
-        return "(.*)\\/(.*).tar.gz$";
     }
 
     @Override

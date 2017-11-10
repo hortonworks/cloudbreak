@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
@@ -103,20 +102,6 @@ public interface PlatformParameters {
      * @return the {@link PlatformOrchestrator} of a platform
      */
     PlatformOrchestrator orchestratorParams();
-
-    /**
-     * Return the supported images types for a platform
-     *
-     * @return the {@link PlatformImage} of a platform
-     */
-    PlatformImage images();
-
-    /**
-     * Return the supported images regex for a platform
-     *
-     * @return the {@link String} of a platform
-     */
-    String imageRegex();
 
     /**
      * Return the platform specific tag specification

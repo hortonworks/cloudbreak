@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -16,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.Versioned;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -31,6 +34,8 @@ public class ImageCatalogService {
     private static final String RELEASED_VERSION_PATTERN = "^\\d+\\.\\d+\\.\\d+";
 
     private static final String UNRELEASED_VERSION_PATTERN = "^\\d+\\.\\d+\\.\\d+-[d,r][c,e][v]?";
+
+    private static final String UNSPECIFIED_VERSION = "unspecified";
 
     @Value("${info.app.version:}")
     private String cbVersion;
@@ -90,8 +95,9 @@ public class ImageCatalogService {
         if (imageCatalog != null) {
             Set<String> vMImageUUIDs = new HashSet<>();
             List<CloudbreakVersion> cloudbreakVersions = imageCatalog.getVersions().getCloudbreakVersions();
+            String cbv = UNSPECIFIED_VERSION.equals(cbVersion) ? latestCloudbreakVersion(cloudbreakVersions) : cbVersion;
             List<CloudbreakVersion> exactMatchedImgs = cloudbreakVersions.stream()
-                    .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(cbVersion)).collect(Collectors.toList());
+                    .filter(cloudbreakVersion -> cloudbreakVersion.getVersions().contains(cbv)).collect(Collectors.toList());
 
             if (!exactMatchedImgs.isEmpty()) {
                 exactMatchedImgs.forEach(cloudbreakVersion -> vMImageUUIDs.addAll(cloudbreakVersion.getImageIds()));
@@ -118,6 +124,19 @@ public class ImageCatalogService {
             images.setHdfImages(hdfImages);
         }
         return images;
+    }
+
+    private String latestCloudbreakVersion(List<CloudbreakVersion> cloudbreakVersions) {
+        SortedMap<Versioned, CloudbreakVersion> sortedCloudbreakVersions = new TreeMap<>(new VersionComparator());
+        for (CloudbreakVersion cbv : cloudbreakVersions) {
+            cbv.getVersions().forEach(cbvs -> sortedCloudbreakVersions.put(new Versioned() {
+                @Override
+                public String getVersion() {
+                    return cbvs;
+                }
+            }, cbv));
+        }
+        return sortedCloudbreakVersions.lastKey().getVersion();
     }
 
     private Set<String> prefixMatchForCBVersion(String cbVersion, List<CloudbreakVersion> cloudbreakVersions) {

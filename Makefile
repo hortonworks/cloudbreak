@@ -1,12 +1,6 @@
 dev-deploy:
 	 ./gradlew clean build && scp ./core/build/libs/cloudbreak-*.jar cbd-test:
 
-generate-image-yamls:
-	 make -C cloud-openstack generate-yml
-	 make -C cloud-azure generate-yml
-	 make -C cloud-gcp generate-yml
-	 make -C cloud-aws generate-yml
-
 generate-ambari-docker-image:
 	 make -C cloud-common update-ambari-image
 
