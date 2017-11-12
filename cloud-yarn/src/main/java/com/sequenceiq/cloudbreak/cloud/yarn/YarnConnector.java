@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.Validator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnAuthenticator;
+import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnCredentialConnector;
 
 @Service
 public class YarnConnector implements CloudConnector {

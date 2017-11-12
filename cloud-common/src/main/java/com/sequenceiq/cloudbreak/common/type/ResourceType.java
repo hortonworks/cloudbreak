@@ -33,6 +33,9 @@ public enum ResourceType {
     // ARM
     ARM_TEMPLATE,
 
+    // YARN
+    YARN_APPLICATION,
+
     // MOCK
     MOCK_INSTANCE
 }

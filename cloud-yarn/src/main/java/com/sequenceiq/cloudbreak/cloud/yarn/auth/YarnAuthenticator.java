@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.yarn;
+package com.sequenceiq.cloudbreak.cloud.yarn.auth;
 
 import org.springframework.stereotype.Service;
 
@@ -8,12 +8,12 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.cloud.yarn.YarnConstants;
 
 @Service
 public class YarnAuthenticator implements Authenticator {
     @Override
-    public AuthenticatedContext authenticate(CloudContext cloudContext,
-                                             CloudCredential cloudCredential) {
+    public AuthenticatedContext authenticate(CloudContext cloudContext, CloudCredential cloudCredential) {
         return new AuthenticatedContext(cloudContext, cloudCredential);
     }
 

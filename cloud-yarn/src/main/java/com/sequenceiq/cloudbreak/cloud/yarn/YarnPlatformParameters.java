@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
+import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
+import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -11,36 +15,30 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
-import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
-import com.sequenceiq.cloudbreak.cloud.model.CustomImage;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformImage;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
-import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
-import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZones;
-import com.sequenceiq.cloudbreak.cloud.model.Regions;
-import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
-import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
+import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.cloud.model.Regions;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
+import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
+import com.sequenceiq.cloudbreak.cloud.model.VmType;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
-import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL;
-import static com.sequenceiq.cloudbreak.cloud.model.CustomImage.customImage;
-import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
-import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmType;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 
 @Service
 public class YarnPlatformParameters implements PlatformParameters {
@@ -141,21 +139,6 @@ public class YarnPlatformParameters implements PlatformParameters {
         return new PlatformOrchestrator(
                 Collections.singletonList(orchestrator(OrchestratorConstants.SALT)),
                 orchestrator(OrchestratorConstants.SALT));
-    }
-
-    @Override
-    public PlatformImage images() {
-        List<CustomImage> customImages = new ArrayList<>();
-        for (Map.Entry<Region, List<AvailabilityZone>> regionListEntry : regions.entrySet()) {
-            String property = environment.getProperty("yarn." + "default");
-            customImages.add(customImage(regionListEntry.getKey().value(), property));
-        }
-        return new PlatformImage(customImages, imageRegex());
-    }
-
-    @Override
-    public String imageRegex() {
-        return "";
     }
 
     @Override
