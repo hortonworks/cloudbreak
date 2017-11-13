@@ -5,14 +5,14 @@ import com.sequenceiq.cloudbreak.reactor.api.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePreRecipesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesResult;
 
 public enum ClusterUpscaleEvent implements FlowEvent {
     CLUSTER_UPSCALE_TRIGGER_EVENT("CLUSTER_UPSCALE_TRIGGER_EVENT"),
     UPSCALE_AMBARI_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleAmbariResult.class)),
     UPSCALE_AMBARI_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleAmbariResult.class)),
-    EXECUTE_PRERECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UpscalePreRecipesResult.class)),
-    EXECUTE_PRERECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscalePreRecipesResult.class)),
+    UPLOAD_UPSCALE_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UploadUpscaleRecipesResult.class)),
+    UPLOAD_UPSCALE_RECIPES_FAILED_EVENT(EventSelectorUtil.failureSelector(UploadUpscaleRecipesResult.class)),
     CLUSTER_UPSCALE_FINISHED_EVENT(EventSelectorUtil.selector(UpscaleClusterResult.class)),
     CLUSTER_UPSCALE_FAILED_EVENT(EventSelectorUtil.failureSelector(UpscaleClusterResult.class)),
     EXECUTE_POSTRECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UpscalePostRecipesResult.class)),

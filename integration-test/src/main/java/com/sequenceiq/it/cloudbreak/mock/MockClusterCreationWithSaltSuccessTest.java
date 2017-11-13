@@ -154,7 +154,8 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.lookup_jid").bodyContains("jid=1").atLeast(2).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_agent").exactTimes(1).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("ambari_server").exactTimes(1).verify();
-        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(2).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.append").bodyContains("recipes").exactTimes(4).verify();
+        verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=grains.remove").bodyContains("recipes").exactTimes(4).verify();
         verify(SALT_API_ROOT + "/run", "POST").bodyContains("fun=jobs.active").atLeast(2).verify();
 
         verify(SALT_BOOT_ROOT + "/file", "POST").exactTimes(0).verify();

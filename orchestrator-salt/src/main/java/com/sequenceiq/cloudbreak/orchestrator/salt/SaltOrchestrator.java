@@ -384,15 +384,15 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void preInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
-            throws CloudbreakOrchestratorFailedException {
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.PRE);
+    public void postAmbariStartRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
+        throws CloudbreakOrchestratorFailedException {
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_AMBARI_START);
     }
 
     @Override
     public void postInstallRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel)
             throws CloudbreakOrchestratorFailedException {
-        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST);
+        executeRecipes(gatewayConfig, allNodes, exitCriteriaModel, RecipeExecutionPhase.POST_CLUSTER_INSTALL);
     }
 
     @Override
@@ -464,12 +464,21 @@ public class SaltOrchestrator implements HostOrchestrator {
         saltCommandRunBootstrapFuture.get();
     }
 
+    @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     private void executeRecipes(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, RecipeExecutionPhase phase)
-            throws CloudbreakOrchestratorFailedException {
+        throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = new SaltConnector(gatewayConfig, restDebug)) {
             // add 'recipe' grain to all nodes
             Set<String> targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", phase.value(), CompoundType.IP), exitCriteriaModel);
+
+            // Add Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
+            boolean postRecipe = phase.isPostRecipe();
+            if (postRecipe) {
+                runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", RecipeExecutionPhase.POST.value(), CompoundType.IP), exitCriteriaModel);
+            } else {
+                runSaltCommand(sc, new GrainAddRunner(targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
+            }
 
             Set<String> all = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new SyncGrainsRunner(all, allNodes), exitCriteriaModel);
@@ -478,6 +487,13 @@ public class SaltOrchestrator implements HostOrchestrator {
             // remove 'recipe' grain from all nodes
             targets = allNodes.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", phase.value(), CompoundType.IP), exitCriteriaModel);
+
+            // Remove Deprecated 'PRE/POST' recipe execution for backward compatibility (since version 2.2.0)
+            if (postRecipe) {
+                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", RecipeExecutionPhase.POST.value(), CompoundType.IP), exitCriteriaModel);
+            } else {
+                runSaltCommand(sc, new GrainRemoveRunner(targets, allNodes, "recipes", RecipeExecutionPhase.PRE.value(), CompoundType.IP), exitCriteriaModel);
+            }
         } catch (Exception e) {
             LOGGER.error("Error occurred during recipe execution", e);
             throw new CloudbreakOrchestratorFailedException(e);
@@ -531,10 +547,11 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     private void uploadRecipe(SaltConnector sc, Set<String> targets, ExitCriteriaModel exitModel,
-            String name, String recipe, RecipeExecutionPhase phase) throws CloudbreakOrchestratorFailedException {
+        String name, String recipe, RecipeExecutionPhase phase) throws CloudbreakOrchestratorFailedException {
         byte[] recipeBytes = recipe.getBytes(StandardCharsets.UTF_8);
         LOGGER.info("Upload '{}' recipe: {}", phase.value(), name);
-        uploadFileToGateways(sc, targets, exitModel, "/srv/salt/" + phase.value() + "-recipes/scripts", name, recipeBytes);
+        String folder = phase.isPreRecipe() ? "pre-recipes" : "post-recipes";
+        uploadFileToGateways(sc, targets, exitModel, "/srv/salt/" + folder + "/scripts", name, recipeBytes);
     }
 
     private void uploadFileToGateways(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,

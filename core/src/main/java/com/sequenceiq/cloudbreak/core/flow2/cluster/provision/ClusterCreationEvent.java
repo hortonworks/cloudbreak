@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServ
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyFailed;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesFailed;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 
 public enum ClusterCreationEvent implements FlowEvent {
     CLUSTER_CREATION_EVENT("CLUSTER_PROVISION_TRIGGER_EVENT"),
@@ -22,6 +24,8 @@ public enum ClusterCreationEvent implements FlowEvent {
     BOOTSTRAP_MACHINES_FAILED_EVENT(EventSelectorUtil.selector(BootstrapMachinesFailed.class)),
     HOST_METADATASETUP_FINISHED_EVENT(EventSelectorUtil.selector(HostMetadataSetupSuccess.class)),
     HOST_METADATASETUP_FAILED_EVENT(EventSelectorUtil.selector(HostMetadataSetupFailed.class)),
+    UPLOAD_RECIPES_FINISHED_EVENT(EventSelectorUtil.selector(UploadRecipesSuccess.class)),
+    UPLOAD_RECIPES_FAILED_EVENT(EventSelectorUtil.selector(UploadRecipesFailed.class)),
     START_AMBARI_SERVICES_FINISHED_EVENT(EventSelectorUtil.selector(StartAmbariServicesSuccess.class)),
     START_AMBARI_SERVICES_FAILED_EVENT(EventSelectorUtil.selector(StartAmbariServicesFailed.class)),
     REGISTER_PROXY_FINISHED_EVENT(EventSelectorUtil.selector(RegisterProxySuccess.class)),

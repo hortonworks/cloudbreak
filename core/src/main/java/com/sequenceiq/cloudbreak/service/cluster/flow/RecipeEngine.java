@@ -62,7 +62,7 @@ public class RecipeEngine {
     @Inject
     private SmartSenseConfigProvider smartSenseConfigProvider;
 
-    public void executePreInstall(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void uploadRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             addFsRecipes(stack, hostGroups);
@@ -71,12 +71,11 @@ public class RecipeEngine {
             boolean recipesFound = recipesFound(hostGroups);
             if (recipesFound) {
                 orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
-                orchestratorRecipeExecutor.preInstall(stack);
             }
         }
     }
 
-    public void executeUpscalePreInstall(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaDatas, Set<HostGroup> hostGroups) throws CloudbreakException {
+    public void uploadUpscaleRecipes(Stack stack, HostGroup hostGroup, Set<HostMetadata> metaDatas, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             Set<HostGroup> hgs = Collections.singleton(hostGroup);
@@ -86,19 +85,18 @@ public class RecipeEngine {
                 if (hostGroup.getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
                     orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
                 }
-                orchestratorRecipeExecutor.preInstall(stack);
             }
         }
     }
 
-    public void executePostInstall(Stack stack) throws CloudbreakException {
+    public void executePostAmbariStartRecipes(Stack stack) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
-            orchestratorRecipeExecutor.postInstall(stack);
+            orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
         }
     }
 
-    public void executeUpscalePostInstall(Stack stack, Set<HostMetadata> hostMetadata) throws CloudbreakException {
+    public void executePostInstall(Stack stack) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postInstall(stack);
@@ -161,7 +159,7 @@ public class RecipeEngine {
 
     private FileSystemConfiguration getFileSystemConfiguration(FileSystem fs) throws IOException {
         String json = JsonUtil.writeValueAsString(fs.getProperties());
-        return (FileSystemConfiguration) JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
+        return JsonUtil.readValue(json, FileSystemType.valueOf(fs.getType()).getClazz());
     }
 
     private boolean recipesFound(Set<HostGroup> hostGroups) {

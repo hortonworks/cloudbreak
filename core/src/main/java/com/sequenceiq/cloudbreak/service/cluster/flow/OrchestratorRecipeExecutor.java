@@ -63,12 +63,12 @@ public class OrchestratorRecipeExecutor {
         }
     }
 
-    public void preInstall(Stack stack) throws CloudbreakException {
+    public void postAmbariStartRecipes(Stack stack) throws CloudbreakException {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.preInstallRecipes(gatewayConfig, collectNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.postAmbariStartRecipes(gatewayConfig, collectNodes(stack),
+                clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
@@ -78,8 +78,7 @@ public class OrchestratorRecipeExecutor {
         HostOrchestrator hostOrchestrator = hostOrchestratorResolver.get(stack.getOrchestrator().getType());
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         try {
-            hostOrchestrator.postInstallRecipes(gatewayConfig, collectNodes(stack),
-                    clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
+            hostOrchestrator.postInstallRecipes(gatewayConfig, collectNodes(stack), clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()));
         } catch (CloudbreakOrchestratorFailedException e) {
             throw new CloudbreakException(e);
         }
@@ -125,13 +124,13 @@ public class OrchestratorRecipeExecutor {
             Collections.sort(recipes);
             String messageStr = Joiner.on(';').join(recipes);
             cloudbreakEventService.fireCloudbreakEvent(stackId, status.name(),
-                    cloudbreakMessagesService.getMessage(Msg.EXECUTE_RECIPES.code(), Collections.singletonList(messageStr)));
+                    cloudbreakMessagesService.getMessage(Msg.UPLOAD_RECIPES.code(), Collections.singletonList(messageStr)));
         }
     }
 
     private enum Msg {
 
-        EXECUTE_RECIPES("recipes.execute");
+        UPLOAD_RECIPES("recipes.upload");
 
         private final String code;
 

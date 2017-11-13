@@ -26,10 +26,10 @@ public class ConsulRecipeBuilder implements RecipeBuilder {
             recipe.setContent(Base64.encodeBase64String(script.getScript().getBytes()));
             switch (script.getClusterLifecycleEvent()) {
                 case PRE_INSTALL:
-                    recipe.setRecipeType(RecipeType.PRE);
+                    recipe.setRecipeType(RecipeType.POST_AMBARI_START);
                     break;
                 case POST_INSTALL:
-                    recipe.setRecipeType(RecipeType.POST);
+                    recipe.setRecipeType(RecipeType.POST_CLUSTER_INSTALL);
                     break;
                 default:
                     throw new UnsupportedOperationException("Cluster lifecycle event " + script.getClusterLifecycleEvent() + " is not supported");
