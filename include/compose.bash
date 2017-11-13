@@ -8,7 +8,7 @@ compose-init() {
     env-import COMPOSE_HTTP_TIMEOUT 120
     env-import CBD_LOG_NAME cbreak
     env-import ULUWATU_VOLUME_HOST /dev/null
-    env-import ULUWATU_CONTAINER_PATH /uluwatu
+    env-import ULUWATU_CONTAINER_PATH /hortonworks-cloud-web
 
     if [[ "$ULUWATU_VOLUME_HOST" != "/dev/null" ]]; then
       ULUWATU_VOLUME_CONTAINER=${ULUWATU_CONTAINER_PATH}
@@ -16,7 +16,7 @@ compose-init() {
       ULUWATU_VOLUME_CONTAINER=/tmp/null
     fi
     env-import SULTANS_VOLUME_HOST /dev/null
-    env-import SULTANS_CONTAINER_PATH /sultans
+    env-import SULTANS_CONTAINER_PATH /hortonworks-cloud-auth
     if [[ "$SULTANS_VOLUME_HOST" != "/dev/null" ]]; then
       SULTANS_VOLUME_CONTAINER=${SULTANS_CONTAINER_PATH}
     else
