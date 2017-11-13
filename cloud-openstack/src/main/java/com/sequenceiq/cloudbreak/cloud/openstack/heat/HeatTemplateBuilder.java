@@ -20,10 +20,10 @@ import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackUtils;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.NeutronNetworkView;
@@ -73,15 +73,19 @@ public class HeatTemplateBuilder {
         }
     }
 
-    public Map<String, String> buildParameters(AuthenticatedContext auth, Network network, Image image, boolean existingNetwork, String existingSubnetCidr) {
+    public Map<String, String> buildParameters(AuthenticatedContext auth, CloudStack cloudStack, boolean existingNetwork, String existingSubnetCidr) {
         KeystoneCredentialView osCredential = new KeystoneCredentialView(auth);
-        NeutronNetworkView neutronView = new NeutronNetworkView(network);
+        NeutronNetworkView neutronView = new NeutronNetworkView(cloudStack.getNetwork());
         Map<String, String> parameters = new HashMap<>();
         if (neutronView.isAssignFloatingIp()) {
             parameters.put("public_net_id", neutronView.getPublicNetId());
         }
-        parameters.put("image_id", image.getImageName());
-        parameters.put("key_name", osCredential.getKeyPairName());
+        parameters.put("image_id", cloudStack.getImage().getImageName());
+        if (cloudStack.getInstanceAuthentication().getPublicKeyId() != null) {
+            parameters.put("key_name", cloudStack.getInstanceAuthentication().getPublicKeyId());
+        } else {
+            parameters.put("key_name", osCredential.getKeyPairName());
+        }
         if (existingNetwork) {
             parameters.put("app_net_id", neutronView.getCustomNetworkId());
             if (isNoneEmpty(existingSubnetCidr)) {
