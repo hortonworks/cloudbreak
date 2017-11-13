@@ -114,7 +114,7 @@ public class BlueprintLoaderService {
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
         blueprintFromDatabase.setInputParameters(newBlueprint.getInputParameters());
-        blueprintFromDatabase.setBlueprintName(newBlueprint.getBlueprintName());
+        blueprintFromDatabase.setAmbariName(newBlueprint.getAmbariName());
         return blueprintFromDatabase;
     }
 

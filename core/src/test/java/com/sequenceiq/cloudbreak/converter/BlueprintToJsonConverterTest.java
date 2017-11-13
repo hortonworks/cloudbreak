@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Matchers.anyString;
 
@@ -41,7 +40,6 @@ public class BlueprintToJsonConverterTest extends AbstractEntityConverterTest<Bl
         // WHEN
         BlueprintResponse result = underTest.convert(getSource());
         // THEN
-        assertEquals("multi-node-yarn", result.getBlueprintName());
         assertAllFieldsNotNull(result);
     }
 

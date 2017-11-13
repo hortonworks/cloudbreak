@@ -86,7 +86,7 @@ public class StructuredFlowEventFactory {
             Blueprint blueprint = cluster.getBlueprint();
             if (blueprint != null) {
                 notificationDetails.setBlueprintId(blueprint.getId());
-                notificationDetails.setBlueprintName(blueprint.getBlueprintName());
+                notificationDetails.setBlueprintName(blueprint.getAmbariName());
             }
         }
         return new StructuredNotificationEvent(operationDetails, notificationDetails);

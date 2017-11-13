@@ -34,7 +34,7 @@ public class Blueprint implements ProvisionEntity {
     @Column(length = 1000000, columnDefinition = "TEXT", nullable = false)
     private String blueprintText;
 
-    private String blueprintName;
+    private String ambariName;
 
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
@@ -90,12 +90,12 @@ public class Blueprint implements ProvisionEntity {
         this.blueprintText = blueprintText;
     }
 
-    public String getBlueprintName() {
-        return blueprintName;
+    public String getAmbariName() {
+        return ambariName;
     }
 
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
+    public void setAmbariName(String ambariName) {
+        this.ambariName = ambariName;
     }
 
     public int getHostGroupCount() {
