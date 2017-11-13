@@ -296,7 +296,7 @@ public class AmbariClusterConnector {
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
 
-            recipeEngine.executePreInstall(stack, hostGroups);
+            recipeEngine.executePostAmbariStartRecipes(stack);
             Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
 
             String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint(), rdsConfigs);
@@ -410,14 +410,14 @@ public class AmbariClusterConnector {
         waitForHosts(stack, ambariClient, hostMetadata);
     }
 
-    public void installServices(Stack stack, HostGroup hostGroup, Collection<HostMetadata> hostMetadata)
-            throws CloudbreakSecuritySetupException, ClusterException {
+    public void installServices(Stack stack, HostGroup hostGroup, Collection<HostMetadata> hostMetadata) throws CloudbreakException {
         AmbariClient ambariClient = getAmbariClient(stack);
         List<String> existingHosts = ambariClient.getClusterHosts();
         List<String> upscaleHostNames = getHostNames(hostMetadata).stream().filter(hostName -> !existingHosts.contains(hostName)).collect(Collectors.toList());
         if (!upscaleHostNames.isEmpty()) {
+            recipeEngine.executePostAmbariStartRecipes(stack);
             PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
-                    installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
+                installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
         }
     }

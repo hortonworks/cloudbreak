@@ -11,8 +11,6 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 
-import java.io.File;
-
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v1.RecipeEndpoint;
 import com.sequenceiq.cloudbreak.api.model.RecipeRequest;
 import com.sequenceiq.cloudbreak.api.model.RecipeResponse;
 import com.sequenceiq.cloudbreak.client.CloudbreakClient;
-import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.shell.commands.common.RecipeCommands;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -144,55 +141,4 @@ public class RecipeCommandsTest {
         verify(recipeEndpoint, times(0)).delete(anyLong());
     }
 
-    @Test
-    public void testStoreRecipePreScriptExistsAndPublic() throws Exception {
-        underTest.createRecipe("name", RecipeType.PRE, null,
-                new File(getClass().getResource("/store-recipe-test").getFile()), null, true);
-        verify(recipeEndpoint, times(1)).postPublic(any(RecipeRequest.class));
-        verify(recipeEndpoint, times(0)).postPrivate(any(RecipeRequest.class));
-    }
-
-    @Test
-    public void testStoreRecipePostScriptExistsAndPrivate() throws Exception {
-        underTest.createRecipe("name", RecipeType.PRE, null,
-                new File(getClass().getResource("/store-recipe-test").getFile()), null, false);
-        verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
-        verify(recipeEndpoint, times(1)).postPrivate(any(RecipeRequest.class));
-    }
-
-    @Test
-    public void testStoreRecipeMissingScriptFiles() throws Exception {
-        RuntimeException ext = null;
-        try {
-            underTest.createRecipe("name", RecipeType.PRE, null, null, null, null);
-        } catch (RuntimeException e) {
-            ext = e;
-        }
-        Assert.assertEquals("Wrong error occurred", expectedException, ext);
-        verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
-    }
-
-    @Test
-    public void testStoreRecipeNotExistsPreScriptFile() throws Exception {
-        RuntimeException ext = null;
-        try {
-            underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
-        } catch (RuntimeException e) {
-            ext = e;
-        }
-        Assert.assertEquals("Wrong error occurred", expectedException, ext);
-        verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
-    }
-
-    @Test
-    public void testStoreRecipeNotExistsPostScriptFile() throws Exception {
-        RuntimeException ext = null;
-        try {
-            underTest.createRecipe("name", RecipeType.PRE, null, new File(""), null, null);
-        } catch (RuntimeException e) {
-            ext = e;
-        }
-        Assert.assertEquals("Wrong error occurred", expectedException, ext);
-        verify(recipeEndpoint, times(0)).postPublic(any(RecipeRequest.class));
-    }
 }

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.recipe;
 
 import java.util.Set;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
@@ -33,15 +32,7 @@ public class RecipeService {
     private HostGroupRepository hostGroupRepository;
 
     @Inject
-    private RecipeMigration recipeMigration;
-
-    @Inject
     private AuthorizationService authorizationService;
-
-    @PostConstruct
-    public void migrate() {
-        recipeMigration.migrate();
-    }
 
     @Transactional(TxType.NEVER)
     public Recipe create(IdentityUser user, Recipe recipe) {

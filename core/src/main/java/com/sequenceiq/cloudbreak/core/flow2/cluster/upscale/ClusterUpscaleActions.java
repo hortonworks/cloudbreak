@@ -31,8 +31,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariRe
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleAmbariResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePostRecipesResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePreRecipesRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UpscalePreRecipesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadUpscaleRecipesResult;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Configuration
@@ -42,8 +42,8 @@ public class ClusterUpscaleActions {
     @Inject
     private ClusterUpscaleFlowService clusterUpscaleFlowService;
 
-    @Bean(name = "UPSCALING_AMBARI_STATE")
-    public Action upscalingAmbariAction() {
+    @Bean(name = "UPLOAD_UPSCALE_RECIPES_STATE")
+    public Action uploadUpscaleRecipesAction() {
         return new AbstractClusterUpscaleAction<ClusterScaleTriggerEvent>(ClusterScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(ClusterScaleTriggerEvent payload, Map<Object, Object> variables) {
@@ -53,6 +53,21 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, ClusterScaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterUpscaleContext context) {
+                return new UploadUpscaleRecipesRequest(context.getStackId(), context.getHostGroupName());
+            }
+        };
+    }
+
+    @Bean(name = "UPSCALING_AMBARI_STATE")
+    public Action upscalingAmbariAction() {
+        return new AbstractClusterUpscaleAction<UploadUpscaleRecipesResult>(UploadUpscaleRecipesResult.class) {
+            @Override
+            protected void doExecute(ClusterUpscaleContext context, UploadUpscaleRecipesResult payload, Map<Object, Object> variables) throws Exception {
                 clusterUpscaleFlowService.upscalingAmbari(context.getStackId());
                 sendEvent(context);
             }
@@ -65,27 +80,12 @@ public class ClusterUpscaleActions {
         };
     }
 
-    @Bean(name = "EXECUTING_PRERECIPES_STATE")
-    public Action executingPrerecipesAction() {
-        return new AbstractClusterUpscaleAction<UpscaleAmbariResult>(UpscaleAmbariResult.class) {
-            @Override
-            protected void doExecute(ClusterUpscaleContext context, UpscaleAmbariResult payload, Map<Object, Object> variables) throws Exception {
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterUpscaleContext context) {
-                return new UpscalePreRecipesRequest(context.getStackId(), context.getHostGroupName());
-            }
-        };
-    }
-
     @Bean(name = "UPSCALING_CLUSTER_STATE")
     public Action installServicesAction() {
-        return new AbstractClusterUpscaleAction<UpscalePreRecipesResult>(UpscalePreRecipesResult.class) {
+        return new AbstractClusterUpscaleAction<UpscaleAmbariResult>(UpscaleAmbariResult.class) {
 
             @Override
-            protected void doExecute(ClusterUpscaleContext context, UpscalePreRecipesResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(ClusterUpscaleContext context, UpscaleAmbariResult payload, Map<Object, Object> variables) throws Exception {
                 sendEvent(context);
             }
 

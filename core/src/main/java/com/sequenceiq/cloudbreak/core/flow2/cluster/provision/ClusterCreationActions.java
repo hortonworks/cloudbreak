@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServ
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxyRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.proxy.RegisterProxySuccess;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 
 @Configuration
 public class ClusterCreationActions {
@@ -68,11 +70,26 @@ public class ClusterCreationActions {
         };
     }
 
-    @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
-    public Action startingAmbariServicesAction() {
+    @Bean(name = "UPLOAD_RECIPES_STATE")
+    public Action uploadRecipesAction() {
         return new AbstractClusterAction<HostMetadataSetupSuccess>(HostMetadataSetupSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, HostMetadataSetupSuccess payload, Map<Object, Object> variables) throws Exception {
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(ClusterViewContext context) {
+                return new UploadRecipesRequest(context.getStackId());
+            }
+        };
+    }
+
+    @Bean(name = "STARTING_AMBARI_SERVICES_STATE")
+    public Action startingAmbariServicesAction() {
+        return new AbstractClusterAction<UploadRecipesSuccess>(UploadRecipesSuccess.class) {
+            @Override
+            protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) throws Exception {
                 clusterCreationService.startingAmbariServices(context.getStack());
                 sendEvent(context);
             }

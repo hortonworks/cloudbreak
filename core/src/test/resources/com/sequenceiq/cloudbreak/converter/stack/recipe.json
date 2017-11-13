@@ -1,7 +1,7 @@
 {
   "name" : "recipe-01",
   "description" : "my first recipe",
-  "recipeType": "PRE",
+  "recipeType": "PRE_AMBARI_START",
   "content": "base64",
   "uri": "https://some.url"
 }

@@ -17,6 +17,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.START_AMBARI_SERVICES_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.UPLOAD_RECIPES_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.BOOTSTRAPPING_MACHINES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CLUSTER_CREATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.CLUSTER_CREATION_FINISHED_STATE;
@@ -27,6 +29,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCrea
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.REGISTER_PROXY_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.STARTING_AMBARI_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationState.UPLOAD_RECIPES_STATE;
 
 import java.util.List;
 
@@ -43,8 +46,10 @@ public class ClusterCreationFlowConfig extends AbstractFlowConfiguration<Cluster
             .from(INIT_STATE).to(INSTALLING_CLUSTER_STATE).event(CLUSTER_INSTALL_EVENT).noFailureEvent()
             .from(BOOTSTRAPPING_MACHINES_STATE).to(COLLECTING_HOST_METADATA_STATE).event(BOOTSTRAP_MACHINES_FINISHED_EVENT)
                     .failureEvent(BOOTSTRAP_MACHINES_FAILED_EVENT)
-            .from(COLLECTING_HOST_METADATA_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
+            .from(COLLECTING_HOST_METADATA_STATE).to(UPLOAD_RECIPES_STATE).event(HOST_METADATASETUP_FINISHED_EVENT)
                     .failureEvent(HOST_METADATASETUP_FAILED_EVENT)
+            .from(UPLOAD_RECIPES_STATE).to(STARTING_AMBARI_SERVICES_STATE).event(UPLOAD_RECIPES_FINISHED_EVENT)
+                    .failureEvent(UPLOAD_RECIPES_FAILED_EVENT)
             .from(STARTING_AMBARI_SERVICES_STATE).to(REGISTER_PROXY_STATE).event(START_AMBARI_SERVICES_FINISHED_EVENT)
                     .failureEvent(START_AMBARI_SERVICES_FAILED_EVENT)
             .from(REGISTER_PROXY_STATE).to(STARTING_AMBARI_STATE).event(REGISTER_PROXY_FINISHED_EVENT)

@@ -420,7 +420,7 @@ public class TestUtil {
             recipe.setPublicInAccount(true);
             recipe.setUri("https://some/url");
             recipe.setContent("base64Content");
-            recipe.setRecipeType(RecipeType.PRE);
+            recipe.setRecipeType(RecipeType.POST_AMBARI_START);
             recipes.add(recipe);
         }
         return recipes;

@@ -44,12 +44,14 @@ base:
     - match: compound
     - prometheus.server
     - ambari.server
+    - pre-recipes.pre-ambari-start
     - ambari.server-start
 
   'G@roles:ambari_server and G@roles:smartsense':
     - match: compound
     - prometheus.server
     - ambari.server
+    - pre-recipes.pre-ambari-start
     - smartsense
     - ambari.server-start
 
@@ -62,12 +64,14 @@ base:
   'roles:ambari_agent':
     - match: grain
     - ambari.agent
+    - pre-recipes.pre-ambari-start
+    - ambari.agent-start
 
-  'recipes:pre':
+  'recipes:post-ambari-start':
     - match: grain
-    - pre-recipes
+    - pre-recipes.post-ambari-start
 
-  'recipes:post':
+  'recipes:post-cluster-install':
     - match: grain
     - post-recipes
 
