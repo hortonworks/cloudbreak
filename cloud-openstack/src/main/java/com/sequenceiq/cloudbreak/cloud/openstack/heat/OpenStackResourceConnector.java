@@ -83,7 +83,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
-                authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
+                authenticatedContext, stack, existingNetwork, existingSubnetCidr);
 
         OSClient client = openStackClient.createOSClient(authenticatedContext);
 
@@ -91,7 +91,9 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
         Stack existingStack = client.heat().stacks().getStackByName(stackName);
 
         if (existingStack == null) {
-            createKeyPair(authenticatedContext, stack, client);
+            if (stack.getInstanceAuthentication().getPublicKeyId() == null) {
+                createKeyPair(authenticatedContext, stack, client);
+            }
 
             Stack heatStack = client
                     .heat()
@@ -175,7 +177,9 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
                         });
                         client.heat().stacks().delete(stackName, heatStackId);
                         LOGGER.info("Heat stack has been deleted");
-                        deleteKeyPair(authenticatedContext, client);
+                        if (cloudStack.getInstanceAuthentication().getPublicKeyId() == null) {
+                            deleteKeyPair(authenticatedContext, client);
+                        }
                     } catch (ActionWentFail ignored) {
                         LOGGER.info(String.format("Stack not found with name: %s", resource.getName()));
                     }
@@ -214,7 +218,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
-                authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
+                authenticatedContext, stack, existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
@@ -246,7 +250,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
-                authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
+                authenticatedContext, stack, existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
@@ -280,7 +284,7 @@ public class OpenStackResourceConnector implements ResourceConnector<Object> {
 
         String heatTemplate = heatTemplateBuilder.build(modelContext);
         Map<String, String> parameters = heatTemplateBuilder.buildParameters(
-                authenticatedContext, stack.getNetwork(), stack.getImage(), existingNetwork, existingSubnetCidr);
+                authenticatedContext, stack, existingNetwork, existingSubnetCidr);
         return updateHeatStack(authenticatedContext, resources, heatTemplate, parameters);
     }
 
