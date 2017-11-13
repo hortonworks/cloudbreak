@@ -159,7 +159,7 @@ public class BlueprintLoaderServiceTest {
     public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(Long.valueOf(index));
-        blueprint.setBlueprintName("test-blueprint" + index);
+        blueprint.setAmbariName("test-blueprint" + index);
         blueprint.setBlueprintText(JSON + index);
         blueprint.setHostGroupCount(3);
         blueprint.setStatus(resourceStatus);

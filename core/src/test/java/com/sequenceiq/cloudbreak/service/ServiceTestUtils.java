@@ -40,7 +40,7 @@ public final class ServiceTestUtils {
     public static Blueprint createBlueprint(String owner, String account) {
         Blueprint blueprint = new Blueprint();
         blueprint.setId(1L);
-        blueprint.setBlueprintName("test-blueprint");
+        blueprint.setAmbariName("test-blueprint");
         blueprint.setBlueprintText("dummyText");
         blueprint.setHostGroupCount(3);
         blueprint.setDescription("test blueprint");

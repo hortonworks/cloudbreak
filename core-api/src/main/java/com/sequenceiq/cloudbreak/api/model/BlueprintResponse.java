@@ -17,9 +17,6 @@ public class BlueprintResponse extends BlueprintBase {
     @ApiModelProperty(ModelDescriptions.ID)
     private Long id;
 
-    @ApiModelProperty(BlueprintModelDescription.BLUEPRINT_NAME)
-    private String blueprintName;
-
     @ApiModelProperty(BlueprintModelDescription.HOST_GROUP_COUNT)
     private Integer hostGroupCount;
 
@@ -28,14 +25,6 @@ public class BlueprintResponse extends BlueprintBase {
 
     @ApiModelProperty(BlueprintModelDescription.STATUS)
     private ResourceStatus status;
-
-    public String getBlueprintName() {
-        return blueprintName;
-    }
-
-    public void setBlueprintName(String blueprintName) {
-        this.blueprintName = blueprintName;
-    }
 
     public Integer getHostGroupCount() {
         return hostGroupCount;

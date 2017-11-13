@@ -454,7 +454,7 @@ public class TestUtil {
         blueprint.setId(1L);
         blueprint.setBlueprintText("{\"host_groups\":[{\"name\":\"slave_1\",\"components\":[{\"name\":\"DATANODE\"}]}]}");
         blueprint.setName(name);
-        blueprint.setBlueprintName("multi-node-yarn");
+        blueprint.setAmbariName("multi-node-yarn");
         blueprint.setStatus(ResourceStatus.DEFAULT);
         return blueprint;
     }

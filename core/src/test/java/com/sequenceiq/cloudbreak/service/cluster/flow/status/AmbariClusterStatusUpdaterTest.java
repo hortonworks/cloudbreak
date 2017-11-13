@@ -101,7 +101,7 @@ public class AmbariClusterStatusUpdaterTest {
         cluster.setId(TEST_CLUSTER_ID);
         cluster.setStatus(clusterStatus);
         Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintName(TEST_BLUEPRINT);
+        blueprint.setAmbariName(TEST_BLUEPRINT);
         cluster.setBlueprint(blueprint);
         stack.setCluster(cluster);
         return stack;

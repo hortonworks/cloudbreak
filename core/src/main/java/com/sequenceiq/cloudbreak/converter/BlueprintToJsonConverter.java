@@ -31,7 +31,6 @@ public class BlueprintToJsonConverter extends AbstractConversionServiceAwareConv
     public BlueprintResponse convert(Blueprint entity) {
         BlueprintResponse blueprintJson = new BlueprintResponse();
         blueprintJson.setId(entity.getId());
-        blueprintJson.setBlueprintName(entity.getBlueprintName());
         blueprintJson.setName(entity.getName());
         blueprintJson.setPublicInAccount(entity.isPublicInAccount());
         blueprintJson.setDescription(entity.getDescription() == null ? "" : entity.getDescription());

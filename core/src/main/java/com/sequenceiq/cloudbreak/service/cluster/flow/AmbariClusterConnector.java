@@ -313,7 +313,7 @@ public class AmbariClusterConnector {
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
             String clusterName = cluster.getName();
-            String blueprintName = cluster.getBlueprint().getBlueprintName();
+            String blueprintName = cluster.getBlueprint().getAmbariName();
             String configStrategy = cluster.getConfigStrategy().name();
             Boolean hideQuickLinks = cluster.getGateway().getEnableGateway();
             String clusterTemplate;
@@ -952,7 +952,7 @@ public class AmbariClusterConnector {
     private Map<String, Integer> installServices(List<String> hosts, Stack stack, AmbariClient ambariClient, String hostGroup) {
         try {
             Cluster cluster = stack.getCluster();
-            String blueprintName = cluster.getBlueprint().getBlueprintName();
+            String blueprintName = cluster.getBlueprint().getAmbariName();
             // In case If we changed the blueprintName field we need to query the blueprint name information from ambari
             Map<String, String> blueprintsMap = ambariClient.getBlueprintsMap();
             if (!blueprintsMap.entrySet().isEmpty()) {
