@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.image;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,8 +18,10 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
@@ -49,10 +52,14 @@ public class CachedImageCatalogProvider {
                 catalog = JsonUtil.readValue(content, CloudbreakImageCatalogV2.class);
             }
             validateImageCatalogUuids(catalog);
+            validateCloudBreakVersions(catalog);
+            cleanAndValidateMaps(catalog);
             long timeOfParse = System.currentTimeMillis() - started;
             LOGGER.info("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
         } catch (RuntimeException e) {
             throw new CloudbreakImageCatalogException("Failed to get image catalog", e);
+        } catch (JsonMappingException e) {
+            throw new CloudbreakImageCatalogException(e.getMessage(), e);
         } catch (IOException e) {
             throw new CloudbreakImageCatalogException(String.format("Failed to read image catalog from file: '%s'", catalogUrl), e);
         }
@@ -64,9 +71,9 @@ public class CachedImageCatalogProvider {
     }
 
     private void validateImageCatalogUuids(CloudbreakImageCatalogV2 imageCatalog) throws CloudbreakImageCatalogException {
-        Stream<String> uuidStream = Stream.concat(imageCatalog.getImages().getBaseImages().stream().map(images -> images.getUuid()),
-                imageCatalog.getImages().getHdpImages().stream().map(images -> images.getUuid()));
-        uuidStream = Stream.concat(uuidStream, imageCatalog.getImages().getHdfImages().stream().map(images -> images.getUuid()));
+        Stream<String> uuidStream = Stream.concat(imageCatalog.getImages().getBaseImages().stream().map(Image::getUuid),
+                imageCatalog.getImages().getHdpImages().stream().map(Image::getUuid));
+        uuidStream = Stream.concat(uuidStream, imageCatalog.getImages().getHdfImages().stream().map(Image::getUuid));
         List<String> uuidList = uuidStream.collect(Collectors.toList());
         List<String> orphanUuids = imageCatalog.getVersions().getCloudbreakVersions().stream().flatMap(cbv -> cbv.getImageIds().stream()).
                 filter(imageId -> !uuidList.contains(imageId)).collect(Collectors.toList());
@@ -83,5 +90,38 @@ public class CachedImageCatalogProvider {
     private String readCatalogFromFile(String catalogUrl) throws IOException {
         File customCatalogFile = new File(etcConfigDir, catalogUrl);
         return FileReaderUtils.readFileFromPath(customCatalogFile.toPath());
+    }
+
+    private void cleanAndValidateMaps(CloudbreakImageCatalogV2 catalog) throws CloudbreakImageCatalogException {
+
+        boolean baseImagesValidate = cleanAndCheckMap(catalog.getImages().getBaseImages());
+        boolean hdfImagesValidate = cleanAndCheckMap(catalog.getImages().getHdfImages());
+        boolean hdpImagesValidate = cleanAndCheckMap(catalog.getImages().getHdpImages());
+
+        if (baseImagesValidate && hdfImagesValidate && hdpImagesValidate) {
+            throw new CloudbreakImageCatalogException("All images are empty or every items equals NULL");
+        }
+
+
+    }
+
+    private boolean cleanAndCheckMap(List<Image> images) throws CloudbreakImageCatalogException {
+        boolean invalid = images.isEmpty();
+        if (!invalid) {
+            for (Image image : images) {
+                image.getImageSetsByProvider().values().removeIf(Objects::isNull);
+                if (image.getImageSetsByProvider().isEmpty()) {
+                    invalid = true;
+                }
+            }
+        }
+
+        return invalid;
+    }
+
+    private void validateCloudBreakVersions(CloudbreakImageCatalogV2 catalog) throws CloudbreakImageCatalogException {
+        if (catalog.getVersions() == null || catalog.getVersions().getCloudbreakVersions().isEmpty()) {
+            throw new CloudbreakImageCatalogException("Cloudbreak versions cannot be NULL");
+        }
     }
 }

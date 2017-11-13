@@ -1,0 +1,11 @@
+{
+
+  "versions": {
+    "cloudbreak": [
+      {
+        "versions": ["v1", "v2"],
+        "images": ["sdf", "kgk"]
+      }
+    ]
+  }
+}

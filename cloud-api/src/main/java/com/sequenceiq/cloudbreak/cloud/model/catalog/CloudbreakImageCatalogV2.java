@@ -1,30 +1,29 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CloudbreakImageCatalogV2 {
 
-    @JsonProperty("images")
     private Images images;
 
-    @JsonProperty("versions")
     private Versions versions;
+
+    @JsonCreator
+    public CloudbreakImageCatalogV2(
+            @JsonProperty(value = "images", required = true) Images images,
+            @JsonProperty(value = "versions", required = true) Versions versions) {
+        this.images = images;
+        this.versions = versions;
+    }
 
     public Images getImages() {
         return images;
     }
 
-    public void setImages(Images images) {
-        this.images = images;
-    }
-
     public Versions getVersions() {
         return versions;
-    }
-
-    public void setVersions(Versions versions) {
-        this.versions = versions;
     }
 }
