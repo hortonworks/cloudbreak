@@ -1,99 +1,81 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
+import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Image {
 
-    @JsonProperty("date")
     private String date;
 
-    @JsonProperty("description")
     private String description;
 
-    @JsonProperty("os")
     private String os;
 
-    @JsonProperty("uuid")
     private String uuid;
 
-    @JsonProperty("version")
     private String version;
 
-    @JsonProperty("repo")
     private Map<String, String> repo;
 
-    @JsonProperty("images")
     private Map<String, Map<String, String>> imageSetsByProvider;
 
-    @JsonProperty("stack-details")
     private StackDetails stackDetails;
+
+    @JsonCreator
+    public Image(
+            @JsonProperty(value = "date", required = true) String date,
+            @JsonProperty(value = "description", required = true) String description,
+            @JsonProperty(value = "os", required = true) String os,
+            @JsonProperty(value = "uuid", required = true) String uuid,
+            @JsonProperty(value = "version") String version,
+            @JsonProperty(value = "repo") Map<String, String> repo,
+            @JsonProperty(value = "images", required = true) Map<String, Map<String, String>> imageSetsByProvider,
+            @JsonProperty(value = "stack-details") StackDetails stackDetails) {
+        this.date = date;
+        this.description = description;
+        this.os = os;
+        this.uuid = uuid;
+        this.version = version;
+        this.repo = (repo == null) ? Collections.emptyMap() : repo;
+        this.imageSetsByProvider = imageSetsByProvider;
+        this.stackDetails = stackDetails;
+    }
 
     public String getDate() {
         return date;
-    }
-
-    public void setDate(String date) {
-        this.date = date;
     }
 
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
     public String getOs() {
         return os;
-    }
-
-    public void setOs(String os) {
-        this.os = os;
     }
 
     public String getUuid() {
         return uuid;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
-    }
-
     public String getVersion() {
         return version;
-    }
-
-    public void setVersion(String version) {
-        this.version = version;
     }
 
     public Map<String, String> getRepo() {
         return repo;
     }
 
-    public void setRepo(Map<String, String> repo) {
-        this.repo = repo;
-    }
-
     public Map<String, Map<String, String>> getImageSetsByProvider() {
         return imageSetsByProvider;
     }
 
-    public void setImageSetsByProvider(Map<String, Map<String, String>> imageSetsByProvider) {
-        this.imageSetsByProvider = imageSetsByProvider;
-    }
-
     public StackDetails getStackDetails() {
         return stackDetails;
-    }
-
-    public void setStackDetails(StackDetails stackDetails) {
-        this.stackDetails = stackDetails;
     }
 
     @Override
