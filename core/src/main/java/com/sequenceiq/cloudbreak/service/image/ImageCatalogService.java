@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static java.util.Collections.emptyList;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -90,7 +92,7 @@ public class ImageCatalogService {
 
     public Images getImages(String platform, String cbVersion) throws CloudbreakImageCatalogException {
         LOGGER.info("Determine images for platform: '{}' and Cloudbreak version: '{}'.", platform, cbVersion);
-        Images images = new Images();
+        Images images;
         CloudbreakImageCatalogV2 imageCatalog = imageCatalogProvider.getImageCatalogV2();
         if (imageCatalog != null) {
             Set<String> vMImageUUIDs = new HashSet<>();
@@ -105,36 +107,28 @@ public class ImageCatalogService {
                 vMImageUUIDs.addAll(prefixMatchForCBVersion(cbVersion, cloudbreakVersions));
             }
 
-            List<Image> baseImages = imageCatalog.getImages().getBaseImages().stream()
-                    .filter(img -> vMImageUUIDs.contains(img.getUuid()))
-                    .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(p -> p.equalsIgnoreCase(platform)))
-                    .collect(Collectors.toList());
-            images.setBaseImages(baseImages);
+            List<Image> baseImages = filterImagesByPlatform(platform, imageCatalog.getImages().getBaseImages(), vMImageUUIDs);
+            List<Image> hdpImages = filterImagesByPlatform(platform, imageCatalog.getImages().getHdpImages(), vMImageUUIDs);
+            List<Image> hdfImages = filterImagesByPlatform(platform, imageCatalog.getImages().getHdfImages(), vMImageUUIDs);
 
-            List<Image> hdpImages = imageCatalog.getImages().getHdpImages().stream()
-                    .filter(img -> vMImageUUIDs.contains(img.getUuid()))
-                    .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(p -> p.equalsIgnoreCase(platform)))
-                    .collect(Collectors.toList());
-            images.setHdpImages(hdpImages);
-
-            List<Image> hdfImages = imageCatalog.getImages().getHdfImages().stream()
-                    .filter(img -> vMImageUUIDs.contains(img.getUuid()))
-                    .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(p -> p.equalsIgnoreCase(platform)))
-                    .collect(Collectors.toList());
-            images.setHdfImages(hdfImages);
+            images = new Images(baseImages, hdpImages, hdfImages);
+        } else {
+            images = new Images(emptyList(), emptyList(), emptyList());
         }
         return images;
+    }
+
+    private List<Image> filterImagesByPlatform(String platform, List<Image> images, Set<String> vMImageUUIDs) {
+        return images.stream()
+                        .filter(img -> vMImageUUIDs.contains(img.getUuid()))
+                        .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(p -> p.equalsIgnoreCase(platform)))
+                        .collect(Collectors.toList());
     }
 
     private String latestCloudbreakVersion(List<CloudbreakVersion> cloudbreakVersions) {
         SortedMap<Versioned, CloudbreakVersion> sortedCloudbreakVersions = new TreeMap<>(new VersionComparator());
         for (CloudbreakVersion cbv : cloudbreakVersions) {
-            cbv.getVersions().forEach(cbvs -> sortedCloudbreakVersions.put(new Versioned() {
-                @Override
-                public String getVersion() {
-                    return cbvs;
-                }
-            }, cbv));
+            cbv.getVersions().forEach(cbvs -> sortedCloudbreakVersions.put(() -> cbvs, cbv));
         }
         return sortedCloudbreakVersions.lastKey().getVersion();
     }
