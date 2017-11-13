@@ -24,9 +24,6 @@ type BlueprintResponse struct {
 	// ambari blueprint JSON, set this or the url field
 	AmbariBlueprint string `json:"ambariBlueprint,omitempty"`
 
-	// gathered from blueprintName field from the blueprint JSON
-	BlueprintName string `json:"blueprintName,omitempty"`
-
 	// description of the resource
 	// Max Length: 1000
 	// Min Length: 0
@@ -54,8 +51,6 @@ type BlueprintResponse struct {
 }
 
 /* polymorph BlueprintResponse ambariBlueprint false */
-
-/* polymorph BlueprintResponse blueprintName false */
 
 /* polymorph BlueprintResponse description false */
 
