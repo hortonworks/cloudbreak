@@ -47,3 +47,4 @@ start-local.sh
 cloudbreak.log
 cloudbreak-log/*.log
 autoscale-log/
+core/cloudbreak-log/

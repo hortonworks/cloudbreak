@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
+import java.util.Collections;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -12,37 +14,32 @@ public class StackRepoDetails {
 
     public static final String MPACK_TAG = "mpack";
 
-    @JsonProperty("stack")
     private Map<String, String> stack;
 
-    @JsonProperty("util")
     private Map<String, String> util;
 
-    @JsonProperty("knox")
     private Map<String, String> knox;
+
+    @JsonCreator
+    public StackRepoDetails(
+            @JsonProperty(value = "stack", required = true) Map<String, String> stack,
+            @JsonProperty(value = "util", required = true) Map<String, String> util,
+            @JsonProperty(value = "knox") Map<String, String> knox) {
+        this.stack = stack;
+        this.util = util;
+        this.knox = (knox == null) ? Collections.emptyMap() : knox;
+    }
 
     public Map<String, String> getStack() {
         return stack;
-    }
-
-    public void setStack(Map<String, String> stack) {
-        this.stack = stack;
     }
 
     public Map<String, String> getUtil() {
         return util;
     }
 
-    public void setUtil(Map<String, String> util) {
-        this.util = util;
-    }
-
     public Map<String, String> getKnox() {
         return knox;
-    }
-
-    public void setKnox(Map<String, String> knox) {
-        this.knox = knox;
     }
 
     @Override
