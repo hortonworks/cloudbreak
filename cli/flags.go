@@ -251,7 +251,7 @@ var (
 		RequiredFlag: REQUIRED,
 		StringFlag: cli.StringFlag{
 			Name:  "execution-type",
-			Usage: "type of execution [pre, post]",
+			Usage: "type of execution [pre-ambari-start, post-ambari-start, post-cluster-install]",
 		},
 	}
 	FlAmbariPasswordOptional = StringFlag{

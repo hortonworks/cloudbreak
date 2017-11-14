@@ -58,10 +58,12 @@ func CreateRecipeFromFile(c *cli.Context) {
 
 func getExecutionType(executionType string) string {
 	switch strings.ToLower(executionType) {
-	case "pre":
-		return "PRE"
-	case "post":
-		return "POST"
+	case "pre-ambari-start":
+		return "PRE_AMBARI_START"
+	case "post-ambari-start":
+		return "POST_AMBARI_START"
+	case "post-cluster-install":
+		return "POST_CLUSTER_INSTALL"
 	default:
 		utils.LogErrorMessageAndExit("Recipe type not supported")
 		panic(3)
