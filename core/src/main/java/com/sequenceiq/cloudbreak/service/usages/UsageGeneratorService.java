@@ -114,7 +114,7 @@ public class UsageGeneratorService {
         if (stack.getCluster() != null && stack.getCluster().getBlueprint() != null) {
             Blueprint bp = stack.getCluster().getBlueprint();
             usage.setBlueprintId(bp.getId());
-            usage.setBlueprintName(bp.getBlueprintName());
+            usage.setBlueprintName(bp.getAmbariName());
         }
         usage.setPeriodStarted(Date.from(LocalDateTime.from(started).atZone(ZoneId.systemDefault()).toInstant()));
         usage.setStatus(UsageStatus.OPEN);

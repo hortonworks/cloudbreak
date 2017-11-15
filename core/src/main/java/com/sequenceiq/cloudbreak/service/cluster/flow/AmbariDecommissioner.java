@@ -266,7 +266,7 @@ public class AmbariDecommissioner {
         Set<HostMetadata> hostsInHostGroup = hostGroup.getHostMetadata();
         List<HostMetadata> filteredHostList = hostFilterService.filterHostsForDecommission(cluster, hostsInHostGroup, hostGroupName);
         int reservedInstances = hostsInHostGroup.size() - filteredHostList.size();
-        String blueprintName = cluster.getBlueprint().getBlueprintName();
+        String blueprintName = cluster.getBlueprint().getAmbariName();
         AmbariClient ambariClient = ambariClientProvider.getAmbariClient(clientConfig, stack.getGatewayPort(), cluster);
         if (ambariClient.getBlueprintMap(blueprintName).get(hostGroupName).contains(DATANODE)) {
             int replication = getReplicationFactor(ambariClient, hostGroupName);

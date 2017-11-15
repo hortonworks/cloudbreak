@@ -65,7 +65,7 @@ public class UptimeNotifier {
             notification.setBlueprintName("null");
         } else {
             notification.setBlueprintId(stack.getCluster().getBlueprint().getId());
-            notification.setBlueprintName(stack.getCluster().getBlueprint().getBlueprintName());
+            notification.setBlueprintName(stack.getCluster().getBlueprint().getAmbariName());
             notification.setClusterName(stack.getCluster().getName());
             notification.setClusterId(stack.getCluster().getId());
         }

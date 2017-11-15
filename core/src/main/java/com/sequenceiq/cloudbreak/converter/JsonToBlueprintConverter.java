@@ -68,7 +68,7 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
 
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            blueprint.setBlueprintName(blueprintUtils.getBlueprintName(root));
+            blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
             blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
@@ -101,7 +101,7 @@ public class JsonToBlueprintConverter extends AbstractConversionServiceAwareConv
         validateBlueprint(blueprint.getBlueprintText());
         try {
             JsonNode root = JsonUtil.readTree(blueprint.getBlueprintText());
-            blueprint.setBlueprintName(blueprintUtils.getBlueprintName(root));
+            blueprint.setAmbariName(blueprintUtils.getBlueprintName(root));
             blueprint.setHostGroupCount(blueprintUtils.countHostGroups(root));
         } catch (IOException e) {
             throw new BadRequestException("Invalid Blueprint: Failed to parse JSON.", e);
