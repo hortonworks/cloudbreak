@@ -1,17 +1,12 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import java.util.Set;
-
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
@@ -33,9 +28,6 @@ public class Recipe implements ProvisionEntity {
     private String name;
 
     private String description;
-
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-    private Set<Plugin> plugins;
 
     @Enumerated(EnumType.STRING)
     private RecipeType recipeType;
@@ -78,14 +70,6 @@ public class Recipe implements ProvisionEntity {
 
     public void setDescription(String description) {
         this.description = description;
-    }
-
-    public Set<Plugin> getPlugins() {
-        return plugins;
-    }
-
-    public void setPlugins(Set<Plugin> plugins) {
-        this.plugins = plugins;
     }
 
     public RecipeType getRecipeType() {

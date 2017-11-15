@@ -4,26 +4,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
-import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent;
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 
 public class FileSystemScriptConfig {
     private final String scriptLocation;
 
-    private final ClusterLifecycleEvent clusterLifecycleEvent;
+    private final RecipeType recipeType;
 
     private final ExecutionType executionType;
 
     private Map<String, String> properties = new HashMap<>();
 
-    public FileSystemScriptConfig(String scriptLocation, ClusterLifecycleEvent clusterLifecycleEvent, ExecutionType executionType) {
+    public FileSystemScriptConfig(String scriptLocation, RecipeType recipeType, ExecutionType executionType) {
         this.scriptLocation = scriptLocation;
-        this.clusterLifecycleEvent = clusterLifecycleEvent;
+        this.recipeType = recipeType;
         this.executionType = executionType;
     }
 
-    public FileSystemScriptConfig(String scriptLocation, ClusterLifecycleEvent clusterLifecycleEvent,
-            ExecutionType executionType, Map<String, String> properties) {
-        this(scriptLocation, clusterLifecycleEvent, executionType);
+    public FileSystemScriptConfig(String scriptLocation, RecipeType recipeType, ExecutionType executionType, Map<String, String> properties) {
+        this(scriptLocation, recipeType, executionType);
         this.properties = properties;
     }
 
@@ -31,8 +30,8 @@ public class FileSystemScriptConfig {
         return scriptLocation;
     }
 
-    public ClusterLifecycleEvent getClusterLifecycleEvent() {
-        return clusterLifecycleEvent;
+    public RecipeType getRecipeType() {
+        return recipeType;
     }
 
     public ExecutionType getExecutionType() {
