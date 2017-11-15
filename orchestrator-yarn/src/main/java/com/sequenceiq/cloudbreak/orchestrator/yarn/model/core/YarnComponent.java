@@ -21,6 +21,8 @@ public class YarnComponent implements JsonEntity {
 
     private Boolean runPrivilegedContainer;
 
+    private Configuration configuration;
+
     @JsonProperty("run_privileged_container")
     public Boolean getRunPrivilegedContainer() {
         return runPrivilegedContainer;
@@ -80,5 +82,11 @@ public class YarnComponent implements JsonEntity {
         this.dependencies = dependencies;
     }
 
+    public Configuration getConfiguration() {
+        return configuration;
+    }
 
+    public void setConfiguration(Configuration configuration) {
+        this.configuration = configuration;
+    }
 }
