@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -47,6 +48,18 @@ public class ClusterComponentConfigProvider {
         }
     }
 
+    public StackRepoDetails getStackRepo(Set<ClusterComponent> clusterComponents) {
+        try {
+            StackRepoDetails component = getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDP_REPO_DETAILS);
+            if (component == null) {
+                component = getComponent(Lists.newArrayList(clusterComponents), StackRepoDetails.class, ComponentType.HDF_REPO_DETAILS);
+            }
+            return component;
+        } catch (Exception e) {
+            throw new CloudbreakServiceException("Failed to read HDP repo details.", e);
+        }
+    }
+
     public AmbariRepo getAmbariRepo(Long clusterId) {
         try {
             ClusterComponent component = getComponent(clusterId, ComponentType.AMBARI_REPO_DETAILS);
@@ -55,6 +68,14 @@ public class ClusterComponentConfigProvider {
             }
             return component.getAttributes().get(AmbariRepo.class);
         } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read Ambari repo", e);
+        }
+    }
+
+    public AmbariRepo getAmbariRepo(Set<ClusterComponent> clusterComponents) {
+        try {
+            return getComponent(Lists.newArrayList(clusterComponents), AmbariRepo.class, ComponentType.AMBARI_REPO_DETAILS);
+        } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to read Ambari repo", e);
         }
     }
@@ -77,6 +98,14 @@ public class ClusterComponentConfigProvider {
             }
             return component.getAttributes().get(AmbariDatabase.class);
         } catch (IOException e) {
+            throw new CloudbreakServiceException("Failed to read Ambari database", e);
+        }
+    }
+
+    public AmbariDatabase getAmbariDatabase(Set<ClusterComponent> clusterComponents) {
+        try {
+            return getComponent(Lists.newArrayList(clusterComponents), AmbariDatabase.class, ComponentType.AMBARI_DATABASE_DETAILS);
+        } catch (Exception e) {
             throw new CloudbreakServiceException("Failed to read Ambari database", e);
         }
     }
