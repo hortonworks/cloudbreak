@@ -69,9 +69,9 @@ public class YarnPlatformParameters implements PlatformParameters {
 
     @PostConstruct
     public void init() {
-        defaultRegion = getDefaultRegion();
         String zone = resourceDefinition("zone");
         regions = readRegions(zone);
+        defaultRegion = getDefaultRegion();
     }
 
     @Override

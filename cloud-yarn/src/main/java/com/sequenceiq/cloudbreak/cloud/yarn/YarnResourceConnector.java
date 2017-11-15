@@ -4,8 +4,10 @@ import static com.sequenceiq.cloudbreak.common.type.ResourceType.YARN_APPLICATIO
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.model.AdjustmentType;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -25,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.yarn.auth.YarnClientUtil;
@@ -33,6 +37,9 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.yarn.api.YarnResourceConstants;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.client.YarnClient;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Artifact;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.ConfigFile;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.ConfigFileType;
+import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Configuration;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Resource;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.ApplicationDetailRequest;
@@ -49,15 +56,18 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     @Inject
     private YarnClientUtil yarnClientUtil;
 
-    private int maxResourceNameLength;
+    // TODO from parameter
+    private int maxResourceNameLength = 50;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
             AdjustmentType adjustmentType, Long threshold) throws Exception {
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();
         createApplicationRequest.setName(createApplicationName(authenticatedContext));
-        createApplicationRequest.setQueue(stack.getParameters().get(YarnConstants.YARN_QUEUE_PARAMETER));
-        createApplicationRequest.setLifetime(YarnResourceConstants.UNLIMITED);
+        // TODO default from application.yml
+        createApplicationRequest.setQueue(stack.getParameters().getOrDefault(YarnConstants.YARN_QUEUE_PARAMETER, "default-developers"));
+        // TODO lifetime from parameter or unlimited
+        createApplicationRequest.setLifetime(600);
 
         Artifact artifact = new Artifact();
         artifact.setId(stack.getImage().getImageName());
@@ -69,7 +79,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             component.setName(group.getName());
             component.setNumberOfContainers(group.getInstancesSize());
             // TODO launch command
-            component.setLaunchCommand("");
+            component.setLaunchCommand("/bootstrap/privileged-start-services-script");
             component.setArtifact(artifact);
             component.setDependencies(new ArrayList<>());
             InstanceTemplate instanceTemplate = group.getReferenceInstanceConfiguration().getTemplate();
@@ -78,8 +88,21 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
             resource.setMemory(instanceTemplate.getParameter(YarnConstants.YARN_MEMORY_PARAMETER, Integer.class));
             component.setResource(resource);
             component.setRunPrivilegedContainer(true);
+            String userData = stack.getImage().getUserData(group.getType());
+            ConfigFile configFile = new ConfigFile();
+            Map<String, String> propsMap = Maps.newHashMap();
+            propsMap.put("userData", Base64.getEncoder().encodeToString(userData.getBytes()));
+            propsMap.put("sshUser", stack.getLoginUserName());
+            propsMap.put("sshPubKey", stack.getPublicKey());
+            configFile.setProps(propsMap);
+            configFile.setDestFile("/etc/cloudbreak.properties");
+            configFile.setType(ConfigFileType.PROPERTIES.name());
+            Configuration configuration = new Configuration();
+            configuration.setFiles(Collections.singletonList(configFile));
+            component.setConfiguration(configuration);
             components.add(component);
         }
+        createApplicationRequest.setComponents(components);
         CloudResource yarnApplication = new CloudResource.Builder().type(YARN_APPLICATION).name(createApplicationRequest.getName()).build();
         persistenceNotifier.notifyAllocation(yarnApplication, authenticatedContext.getCloudContext());
 
@@ -109,6 +132,8 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
                         if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_SUCCESS) {
                             ApplicationDetailResponse applicationDetailResponse = (ApplicationDetailResponse) responseContext.getResponseObject();
                             result.add(new CloudResourceStatus(resource, YarnApplicationStatus.mapResourceStatus(applicationDetailResponse.getState())));
+                        } else if (responseContext.getStatusCode() == YarnResourceConstants.HTTP_NOT_FOUND) {
+                            result.add(new CloudResourceStatus(resource, ResourceStatus.DELETED));
                         } else if (responseContext.getResponseError() != null) {
                             throw new CloudConnectorException(String.format("Yarn Application status check failed: HttpStatusCode: %d, Error: %s",
                                     responseContext.getStatusCode(), responseContext.getResponseError().getDiagnostics()));
