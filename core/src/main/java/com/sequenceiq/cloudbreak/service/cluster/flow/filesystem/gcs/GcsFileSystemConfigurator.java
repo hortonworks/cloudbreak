@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.gcs;
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ONE_NODE;
 import static com.sequenceiq.cloudbreak.api.model.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.POST_INSTALL;
-import static com.sequenceiq.cloudbreak.service.cluster.flow.ClusterLifecycleEvent.PRE_INSTALL;
+import static com.sequenceiq.cloudbreak.common.type.RecipeType.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.common.type.RecipeType.POST_CLUSTER_INSTALL;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,9 +28,9 @@ public class GcsFileSystemConfigurator extends AbstractFileSystemConfigurator<Gc
         String privateKey = getPrivateKey(credential);
         Map<String, String> properties = Collections.singletonMap("P12KEY", privateKey);
         List<FileSystemScriptConfig> fsScriptConfigs = new ArrayList<>();
-        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", PRE_INSTALL, ALL_NODES, properties));
-        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector-local.sh", PRE_INSTALL, ALL_NODES));
-        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector-hdfs.sh", POST_INSTALL, ONE_NODE));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-p12.sh", POST_AMBARI_START, ALL_NODES, properties));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector-local.sh", POST_AMBARI_START, ALL_NODES));
+        fsScriptConfigs.add(new FileSystemScriptConfig("scripts/gcs-connector-hdfs.sh", POST_CLUSTER_INSTALL, ONE_NODE));
         return fsScriptConfigs;
     }
 

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
 import com.sequenceiq.cloudbreak.api.model.InstanceGroupType;
+import com.sequenceiq.cloudbreak.common.type.RecipeType;
 import com.sequenceiq.cloudbreak.core.CloudbreakException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.OrchestratorTypeResolver;
 import com.sequenceiq.cloudbreak.domain.Cluster;
@@ -126,7 +127,7 @@ public class RecipeEngine {
             if (cluster != null && ExecutorType.CONTAINER.equals(cluster.getExecutorType())) {
                 for (HostGroup hostGroup : hostGroups) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/configure-container-executor.sh");
-                    RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
+                    RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("configure-container-executor",
                             Collections.singletonList(recipeScript)).get(0);
                     hostGroup.addRecipe(recipe);
@@ -176,7 +177,7 @@ public class RecipeEngine {
             for (HostGroup hostGroup : hostGroups) {
                 if (isComponentPresent(blueprintText, "NAMENODE", hostGroup)) {
                     String script = FileReaderUtils.readFileFromClasspath("scripts/hdfs-home.sh").replaceAll("\\$USER", cluster.getUserName());
-                    RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
+                    RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
                     Recipe recipe = recipeBuilder.buildRecipes("hdfs-home", Collections.singletonList(recipeScript)).get(0);
                     hostGroup.addRecipe(recipe);
                     break;
@@ -195,7 +196,7 @@ public class RecipeEngine {
                 for (HostGroup hostGroup : hostGroups) {
                     if (isComponentPresent(blueprintText, "HST_AGENT", hostGroup)) {
                         String script = FileReaderUtils.readFileFromClasspath("scripts/smartsense-capture-schedule.sh");
-                        RecipeScript recipeScript = new RecipeScript(script, ClusterLifecycleEvent.POST_INSTALL);
+                        RecipeScript recipeScript = new RecipeScript(script, RecipeType.POST_CLUSTER_INSTALL);
                         Recipe recipe = recipeBuilder.buildRecipes("smartsense-capture-schedule",
                                 Collections.singletonList(recipeScript)).get(0);
                         hostGroup.addRecipe(recipe);
