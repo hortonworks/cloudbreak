@@ -28,6 +28,7 @@ import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.cloudbreak.api.model.AmbariDatabaseDetailsJson;
 import com.sequenceiq.cloudbreak.api.model.AmbariRepoDetailsJson;
+import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsResponse;
 import com.sequenceiq.cloudbreak.api.model.BlueprintInputJson;
 import com.sequenceiq.cloudbreak.api.model.BlueprintResponse;
 import com.sequenceiq.cloudbreak.api.model.ClusterResponse;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
+import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.controller.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.controller.json.JsonHelper;
 import com.sequenceiq.cloudbreak.controller.validation.blueprint.BlueprintValidator;
@@ -155,17 +157,22 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
             clusterResponse.setBlueprintCustomProperties(jsonHelper.createJsonFromString(source.getBlueprintCustomProperties()));
         }
         convertContainerConfig(source, clusterResponse);
-        convertComponentConfig(clusterResponse, source.getId());
-        convertAmbariDatabaseComponentConfig(clusterResponse, source.getId());
+        convertComponentConfig(clusterResponse, source);
+        convertAmbariDatabaseComponentConfig(clusterResponse, source);
         return clusterResponse;
     }
 
-    private void convertComponentConfig(ClusterResponse response, Long clusterId) {
+    private void convertComponentConfig(ClusterResponse response, Cluster source) {
         try {
-            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(clusterId);
+            AmbariRepo ambariRepo = componentConfigProvider.getAmbariRepo(source.getComponents());
             if (ambariRepo != null) {
                 AmbariRepoDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariRepo, AmbariRepoDetailsJson.class);
                 response.setAmbariRepoDetailsJson(ambariRepoDetailsJson);
+            }
+            StackRepoDetails stackRepoDetails = componentConfigProvider.getStackRepo(source.getComponents());
+            if (stackRepoDetails != null) {
+                AmbariStackDetailsResponse ambariRepoDetailsJson = conversionService.convert(stackRepoDetails, AmbariStackDetailsResponse.class);
+                response.setAmbariStackDetails(ambariRepoDetailsJson);
             }
         } catch (RuntimeException e) {
             LOGGER.error("Failed to convert dynamic component.", e);
@@ -173,9 +180,9 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
 
     }
 
-    private void convertAmbariDatabaseComponentConfig(ClusterResponse response, Long clusterId) {
+    private void convertAmbariDatabaseComponentConfig(ClusterResponse response, Cluster source) {
         try {
-            AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(clusterId);
+            AmbariDatabase ambariDatabase = componentConfigProvider.getAmbariDatabase(source.getComponents());
             if (ambariDatabase != null) {
                 AmbariDatabaseDetailsJson ambariRepoDetailsJson = conversionService.convert(ambariDatabase, AmbariDatabaseDetailsJson.class);
                 response.setAmbariDatabaseDetails(ambariRepoDetailsJson);
