@@ -58,9 +58,6 @@ type StackRequest struct {
 	// custom hostname for nodes in the stack
 	CustomHostname string `json:"customHostname,omitempty"`
 
-	// custom image for the cluster
-	CustomImage string `json:"customImage,omitempty"`
-
 	// stack related default tags
 	DefaultTags map[string]string `json:"defaultTags,omitempty"`
 
@@ -78,6 +75,9 @@ type StackRequest struct {
 
 	// custom image catalog URL
 	ImageCatalog string `json:"imageCatalog,omitempty"`
+
+	// virtual machine image id from ImageCatalog, machines of the cluster will be started from this image
+	ImageID string `json:"imageId,omitempty"`
 
 	// collection of instance groupst
 	// Required: true
@@ -142,8 +142,6 @@ type StackRequest struct {
 
 /* polymorph StackRequest customHostname false */
 
-/* polymorph StackRequest customImage false */
-
 /* polymorph StackRequest defaultTags false */
 
 /* polymorph StackRequest failurePolicy false */
@@ -155,6 +153,8 @@ type StackRequest struct {
 /* polymorph StackRequest hostgroupNameAsHostname false */
 
 /* polymorph StackRequest imageCatalog false */
+
+/* polymorph StackRequest imageId false */
 
 /* polymorph StackRequest instanceGroups false */
 

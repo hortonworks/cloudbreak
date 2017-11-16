@@ -84,6 +84,62 @@ func (a *Client) GetEventsBySTackID(params *GetEventsBySTackIDParams) (*GetEvent
 
 }
 
+/*
+GetStructuredEvents get structured events API
+*/
+func (a *Client) GetStructuredEvents(params *GetStructuredEventsParams) (*GetStructuredEventsOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetStructuredEventsParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getStructuredEvents",
+		Method:             "GET",
+		PathPattern:        "/v1/events/struct/{stackId}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetStructuredEventsReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return result.(*GetStructuredEventsOK), nil
+
+}
+
+/*
+GetStructuredEventsZip get structured events zip API
+*/
+func (a *Client) GetStructuredEventsZip(params *GetStructuredEventsZipParams) error {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewGetStructuredEventsZipParams()
+	}
+
+	_, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "getStructuredEventsZip",
+		Method:             "GET",
+		PathPattern:        "/v1/events/struct/zip/{stackId}",
+		ProducesMediaTypes: []string{"application/octet-stream"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http", "https"},
+		Params:             params,
+		Reader:             &GetStructuredEventsZipReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+
+}
+
 // SetTransport changes the transport on the client
 func (a *Client) SetTransport(transport runtime.ClientTransport) {
 	a.transport = transport

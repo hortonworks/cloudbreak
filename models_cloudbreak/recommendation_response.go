@@ -20,6 +20,10 @@ import (
 
 type RecommendationResponse struct {
 
+	// disk responses
+	// Unique: true
+	DiskResponses []*DiskResponse `json:"diskResponses"`
+
 	// recommendations
 	Recommendations map[string]VMTypeJSON `json:"recommendations,omitempty"`
 
@@ -28,6 +32,8 @@ type RecommendationResponse struct {
 	VirtualMachines []*VMTypeJSON `json:"virtualMachines"`
 }
 
+/* polymorph RecommendationResponse diskResponses false */
+
 /* polymorph RecommendationResponse recommendations false */
 
 /* polymorph RecommendationResponse virtualMachines false */
@@ -35,6 +41,11 @@ type RecommendationResponse struct {
 // Validate validates this recommendation response
 func (m *RecommendationResponse) Validate(formats strfmt.Registry) error {
 	var res []error
+
+	if err := m.validateDiskResponses(formats); err != nil {
+		// prop
+		res = append(res, err)
+	}
 
 	if err := m.validateRecommendations(formats); err != nil {
 		// prop
@@ -49,6 +60,37 @@ func (m *RecommendationResponse) Validate(formats strfmt.Registry) error {
 	if len(res) > 0 {
 		return errors.CompositeValidationError(res...)
 	}
+	return nil
+}
+
+func (m *RecommendationResponse) validateDiskResponses(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.DiskResponses) { // not required
+		return nil
+	}
+
+	if err := validate.UniqueItems("diskResponses", "body", m.DiskResponses); err != nil {
+		return err
+	}
+
+	for i := 0; i < len(m.DiskResponses); i++ {
+
+		if swag.IsZero(m.DiskResponses[i]) { // not required
+			continue
+		}
+
+		if m.DiskResponses[i] != nil {
+
+			if err := m.DiskResponses[i].Validate(formats); err != nil {
+				if ve, ok := err.(*errors.Validation); ok {
+					return ve.ValidateName("diskResponses" + "." + strconv.Itoa(i))
+				}
+				return err
+			}
+		}
+
+	}
+
 	return nil
 }
 

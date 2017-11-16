@@ -145,66 +145,6 @@ func (a *Client) GetGatewaysCredentialID(params *GetGatewaysCredentialIDParams) 
 }
 
 /*
-GetImages retrives available images
-
-Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-*/
-func (a *Client) GetImages(params *GetImagesParams) (*GetImagesOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetImagesParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getImages",
-		Method:             "GET",
-		PathPattern:        "/v1/connectors/images",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetImagesReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetImagesOK), nil
-
-}
-
-/*
-GetImagesByType retrives images by type
-
-Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
-*/
-func (a *Client) GetImagesByType(params *GetImagesByTypeParams) (*GetImagesByTypeOK, error) {
-	// TODO: Validate the params before sending
-	if params == nil {
-		params = NewGetImagesByTypeParams()
-	}
-
-	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "getImagesByType",
-		Method:             "GET",
-		PathPattern:        "/v1/connectors/images/{type}",
-		ProducesMediaTypes: []string{"application/json"},
-		ConsumesMediaTypes: []string{"application/json"},
-		Schemes:            []string{"http", "https"},
-		Params:             params,
-		Reader:             &GetImagesByTypeReader{formats: a.formats},
-		Context:            params.Context,
-		Client:             params.HTTPClient,
-	})
-	if err != nil {
-		return nil, err
-	}
-	return result.(*GetImagesByTypeOK), nil
-
-}
-
-/*
 GetIPPoolsCredentialID retrives ip pools with properties
 
 Each cloud provider has it's own specific resources like instance types and disk types. These endpoints are collecting them.
