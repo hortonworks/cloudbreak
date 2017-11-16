@@ -19,6 +19,8 @@ dependencies {
   compile group: 'org.glassfish.jersey.core',     name: 'jersey-client',                  version: jerseyCoreVersion
   compile group: 'org.glassfish.jersey.media',    name: 'jersey-media-json-jackson',      version: jerseyCoreVersion
   compile group: 'org.glassfish.jersey.ext',      name: 'jersey-proxy-client',            version: jerseyCoreVersion
+  compile group: 'org.bouncycastle',              name: 'bcprov-jdk15on',                 version: bouncycastleVersion
+  compile group: 'org.bouncycastle',              name: 'bcpkix-jdk15on',                 version: bouncycastleVersion
 
   compile group: 'com.fasterxml.jackson.jaxrs',   name: 'jackson-jaxrs-json-provider',    version: jacksonVersion
   compile (group: 'com.fasterxml.jackson.core',   name: 'jackson-databind',               version: jacksonVersion) {
@@ -28,13 +30,16 @@ dependencies {
   compile group: 'org.apache.httpcomponents',     name: 'httpclient',                     version: '4.5.1'
   compile group: 'org.glassfish.jersey.connectors',  name: 'jersey-apache-connector',     version: jerseyCoreVersion
   compile group: 'com.google.code.findbugs',      name: 'annotations',                    version: '3.0.1'
+  compile group: 'org.springframework.boot',      name: 'spring-boot-starter-security',   version: springBootVersion
+  compile group: 'com.google.guava',              name: 'guava',                          version: guavaVersion
+  compile group: 'org.springframework.security.oauth', name: 'spring-security-oauth2',    version: springOauthVersion
+  compile group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
 
   testCompile group: 'org.mockito',               name: 'mockito-all',                    version: mockitoAllVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
   testCompile group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
   testCompile group: 'junit',                     name: 'junit',                          version: junitVersion
 
-  compile project(':cloud-common')
   compile project(':structuredevent-model')
 }
 

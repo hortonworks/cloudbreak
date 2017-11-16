@@ -14,7 +14,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
 
-import com.sequenceiq.cloudbreak.common.type.DirectoryType;
+import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 
 @Entity
 @Table(name = "ldapconfig", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))

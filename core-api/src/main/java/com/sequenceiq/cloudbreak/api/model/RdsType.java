@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.common.type;
+package com.sequenceiq.cloudbreak.api.model;
 
 public enum RdsType {
 

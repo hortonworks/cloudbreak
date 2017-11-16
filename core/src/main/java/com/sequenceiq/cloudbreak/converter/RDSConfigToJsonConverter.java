@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.model.RDSConfigResponse;
 import com.sequenceiq.cloudbreak.api.model.RdsConfigPropertyJson;
-import com.sequenceiq.cloudbreak.common.type.RdsType;
+import com.sequenceiq.cloudbreak.api.model.RdsType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.json.Json;
 

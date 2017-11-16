@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.common.type;
 
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
+
 public enum RecipeExecutionPhase {
 
     PRE("pre"),

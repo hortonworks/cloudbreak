@@ -13,7 +13,7 @@ import javax.persistence.UniqueConstraint;
 
 import org.hibernate.annotations.Type;
 
-import com.sequenceiq.cloudbreak.common.type.RecipeType;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
 
 @Entity
 @Table(name = "recipe", uniqueConstraints = @UniqueConstraint(columnNames = {"account", "name"}))

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.init.blueprint;
 
-import static com.sequenceiq.cloudbreak.common.type.ResourceStatus.DEFAULT;
+import static com.sequenceiq.cloudbreak.api.model.ResourceStatus.DEFAULT;
 
 import java.util.Collection;
 import java.util.HashMap;

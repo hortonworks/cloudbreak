@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import com.sequenceiq.cloudbreak.common.type.RecipeType;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
 
 public class RecipeModel {
 
