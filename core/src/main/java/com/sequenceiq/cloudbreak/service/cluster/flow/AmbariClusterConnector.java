@@ -42,6 +42,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Sets;
 import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.services.BlueprintService;
@@ -296,7 +297,7 @@ public class AmbariClusterConnector {
             Set<HostGroup> hostGroups = hostGroupService.getByCluster(cluster.getId());
             Map<String, List<Map<String, String>>> hostGroupMappings = buildHostGroupAssociations(hostGroups);
 
-            recipeEngine.executePostAmbariStartRecipes(stack);
+            recipeEngine.executePostAmbariStartRecipes(stack, hostGroups);
             Set<RDSConfig> rdsConfigs = rdsConfigRepository.findByClusterId(stack.getOwner(), stack.getAccount(), cluster.getId());
 
             String blueprintText = updateBlueprintWithInputs(cluster, cluster.getBlueprint(), rdsConfigs);
@@ -415,7 +416,7 @@ public class AmbariClusterConnector {
         List<String> existingHosts = ambariClient.getClusterHosts();
         List<String> upscaleHostNames = getHostNames(hostMetadata).stream().filter(hostName -> !existingHosts.contains(hostName)).collect(Collectors.toList());
         if (!upscaleHostNames.isEmpty()) {
-            recipeEngine.executePostAmbariStartRecipes(stack);
+            recipeEngine.executePostAmbariStartRecipes(stack, Sets.newHashSet(hostGroup));
             PollingResult pollingResult = ambariOperationService.waitForOperations(stack, ambariClient,
                 installServices(upscaleHostNames, stack, ambariClient, hostGroup.getName()), UPSCALE_AMBARI_PROGRESS_STATE);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_UPSCALE_FAILED.code()));
