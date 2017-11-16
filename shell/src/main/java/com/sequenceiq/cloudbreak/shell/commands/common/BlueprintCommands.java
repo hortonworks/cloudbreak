@@ -60,17 +60,13 @@ public class BlueprintCommands implements BaseCommands {
                 }
                 shellContext.addBlueprint(id);
                 if (shellContext.cloudbreakClient().blueprintEndpoint().getPublics().isEmpty()) {
-                    if (shellContext.isMarathonMode()) {
-                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
-                    } else if (shellContext.isYarnMode()) {
+                    if (shellContext.isYarnMode()) {
                         shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
                     } else {
                         shellContext.setHint(Hints.CONFIGURE_INSTANCEGROUP);
                     }
                 } else {
-                    if (shellContext.isMarathonMode()) {
-                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
-                    } else if (shellContext.isYarnMode()) {
+                    if (shellContext.isYarnMode()) {
                         shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
                     } else {
                         shellContext.setHint(Hints.SELECT_STACK);
@@ -115,11 +111,8 @@ public class BlueprintCommands implements BaseCommands {
             if (id != null) {
                 if (shellContext.cloudbreakClient().blueprintEndpoint().get(id) != null) {
                     shellContext.addBlueprint(id.toString());
-                    shellContext.resetMarathonHostGroups();
                     shellContext.resetYarnHostGroups();
-                    if (shellContext.isMarathonMode()) {
-                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
-                    } else if (shellContext.isYarnMode()) {
+                    if (shellContext.isYarnMode()) {
                         shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
                     } else if (shellContext.getStackId() != null) {
                         shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);
@@ -132,11 +125,8 @@ public class BlueprintCommands implements BaseCommands {
                 BlueprintResponse blueprint = shellContext.cloudbreakClient().blueprintEndpoint().getPublic(name);
                 if (blueprint != null) {
                     shellContext.addBlueprint(blueprint.getId().toString());
-                    shellContext.resetMarathonHostGroups();
                     shellContext.resetYarnHostGroups();
-                    if (shellContext.isMarathonMode()) {
-                        shellContext.setHint(Hints.CONFIGURE_MARATHON_HOSTGROUP);
-                    } else if (shellContext.isYarnMode()) {
+                    if (shellContext.isYarnMode()) {
                         shellContext.setHint(Hints.CONFIGURE_YARN_HOSTGROUP);
                     } else if (shellContext.getStackId() != null) {
                         shellContext.setHint(Hints.CONFIGURE_HOSTGROUP);

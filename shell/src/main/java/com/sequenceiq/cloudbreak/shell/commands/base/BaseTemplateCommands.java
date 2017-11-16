@@ -31,7 +31,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
     @CliAvailabilityIndicator("template list")
     @Override
     public boolean listAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "template list", help = "Shows the currently available cloud templates")
@@ -48,7 +48,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
     @CliAvailabilityIndicator("template show")
     @Override
     public boolean showAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
     @CliAvailabilityIndicator("template delete")
     @Override
     public boolean deleteAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @Override
@@ -143,7 +143,7 @@ public class BaseTemplateCommands implements BaseCommands, TemplateCommands {
 
     @Override
     public boolean createTemplateAvailable(String platform) {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @Override

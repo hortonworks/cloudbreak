@@ -96,15 +96,9 @@ public class ShellContext {
 
     private Boolean defaultFileSystem;
 
-    private Long selectedMarathonStackId;
-
-    private String selectedMarathonStackName;
-
     private Set<String> constraintTemplates;
 
     private Set<String> enabledPlatforms = new HashSet<>();
-
-    private Map<String, MarathonHostgroupEntry> marathonHostgroups;
 
     private Long selectedYarnStackId;
 
@@ -139,7 +133,6 @@ public class ShellContext {
         activeHostGroups = new HashSet<>();
         activeInstanceGroups = new HashSet<>();
         constraintTemplates = new HashSet<>();
-        marathonHostgroups = new HashMap<>();
         yarnHostgroups = new HashMap<>();
     }
 
@@ -266,34 +259,6 @@ public class ShellContext {
         }
     }
 
-    public Long getSelectedMarathonStackId() {
-        return selectedMarathonStackId;
-    }
-
-    public String getSelectedMarathonStackName() {
-        return selectedMarathonStackName;
-    }
-
-    public void setSelectedMarathonStackName(String selectedMarathonStackName) {
-        this.selectedMarathonStackName = selectedMarathonStackName;
-    }
-
-    public boolean isSelectedMarathonStackAvailable() {
-        return selectedMarathonStackId != null;
-    }
-
-    public void resetSelectedMarathonStackId() {
-        selectedMarathonStackId = null;
-    }
-
-    public void setSelectedMarathonStackId(Long selectedMarathonStackId) {
-        this.selectedMarathonStackId = selectedMarathonStackId;
-    }
-
-    public void resetMarathonHostGroups() {
-        marathonHostgroups = new HashMap<>();
-    }
-
     public Long getSelectedYarnStackId() {
         return selectedYarnStackId;
     }
@@ -347,15 +312,6 @@ public class ShellContext {
 
     public void setEnabledPlatforms(Set<String> enabledPlatforms) {
         this.enabledPlatforms = enabledPlatforms;
-    }
-
-    public Map<String, MarathonHostgroupEntry> putMarathonHostGroup(String name, MarathonHostgroupEntry hostgroupEntry) {
-        marathonHostgroups.put(name, hostgroupEntry);
-        return marathonHostgroups;
-    }
-
-    public Map<String, MarathonHostgroupEntry> getMarathonHostGroups() {
-        return marathonHostgroups;
     }
 
     public Map<String, AvailabilitySetEntry> putAzureAvailabilitySet(String name, AvailabilitySetEntry azureAvailabilitySetEntry) {
@@ -713,10 +669,6 @@ public class ShellContext {
 
     private boolean isPropertyAvailable(PropertyKey key) {
         return properties.get(key) != null && !properties.get(key).isEmpty();
-    }
-
-    public boolean isMarathonMode() {
-        return "MESOS".equals(byosOrchestrator);
     }
 
     public boolean isYarnMode() {

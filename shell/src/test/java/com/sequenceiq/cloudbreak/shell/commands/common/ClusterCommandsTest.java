@@ -54,10 +54,8 @@ public class ClusterCommandsTest {
     public void clusterUpscaleForDefaultModeStack() throws Exception {
         Long stackId = 1L;
         String stackIdStr = stackId.toString();
-        given(shellContext.isMarathonMode()).willReturn(false);
         given(shellContext.isYarnMode()).willReturn(false);
         given(shellContext.getStackId()).willReturn(stackIdStr);
-        given(shellContext.getSelectedMarathonStackId()).willReturn(null);
         given(shellContext.getSelectedYarnStackId()).willReturn(null);
 
         HostGroup hostGroup = new HostGroup("master");
@@ -65,20 +63,6 @@ public class ClusterCommandsTest {
 
         verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(addNodeResult, containsString("id: " + stackIdStr));
-    }
-
-    @Test
-    public void clusterUpscaleForMarathonModeStack() throws Exception {
-        Long stackId = 42L;
-        given(shellContext.isMarathonMode()).willReturn(true);
-        given(shellContext.getStackId()).willReturn(null);
-        given(shellContext.getSelectedMarathonStackId()).willReturn(stackId);
-
-        HostGroup hostGroup = new HostGroup("master");
-        String addNodeResult = underTest.addNode(hostGroup, +1, false, null);
-
-        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
-        Assert.assertThat(addNodeResult, containsString("id: " + stackId));
     }
 
     @Test
@@ -99,10 +83,8 @@ public class ClusterCommandsTest {
     public void clusterDownscaleForDefaultModeStack() throws Exception {
         Long stackId = 1L;
         String stackIdStr = stackId.toString();
-        given(shellContext.isMarathonMode()).willReturn(false);
         given(shellContext.isYarnMode()).willReturn(false);
         given(shellContext.getStackId()).willReturn(stackIdStr);
-        given(shellContext.getSelectedMarathonStackId()).willReturn(null);
         given(shellContext.getSelectedYarnStackId()).willReturn(null);
 
         HostGroup hostGroup = new HostGroup("master");
@@ -110,20 +92,6 @@ public class ClusterCommandsTest {
 
         verify(clusterV1Endpoint).put(eq(stackId), anyObject());
         Assert.assertThat(removeNodeResult, containsString("id: " + stackIdStr));
-    }
-
-    @Test
-    public void clusterDownscaleForMarathonModeStack() throws Exception {
-        Long stackId = 42L;
-        given(shellContext.isMarathonMode()).willReturn(true);
-        given(shellContext.getStackId()).willReturn(null);
-        given(shellContext.getSelectedMarathonStackId()).willReturn(stackId);
-
-        HostGroup hostGroup = new HostGroup("master");
-        String removeNodeResult = underTest.removeNode(hostGroup, -1, false, false, null);
-
-        verify(clusterV1Endpoint).put(eq(stackId), anyObject());
-        Assert.assertThat(removeNodeResult, containsString("id: " + stackId));
     }
 
     @Test

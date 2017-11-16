@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.shell.commands.common.SmartSenseSubscriptionCom
 import com.sequenceiq.cloudbreak.shell.commands.provider.AwsCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.AzureCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.GcpCommands;
-import com.sequenceiq.cloudbreak.shell.commands.provider.MarathonCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.OpenStackCommands;
 import com.sequenceiq.cloudbreak.shell.commands.provider.YarnCommands;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -154,11 +153,6 @@ public class CommandDefinition {
     @Bean
     public YarnCommands yarnCommands() {
         return new YarnCommands(shellContext, baseCredentialCommands(), stackCommands());
-    }
-
-    @Bean
-    public MarathonCommands marathonCommands() {
-        return new MarathonCommands(shellContext, baseCredentialCommands(), stackCommands());
     }
 
     @Bean

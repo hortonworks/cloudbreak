@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.converter;
 
-import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.MARATHON;
 import static com.sequenceiq.cloudbreak.common.type.OrchestratorConstants.YARN;
 import static com.sequenceiq.cloudbreak.domain.ClusterAttributes.CUSTOM_QUEUE;
 
@@ -384,7 +383,7 @@ public class ClusterToJsonConverter extends AbstractConversionServiceAwareConver
         String orchestrator = cluster.getStack().getOrchestrator().getType();
         if (ambariIp != null) {
             Gateway gateway = cluster.getGateway();
-            if (YARN.equals(orchestrator) || MARATHON.equals(orchestrator)) {
+            if (YARN.equals(orchestrator)) {
                 url = String.format("http://%s:8080", ambariIp);
             } else {
                 if (gateway.getEnableGateway() != null && gateway.getEnableGateway()) {

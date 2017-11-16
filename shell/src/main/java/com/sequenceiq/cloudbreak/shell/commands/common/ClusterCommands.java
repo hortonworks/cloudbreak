@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.shell.completion.HostGroup;
 import com.sequenceiq.cloudbreak.shell.model.Hints;
 import com.sequenceiq.cloudbreak.shell.model.HostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.InstanceGroupEntry;
-import com.sequenceiq.cloudbreak.shell.model.MarathonHostgroupEntry;
 import com.sequenceiq.cloudbreak.shell.model.NodeCountEntry;
 import com.sequenceiq.cloudbreak.shell.model.OutPutType;
 import com.sequenceiq.cloudbreak.shell.model.ShellContext;
@@ -75,10 +74,7 @@ public class ClusterCommands implements BaseCommands {
             return false;
         }
 
-        if (shellContext.isMarathonMode()) {
-            return shellContext.isSelectedMarathonStackAvailable()
-                    && shellContext.getActiveHostGroups().size() == shellContext.getMarathonHostGroups().size();
-        } else if (shellContext.isYarnMode()) {
+        if (shellContext.isYarnMode()) {
             return shellContext.isSelectedYarnStackAvailable()
                     && shellContext.getActiveHostGroups().size() == shellContext.getYarnHostGroups().size();
         } else {
@@ -145,9 +141,7 @@ public class ClusterCommands implements BaseCommands {
         try {
             Set<HostGroupRequest> hostGroupList = new HashSet<>();
             Set<? extends Entry<String, ? extends NodeCountEntry>> entries;
-            if (shellContext.isMarathonMode()) {
-                entries = shellContext.getMarathonHostGroups().entrySet();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 entries = shellContext.getYarnHostGroups().entrySet();
             } else {
                 entries = shellContext.getHostGroups().entrySet();
@@ -159,9 +153,7 @@ public class ClusterCommands implements BaseCommands {
                 ConstraintJson constraintJson = new ConstraintJson();
 
                 constraintJson.setHostCount(entry.getValue().getNodeCount());
-                if (shellContext.isMarathonMode()) {
-                    constraintJson.setConstraintTemplateName(((MarathonHostgroupEntry) entry.getValue()).getConstraintName());
-                } else if (shellContext.isYarnMode()) {
+                if (shellContext.isYarnMode()) {
                     constraintJson.setConstraintTemplateName(((YarnHostgroupEntry) entry.getValue()).getConstraintName());
                 } else {
                     hostGroupBase.setRecipeIds(((HostgroupEntry) entry.getValue()).getRecipeIdSet());
@@ -174,7 +166,7 @@ public class ClusterCommands implements BaseCommands {
             }
 
             ClusterRequest clusterRequest = new ClusterRequest();
-            if (shellContext.isMarathonMode() || shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 CustomContainerRequest customContainerRequest = new CustomContainerRequest();
                 Map<String, String> images = new HashMap<>();
                 if (!Strings.isNullOrEmpty(ambariServerImage)) {
@@ -191,9 +183,7 @@ public class ClusterCommands implements BaseCommands {
                     clusterRequest.setCustomContainer(customContainerRequest);
                 }
             }
-            if (shellContext.isMarathonMode()) {
-                clusterRequest.setName(shellContext.getSelectedMarathonStackName());
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 clusterRequest.setName(shellContext.getSelectedYarnStackName());
             } else {
                 clusterRequest.setName(shellContext.getStackName());
@@ -266,7 +256,7 @@ public class ClusterCommands implements BaseCommands {
                 clusterRequest.setConfigStrategy(strategy);
             }
 
-            if (!shellContext.isMarathonMode() && !shellContext.isYarnMode()) {
+            if (!shellContext.isYarnMode()) {
                 FileSystemRequest fileSystemRequest = new FileSystemRequest();
                 fileSystemRequest.setName(shellContext.getStackName());
                 fileSystemRequest.setDefaultFs(shellContext.getDefaultFileSystem() == null ? true : shellContext.getDefaultFileSystem());
@@ -314,7 +304,7 @@ public class ClusterCommands implements BaseCommands {
                 if (connectionURL != null || connectionUserName != null || connectionPassword != null || databaseType != null || hdpVersion != null) {
                     throw shellContext.exceptionTransformer().transformToRuntimeException(
                             "--connectionURL, --databaseType, --connectionUserName, --connectionPassword switches "
-                            + "cannot be used if an RDS config is already selected with 'rdsconfig select'");
+                                    + "cannot be used if an RDS config is already selected with 'rdsconfig select'");
                 }
                 Set<Long> rdsConfigs = new HashSet<>();
                 rdsConfigs.add(Long.valueOf(shellContext.getRdsConfigId()));
@@ -375,9 +365,7 @@ public class ClusterCommands implements BaseCommands {
             }
 
             String stackId;
-            if (shellContext.isMarathonMode()) {
-                stackId = shellContext.getSelectedMarathonStackId().toString();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 stackId = shellContext.getSelectedYarnStackId().toString();
             } else {
                 stackId = shellContext.getStackId();
@@ -404,7 +392,7 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator({"cluster stop", "cluster start"})
     public boolean startStopAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+        return shellContext.isStackAvailable()
                 || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
@@ -414,9 +402,7 @@ public class ClusterCommands implements BaseCommands {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.STOPPED);
             String stackId;
-            if (shellContext.isMarathonMode()) {
-                stackId = shellContext.getSelectedMarathonStackId().toString();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 stackId = shellContext.getSelectedYarnStackId().toString();
             } else {
                 stackId = shellContext.getStackId();
@@ -435,9 +421,7 @@ public class ClusterCommands implements BaseCommands {
             UpdateClusterJson updateClusterJson = new UpdateClusterJson();
             updateClusterJson.setStatus(StatusRequest.STARTED);
             String stackId;
-            if (shellContext.isMarathonMode()) {
-                stackId = shellContext.getSelectedMarathonStackId().toString();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 stackId = shellContext.getSelectedYarnStackId().toString();
             } else {
                 stackId = shellContext.getStackId();
@@ -458,7 +442,7 @@ public class ClusterCommands implements BaseCommands {
     @CliAvailabilityIndicator("cluster delete")
     @Override
     public boolean deleteAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+        return shellContext.isStackAvailable()
                 || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
@@ -466,9 +450,7 @@ public class ClusterCommands implements BaseCommands {
     public String delete() {
         try {
             String stackId;
-            if (shellContext.isMarathonMode()) {
-                stackId = shellContext.getSelectedMarathonStackId().toString();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 stackId = shellContext.getSelectedYarnStackId().toString();
             } else {
                 stackId = shellContext.getStackId();
@@ -523,7 +505,7 @@ public class ClusterCommands implements BaseCommands {
     @CliAvailabilityIndicator({"cluster show", "cluster show --id", "cluster show --name"})
     @Override
     public boolean showAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+        return shellContext.isStackAvailable()
                 || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
@@ -532,9 +514,7 @@ public class ClusterCommands implements BaseCommands {
         try {
             outPutType = outPutType == null ? OutPutType.RAW : outPutType;
             String stackId;
-            if (shellContext.isMarathonMode()) {
-                stackId = shellContext.getSelectedMarathonStackId().toString();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 stackId = shellContext.getSelectedYarnStackId().toString();
             } else {
                 stackId = shellContext.getStackId();
@@ -566,13 +546,13 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator({"cluster node --ADD", "cluster node --REMOVE"})
     public boolean nodeAvailable() {
-        return shellContext.isStackAvailable() || (shellContext.isMarathonMode() && shellContext.isSelectedMarathonStackAvailable())
+        return shellContext.isStackAvailable()
                 || (shellContext.isYarnMode() && shellContext.isSelectedYarnStackAvailable());
     }
 
     @CliAvailabilityIndicator("cluster fileSystem")
     public boolean fileSystemAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return shellContext.isStackAvailable() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "cluster node --ADD", help = "Add new nodes to the cluster")
@@ -593,9 +573,7 @@ public class ClusterCommands implements BaseCommands {
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
             String stackIdStr;
-            if (shellContext.isMarathonMode()) {
-                stackIdStr = shellContext.getSelectedMarathonStackId().toString();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 stackIdStr = shellContext.getSelectedYarnStackId().toString();
             } else {
                 stackIdStr = shellContext.getStackId();
@@ -632,9 +610,7 @@ public class ClusterCommands implements BaseCommands {
             hostGroupAdjustmentJson.setHostGroup(hostGroup.getName());
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
             String stackIdStr;
-            if (shellContext.isMarathonMode()) {
-                stackIdStr = shellContext.getSelectedMarathonStackId().toString();
-            } else if (shellContext.isYarnMode()) {
+            if (shellContext.isYarnMode()) {
                 stackIdStr = shellContext.getSelectedYarnStackId().toString();
             } else {
                 stackIdStr = shellContext.getStackId();
@@ -660,7 +636,7 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator("cluster sync")
     public boolean syncAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return shellContext.isStackAvailable() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "cluster sync", help = "Sync the cluster")
@@ -678,7 +654,7 @@ public class ClusterCommands implements BaseCommands {
 
     @CliAvailabilityIndicator("cluster upgrade")
     public boolean upgradeAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return shellContext.isStackAvailable() && !shellContext.isYarnMode();
     }
 
     @CliCommand("cluster upgrade")

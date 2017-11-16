@@ -787,7 +787,7 @@ public class AmbariClusterConnector {
                             kerberosContainerDnResolver.resolveContainerDnForKerberos(cluster.getKerberosConfig()),
                             !cluster.getKerberosConfig().getKerberosTcpAllowed(), propagationPort);
                 } else {
-                    // TODO this won't work on mesos, but it doesn't work anyway
+                    // TODO this won't work on yarn, but it doesn't work anyway
                     blueprintText = ambariClient.extendBlueprintWithKerberos(blueprintText,
                             kerberosTypeResolver.resolveTypeForKerberos(cluster.getKerberosConfig()),
                             gatewayHost,
