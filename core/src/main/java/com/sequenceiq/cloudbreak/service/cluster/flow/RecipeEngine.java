@@ -81,8 +81,7 @@ public class RecipeEngine {
         if (recipesSupportedOnOrchestrator(orchestrator)) {
             Set<HostGroup> hgs = Collections.singleton(hostGroup);
             addFsRecipes(stack, hgs);
-            boolean recipesFound = recipesFound(hgs);
-            if (recipesFound) {
+            if (recipesFound(hgs)) {
                 if (hostGroup.getConstraint().getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
                     orchestratorRecipeExecutor.uploadRecipes(stack, hostGroups);
                 }
@@ -90,9 +89,9 @@ public class RecipeEngine {
         }
     }
 
-    public void executePostAmbariStartRecipes(Stack stack) throws CloudbreakException {
+    public void executePostAmbariStartRecipes(Stack stack, Set<HostGroup> hostGroups) throws CloudbreakException {
         Orchestrator orchestrator = stack.getOrchestrator();
-        if (recipesSupportedOnOrchestrator(orchestrator)) {
+        if (recipesFound(hostGroups) && recipesSupportedOnOrchestrator(orchestrator)) {
             orchestratorRecipeExecutor.postAmbariStartRecipes(stack);
         }
     }
