@@ -119,7 +119,7 @@ var recipeRequestTypeRecipeTypePropEnum []interface{}
 
 func init() {
 	var res []string
-	if err := json.Unmarshal([]byte(`["LEGACY","MIGRATED","PRE","POST"]`), &res); err != nil {
+	if err := json.Unmarshal([]byte(`["PRE_AMBARI_START","POST_AMBARI_START","POST_CLUSTER_INSTALL"]`), &res); err != nil {
 		panic(err)
 	}
 	for _, v := range res {
@@ -128,14 +128,12 @@ func init() {
 }
 
 const (
-	// RecipeRequestRecipeTypeLEGACY captures enum value "LEGACY"
-	RecipeRequestRecipeTypeLEGACY string = "LEGACY"
-	// RecipeRequestRecipeTypeMIGRATED captures enum value "MIGRATED"
-	RecipeRequestRecipeTypeMIGRATED string = "MIGRATED"
-	// RecipeRequestRecipeTypePRE captures enum value "PRE"
-	RecipeRequestRecipeTypePRE string = "PRE"
-	// RecipeRequestRecipeTypePOST captures enum value "POST"
-	RecipeRequestRecipeTypePOST string = "POST"
+	// RecipeRequestRecipeTypePREAMBARISTART captures enum value "PRE_AMBARI_START"
+	RecipeRequestRecipeTypePREAMBARISTART string = "PRE_AMBARI_START"
+	// RecipeRequestRecipeTypePOSTAMBARISTART captures enum value "POST_AMBARI_START"
+	RecipeRequestRecipeTypePOSTAMBARISTART string = "POST_AMBARI_START"
+	// RecipeRequestRecipeTypePOSTCLUSTERINSTALL captures enum value "POST_CLUSTER_INSTALL"
+	RecipeRequestRecipeTypePOSTCLUSTERINSTALL string = "POST_CLUSTER_INSTALL"
 )
 
 // prop value enum

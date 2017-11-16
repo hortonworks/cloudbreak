@@ -34,7 +34,7 @@ type ClusterResponse struct {
 	AmbariServerURL string `json:"ambariServerUrl,omitempty"`
 
 	// details of the Ambari stack
-	AmbariStackDetails *AmbariStackDetails `json:"ambariStackDetails,omitempty"`
+	AmbariStackDetails *AmbariStackDetailsResponse `json:"ambariStackDetails,omitempty"`
 
 	// Additional information for ambari cluster
 	Attributes map[string]interface{} `json:"attributes,omitempty"`
