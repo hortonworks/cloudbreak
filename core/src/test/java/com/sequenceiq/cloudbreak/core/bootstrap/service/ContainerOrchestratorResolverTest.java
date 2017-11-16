@@ -63,7 +63,7 @@ public class ContainerOrchestratorResolverTest {
     private static class TestTwoMockContainerOrchestrator extends MockContainerOrchestrator {
         @Override
         public String name() {
-            return "MESOS";
+            return "YARN";
         }
     }
 }

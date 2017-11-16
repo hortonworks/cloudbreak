@@ -17,7 +17,7 @@ public class Notes {
             + "We support heterogenous clusters - this one Hadoop cluster can be built by combining different templates.";
     public static final String CONSTRAINT_NOTES = "A constraint template tells Cloudbreak the resource constraints "
             + "(cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created on"
-            + "environments where there is no one-to-one mapping between containers and nodes, like Mesos.";
+            + "environments where there is no one-to-one mapping between containers and nodes, like YARN.";
     public static final String CREDENTIAL_NOTES = "Cloudbreak is launching Hadoop clusters on the user's behalf - "
             + "on different cloud providers. One key point is that Cloudbreak does not store your "
             + "Cloud provider account details (such as username, password, keys, private SSL certificates, etc). "

@@ -36,20 +36,18 @@ public class BaseInstanceGroupCommands implements CommandMarker, InstanceGroupCo
     @CliAvailabilityIndicator("instancegroup configure")
     public boolean createAvailable() {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())
-                && !shellContext.isMarathonMode()
                 && !shellContext.isYarnMode();
     }
 
     @CliAvailabilityIndicator("instancegroup delete")
     public boolean deleteAvailable() {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable())
-                && !shellContext.isMarathonMode()
                 && !shellContext.isYarnMode();
     }
 
     @CliAvailabilityIndicator("instancegroup show")
     public boolean showAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @Override

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.shell.model;
 
 public enum FocusType {
 
-    MARATHON("cloudbreak-shell:marathon"),
     YARN("cloudbreak-shell:yarn"),
     ROOT("");
 

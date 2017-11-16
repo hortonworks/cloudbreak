@@ -91,7 +91,6 @@ dependencies {
     compile project(':cloud-reactor')
     compile project(':structuredevent-model')
 
-    runtime project(':orchestrator-marathon')
     runtime project(':orchestrator-salt')
     runtime project(':orchestrator-yarn')
     runtime project(':cloud-reactor')

@@ -30,13 +30,12 @@ public class HostGroupCommands implements CommandMarker {
     @CliAvailabilityIndicator("hostgroup configure")
     public boolean isCreateHostGroupAvailable() {
         return (shellContext.isBlueprintAvailable() && shellContext.isCredentialAvailable() || shellContext.isStackAvailable())
-                && !shellContext.isMarathonMode()
                 && !shellContext.isYarnMode();
     }
 
     @CliAvailabilityIndicator("hostgroup show")
     public boolean isShowHostGroupAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "hostgroup configure", help = "Configure host groups")

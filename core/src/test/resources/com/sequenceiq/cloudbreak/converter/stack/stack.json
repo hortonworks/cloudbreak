@@ -44,7 +44,7 @@
   "consulServerCount": 1,
   "created": 8000000,
   "orchestrator": {
-    "type": "MARATHON"
+    "type": "YARN"
   },
   "stackTemplate": "{}"
 }

@@ -78,7 +78,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator("stack list")
     @Override
     public boolean listAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack list", help = "Shows all of your stacks")
@@ -209,7 +209,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
     @CliAvailabilityIndicator({"stack select --id", "stack select --name"})
     @Override
     public boolean selectAvailable() {
-        return shellContext.isStackAccessible() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return shellContext.isStackAccessible() && !shellContext.isYarnMode();
     }
 
     @Override
@@ -272,7 +272,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
                 && shellContext.getActiveCloudPlatform().equals(platform)
                 && shellContext.getActiveNetworkId() != null
                 && (shellContext.getActiveHostGroups().size() == shellContext.getInstanceGroups().size()
-                && !shellContext.getActiveHostGroups().isEmpty()) && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+                && !shellContext.getActiveHostGroups().isEmpty()) && !shellContext.isYarnMode();
     }
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
@@ -402,7 +402,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliAvailabilityIndicator({"stack node --ADD", "stack node --REMOVE", "stack stop --id", "stack stop --name", "stack start --id", "stack start --name"})
     public boolean nodeAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return shellContext.isStackAvailable() && !shellContext.isYarnMode();
     }
 
     private String stop(StackResponse stackResponse) {
@@ -553,7 +553,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliAvailabilityIndicator("stack metadata")
     public boolean metadataAvailable() {
-        return !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack metadata", help = "Shows the stack metadata")
@@ -578,7 +578,7 @@ public class BaseStackCommands implements BaseCommands, StackCommands {
 
     @CliAvailabilityIndicator("stack sync")
     public boolean syncAvailable() {
-        return shellContext.isStackAvailable() && !shellContext.isMarathonMode() && !shellContext.isYarnMode();
+        return shellContext.isStackAvailable() && !shellContext.isYarnMode();
     }
 
     @CliCommand(value = "stack sync", help = "Sync the stack")

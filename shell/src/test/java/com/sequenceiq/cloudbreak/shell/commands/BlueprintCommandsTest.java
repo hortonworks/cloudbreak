@@ -70,7 +70,6 @@ public class BlueprintCommandsTest {
         dummyResult = new BlueprintResponse();
         dummyResult.setId(BLUEPRINT_ID);
         dummyResult.setAmbariBlueprint("");
-        given(shellContext.isMarathonMode()).willReturn(false);
         given(shellContext.isYarnMode()).willReturn(false);
         given(shellContext.cloudbreakClient()).willReturn(cloudbreakClient);
         given(cloudbreakClient.blueprintEndpoint()).willReturn(blueprintEndpoint);

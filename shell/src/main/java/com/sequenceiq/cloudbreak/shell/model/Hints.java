@@ -18,10 +18,6 @@ public enum Hints {
     CONFIGURE_HOSTGROUP("Configure hostgroups with the 'hostgroup configure' command"),
     NONE("No more hints for you.. :("),
 
-    MARATHON_STACK("Create a marathon stack with 'marathon create' command select one of them with 'marathon select'"),
-    CONFIGURE_MARATHON_HOSTGROUP("Configure hostgroups with 'marathon hostgroup configure'."),
-    MARATHON_CLUSTER("Create marathon cluster with 'cluster create' command"),
-
     YARN_STACK("Create a yarn stack with 'yarn create' command select one of them with 'yarn select'"),
     CONFIGURE_YARN_HOSTGROUP("Configure hostgroups with 'yarn hostgroup configure'."),
     YARN_CLUSTER("Create yarn cluster with 'cluster create' command");
