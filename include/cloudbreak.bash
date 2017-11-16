@@ -635,7 +635,7 @@ util-local-dev() {
 
     create-migrate-log
     migrate-one-db cbdb up
-    migrate-one-db cbdb pending
+    migrate-one-db periscopedb up
 
     debug starting an ambassador to be registered as cloudbreak.service.consul.
     debug "all traffic to ambassador will be proxied to localhost"
