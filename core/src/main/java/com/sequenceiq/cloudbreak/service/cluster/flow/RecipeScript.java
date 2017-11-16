@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow;
 
 import com.sequenceiq.cloudbreak.api.model.ExecutionType;
-import com.sequenceiq.cloudbreak.common.type.RecipeType;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
 
 public class RecipeScript {
 

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.common;
+package com.sequenceiq.cloudbreak.client;
 
 import org.apache.commons.lang3.builder.StandardToStringStyle;
 

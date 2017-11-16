@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.client;
 
-import static org.terracotta.modules.ehcache.store.TerracottaClusteredInstanceFactory.LOGGER;
-
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -23,8 +21,12 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.glassfish.jersey.client.JerseyClientBuilder;
 import org.glassfish.jersey.filter.LoggingFilter;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RestClientUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestClientUtil.class);
 
     // apache http connection pool defaults are constraining
     // https://hc.apache.org/httpcomponents-client-ga/tutorial/html/connmgmt.html

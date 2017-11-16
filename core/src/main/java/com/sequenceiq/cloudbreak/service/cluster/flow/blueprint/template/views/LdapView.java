@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.blueprint.template.views;
 
-import com.sequenceiq.cloudbreak.common.type.DirectoryType;
+import com.sequenceiq.cloudbreak.api.model.DirectoryType;
 import com.sequenceiq.cloudbreak.domain.LdapConfig;
 
 public class LdapView {

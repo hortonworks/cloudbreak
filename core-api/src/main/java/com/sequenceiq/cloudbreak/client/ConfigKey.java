@@ -5,8 +5,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import com.sequenceiq.cloudbreak.common.CloudbreakToStringStyle;
-
 public class ConfigKey {
 
     private final boolean secure;

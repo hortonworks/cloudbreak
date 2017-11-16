@@ -30,6 +30,7 @@ task runMockSshServer(type:JavaExec) {
 }
 
 dependencies {
+  compile project(':cloud-common')
   compile project(':core-api')
   compile (project(':orchestrator-api')) {
     transitive = false;

@@ -23,6 +23,7 @@ apply plugin: 'info.solidsoft.pitest'
 
 dependencies {
 
+  compile project(':cloud-common')
   compile project(':core-api')
 
   compile group: 'org.springframework.shell',     name: 'spring-shell',                 version: '1.2.0.RELEASE'

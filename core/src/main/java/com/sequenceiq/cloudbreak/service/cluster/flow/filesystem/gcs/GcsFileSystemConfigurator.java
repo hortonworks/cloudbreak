@@ -3,8 +3,8 @@ package com.sequenceiq.cloudbreak.service.cluster.flow.filesystem.gcs;
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ALL_NODES;
 import static com.sequenceiq.cloudbreak.api.model.ExecutionType.ONE_NODE;
 import static com.sequenceiq.cloudbreak.api.model.FileSystemType.GCS;
-import static com.sequenceiq.cloudbreak.common.type.RecipeType.POST_AMBARI_START;
-import static com.sequenceiq.cloudbreak.common.type.RecipeType.POST_CLUSTER_INSTALL;
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_AMBARI_START;
+import static com.sequenceiq.cloudbreak.api.model.RecipeType.POST_CLUSTER_INSTALL;
 
 import java.util.ArrayList;
 import java.util.Collections;

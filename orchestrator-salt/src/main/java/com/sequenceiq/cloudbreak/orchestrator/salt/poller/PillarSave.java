@@ -16,7 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
-import com.sequenceiq.cloudbreak.common.type.RecipeType;
+import com.sequenceiq.cloudbreak.api.model.RecipeType;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
