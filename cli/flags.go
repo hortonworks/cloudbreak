@@ -7,8 +7,8 @@ import (
 	"github.com/urfave/cli"
 )
 
-var REQUIRED RequiredFlag = RequiredFlag{true}
-var OPTIONAL RequiredFlag = RequiredFlag{false}
+var REQUIRED = RequiredFlag{true}
+var OPTIONAL = RequiredFlag{false}
 
 var (
 	FlDebug = BoolFlag{
@@ -294,6 +294,90 @@ var (
 		StringFlag: cli.StringFlag{
 			Name:  "ambari-user",
 			Usage: "user of ambari",
+		},
+	}
+	FlLdapServer = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-server",
+			Usage: "address of the ldap server (e.g: ldap://10.0.0.1:384)",
+		},
+	}
+	FlLdapDomain = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-domain",
+			Usage: "ldap domain (e.g: ad.cb.com)",
+		},
+	}
+	FlLdapBindDN = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-bind-dn",
+			Usage: "ldap bind dn (e.g: CN=Administrator,CN=Users,DC=ad,DC=cb,DC=com)",
+		},
+	}
+	FlLdapUserNameAttribute = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-name-attribute",
+			Usage: "ldap user name attribute",
+		},
+	}
+	FlLdapUserObjectClass = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-object-class",
+			Usage: "ldap user object class",
+		},
+	}
+	FlLdapGroupMemberAttribute = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-member-attribute",
+			Usage: "ldap group member attribute",
+		},
+	}
+	FlLdapGroupNameAttribute = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-name-attribute",
+			Usage: "ldap group name attribute",
+		},
+	}
+	FlLdapGroupObjectClass = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-object-class",
+			Usage: "ldap group object class",
+		},
+	}
+	FlLdapBindPassword = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-bind-password",
+			Usage: "ldap bind password",
+		},
+	}
+	FlLdapDirectoryType = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-directory-type",
+			Usage: "ldap directory type (LDAP or ACTIVE_DIRECTORY)",
+		},
+	}
+	FlLdapUserSearchBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-user-search-base",
+			Usage: "ldap user search base (e.g: CN=Users,DC=ad,DC=cb,DC=com)",
+		},
+	}
+	FlLdapGroupSearchBase = StringFlag{
+		RequiredFlag: REQUIRED,
+		StringFlag: cli.StringFlag{
+			Name:  "ldap-group-search-base",
+			Usage: "ldap group search base (e.g: OU=scopes,DC=ad,DC=cb,DC=com)",
 		},
 	}
 )

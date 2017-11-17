@@ -680,6 +680,48 @@ func main() {
 				}
 			},
 		},
+		{
+			Name:  "create-ldap",
+			Usage: "create a new LDAP",
+			Flags: cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
+				cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
+				cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
+				cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase).AddAuthenticationFlags().Build(),
+			Before: ConfigRead,
+			Action: cb.CreateLDAP,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlLdapServer, cb.FlLdapDomain,
+					cb.FlLdapBindDN, cb.FlLdapBindPassword, cb.FlLdapDirectoryType, cb.FlLdapUserSearchBase,
+					cb.FlLdapUserNameAttribute, cb.FlLdapUserObjectClass, cb.FlLdapGroupMemberAttribute,
+					cb.FlLdapGroupNameAttribute, cb.FlLdapGroupObjectClass, cb.FlLdapGroupSearchBase).AddAuthenticationFlags().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "list-ldaps",
+			Usage:  "list the available ldaps",
+			Flags:  cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build(),
+			Before: ConfigRead,
+			Action: cb.ListLdaps,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddOutputFlag().AddAuthenticationFlags().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
+		{
+			Name:   "delete-ldap",
+			Usage:  "delete an LDAP",
+			Flags:  cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build(),
+			Before: ConfigRead,
+			Action: cb.DeleteLdap,
+			BashComplete: func(c *cli.Context) {
+				for _, f := range cb.NewFlagBuilder().AddFlags(cb.FlName).AddOutputFlag().AddAuthenticationFlags().Build() {
+					printFlagCompletion(f)
+				}
+			},
+		},
 	}
 
 	// internal commands

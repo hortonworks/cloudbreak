@@ -24,7 +24,7 @@ func SetProviderType(ct CloudType) {
 	currentCloud = ct
 }
 
-var CloudProviders map[CloudType]CloudProvider = make(map[CloudType]CloudProvider)
+var CloudProviders = make(map[CloudType]CloudProvider)
 
 type CloudProvider interface {
 	GetName() *string

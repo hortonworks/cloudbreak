@@ -19,12 +19,12 @@ type node struct {
 	count     int32
 }
 
-var defaultNodes []node = []node{
-	node{"master", models_cloudbreak.InstanceGroupResponseTypeGATEWAY, 1},
-	node{"slave", models_cloudbreak.InstanceGroupResponseTypeCORE, 3},
+var defaultNodes = []node{
+	{"master", models_cloudbreak.InstanceGroupResponseTypeGATEWAY, 1},
+	{"slave", models_cloudbreak.InstanceGroupResponseTypeCORE, 3},
 }
 
-var maxCardinality map[string]int = map[string]int{
+var maxCardinality = map[string]int{
 	"1":   1,
 	"0-1": 1,
 	"1-2": 2,
@@ -33,7 +33,7 @@ var maxCardinality map[string]int = map[string]int{
 	"ALL": 9,
 }
 
-var getBlueprintClient func(string, string, string) getPublicBlueprint = func(server, userName, password string) getPublicBlueprint {
+var getBlueprintClient = func(server, userName, password string) getPublicBlueprint {
 	cbClient := NewCloudbreakOAuth2HTTPClient(server, userName, password)
 	return cbClient.Cloudbreak.V1blueprints
 }
