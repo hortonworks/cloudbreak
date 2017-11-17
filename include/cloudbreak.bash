@@ -385,10 +385,12 @@ cloudbreak-generate-cert() {
       mkdir -p "${CBD_CERT_ROOT_PATH}/traefik"
       docker run \
           --label cbreak.sidekick=true \
+          -u $(id -u $(whoami)):$(id -g $(whoami)) \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
           ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs/traefik ca generate -o=local &> /dev/null
       docker run \
           --label cbreak.sidekick=true \
+          -u $(id -u $(whoami)):$(id -g $(whoami)) \
           -v ${CBD_CERT_ROOT_PATH}:/certs \
           ehazlett/certm:${DOCKER_TAG_CERT_TOOL} -d /certs/traefik client generate --common-name=${PUBLIC_IP} -o=local &> /dev/null
       owner=$(ls -od ${CBD_CERT_ROOT_PATH} | tr -s ' ' | cut -d ' ' -f 3)
