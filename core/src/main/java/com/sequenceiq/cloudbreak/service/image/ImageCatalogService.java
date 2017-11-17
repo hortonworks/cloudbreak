@@ -18,6 +18,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Versioned;
@@ -25,8 +26,16 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.controller.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.domain.UserProfile;
+import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
+import com.sequenceiq.cloudbreak.service.AuthorizationService;
+import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
 @Component
 public class ImageCatalogService {
@@ -39,14 +48,35 @@ public class ImageCatalogService {
 
     private static final String UNSPECIFIED_VERSION = "unspecified";
 
+    private static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
+
     @Value("${info.app.version:}")
     private String cbVersion;
+
+    @Value("${cb.image.catalog.url}")
+    private String defaultCatalogUrl;
 
     @Inject
     private ImageCatalogProvider imageCatalogProvider;
 
+    @Inject
+    private ImageCatalogRepository imageCatalogRepository;
+
+    @Inject
+    private AuthorizationService authorizationService;
+
+    @Inject
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Inject
+    private UserProfileService userProfileService;
+
     public Images getImages(String provider) throws CloudbreakImageCatalogException {
-        return getImages(provider, cbVersion);
+        ImageCatalog defaultImageCatalog = getDefaultImageCatalog();
+
+        String url = (defaultImageCatalog == null) ? defaultCatalogUrl : defaultImageCatalog.getImageCatalogUrl();
+
+        return getImages(url, provider, cbVersion);
     }
 
     public List<Image> getBaseImages(String platform) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
@@ -59,17 +89,111 @@ public class ImageCatalogService {
         return baseImages;
     }
 
+    public Images getImages(String name, String provider) throws CloudbreakImageCatalogException {
+        ImageCatalog imageCatalog = get(name);
+        if (imageCatalog == null) {
+            return emptyImages();
+        }
+        return getImages(imageCatalog.getImageCatalogUrl(), provider, cbVersion);
+    }
+
     public Image getImage(String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        Images images = imageCatalogProvider.getImageCatalogV2().getImages();
+        return getImage(defaultCatalogUrl, imageId);
+    }
+
+    public Image getImage(String catalogUrl, String imageId) throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Images images = imageCatalogProvider.getImageCatalogV2(catalogUrl).getImages();
         Optional<? extends Image> image = getImage(imageId, images);
         if (!image.isPresent()) {
-            images = imageCatalogProvider.getImageCatalogV2(true).getImages();
+            images = imageCatalogProvider.getImageCatalogV2(catalogUrl, true).getImages();
             image = getImage(imageId, images);
         }
         if (!image.isPresent()) {
             throw new CloudbreakImageNotFoundException(String.format("Could not find any image with id: '%s'.", imageId));
         }
         return image.get();
+    }
+
+    public ImageCatalog create(ImageCatalog imageCatalog) throws CloudbreakImageCatalogException {
+        try {
+            return imageCatalogRepository.save(imageCatalog);
+        } catch (DataIntegrityViolationException e) {
+            String msg = String.format("Image catalog exists with the given name [%s] for the account [%s]",
+                    imageCatalog.getImageCatalogName(), imageCatalog.getAccount());
+            LOGGER.warn(msg);
+            throw new CloudbreakImageCatalogException(msg);
+        }
+    }
+
+    public void delete(String name) {
+        ImageCatalog imageCatalog = get(name);
+        authorizationService.hasWritePermission(imageCatalog);
+        imageCatalog.setArchived(true);
+        setImageCatalogAsDefault(null);
+        imageCatalogRepository.save(imageCatalog);
+        LOGGER.info("Image catalog has been archived: {}", imageCatalog);
+    }
+
+    public ImageCatalog get(String name) {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return imageCatalogRepository.findByName(name, user.getUserId(), user.getAccount());
+    }
+
+    public ImageCatalog setAsDefault(String name) {
+
+        removeDefaultFlag();
+
+        if (!CLOUDBREAK_DEFAULT_CATALOG_NAME.equals(name)) {
+            ImageCatalog imageCatalog = get(name);
+            checkImageCatalog(imageCatalog, name);
+
+            authorizationService.hasWritePermission(imageCatalog);
+
+            setImageCatalogAsDefault(imageCatalog);
+
+            return imageCatalogRepository.save(imageCatalog);
+        }
+        return getCloudbreakDefaultImageCatalog();
+    }
+
+    private void setImageCatalogAsDefault(ImageCatalog imageCatalog) {
+        UserProfile userProfile = getUserProfile();
+        userProfile.setImageCatalog(imageCatalog);
+        userProfileService.save(userProfile);
+    }
+
+    public ImageCatalog update(ImageCatalog source) throws CloudbreakImageCatalogException {
+
+        ImageCatalog imageCatalog = imageCatalogRepository.findOne(source.getId());
+        checkImageCatalog(imageCatalog, source.getId());
+        imageCatalog.setImageCatalogName(source.getImageCatalogName());
+        imageCatalog.setImageCatalogUrl(source.getImageCatalogUrl());
+        return create(imageCatalog);
+    }
+
+    private void checkImageCatalog(ImageCatalog imageCatalog, Object filter) {
+        if (imageCatalog == null) {
+            throw new NotFoundException(String.format("Resource not found with filter [%s]", filter));
+        }
+    }
+
+    public Iterable<ImageCatalog> getAllPublicInAccount() {
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
+        List<ImageCatalog> allPublicInAccount = imageCatalogRepository.findAllPublicInAccount(cbUser.getUserId(), cbUser.getAccount());
+        allPublicInAccount.add(getCloudbreakDefaultImageCatalog());
+        return allPublicInAccount;
+    }
+
+    private ImageCatalog getCloudbreakDefaultImageCatalog() {
+        ImageCatalog imageCatalog = new ImageCatalog();
+        imageCatalog.setImageCatalogName(CLOUDBREAK_DEFAULT_CATALOG_NAME);
+        imageCatalog.setImageCatalogUrl(defaultCatalogUrl);
+        imageCatalog.setPublicInAccount(true);
+        return imageCatalog;
+    }
+
+    private Images emptyImages() {
+        return new Images(emptyList(), emptyList(), emptyList());
     }
 
     private Optional<? extends Image> getImage(String imageId, Images images) throws CloudbreakImageNotFoundException,
@@ -84,16 +208,10 @@ public class ImageCatalogService {
         return image;
     }
 
-    private Optional<? extends Image> findFirstWithImageId(String imageId, Collection<? extends Image> images) {
-        return images.stream()
-                .filter(img -> img.getUuid().equals(imageId))
-                .findFirst();
-    }
-
-    public Images getImages(String platform, String cbVersion) throws CloudbreakImageCatalogException {
-        LOGGER.info("Determine images for platform: '{}' and Cloudbreak version: '{}'.", platform, cbVersion);
+    public Images getImages(String imageCatalogUrl, String platform, String cbVersion) throws CloudbreakImageCatalogException {
+        LOGGER.info("Determine images for imageCatalogUrl: '{}', platform: '{}' and Cloudbreak version: '{}'.", platform, cbVersion);
         Images images;
-        CloudbreakImageCatalogV2 imageCatalog = imageCatalogProvider.getImageCatalogV2();
+        CloudbreakImageCatalogV2 imageCatalog = imageCatalogProvider.getImageCatalogV2(imageCatalogUrl);
         if (imageCatalog != null) {
             Set<String> vMImageUUIDs = new HashSet<>();
             List<CloudbreakVersion> cloudbreakVersions = imageCatalog.getVersions().getCloudbreakVersions();
@@ -113,16 +231,22 @@ public class ImageCatalogService {
 
             images = new Images(baseImages, hdpImages, hdfImages);
         } else {
-            images = new Images(emptyList(), emptyList(), emptyList());
+            images = emptyImages();
         }
         return images;
     }
 
+    private Optional<? extends Image> findFirstWithImageId(String imageId, Collection<? extends Image> images) {
+        return images.stream()
+                .filter(img -> img.getUuid().equals(imageId))
+                .findFirst();
+    }
+
     private List<Image> filterImagesByPlatform(String platform, List<Image> images, Set<String> vMImageUUIDs) {
         return images.stream()
-                        .filter(img -> vMImageUUIDs.contains(img.getUuid()))
-                        .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(p -> p.equalsIgnoreCase(platform)))
-                        .collect(Collectors.toList());
+                .filter(img -> vMImageUUIDs.contains(img.getUuid()))
+                .filter(img -> img.getImageSetsByProvider().keySet().stream().anyMatch(p -> p.equalsIgnoreCase(platform)))
+                .collect(Collectors.toList());
     }
 
     private String latestCloudbreakVersion(List<CloudbreakVersion> cloudbreakVersions) {
@@ -160,5 +284,23 @@ public class ImageCatalogService {
             return matcher.group(0);
         }
         return cbVersion;
+    }
+
+    private void removeDefaultFlag() {
+        ImageCatalog imageCatalog = getDefaultImageCatalog();
+        if (imageCatalog != null) {
+            setImageCatalogAsDefault(null);
+            imageCatalogRepository.save(imageCatalog);
+        }
+    }
+
+    private ImageCatalog getDefaultImageCatalog() {
+        IdentityUser user = authenticatedUserService.getCbUser();
+        return userProfileService.get(user.getAccount(), user.getUserId()).getImageCatalog();
+    }
+
+    private UserProfile getUserProfile() {
+        IdentityUser cbUser = authenticatedUserService.getCbUser();
+        return userProfileService.get(cbUser.getAccount(), cbUser.getUserId());
     }
 }
