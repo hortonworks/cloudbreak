@@ -23,6 +23,7 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
         cluster.setEmailTo(source.getEmailTo());
         cluster.setFileSystem(source.getFileSystem());
         cluster.setLdapConfigId(source.getLdapConfigId());
+        cluster.setLdapConfig(source.getLdapConfig());
         cluster.setName(source.getName());
         cluster.setRdsConfigIds(source.getRdsConfigIds());
         cluster.setRdsConfigJsons(source.getRdsConfigJsons());
