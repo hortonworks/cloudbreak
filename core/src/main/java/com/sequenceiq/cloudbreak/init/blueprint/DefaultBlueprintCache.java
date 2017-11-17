@@ -46,11 +46,11 @@ public class DefaultBlueprintCache {
                     LOGGER.info("Load default blueprint '{}'.", blueprintStrings);
                     BlueprintRequest blueprintJson = new BlueprintRequest();
                     blueprintJson.setName(split[0].trim());
-                    blueprintJson.setDescription(split[0]);
                     JsonNode jsonNode = blueprintUtils.convertStringToJsonNode(blueprintUtils.readDefaultBlueprintFromFile(split));
                     blueprintJson.setAmbariBlueprint(jsonNode.get("blueprint").toString());
                     Blueprint bp = converter.convert(blueprintJson);
                     JsonNode inputs = jsonNode.get("inputs");
+                    bp.setDescription(jsonNode.get("description").asText(split[0]));
                     BlueprintInputParameters inputParameters = new BlueprintInputParameters(blueprintUtils.prepareInputs(inputs));
                     bp.setInputParameters(new Json(inputParameters));
                     defaultBlueprints.put(bp.getName(), bp);

@@ -21,6 +21,7 @@
       "referenceConfiguration":"s3.bucket"
     }
   ],
+  "description": "Useful for EDW analytics using Hive LLAP",
   "settings": [
     {
       "recovery_settings": []
