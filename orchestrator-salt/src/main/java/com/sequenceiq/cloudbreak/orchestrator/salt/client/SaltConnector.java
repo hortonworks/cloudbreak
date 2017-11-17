@@ -87,7 +87,7 @@ public class SaltConnector implements Closeable {
     public GenericResponse health() {
         Response response = saltTarget.path(SaltEndpoint.BOOT_HEALTH.getContextPath()).request().get();
         GenericResponse responseEntity = JaxRSUtil.response(response, GenericResponse.class);
-        LOGGER.info("Health response: {}", responseEntity);
+        LOGGER.info("SaltBoot. Health response: {}", responseEntity);
         return responseEntity;
     }
 
@@ -117,7 +117,7 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(saltAction).getBytes()))
                 .post(Entity.json(saltAction));
         GenericResponses responseEntity = JaxRSUtil.response(response, GenericResponses.class);
-        LOGGER.info("SaltAction response: {}", responseEntity);
+        LOGGER.info("SaltBoot. SaltAction response: {}", responseEntity);
         return responseEntity;
     }
 
@@ -165,7 +165,7 @@ public class SaltConnector implements Closeable {
                 .header(SIGN_HEADER, PkiUtil.generateSignature(signatureKey, toJson(form.asMap()).getBytes()))
                 .post(Entity.form(form));
         T responseEntity = JaxRSUtil.response(response, clazz);
-        LOGGER.info("SaltAction response: {}", responseEntity);
+        LOGGER.info("Salt wheel run response: {}", responseEntity);
         return responseEntity;
     }
 

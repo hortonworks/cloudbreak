@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.github.jknack.handlebars.EscapingStrategy;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Helper;
 import com.github.jknack.handlebars.Options;
@@ -37,6 +38,7 @@ public class BlueprintTemplateProcessor {
 
     private String generateBlueprintWithParameters(String blueprintText, Cluster cluster, Set<RDSConfig> rdsConfigs) throws IOException {
         Handlebars handlebars = new Handlebars();
+        handlebars.with(EscapingStrategy.NOOP);
         handlebars.registerHelperMissing(new Helper<Object>() {
             @Override
             public CharSequence apply(final Object context, final Options options) throws IOException {
