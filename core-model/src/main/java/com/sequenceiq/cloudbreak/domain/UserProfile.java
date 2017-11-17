@@ -26,6 +26,9 @@ public class UserProfile {
     @OneToOne
     private Credential credential;
 
+    @OneToOne
+    private ImageCatalog imageCatalog;
+
     @Column(nullable = false)
     private String owner;
 
@@ -74,5 +77,13 @@ public class UserProfile {
 
     public void setUiProperties(Json uiProperties) {
         this.uiProperties = uiProperties;
+    }
+
+    public ImageCatalog getImageCatalog() {
+        return imageCatalog;
+    }
+
+    public void setImageCatalog(ImageCatalog imageCatalog) {
+        this.imageCatalog = imageCatalog;
     }
 }

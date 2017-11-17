@@ -442,4 +442,9 @@ public class ModelDescriptions {
         public static final String LOGIN_USERNAME = "authentication name for machines";
         public static final String PUBLIC_KEY_ID = "public key id for accessing instances";
     }
+
+    public static class ImageCatalogDescription {
+        public static final String IMAGE_CATALOG_URL = "custom image catalog's URL";
+        public static final String DEFAULT = "true if image catalog is the default one";
+    }
 }

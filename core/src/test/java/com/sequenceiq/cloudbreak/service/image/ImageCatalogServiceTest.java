@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Collections;
+import java.util.Date;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -12,6 +17,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV2;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.model.user.IdentityUser;
+import com.sequenceiq.cloudbreak.controller.AuthenticatedUserService;
+import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.JsonUtil;
 
@@ -21,6 +30,12 @@ public class ImageCatalogServiceTest {
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
 
+    @Mock
+    private AuthenticatedUserService authenticatedUserService;
+
+    @Mock
+    private ImageCatalogRepository imageCatalogRepository;
+
     @InjectMocks
     private ImageCatalogService underTest;
 
@@ -28,13 +43,17 @@ public class ImageCatalogServiceTest {
     public void beforeTest() throws Exception {
         String catalogJson = FileReaderUtils.readFileFromClasspath("com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json");
         CloudbreakImageCatalogV2 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV2.class);
-        when(imageCatalogProvider.getImageCatalogV2()).thenReturn(catalog);
+        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(catalog);
+
+        IdentityUser user = new IdentityUser("userId", "username", "account",
+                Collections.emptyList(), "givenName", "familyName", new Date());
+        when(authenticatedUserService.getCbUser()).thenReturn(user);
     }
 
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalog() throws Exception {
         String cbVersion = "1.16.4";
-        Images images = underTest.getImages("aws", cbVersion);
+        Images images = underTest.getImages("", "aws", cbVersion);
 
         boolean exactImageIdMatch = images.getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -43,7 +62,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarDevVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        Images images = underTest.getImages("aws", "1.16.4-dev.132");
+        Images images = underTest.getImages("", "aws", "1.16.4-dev.132");
 
         boolean match = images.getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -52,7 +71,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarRcVersionDoesntExistInCatalogShouldReturnWithReleasedVersionIfExists() throws Exception {
-        Images images = underTest.getImages("aws", "1.16.4-rc.13");
+        Images images = underTest.getImages("", "aws", "1.16.4-rc.13");
 
         boolean match = images.getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
@@ -61,7 +80,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarDevVersionExistsInCatalog() throws Exception {
-        Images images = underTest.getImages("aws", "2.1.0-dev.4000");
+        Images images = underTest.getImages("", "aws", "2.1.0-dev.4000");
 
         boolean hdfImgMatch = images.getHdfImages().stream()
                 .anyMatch(ambariImage -> ambariImage.getUuid().equals("9958938a-1261-48e2-aff9-dbcb2cebf6cd"));
@@ -74,7 +93,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenSimilarRcVersionExistsInCatalog() throws Exception {
-        Images images = underTest.getImages("aws", "2.0.0-rc.4");
+        Images images = underTest.getImages("", "aws", "2.0.0-rc.4");
 
         boolean allMatch = images.getHdpImages().stream()
                 .allMatch(img -> img.getUuid().equals("2.4.2.2-1-9e3ccdca-fa64-42eb-ab29-b1450767bbd8-2.5.0.1-265")
@@ -84,7 +103,7 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenExactVersionExistsInCatalogForPlatform() throws Exception {
-        Images images = underTest.getImages("AWS", "1.16.4");
+        Images images = underTest.getImages("", "AWS", "1.16.4");
         boolean exactImageIdMatch = images.getHdpImages().stream()
                 .anyMatch(img -> img.getUuid().equals("2.5.1.9-4-ccbb32dc-6c9f-43f1-8a09-64b598fda733-2.6.1.4-2"));
         Assert.assertTrue("Result doesn't contain the required Ambari image with id for the platform.", exactImageIdMatch);
@@ -92,11 +111,36 @@ public class ImageCatalogServiceTest {
 
     @Test
     public void testGetImagesWhenExactVersionDoesnotExistInCatalogForPlatform() throws Exception {
-        Images images = underTest.getImages("owncloud", "1.16.4");
+        Images images = underTest.getImages("", "owncloud", "1.16.4");
 
         boolean noMatch = images.getBaseImages().isEmpty()
                 && images.getHdpImages().isEmpty()
                 && images.getHdfImages().isEmpty();
         Assert.assertTrue("Result contains no Ambari Image for the version and platform.", noMatch);
+    }
+
+    @Test
+    public void testGetImagesWhenCustomImageCatalogExists() throws Exception {
+        ImageCatalog ret = new ImageCatalog();
+        ret.setImageCatalogUrl("");
+        when(imageCatalogRepository.findByName("name", "userId", "account")).thenReturn(ret);
+        when(imageCatalogProvider.getImageCatalogV2("")).thenReturn(null);
+        underTest.getImages("name", "aws");
+
+        verify(imageCatalogProvider, times(1)).getImageCatalogV2("");
+
+    }
+
+    @Test
+    public void testGetImagesWhenCustomImageCatalogDoesNotExists() throws Exception {
+        when(imageCatalogRepository.findByName("name", "userId", "account")).thenReturn(null);
+        Images images = underTest.getImages("name", "aws");
+
+        verify(imageCatalogProvider, times(0)).getImageCatalogV2("");
+
+        Assert.assertTrue("Base images should be empty!", images.getBaseImages().isEmpty());
+        Assert.assertTrue("HDF images should be empty!", images.getHdfImages().isEmpty());
+        Assert.assertTrue("HDP images should be empty!", images.getHdpImages().isEmpty());
+
     }
 }

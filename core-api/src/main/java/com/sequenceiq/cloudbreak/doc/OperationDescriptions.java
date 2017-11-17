@@ -283,6 +283,15 @@ public class OperationDescriptions {
     }
 
     public static class ImageCatalogOpDescription {
-        public static final String GET_IMAGES_BY_PROVIDER = "determines available images for the Cloudbreak version by the given provider";
+        public static final String GET_PUBLICS_IMAGE_CATALOGS = "list available custom image catalogs as public resources";
+        public static final String GET_PUBLIC_IMAGE_CATALOG_BY_NAME = "get custom image catalog by name";
+        public static final String GET_IMAGES_BY_PROVIDER = "determines available images for the Cloudbreak version "
+                + "by the given provider and default image catalog url";
+        public static final String GET_IMAGES_BY_PROVIDER_AND_CUSTOM_IMAGE_CATALOG = "determines available images for the Cloudbreak version "
+                + "by the given provider and given image catalog url";
+        public static final String POST_PUBLIC = "create Image Catalog as public resources";
+        public static final String POST_PRIVATE = "create Image Catalog as private resources";
+        public static final String DELETE_PUBLIC_BY_NAME = "delete public (owned) or private Image Catalog by id";
+        public static final String PUT_PUBLIC_BY_NAME = "update public (owned) or private Image Catalog by id";
     }
 }
