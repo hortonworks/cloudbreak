@@ -21,6 +21,7 @@
       "referenceConfiguration": "s3.bucket"
     }
   ],
+  "description": "Useful for ETL data processing with Hive and Spark 1.6",
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-etl-edw-shared",

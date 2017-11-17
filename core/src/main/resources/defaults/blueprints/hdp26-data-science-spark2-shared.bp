@@ -5,6 +5,7 @@
       "referenceConfiguration":"s3.bucket"
     }
   ],
+  "description": "Useful for data science with Spark 2.1 and Zeppelin",
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-data-science-spark2-shared",

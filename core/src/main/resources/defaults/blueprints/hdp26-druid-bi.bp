@@ -1,5 +1,6 @@
 {
   "inputs": [],
+  "description": "Technical preview of Druid",
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-druid-bi",

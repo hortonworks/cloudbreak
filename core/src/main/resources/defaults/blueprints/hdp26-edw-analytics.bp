@@ -1,5 +1,6 @@
 {
   "inputs": [],
+  "description": "Useful for EDW analytics using Hive LLAP",
   "blueprint": {
     "Blueprints": {
       "blueprint_name": "hdp26-edw-analytics",

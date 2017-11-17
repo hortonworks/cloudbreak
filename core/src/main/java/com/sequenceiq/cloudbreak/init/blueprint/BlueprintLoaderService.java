@@ -96,7 +96,9 @@ public class BlueprintLoaderService {
         LOGGER.info("Updating default blueprints which are contains text modifications.");
         for (Blueprint blueprintFromDatabase : blueprints) {
             Blueprint newBlueprint = defaultBlueprintCache.defaultBlueprints().get(blueprintFromDatabase.getName());
-            if (defaultBlueprintExistInTheCache(newBlueprint) && defaultBlueprintContainsNewTexts(blueprintFromDatabase, newBlueprint)) {
+            if (defaultBlueprintExistInTheCache(newBlueprint)
+                    && (defaultBlueprintContainsNewTexts(blueprintFromDatabase, newBlueprint)
+                    || defaultBlueprintContainsNewDescription(blueprintFromDatabase, newBlueprint))) {
                 LOGGER.info("Default Blueprint '{}' needs to modify for the '{}' user because the blueprint text changed.",
                         blueprintFromDatabase.getName(), user.getUserId());
                 resultList.add(prepateBlueprint(user, blueprintFromDatabase, newBlueprint));
@@ -112,6 +114,7 @@ public class BlueprintLoaderService {
         blueprintFromDatabase.setPublicInAccount(true);
         blueprintFromDatabase.setStatus(DEFAULT);
         blueprintFromDatabase.setBlueprintText(newBlueprint.getBlueprintText());
+        blueprintFromDatabase.setDescription(newBlueprint.getDescription());
         blueprintFromDatabase.setHostGroupCount(newBlueprint.getHostGroupCount());
         blueprintFromDatabase.setInputParameters(newBlueprint.getInputParameters());
         blueprintFromDatabase.setAmbariName(newBlueprint.getAmbariName());
@@ -149,6 +152,10 @@ public class BlueprintLoaderService {
         return !bp.getBlueprintText().equals(blueprint.getBlueprintText());
     }
 
+    private boolean defaultBlueprintContainsNewDescription(Blueprint bp, Blueprint blueprint) {
+        return !bp.getDescription().equals(blueprint.getDescription());
+    }
+
     private boolean isNewUserOrDeletedEveryDefaultBlueprint(Set<Blueprint> blueprints) {
         return blueprints.size() == 0;
     }
@@ -156,7 +163,8 @@ public class BlueprintLoaderService {
     private boolean mustUpdateTheExistingBlueprint(Blueprint blueprintFromDatabase, Blueprint defaultBlueprint) {
         return isDefaultBlueprint(blueprintFromDatabase)
                 && defaultBlueprintExistInTheCache(defaultBlueprint)
-                && defaultBlueprintContainsNewTexts(blueprintFromDatabase, defaultBlueprint);
+                && (defaultBlueprintContainsNewTexts(blueprintFromDatabase, defaultBlueprint)
+                || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint));
     }
 
     private boolean defaultBlueprintDoesNotExistInTheDatabase(Set<Blueprint> blueprints) {
