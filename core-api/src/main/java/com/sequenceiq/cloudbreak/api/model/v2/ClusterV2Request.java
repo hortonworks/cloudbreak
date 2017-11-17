@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemRequest;
 import com.sequenceiq.cloudbreak.api.model.JsonEntity;
+import com.sequenceiq.cloudbreak.api.model.LdapConfigRequest;
 import com.sequenceiq.cloudbreak.api.model.RDSConfigRequest;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -32,6 +33,9 @@ public class ClusterV2Request implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
+
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
+    private LdapConfigRequest ldapConfig;
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
     private Set<Long> rdsConfigIds = new HashSet<>();
@@ -61,6 +65,14 @@ public class ClusterV2Request implements JsonEntity {
 
     public void setEmailNeeded(Boolean emailNeeded) {
         this.emailNeeded = emailNeeded;
+    }
+
+    public LdapConfigRequest getLdapConfig() {
+        return ldapConfig;
+    }
+
+    public void setLdapConfig(LdapConfigRequest ldapConfig) {
+        this.ldapConfig = ldapConfig;
     }
 
     public Set<Long> getRdsConfigIds() {
