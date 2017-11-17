@@ -1,10 +1,11 @@
 {
   "inputs": [],
+  "description": "Dataplane blueprint",
   "blueprint": {
     "Blueprints": {
-      "blueprint_name": "hdp25-edw-analytics",
+      "blueprint_name": "hdp26-etl-edw-spark2",
       "stack_name": "HDP",
-      "stack_version": "2.5"
+      "stack_version": "2.6"
     },
     "settings": [
       {
@@ -23,12 +24,6 @@
       }
     ],
     "configurations": [
-      {
-        "hive-interactive-env": {
-          "enable_hive_interactive": "true",
-          "llap_queue_capacity": "75"
-        }
-      },
       {
         "core-site": {
           "fs.trash.interval": "4320"
@@ -87,13 +82,7 @@
             "name": "HIVE_SERVER"
           },
           {
-            "name": "HIVE_SERVER_INTERACTIVE"
-          },
-          {
             "name": "JOURNALNODE"
-          },
-          {
-            "name": "LIVY_SERVER"
           },
           {
             "name": "MAPREDUCE2_CLIENT"
@@ -120,13 +109,10 @@
             "name": "SECONDARY_NAMENODE"
           },
           {
-            "name": "SLIDER"
+            "name": "SPARK2_CLIENT"
           },
           {
-            "name": "SPARK_CLIENT"
-          },
-          {
-            "name": "SPARK_JOBHISTORYSERVER"
+            "name": "SPARK2_JOBHISTORYSERVER"
           },
           {
             "name": "TEZ_CLIENT"
@@ -136,9 +122,6 @@
           },
           {
             "name": "YARN_CLIENT"
-          },
-          {
-            "name": "ZEPPELIN_MASTER"
           },
           {
             "name": "ZOOKEEPER_CLIENT"
@@ -160,7 +143,7 @@
             "name": "TEZ_CLIENT"
           },
           {
-            "name": "SPARK_CLIENT"
+            "name": "SPARK2_CLIENT"
           },
           {
             "name": "DATANODE"
@@ -185,7 +168,7 @@
             "name": "TEZ_CLIENT"
           },
           {
-            "name": "SPARK_CLIENT"
+            "name": "SPARK2_CLIENT"
           },
           {
             "name": "METRICS_MONITOR"
