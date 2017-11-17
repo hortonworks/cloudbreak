@@ -4,6 +4,7 @@ create_recipe_log_dir_pre_start:
 
 {% for hg, args in pillar.get('recipes', {}).items() %}
 {% if grains['hostgroup'] == hg %}
+{% if args['pre-ambari-start'] is defined %}
 {% for script_name in args['pre-ambari-start'] %}
 /opt/scripts/pre-ambari-start/{{ script_name }}:
   file.managed:
@@ -20,6 +21,7 @@ run_pre_ambari_start_script_{{ script_name }}:
       - ls /opt/scripts/pre-ambari-start/{{ script_name }}
     - unless: ls /var/log/recipes/pre-ambari-start-{{ script_name }}.log
 {% endfor %}
+{% endif %}
 
 {% endif %}
 {% endfor %}
