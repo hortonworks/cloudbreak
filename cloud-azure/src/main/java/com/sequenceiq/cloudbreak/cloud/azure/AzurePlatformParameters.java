@@ -71,7 +71,7 @@ public class AzurePlatformParameters implements PlatformParameters {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzurePlatformParameters.class);
 
-    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 3;
+    private static final int DEFAULT_FAULT_DOMAIN_COUNTER = 2;
 
     private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
 
