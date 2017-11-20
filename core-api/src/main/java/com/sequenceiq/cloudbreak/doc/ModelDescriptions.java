@@ -165,6 +165,7 @@ public class ModelDescriptions {
         public static final String RDSCONFIG_IDS = "RDS configuration ids for the cluster";
         public static final String RDSCONFIGS = "RDS configurations for the cluster";
         public static final String LDAP_CONFIG_ID = "LDAP config id for the cluster";
+        public static final String LDAP_CONFIG_NAME = "LDAP config name for the cluster";
         public static final String LDAP_CONFIG = "LDAP config for the cluster";
         public static final String HOSTGROUP_ADJUSTMENT = "host group adjustment";
         public static final String ADJUSTMENT_TYPE = "type of  adjustment";

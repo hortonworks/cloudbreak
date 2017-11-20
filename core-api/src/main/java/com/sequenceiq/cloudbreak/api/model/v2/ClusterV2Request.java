@@ -30,8 +30,8 @@ public class ClusterV2Request implements JsonEntity {
     @ApiModelProperty(ClusterModelDescription.EMAIL_TO)
     private String emailTo;
 
-    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)
-    private Long ldapConfigId;
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
+    private String ldapConfigName;
 
     @ApiModelProperty(ClusterModelDescription.RDSCONFIG_IDS)
     private Set<Long> rdsConfigIds = new HashSet<>();
@@ -87,16 +87,16 @@ public class ClusterV2Request implements JsonEntity {
         this.fileSystem = fileSystem;
     }
 
-    public Long getLdapConfigId() {
-        return ldapConfigId;
-    }
-
-    public void setLdapConfigId(Long ldapConfigId) {
-        this.ldapConfigId = ldapConfigId;
-    }
-
     public String getEmailTo() {
         return emailTo;
+    }
+
+    public String getLdapConfigName() {
+        return ldapConfigName;
+    }
+
+    public void setLdapConfigName(String ldapConfigName) {
+        this.ldapConfigName = ldapConfigName;
     }
 
     public void setEmailTo(String emailTo) {
