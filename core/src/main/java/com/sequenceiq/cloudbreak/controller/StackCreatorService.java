@@ -69,8 +69,7 @@ public class StackCreatorService {
     public StackResponse createStack(IdentityUser user, StackRequest stackRequest, boolean publicInAccount) throws Exception {
         stackRequest.setAccount(user.getAccount());
         stackRequest.setOwner(user.getUserId());
-        stackValidator.validate(user, stackRequest.getName(), stackRequest.getCredentialSource(),
-                stackRequest.getCredentialId(), stackRequest.getCredential(), stackRequest.getParameters());
+        stackValidator.validate(user, stackRequest);
         Stack stack = conversionService.convert(stackRequest, Stack.class);
         MDCBuilder.buildMdcContext(stack);
         stack = stackSensitiveDataPropagator.propagate(stackRequest.getCredentialSource(), stack, user);

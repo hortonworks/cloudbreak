@@ -48,10 +48,10 @@ import com.sequenceiq.cloudbreak.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
-public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack> {
+public class StackToStackResponseConverterTest extends AbstractEntityConverterTest<Stack> {
 
     @InjectMocks
-    private StackToJsonConverter underTest;
+    private StackToStackResponseConverter underTest;
 
     @Mock
     private ConversionService conversionService;
@@ -67,7 +67,7 @@ public class StackToJsonConverterTest extends AbstractEntityConverterTest<Stack>
 
     @Before
     public void setUp() throws CloudbreakImageNotFoundException {
-        underTest = new StackToJsonConverter();
+        underTest = new StackToStackResponseConverter();
         MockitoAnnotations.initMocks(this);
         when(imageService.getImage(anyLong())).thenReturn(new Image("testimage", new HashMap<>()));
         when(componentConfigProvider.getCloudbreakDetails(anyLong())).thenReturn(new CloudbreakDetails("version"));

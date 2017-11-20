@@ -43,8 +43,8 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 
 @Component
-public class StackToJsonConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackToJsonConverter.class);
+public class StackToStackResponseConverter extends AbstractConversionServiceAwareConverter<Stack, StackResponse> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackToStackResponseConverter.class);
 
     @Inject
     @Qualifier("conversionService")
