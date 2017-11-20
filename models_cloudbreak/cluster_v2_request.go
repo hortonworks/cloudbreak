@@ -39,8 +39,8 @@ type ClusterV2Request struct {
 	// external file system configuration
 	FileSystem *FileSystem `json:"fileSystem,omitempty"`
 
-	// LDAP config id for the cluster
-	LdapConfigID int64 `json:"ldapConfigId,omitempty"`
+	// LDAP config name for the cluster
+	LdapConfigName string `json:"ldapConfigName,omitempty"`
 
 	// RDS configuration ids for the cluster
 	// Unique: true
@@ -63,7 +63,7 @@ type ClusterV2Request struct {
 
 /* polymorph ClusterV2Request fileSystem false */
 
-/* polymorph ClusterV2Request ldapConfigId false */
+/* polymorph ClusterV2Request ldapConfigName false */
 
 /* polymorph ClusterV2Request rdsConfigIds false */
 

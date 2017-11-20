@@ -94,6 +94,9 @@ type ClusterRequest struct {
 	// LDAP config id for the cluster
 	LdapConfigID int64 `json:"ldapConfigId,omitempty"`
 
+	// LDAP config name for the cluster
+	LdapConfigName string `json:"ldapConfigName,omitempty"`
+
 	// name of the resource
 	// Required: true
 	// Max Length: 40
@@ -171,6 +174,8 @@ type ClusterRequest struct {
 /* polymorph ClusterRequest ldapConfig false */
 
 /* polymorph ClusterRequest ldapConfigId false */
+
+/* polymorph ClusterRequest ldapConfigName false */
 
 /* polymorph ClusterRequest name false */
 

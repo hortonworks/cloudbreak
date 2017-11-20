@@ -27,7 +27,7 @@ type Client struct {
 /*
 DeleteConstraint deletes constraint template by id
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) DeleteConstraint(params *DeleteConstraintParams) error {
 	// TODO: Validate the params before sending
@@ -57,7 +57,7 @@ func (a *Client) DeleteConstraint(params *DeleteConstraintParams) error {
 /*
 DeletePrivateConstraint deletes private constraint template by name
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) DeletePrivateConstraint(params *DeletePrivateConstraintParams) error {
 	// TODO: Validate the params before sending
@@ -87,7 +87,7 @@ func (a *Client) DeletePrivateConstraint(params *DeletePrivateConstraintParams) 
 /*
 DeletePublicConstraint deletes public owned or private constraint template by name
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) DeletePublicConstraint(params *DeletePublicConstraintParams) error {
 	// TODO: Validate the params before sending
@@ -117,7 +117,7 @@ func (a *Client) DeletePublicConstraint(params *DeletePublicConstraintParams) er
 /*
 GetConstraint retrieves constraint template by id
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) GetConstraint(params *GetConstraintParams) (*GetConstraintOK, error) {
 	// TODO: Validate the params before sending
@@ -147,7 +147,7 @@ func (a *Client) GetConstraint(params *GetConstraintParams) (*GetConstraintOK, e
 /*
 GetPrivateConstraint retrieves a private constraint template by name
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) GetPrivateConstraint(params *GetPrivateConstraintParams) (*GetPrivateConstraintOK, error) {
 	// TODO: Validate the params before sending
@@ -177,7 +177,7 @@ func (a *Client) GetPrivateConstraint(params *GetPrivateConstraintParams) (*GetP
 /*
 GetPrivatesConstraint retrieves private constraint templates
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) GetPrivatesConstraint(params *GetPrivatesConstraintParams) (*GetPrivatesConstraintOK, error) {
 	// TODO: Validate the params before sending
@@ -207,7 +207,7 @@ func (a *Client) GetPrivatesConstraint(params *GetPrivatesConstraintParams) (*Ge
 /*
 GetPublicConstraint retrieves a public or private owned constraint template by name
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) GetPublicConstraint(params *GetPublicConstraintParams) (*GetPublicConstraintOK, error) {
 	// TODO: Validate the params before sending
@@ -237,7 +237,7 @@ func (a *Client) GetPublicConstraint(params *GetPublicConstraintParams) (*GetPub
 /*
 GetPublicsConstraint retrieves public and private owned constraint templates
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) GetPublicsConstraint(params *GetPublicsConstraintParams) (*GetPublicsConstraintOK, error) {
 	// TODO: Validate the params before sending
@@ -267,7 +267,7 @@ func (a *Client) GetPublicsConstraint(params *GetPublicsConstraintParams) (*GetP
 /*
 PostPrivateConstraint creates constraint template as private resource
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) PostPrivateConstraint(params *PostPrivateConstraintParams) (*PostPrivateConstraintOK, error) {
 	// TODO: Validate the params before sending
@@ -297,7 +297,7 @@ func (a *Client) PostPrivateConstraint(params *PostPrivateConstraintParams) (*Po
 /*
 PostPublicConstraint creates constraint template as public resource
 
-A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like Mesos.
+A constraint template tells Cloudbreak the resource constraints (cpu, memory, disk) of the Ambari containers that will be deployed to the cluster. A constraint template must be created onenvironments where there is no one-to-one mapping between containers and nodes, like YARN.
 */
 func (a *Client) PostPublicConstraint(params *PostPublicConstraintParams) (*PostPublicConstraintOK, error) {
 	// TODO: Validate the params before sending
