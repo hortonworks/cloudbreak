@@ -103,6 +103,13 @@ var (
 			Usage: "name of resource",
 		},
 	}
+	FlNameOptional = StringFlag{
+		RequiredFlag: OPTIONAL,
+		StringFlag: cli.StringFlag{
+			Name:  "name",
+			Usage: "name of resource",
+		},
+	}
 	FlDescription = StringFlag{
 		RequiredFlag: OPTIONAL,
 		StringFlag: cli.StringFlag{
@@ -483,6 +490,13 @@ func (fb *FlagBuilder) AddAuthenticationFlags() *FlagBuilder {
 
 func (fb *FlagBuilder) AddResourceDefaultFlags() *FlagBuilder {
 	for _, f := range []cli.Flag{FlName, FlDescription, FlPublic} {
+		fb.flags = append(fb.flags, f)
+	}
+	return fb
+}
+
+func (fb *FlagBuilder) AddResourceFlagsWithOptionalName() *FlagBuilder {
+	for _, f := range []cli.Flag{FlNameOptional, FlDescription, FlPublic} {
 		fb.flags = append(fb.flags, f)
 	}
 	return fb

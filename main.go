@@ -496,12 +496,12 @@ func main() {
 		{
 			Name:      "create-cluster",
 			Usage:     "creates a new cluster",
-			Flags:     cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWait).AddAuthenticationFlags().Build(),
+			Flags:     cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWait).AddAuthenticationFlags().Build(),
 			Before:    ConfigRead,
 			Action:    cb.CreateStack,
 			ArgsUsage: cb.StackTemplateHelp,
 			BashComplete: func(c *cli.Context) {
-				for _, f := range cb.NewFlagBuilder().AddResourceDefaultFlags().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWait).AddAuthenticationFlags().Build() {
+				for _, f := range cb.NewFlagBuilder().AddResourceFlagsWithOptionalName().AddFlags(cb.FlInputJson, cb.FlAmbariPasswordOptional, cb.FlWait).AddAuthenticationFlags().Build() {
 					printFlagCompletion(f)
 				}
 			},

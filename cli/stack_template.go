@@ -85,7 +85,7 @@ func generateStackTemplateImpl(mode cloud.NetworkMode, stringFinder func(string)
 				Password:      &(&types.S{S: ""}).S,
 			},
 		},
-		Name:             &(&types.S{S: "____"}).S,
+		Name:             &(&types.S{S: ""}).S,
 		CredentialName:   "____",
 		AvailabilityZone: "____",
 		Region:           "____",

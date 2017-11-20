@@ -70,7 +70,12 @@ func assembleStackRequest(c *cli.Context) *models_cloudbreak.StackV2Request {
 	}
 
 	name := c.String(FlName.Name)
-	req.Name = &name
+	if len(name) != 0 {
+		req.Name = &name
+	}
+	if len(*req.Name) == 0 {
+		utils.LogErrorMessageAndExit("Name of the cluster must be set either in the template or with the --name command line option.")
+	}
 
 	ambariPassword := c.String(FlAmbariPasswordOptional.Name)
 	if len(ambariPassword) != 0 {
