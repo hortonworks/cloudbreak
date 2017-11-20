@@ -22,10 +22,10 @@ public class ClusterV2RequestToClusterRequestConverter extends AbstractConversio
         cluster.setEmailNeeded(source.getEmailNeeded());
         cluster.setEmailTo(source.getEmailTo());
         cluster.setFileSystem(source.getFileSystem());
-        cluster.setLdapConfigId(source.getLdapConfigId());
         cluster.setName(source.getName());
         cluster.setRdsConfigIds(source.getRdsConfigIds());
         cluster.setRdsConfigJsons(source.getRdsConfigJsons());
+        cluster.setLdapConfigName(source.getLdapConfigName());
         if (source.getAmbariRequest() != null) {
             cluster.setAmbariDatabaseDetails(source.getAmbariRequest().getAmbariDatabaseDetails());
             cluster.setAmbariRepoDetailsJson(source.getAmbariRequest().getAmbariRepoDetailsJson());

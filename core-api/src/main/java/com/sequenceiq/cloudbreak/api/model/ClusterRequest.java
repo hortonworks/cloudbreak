@@ -22,7 +22,7 @@ public class ClusterRequest implements JsonEntity {
 
     @Size(max = 40, min = 5, message = "The length of the cluster's name has to be in range of 5 to 40")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
+        message = "The name of the cluster can only contain lowercase alphanumeric characters and hyphens and has to start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = ModelDescriptions.NAME, required = true)
     private String name;
@@ -57,7 +57,7 @@ public class ClusterRequest implements JsonEntity {
 
     @Size(max = 15, min = 5, message = "The length of the username has to be in range of 5 to 15")
     @Pattern(regexp = "([a-z][-a-z0-9]*[a-z0-9])",
-            message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
+        message = "The username can only contain lowercase alphanumeric characters and hyphens and has start with an alphanumeric character")
     @NotNull
     @ApiModelProperty(value = StackModelDescription.USERNAME, required = true)
     private String userName;
@@ -71,6 +71,9 @@ public class ClusterRequest implements JsonEntity {
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_ID)
     private Long ldapConfigId;
+
+    @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG_NAME)
+    private String ldapConfigName;
 
     @ApiModelProperty(ClusterModelDescription.LDAP_CONFIG)
     private LdapConfigRequest ldapConfig;
@@ -256,6 +259,14 @@ public class ClusterRequest implements JsonEntity {
 
     public void setLdapConfigId(Long ldapConfigId) {
         this.ldapConfigId = ldapConfigId;
+    }
+
+    public String getLdapConfigName() {
+        return ldapConfigName;
+    }
+
+    public void setLdapConfigName(String ldapConfigName) {
+        this.ldapConfigName = ldapConfigName;
     }
 
     public ConfigStrategy getConfigStrategy() {

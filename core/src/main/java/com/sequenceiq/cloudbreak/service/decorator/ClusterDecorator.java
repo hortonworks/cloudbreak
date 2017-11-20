@@ -102,7 +102,7 @@ public class ClusterDecorator {
         }
         subject.setTopologyValidation(request.getValidateBlueprint());
         prepareRds(subject, user, request.getRdsConfigIds(), request.getRdsConfigJsons(), stack);
-        prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), stack);
+        prepareLdap(subject, user, request.getLdapConfigId(), request.getLdapConfig(), request.getLdapConfigName(), stack);
         prepareConnectedClusterParameters(subject, user, request.getConnectedCluster());
         return subject;
     }
@@ -155,9 +155,12 @@ public class ClusterDecorator {
         }
     }
 
-    private void prepareLdap(Cluster subject, IdentityUser user, Long ldapConfigId, LdapConfigRequest ldapConfigRequest, Stack stack) {
+    private void prepareLdap(Cluster subject, IdentityUser user, Long ldapConfigId, LdapConfigRequest ldapConfigRequest, String ldapName, Stack stack) {
         if (ldapConfigId != null) {
             LdapConfig ldapConfig = ldapConfigService.get(ldapConfigId);
+            subject.setLdapConfig(ldapConfig);
+        } else if (ldapName != null) {
+            LdapConfig ldapConfig = ldapConfigService.getPublicConfig(ldapName, user);
             subject.setLdapConfig(ldapConfig);
         } else if (ldapConfigRequest != null) {
             LdapConfig ldapConfig = conversionService.convert(ldapConfigRequest, LdapConfig.class);
