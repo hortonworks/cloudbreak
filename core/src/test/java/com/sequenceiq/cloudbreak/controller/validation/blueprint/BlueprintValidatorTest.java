@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -92,11 +93,11 @@ public class BlueprintValidatorTest {
         // GIVEN
         Blueprint blueprint = createBlueprint();
         Set<InstanceGroup> instanceGroups = createInstanceGroups();
-        Set<HostGroup> hostGroups = createHostGroups(instanceGroups.stream().limit(instanceGroups.size() - 1).collect(Collectors.toSet()));
+        Set<HostGroup> hostGroups = createHostGroups(instanceGroups.stream().sorted().limit(instanceGroups.size() - 1).collect(Collectors.toSet()));
         JsonNode blueprintJsonTree = createJsonTree();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("The host groups in the blueprint must match the hostgroups in the request.");
+        thrown.expectMessage(Matchers.startsWith("The host groups in the blueprint"));
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
@@ -128,7 +129,7 @@ public class BlueprintValidatorTest {
         JsonNode blueprintJsonTree = createJsonTreeWithTooMuchGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("The host groups in the blueprint must match the hostgroups in the request.");
+        thrown.expectMessage(Matchers.startsWith("The host groups in the blueprint"));
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
@@ -143,7 +144,7 @@ public class BlueprintValidatorTest {
         JsonNode blueprintJsonTree = createJsonTreeWithNotEnoughGroup();
         BDDMockito.given(objectMapper.readTree(BLUEPRINT_STRING)).willReturn(blueprintJsonTree);
         thrown.expect(BadRequestException.class);
-        thrown.expectMessage("The host groups in the blueprint must match the hostgroups in the request.");
+        thrown.expectMessage(Matchers.startsWith("The host groups in the blueprint"));
         // WHEN
         underTest.validateBlueprintForStack(blueprint, hostGroups, instanceGroups);
         // THEN throw exception
