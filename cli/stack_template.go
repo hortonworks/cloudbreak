@@ -21,16 +21,17 @@ type node struct {
 
 var defaultNodes = []node{
 	{"master", models_cloudbreak.InstanceGroupResponseTypeGATEWAY, 1},
-	{"slave", models_cloudbreak.InstanceGroupResponseTypeCORE, 3},
+	{"worker", models_cloudbreak.InstanceGroupResponseTypeCORE, 3},
+	{"compute", models_cloudbreak.InstanceGroupResponseTypeCORE, 0},
 }
 
 var maxCardinality = map[string]int{
 	"1":   1,
 	"0-1": 1,
 	"1-2": 2,
-	"0+":  9,
-	"1+":  9,
-	"ALL": 9,
+	"0+":  3,
+	"1+":  3,
+	"ALL": 3,
 }
 
 var getBlueprintClient = func(server, userName, password string) getPublicBlueprint {
