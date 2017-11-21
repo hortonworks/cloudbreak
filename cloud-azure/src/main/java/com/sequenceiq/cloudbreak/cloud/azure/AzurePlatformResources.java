@@ -69,7 +69,7 @@ public class AzurePlatformResources implements PlatformResources {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
 
-        for (Network network : client.getNetworks().list()) {
+        for (Network network : client.getNetworks()) {
             String actualRegion = network.region().label();
             if (regionMatch(actualRegion, region)) {
                 Map<String, String> subnets = new HashMap<>();
