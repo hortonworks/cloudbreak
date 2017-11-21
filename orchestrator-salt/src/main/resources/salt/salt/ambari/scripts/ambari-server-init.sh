@@ -2,7 +2,15 @@
 
 set -x
 
+JAVA_PROFILE=/etc/profile.d/java.sh
+if [ -f $JAVA_PROFILE ]
+then
+    echo "Setting JAVA_HOME from $JAVA_PROFILE"
+    source $JAVA_PROFILE
+fi
+
 : ${JAVA_HOME:="/usr/lib/jvm/java"}
+echo "JAVA_HOME set to $JAVA_HOME"
 
 config_remote_jdbc() {
     if [[ '{{ ambari_database.vendor }}' = 'embedded' ]]; then
@@ -49,7 +57,7 @@ find_and_distribute_latest_jdbc_driver() {
         exit 1
     fi
     ln -s $latest /usr/share/java # this is for ambari-server setup
-    ln -s $latest /usr/lib/jvm/java/jre/lib/ext # this is for ambari-server start -> database check
+    ln -s $latest $JAVA_HOME/jre/lib/ext # this is for ambari-server start -> database check
     ambari-server setup --jdbc-db=$1 --jdbc-driver=${latest}
     echo ${latest}
 }
