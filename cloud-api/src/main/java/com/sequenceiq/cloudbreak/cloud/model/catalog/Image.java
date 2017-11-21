@@ -16,6 +16,8 @@ public class Image {
 
     private String os;
 
+    private String osType;
+
     private String uuid;
 
     private String version;
@@ -35,7 +37,8 @@ public class Image {
             @JsonProperty(value = "version") String version,
             @JsonProperty(value = "repo") Map<String, String> repo,
             @JsonProperty(value = "images", required = true) Map<String, Map<String, String>> imageSetsByProvider,
-            @JsonProperty(value = "stack-details") StackDetails stackDetails) {
+            @JsonProperty(value = "stack-details") StackDetails stackDetails,
+            @JsonProperty(value = "os_type") String osType) {
         this.date = date;
         this.description = description;
         this.os = os;
@@ -44,6 +47,7 @@ public class Image {
         this.repo = (repo == null) ? Collections.emptyMap() : repo;
         this.imageSetsByProvider = imageSetsByProvider;
         this.stackDetails = stackDetails;
+        this.osType = osType;
     }
 
     public String getDate() {
@@ -78,6 +82,10 @@ public class Image {
         return stackDetails;
     }
 
+    public String getOsType() {
+        return osType;
+    }
+
     @Override
     public String toString() {
         return "Image{"
@@ -85,6 +93,7 @@ public class Image {
                 + ", date='" + date + '\''
                 + ", description='" + description + '\''
                 + ", os='" + os + '\''
+                + ", osType='" + osType + '\''
                 + ", version='" + version + '\''
                 + '}';
     }

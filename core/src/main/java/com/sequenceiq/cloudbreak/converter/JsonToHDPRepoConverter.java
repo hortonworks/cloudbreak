@@ -4,9 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.model.AmbariStackDetailsJson;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.controller.BadRequestException;
 
 @Component
 public class JsonToHDPRepoConverter extends AbstractConversionServiceAwareConverter<AmbariStackDetailsJson, StackRepoDetails> {
@@ -20,6 +22,7 @@ public class JsonToHDPRepoConverter extends AbstractConversionServiceAwareConver
         StackRepoDetails repo = new StackRepoDetails();
         Map<String, String> stack = new HashMap<>();
         Map<String, String> util = new HashMap<>();
+        validateRepoFieldsExistence(source);
 
         stack.put("repoid", source.getStackRepoId());
         util.put("repoid", source.getUtilsRepoId());
@@ -36,10 +39,34 @@ public class JsonToHDPRepoConverter extends AbstractConversionServiceAwareConver
             util.put(source.getOs(), utilsBaseURL);
         }
 
+        if (!StringUtils.isEmpty(source.getRepositoryVersion())) {
+            stack.put(StackRepoDetails.REPOSITORY_VERSION, source.getRepositoryVersion());
+            stack.put("repoid", source.getStack());
+        }
+        if (!StringUtils.isEmpty(source.getVersionDefinitionFileUrl())) {
+            stack.put(StackRepoDetails.CUSTOM_VDF_REPO_KEY, source.getVersionDefinitionFileUrl());
+        }
+
         repo.setStack(stack);
         repo.setUtil(util);
         repo.setVerify(source.getVerify());
         repo.setHdpVersion(source.getVersion());
         return repo;
+    }
+
+    private void validateRepoFieldsExistence(AmbariStackDetailsJson source) {
+        boolean vdfRequiredFieldsExists = !StringUtils.isEmpty(source.getRepositoryVersion())
+                && !StringUtils.isEmpty(source.getVersionDefinitionFileUrl());
+
+        boolean customBaseRepoRequiredFieldsExists = !StringUtils.isEmpty(source.getStackBaseURL())
+                && !StringUtils.isEmpty(source.getStackRepoId())
+                && !StringUtils.isEmpty(source.getUtilsBaseURL())
+                && !StringUtils.isEmpty(source.getUtilsRepoId());
+
+        if (!vdfRequiredFieldsExists && !customBaseRepoRequiredFieldsExists) {
+            String msg = "The 'repositoryVersion', 'versionDefinitionFileUrl' or "
+                    + "'stackBaseURL', 'stackRepoId', 'utilsBaseUrl', 'utilsRepoId' fields must be specified!";
+            throw new BadRequestException(msg);
+        }
     }
 }

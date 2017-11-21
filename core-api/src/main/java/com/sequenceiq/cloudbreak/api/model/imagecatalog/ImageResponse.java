@@ -18,6 +18,9 @@ public class ImageResponse implements JsonEntity {
     @JsonProperty("os")
     private String os;
 
+    @JsonProperty("osType")
+    private String osType;
+
     @JsonProperty("uuid")
     private String uuid;
 
@@ -95,5 +98,13 @@ public class ImageResponse implements JsonEntity {
 
     public void setStackDetails(StackDetailsJson stackDetails) {
         this.stackDetails = stackDetails;
+    }
+
+    public String getOsType() {
+        return osType;
+    }
+
+    public void setOsType(String osType) {
+        this.osType = osType;
     }
 }

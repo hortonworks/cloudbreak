@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -15,6 +16,7 @@ import javax.inject.Named;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.util.StringUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -25,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.model.ClusterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariDatabase;
 import com.sequenceiq.cloudbreak.cloud.model.AmbariRepo;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDFInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultHDPEntries;
@@ -114,8 +117,10 @@ public class ClusterCreationSetupService {
                 && c.getName().equalsIgnoreCase(ComponentType.AMBARI_REPO_DETAILS.name())).findAny();
         Optional<Component> stackHdpRepoConfig = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.HDP_REPO_DETAILS)
                 && c.getName().equalsIgnoreCase(ComponentType.HDP_REPO_DETAILS.name())).findAny();
+        Optional<Component> stackImageComponent = allComponent.stream().filter(c -> c.getComponentType().equals(ComponentType.IMAGE)
+                && c.getName().equalsIgnoreCase(ComponentType.IMAGE.name())).findAny();
         components = addAmbariRepoConfig(stackAmbariRepoConfig, components, request.getAmbariRepoDetailsJson(), cluster);
-        components = addHDPRepoConfig(blueprint, stackHdpRepoConfig, components, request, cluster, user);
+        components = addHDPRepoConfig(blueprint, stackHdpRepoConfig, components, request, cluster, user, stackImageComponent);
         components = addAmbariDatabaseConfig(components, request.getAmbariDatabaseDetails(), cluster);
         return clusterService.create(user, stack, cluster, components);
     }
@@ -138,21 +143,24 @@ public class ClusterCreationSetupService {
     }
 
     private List<ClusterComponent> addHDPRepoConfig(Blueprint blueprint, Optional<Component> stackHdpRepoConfig,
-            List<ClusterComponent> components, ClusterRequest request, Cluster cluster, IdentityUser user) throws JsonProcessingException {
+            List<ClusterComponent> components, ClusterRequest request, Cluster cluster, IdentityUser user, Optional<Component> stackImageComponent)
+            throws JsonProcessingException {
+
+        Json stackRepoDetailsJson;
         if (!stackHdpRepoConfig.isPresent()) {
             if (request.getAmbariStackDetails() != null) {
                 StackRepoDetails stackRepoDetails = conversionService.convert(request.getAmbariStackDetails(), StackRepoDetails.class);
-                ClusterComponent component = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, new Json(stackRepoDetails), cluster);
-                components.add(component);
+                stackRepoDetailsJson = new Json(stackRepoDetails);
             } else {
-                ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS,
-                        new Json(defaultHDPInfo(blueprint, request, user).getRepo()), cluster);
-                components.add(hdpRepoComponent);
+                StackRepoDetails repo = defaultHDPInfo(blueprint, request, user).getRepo();
+                pruneVDFUrlsByOsType(cluster, stackImageComponent, repo);
+                stackRepoDetailsJson = new Json(repo);
             }
         } else {
-            ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackHdpRepoConfig.get().getAttributes(), cluster);
-            components.add(hdpRepoComponent);
+            stackRepoDetailsJson = stackHdpRepoConfig.get().getAttributes();
         }
+        ClusterComponent hdpRepoComponent = new ClusterComponent(ComponentType.HDP_REPO_DETAILS, stackRepoDetailsJson, cluster);
+        components.add(hdpRepoComponent);
         return components;
     }
 
@@ -199,6 +207,25 @@ public class ClusterCreationSetupService {
             }
         }
         return root;
+    }
+
+    private void pruneVDFUrlsByOsType(Cluster cluster, Optional<Component> stackImageComponent, StackRepoDetails repo) {
+        if (stackImageComponent.isPresent()) {
+            try {
+                Image imageComponent = stackImageComponent.get().getAttributes().get(Image.class);
+                if (!StringUtils.isEmpty(stackImageComponent)) {
+                    String osType = imageComponent.getOsType();
+                    Set<String> vdfUrlKeysToRemove = repo.getStack().keySet().stream()
+                            .filter(key -> key.startsWith(StackRepoDetails.VDF_REPO_KEY_PREFIX))
+                            .filter(key -> !StringUtils.isEmpty(osType) && !key.equalsIgnoreCase(StackRepoDetails.VDF_REPO_KEY_PREFIX + osType))
+                            .collect(Collectors.toSet());
+
+                    vdfUrlKeysToRemove.forEach(key -> repo.getStack().remove(key));
+                }
+            } catch (IOException e) {
+                LOGGER.warn("Could not get Image component from database for cluster: " + cluster.getId(), e);
+            }
+        }
     }
 
     private List<ClusterComponent> addAmbariDatabaseConfig(List<ClusterComponent> components, AmbariDatabaseDetailsJson ambariRepoDetailsJson, Cluster cluster)

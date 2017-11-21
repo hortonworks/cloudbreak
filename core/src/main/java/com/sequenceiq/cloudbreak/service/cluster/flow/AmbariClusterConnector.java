@@ -25,7 +25,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -47,7 +46,6 @@ import com.sequenceiq.ambari.client.AmbariClient;
 import com.sequenceiq.ambari.client.AmbariConnectionException;
 import com.sequenceiq.ambari.client.services.BlueprintService;
 import com.sequenceiq.ambari.client.services.ServiceAndHostService;
-import com.sequenceiq.ambari.client.services.StackService;
 import com.sequenceiq.cloudbreak.api.model.ExecutorType;
 import com.sequenceiq.cloudbreak.api.model.FileSystemConfiguration;
 import com.sequenceiq.cloudbreak.api.model.FileSystemType;
@@ -70,8 +68,6 @@ import com.sequenceiq.cloudbreak.domain.HostGroup;
 import com.sequenceiq.cloudbreak.domain.HostMetadata;
 import com.sequenceiq.cloudbreak.domain.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.KerberosConfig;
-import com.sequenceiq.cloudbreak.domain.Orchestrator;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Stack;
 import com.sequenceiq.cloudbreak.domain.Topology;
@@ -106,7 +102,6 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosContainer
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosDomainResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosHostResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosLdapResolver;
-import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosPrincipalResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosRealmResolver;
 import com.sequenceiq.cloudbreak.service.cluster.flow.kerberos.KerberosTypeResolver;
 import com.sequenceiq.cloudbreak.service.events.CloudbreakEventService;
@@ -128,8 +123,6 @@ public class AmbariClusterConnector {
     private static final String REALM = "NODE.DC1.CONSUL";
 
     private static final String DOMAIN = "node.dc1.consul";
-
-    private static final String KEY_TYPE = "PERSISTED";
 
     private static final String FQDN = "fqdn";
 
@@ -243,9 +236,6 @@ public class AmbariClusterConnector {
     private KerberosHostResolver kerberosHostResolver;
 
     @Inject
-    private KerberosPrincipalResolver kerberosPrincipalResolver;
-
-    @Inject
     private KerberosLdapResolver kerberosLdapResolver;
 
     @Inject
@@ -268,6 +258,12 @@ public class AmbariClusterConnector {
 
     @Inject
     private BlueprintTemplateProcessor blueprintTemplateProcessor;
+
+    @Inject
+    private AmbariClusterTemplateService ambariClusterTemplateService;
+
+    @Inject
+    private AmbariRepositoryVersionService ambariRepositoryVersionService;
 
     public void waitForAmbariServer(Stack stack) throws CloudbreakException {
         AmbariClient defaultAmbariClient = getDefaultAmbariClient(stack);
@@ -306,32 +302,14 @@ public class AmbariClusterConnector {
             blueprintText = updateBlueprintConfiguration(stack, blueprintText, rdsConfigs, fs);
 
             AmbariClient ambariClient = getAmbariClient(stack);
-            setBaseRepoURL(stack, ambariClient);
+            ambariRepositoryVersionService.setBaseRepoURL(stack.getId(), cluster.getId(), stack.getOrchestrator(), ambariClient);
             addBlueprint(stack, ambariClient, blueprintText);
 
             Set<HostMetadata> hostsInCluster = hostMetadataRepository.findHostsInCluster(cluster.getId());
             PollingResult waitForHostsResult = waitForHosts(stack, ambariClient, hostsInCluster);
             checkPollingResult(waitForHostsResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_HOST_JOIN_FAILED.code()));
 
-            String clusterName = cluster.getName();
-            String blueprintName = cluster.getBlueprint().getAmbariName();
-            String configStrategy = cluster.getConfigStrategy().name();
-            Boolean hideQuickLinks = cluster.getGateway().getEnableGateway();
-            String clusterTemplate;
-            if (ambariClient.getClusterName() == null) {
-                if (cluster.isSecure()) {
-                    KerberosConfig kerberosConfig = cluster.getKerberosConfig();
-                    String principal = kerberosPrincipalResolver.resolvePrincipalForKerberos(kerberosConfig);
-                    clusterTemplate = ambariClient.createSecureCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            cluster.getPassword(), principal, kerberosConfig.getKerberosPassword(), KEY_TYPE, hideQuickLinks);
-                } else {
-                    clusterTemplate = ambariClient.createCluster(clusterName, blueprintName, hostGroupMappings, configStrategy,
-                            ambariAuthenticationProvider.getAmbariPassword(cluster), hideQuickLinks);
-                }
-                LOGGER.info("Submitted cluster creation template: {}", JsonUtil.minify(clusterTemplate));
-            } else {
-                LOGGER.info("Ambari cluster already exists: {}", clusterName);
-            }
+            ambariClusterTemplateService.addClusterTemplate(cluster, hostGroupMappings, ambariClient);
             PollingResult pollingResult = ambariOperationService.waitForOperationsToStart(stack, ambariClient, singletonMap("INSTALL_START", 1),
                     START_OPERATION_STATE);
             checkPollingResult(pollingResult, cloudbreakMessagesService.getMessage(Msg.AMBARI_CLUSTER_INSTALL_FAILED.code()));
@@ -715,47 +693,6 @@ public class AmbariClusterConnector {
             }
         }
         return stopped;
-    }
-
-    private void setBaseRepoURL(Stack stack, StackService ambariClient) throws CloudbreakException {
-        StackRepoDetails stackRepoDetails = null;
-        Orchestrator orchestrator = stack.getOrchestrator();
-        if (!orchestratorTypeResolver.resolveType(orchestrator).containerOrchestrator() || "YARN".equals(orchestrator.getType())) {
-            stackRepoDetails = clusterComponentConfigProvider.getHDPRepo(stack.getCluster().getId());
-        }
-        if (stackRepoDetails != null) {
-            try {
-                LOGGER.info("Use specific Ambari repository: {}", stackRepoDetails);
-                Map<String, String> stackRepo = stackRepoDetails.getStack();
-                Map<String, String> utilRepo = stackRepoDetails.getUtil();
-                String stackRepoId = stackRepo.remove(StackRepoDetails.REPO_ID_TAG);
-                String utilRepoId = utilRepo.remove(StackRepoDetails.REPO_ID_TAG);
-                stackRepo.remove(StackRepoDetails.MPACK_TAG);
-                String[] typeVersion = stackRepoId.split("-");
-                String stackType = typeVersion[0];
-                String version = "";
-                if (typeVersion.length > 1) {
-                    version = typeVersion[1];
-                }
-                for (Entry<String, String> entry : stackRepo.entrySet()) {
-                    addRepository(ambariClient, stackType, version, entry.getKey(), stackRepoId, entry.getValue(), stackRepoDetails.isVerify());
-                }
-                for (Entry<String, String> entry : utilRepo.entrySet()) {
-                    addRepository(ambariClient, stackType, version, entry.getKey(), utilRepoId, entry.getValue(), stackRepoDetails.isVerify());
-                }
-            } catch (HttpResponseException e) {
-                String exceptionErrorMsg = AmbariClientExceptionUtil.getErrorMessage(e);
-                String msg = String.format("Cannot use the specified Ambari stack: %s. Error: %s", stackRepoDetails.toString(), exceptionErrorMsg);
-                throw new BadRequestException(msg, e);
-            }
-        } else {
-            LOGGER.info("Using latest HDP repository");
-        }
-    }
-
-    private void addRepository(StackService client, String stack, String version, String os,
-            String repoId, String repoUrl, boolean verify) throws HttpResponseException {
-        client.addStackRepository(stack, version, os, repoId, repoUrl, verify);
     }
 
     private void addBlueprint(Stack stack, AmbariClient ambariClient, String blueprintText) {

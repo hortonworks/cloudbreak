@@ -178,6 +178,12 @@ public class AmbariClusterConnectorTest {
     @Mock
     private CloudbreakMessagesService cloudbreakMessagesService;
 
+    @Mock
+    private AmbariClusterTemplateService ambariClusterTemplateService;
+
+    @Mock
+    private AmbariRepositoryVersionService ambariRepositoryVersionService;
+
     @InjectMocks
     private final AmbariClusterConnector underTest = new AmbariClusterConnector();
 
@@ -196,7 +202,7 @@ public class AmbariClusterConnectorTest {
         when(hostMetadataRepository.findHostsInCluster(anyLong())).thenReturn(new HashSet<>());
         when(ambariClient.extendBlueprintHostGroupConfiguration(anyString(), anyMap())).thenReturn(blueprint.getBlueprintText());
         when(ambariClient.addBlueprint(anyString())).thenReturn("");
-        when(ambariClient.createCluster(anyString(), anyString(), any(Map.class), anyString(), anyString(), anyBoolean())).thenReturn("");
+        when(ambariClient.createCluster(anyString(), anyString(), any(Map.class), anyString(), anyString(), anyBoolean(), anyString())).thenReturn("");
         when(hadoopConfigurationService.getHostGroupConfiguration(any(Cluster.class))).thenReturn(new HashMap<>());
         when(ambariClientProvider.getAmbariClient(any(HttpClientConfig.class), anyInt(), anyString(), anyString())).thenReturn(ambariClient);
         when(ambariClientProvider.getDefaultAmbariClient(any(HttpClientConfig.class), anyInt())).thenReturn(ambariClient);
