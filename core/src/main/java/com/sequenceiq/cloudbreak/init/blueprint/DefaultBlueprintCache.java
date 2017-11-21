@@ -50,7 +50,8 @@ public class DefaultBlueprintCache {
                     blueprintJson.setAmbariBlueprint(jsonNode.get("blueprint").toString());
                     Blueprint bp = converter.convert(blueprintJson);
                     JsonNode inputs = jsonNode.get("inputs");
-                    bp.setDescription(jsonNode.get("description").asText(split[0]));
+                    JsonNode description = jsonNode.get("description");
+                    bp.setDescription(description == null ? split[0] : description.asText(split[0]));
                     BlueprintInputParameters inputParameters = new BlueprintInputParameters(blueprintUtils.prepareInputs(inputs));
                     bp.setInputParameters(new Json(inputParameters));
                     defaultBlueprints.put(bp.getName(), bp);
