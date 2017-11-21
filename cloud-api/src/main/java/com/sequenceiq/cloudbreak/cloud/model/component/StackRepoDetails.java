@@ -11,6 +11,12 @@ public class StackRepoDetails {
 
     public static final String MPACK_TAG = "mpack";
 
+    public static final String REPOSITORY_VERSION = "repository-version";
+
+    public static final String VDF_REPO_KEY_PREFIX = "vdf-";
+
+    public static final String CUSTOM_VDF_REPO_KEY = "vdf-url";
+
     private Map<String, String> stack;
 
     private Map<String, String> util;

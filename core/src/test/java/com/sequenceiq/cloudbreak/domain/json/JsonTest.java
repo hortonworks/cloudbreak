@@ -19,7 +19,7 @@ public class JsonTest {
         userData.put(InstanceGroupType.CORE, "CORE");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
         Json json = new Json(image);
-        Assert.assertEquals("{\"imageName\":\"cb-centos66-amb200-2015-05-25\",\"userdata\":{\"CORE\":\"CORE\"}}",
+        Assert.assertEquals("{\"imageName\":\"cb-centos66-amb200-2015-05-25\",\"userdata\":{\"CORE\":\"CORE\"},\"osType\":\"\"}",
                 json.getValue());
     }
 
@@ -29,6 +29,18 @@ public class JsonTest {
         Map<InstanceGroupType, String> userData = new HashMap<>();
         userData.put(InstanceGroupType.CORE, "CORE");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData);
+        Json json = new Json(image);
+        String expected = json.getValue();
+        Image covertedAgain = json.get(Image.class);
+        json = new Json(covertedAgain);
+        Assert.assertEquals(expected, json.getValue());
+    }
+
+    @Test
+    public void testMultipleSerialisationWithOtherConstructorOfImage() throws IOException {
+        Map<InstanceGroupType, String> userData = new HashMap<>();
+        userData.put(InstanceGroupType.CORE, "CORE");
+        Image image = new Image("cb-centos66-amb200-2015-05-25", userData, null);
         Json json = new Json(image);
         String expected = json.getValue();
         Image covertedAgain = json.get(Image.class);

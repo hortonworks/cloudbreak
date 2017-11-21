@@ -113,6 +113,7 @@ public class ImagesToImagesResponseJsonConverter extends AbstractConversionServi
         json.setDate(source.getDate());
         json.setDescription(source.getDescription());
         json.setOs(source.getOs());
+        json.setOsType(source.getOsType());
         json.setUuid(source.getUuid());
         json.setVersion(source.getVersion());
         if (source.getRepo() != null) {

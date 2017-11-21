@@ -23,25 +23,27 @@ public class AmbariStackDetailsJson implements JsonEntity {
     @ApiModelProperty(AmbariStackDetailsDescription.OS)
     private String os;
 
-    @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_REPO_ID, required = true)
     private String stackRepoId;
 
-    @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.STACK_BASE_URL, required = true)
     private String stackBaseURL;
 
-    @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_REPO_ID, required = true)
     private String utilsRepoId;
 
-    @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.UTILS_BASE_URL, required = true)
     private String utilsBaseURL;
 
     @NotNull
     @ApiModelProperty(value = AmbariStackDetailsDescription.VERIFY, required = true)
     private Boolean verify;
+
+    @ApiModelProperty(value = AmbariStackDetailsDescription.REPOSITORY_VERSION, required = true)
+    private String repositoryVersion;
+
+    @ApiModelProperty(value = AmbariStackDetailsDescription.VDF_URL, required = true)
+    private String versionDefinitionFileUrl;
 
     public String getStack() {
         return stack;
@@ -105,5 +107,21 @@ public class AmbariStackDetailsJson implements JsonEntity {
 
     public void setUtilsBaseURL(String utilsBaseURL) {
         this.utilsBaseURL = utilsBaseURL;
+    }
+
+    public String getRepositoryVersion() {
+        return repositoryVersion;
+    }
+
+    public void setRepositoryVersion(String repositoryVersion) {
+        this.repositoryVersion = repositoryVersion;
+    }
+
+    public String getVersionDefinitionFileUrl() {
+        return versionDefinitionFileUrl;
+    }
+
+    public void setVersionDefinitionFileUrl(String versionDefinitionFileUrl) {
+        this.versionDefinitionFileUrl = versionDefinitionFileUrl;
     }
 }

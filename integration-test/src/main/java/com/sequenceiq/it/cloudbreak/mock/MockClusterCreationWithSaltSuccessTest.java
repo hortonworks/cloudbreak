@@ -189,6 +189,7 @@ public class MockClusterCreationWithSaltSuccessTest extends AbstractMockIntegrat
         post(AMBARI_API_ROOT + "/users", new EmptyAmbariResponse());
         get(AMBARI_API_ROOT + "/clusters/:cluster/hosts", new AmbariClustersHostsResponse(instanceMap, "SUCCESSFUL"));
         put(AMBARI_API_ROOT + "/stacks/HDP/versions/:version/operating_systems/:os/repositories/:hdpversion", new EmptyAmbariResponse());
+        post(AMBARI_API_ROOT + "/version_definitions", new EmptyAmbariResponse());
     }
 
     private void addSaltMappings(Map<String, CloudVmMetaDataStatus> instanceMap) {
