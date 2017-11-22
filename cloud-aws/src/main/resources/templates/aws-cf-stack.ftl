@@ -390,20 +390,6 @@
         "VpcId" : { "Ref" : "VPC" },
         </#if>
         "SecurityGroupIngress" : [
-          <#if group.type == "GATEWAY">
-            <#if defaultInboundSecurityGroup??>
-              { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "SourceSecurityGroupId" : "${defaultInboundSecurityGroup}"} ,
-              { "IpProtocol" : "tcp", "FromPort" : "${gatewayPort}", "ToPort" : "${gatewayPort}", "SourceSecurityGroupId" : "${defaultInboundSecurityGroup}"},
-            </#if>
-            <#if cloudbreakPublicIp??>
-              { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "${cloudbreakPublicIp}/32"} ,
-              { "IpProtocol" : "tcp", "FromPort" : "${gatewayPort}", "ToPort" : "${gatewayPort}", "CidrIp" : "${cloudbreakPublicIp}/32"},
-            </#if>
-            <#if defaultGatewayCidr??>
-              { "IpProtocol" : "tcp", "FromPort" : "22", "ToPort" : "22", "CidrIp" : "${defaultGatewayCidr}"},
-              { "IpProtocol" : "tcp", "FromPort" : "${gatewayPort}", "ToPort" : "${gatewayPort}", "CidrIp" : "${defaultGatewayCidr}"},
-            </#if>
-          </#if>
           <#list group.rules as r>
             <#list r.ports as p>
               { "IpProtocol" : "${r.protocol}", "FromPort" : "${p.from}", "ToPort" : "${p.to}", "CidrIp" : "${r.cidr}"} ,

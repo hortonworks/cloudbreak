@@ -63,6 +63,7 @@ public class Notes {
     public static final String SMARTSENSE_SUBSCRIPTION_NOTES = "SmartSense subscriptions could be configured.";
     public static final String FLEX_SUBSCRIPTION_NOTES = "Flex subscriptions could be configured.";
     public static final String IMAGE_CATALOG_NOTES = "Provides an interface to determine available Virtual Machine images for the given version of Cloudbreak.";
+    public static final String SECURITY_RULE_NOTES = "Security Rules operations";
 
     private Notes() {
     }

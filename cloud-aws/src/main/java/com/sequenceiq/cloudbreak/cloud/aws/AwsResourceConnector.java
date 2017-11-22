@@ -150,26 +150,11 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
     @Inject
     private EncryptedSnapshotPreparator encryptedSnapshotPreparator;
 
-    @Value("${cb.publicip:}")
-    private String cloudbreakPublicIp;
-
-    @Value("${cb.aws.default.inbound.security.group:}")
-    private String defaultInboundSecurityGroup;
-
     @Value("${cb.aws.vpc:}")
     private String cloudbreakVpc;
 
-    @Value("${cb.nginx.port:9443}")
-    private int gatewayPort;
-
-    @Value("${cb.knox.port:8443}")
-    private int knoxPort;
-
     @Value("${cb.aws.cf.template.new.path:}")
     private String awsCloudformationTemplatePath;
-
-    @Value("${cb.default.gateway.cidr:}")
-    private String defaultGatewayCidr;
 
     @Inject
     @Qualifier("DefaultRetryService")
@@ -197,8 +182,6 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
 
             String cidr = stack.getNetwork().getSubnet().getCidr();
             String subnet = isNoCIDRProvided(existingVPC, existingSubnet, cidr) ? findNonOverLappingCIDR(ac, stack) : cidr;
-            String inboundSecurityGroup = deployingToSameVPC(awsNetworkView, existingVPC)
-                    ? defaultInboundSecurityGroup : "";
             AwsInstanceProfileView awsInstanceProfileView = new AwsInstanceProfileView(stack);
             ModelContext modelContext = new ModelContext()
                     .withAuthenticatedContext(ac)
@@ -212,12 +195,7 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                     .withEnableInstanceProfile(awsInstanceProfileView.isEnableInstanceProfileStrategy())
                     .withInstanceProfileAvailable(awsInstanceProfileView.isInstanceProfileAvailable())
                     .withTemplate(stack.getTemplate())
-                    .withDefaultSubnet(subnet)
-                    .withCloudbreakPublicIp(cloudbreakPublicIp)
-                    .withDefaultInboundSecurityGroup(inboundSecurityGroup)
-                    .withGatewayPort(gatewayPort)
-                    .withKnoxPort(knoxPort)
-                    .withDefaultGatewayCidr(defaultGatewayCidr);
+                    .withDefaultSubnet(subnet);
             String cfTemplate = cloudFormationTemplateBuilder.build(modelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfClient.createStack(createCreateStackRequest(ac, stack, cFStackName, subnet, cfTemplate));
